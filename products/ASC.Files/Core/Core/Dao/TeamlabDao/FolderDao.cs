@@ -100,6 +100,33 @@ internal class FolderDao(
 
         return roomSettings.Watermark.Map();
     }
+
+    public async Task<ChatSettings> GetChatSettingsAsync(int agentId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var chatSettings = await filesDbContext.RoomChatSettingsAsync(tenantId, agentId);
+
+        return chatSettings?.Map();
+    }
+
+    public async Task<Dictionary<int, ChatSettings>> GetChatSettingsAsync(IEnumerable<int> agentIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var result = new Dictionary<int, ChatSettings>();
+
+        await foreach (var settings in filesDbContext.RoomChatSettingsAsync(tenantId, agentIds))
+        {
+            result[settings.RoomId] = settings.Map();
+        }
+
+        return result;
+    }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
@@ -565,11 +592,24 @@ internal class FolderDao(
                     Watermark = folder.SettingsWatermark.Map(),
                     Quota = folder.SettingsQuota,
                     Lifetime = folder.SettingsLifetime.Map(),
-                    ChatProviderId = folder.SettingsChatProviderId,
-                    ChatParameters = folder.SettingsChatParameters,
                     SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX,
                     SendFormToExternalDB = folder.SettingsSendFormToExternalDB
                 };
+
+                if (folder.IsAgent && folder.ChatSettings != null)
+                {
+                    toUpdate.Settings.ChatSettings = new DbRoomChatSettings
+                    {
+                        RoomId = toUpdate.Id,
+                        TenantId = tenantId,
+                        ChatProviderId = folder.ChatSettings.ProviderId,
+                        ChatParameters = new ChatParameters
+                        {
+                            ModelId = folder.ChatSettings.ModelId,
+                            Prompt = folder.ChatSettings.Prompt
+                        }
+                    };
+                }
             }
 
             filesDbContext.Update(toUpdate);
@@ -612,11 +652,24 @@ internal class FolderDao(
                     Watermark = folder.SettingsWatermark.Map(),
                     Quota = folder.SettingsQuota,
                     Lifetime = folder.SettingsLifetime.Map(),
-                    ChatProviderId = folder.SettingsChatProviderId,
-                    ChatParameters = folder.SettingsChatParameters,
                     SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX,
-                    SendFormToExternalDB = folder.SettingsSendFormToExternalDB
+                    SendFormToExternalDB = folder.SettingsSendFormToExternalDB,
                 };
+
+                if (folder.IsAgent && folder.ChatSettings != null)
+                {
+                    newFolder.Settings.ChatSettings = new DbRoomChatSettings
+                    {
+                        RoomId = newFolder.Id,
+                        TenantId = tenantId,
+                        ChatProviderId = folder.ChatSettings.ProviderId,
+                        ChatParameters = new ChatParameters
+                        {
+                            ModelId = folder.ChatSettings.ModelId,
+                            Prompt = folder.ChatSettings.Prompt
+                        }
+                    };
+                }
             }
 
             var entityEntry = await filesDbContext.Folders.AddAsync(newFolder);
@@ -1227,8 +1280,6 @@ internal class FolderDao(
                 Watermark = folder.SettingsWatermark.Map(),
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
                 Lifetime = folder.SettingsLifetime.Map(),
-                ChatProviderId = folder.SettingsChatProviderId,
-                ChatParameters = folder.SettingsChatParameters
             };
         }
 
@@ -1259,8 +1310,15 @@ internal class FolderDao(
 
         if (chatSettings != null)
         {
-            toUpdate.Settings.ChatProviderId = chatSettings.ProviderId;
-            toUpdate.Settings.ChatParameters = chatSettings.Map();
+            toUpdate.Settings.ChatSettings = new DbRoomChatSettings
+            {
+                ChatProviderId = chatSettings.ProviderId,
+                ChatParameters = new ChatParameters
+                {
+                    ModelId = chatSettings.ModelId,
+                    Prompt = chatSettings.Prompt
+                }
+            };
         }
 
         if (lifeTime != null)

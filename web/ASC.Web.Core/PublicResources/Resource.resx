@@ -1416,4 +1416,16 @@
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>AI search</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Use an AI search engine to enhance AI chats with real-time information from the internet</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Web search</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
+    <value>Results</value>
+  </data>
 </root>

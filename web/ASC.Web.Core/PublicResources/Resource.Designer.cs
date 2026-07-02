@@ -123,11 +123,29 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Month.
+        /// </summary>
+        public static string AccountingCustomerOperationMonth {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationMonth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quantity.
         /// </summary>
         public static string AccountingCustomerOperationQuantity {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationQuantity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Service.
+        /// </summary>
+        public static string AccountingCustomerOperationService {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
             }
         }
         
@@ -146,6 +164,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceDesc_adminyear {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_adminyear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Web search.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_ai_search {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_ai-search", resourceCulture);
             }
         }
         
@@ -249,6 +276,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Results.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_ai_search {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_ai-search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI Credits.
         /// </summary>
         public static string AccountingCustomerOperationServiceUOM_ai_tools {
@@ -337,25 +373,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingCustomerOperationType", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Month.
-        /// </summary>
-        public static string AccountingCustomerOperationMonth {
-            get {
-                return ResourceManager.GetString("AccountingCustomerOperationMonth", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Service.
-        /// </summary>
-        public static string AccountingCustomerOperationService {
-            get {
-                return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Monthly usage report ({0}-{1}).
         /// </summary>
@@ -364,7 +382,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingMonthlyUsageReportName", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Monthly usage.
         /// </summary>
@@ -373,7 +391,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingMonthlyUsageReportSheetName", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Service usage report ({0}-{1}).
         /// </summary>
@@ -382,7 +400,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingServiceUsageReportName", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Service usage.
         /// </summary>
@@ -391,7 +409,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("AccountingServiceUsageReportSheetName", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Validation code field cannot be empty.
         /// </summary>
@@ -3539,6 +3557,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_aiagent_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_aiagent_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI search.
+        /// </summary>
+        public static string TariffsFeature_aisearch_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aisearch_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use an AI search engine to enhance AI chats with real-time information from the internet.
+        /// </summary>
+        public static string TariffsFeature_aisearch_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aisearch_wallet_price_count", resourceCulture);
             }
         }
         

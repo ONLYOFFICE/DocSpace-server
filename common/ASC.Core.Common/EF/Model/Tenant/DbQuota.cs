@@ -211,7 +211,7 @@ public static class DbQuotaExtension
                     Name = "aitools",
                     Description = null,
                     Features = "aitools",
-                    Price = 1,
+                    Price = 0,
                     ProductId = null,
                     ServiceName = "ai-tools",
                     ServiceGroup = null,
@@ -232,6 +232,20 @@ public static class DbQuotaExtension
                     Visible = true,
                     Wallet = true,
                     Additional = false // primary quota, not additive
+                },
+                new DbQuota
+                {
+                    TenantId = -18,
+                    Name = "aisearch",
+                    Description = null,
+                    Features = "aisearch",
+                    Price = 0,
+                    ProductId = null,
+                    ServiceName = "ai-search",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = true
                 }
                 );
         return modelBuilder;

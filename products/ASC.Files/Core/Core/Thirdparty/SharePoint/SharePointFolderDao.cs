@@ -502,6 +502,16 @@ internal class SharePointFolderDao(
         throw new NotImplementedException();
     }
 
+    public Task<ChatSettings> GetChatSettingsAsync(string agentId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Dictionary<string, ChatSettings>> GetChatSettingsAsync(IEnumerable<string> agentIds)
+    {
+        throw new NotImplementedException();
+    }
+
     public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, string parentId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         throw new NotImplementedException();

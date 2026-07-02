@@ -467,6 +467,20 @@ public interface IFolderDao<T>
     Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteLifetimeSettings(Folder<T> room);
 
+    /// <summary>
+    /// Get chat settings for the agent.
+    /// </summary>
+    /// <param name="agentId">agent (room) id</param>
+    /// <returns>chat settings</returns>
+    Task<ChatSettings> GetChatSettingsAsync(T agentId);
+
+    /// <summary>
+    /// Get chat settings for the list of agents.
+    /// </summary>
+    /// <param name="agentIds">agent (room) ids</param>
+    /// <returns>chat settings by agent (room) id</returns>
+    Task<Dictionary<T, ChatSettings>> GetChatSettingsAsync(IEnumerable<T> agentIds);
+
     IAsyncEnumerable<Folder<T>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, bool excludeSubject, Location? location, int trashId, T parentId, List<FolderType> folderType, OrderBy orderBy, int offset, int count);
 

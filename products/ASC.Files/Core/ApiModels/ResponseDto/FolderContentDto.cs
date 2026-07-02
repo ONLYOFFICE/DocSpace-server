@@ -98,7 +98,7 @@ public class FolderContentDtoHelper(
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
-    AiModelSettingsLoader modelSettingsLoader)
+    IDaoFactory daoFactory)
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, T parentId = default, List<FolderType> folderType = null)
     {
@@ -131,13 +131,12 @@ public class FolderContentDtoHelper(
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
 
-        var aiStatusTask = accessibility.GetStatusAsync();
-        var modelSettingsResultTask = modelSettingsLoader.LoadForEntriesAsync(folderItems.Entries, folderItems.FolderInfo);
+        if (folderItems.FolderInfo is { FolderType: FolderType.AiAgents })
+        {
+            await SetAgentsChatSettingsAsync(folderItems);
+        }
 
-        await Task.WhenAll(aiStatusTask, modelSettingsResultTask);
-
-        var aiStatus = await aiStatusTask;
-        var modelSettingsResult = await modelSettingsResultTask;
+        var aiStatus = await accessibility.GetStatusAsync();
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
@@ -257,6 +256,26 @@ public class FolderContentDtoHelper(
             }
 
             return null;
+        }
+    }
+
+    private async Task SetAgentsChatSettingsAsync<T>(DataWrapper<T> folderItems)
+    {
+        var agentFolders = folderItems.Entries.OfType<Folder<int>>().Where(f => f.IsAgent).ToList();
+
+        var ids = agentFolders.Where(f => f.ChatSettings == null).Select(f => f.Id).Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        var chatSettings = await daoFactory.GetFolderDao<int>().GetChatSettingsAsync(ids);
+        foreach (var folder in agentFolders)
+        {
+            if (folder.ChatSettings == null && chatSettings.TryGetValue(folder.Id, out var settings))
+            {
+                folder.ChatSettings = settings;
+            }
         }
     }
 

@@ -398,11 +398,16 @@ public class FolderDtoHelper(
             result.Type = folder.FolderType;
         }
 
-        if (folder.SettingsChatParameters != null)
+        if (folder.IsAgent && folder.ChatSettings == null)
+        {
+            folder.ChatSettings = await _daoFactory.GetFolderDao<T>().GetChatSettingsAsync(folder.Id);
+        }
+
+        if (folder.ChatSettings != null)
         {
             result.ChatSettings = new ChatSettingsDto
             {
-                Prompt = folder.SettingsChatParameters.Prompt,
+                Prompt = folder.ChatSettings.Prompt
             };
         }
 

@@ -51,13 +51,20 @@ public class DbRoomSettings
     public DbRoomWatermark Watermark { get; set; }
     public bool DenyDownload { get; set; }
     public DbRoomDataLifetime Lifetime { get; set; }
-    public int ChatProviderId { get; set; }
-    public ChatParameters ChatParameters { get; set; }
     public bool SendFormToExternalDB { get; set; }
     public bool SaveFormAsXLSX { get; set; }
-    
+
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
+    public DbRoomChatSettings ChatSettings { get; set; }
+}
+
+public class DbRoomChatSettings
+{
+    public int RoomId { get; set; }
+    public int TenantId { get; set; }
+    public int ChatProviderId { get; set; }
+    public ChatParameters ChatParameters { get; set; }
 }
 
 public static class DbRoomSettingsExtension
@@ -66,6 +73,13 @@ public static class DbRoomSettingsExtension
     {
         modelBuilder.Entity<DbRoomSettings>().Navigation(e => e.Tenant).AutoInclude(false);
         modelBuilder.Entity<DbRoomSettings>().Navigation(e => e.Room).AutoInclude(false);
+
+        modelBuilder.Entity<DbRoomSettings>()
+            .HasOne(e => e.ChatSettings)
+            .WithOne()
+            .HasForeignKey<DbRoomChatSettings>(e => new { e.TenantId, e.RoomId });
+
+        modelBuilder.Entity<DbRoomSettings>().Navigation(e => e.ChatSettings).IsRequired().AutoInclude(false);
 
         modelBuilder
             .Add(MySqlAddDbRoomSettings, Provider.MySql)
@@ -127,18 +141,6 @@ public static class DbRoomSettingsExtension
                     .UseCollation("utf8_general_ci");
 
                 entity.Property(e => e.DenyDownload).HasColumnName("deny_download").HasDefaultValueSql("0");
-            
-                entity.Property(e => e.ChatProviderId)
-                    .HasColumnName("chat_provider_id");
-            
-                entity.HasIndex(e => e.ChatProviderId)
-                    .HasDatabaseName("IX_chat_provider_id");
-            
-                entity.Property(e => e.ChatParameters)
-                    .HasColumnName("chat_settings")
-                    .HasColumnType("json")
-                    .HasCharSet("utf8")
-                    .UseCollation("utf8_general_ci");
 
                 entity.Property(e => e.SendFormToExternalDB)
                     .HasColumnName("send_form_to_external_db")
@@ -147,6 +149,31 @@ public static class DbRoomSettingsExtension
                 entity.Property(e => e.SaveFormAsXLSX)
                     .HasColumnName("save_form_as_xlsx")
                     .HasDefaultValue(true);
+            });
+
+            modelBuilder.Entity<DbRoomChatSettings>(entity =>
+            {
+                entity.ToTable("files_room_settings")
+                    .HasCharSet("utf8");
+
+                entity.HasKey(e => new { e.TenantId, e.RoomId })
+                    .HasName("primary");
+
+                entity.Property(e => e.RoomId).HasColumnName("room_id");
+
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+
+                entity.Property(e => e.ChatProviderId)
+                    .HasColumnName("chat_provider_id");
+
+                entity.HasIndex(e => e.ChatProviderId)
+                    .HasDatabaseName("IX_chat_provider_id");
+
+                entity.Property(e => e.ChatParameters)
+                    .HasColumnName("chat_settings")
+                    .HasColumnType("json")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
             });
         }
 
@@ -208,6 +235,20 @@ public static class DbRoomSettingsExtension
                 entity.Property(e => e.SaveFormAsXLSX)
                     .HasColumnName("save_form_as_xlsx")
                     .HasDefaultValue(true);
+            });
+
+            modelBuilder.Entity<DbRoomChatSettings>(entity =>
+            {
+                entity.ToTable("files_room_settings");
+
+                entity.HasKey(e => new { e.TenantId, e.RoomId })
+                    .HasName("pk_files_room_settings");
+
+                entity.Property(e => e.RoomId)
+                    .HasColumnName("room_id");
+
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
             });
         }
     }
