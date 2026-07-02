@@ -55,16 +55,21 @@ public class WebSearchStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        if (_gateway.Configured)
+        if (!_gateway.Configured)
         {
-            return new WebSearchConfig
-            {
-                Provider = "onlyoffice",
-                BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
-            };
+            return await storage.ReadAsync(tenantManager.GetCurrentTenantId());
         }
 
-        return await storage.ReadAsync(tenantManager.GetCurrentTenantId());
+        if (!await _gateway.IsSearchEnabledAsync())
+        {
+            return null;
+        }
+
+        return new WebSearchConfig
+        {
+            Provider = "onlyoffice",
+            BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
+        };
     }
 
     public async Task UpsertAsync(WebSearchConfig config)

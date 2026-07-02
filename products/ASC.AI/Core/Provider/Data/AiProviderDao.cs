@@ -333,7 +333,7 @@ public class AiProviderDao(
 
     public async Task<int?> GetFirstProviderIdAsync(int tenantId)
     {
-        if (gateway.Configured && await gateway.IsEnabledAsync())
+        if (gateway.Configured && await gateway.IsAiEnabledAsync())
         {
             return AiGateway.ProviderId;
         }

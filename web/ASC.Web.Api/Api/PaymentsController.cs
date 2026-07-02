@@ -1868,7 +1868,7 @@ public class PaymentController(
     [HttpGet("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
     {
-        if (!tariffService.IsConfigured() || !await aiGateway.IsEnabledAsync())
+        if (!tariffService.IsConfigured() || !await aiGateway.IsAiEnabledAsync())
         {
             return new RestrictedModelsResponse { Models = [] };
         }

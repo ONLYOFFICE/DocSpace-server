@@ -55,7 +55,7 @@ public class AiAccessibility(
             return new AiStatus { Enabled = false, GatewayEnabled = false };
         }
 
-        if (await aiGateway.IsEnabledAsync())
+        if (await aiGateway.IsAiEnabledAsync())
         {
             return new AiStatus { Enabled = true, GatewayEnabled = true };
         }

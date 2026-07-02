@@ -73,7 +73,7 @@ public class EmbeddingGeneratorFactory(
 
         if (gateway.Configured)
         {
-            if (await gateway.IsEnabledAsync())
+            if (await gateway.IsAiEnabledAsync())
             {
                 providerType = EmbeddingProviderType.PortalAi;
                 key = await gateway.GetKeyAsync();

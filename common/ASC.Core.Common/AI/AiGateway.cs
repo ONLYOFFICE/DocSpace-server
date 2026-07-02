@@ -70,7 +70,7 @@ public class AiGateway(
 
     public bool Configured => aiGatewayConfiguration.Configured;
 
-    public async Task<bool> IsEnabledAsync()
+    public async Task<bool> IsAiEnabledAsync()
     {
         if (!Configured)
         {
@@ -81,9 +81,20 @@ public class AiGateway(
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
     }
 
+    public async Task<bool> IsSearchEnabledAsync()
+    {
+        if (!Configured)
+        {
+            return false;
+        }
+
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantManager.GetCurrentTenantId());
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AISearch);
+    }
+
     public async Task<string> GetKeyAsync(bool allowEmpty = false)
     {
-        if (!await IsEnabledAsync())
+        if (!await IsAiEnabledAsync())
         {
             return allowEmpty ? string.Empty : throw new InvalidOperationException("AI Gateway is not enabled");
         }
