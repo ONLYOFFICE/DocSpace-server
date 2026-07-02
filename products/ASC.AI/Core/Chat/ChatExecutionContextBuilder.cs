@@ -62,7 +62,13 @@ public class ChatExecutionContextBuilder(
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
 
-        var providerContextTask = providerService.GetProviderContextAsync(agent.SettingsChatProviderId, agent.SettingsChatParameters.ModelId);
+        var agentSettings = await folderDao.GetChatSettingsAsync(agent.Id);
+        if (agentSettings == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        var providerContextTask = providerService.GetProviderContextAsync(agentSettings.ProviderId, agentSettings.ModelId);
         var resultStorageTask = folderDao.GetFoldersAsync(agent.Id, FolderType.ResultStorage).FirstAsync().AsTask();
         var knowledgeTask = folderDao.GetFoldersAsync(agent.Id, FolderType.Knowledge).FirstAsync().AsTask();
         var chatSettingsTask = chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
@@ -128,7 +134,7 @@ public class ChatExecutionContextBuilder(
                 ReasoningEffort = reasoningEffort,
                 Metadata = metadata
             },
-            Instruction = agent.SettingsChatParameters.Prompt,
+            Instruction = agentSettings.Prompt,
             ResultStorageId = resultStorage.Id,
             ChatSettings = chatSettings,
             Tools = tools,
