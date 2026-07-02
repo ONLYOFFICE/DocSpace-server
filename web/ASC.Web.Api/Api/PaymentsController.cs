@@ -587,7 +587,7 @@ public class PaymentController(
 
         for (var attempt = 0; attempt < _maxTopUpAttempts && balanceAmount < requiredAmount; attempt++)
         {
-            var topUpAmount = requiredAmount - balanceAmount;
+            var topUpAmount = Math.Ceiling((requiredAmount - balanceAmount) * 100) / 100;
 
             var toppedUp = await tariffService.TopUpDepositAsync(tenant.Id, topUpAmount, defaultCurrency, participant, siteName, null, true);
             if (toppedUp)

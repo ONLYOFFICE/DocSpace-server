@@ -599,4 +599,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Failed to synchronize form data to external database.</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>An AI agent's instruction cannot be longer than {0} characters</value>
+  </data>
 </root>
