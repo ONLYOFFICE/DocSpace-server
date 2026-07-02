@@ -40,7 +40,7 @@ public class ThirdpartyConfigurationData(IConfiguration configuration)
         configuration.GetSection("files:thirdparty:enable").Get<HashSet<string>>() ?? [];
 
     public TimeSpan ThirdPartyRequestTimeout =>
-        TimeSpan.FromSeconds(configuration.GetValue("files:thirdparty:requestTimeoutInSeconds", 10));
+        field != default ? field : field = TimeSpan.FromSeconds(configuration.GetValue("files:thirdparty:requestTimeoutInSeconds", 10));
 }
 
 [Scope]
