@@ -194,8 +194,8 @@ public class FolderContentDtoHelper(
 
             await Task.WhenAll(foldersTask, filesTask);
 
-            result.Files = filesTask.Result;
-            result.Folders = foldersTask.Result;
+            result.Files = [.. filesTask.Result];
+            result.Folders = [.. foldersTask.Result];
         }
 
 
@@ -233,13 +233,13 @@ public class FolderContentDtoHelper(
             return entryDtos;
         }
 
-        async Task<List<FileEntryBaseDto>> GetFilesDto(List<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<IEnumerable<FileEntryBaseDto>> GetFilesDto(List<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
             var count = fileEntries.Count;
-            var fileDtos = new List<FileEntryBaseDto>(count);
+            var fileDtos = new FileEntryBaseDto[count];
             await Parallel.ForEachAsync(Enumerable.Range(0, count),
                 new ParallelOptions { MaxDegreeOfParallelism = _foldersDtoParallelism },
-                async (i, _) => fileDtos.Insert(i, await GetFileDto(fileEntries[i], entriesOrder, contextFolder)));
+                async (i, _) => fileDtos[i] = await GetFileDto(fileEntries[i], entriesOrder, contextFolder));
             return fileDtos;
         }
 
@@ -253,13 +253,13 @@ public class FolderContentDtoHelper(
             };
         }
 
-        async Task<List<FileEntryBaseDto>> GetFoldersDto(List<FileEntry> folderEntries, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<IEnumerable<FileEntryBaseDto>> GetFoldersDto(List<FileEntry> folderEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
             var count = folderEntries.Count;
-            var folderDtos = new List<FileEntryBaseDto>(count);
+            var folderDtos = new FileEntryBaseDto[count];
             await Parallel.ForEachAsync(Enumerable.Range(0, count),
                 new ParallelOptions { MaxDegreeOfParallelism = _foldersDtoParallelism },
-                async (i, _) => folderDtos.Insert(i, await GetFolderDto(folderEntries[i], entriesOrder, contextFolder: folderItems.FolderInfo)));
+                async (i, _) => folderDtos[i] = await GetFolderDto(folderEntries[i], entriesOrder, contextFolder: folderItems.FolderInfo));
             return folderDtos;
         }
 
