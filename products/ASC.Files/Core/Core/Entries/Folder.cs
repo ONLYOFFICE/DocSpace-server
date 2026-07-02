@@ -280,16 +280,6 @@ public class Folder<T> : FileEntry<T>, IFolder
     public ChatSettings ChatSettings { get; set; }
 
     /// <summary>
-    /// The chat provider ID configured for the folder.
-    /// </summary>
-    public int SettingsChatProviderId { get; set; }
-
-    /// <summary>
-    /// The chat parameters configured for the folder.
-    /// </summary>
-    public ChatParameters SettingsChatParameters { get; set; }
-
-    /// <summary>
     /// Specifies if the files can be downloaded from this folder or not.
     /// </summary>
     public bool SettingsDenyDownload { get; set; }

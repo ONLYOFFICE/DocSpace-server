@@ -98,7 +98,6 @@ public class FolderContentDtoHelper(
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
-    AiModelSettingsLoader modelSettingsLoader,
     IDaoFactory daoFactory)
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, T parentId = default, List<FolderType> folderType = null)
@@ -137,13 +136,7 @@ public class FolderContentDtoHelper(
             await SetAgentsChatSettingsAsync(folderItems);
         }
 
-        var aiStatusTask = accessibility.GetStatusAsync();
-        var modelSettingsResultTask = modelSettingsLoader.LoadForEntriesAsync(folderItems.Entries, folderItems.FolderInfo);
-
-        await Task.WhenAll(aiStatusTask, modelSettingsResultTask);
-
-        var aiStatus = await aiStatusTask;
-        var modelSettingsResult = await modelSettingsResultTask;
+        var aiStatus = await accessibility.GetStatusAsync();
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
