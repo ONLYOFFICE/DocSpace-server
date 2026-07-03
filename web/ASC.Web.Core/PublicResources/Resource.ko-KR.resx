@@ -1167,6 +1167,9 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>에이전트 수는 다음 한도를 초과할 수 없습니다: {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>AI 검색</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI 기능</value>
   </data>
@@ -1317,6 +1320,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>웹 검색</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>웹 검색</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI 크레딧</value>
   </data>
@@ -1324,6 +1330,9 @@
     <value>소스</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>결과</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>결과</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1412,6 +1421,9 @@
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>OpenRouter 통합을 통해 다양한 AI 모델에 액세스하세요. 사용한 만큼만 지불하며, 요금은 지갑에서 청구됩니다.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>AI 검색 엔진을 사용하여 인터넷의 실시간 정보로 AI 채팅을 향상하세요</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>비즈니스</value>

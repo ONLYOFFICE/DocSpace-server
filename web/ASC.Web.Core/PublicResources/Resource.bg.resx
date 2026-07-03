@@ -1167,6 +1167,9 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Броят на AI агентите не трябва да надвишава {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>AI търсене</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI функции</value>
   </data>
@@ -1317,6 +1320,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Уеб търсене</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Уеб търсене</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI кредити</value>
   </data>
@@ -1324,6 +1330,9 @@
     <value>Източници</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Резултати</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Резултати</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1412,6 +1421,9 @@
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Получете достъп до широка гама от AI модели чрез интеграцията с OpenRouter. Плащате само за това, което използвате, таксувано от вашия Портфейл.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Използвайте AI търсачка, за да обогатите AI чатовете с информация от интернет в реално време</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Бизнес</value>
