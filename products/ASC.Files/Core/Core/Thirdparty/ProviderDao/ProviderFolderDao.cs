@@ -183,6 +183,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             SearchArea.Templates => q.Where(a => a.FolderType == FolderType.RoomTemplates),
             SearchArea.AiAgents => q.Where(a => a.FolderType == FolderType.AiAgents),
             SearchArea.Forms => q.Where(a => a.FolderType == FolderType.Forms),
+            SearchArea.FormTemplates => q.Where(a => false),
             _ => q
         };
 
@@ -585,6 +586,8 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             SearchArea.Templates => q.Where(a => a.FolderType == FolderType.RoomTemplates),
             SearchArea.AiAgents => q.Where(a => a.FolderType == FolderType.AiAgents),
             SearchArea.Forms => q.Where(a => a.FolderType == FolderType.Forms),
+            // Provider-based rooms are always public rooms, so no form filling room templates can exist there
+            SearchArea.FormTemplates => q.Where(a => false),
             SearchArea.Any => q.Where(a => a.FolderType == FolderType.VirtualRooms || a.FolderType == FolderType.Archive),
             _ => q
         };

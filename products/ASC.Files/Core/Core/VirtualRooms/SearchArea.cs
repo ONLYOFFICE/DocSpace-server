@@ -63,5 +63,8 @@ public enum SearchArea
     AiAgents,
 
     [Description("Forms")]
-    Forms
+    Forms,
+
+    [Description("Form templates")]
+    FormTemplates
 }

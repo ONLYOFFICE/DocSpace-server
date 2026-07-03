@@ -2702,7 +2702,7 @@ public class FileSecurity(
         List<OrderedSubject> currentUserOrderedSubjects = [];
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
 
-        if (searchArea != SearchArea.Templates || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
+        if (searchArea is not (SearchArea.Templates or SearchArea.FormTemplates) || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
         {
             currentUserOrderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
         }
@@ -2744,7 +2744,7 @@ public class FileSecurity(
             }
         }
 
-        if (isAdmin && searchArea != SearchArea.Templates)
+        if (isAdmin && searchArea is not (SearchArea.Templates or SearchArea.FormTemplates))
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
                 subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter);
@@ -2756,7 +2756,10 @@ public class FileSecurity(
 
     // FillingFormsRoom rooms physically live under VirtualRooms but are surfaced in the separate Forms
     // section, so they are split by the room's own folder type: excluded from the Rooms (Active) listing
-    // and shown only in Forms. Non-room entries (subfolders) are never affected.
+    // and shown only in Forms. The same split applies to room templates: they all physically live under
+    // the RoomTemplates root, so FillingFormsRoom templates (including ones created before the split) are
+    // excluded from the Rooms templates listing and shown only in the Forms templates listing.
+    // Non-room entries (subfolders) are never affected.
     private static bool MatchesFormsSplit<T>(Folder<T> room, SearchArea searchArea)
     {
         if (!room.IsRoom)
@@ -2768,6 +2771,8 @@ public class FileSecurity(
         {
             SearchArea.Active => room.FolderType != FolderType.FillingFormsRoom,
             SearchArea.Forms => room.FolderType == FolderType.FillingFormsRoom,
+            SearchArea.Templates => room.FolderType != FolderType.FillingFormsRoom,
+            SearchArea.FormTemplates => room.FolderType == FolderType.FillingFormsRoom,
             _ => true
         };
     }
@@ -2805,6 +2810,7 @@ public class FileSecurity(
             SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
             SearchArea.Forms => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
+            SearchArea.FormTemplates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
@@ -2911,6 +2917,7 @@ public class FileSecurity(
             SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
             SearchArea.Forms => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
+            SearchArea.FormTemplates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
@@ -2961,6 +2968,7 @@ public class FileSecurity(
             {
                 case SearchArea.Archive when entry.RootFolderType == FolderType.Archive:
                 case SearchArea.Templates when entry.RootFolderType == FolderType.RoomTemplates:
+                case SearchArea.FormTemplates when entry.RootFolderType == FolderType.RoomTemplates:
                     {
                         if (entry.CreateBy != authContext.CurrentAccount.ID)
                         {

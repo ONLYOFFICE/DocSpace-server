@@ -371,7 +371,9 @@ public class FileStorageService //: IFileStorageService
         searchArea = parent.FolderType switch
         {
             FolderType.Archive => SearchArea.Archive,
-            FolderType.RoomTemplates => SearchArea.Templates,
+            // Virtual Rooms and Form Filling Rooms templates share the same physical RoomTemplates root,
+            // so the requested FormTemplates area must be preserved to keep the split.
+            FolderType.RoomTemplates => searchArea == SearchArea.FormTemplates ? SearchArea.FormTemplates : SearchArea.Templates,
             FolderType.AiAgents => SearchArea.AiAgents,
             FolderType.Forms => SearchArea.Forms,
             _ => searchArea
