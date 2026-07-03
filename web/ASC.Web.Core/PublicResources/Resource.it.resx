@@ -1167,6 +1167,9 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Il numero di agenti IA non deve superare {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Ricerca IA</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Funzionalità IA</value>
   </data>
@@ -1317,6 +1320,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Ricerca web</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Ricerca web</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Crediti IA</value>
   </data>
@@ -1324,6 +1330,9 @@
     <value>Fonti</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Risultati</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Risultati</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1412,6 +1421,9 @@
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Accedi a un'ampia gamma di modelli IA tramite l'integrazione con OpenRouter. Paghi solo per ciò che utilizzi, con addebito sul tuo Portafoglio.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Utilizza un motore di ricerca IA per arricchire le chat IA con informazioni in tempo reale da Internet</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>
