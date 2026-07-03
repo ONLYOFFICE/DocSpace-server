@@ -1002,7 +1002,10 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                newFolder.SettingsChatParameters = chatSettings.Map();
+                newFolder.ChatSettings = new ChatSettings
+                {
+                    Prompt = chatSettings.Prompt
+                };
             }
 
             newFolder.SettingsLifetime = lifetime;

@@ -235,7 +235,7 @@ public abstract class EditorController<T>(
 
         if (docParams.LocatedInPrivateRoom)
         {
-            configuration.EditorConfig.EncryptionKeys = (await encryptionKeyPairDtoHelper.GetKeyPairAsync())?.FirstOrDefault();
+            configuration.EditorConfig.EncryptionKeys = await encryptionKeyPairDtoHelper.GetKeyPairAsync();
         }
 
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
