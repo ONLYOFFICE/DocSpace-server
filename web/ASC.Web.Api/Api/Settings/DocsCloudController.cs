@@ -127,13 +127,13 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant", typeof(DocsCloudTenant))]
     [HttpGet("tenant")]
-    public async Task<DocsCloudTenant> GetTenant()
+    public async Task<DocsCloudTenant> GetTenant(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         try
         {
-            return await docsCloudClient.GetTenantAsync(await GetPortalIdAsync());
+            return await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), refresh);
         }
         catch (DocsCloudNotFoundException)
         {
@@ -149,11 +149,11 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant information", typeof(DocsCloudTenantInfo))]
     [HttpGet("tenant/info")]
-    public async Task<DocsCloudTenantInfo> GetTenantInfo()
+    public async Task<DocsCloudTenantInfo> GetTenantInfo(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var info = await docsCloudClient.GetTenantInfoAsync(await GetPortalIdAsync());
+        var info = await docsCloudClient.GetTenantInfoAsync(await GetPortalIdAsync(), refresh);
 
         if (!info.License.Trial)
         {
@@ -183,11 +183,11 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant configuration", typeof(DocsCloudConfigDto))]
     [HttpGet("tenant/config")]
-    public async Task<DocsCloudConfigDto> GetTenantConfig()
+    public async Task<DocsCloudConfigDto> GetTenantConfig(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await docsCloudClient.GetTenantConfigAsync(await GetPortalIdAsync());
+        return await docsCloudClient.GetTenantConfigAsync(await GetPortalIdAsync(), refresh);
     }
 
     /// <remarks>
@@ -217,11 +217,11 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud user quota", typeof(DocsCloudQuota))]
     [HttpGet("tenant/quota")]
-    public async Task<DocsCloudQuota> GetTenantQuota()
+    public async Task<DocsCloudQuota> GetTenantQuota(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await docsCloudClient.GetTenantQuotaAsync(await GetPortalIdAsync());
+        return await docsCloudClient.GetTenantQuotaAsync(await GetPortalIdAsync(), refresh);
     }
 
     /// <remarks>
@@ -249,11 +249,11 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant usage statistics", typeof(DocsCloudUsage))]
     [HttpGet("tenant/usage")]
-    public async Task<DocsCloudUsage> GetTenantUsage()
+    public async Task<DocsCloudUsage> GetTenantUsage(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await docsCloudClient.GetTenantUsageAsync(await GetPortalIdAsync());
+        return await docsCloudClient.GetTenantUsageAsync(await GetPortalIdAsync(), refresh);
     }
 
     // DocsCloud identifies a portal by its Customer.UID, which maps to the core key of the current tenant.

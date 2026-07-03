@@ -60,6 +60,7 @@ public class TariffService(
     ILogger<TariffService> logger,
     BillingClient billingClient,
     AccountingClient accountingClient,
+    DocsCloudClient docsCloudClient,
     IServiceProvider serviceProvider,
     ResiliencePipelineProvider<string> resiliencePipelineProvider,
     TenantExtraConfig tenantExtraConfig)
@@ -353,7 +354,9 @@ public class TariffService(
 
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            var changed = await billingClient.ChangePaymentAsync(portalId, productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
 
             if (!changed)
             {
@@ -361,6 +364,8 @@ public class TariffService(
             }
 
             await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ResetTenantCacheAsync(portalId);
         }
         catch (Exception error)
         {
@@ -434,6 +439,8 @@ public class TariffService(
             var result = await billingClient.GetDocsCloudTrialAsync(portalId);
 
             await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ResetTenantCacheAsync(portalId);
 
             return result;
         }
