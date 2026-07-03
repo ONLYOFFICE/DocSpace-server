@@ -39,7 +39,8 @@ public class WalletServiceDescriptionManager
     {
         { "chat", "total_tokens" },
         { "embedding", "prompt_tokens" },
-        { "search", "num_results" }
+        { "search", "num_results" },
+        { "image", "total_tokens" }
     };
 
     public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, string filterServiceName, Dictionary<string, string> metadata)
