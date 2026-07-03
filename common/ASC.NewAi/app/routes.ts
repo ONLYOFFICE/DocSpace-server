@@ -130,13 +130,18 @@ export default function registerRoutes(app: Application): void {
   // Auth gate: this service does no auth of its own and blindly forwards the
   // caller's credentials downstream, so an unauthenticated request would
   // reach the engine / .NET integration with no DocSpace session. Reject
-  // anything without the `asc_auth_key` session cookie (the credential the
-  // browser sends and which `httpClient` / MCP forwarding rely on) up front
-  // with 401, before any engine work. Health endpoints above stay open.
+  // anything that carries neither the `asc_auth_key` session cookie (what the
+  // browser sends) nor an `Authorization` header (Bearer/API-key callers)
+  // up front with 401, before any engine work. The actual credential is
+  // validated downstream; `httpClient` / MCP forwarding relay both. Health
+  // endpoints above stay open.
   router.use((req, res, next) => {
     const cookies = (req as { cookies?: Record<string, unknown> }).cookies;
     const authKey = cookies?.["asc_auth_key"];
-    if (typeof authKey !== "string" || authKey.trim().length === 0) {
+    const hasCookie = typeof authKey === "string" && authKey.trim().length > 0;
+    const authHeader = req.headers.authorization;
+    const hasHeader = typeof authHeader === "string" && authHeader.trim().length > 0;
+    if (!hasCookie && !hasHeader) {
       logger.warn(`Unauthenticated request rejected: ${req.method} ${req.originalUrl}`);
       res.status(401).json({ error: "Unauthorized" });
       return;
