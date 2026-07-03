@@ -341,7 +341,7 @@ public class DocsCloudLicenseInfo
     /// Whether the license is a trial.
     /// </summary>
     /// <example>false</example>
-    public bool Trial { get; init; }
+    public bool Trial { get; set; }
 
     /// <summary>
     /// The license build date.

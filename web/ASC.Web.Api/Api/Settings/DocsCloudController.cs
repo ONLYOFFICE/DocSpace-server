@@ -153,7 +153,26 @@ public class DocsCloudController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await docsCloudClient.GetTenantInfoAsync(await GetPortalIdAsync());
+        var info = await docsCloudClient.GetTenantInfoAsync(await GetPortalIdAsync());
+
+        if (!info.License.Trial)
+        {
+            return info;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+        if (tariff.Quotas.Concat(tariff.OverdueQuotas ?? []).Any(q =>
+                q.Id == (int)TenantWalletService.DocsCloud ||
+                q.Id == (int)TenantWalletService.DocsCloudDevPack))
+        {
+            // for testing purposes
+            info.License.Trial = false;
+        }
+
+        return info;
     }
 
     /// <remarks>
