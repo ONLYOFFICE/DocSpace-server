@@ -1799,7 +1799,10 @@ public class PaymentController(
         var aiPrices = await aiGateway.GetPricesAsync();
         var icons = new Dictionary<string, string>();
 
-        var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower()).Distinct();
+        var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower())
+            .Concat(aiPrices.Image.Select(m => m.OwnedBy.ToLower()))
+            .Distinct();
+
         var searchTypes = aiPrices.Search.Select(s => s.Id).Distinct();
 
         foreach (var provider in providers)
@@ -1834,6 +1837,16 @@ public class PaymentController(
             Link = e.Link
         }).ToList();
 
+        var image = aiPrices.Image.Select(m => new AiEntryPricingDto<AiImagePriceDto>
+        {
+            Id = m.Id,
+            Image = icons[m.OwnedBy.ToLower()],
+            Alias = m.Alias,
+            Provider = m.Provider,
+            Price = new AiImagePriceDto { Prompt = m.Price.Prompt, Image = m.Price.Image },
+            Link = m.Link
+        }).ToList();
+
         var search = aiPrices.Search.Select(s => new AiEntryPricingDto<decimal>
         {
             Id = s.Id,
@@ -1848,6 +1861,7 @@ public class PaymentController(
         {
             Chat = chat,
             Embedding = embedding,
+            Image = image,
             WebSearch = search,
             Currency = aiPrices.Currency
         };

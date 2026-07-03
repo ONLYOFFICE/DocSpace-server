@@ -207,19 +207,22 @@ public record AiPricesResponse
 {
     public required IEnumerable<AiChatModelPricing> Chat { get; init; }
     public required IEnumerable<AiEmbeddingModelPricing> Embedding { get; init; }
+    public required IEnumerable<AiImageModelPricing> Image { get; init; }
     public required IEnumerable<AiWebSearchPricing> Search { get; init; }
     public required CurrencyInfo Currency { get; init; }
 }
 
-public record AiChatModelPricing
+public abstract record AiModelPricing<TPrice>
 {
     public required string Id { get; init; }
     public string Alias { get; init; }
     public string OwnedBy { get; init; }
     public string Provider { get; init; }
     public string Link { get; init; }
-    public required AiChatPrice Price { get; init; }
+    public required TPrice Price { get; init; }
 }
+
+public record AiChatModelPricing : AiModelPricing<AiChatPrice>;
 
 public record AiChatPrice
 {
@@ -227,19 +230,19 @@ public record AiChatPrice
     public decimal Completion { get; init; }
 }
 
-public record AiEmbeddingModelPricing
-{
-    public required string Id { get; init; }
-    public string Alias { get; init; }
-    public string OwnedBy { get; init; }
-    public string Provider { get; init; }
-    public string Link { get; init; }
-    public required AiEmbeddingPrice Price { get; init; }
-}
+public record AiEmbeddingModelPricing : AiModelPricing<AiEmbeddingPrice>;
 
 public record AiEmbeddingPrice
 {
     public decimal Prompt { get; init; }
+}
+
+public record AiImageModelPricing : AiModelPricing<AiImagePrice>;
+
+public record AiImagePrice
+{
+    public decimal Prompt { get; init; }
+    public decimal Image { get; init; }
 }
 
 public record AiWebSearchPricing
