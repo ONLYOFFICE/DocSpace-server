@@ -387,6 +387,15 @@ public class FileStorageService //: IFileStorageService
             withSubfolders = false;
         }
 
+        if (parent.FolderType == FolderType.RoomTemplates)
+        {
+            // The templates listing always goes through the "for me" branch, where the subfolders query is
+            // built from shared entries only and loses the templates created by the current user (they are
+            // visible through the CreateBy condition that exists only in the flat query). The section is a
+            // flat list of templates anyway, so subfolder expansion is disabled.
+            withSubfolders = false;
+        }
+
         int total;
         IEnumerable<FileEntry> entries;
 
