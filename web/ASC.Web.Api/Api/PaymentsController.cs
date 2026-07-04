@@ -1636,12 +1636,22 @@ public class PaymentController(
 
         if (inDto.Enabled && !settings.EnabledServices.Contains(inDto.Service))
         {
+            if (inDto.Service == TenantWalletService.AISearch && !settings.EnabledServices.Contains(TenantWalletService.AITools))
+            {
+                throw new InvalidOperationException("AI Tools service must be enabled before Search");
+            }
+
             settings.EnabledServices.Add(inDto.Service);
         }
 
         if (!inDto.Enabled && settings.EnabledServices.Contains(inDto.Service))
         {
             settings.EnabledServices.Remove(inDto.Service);
+
+            if (inDto.Service == TenantWalletService.AITools && settings.EnabledServices.Contains(TenantWalletService.AISearch))
+            {
+                settings.EnabledServices.Remove(TenantWalletService.AISearch);
+            }
         }
 
         if (settings.EnabledServices.Count == 0)
@@ -1650,6 +1660,11 @@ public class PaymentController(
         }
 
         var result = await settingsManager.SaveAsync(settings);
+
+        if (!result)
+        {
+            throw new InvalidOperationException("Failed to save tenant wallet service settings");
+        }
 
         messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
 
@@ -1784,7 +1799,10 @@ public class PaymentController(
         var aiPrices = await aiGateway.GetPricesAsync();
         var icons = new Dictionary<string, string>();
 
-        var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower()).Distinct();
+        var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower())
+            .Concat(aiPrices.Image.Select(m => m.OwnedBy.ToLower()))
+            .Distinct();
+
         var searchTypes = aiPrices.Search.Select(s => s.Id).Distinct();
 
         foreach (var provider in providers)
@@ -1819,6 +1837,16 @@ public class PaymentController(
             Link = e.Link
         }).ToList();
 
+        var image = aiPrices.Image.Select(m => new AiEntryPricingDto<AiImagePriceDto>
+        {
+            Id = m.Id,
+            Image = icons[m.OwnedBy.ToLower()],
+            Alias = m.Alias,
+            Provider = m.Provider,
+            Price = new AiImagePriceDto { Prompt = m.Price.Prompt, Image = m.Price.Image },
+            Link = m.Link
+        }).ToList();
+
         var search = aiPrices.Search.Select(s => new AiEntryPricingDto<decimal>
         {
             Id = s.Id,
@@ -1833,6 +1861,7 @@ public class PaymentController(
         {
             Chat = chat,
             Embedding = embedding,
+            Image = image,
             WebSearch = search,
             Currency = aiPrices.Currency
         };
@@ -1853,7 +1882,7 @@ public class PaymentController(
     [HttpGet("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
     {
-        if (!tariffService.IsConfigured() || !await aiGateway.IsEnabledAsync())
+        if (!tariffService.IsConfigured() || !await aiGateway.IsAiEnabledAsync())
         {
             return new RestrictedModelsResponse { Models = [] };
         }

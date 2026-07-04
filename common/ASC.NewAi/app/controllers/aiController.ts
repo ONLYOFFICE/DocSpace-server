@@ -341,6 +341,7 @@ export const aiController = {
   }),
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
+    markForwardHeadersToProvider();
     const body = await withToolsPrompt(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
@@ -349,6 +350,7 @@ export const aiController = {
   }),
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
+    markForwardHeadersToProvider();
     const body = withRequestSignal(res, req.body);
     await streamNdjson(
       res,
@@ -357,6 +359,7 @@ export const aiController = {
   }),
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
+    markForwardHeadersToProvider();
     const body = withRequestSignal(res, req.body);
     await streamNdjson(
       res,

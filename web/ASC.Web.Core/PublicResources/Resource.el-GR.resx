@@ -1167,6 +1167,9 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Ο αριθμός των εκπροσώπων AI δεν πρέπει να υπερβαίνει τα {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Αναζήτηση AI</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Λειτουργίες AI</value>
   </data>
@@ -1317,6 +1320,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Αναζήτηση ιστού</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Αναζήτηση ιστού</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Πιστώσεις AI</value>
   </data>
@@ -1324,6 +1330,9 @@
     <value>Πηγές</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Αποτελέσματα</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Αποτελέσματα</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1412,6 +1421,9 @@
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Αποκτήστε πρόσβαση σε ένα ευρύ φάσμα μοντέλων AI μέσω της ενσωμάτωσης OpenRouter. Πληρώνετε μόνο για όσα χρησιμοποιείτε, με χρέωση από το Πορτοφόλι σας.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Χρησιμοποιήστε μια μηχανή αναζήτησης AI για να εμπλουτίσετε τις συνομιλίες AI με πληροφορίες σε πραγματικό χρόνο από το διαδίκτυο</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Επαγγελματικό</value>
