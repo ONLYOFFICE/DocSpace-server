@@ -101,6 +101,20 @@ public abstract class Migrator(
         MigrationLogger.Log(msg, exception);
     }
 
+    protected static string GetSafeExtractPath(string root, string entryName)
+    {
+        var normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        var fullPath = Path.GetFullPath(Path.Combine(normalizedRoot, entryName));
+
+        if (!fullPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+            && !fullPath.Equals(normalizedRoot, StringComparison.Ordinal))
+        {
+            throw new InvalidDataException($"Archive entry is outside the extraction directory: {entryName}");
+        }
+
+        return fullPath;
+    }
+
     public string GetLogName()
     {
         return MigrationLogger.GetLogName();
