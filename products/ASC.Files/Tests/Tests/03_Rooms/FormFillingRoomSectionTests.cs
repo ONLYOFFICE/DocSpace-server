@@ -43,7 +43,6 @@ namespace ASC.Files.Tests.Tests._03_Rooms;
 /// purely on <see cref="FolderType.FillingFormsRoom"/>, this behavior applies equally to rooms created
 /// before the "Forms" section was introduced and to newly created ones.
 /// </summary>
-[Collection("Test Collection")]
 [Trait("Category", "Rooms")]
 public class FormFillingRoomSectionTests(
     AspireAppFixture fixture)

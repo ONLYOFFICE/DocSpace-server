@@ -44,7 +44,6 @@ namespace ASC.Files.Tests.Tests._03_Rooms;
 /// stored folder type, it applies equally to templates created before the split was introduced
 /// and to newly created ones.
 /// </summary>
-[Collection("Test Collection")]
 [Trait("Category", "Rooms")]
 public class FormFillingRoomTemplateSectionTests(
     AspireAppFixture fixture)

@@ -43,7 +43,6 @@ namespace ASC.Files.Tests.Tests._03_Rooms;
 /// crossing the root boundary is redirected to the Forms root folder, so the "Rooms" section
 /// statistics no longer include their content while the "Forms" section reflects it.
 /// </summary>
-[Collection("Test Collection")]
 [Trait("Category", "Rooms")]
 public class FormFillingRoomUsedSpaceTests(
     AspireAppFixture fixture)
