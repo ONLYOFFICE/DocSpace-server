@@ -19,8 +19,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
-                columns: new[] { "tenant", "Additional", "description", "features", "name", "product_id", "service_group", "service_name", "visible", "wallet" },
-                values: new object[] { -18, true, null, "aisearch", "aisearch", null, null, "ai-search", true, true });
+                columns: new[] { "tenant", "description", "features", "name", "product_id", "service_group", "service_name", "visible", "wallet", "additional" },
+                values: new object[] { -18, null, "aisearch", "aisearch", null, null, "ai-search", true, true, true });
         }
 
         /// <inheritdoc />
