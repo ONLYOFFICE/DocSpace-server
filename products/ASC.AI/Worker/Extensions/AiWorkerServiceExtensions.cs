@@ -45,7 +45,7 @@ public static class AiWorkerServiceExtensions
     {
         services.AddBaseDbContextPool<AiDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddBaseDbContextPool<AiIntegrationContext>();
+        services.AddAiIntegrationServices();
         services.RegisterQuotaFeature();
 
         services.RegisterQueue<VectorizationTask>(20);

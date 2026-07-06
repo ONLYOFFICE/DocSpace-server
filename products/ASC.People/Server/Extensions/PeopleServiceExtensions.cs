@@ -38,7 +38,7 @@ public static class PeopleServiceExtensions
     public static IServiceCollection AddPeopleServices(this IServiceCollection services)
     {
         services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddBaseDbContextPool<AiIntegrationContext>();
+        services.AddAiIntegrationServices();
         services.RegisterQuotaFeature();
 
         services.RegisterQueue<UsersQuotaSyncJob>();

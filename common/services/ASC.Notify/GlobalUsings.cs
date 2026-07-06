@@ -34,7 +34,7 @@
 global using System.Reflection;
 global using System.Text.Json;
 
-global using ASC.AI.Integration.Database;
+global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;

@@ -49,7 +49,7 @@ public static class WebApiServiceExtensions
         }
 
         services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddBaseDbContextPool<AiIntegrationContext>();
+        services.AddAiIntegrationServices();
         services.AddBaseDbContextPool<BackupsContext>();
         services.RegisterQuotaFeature();
         services.RegisterFreeBackupQuotaFeature();
