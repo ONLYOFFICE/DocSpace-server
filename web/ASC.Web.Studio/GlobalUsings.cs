@@ -38,6 +38,7 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 
+global using ASC.AI.Integration.Database;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;

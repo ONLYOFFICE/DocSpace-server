@@ -47,6 +47,7 @@ global using System.Text.RegularExpressions;
 global using System.Reflection;
 global using System.Web;
 
+global using ASC.AI.Integration.Database;
 global using ASC.ActiveDirectory;
 global using ASC.ActiveDirectory.Base;
 global using ASC.ActiveDirectory.Base.Settings;

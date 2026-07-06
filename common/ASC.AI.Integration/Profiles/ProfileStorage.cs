@@ -105,6 +105,13 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         return result;
     }
 
+    public async Task<bool> AnyAsync(int tenantId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.AnyProfileAsync(tenantId);
+    }
+
     public async Task<Profile> UpdateAsync(int tenantId, Profile profile)
     {
         var encryptedKey = await EncryptKeyAsync(profile.Key);

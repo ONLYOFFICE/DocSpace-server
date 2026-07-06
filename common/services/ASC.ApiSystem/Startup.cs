@@ -81,6 +81,7 @@ public class Startup
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddBaseDbContextPool<AiIntegrationContext>();
         services.AddBaseDbContextPool<ApiKeysDbContext>();
 
         _diHelper.Configure(services);

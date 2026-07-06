@@ -39,6 +39,7 @@ global using System.Security.Claims;
 global using System.Text.Json;
 global using System.Web;
 
+global using ASC.AI.Integration.Database;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Auth;
 global using ASC.Api.Core.Convention;

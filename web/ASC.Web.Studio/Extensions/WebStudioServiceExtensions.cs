@@ -48,6 +48,7 @@ public static class WebStudioServiceExtensions
     {
         services.AddMemoryCache();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddBaseDbContextPool<AiIntegrationContext>();
         services.RegisterQuotaFeature();
         services.AddHttpClient();
         services.AddHostedService<WorkerService>();

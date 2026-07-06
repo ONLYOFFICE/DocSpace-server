@@ -31,6 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using ASC.AI.Integration.Database;
 global using ASC.Api.Core;
 global using ASC.AI.Core.Chat.Data;
 global using ASC.AI.Core.Chat.Deletion;

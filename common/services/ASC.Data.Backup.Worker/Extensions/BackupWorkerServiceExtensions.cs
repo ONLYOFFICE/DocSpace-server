@@ -57,6 +57,7 @@ public static class BackupWorkerServiceExtensions
 
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddBaseDbContextPool<AiIntegrationContext>();
         services.RegisterQuotaFeature();
         services.RegisterFreeBackupQuotaFeature();
 

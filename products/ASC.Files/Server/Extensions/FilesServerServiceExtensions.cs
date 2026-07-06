@@ -41,6 +41,7 @@ public static class FilesServerServiceExtensions
     {
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
+        services.AddBaseDbContextPool<AiIntegrationContext>();
         services.RegisterQuotaFeature();
         services.RegisterFreeBackupQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
