@@ -812,9 +812,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant");
 
-                    b.Property<bool>("Additional")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Description")
                         .HasMaxLength(128)
                         .HasColumnType("varchar")
@@ -870,6 +867,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("wallet")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<bool>("Additional")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("additional")
                         .HasDefaultValueSql("'0'");
 
                     b.HasKey("TenantId")
