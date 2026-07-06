@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -40,13 +40,7 @@ public partial class AiDbContext
     {
         return Queries.UpdateRoomSettingsAsync(this, tenantId, providersIds);
     }
-    
-    [PreCompileQuery]
-    public IAsyncEnumerable<DbMcpServerSettings> GetToolsSettings(int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds)
-    {
-        return Queries.GetToolsSettings(this, tenantId, roomId, userId, serversIds);
     }
-}
 
 static file class Queries
 {
@@ -56,9 +50,4 @@ static file class Queries
                 .Where(x => x.TenantId == tenantId && providersIds.Contains(x.ChatProviderId))
                 .ExecuteUpdate(x => 
                     x.SetProperty(y => y.ChatProviderId, 0)));
-    
-    public static readonly Func<AiDbContext, int, int, Guid, IEnumerable<Guid>, IAsyncEnumerable<DbMcpServerSettings>> GetToolsSettings =
-        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds) => 
-            ctx.RoomMcpServerSettings.Where(x => 
-                x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && serversIds.Contains(x.ServerId)));
 }

@@ -42,48 +42,28 @@ public class PreferencesStorageService(
     TenantManager tenantManager,
     PreferencesStorage storage,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity)
+    FileSecurity fileSecurity,
+    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
 
     public async Task<Preferences?> ReadAsync(string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
 
     public async Task UpsertAsync(Preferences preferences, string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, preferences, entryId);
     }
 
     public async Task DeleteAsync(string? entityId = null)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        int? entryId = entityId == null ? null : int.Parse(entityId);
-
-        if (entryId.HasValue)
-        {
-            await AssertEntryAccessAsync(entryId.Value);
-        }
+        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }

@@ -154,6 +154,35 @@ export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknow
   };
 }
 
+// Idle interval after which a keep-alive frame is emitted on an otherwise
+// silent stream. A slow tool call (e.g. `generate_image`) can pause token
+// output for tens of seconds; without traffic an upstream proxy's read-timeout
+// (nginx default 60s) drops the response mid-stream and the browser sees
+// `ERR_INCOMPLETE_CHUNKED_ENCODING`. Keep this well under that timeout.
+const STREAM_HEARTBEAT_MS = 10_000;
+
+// Emit `frame` whenever the stream has been idle for `STREAM_HEARTBEAT_MS`.
+// `frame` must be something the client's stream parser ignores: a blank line
+// for ndjson (`readNdjson` skips empty lines), an SSE comment for SSE. Returns
+// `touch` (call after every real write to reset the idle timer) and `stop`.
+function startStreamHeartbeat(res: Response, frame: string): { touch: () => void; stop: () => void } {
+  let lastActivity = Date.now();
+  const timer = setInterval(() => {
+    if (res.writableEnded || res.destroyed) {
+      return;
+    }
+    if (Date.now() - lastActivity >= STREAM_HEARTBEAT_MS) {
+      res.write(frame);
+      lastActivity = Date.now();
+    }
+  }, STREAM_HEARTBEAT_MS);
+  timer.unref?.();
+  return {
+    touch: () => { lastActivity = Date.now(); },
+    stop: () => clearInterval(timer),
+  };
+}
+
 export async function streamNdjson(
   res: Response,
   generator: AsyncIterable<unknown>,
@@ -163,9 +192,13 @@ export async function streamNdjson(
   res.setHeader("X-Accel-Buffering", "no");
   res.flushHeaders?.();
 
+  // Blank line: prevents proxy read-timeouts during silent tool calls and is
+  // skipped by the lib's `readNdjson` parser.
+  const heartbeat = startStreamHeartbeat(res, "\n");
   try {
     for await (const event of generator) {
       res.write(`${JSON.stringify(event)}\n`);
+      heartbeat.touch();
     }
   } catch (err) {
     logger.error(`stream aborted: ${errorDetails(err)}`);
@@ -173,6 +206,45 @@ export async function streamNdjson(
     // carry the internal AI service URL / upstream body.
     res.write(`${JSON.stringify({ type: "error", message: "stream error" })}\n`);
   } finally {
+    heartbeat.stop();
+    res.end();
+  }
+}
+
+// Streams OpenAI-format chunks as Server-Sent Events: each chunk is written
+// as a `data:` frame and a normal completion is terminated with the OpenAI
+// sentinel `data: [DONE]`. The engine's `sendWithStreamOpenAI` already emits
+// a native OpenAI error envelope (`{ error: {...} }`) as an in-stream chunk
+// on provider failure; this wrapper only adds a generic error frame (and no
+// `[DONE]`, matching OpenAI) if the generator itself throws.
+export async function streamOpenAiSse(
+  res: Response,
+  generator: AsyncIterable<unknown>,
+): Promise<void> {
+  res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+
+  // SSE comment line: ignored by any SSE consumer, keeps the connection warm.
+  const heartbeat = startStreamHeartbeat(res, ": ping\n\n");
+  try {
+    for await (const chunk of generator) {
+      res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+      heartbeat.touch();
+    }
+    res.write("data: [DONE]\n\n");
+  } catch (err) {
+    logger.error(`openai stream aborted: ${errorDetails(err)}`);
+    // Generic message only — detail stays in the server log.
+    res.write(
+      `data: ${JSON.stringify({
+        error: { message: "stream error", type: "server_error" },
+      })}\n\n`,
+    );
+  } finally {
+    heartbeat.stop();
     res.end();
   }
 }

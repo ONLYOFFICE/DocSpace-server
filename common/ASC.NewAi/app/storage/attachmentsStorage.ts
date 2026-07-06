@@ -33,7 +33,7 @@
 
 import { randomUUID } from "node:crypto";
 
-import { aiService, AiServiceHttpError, proxyBaseUrl } from "./httpClient.js";
+import { aiService, AiServiceHttpError, proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { getNumber, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
@@ -86,6 +86,70 @@ function detectImageMime(bytes: Uint8Array, fallback: string | null): string {
     return fallback;
   }
   return "image/png";
+}
+
+// Decode a tool-image payload into raw bytes + mime. The model returns either
+// a bare base64 string or a `data:image/*;base64,…` data URL depending on the
+// provider; handle both and sniff the mime from magic bytes when absent.
+function decodeImagePayload(base64: string): { bytes: Uint8Array; mime: string } {
+  const match = /^data:([^;]+);base64,(.*)$/s.exec(base64);
+  const data = match ? (match[2] ?? "") : base64;
+  const bytes = new Uint8Array(Buffer.from(data, "base64"));
+  const mime = match?.[1] ?? detectImageMime(bytes, null);
+  return { bytes, mime };
+}
+
+function extensionForMime(mime: string): string {
+  switch (mime) {
+    case "image/jpeg": return ".jpg";
+    case "image/gif": return ".gif";
+    case "image/webp": return ".webp";
+    default: return ".png";
+  }
+}
+
+// Upload a tool-generated image into the chat's `entityId` folder using the
+// public DocSpace Files API (`POST api/2.0/files/{folderId}/insert`), acting on
+// behalf of the current user (forwarded auth cookies). Returns the new entry id
+// (internal int or thirdparty string, serialized as string).
+async function insertGeneratedImage(
+  folderId: string,
+  title: string | undefined,
+  base64: string,
+): Promise<string> {
+  const { bytes, mime } = decodeImagePayload(base64);
+  const baseName = title && title.trim() ? title.replace(/\.[^.]+$/, "") : "generate_image";
+  const fileName = `${baseName}${extensionForMime(mime)}`;
+
+  const form = new FormData();
+  form.append("title", fileName);
+  form.append("createNewIfExist", "true");
+  form.append("file", new Blob([bytes], { type: mime }), fileName);
+
+  const url = `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(folderId)}/insert`;
+  // Don't set Content-Type — `fetch` derives the multipart boundary from the
+  // FormData body, and `getForwardedHeaders` strips content-type anyway.
+  const { signal, cancel } = withTimeout(undefined);
+  try {
+    const res = await fetch(url, { method: "POST", headers: getForwardedHeaders(), body: form, signal });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new AiServiceHttpError(res.status, res.statusText, text, url);
+    }
+    const json: unknown = await res.json();
+    const file = isObject(json) && "response" in json ? json.response : json;
+    if (!isObject(file)) {
+      throw new Error("DocSpace insert returned an unexpected payload");
+    }
+    const numId = getNumber(file, "id");
+    const id = numId !== undefined ? String(numId) : getString(file, "id");
+    if (id === undefined) {
+      throw new Error("DocSpace insert returned a file without an id");
+    }
+    return id;
+  } finally {
+    cancel();
+  }
 }
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
@@ -188,6 +252,12 @@ function dtoToAttachment(raw: unknown): Attachment | null {
   if (type !== undefined) {
     result.type = type;
   }
+  // Origin marker (0.4.132+). C# doesn't echo it today, so it's normally
+  // back-filled by the caller (tool uploads); read it forward-compat.
+  const source = getString(raw, "source");
+  if (source === "user" || source === "tool") {
+    result.source = source;
+  }
   return result;
 }
 
@@ -207,39 +277,60 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       return [];
     }
 
-    // Synthesize records for raw-payload drafts (no `input.path`). The C#
-    // backend can't accept these yet, so we stash them in a server-local
-    // cache and serve them back through `readById`/`readManyByIds`. Keeps
-    // the chip preview alive in the composer until the message is sent.
-    const synthesized: (Attachment | null)[] = inputs.map((input) => {
-      if (input.path) return null;
+    const result: (Attachment | null)[] = new Array(inputs.length).fill(null);
+
+    // 0.4.132+: tool-generated images (`generate_image`) arrive as raw base64
+    // with `source === "tool"` and no DocSpace entry. Upload the bytes as a
+    // real file into the chat's `entityId` folder so they're persisted (and
+    // reclaimed by the message/thread cascade), rather than cached in-memory.
+    const toolTasks: Promise<void>[] = [];
+    inputs.forEach((input, i) => {
+      if (input.source !== "tool") return;
+      toolTasks.push(
+        (async () => {
+          result[i] = await this.uploadToolImage(input);
+        })(),
+      );
+    });
+    if (toolTasks.length > 0) {
+      await Promise.all(toolTasks);
+    }
+
+    // Synthesize records for raw-payload drafts (no `input.path`, not a tool
+    // upload). The C# backend can't accept these yet, so we stash them in a
+    // server-local cache and serve them back through `readById`/
+    // `readManyByIds`. Keeps the chip preview alive in the composer until the
+    // message is sent.
+    inputs.forEach((input, i) => {
+      if (result[i] || input.path || input.source === "tool") return;
       const id = randomUUID();
       const rec: Attachment = {
         id,
         kind: input.kind,
         title: input.title,
         createdAt: Date.now(),
+        ...(input.source !== undefined ? { source: input.source } : {}),
         ...(input.content !== undefined ? { content: input.content } : {}),
         ...(input.base64 !== undefined ? { base64: input.base64 } : {}),
         ...(input.type !== undefined ? { type: input.type } : {}),
       };
       rawAttachmentCache.set(id, rec);
-      return rec;
+      result[i] = rec;
     });
 
     const docspaceIndices: number[] = [];
     const entryIds: string[] = [];
     inputs.forEach((input, i) => {
-      if (synthesized[i]) return;
+      if (result[i]) return;
       docspaceIndices.push(i);
       entryIds.push(input.path ?? "");
     });
 
     if (entryIds.length === 0) {
-      // All inputs were raw-payload — skip the C# round-trip entirely.
-      return synthesized.map((rec, i) => {
+      // No DocSpace-entry inputs — everything was handled above.
+      return result.map((rec, i) => {
         if (!rec) {
-          throw new Error(`createMany: missing synthesized record at index ${i}`);
+          throw new Error(`createMany: missing record at index ${i}`);
         }
         return rec;
       });
@@ -278,11 +369,8 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
           + `(missing id/title/kind/entryId); skipped=${JSON.stringify(skipped)}`,
       );
     }
-    const result = inputs.map((input, i) => {
-      const stub = synthesized[i];
-      if (stub) return stub;
-
-      const docspaceIdx = docspaceIndices.indexOf(i);
+    docspaceIndices.forEach((i, docspaceIdx) => {
+      const input = inputs[i]!;
       const entryId = entryIds[docspaceIdx] ?? "";
       const matched = byEntryId.get(entryId);
       if (!matched) {
@@ -301,10 +389,47 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       if (matched.type === undefined && input.type !== undefined) {
         matched.type = input.type;
       }
-      return matched;
+      result[i] = matched;
     });
-    await inlineImagesAsync(result);
-    return result;
+
+    const finalResult = result.map((rec, i) => {
+      if (!rec) {
+        throw new Error(`createMany: missing record at index ${i}`);
+      }
+      return rec;
+    });
+    await inlineImagesAsync(finalResult);
+    return finalResult;
+  }
+
+  // Persist a tool-generated image (raw base64, `source === "tool"`). The bytes
+  // are uploaded as a real DocSpace file into the chat's `entityId` folder via
+  // the public Files API; the resulting entry is then recorded as a normal
+  // image attachment through the existing entry-based flow, so reads serve a
+  // pre-signed URL exactly like a user upload. The lib keeps only the returned
+  // attachment `id` as a lightweight ref.
+  private async uploadToolImage(
+    input: Omit<Attachment, "id" | "createdAt">,
+  ): Promise<Attachment> {
+    if (!input.base64) {
+      throw new Error("tool image attachment is missing its base64 payload");
+    }
+    if (!input.entityId) {
+      throw new Error("tool image attachment is missing entityId (target folder)");
+    }
+
+    const entryId = await insertGeneratedImage(input.entityId, input.title, input.base64);
+
+    // Reuse the entry-based path: `path` routes this back through the DocSpace
+    // branch of `createMany` (no `source`, so it won't recurse here).
+    const [attachment] = await this.createMany([
+      { kind: "image", title: input.title, path: entryId },
+    ]);
+    if (!attachment) {
+      throw new Error("failed to create attachment for uploaded tool image");
+    }
+    attachment.source = "tool";
+    return attachment;
   }
 
   async readById(id: string): Promise<Attachment | null> {

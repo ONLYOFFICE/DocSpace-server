@@ -133,8 +133,9 @@ export const assignmentsController = {
     res.json(profileId);
   }),
 
-  getAllAssignments: asyncHandler(async (_req, res) => {
-    const result = await engine.getAllAssignments();
+  getAllAssignments: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const result = await engine.getAllAssignments(entityId);
     res.json(result);
   }),
 

@@ -37,8 +37,71 @@ import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
+import logger from "../log.js";
 
 const engine = new ProfilesEngine({ storage });
+
+// Translate a provider-side failure (raised by the OpenAI-compatible SDK
+// while listing models) into a meaningful HTTP status + message instead of
+// letting `asyncHandler` collapse everything to a generic 500. The base URL
+// and key come from the user's profile form, so most failures are config
+// errors that should read as such in the UI.
+function describeProviderError(err: unknown): { status: number; message: string } {
+  // OpenAI-SDK HTTP errors expose a numeric `status`.
+  const httpStatus =
+    typeof (err as { status?: unknown })?.status === "number"
+      ? (err as { status: number }).status
+      : undefined;
+  if (httpStatus === 401 || httpStatus === 403) {
+    return { status: 400, message: "Invalid API key for the AI provider" };
+  }
+  if (httpStatus === 404) {
+    return {
+      status: 400,
+      message:
+        "Invalid base URL — expected an OpenAI-compatible endpoint (e.g. ending in /v1)",
+    };
+  }
+  if (typeof httpStatus === "number" && httpStatus >= 500) {
+    return { status: 502, message: "The AI provider returned an error" };
+  }
+  if (typeof httpStatus === "number" && httpStatus >= 400) {
+    return { status: 400, message: `The AI provider rejected the request (${httpStatus})` };
+  }
+
+  // Network-level failures (no HTTP status): walk the cause chain for a
+  // known DNS/connection code.
+  const codes = new Set([
+    "ENOTFOUND",
+    "ECONNREFUSED",
+    "EAI_AGAIN",
+    "ECONNRESET",
+    "ETIMEDOUT",
+    "UND_ERR_CONNECT_TIMEOUT",
+  ]);
+  let cur: unknown = err;
+  for (let i = 0; i < 5 && cur; i++) {
+    const code = (cur as { code?: unknown }).code;
+    if (typeof code === "string" && codes.has(code)) {
+      return {
+        status: 502,
+        message:
+          "The AI provider is unreachable — check the base URL and that the service is running",
+      };
+    }
+    cur = (cur as { cause?: unknown }).cause;
+  }
+
+  const msg = err instanceof Error ? err.message : String(err);
+  if (/connection error|fetch failed|timeout/i.test(msg)) {
+    return {
+      status: 502,
+      message:
+        "The AI provider is unreachable — check the base URL and that the service is running",
+    };
+  }
+  return { status: 502, message: "Failed to list provider models" };
+}
 
 interface ListProviderModelsBody {
   providerType?: ProviderType;
@@ -77,12 +140,22 @@ export const profilesController = {
       return;
     }
     assertSafeBaseUrl(baseUrl);
-    const models = await engine.listProviderModels({
-      providerType,
-      baseUrl,
-      apiKey: apiKey ?? "",
-    });
-    res.json(models);
+    try {
+      const models = await engine.listProviderModels({
+        providerType,
+        baseUrl,
+        apiKey: apiKey ?? "",
+      });
+      res.json(models);
+    } catch (err) {
+      const { status, message } = describeProviderError(err);
+      logger.warn(
+        `listProviderModels failed (${providerType} @ ${baseUrl}) -> ${status}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      res.status(status).json({ error: message });
+    }
   }),
 
   listModels: asyncHandler(async (req, res) => {

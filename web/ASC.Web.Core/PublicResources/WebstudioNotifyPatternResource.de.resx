@@ -1688,7 +1688,7 @@ $TrulyYours</value>
 
 Der geplante Backup-Prozess für Ihren DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ist fehlgeschlagen.
 
-Wir empfehlen Ihnen, die Einstellungen "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" und "Services":"${__VirtualRootPath}/portal-settings/services" zu überprüfen.
+Wir empfehlen Ihnen, die Einstellungen "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" und "Services":"${__VirtualRootPath}/portal-settings/payments/services" zu überprüfen.
 
 Bei Fragen oder Unterstützung kontaktieren Sie uns gerne über "${__SupportLink}":"${__SupportLink}"
 
@@ -1699,7 +1699,7 @@ $TrulyYours</value>
 
 Der geplante Backup-Prozess für Ihren DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ist fehlgeschlagen.
 
-Wir empfehlen Ihnen, die Einstellungen [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) und [Services](${__VirtualRootPath}/portal-settings/services) zu überprüfen.
+Wir empfehlen Ihnen, die Einstellungen [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) und [Services](${__VirtualRootPath}/portal-settings/payments/services) zu überprüfen.
 
 Bei Fragen oder Unterstützung kontaktieren Sie uns gerne über [${__SupportLink}](${__SupportLink})
 

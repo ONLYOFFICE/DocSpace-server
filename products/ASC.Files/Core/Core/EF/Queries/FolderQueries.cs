@@ -336,9 +336,39 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<int> UpdateFolderCounterAsync(int tenantId, int folderId, long size)
+    {
+        return FolderQueries.UpdateFolderCounterAsync(this, tenantId, folderId, size);
+    }
+
+    [PreCompileQuery]
+    public Task<bool> IsInsideFillingFormsRoomAsync(int tenantId, int folderId)
+    {
+        return FolderQueries.IsInsideFillingFormsRoomAsync(this, tenantId, folderId);
+    }
+
+    [PreCompileQuery]
+    public Task<long> FillingFormsRoomsCounterSumAsync(int tenantId, int parentId)
+    {
+        return FolderQueries.FillingFormsRoomsCounterSumAsync(this, tenantId, parentId);
+    }
+
+    [PreCompileQuery]
     public Task<DbRoomSettings> RoomSettingsAsync(int tenantId, int roomId)
     {
         return FolderQueries.RoomSettingsAsync(this, tenantId, roomId);
+    }
+
+    [PreCompileQuery]
+    public Task<DbRoomChatSettings> RoomChatSettingsAsync(int tenantId, int roomId)
+    {
+        return FolderQueries.RoomChatSettingsAsync(this, tenantId, roomId);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<DbRoomChatSettings> RoomChatSettingsAsync(int tenantId, IEnumerable<int> roomIds)
+    {
+        return FolderQueries.RoomChatSettingsByIdsAsync(this, tenantId, roomIds);
     }
 
     [PreCompileQuery]
@@ -965,11 +995,52 @@ static file class FolderQueries
                             .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
                         ));
 
+    public static readonly Func<FilesDbContext, int, int, long, Task<int>> UpdateFolderCounterAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId, long size) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId && r.Id == folderId)
+                    .AsNoTracking()
+                    .ExecuteUpdate(toUpdate => toUpdate
+                            .SetProperty(p => p.Counter, p => p.Counter + size)
+                        ));
+
+    public static readonly Func<FilesDbContext, int, int, Task<bool>> IsInsideFillingFormsRoomAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId) =>
+                ctx.Tree
+                    .AsNoTracking()
+                    .Where(t => t.FolderId == folderId)
+                    .Join(ctx.Folders, t => t.ParentId, f => f.Id, (t, f) => f)
+                    .Any(f => f.TenantId == tenantId
+                        && f.FolderType == FolderType.FillingFormsRoom
+                        && ctx.Folders.Any(p => p.TenantId == tenantId && p.Id == f.ParentId && p.FolderType == FolderType.VirtualRooms)));
+
+    public static readonly Func<FilesDbContext, int, int, Task<long>> FillingFormsRoomsCounterSumAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentId) =>
+                ctx.Folders
+                    .AsNoTracking()
+                    .Where(r => r.TenantId == tenantId && r.ParentId == parentId && r.FolderType == FolderType.FillingFormsRoom)
+                    .Sum(r => r.Counter));
+
     public static readonly Func<FilesDbContext, int, int, Task<DbRoomSettings>> RoomSettingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int roomId) =>
                 ctx.RoomSettings
                     .FirstOrDefault(r => r.TenantId == tenantId && r.RoomId == roomId));
+
+    public static readonly Func<FilesDbContext, int, int, Task<DbRoomChatSettings>> RoomChatSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId) =>
+                ctx.Set<DbRoomChatSettings>()
+                    .FirstOrDefault(r => r.TenantId == tenantId && r.RoomId == roomId));
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbRoomChatSettings>> RoomChatSettingsByIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> roomIds) =>
+                ctx.Set<DbRoomChatSettings>()
+                    .Where(r => r.TenantId == tenantId && roomIds.Contains(r.RoomId)));
 
     public static readonly Func<FilesDbContext, int, int, Task<bool>> ContainsFormsInFolder =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

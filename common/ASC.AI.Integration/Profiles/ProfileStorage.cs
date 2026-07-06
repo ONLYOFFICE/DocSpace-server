@@ -149,6 +149,7 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             await using var transaction = await context.Database.BeginTransactionAsync();
 
             await context.ClearThreadsProfileAsync(tenantId, id);
+            await context.DeleteAssignmentsByProfileAsync(tenantId, id);
             await context.DeleteProfileAsync(tenantId, id);
 
             await transaction.CommitAsync();

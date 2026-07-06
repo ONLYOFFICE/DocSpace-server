@@ -54,6 +54,7 @@
             "description": "The filter by user ID.",
             "schema": {
               "type": "string",
+              "format": "uuid",
               "example": "00000000-0000-0000-0000-000000000000"
             }
           },
@@ -63,6 +64,7 @@
             "description": "The filter by room owner ID.",
             "schema": {
               "type": "string",
+              "format": "uuid",
               "example": "00000000-0000-0000-0000-000000000000"
             }
           },
@@ -92,15 +94,6 @@
               "type": "boolean",
               "example": false
             }
-          },
-          {
-            "name": "subjectFilter",
-            "in": "query",
-            "description": "The filter by user (Owner - 0, Member - 1).",
-            "schema": {
-              "$ref": "#/components/schemas/SubjectFilter"
-            },
-            "example": 0
           },
           {
             "name": "quotaFilter",
@@ -6569,35 +6562,6 @@
         "additionalProperties": false,
         "description": "The chat session information."
       },
-      "ChatImageMultimodalSettingsDto": {
-        "type": "object",
-        "properties": {
-          "formats": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The supported image formats.",
-            "nullable": true,
-            "example": [
-              ".jpeg",
-              ".gif"
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "description": "The image multimodal settings for the chat model."
-      },
-      "ChatMultimodalSettingsDto": {
-        "type": "object",
-        "properties": {
-          "image": {
-            "$ref": "#/components/schemas/ChatImageMultimodalSettingsDto"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The multimodal settings for the chat model."
-      },
       "ChatReasoningEffort": {
         "oneOf": [
           {
@@ -6668,47 +6632,11 @@
       "ChatSettingsDto": {
         "type": "object",
         "properties": {
-          "providerId": {
-            "type": "integer",
-            "description": "The AI provider ID.",
-            "format": "int32",
-            "example": 1
-          },
-          "modelId": {
-            "type": "string",
-            "description": "The AI model ID used for chat completions.",
-            "nullable": true,
-            "example": "gpt-5.2"
-          },
-          "modelAlias": {
-            "type": "string",
-            "description": "The AI model display alias.",
-            "nullable": true,
-            "example": "GPT-5.2"
-          },
           "prompt": {
             "type": "string",
             "description": "The system prompt for the chat.",
             "nullable": true,
             "example": "You are a helpful assistant."
-          },
-          "multimodal": {
-            "$ref": "#/components/schemas/ChatMultimodalSettingsDto"
-          },
-          "thinking": {
-            "type": "boolean",
-            "description": "Indicates whether the model supports extended thinking mode.",
-            "example": false,
-            "deprecated": true
-          },
-          "capabilities": {
-            "$ref": "#/components/schemas/AiModelCapabilities"
-          },
-          "internal": {
-            "type": "boolean",
-            "description": "Indicates whether this is an internal AI gateway provider.",
-            "readOnly": true,
-            "example": false
           }
         },
         "additionalProperties": false,
@@ -10135,33 +10063,6 @@
         },
         "additionalProperties": false,
         "description": "Parameters for starting a new AI chat session."
-      },
-      "SubjectFilter": {
-        "oneOf": [
-          {
-            "enum": [
-              "Owner",
-              "Member"
-            ],
-            "type": "string",
-            "description": "[Owner - Owner, Member - Member]",
-            "example": "Owner"
-          },
-          {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "[0 - Owner, 1 - Member]",
-            "example": 0,
-            "x-enum-varnames": [
-              "Owner",
-              "Member"
-            ]
-          }
-        ],
-        "x-enum-type": "integer"
       },
       "ToolDecisionRequestBody": {
         "type": "object",

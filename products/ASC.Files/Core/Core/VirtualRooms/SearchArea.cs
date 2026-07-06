@@ -60,5 +60,11 @@ public enum SearchArea
     ResultStorage,
 
     [Description("AiAgents")]
-    AiAgents
+    AiAgents,
+
+    [Description("Forms")]
+    Forms,
+
+    [Description("Form templates")]
+    FormTemplates
 }

@@ -82,3 +82,17 @@ export function requestContextMiddleware(req: Request, _res: Response, next: Nex
 export function getForwardedHeaders(): ForwardedHeaders {
   return als.getStore()?.headers ?? {};
 }
+
+// Opt the current request into forwarding the client headers down to the
+// provider (see RequestContext.forwardHeadersToProvider). Set by the
+// chat-stream handlers; read when the provider profile is resolved.
+export function markForwardHeadersToProvider(): void {
+  const store = als.getStore();
+  if (store) {
+    store.forwardHeadersToProvider = true;
+  }
+}
+
+export function shouldForwardHeadersToProvider(): boolean {
+  return als.getStore()?.forwardHeadersToProvider === true;
+}

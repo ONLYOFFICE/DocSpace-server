@@ -108,7 +108,14 @@ public class QuotasRequestDto
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "wallet")]
-    public bool Wallet { get; set; }
+    public bool? Wallet { get; set; }
+
+    /// <summary>
+    /// Specifies whether to return additional quotas only.
+    /// </summary>
+    /// <example>true</example>
+    [FromQuery(Name = "additional")]
+    public bool? Additional { get; set; }
 }
 
 /// <summary>

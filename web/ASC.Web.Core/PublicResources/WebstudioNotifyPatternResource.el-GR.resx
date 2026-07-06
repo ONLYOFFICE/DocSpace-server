@@ -1701,7 +1701,7 @@ $TrulyYours</value>
 
 Η προγραμματισμένη διαδικασία δημιουργίας αντιγράφου ασφαλείας για το DocSpace σας "${__VirtualRootPath}":"${__VirtualRootPath}" απέτυχε.
 
-Συνιστούμε να ελέγξετε τις ρυθμίσεις "Αντίγραφο Ασφαλείας":"${__VirtualRootPath}/portal-settings/backup/data-backup" και "Υπηρεσίες":"${__VirtualRootPath}/portal-settings/services".
+Συνιστούμε να ελέγξετε τις ρυθμίσεις "Αντίγραφο Ασφαλείας":"${__VirtualRootPath}/portal-settings/backup/data-backup" και "Υπηρεσίες":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω "${__SupportLink}":"${__SupportLink}"
 
@@ -1712,7 +1712,7 @@ $TrulyYours</value>
 
 Η προγραμματισμένη διαδικασία δημιουργίας αντιγράφου ασφαλείας για το DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) απέτυχε.
 
-Συνιστούμε να ελέγξετε τις ρυθμίσεις [Αντίγραφο Ασφαλείας](${__VirtualRootPath}/portal-settings/backup/data-backup) και [Υπηρεσίες](${__VirtualRootPath}/portal-settings/services).
+Συνιστούμε να ελέγξετε τις ρυθμίσεις [Αντίγραφο Ασφαλείας](${__VirtualRootPath}/portal-settings/backup/data-backup) και [Υπηρεσίες](${__VirtualRootPath}/portal-settings/payments/services).
 
 Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω του [${__SupportLink}](${__SupportLink})
 

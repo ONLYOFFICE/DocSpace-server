@@ -33,6 +33,18 @@
 
 namespace ASC.AI.Service;
 
+public class AttachmentResult
+{
+    public required Guid Id { get; init; }
+    public required AttachmentKind Kind { get; init; }
+    public required string Title { get; init; }
+    public string? Content { get; init; }
+    public string? DataUrl { get; init; }
+    public int? EntryId { get; init; }
+    public string? ThirdpartyEntryId { get; init; }
+    public DateTime CreatedAt { get; init; }
+}
+
 [Scope]
 public class AttachmentsStorageService(
     TenantManager tenantManager,

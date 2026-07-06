@@ -36,6 +36,7 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
+[DisableResponseWrapper]
 public class PortalController(
         ILogger<PortalController> logger,
         SettingsManager settingsManager,

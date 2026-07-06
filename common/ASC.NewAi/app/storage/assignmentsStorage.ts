@@ -61,8 +61,11 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     }
   }
 
-  async readAll(): Promise<Partial<Record<ActionType, string>>> {
-    const raw = await aiService.get(PATH);
+  async readAll(entityId?: string): Promise<Partial<Record<ActionType, string>>> {
+    const raw = await aiService.get(
+      PATH,
+      entityId ? { query: entityIdQuery(entityId) } : undefined,
+    );
     if (!isObject(raw)) {
       return {};
     }

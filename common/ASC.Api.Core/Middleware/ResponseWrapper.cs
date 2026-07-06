@@ -123,10 +123,25 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
     }
 }
 
+/// <summary>
+/// Marks a controller or action whose responses must not be wrapped into <see cref="SuccessApiResponse"/>
+/// by <see cref="CustomResponseFilterAttribute"/>. Used by services (e.g. ASC.ApiSystem) that expose a flat
+/// response shape when their controllers are hosted inside the common (monolith) pipeline.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public sealed class DisableResponseWrapperAttribute : Attribute;
+
 public class CustomResponseFilterAttribute : ResultFilterAttribute
 {
     public override void OnResultExecuting(ResultExecutingContext context)
     {
+        if (context.ActionDescriptor.EndpointMetadata.Any(m => m is DisableResponseWrapperAttribute))
+        {
+            base.OnResultExecuting(context);
+
+            return;
+        }
+
         if (context.Result is ObjectResult result)
         {
             result.DeclaredType = typeof(SuccessApiResponse);

@@ -354,7 +354,7 @@ public class FileDeleteTests(
     {
         var trashId = await GetTrashFolderIdAsync(Owner);
 
-        return (await _foldersApi.GetFolderByFolderIdAsync(trashId, folderType: folderType, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        return (await _foldersApi.GetFolderByFolderIdAsync(trashId, folderType: folderType?.Select(r=> (int)r).ToList(), cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
 
     private async Task MoveFilesToTrash(params FileDtoInteger[] files)

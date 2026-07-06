@@ -2878,7 +2878,7 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/services")),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/services")),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];
     }

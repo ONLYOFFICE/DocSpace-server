@@ -1690,7 +1690,7 @@ $TrulyYours</value>
 
 Planirani proces pravljenja rezervne kopije za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" nije uspeo.
 
-Preporučujemo da proverite podešavanja "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" i "Services":"${__VirtualRootPath}/portal-settings/services".
+Preporučujemo da proverite podešavanja "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" i "Services":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte putem "${__SupportLink}":"${__SupportLink}"
 
@@ -1701,7 +1701,7 @@ $TrulyYours</value>
 
 Planirani proces pravljenja rezervne kopije za vaš DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) nije uspeo.
 
-Preporučujemo da proverite [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) i [Services](${__VirtualRootPath}/portal-settings/services) podešavanja.
+Preporučujemo da proverite [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) i [Services](${__VirtualRootPath}/portal-settings/payments/services) podešavanja.
 
 Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte putem [${__SupportLink}](${__SupportLink})
 

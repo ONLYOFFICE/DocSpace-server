@@ -87,7 +87,7 @@ internal class SharePointFolderDao(
         return Task.FromResult(SharePointProviderInfo.ToFolder(SharePointProviderInfo.RootFolder));
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter? subjectFilter, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
     {
         if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != SharePointProviderInfo.ProviderFilter))
         {
@@ -99,7 +99,7 @@ internal class SharePointFolderDao(
             .Select(async (string e, CancellationToken _) => await GetFolderAsync(e).ConfigureAwait(false));
 
         rooms = FilterByRoomType(rooms, filterTypes);
-        rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectOwnerId, subjectEntriesIds);
+        rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectOwnerId, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
         {
@@ -498,6 +498,16 @@ internal class SharePointFolderDao(
     }
 
     public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<ChatSettings> GetChatSettingsAsync(string agentId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Dictionary<string, ChatSettings>> GetChatSettingsAsync(IEnumerable<string> agentIds)
     {
         throw new NotImplementedException();
     }

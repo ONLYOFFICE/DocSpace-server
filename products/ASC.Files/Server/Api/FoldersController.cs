@@ -664,6 +664,21 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
+    /// <remarks>
+    /// Returns the detailed list of rooms used for filling out forms located in the "Forms" section.
+    /// </remarks>
+    /// <summary>Get the "Forms" section</summary>
+    /// <path>api/2.0/files/@forms</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "The \"Forms\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
+    [HttpGet("@forms")]
+    public async Task<FolderContentDto<int>> GetFormsFolder(GetCommonFolderRequestDto inDto)
+    {
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFormsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+    }
+
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var aiAccessSettingsTask = settingsManager.LoadAsync<TenantAiAccessSettings>();
@@ -694,6 +709,7 @@ public class FoldersControllerCommon(
         }
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
+        yield return await globalFolderHelper.FolderFormsAsync;
         yield return await globalFolderHelper.FolderArchiveAsync;
 
         var aiAccessSettings = await aiAccessSettingsTask;
