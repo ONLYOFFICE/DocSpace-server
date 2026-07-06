@@ -35,7 +35,7 @@ namespace ASC.Web.Studio.Wallet;
 
 internal static partial class RenewSubscriptionServiceLogger
 {
-    [LoggerMessage(LogLevel.Information, "Found {count} expired wallet quotas")]
+    [LoggerMessage(LogLevel.Information, "Found {count} wallet quotas to renew")]
     public static partial void InfoRenewSubscriptionServiceFound(this ILogger<RenewSubscriptionService> logger, int count);
 
     [LoggerMessage(LogLevel.Information, "Subscription renewed: tenant {tenantId}, {description}")]

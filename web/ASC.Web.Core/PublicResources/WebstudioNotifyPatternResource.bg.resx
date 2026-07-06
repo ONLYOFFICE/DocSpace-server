@@ -1675,7 +1675,7 @@ $TrulyYours</value>
 
 Планираният процесът по архивиране на вашия DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" не беше неуспешен.
 
-Препоръчваме да проверите настройките "Резервно копие":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Услуги":"${__VirtualRootPath}/portal-settings/services".
+Препоръчваме да проверите настройките "Резервно копие":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Услуги":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Ако имате въпроси или се нуждаете от помощ, моля, не се колебайте да се свържете с нас чрез "${__SupportLink}":"${__SupportLink}"
 
@@ -1686,7 +1686,7 @@ $TrulyYours</value>
 
 Планираният процесът по архивиране на вашия DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) не беше неуспешен.
 
-Препоръчваме да проверите настройките [Резервно копие](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Услуги](${__VirtualRootPath}/portal-settings/services).
+Препоръчваме да проверите настройките [Резервно копие](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Услуги](${__VirtualRootPath}/portal-settings/payments/services).
 
 Ако имате въпроси или се нуждаете от помощ, моля, не се колебайте да се свържете с нас чрез [${__SupportLink}](${__SupportLink})
 

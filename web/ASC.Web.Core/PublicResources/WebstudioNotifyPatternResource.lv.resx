@@ -1701,7 +1701,7 @@ $TrulyYours</value>
 
 Jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ieplānotais dublēšanas process nav izdevies.
 
-Mēs iesakām pārbaudīt iestatījumus "Dublējums":"${__VirtualRootPath}/portal-settings/backup/data-backup" un "Pakalpojumi":"${__VirtualRootPath}/portal-settings/services".
+Mēs iesakām pārbaudīt iestatījumus "Dublējums":"${__VirtualRootPath}/portal-settings/backup/data-backup" un "Pakalpojumi":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot "${__SupportLink}":"${__SupportLink}"
 
@@ -1712,7 +1712,7 @@ $TrulyYours</value>
 
 Jūsu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ieplānotais dublēšanas process nav izdevies.
 
-Mēs iesakām pārbaudīt iestatījumus [Dublējums](${__VirtualRootPath}/portal-settings/backup/data-backup) un [Pakalpojumi](${__VirtualRootPath}/portal-settings/services).
+Mēs iesakām pārbaudīt iestatījumus [Dublējums](${__VirtualRootPath}/portal-settings/backup/data-backup) un [Pakalpojumi](${__VirtualRootPath}/portal-settings/payments/services).
 
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot [${__SupportLink}](${__SupportLink})
 

@@ -936,6 +936,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Portal bölgəsinin köçürülməsinə başla</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Abunəlik balansı cüzdana köçürüldü: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Sistem Hesabı</value>
   </data>

@@ -40,6 +40,7 @@ global using System.Text;
 global using ASC.Common.Caching;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Security;
+global using ASC.Core.Tenants;
 global using ASC.Notify.Cron;
 
 global using FluentAssertions;

@@ -1701,7 +1701,7 @@ $TrulyYours</value>
 
 Plánovaný process zálohovania vášho DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" zlyhal.
 
-Odporúčame skontrolovať nastavenia "Záloha":"${__VirtualRootPath}/portal-settings/backup/data-backup" a "Služby":"${__VirtualRootPath}/portal-settings/services".
+Odporúčame skontrolovať nastavenia "Záloha":"${__VirtualRootPath}/portal-settings/backup/data-backup" a "Služby":"${__VirtualRootPath}/portal-settings/payments/services".
 
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom "${__SupportLink}":"${__SupportLink}"
  
@@ -1712,7 +1712,7 @@ $TrulyYours</value>
 
 Plánovaný process zálohovania vášho DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) zlyhal.
 
-Odporúčame skontrolovať nastavenia [Záloha](${__VirtualRootPath}/portal-settings/backup/data-backup) a [Služby](${__VirtualRootPath}/portal-settings/services).
+Odporúčame skontrolovať nastavenia [Záloha](${__VirtualRootPath}/portal-settings/backup/data-backup) a [Služby](${__VirtualRootPath}/portal-settings/payments/services).
 
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom [${__SupportLink}](${__SupportLink})
 

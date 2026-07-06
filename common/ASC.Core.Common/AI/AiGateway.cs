@@ -66,9 +66,11 @@ public class AiGateway(
 
     public string Url => aiGatewayConfiguration.Settings?.Url;
 
+    public TimeSpan ResponseTimeout => aiGatewayConfiguration.Settings.ResponseTimeout;
+
     public bool Configured => aiGatewayConfiguration.Configured;
 
-    public async Task<bool> IsEnabledAsync()
+    public async Task<bool> IsAiEnabledAsync()
     {
         if (!Configured)
         {
@@ -79,52 +81,74 @@ public class AiGateway(
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
     }
 
-    public async Task<string> GetKeyAsync(bool force = false)
+    public async Task<bool> IsSearchEnabledAsync()
     {
-        if (!force && !await IsEnabledAsync())
+        if (!Configured)
         {
-            throw new InvalidOperationException("AI Gateway is not enabled");
+            return false;
         }
 
-        return await GenerateKeyAsync();
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantManager.GetCurrentTenantId());
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AISearch);
+    }
+
+    public async Task<string> GetKeyAsync(bool allowEmpty = false)
+    {
+        if (!await IsAiEnabledAsync())
+        {
+            return allowEmpty ? string.Empty : throw new InvalidOperationException("AI Gateway is not enabled");
+        }
+
+        return await GenerateKeyAsync(allowEmpty);
     }
 
     public async Task<AiPricesResponse> GetPricesAsync()
     {
-        return await SendAsync<AiPricesResponse>(HttpMethod.Get, "/prices", authorize: false);
+        var key = await GetKeyAsync(allowEmpty: true);
+        return await SendAsync<AiPricesResponse>(HttpMethod.Get, "/prices", key: key);
     }
 
     public async Task<RestrictedModelsResponse> GetRestrictedModelsAsync()
     {
-        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Get, "/chat/models/restrictions");
+        var key = await GenerateKeyAsync();
+        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Get, "/chat/models/restrictions", key: key);
     }
 
     public async Task<RestrictedModelsResponse> SetRestrictedModelsAsync(HashSet<string> models)
     {
         var content = JsonContent.Create(new SetRestrictedModelsRequest { Models = models });
-        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Put, "/chat/models/restrictions", content);
+        var key = await GenerateKeyAsync();
+
+        await fusionCache.RemoveAsync(GetCustomerModelsCacheKey());
+
+        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Put, "/chat/models/restrictions", content, key);
     }
 
     public async Task<ModelsResponse> GetModelsAsync()
     {
-        // The model list is gateway-wide (not tenant-specific) and changes rarely, so cache it
-        // with a short TTL to avoid hitting the gateway once per ReadAllAsync/ReadByIdAsync call.
+        var key = await GetKeyAsync(allowEmpty: true);
+        var path = string.IsNullOrEmpty(key) ? "/models" : "/customer/models";
+
+        var cacheKey = string.IsNullOrEmpty(key)
+            ? ModelsCacheKey
+            : GetCustomerModelsCacheKey();
+
         return await fusionCache.GetOrSetAsync<ModelsResponse>(
-            ModelsCacheKey,
-            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, "/models"),
+            cacheKey,
+            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, path, key: key),
             opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
     }
 
-    private async Task<string> GenerateKeyAsync()
+    private async Task<string> GenerateKeyAsync(bool allowEmpty = false)
     {
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
         {
-            throw new AccountingPaymentRequiredException();
+            return allowEmpty ? string.Empty : throw new AccountingPaymentRequiredException();
         }
 
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        if (user == null || user.Removed ||  user.Status == EmployeeStatus.Terminated || user.Id == Constants.LostUser.Id)
+        if (user == null || user.Removed || user.Status == EmployeeStatus.Terminated || user.Id == Constants.LostUser.Id)
         {
             throw new SecurityException();
         }
@@ -140,13 +164,12 @@ public class AiGateway(
         return JsonWebToken.Encode(payload, aiGatewayConfiguration.Settings.Secret);
     }
 
-    private async Task<T> SendAsync<T>(HttpMethod method, string path, HttpContent content = null, bool authorize = true)
+    private async Task<T> SendAsync<T>(HttpMethod method, string path, HttpContent content = null, string key = null)
     {
         using var request = new HttpRequestMessage(method, $"{Url}{path}");
 
-        if (authorize)
+        if (!string.IsNullOrEmpty(key))
         {
-            var key = await GenerateKeyAsync();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
         }
 
@@ -159,6 +182,11 @@ public class AiGateway(
 
         return await response.Content.ReadFromJsonAsync<T>();
     }
+
+    private string GetCustomerModelsCacheKey()
+    {
+        return $"{ModelsCacheKey}:{tenantManager.GetCurrentTenantId()}";
+    }
 }
 
 public class AiGatewaySettings
@@ -166,6 +194,7 @@ public class AiGatewaySettings
     public string Url { get; init; }
     public string Secret { get; init; }
     public TimeSpan TokenExpiration { get; init; }
+    public TimeSpan ResponseTimeout { get; init; } = TimeSpan.FromMinutes(10);
 }
 
 public record CurrencyInfo
@@ -176,20 +205,24 @@ public record CurrencyInfo
 
 public record AiPricesResponse
 {
-    public required List<AiChatModelPricing> Chat { get; init; }
-    public required List<AiEmbeddingModelPricing> Embedding { get; init; }
-    public required AiWebSearchPricing WebSearch { get; init; }
-    public required CurrencyInfo Currency { get; init; } = new() { Code = "USD", Symbol = "$" };
+    public required IEnumerable<AiChatModelPricing> Chat { get; init; }
+    public required IEnumerable<AiEmbeddingModelPricing> Embedding { get; init; }
+    public required IEnumerable<AiImageModelPricing> Image { get; init; }
+    public required IEnumerable<AiWebSearchPricing> Search { get; init; }
+    public required CurrencyInfo Currency { get; init; }
 }
 
-public record AiChatModelPricing
+public abstract record AiModelPricing<TPrice>
 {
     public required string Id { get; init; }
-    public string Alias { get; init; } = "GPT-5.2";
-    public string OwnedBy { get; init; } = "openai";
-    public string Provider { get; init; } = "OpenRouter";
-    public required AiChatPrice Price { get; init; }
+    public string Alias { get; init; }
+    public string OwnedBy { get; init; }
+    public string Provider { get; init; }
+    public string Link { get; init; }
+    public required TPrice Price { get; init; }
 }
+
+public record AiChatModelPricing : AiModelPricing<AiChatPrice>;
 
 public record AiChatPrice
 {
@@ -197,25 +230,27 @@ public record AiChatPrice
     public decimal Completion { get; init; }
 }
 
-public record AiEmbeddingModelPricing
-{
-    public required string Id { get; init; }
-    public string Alias { get; init; } = "GPT-5.2";
-    public string OwnedBy { get; init; } = "openai";
-    public string Provider { get; init; } = "OpenRouter";
-    public required AiEmbeddingPrice Price { get; init; }
-}
+public record AiEmbeddingModelPricing : AiModelPricing<AiEmbeddingPrice>;
 
 public record AiEmbeddingPrice
 {
     public decimal Prompt { get; init; }
 }
 
+public record AiImageModelPricing : AiModelPricing<AiImagePrice>;
+
+public record AiImagePrice
+{
+    public decimal Prompt { get; init; }
+    public decimal Image { get; init; }
+}
+
 public record AiWebSearchPricing
 {
-    public string Provider { get; init; } = "Exa";
-    public decimal Search { get; init; }
-    public decimal Contents { get; init; }
+    public string Id { get; init; }
+    public string Provider { get; init; }
+    public decimal Price { get; init; }
+    public string Link { get; init; }
 }
 
 public class SetRestrictedModelsRequest

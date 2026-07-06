@@ -44,7 +44,8 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         Guid createBy,
         int tenantId,
         string baseUri,
-        string serviceName,
+        ReportType reportType,
+        string serviceName = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
         string participantName = null,
@@ -52,6 +53,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         bool? debit = null,
         OperationType? type = null,
         OperationStatus? status = null,
+        Dictionary<string, string> metadata = null,
         string orderBy = null,
         OperationOrderType? orderType = null,
         IDictionary<string, string> headers = null,
@@ -59,6 +61,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
     : base(createBy, tenantId)
     {
         BaseUri = baseUri;
+        ReportType = reportType;
         ServiceName = serviceName;
         StartDate = startDate;
         EndDate = endDate;
@@ -69,6 +72,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         Terminate = terminate;
         Type = type;
         Status = status;
+        Metadata = metadata;
         OrderBy = orderBy;
         OrderType = orderType;
     }
@@ -111,4 +115,10 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
 
     [ProtoMember(13)]
     public OperationOrderType? OrderType  { get; set; }
+
+    [ProtoMember(14)]
+    public Dictionary<string, string> Metadata { get; set; }
+
+    [ProtoMember(15)]
+    public ReportType ReportType { get; set; }
 }

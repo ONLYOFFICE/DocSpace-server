@@ -428,9 +428,12 @@ public class BackupService(
             });
     }
 
-    public async Task DeleteScheduleAsync(int tenantId)
+    public async Task DeleteScheduleAsync(int tenantId, bool demandPermissions = true)
     {
-        await DemandPermissionsBackupAsync();
+        if (demandPermissions)
+        {
+            await DemandPermissionsBackupAsync();
+        }
 
         await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
@@ -567,6 +570,13 @@ public class BackupService(
         return await backupRepository.GetBackupsCountAsync(tenantId, paid, from, to);
     }
 
+    public async Task<(int Free, int Paid)> GetBackupsCountAsync(int tenantId, DateTime from, DateTime to)
+    {
+        await DemandPermissionsBackupAsync();
+
+        return await backupRepository.GetBackupsCountAsync(tenantId, from, to);
+    }
+
     public async Task<bool> IsBackupServiceEnabledAsync(int tenantId)
     {
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
@@ -651,7 +661,7 @@ public class BackupService(
 
     private async Task<string> GetBackupServiceName()
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
 
         var backupQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.Backup);
 

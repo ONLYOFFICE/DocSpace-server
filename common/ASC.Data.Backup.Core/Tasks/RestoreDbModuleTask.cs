@@ -274,7 +274,20 @@ public class RestoreDbModuleTask : PortalTaskBase
         var showColumnsCommand = DbFactory.CreateShowColumnsCommand(table.Name);
         showColumnsCommand.Connection = connection;
 
-        table.Columns = ExecuteArray(showColumnsCommand);
+        var list = new List<string>();
+        using (var result = showColumnsCommand.ExecuteReader())
+        {
+            while (result.Read())
+            {
+                var extra = result.GetString(5);
+                if (!extra.Contains("GENERATED", StringComparison.OrdinalIgnoreCase))
+                {
+                    list.Add(result.GetString(0));
+                }
+            }
+        }
+
+        table.Columns = list.ToArray();
     }
 
     private class TransactionData

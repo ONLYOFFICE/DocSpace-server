@@ -35,6 +35,8 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class EncryptionKeyDto
 {
+    private const string DefaultCryptoEngineId = "{DC522726-5E0E-43E5-AA02-8EA156BECBC5}";
+
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid UserId { get; set; }
     //public EncryptionKeyType Type { get; set; }
@@ -43,8 +45,8 @@ public class EncryptionKeyDto
     public string PublicKey { get; set; }
     public string PrivateKeyEnc { get; set; }
 
-    private const string DefaultCryptoEngineId = "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
-    public string CryptoEngineId => DefaultCryptoEngineId;
+    public string CryptoEngineId { get; set; } = DefaultCryptoEngineId;
+    //public string CryptoEngineId => DefaultCryptoEngineId;
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

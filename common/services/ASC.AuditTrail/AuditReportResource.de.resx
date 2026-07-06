@@ -951,6 +951,9 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Regionsmigration des Portals starten</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Abonnementguthaben in Wallet verschoben: {0}</value>
+  </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Systemkonto</value>
   </data>

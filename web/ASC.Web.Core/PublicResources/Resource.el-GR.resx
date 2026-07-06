@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Καθέκαστα</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Μήνας</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Ποσότητα</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Υπηρεσία</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Λειτουργίες AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Αντίγραφο ασφαλείας</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Χώρος αποθήκευσης στον δίσκο</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Διανυσματικοποίηση</value>
@@ -176,6 +179,18 @@
   </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Τύπος</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Αναφορά μηνιαίας χρήσης ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Μηνιαία χρήση</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Αναφορά χρήσης υπηρεσιών ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Χρήση υπηρεσιών</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Το πεδίο κωδικός επικύρωσης δεν μπορεί να είναι κενό</value>
@@ -1152,11 +1167,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Ο αριθμός των εκπροσώπων AI δεν πρέπει να υπερβαίνει τα {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Αναζήτηση AI</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Λειτουργίες AI</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Ενεργοποιήστε τις λειτουργίες AI για να αυξήσετε την παραγωγικότητα.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Παρακολούθηση συνδέσεων και ενεργειών</value>
@@ -1305,6 +1320,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Αναζήτηση ιστού</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Αναζήτηση ιστού</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Πιστώσεις AI</value>
   </data>
@@ -1312,6 +1330,9 @@
     <value>Πηγές</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Αποτελέσματα</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Αποτελέσματα</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1382,5 +1403,29 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Η αυθεντικοποίηση χρήστη απέτυχε</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Πρόσθετος χώρος αποθήκευσης στον δίσκο</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Επαγγελματικό πρόγραμμα</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Επαγγελματικό πρόγραμμα</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Διαχειριστές</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Διαχειριστές</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Αποκτήστε πρόσβαση σε ένα ευρύ φάσμα μοντέλων AI μέσω της ενσωμάτωσης OpenRouter. Πληρώνετε μόνο για όσα χρησιμοποιείτε, με χρέωση από το Πορτοφόλι σας.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Χρησιμοποιήστε μια μηχανή αναζήτησης AI για να εμπλουτίσετε τις συνομιλίες AI με πληροφορίες σε πραγματικό χρόνο από το διαδίκτυο</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Επαγγελματικό</value>
   </data>
 </root>

@@ -334,8 +334,11 @@ public partial class BackupPortalTask(
             await using (var connection = DbFactory.OpenConnection(connectionString: connectionString))
             {
                 var command = connection.CreateCommand();
-                command.CommandText = string.Format($"SHOW COLUMNS FROM `{t}`");
-                columns = ExecuteList(command).Select(r => "`" + Convert.ToString(r[0]) + "`").ToList();
+                command.CommandText = $"SHOW COLUMNS FROM `{t}`";
+                columns = ExecuteList(command)
+                    .Where(r => !Convert.ToString(r[5]).Contains("GENERATED", StringComparison.OrdinalIgnoreCase))
+                    .Select(r => "`" + Convert.ToString(r[0]) + "`")
+                    .ToList();
             }
 
             await using (var connection = DbFactory.OpenConnection())

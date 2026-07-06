@@ -255,6 +255,23 @@ public class BillingClient
         return [];
     }
 
+    public async Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(string portalId, string productId)
+    {
+        var parameters = new List<Tuple<string, string>> { Tuple.Create("ProductId", productId) };
+
+        var result = await RequestAsync("GetSubscriptionBalanceInfo", portalId, parameters);
+
+        return JsonSerializer.Deserialize<SubscriptionBalanceInfo>(result);
+    }
+
+    public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(string portalId, string productId)
+    {
+        var parameters = new List<Tuple<string, string>> { Tuple.Create("ProductId", productId) };
+
+        var result = await RequestAsync("SubscriptionBalanceToWallet", portalId, parameters);
+
+        return JsonSerializer.Deserialize<SubscriptionToWalletResult>(result);
+    }
 
     private string CreateAuthToken(string pkey, string machinekey)
     {
@@ -277,7 +294,6 @@ public class BillingClient
         }
 
         var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
-        httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
 
         var data = new Dictionary<string, List<string>>();
 
@@ -305,7 +321,9 @@ public class BillingClient
         request.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
         string result;
-        using (var response = await httpClient.SendAsync(request))
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+
+        using (var response = await httpClient.SendAsync(request, cts.Token))
         await using (var stream = await response.Content.ReadAsStreamAsync())
         {
             if (stream == null)
