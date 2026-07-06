@@ -34,9 +34,13 @@
 namespace ASC.AI.Integration.Profiles;
 
 [Scope]
-public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory, InstanceCrypto crypto)
+public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory, InstanceCrypto crypto, IFusionCache fusionCache)
 {
+    private static readonly TimeSpan _anyCacheDuration = TimeSpan.FromMinutes(3);
+
     public static string GetLockKey(int tenantId, Guid profileId) => $"ai_integration_profile_{tenantId}_{profileId}";
+
+    private static string GetAnyCacheKey(int tenantId) => $"ai_integration_profile_any_{tenantId}";
 
 
     public async Task<Profile> CreateAsync(int tenantId, ProfileData profile)
@@ -48,6 +52,8 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
 
         context.Profiles.Add(entity);
         await context.SaveChangesAsync();
+
+        await fusionCache.RemoveAsync(GetAnyCacheKey(tenantId));
 
         return ToDomainEntity(entity, profile.Key);
     }
@@ -70,6 +76,8 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
 
         context.Profiles.AddRange(entities);
         await context.SaveChangesAsync();
+
+        await fusionCache.RemoveAsync(GetAnyCacheKey(tenantId));
 
         var result = new List<Profile>(entities.Count);
         result.AddRange(entities.Select((t, i) => ToDomainEntity(t, profiles[i].Key)));
@@ -107,9 +115,15 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
 
     public async Task<bool> AnyAsync(int tenantId)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
+        return await fusionCache.GetOrSetAsync<bool>(
+            GetAnyCacheKey(tenantId),
+            async (_, _) =>
+            {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.AnyProfileAsync(tenantId);
+                return await context.AnyProfileAsync(tenantId);
+            },
+            opt => opt.SetDuration(_anyCacheDuration).SetFailSafe(true));
     }
 
     public async Task<Profile> UpdateAsync(int tenantId, Profile profile)
@@ -161,6 +175,8 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
 
             await transaction.CommitAsync();
         });
+
+        await fusionCache.RemoveAsync(GetAnyCacheKey(tenantId));
     }
 
     private async Task<string?> EncryptKeyAsync(string? key)
