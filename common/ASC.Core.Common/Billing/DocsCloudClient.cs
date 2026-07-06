@@ -346,6 +346,16 @@ public class DocsCloudConfigDto
     /// The server configuration.
     /// </summary>
     public DocsCloudServerConfig Server { get; init; }
+
+    /// <summary>
+    /// The WOPI configuration.
+    /// </summary>
+    public WopiConfig Wopi { get; set; }
+
+    /// <summary>
+    /// The IP filter configuration.
+    /// </summary>
+    public List<IpFilterConfig> IpFilter { get; set; }
 }
 
 /// <summary>
@@ -376,6 +386,42 @@ public class DocsCloudServerConfig
     /// </summary>
     /// <example>false</example>
     public bool IsAnonymousSupport { get; init; }
+
+    /// <summary>
+    /// The maximum file size in bytes.
+    /// </summary>
+    /// <example>104857600</example>
+    public long FileSizeLimit { get; init; }
+}
+
+/// <summary>
+/// Represents the WOPI configuration of a DocsCloud tenant.
+/// </summary>
+public class WopiConfig
+{
+    /// <summary>
+    /// Whether WOPI is enabled.
+    /// </summary>
+    /// <example>false</example>
+    public bool Enable { get; init; }
+}
+
+/// <summary>
+/// Represents the IP filter configuration of a DocsCloud tenant.
+/// </summary>
+public class IpFilterConfig
+{
+    /// <summary>
+    /// The IP address.
+    /// </summary>
+    /// <example>127.0.0.1</example>
+    public string Address { get; init; }
+
+    /// <summary>
+    /// Whether the IP address is allowed.
+    /// </summary>
+    /// <example>true</example>
+    public bool Allowed { get; init; }
 }
 
 /// <summary>
