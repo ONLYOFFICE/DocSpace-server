@@ -55,6 +55,12 @@ public class AiPricesDto
     public required List<AiEntryPricingDto<AiEmbeddingPriceDto>> Embedding { get; init; }
 
     /// <summary>
+    /// Gets the list of pricing entries for AI image models.
+    /// </summary>
+    /// <example>[{"id":"gpt-5.4-image-2","alias":"GPT 5.4 Image 2","provider":"OpenRouter","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":8.0,"image":30.0}}]</example>
+    public required List<AiEntryPricingDto<AiImagePriceDto>> Image { get; init; }
+
+    /// <summary>
     /// Gets the list of pricing entries for AI web search operations.
     /// </summary>
     /// <example>[{"id":"web-search","alias":"Web Search","provider":"tavily","image":"https://cdn.example.com/providers/tavily.png","price":0.01}]</example>
@@ -140,4 +146,22 @@ public class AiEmbeddingPriceDto
     /// </summary>
     /// <example>0.13</example>
     public decimal Prompt { get; init; }
+}
+
+/// <summary>
+/// Data transfer object that represents the pricing information for an AI image generation.
+/// </summary>
+public class AiImagePriceDto
+{
+    /// <summary>
+    /// Gets the price per one million prompt tokens.
+    /// </summary>
+    /// <example>8.0</example>
+    public decimal Prompt { get; init; }
+
+    /// <summary>
+    /// Gets the price per generated image.
+    /// </summary>
+    /// <example>30.0</example>
+    public decimal Image { get; init; }
 }
