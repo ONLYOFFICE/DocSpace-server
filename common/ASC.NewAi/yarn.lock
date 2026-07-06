@@ -479,10 +479,10 @@
 "@nodable/entities@^2.1.0", "@nodable/entities@2.1.0":
   version "2.1.0"
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.4.145.tgz":
-  version "0.4.145"
-  resolved "file:onlyoffice-ai-chat-0.4.145.tgz"
-  integrity sha512-aLQc00ntaGywhyeM26N1PK19SBUnGZYGs56rJHpK29wedIGRU3qzheI4sw+z4UzEkCXY3vsnIuj/G9bmvX1NCg==
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.4.146.tgz":
+  version "0.4.146"
+  resolved "file:onlyoffice-ai-chat-0.4.146.tgz"
+  integrity sha512-C5RYWWDF5MHDTI0V0o4xxyrR7LB6mijpJ4D9DQeYni/VBSLYZoq6zV1aHqnXLESa3DB/2ZJRqRSREqh4/2LofA==
   dependencies:
     lodash.clonedeep "^4.5.0"
 
