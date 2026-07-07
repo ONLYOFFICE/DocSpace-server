@@ -1167,6 +1167,9 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Število AI agentov ne sme presegati {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Iskanje z AI</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Funkcije AI</value>
   </data>
@@ -1317,6 +1320,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Spletno iskanje</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Spletno iskanje</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI krediti</value>
   </data>
@@ -1324,6 +1330,9 @@
     <value>Viri</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Rezultati</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Rezultati</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1412,6 +1421,9 @@
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Pridobite dostop do širokega nabora modelov AI prek integracije OpenRouter. Plačate le tisto, kar porabite, znesek pa se odšteje z vaše Denarnice.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Uporabite iskalnik z AI za obogatitev klepetov z AI z informacijami iz interneta v realnem času</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>

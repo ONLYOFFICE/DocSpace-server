@@ -34,8 +34,16 @@
 namespace ASC.Core.Billing;
 
 [Scope]
-public class DocsCloudClient(IOptions<DocsCloudConfiguration> configuration, IDocsCloudApi docsCloudApi)
+public class DocsCloudClient(
+    IOptions<DocsCloudConfiguration> configuration,
+    IDocsCloudApi docsCloudApi,
+    IFusionCache hybridCache,
+    ILogger<DocsCloudClient> logger)
 {
+    // Volatile data (usage-derived) is cached briefly; the tenant and its configuration change rarely, so they are cached longer.
+    private static readonly TimeSpan _shortCacheExpiration = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan _longCacheExpiration = TimeSpan.FromHours(1);
+
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
     /// <summary>
@@ -47,39 +55,87 @@ public class DocsCloudClient(IOptions<DocsCloudConfiguration> configuration, IDo
         await docsCloudApi.HealthCheckAsync();
     }
 
-    public async Task<DocsCloudTenant> GetTenantAsync(string portalId)
+    public async Task<DocsCloudTenant> GetTenantAsync(string portalId, bool refresh = false)
     {
         EnsureConfigured();
 
-        return await docsCloudApi.GetTenantAsync(portalId);
+        var key = GetTenantCacheKey(portalId);
+
+        var tenant = refresh ? null : await GetFromCache<DocsCloudTenant>(key);
+        if (tenant != null)
+        {
+            return tenant;
+        }
+
+        tenant = await docsCloudApi.GetTenantAsync(portalId);
+        await hybridCache.SetAsync(key, tenant, _longCacheExpiration);
+
+        return tenant;
     }
 
-    public async Task<DocsCloudTenantInfo> GetTenantInfoAsync(string portalId)
+    public async Task<DocsCloudTenantInfo> GetTenantInfoAsync(string portalId, bool refresh = false)
     {
         EnsureConfigured();
 
-        return await docsCloudApi.GetTenantInfoAsync(portalId);
+        var key = GetTenantInfoCacheKey(portalId);
+
+        var info = refresh ? null : await GetFromCache<DocsCloudTenantInfo>(key);
+        if (info != null)
+        {
+            return info;
+        }
+
+        info = await docsCloudApi.GetTenantInfoAsync(portalId);
+        await hybridCache.SetAsync(key, info, _shortCacheExpiration);
+
+        return info;
     }
 
-    public async Task<DocsCloudConfigDto> GetTenantConfigAsync(string portalId)
+    public async Task<DocsCloudConfigDto> GetTenantConfigAsync(string portalId, bool refresh = false)
     {
         EnsureConfigured();
 
-        return await docsCloudApi.GetTenantConfigAsync(portalId);
+        var key = GetTenantConfigCacheKey(portalId);
+
+        var config = refresh ? null : await GetFromCache<DocsCloudConfigDto>(key);
+        if (config != null)
+        {
+            return config;
+        }
+
+        config = await docsCloudApi.GetTenantConfigAsync(portalId);
+        await hybridCache.SetAsync(key, config, _longCacheExpiration);
+
+        return config;
     }
 
     public async Task<DocsCloudConfigDto> UpdateTenantConfigAsync(string portalId, DocsCloudConfigDto config)
     {
         EnsureConfigured();
 
-        return await docsCloudApi.UpdateTenantConfigAsync(portalId, config);
+        var result = await docsCloudApi.UpdateTenantConfigAsync(portalId, config);
+
+        await hybridCache.RemoveAsync(GetTenantConfigCacheKey(portalId));
+
+        return result;
     }
 
-    public async Task<DocsCloudQuota> GetTenantQuotaAsync(string portalId)
+    public async Task<DocsCloudQuota> GetTenantQuotaAsync(string portalId, bool refresh = false)
     {
         EnsureConfigured();
 
-        return await docsCloudApi.GetTenantQuotaAsync(portalId);
+        var key = GetTenantQuotaCacheKey(portalId);
+
+        var quota = refresh ? null : await GetFromCache<DocsCloudQuota>(key);
+        if (quota != null)
+        {
+            return quota;
+        }
+
+        quota = await docsCloudApi.GetTenantQuotaAsync(portalId);
+        await hybridCache.SetAsync(key, quota, _shortCacheExpiration);
+
+        return quota;
     }
 
     public async Task<Stream> DownloadTenantQuotaAsync(string portalId)
@@ -89,11 +145,51 @@ public class DocsCloudClient(IOptions<DocsCloudConfiguration> configuration, IDo
         return await docsCloudApi.DownloadTenantQuotaAsync(portalId);
     }
 
-    public async Task<DocsCloudUsage> GetTenantUsageAsync(string portalId)
+    public async Task<DocsCloudUsage> GetTenantUsageAsync(string portalId, bool refresh = false)
     {
         EnsureConfigured();
 
-        return await docsCloudApi.GetTenantUsageAsync(portalId);
+        var key = GetTenantUsageCacheKey(portalId);
+
+        var usage = refresh ? null : await GetFromCache<DocsCloudUsage>(key);
+        if (usage != null)
+        {
+            return usage;
+        }
+
+        usage = await docsCloudApi.GetTenantUsageAsync(portalId);
+        await hybridCache.SetAsync(key, usage, _shortCacheExpiration);
+
+        return usage;
+    }
+
+    /// <summary>
+    /// Drops the cached tenant so the next read reflects a just-changed subscription (e.g. a started trial or a
+    /// DocsCloud/DocsCloudDevPack purchase).
+    /// </summary>
+    public async Task ResetTenantCacheAsync(string portalId)
+    {
+        await hybridCache.RemoveAsync(GetTenantCacheKey(portalId));
+    }
+
+    private static string GetTenantCacheKey(string portalId) => $"docscloud:{portalId}:tenant";
+    private static string GetTenantInfoCacheKey(string portalId) => $"docscloud:{portalId}:tenant:info";
+    private static string GetTenantConfigCacheKey(string portalId) => $"docscloud:{portalId}:tenant:config";
+    private static string GetTenantQuotaCacheKey(string portalId) => $"docscloud:{portalId}:tenant:quota";
+    private static string GetTenantUsageCacheKey(string portalId) => $"docscloud:{portalId}:tenant:usage";
+
+    private async Task<T> GetFromCache<T>(string key)
+    {
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            return await hybridCache.GetOrDefaultAsync<T>(key, token: cts.Token);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+            return default;
+        }
     }
 
     private void EnsureConfigured()
@@ -250,6 +346,16 @@ public class DocsCloudConfigDto
     /// The server configuration.
     /// </summary>
     public DocsCloudServerConfig Server { get; init; }
+
+    /// <summary>
+    /// The WOPI configuration.
+    /// </summary>
+    public WopiConfig Wopi { get; set; }
+
+    /// <summary>
+    /// The IP filter configuration.
+    /// </summary>
+    public List<IpFilterConfig> IpFilter { get; set; }
 }
 
 /// <summary>
@@ -280,6 +386,42 @@ public class DocsCloudServerConfig
     /// </summary>
     /// <example>false</example>
     public bool IsAnonymousSupport { get; init; }
+
+    /// <summary>
+    /// The maximum file size in bytes.
+    /// </summary>
+    /// <example>104857600</example>
+    public long FileSizeLimit { get; init; }
+}
+
+/// <summary>
+/// Represents the WOPI configuration of a DocsCloud tenant.
+/// </summary>
+public class WopiConfig
+{
+    /// <summary>
+    /// Whether WOPI is enabled.
+    /// </summary>
+    /// <example>false</example>
+    public bool Enable { get; init; }
+}
+
+/// <summary>
+/// Represents the IP filter configuration of a DocsCloud tenant.
+/// </summary>
+public class IpFilterConfig
+{
+    /// <summary>
+    /// The IP address.
+    /// </summary>
+    /// <example>127.0.0.1</example>
+    public string Address { get; init; }
+
+    /// <summary>
+    /// Whether the IP address is allowed.
+    /// </summary>
+    /// <example>true</example>
+    public bool Allowed { get; init; }
 }
 
 /// <summary>

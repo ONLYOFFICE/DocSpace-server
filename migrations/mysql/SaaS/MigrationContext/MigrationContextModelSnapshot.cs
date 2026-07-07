@@ -1348,9 +1348,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant");
 
-                    b.Property<bool>("Additional")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Description")
                         .HasMaxLength(128)
                         .HasColumnType("varchar")
@@ -1406,6 +1403,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("wallet")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<bool>("Additional")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("additional")
                         .HasDefaultValueSql("'0'");
 
                     b.HasKey("TenantId")
@@ -5288,7 +5291,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
+            modelBuilder.Entity("ASC.Files.Core.EF.DbRoomChatSettings", b =>
                 {
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -5307,6 +5310,27 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("ChatProviderId")
                         .HasColumnType("int")
                         .HasColumnName("chat_provider_id");
+
+                    b.HasKey("TenantId", "RoomId")
+                        .HasName("primary");
+
+                    b.HasIndex("ChatProviderId")
+                        .HasDatabaseName("IX_chat_provider_id");
+
+                    b.ToTable("files_room_settings", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
 
                     b.Property<string>("Color")
                         .HasMaxLength(6)
@@ -5378,9 +5402,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("TenantId", "RoomId")
                         .HasName("primary");
-
-                    b.HasIndex("ChatProviderId")
-                        .HasDatabaseName("IX_chat_provider_id");
 
                     b.HasIndex("RoomId")
                         .IsUnique();
@@ -7119,6 +7140,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbRoomChatSettings", b =>
+                {
+                    b.HasOne("ASC.Files.Core.EF.DbRoomSettings", null)
+                        .WithOne("ChatSettings")
+                        .HasForeignKey("ASC.Files.Core.EF.DbRoomChatSettings", "TenantId", "RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
                 {
                     b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
@@ -7330,6 +7360,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Files.Core.EF.DbFolder", b =>
                 {
                     b.Navigation("Settings");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
+                {
+                    b.Navigation("ChatSettings")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ASC.MessagingSystem.EF.Model.DbAuditEvent", b =>

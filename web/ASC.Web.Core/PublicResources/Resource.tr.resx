@@ -1167,6 +1167,9 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Yapay zekâ ajanı sayısı {0} değerini aşmamalı</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Yapay Zeka araması</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Yapay Zeka özellikleri</value>
   </data>
@@ -1317,6 +1320,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Web araması</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Web araması</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI kredileri</value>
   </data>
@@ -1324,6 +1330,9 @@
     <value>Kaynaklar</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Sonuçlar</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Sonuçlar</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1412,6 +1421,9 @@
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>OpenRouter entegrasyonu sayesinde çok çeşitli yapay zeka modellerine erişin. Yalnızca kullandığınız kadar ödeyin; ücret Cüzdanınızdan tahsil edilir.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Yapay zeka sohbetlerini internetten gerçek zamanlı bilgilerle zenginleştirmek için bir yapay zeka arama motoru kullanın</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>

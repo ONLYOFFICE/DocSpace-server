@@ -125,7 +125,10 @@ public enum FolderType
     AiAgents = 34,
 
     [Description("Default Templates")]
-    DefaultTemplates = 35
+    DefaultTemplates = 35,
+
+    [Description("Forms")]
+    Forms = 36
 }
 
 /// <summary>

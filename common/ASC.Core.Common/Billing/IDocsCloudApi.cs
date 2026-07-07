@@ -52,7 +52,7 @@ public interface IDocsCloudApi
     [Get("/tenant/config")]
     Task<DocsCloudConfigDto> GetTenantConfigAsync([Query] string portalId);
 
-    [Post("/tenant/config")]
+    [Put("/tenant/config")]
     Task<DocsCloudConfigDto> UpdateTenantConfigAsync([Query] string portalId, [Body] DocsCloudConfigDto config);
 
     [Get("/tenant/quota")]

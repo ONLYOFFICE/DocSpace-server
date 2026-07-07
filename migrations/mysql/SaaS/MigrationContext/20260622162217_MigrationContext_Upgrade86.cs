@@ -12,18 +12,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         {
             migrationBuilder.InsertData(
                 table: "tenants_quota",
-                columns: new[] { "tenant", "Additional", "description", "features", "name", "product_id", "service_group", "service_name" },
-                values: new object[] { -17, true, null, "docscloud:1000,docsclouddevpack,docscloudtrial", "docscloudtrial", "1016", null, null });
+                columns: new[] { "tenant", "description", "features", "name", "product_id", "service_group", "service_name", "additional" },
+                values: new object[] { -17, null, "docscloud:1000,docsclouddevpack,docscloudtrial", "docscloudtrial", "1016", null, null, true });
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
-                columns: new[] { "tenant", "Additional", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet" },
-                values: new object[] { -16, true, null, "docscloud:1,docsclouddevpack", "docsclouddevpack", 12m, "1015", null, "docscloud-devpack", true, true });
+                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet", "additional" },
+                values: new object[] { -16, null, "docscloud:1,docsclouddevpack", "docsclouddevpack", 12m, "1015", null, "docscloud-devpack", true, true, true });
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
-                columns: new[] { "tenant", "Additional", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet" },
-                values: new object[] { -15, true, null, "docscloud:1", "docscloud", 8m, "1014", null, "docscloud", true, true });
+                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet", "additional" },
+                values: new object[] { -15, null, "docscloud:1", "docscloud", 8m, "1014", null, "docscloud", true, true, true });
         }
 
         /// <inheritdoc />

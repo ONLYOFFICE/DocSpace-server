@@ -113,7 +113,7 @@ public class ChatTools(
     {
         if (aiGateway.Configured)
         {
-            if (!await aiGateway.IsEnabledAsync())
+            if (!await aiGateway.IsAiEnabledAsync())
             {
                 return null;
             }
