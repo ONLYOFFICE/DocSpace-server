@@ -42,7 +42,7 @@ public class SettingsTests(
     public async Task ChangeAccessToThirdparty_ShouldChangeThirdPartySettings()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
         var initialState = true;
 
         // Act
@@ -63,7 +63,7 @@ public class SettingsTests(
     public async Task ChangeDeleteConfirm_ShouldChangeDeleteConfirmSetting()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
         var initialState = true;
 
         // Act
@@ -84,7 +84,7 @@ public class SettingsTests(
     public async Task HideConfirmCancelOperation_ShouldChangeConfirmCancelSetting()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
         var initialState = true;
 
         // Act
@@ -105,7 +105,7 @@ public class SettingsTests(
     public async Task HideConfirmRoomLifetime_ShouldChangeRoomLifetimeSetting()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
         var initialState = true;
 
         // Act
@@ -126,7 +126,7 @@ public class SettingsTests(
     public async Task StoreOriginal_ShouldChangeStoreOriginalSetting()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
         var initialState = true;
 
         // Act
@@ -147,7 +147,7 @@ public class SettingsTests(
     public async Task KeepNewFileName_ShouldChangeKeepNewFileNameSetting()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
         var initialState = true;
 
         // Act
@@ -168,7 +168,7 @@ public class SettingsTests(
     public async Task DisplayFileExtension_ShouldChangeDisplayExtensionSetting()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
         var initialState = true;
 
         // Act
@@ -189,7 +189,7 @@ public class SettingsTests(
     public async Task SetOpenEditorInSameTab_ShouldChangeOpenEditorSetting()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
         var initialState = true;
 
         // Act
@@ -210,7 +210,7 @@ public class SettingsTests(
     // public async Task ChangeDownloadZip_ShouldChangeDownloadFormat()
     // {
     //     // Arrange
-    //     await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+    //     await InviteContact(EmployeeType.DocSpaceAdmin);
     //
     //     // Act
     //     var response = await _filesSettingsApi.ChangeDownloadZipFromBodyAsync(new DisplayRequestDto { Set = true }, TestContext.Current.CancellationToken);
@@ -223,7 +223,7 @@ public class SettingsTests(
     // public async Task HideConfirmConvert_ShouldChangeConfirmConvertSetting()
     // {
     //     // Arrange
-    //     await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+    //     await InviteContact(EmployeeType.DocSpaceAdmin);
     //
     //     // Act
     //     var response = await _filesSettingsApi.HideConfirmConvertAsync(new HideConfirmConvertRequestDto { Save = true }, TestContext.Current.CancellationToken);
@@ -236,7 +236,7 @@ public class SettingsTests(
     public async Task GetAutomaticallyCleanUp_ShouldReturnAutoCleanupSettings()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
 
         // Act
         var response = await _filesSettingsApi.GetAutomaticallyCleanUpAsync(TestContext.Current.CancellationToken);
@@ -250,7 +250,7 @@ public class SettingsTests(
     public async Task ChangeAutomaticallyCleanUp_ShouldUpdateAutoCleanupSettings()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
         var setting = new AutoCleanupRequestDto
         {
             Set = true,
@@ -271,7 +271,7 @@ public class SettingsTests(
     public async Task GetFilesSettings_ShouldReturnSettings()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
 
         // Act
         var response = await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken);
@@ -285,7 +285,7 @@ public class SettingsTests(
     public async Task GetFilesModule_ShouldReturnModuleInfo()
     {
         // Arrange
-        await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await InviteContact(EmployeeType.DocSpaceAdmin);
 
         // Act
         var response = await _filesSettingsApi.GetFilesModuleAsync(TestContext.Current.CancellationToken);
@@ -300,7 +300,7 @@ public class SettingsTests(
     // public async Task ChangeDefaultAccessRights_ShouldUpdateAccessRights()
     // {
     //     // Arrange
-    //     await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+    //     await InviteContact(EmployeeType.DocSpaceAdmin);
     //     var defaultRights = new List<int> { (int)FileShare.Read };
     //
     //     // Act

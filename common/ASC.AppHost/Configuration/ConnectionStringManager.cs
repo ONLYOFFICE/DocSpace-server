@@ -239,26 +239,19 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true, bool withDataVolume = true)
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool withDataVolume = true, bool? isProxied = null)
     {
+        var dockerfileContext = Path.Combine(builder.AppHostDirectory, "Dockerfiles", "opensearch");
+
         OpensearchResource = builder
-            .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "3.5.0")
+            .AddDockerfile(Constants.OpensearchContainer, dockerfileContext)
+            .WithImage("onlyoffice-opensearch")
+            .WithImageTag(Constants.OpensearchVersion)
+            .WithBuildArg("OPENSEARCH_VERSION", Constants.OpensearchVersion)
+            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http", isProxied: isProxied)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
-            .WithEnvironment("discovery.type", "single-node")
-            .WithEntrypoint("/bin/bash")
-            .WithArgs("-c", "opensearch-plugin install ingest-attachment --batch && /usr/share/opensearch/opensearch-docker-entrypoint.sh");
-
-        if (fixedPort)
-        {
-            OpensearchResource = OpensearchResource
-                .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http");
-        }
-        else
-        {
-            OpensearchResource = OpensearchResource
-                .WithHttpEndpoint(targetPort: Constants.OpensearchPort, name: "http");
-        }
+            .WithEnvironment("discovery.type", "single-node");
 
         if (withDataVolume)
         {
@@ -404,6 +397,20 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             { "auth:allowskip:default", true.ToString() },
             { "auth:allowskip:registerportal", true.ToString() }
         };
+
+        return this;
+    }
+
+    public ConnectionStringManager AllowPortalRegistration()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+
+        _parameters ??= new Dictionary<string, string>();
+        _parameters["auth:allowskip:registerportal"] = true.ToString();
+
+        // Treat the test owner address as an autotest email so that ApiSystem skips
+        // registration rate-limiting and recaptcha when every test creates its own portal.
+        _parameters["web:autotest:secret-email"] = docspaceOwnerEmail;
 
         return this;
     }
