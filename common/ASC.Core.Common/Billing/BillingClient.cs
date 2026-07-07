@@ -207,6 +207,47 @@ public class BillingClient
         return changed;
     }
 
+    public async Task<bool> SwitchSubscriptionAsync(string portalId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    {
+        var parameters = new List<Tuple<string, string>>
+        {
+            Tuple.Create("FromProductId", fromProductId),
+            Tuple.Create("ToProductId", toProductId),
+            Tuple.Create("ProductQty", quantity.ToString())
+        };
+
+        if (!string.IsNullOrEmpty(customerParticipantName))
+        {
+            parameters.Add(Tuple.Create("CustomerParticipantName", customerParticipantName));
+        }
+
+        if (metadata != null)
+        {
+            parameters.Add(Tuple.Create("Metadata", JsonSerializer.Serialize(metadata)));
+        }
+
+        var result = await RequestAsync("SwitchSubscription", portalId, parameters);
+        var switched = JsonSerializer.Deserialize<bool>(result);
+
+        return switched;
+    }
+
+    public async Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(string portalId, string fromProductId, string toProductId, int quantity)
+    {
+        var parameters = new List<Tuple<string, string>>
+        {
+            Tuple.Create("FromProductId", fromProductId),
+            Tuple.Create("ToProductId", toProductId),
+            Tuple.Create("ProductQty", quantity.ToString())
+        };
+
+        var result = await RequestAsync("CalculateSwitchSubscription", portalId, parameters);
+
+        var response = JsonSerializer.Deserialize<PaymentCalculation>(result);
+
+        return response;
+    }
+
     public async Task<PaymentCalculation> CalculatePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))

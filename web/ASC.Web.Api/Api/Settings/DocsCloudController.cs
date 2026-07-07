@@ -41,6 +41,8 @@ public class DocsCloudController(
     DocsCloudClient docsCloudClient,
     ITariffService tariffService,
     IQuotaService quotaService,
+    UserManager userManager,
+    SecurityContext securityContext,
     MessageService messageService,
     WebItemManager webItemManager,
     IFusionCache fusionCache)
@@ -102,6 +104,64 @@ public class DocsCloudController(
         }
 
         return result;
+    }
+
+    /// <remarks>
+    /// Switches the current DocsCloud subscription to DocsCloudDevPack: charges the price difference
+    /// from the wallet and transfers the subscription (with its license) to the target product.
+    /// The quantity is taken from the currently purchased DocsCloud quota.
+    /// Only the portal payer can perform this action.
+    /// </remarks>
+    /// <summary>
+    /// Switch the DocsCloud subscription to DocsCloudDevPack
+    /// </summary>
+    /// <path>api/2.0/settings/docscloud/switchtodevpack</path>
+    [Tags("Settings / DocsCloud")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "Invalid request parameters")]
+    [SwaggerResponse(402, "Tariff is not paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer or service could not be found")]
+    [HttpPost("switchtodevpack")]
+    public async Task<bool> SwitchToDevPack()
+    {
+        var (fromQuota, toQuota, quantity) = await PrepareSwitchAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var result = await tariffService.SwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), quantity, securityContext.CurrentAccount.ID.ToString());
+
+        if (result)
+        {
+            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{toQuota.Name} {quantity}");
+        }
+
+        return result;
+    }
+
+    /// <remarks>
+    /// Calculates the top-up cost of switching the current DocsCloud subscription to DocsCloudDevPack,
+    /// without making any changes. The quantity is taken from the currently purchased DocsCloud quota.
+    /// Only the portal payer can perform this action.
+    /// </remarks>
+    /// <summary>
+    /// Calculate the DocsCloud subscription switch cost
+    /// </summary>
+    /// <path>api/2.0/settings/docscloud/calculatedevpack</path>
+    [Tags("Settings / DocsCloud")]
+    [SwaggerResponse(200, "Payment calculation", typeof(PaymentCalculation))]
+    [SwaggerResponse(400, "Invalid request parameters")]
+    [SwaggerResponse(402, "Tariff is not paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Customer or service could not be found")]
+    [HttpPost("calculatedevpack")]
+    public async Task<PaymentCalculation> CalculateDevPack()
+    {
+        var (fromQuota, toQuota, quantity) = await PrepareSwitchAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        return await tariffService.CalculateSwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), quantity);
     }
 
     /// <remarks>
@@ -262,5 +322,67 @@ public class DocsCloudController(
         var tenant = tenantManager.GetCurrentTenant();
 
         return await coreSettings.GetKeyAsync(tenant.Id);
+    }
+
+    private async Task<(TenantQuota FromQuota, TenantQuota ToQuota, int Quantity)> PrepareSwitchAsync()
+    {
+        // Only the DocsCloud to DocsCloudDevPack transition is supported.
+        const TenantWalletService from = TenantWalletService.DocsCloud;
+        const TenantWalletService to = TenantWalletService.DocsCloudDevPack;
+
+        if (!tariffService.IsConfigured())
+        {
+            throw new InvalidOperationException("Tariff service is not configured");
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+        if (tariff.State > TariffState.Paid)
+        {
+            throw new BillingException("Tariff is not paid");
+        }
+
+        var currentQuota = tariff.Quotas.FirstOrDefault(q => q.Id == (int)from);
+        if (currentQuota == null)
+        {
+            throw new ArgumentException("DocsCloud subscription is not active");
+        }
+
+        if (tariff.Quotas.Any(q => q.Id == (int)to))
+        {
+            throw new ArgumentException("DocsCloudDevPack subscription is already set");
+        }
+
+        var quotaList = (await quotaService.GetTenantQuotasAsync()).Where(q => q.Wallet).ToList();
+
+        var fromQuota = quotaList.FirstOrDefault(q => q.TenantId == (int)from);
+        var toQuota = quotaList.FirstOrDefault(q => q.TenantId == (int)to);
+
+        if (string.IsNullOrEmpty(fromQuota?.GetPaymentId()) || string.IsNullOrEmpty(toQuota?.GetPaymentId()))
+        {
+            throw new ItemNotFoundException("Service could not be found");
+        }
+
+        return (fromQuota, toQuota, currentQuota.Quantity);
+    }
+
+    private async Task DemandPayerAsync(CustomerInfo customerInfo)
+    {
+        var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
+
+        if (securityContext.CurrentAccount.ID != payer.Id)
+        {
+            throw new SecurityException("Access denied: insufficient permissions for this payment operation");
+        }
     }
 }

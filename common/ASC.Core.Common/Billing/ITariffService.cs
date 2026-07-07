@@ -47,6 +47,8 @@ public interface ITariffService
     Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency);
     Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(int tenantId, string productId);
     Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId);
+    Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
+    Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity);
     Task<bool> GetDocsCloudTrialAsync(int tenantId);
     int GetPaymentDelay();
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
