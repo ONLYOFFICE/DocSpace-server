@@ -162,6 +162,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Microsoft.OpenApi;
 
+global using Swashbuckle.AspNetCore.Swagger;
 global using Swashbuckle.AspNetCore.SwaggerGen;
 global using Microsoft.Extensions.Primitives;
 global using Microsoft.IdentityModel.Tokens;

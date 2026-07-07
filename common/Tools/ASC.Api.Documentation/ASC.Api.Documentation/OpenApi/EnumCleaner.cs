@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -68,7 +68,7 @@ public class EnumCleaner
             {
                 var targetType = preferredEnumType ?? obj["x-enum-type"]?.GetValue<string>() ?? "integer";
 
-                var preferred = arr.OfType<JsonObject>().FirstOrDefault(o => (o["x-enum-type"]?.GetValue<string>() ?? o["type"]?.GetValue<string>()) == targetType);
+                var preferred = arr.OfType<JsonObject>().FirstOrDefault(o => (o["x-enum-type"]?.GetValue<string>() ?? GetScalarType(o["type"])) == targetType);
 
                 if (preferred != null)
                 {
@@ -114,6 +114,11 @@ public class EnumCleaner
 
     private static bool IsEnumAnyOf(JsonArray arr)
     {
-        return arr.All(item => item is JsonObject o && o["$ref"] == null && (o["type"]?.GetValue<string>() == "string" || o["type"]?.GetValue<string>() == "integer") && o["enum"] is JsonArray);
+        return arr.All(item => item is JsonObject o && o["$ref"] == null && (GetScalarType(o["type"]) == "string" || GetScalarType(o["type"]) == "integer") && o["enum"] is JsonArray);
+    }
+
+    private static string? GetScalarType(JsonNode? typeNode)
+    {
+        return typeNode is JsonValue v && v.TryGetValue<string>(out var s) ? s : null;
     }
 }

@@ -105,6 +105,7 @@
         {{/vendorExtensions.x-localVars}}
     
     {{^vendorExtensions.isApiDateTime}}
+    {{#vendorExtensions.x-has-localVars}}
     {{#hasRequired}}
     {{^hasOnlyReadOnly}}
         /// <summary>
@@ -122,6 +123,7 @@
         {{/isAdditionalPropertiesTrue}}
     {{/hasOnlyReadOnly}}
     {{/hasRequired}}
+    {{/vendorExtensions.x-has-localVars}}
     {{/vendorExtensions.isApiDateTime}}
         /// <summary>
         /// Initializes a new instance of the <see cref="{{classname}}" /> class.
@@ -299,7 +301,7 @@
         /// Gets or Sets additional properties
         /// </summary>
         [JsonExtensionData]
-        public IDictionary<string, JToken> AdditionalProperties { get; set; }
+        public {{#vendorExtensions.x-hides-additional-properties}}new {{/vendorExtensions.x-hides-additional-properties}}IDictionary<string, object> AdditionalProperties { get; set; }
 
         {{/isAdditionalPropertiesTrue}}
         /// <summary>

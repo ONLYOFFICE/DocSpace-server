@@ -46,6 +46,8 @@ public static class OpenApiExtension
 {
     public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration, string docVersion = "2.0")
     {
+        services.Configure<SwaggerOptions>(o => o.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1);
+
         return services.AddSwaggerGen(c =>
         {
             var entryAssembly = Assembly.GetEntryAssembly();
@@ -253,7 +255,7 @@ public static class OpenApiExtension
 
             app.UseSwagger(options =>
             {
-                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
                 options.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
             });
 

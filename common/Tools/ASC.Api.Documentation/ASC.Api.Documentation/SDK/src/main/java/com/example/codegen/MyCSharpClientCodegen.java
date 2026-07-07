@@ -144,6 +144,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 }
 
                 model.getVendorExtensions().put("x-localVars", localVars);
+                model.getVendorExtensions().put("x-has-localVars", !localVars.isEmpty());
             }
         }
         
@@ -332,6 +333,53 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                     .toLowerCase();
     }
     
+    @Override
+    public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
+        Map<String, ModelsMap> processed = super.postProcessAllModels(objs);
+
+        Map<String, CodegenModel> byName = new HashMap<>();
+        for (ModelsMap mm : processed.values()) {
+            for (ModelMap m : mm.getModels()) {
+                if (m.getModel() != null) {
+                    byName.put(m.getModel().classname, m.getModel());
+                }
+            }
+        }
+
+        Map<String, String> parentOf = new HashMap<>();
+        for (CodegenModel model : byName.values()) {
+            Schema<?> schema = model.schemaName == null
+                ? null
+                : openAPI.getComponents().getSchemas().get(model.schemaName);
+            if (schema != null && ModelUtils.isAllOf(schema)) {
+                for (Object obj : schema.getAllOf()) {
+                    if (obj instanceof Schema && ((Schema<?>) obj).get$ref() != null) {
+                        parentOf.put(model.classname,
+                            toModelName(ModelUtils.getSimpleRef(((Schema<?>) obj).get$ref())));
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (CodegenModel model : byName.values()) {
+            if (!model.isAdditionalPropertiesTrue) {
+                continue;
+            }
+            String parent = parentOf.get(model.classname);
+            while (parent != null) {
+                CodegenModel ancestor = byName.get(parent);
+                if (ancestor != null && ancestor.isAdditionalPropertiesTrue) {
+                    model.vendorExtensions.put("x-hides-additional-properties", true);
+                    break;
+                }
+                parent = parentOf.get(parent);
+            }
+        }
+
+        return processed;
+    }
+
     @Override
     public String getName() {
         return "my-csharp";

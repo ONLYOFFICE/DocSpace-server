@@ -611,7 +611,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
                 if (components.TryGetPropertyValue(name, out var compSchema))
                 {
                     var compObj = compSchema as JsonObject;
-                    if (compObj?["type"]?.ToString() == "object")
+                    if (SchemaTypeIncludes(compObj?["type"], "object"))
                     {
                         return true;
                     }
@@ -620,6 +620,16 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
 
         return false;
+    }
+
+    private static bool SchemaTypeIncludes(JsonNode? typeNode, string wanted)
+    {
+        return typeNode switch
+        {
+            JsonValue v => v.TryGetValue<string>(out var s) && s == wanted,
+            JsonArray a => a.Any(n => n is JsonValue nv && nv.TryGetValue<string>(out var s) && s == wanted),
+            _ => false
+        };
     }
 
     private static bool JsonDeepEquals(JsonNode a, JsonNode b)
