@@ -114,6 +114,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-app-enabled", (req, res) => {
+    files.changeAppEnabled(req.body);
+    res.end();
+  });
+
   router.post("/top-up-wallet", (req, res) => {
     files.topUpWallet(req.body);
     res.end();

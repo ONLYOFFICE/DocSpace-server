@@ -42,7 +42,9 @@ import com.asc.common.service.transfer.message.ClientCacheTenantRemoveEvent;
 import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
 import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
 import com.asc.common.service.transfer.response.ClientResponse;
+import com.asc.registration.service.exception.InvalidScopeException;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
+import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoPaginationQuery;
@@ -53,9 +55,12 @@ import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
+import com.asc.registration.service.transfer.response.ScopeResponse;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -67,6 +72,7 @@ import lombok.RequiredArgsConstructor;
 public class CoreClientApplicationService implements ClientApplicationService {
   private final Validator validator;
   private final ClientCacheService clientCacheService;
+  private final ScopeApplicationService scopeApplicationService;
 
   private final AuthorizationMessagePublisher<TenantClientsRemovedEvent>
       tenantClientsMessagePublisher;
@@ -90,6 +96,23 @@ public class CoreClientApplicationService implements ClientApplicationService {
     if (object == null) return;
     var violations = validator.validate(object);
     if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+  }
+
+  /**
+   * Checks if the provided scopes exist in the system.
+   *
+   * @param scopes the set of scope names to validate
+   * @throws InvalidScopeException if any provided scope is not found in the application registry
+   */
+  private void validateScopes(Set<String> scopes) {
+    if (scopes == null || scopes.isEmpty()) return;
+    var validScopeNames =
+        scopeApplicationService.getScopes().stream()
+            .map(ScopeResponse::getName)
+            .collect(Collectors.toSet());
+    var invalidScopes =
+        scopes.stream().filter(s -> !validScopeNames.contains(s)).collect(Collectors.toSet());
+    if (!invalidScopes.isEmpty()) throw new InvalidScopeException(invalidScopes);
   }
 
   /**
@@ -177,6 +200,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public ClientResponse createClient(Audit audit, CreateTenantClientCommand command) {
     validate(command);
+    validateScopes(command.getScopes());
     return clientCreateCommandHandler.createClient(audit, command);
   }
 
@@ -226,6 +250,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public ClientResponse updateClient(Audit audit, Role role, UpdateTenantClientCommand command) {
     validate(command);
+    validateScopes(command.getScopes());
     return clientUpdateCommandHandler.updateClient(audit, role, command);
   }
 

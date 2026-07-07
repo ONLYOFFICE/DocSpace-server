@@ -44,39 +44,39 @@ public class ApiKeysDbContext(DbContextOptions<ApiKeysDbContext> options) : Base
                            .AddDbTenant();
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<ApiKey> ApiKeysForUserAsync(int tenantId, Guid userId)
     {
         return Queries.ApiKeysForUserAsync(this, tenantId, userId);
     }
 
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<ApiKey> ValidateApiKeyAsync(int tenantId, string hashedKey)
     {
         return Queries.ValidateApiKeyAsync(this, tenantId, hashedKey);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<ApiKey> GetApiKeyAsync(int tenantId, Guid keyId)
     {
         return Queries.GetApiKeyAsync(this, tenantId, keyId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<ApiKey> GetApiKeyAsync(int tenantId, string hashedKey)
     {
         return Queries.GetApiKeyByHashedKeyAsync(this, tenantId, hashedKey);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<ApiKey> GetAllApiKeyAsync(int tenantId)
     {
         return Queries.AllApiKeysAsync(this, tenantId);
     }
 
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteApiKeyAsync(int tenantId, Guid keyId)
     {
         return Queries.DeleteApiKeyAsync(this, tenantId, keyId);

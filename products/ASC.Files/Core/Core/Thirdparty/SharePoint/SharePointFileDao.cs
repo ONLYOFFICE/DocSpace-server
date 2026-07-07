@@ -181,7 +181,7 @@ internal class SharePointFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -545,7 +545,17 @@ internal class SharePointFileDao(
     {
         return Task.CompletedTask;
     }
-
+    
+    public Task SetFileKey(string fileId, IEnumerable<FileKeyData> keys)
+    {
+        return Task.CompletedTask;
+    }
+    
+    public Task<List<FileKeys>> GetFileKeys(string fileId, Guid userId)
+    {
+        return Task.FromResult<List<FileKeys>>([]);
+    }
+    
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {
         if (!long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))

@@ -36,30 +36,30 @@ namespace ASC.Files.Core.EF;
 public partial class FilesDbContext
 {
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbFilesGroup> GroupForUpdateAsync(int tenantId, int id)
     {
         return GroupsQueries.GroupForUpdateAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbFilesRoomGroup> GetRoomsByGroupAsync(int tenantId, int groupId)
     {
         return GroupsQueries.GetRoomsByGroupAsync(this, tenantId, groupId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<bool> AnyRoomGroupRefAsync(int tenantId, int groupId, int roomId)
     {
         return GroupsQueries.AnyInternalRoomGroupRefAsync(this, tenantId, groupId, roomId);
     }
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<bool> AnyRoomGroupRefAsync(int tenantId, int groupId, string roomId)
     {
         return GroupsQueries.AnyThirdpartyRoomGroupRefAsync(this, tenantId, groupId, roomId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteRoomGroupRefByFolderIdsAsync(int tenantId, IEnumerable<int> folderIds)
     {
         return GroupsQueries.DeleteRoomGroupRefByFolderIdsAsync(this, tenantId, folderIds);

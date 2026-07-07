@@ -43,7 +43,7 @@ public class AiProviderDetails
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<bool> AiProviderExistsAsync(int tenantId)
     {
         return AiQueries.AiProviderExistsAsync(this, tenantId);

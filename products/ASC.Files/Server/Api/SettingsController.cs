@@ -274,19 +274,6 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Checks if the "Private Room" settings are available or not.
-    /// </remarks>
-    /// <summary>Check the "Private Room" availability</summary>
-    /// <path>api/2.0/files/@privacy/available</path>
-    [Tags("Files / Settings")]
-    [SwaggerResponse(200, "Boolean value: true if the Private Room settings are available", typeof(bool))]
-    [HttpGet("@privacy/available")]
-    public bool IsAvailablePrivacyRoomSettings()
-    {
-        return PrivacyRoomSettings.IsAvailable();
-    }
-
-    /// <remarks>
     /// Changes the ability to store the forcesaved file versions.
     /// </remarks>
     /// <summary>Change the ability to store the forcesaved files</summary>

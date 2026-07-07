@@ -1,0 +1,338 @@
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+extern alias ASCWebApi;
+extern alias ASCPeople;
+using System.Reflection;
+
+namespace ASC.Files.Tests.Tests._08_Privacy;
+
+[Collection("Test Collection")]
+[Trait("Category", "CRUD")]
+[Trait("Feature", "PrivacyRoom")]
+public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
+{
+    [Fact]
+    public async Task CRUD_UserPrivateKey()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var (publicKey, privateKey, _, keys) = await ExportPublicAndPrivateKeys();
+
+        keys.Should().NotBeNull();
+        keys.Should().HaveCount(1);
+        keys[0].PublicKey.Should().BeEquivalentTo(publicKey);
+        keys[0].PrivateKeyEnc.Should().BeEquivalentTo(privateKey);
+
+        keys = (await _privacyRoomApi.GetUserKeysAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        keys.Should().NotBeNull();
+        keys.Should().HaveCount(1);
+        keys[0].PublicKey.Should().BeEquivalentTo(publicKey);
+        keys[0].PrivateKeyEnc.Should().BeEquivalentTo(privateKey);
+
+        keys = (await _privacyRoomApi.DeleteKeysAsync(keys[0].Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        keys.Should().NotBeNull();
+        keys.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CreateRoom_Private_WithUserKeys_ThrowsException()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+
+        await _filesClient.Authenticate(docspaceAdmin);
+
+        var createRequest = new CreateRoomRequestDto(
+            title: "private room",
+            roomType: RoomType.CustomRoom,
+            @private: true
+        );
+
+        await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.CreateRoomAsync(createRequest, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task SetFileAccess_PrivateRoom_WithUserKeys_ReturnsOk()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
+        var (userPublicKey, _, userPassword, userKeys) = await ExportPublicAndPrivateKeys();
+
+        var userKey = userKeys[0];
+
+        var createRequest = new CreateRoomRequestDto(
+            title: "private room",
+            roomType: RoomType.CustomRoom,
+            @private: true
+        );
+
+        var createdRoom = (await _roomsApi.CreateRoomAsync(createRequest, TestContext.Current.CancellationToken)).Response;
+        var roomKeys = (await _privacyRoomApi.GetUserKeysForRoomAsync(createdRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        roomKeys.Should().NotBeNull();
+        roomKeys.Should().HaveCount(1);
+
+        var aesKeyForEncrypt = RandomNumberGenerator.GetBytes(32);
+        var filePrivateKeyEnc = EncryptFilePassword(userPublicKey, aesKeyForEncrypt);
+
+        var assembly = Assembly.GetExecutingAssembly();
+        await using var stream = assembly.GetManifestResourceStream("ASC.Files.Tests.Data.new.docx")!;
+        await using var encryptTempStream = new MemoryStream();
+        await FileEncryptionStream.EncryptFileAsync(stream, encryptTempStream, aesKeyForEncrypt, TestContext.Current.CancellationToken);
+
+        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(createdRoom.Id, new SessionRequest("new.docx", encryptTempStream.Length), TestContext.Current.CancellationToken)).Response;
+        var chunkSize = (int)settings.ChunkUploadSize;
+        var buffer = new byte[chunkSize];
+        var chunkNumber = 1;
+        int bytesRead;
+        encryptTempStream.Position = 0;
+
+        while ((bytesRead = await encryptTempStream.ReadAsync(buffer.AsMemory(0, chunkSize), TestContext.Current.CancellationToken)) > 0)
+        {
+            var chunkStream = new MemoryStream(buffer, 0, bytesRead);
+            var fileParameter = new FileParameter(chunkStream);
+
+            await _filesOperationsApi.UploadAsyncSessionAsync(createdRoom.Id, createdSession.Id, chunkNumber, fileParameter, TestContext.Current.CancellationToken);
+            chunkNumber++;
+        }
+
+        var resultFile = (await _filesOperationsApi.FinalizeSessionAsync(createdRoom.Id, createdSession.Id, TestContext.Current.CancellationToken)).Response;
+        var fileId = resultFile.Id;
+        List<AccessRequestKeyDto> keys = [new(roomKeys[0].UserId, roomKeys[0].Id, filePrivateKeyEnc)];
+
+
+        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin1);
+        await ExportPublicAndPrivateKeys();
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+        {
+            Invitations =
+            [
+                new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.RoomManager }
+            ]
+        }, TestContext.Current.CancellationToken);
+
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesApi.SetEncryptionInfoAsync(fileId, keys, cancellationToken: TestContext.Current.CancellationToken);
+
+        var result = (await _filesApi.GetEncryptionInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        result.Should().NotBeNull();
+        result.UserKeys.Should().NotBeNullOrEmpty();
+        result.UserKeys[0].UserId.Should().Be(userKey.UserId);
+        result.UserKeys[0].Id.Should().Be(userKey.Id);
+
+        result.FileKeys[0].FileId.Should().Be(fileId);
+        result.FileKeys[0].UserId.Should().Be(userKey.UserId);
+        result.FileKeys[0].PublicKeyId.Should().Be(userKey.Id);
+        result.FileKeys[0].PrivateKeyEnc.Should().Be(filePrivateKeyEnc);
+
+        var aesKeyForDecrypt = DecryptFilePassword(result.FileKeys[0].PrivateKeyEnc, DecryptPrivateEncKey(result.UserKeys[0].PrivateKeyEnc, userPassword));
+        aesKeyForDecrypt.Should().BeEquivalentTo(aesKeyForEncrypt);
+
+        var configuration = (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var fileStream = await _filesClient.GetStreamAsync(configuration.ViewUrl, TestContext.Current.CancellationToken);
+
+        await using var fileTempStream = new MemoryStream();
+        await fileStream.CopyToAsync(fileTempStream, TestContext.Current.CancellationToken);
+
+        fileTempStream.Position = 0;
+        await using var decryptTempStream = new MemoryStream();
+        await FileEncryptionStream.DecryptFileAsync(fileTempStream, decryptTempStream, aesKeyForDecrypt, TestContext.Current.CancellationToken);
+
+        AreStreamsEqual(decryptTempStream, stream).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Invite_PrivateRoom_WithUserKeys_ThrowsException()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await _filesClient.Authenticate(docspaceAdmin);
+
+        await ExportPublicAndPrivateKeys();
+
+        var createRequest = new CreateRoomRequestDto(
+            title: "private room",
+            roomType: RoomType.CustomRoom,
+            @private: true
+        );
+
+        var createdRoom = (await _roomsApi.CreateRoomAsync(createRequest, TestContext.Current.CancellationToken)).Response;
+
+        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+
+        await Assert.ThrowsAsync<ApiException>(async () =>
+            await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+            {
+                Invitations =
+                [
+                    new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.ContentCreator }
+                ]
+            }, TestContext.Current.CancellationToken));
+
+        await _filesClient.Authenticate(roomAdmin1);
+
+        await ExportPublicAndPrivateKeys();
+
+        await _filesClient.Authenticate(docspaceAdmin);
+
+        var security = await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+        {
+            Invitations =
+            [
+                new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.ContentCreator }
+            ]
+        }, TestContext.Current.CancellationToken);
+
+        security.Response.Members.Should().Contain(r => r.SharedToUser.Id == roomAdmin1.Id && r.Access == FileShare.ContentCreator);
+    }
+
+    [Fact]
+    public async Task CopyFolder_FromPrivateRoom_ReturnsError()
+    {
+        // Arrange
+        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        await _filesClient.Authenticate(docspaceAdmin);
+
+        await ExportPublicAndPrivateKeys();
+
+        var createRequest = new CreateRoomRequestDto(
+            title: "private room",
+            roomType: RoomType.CustomRoom,
+            @private: true
+        );
+
+        var createdRoom = (await _roomsApi.CreateRoomAsync(createRequest, TestContext.Current.CancellationToken)).Response;
+        var folderInRoom = (await _foldersApi.CreateFolderAsync(createdRoom.Id, new CreateFolder("folderInRoom"), TestContext.Current.CancellationToken)).Response;
+
+        var myFolderId = await GetUserFolderIdAsync(docspaceAdmin);
+        var folderInMy = (await _foldersApi.CreateFolderAsync(myFolderId, new CreateFolder("folderInMy"), TestContext.Current.CancellationToken)).Response;
+        var fileInMy = await CreateFile("fileInMy", folderInMy.Id);
+
+        // Act
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(folderInRoom.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [],
+            FolderIds = [new(folderInMy.Id)],
+            ReturnSingleOperation = true
+        };
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.CopyBatchItemsAsync(copyParams, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+
+        // Act
+        copyParams.FolderIds = [];
+        copyParams.FileIds = [new BatchRequestDtoAllOfFileIds(fileInMy.Id)];
+
+        exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.CopyBatchItemsAsync(copyParams, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+
+        // Act
+        copyParams.DestFolderId = new BatchRequestDtoAllOfDestFolderId(folderInMy.Id);
+        copyParams.FolderIds = [new(folderInRoom.Id)];
+
+        exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.CopyBatchItemsAsync(copyParams, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    private async Task<Key> ExportPublicAndPrivateKeys()
+    {
+        using var rsa = RSA.Create(2048);
+        var publicKey = Convert.ToBase64String(rsa.ExportSubjectPublicKeyInfo());
+        var pbeParameters = new PbeParameters(
+            PbeEncryptionAlgorithm.Aes256Cbc,
+            HashAlgorithmName.SHA256,
+            iterationCount: 100000);
+
+        var password = Initializer.FakerMember.Generate().Password;
+
+        var privateKey = Convert.ToBase64String(rsa.ExportEncryptedPkcs8PrivateKey(password, pbeParameters));
+
+        var keys = (await _privacyRoomApi.SetKeysAsync(new EncryptionKeyRequestDto(Guid.Empty, publicKey, privateKey), cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        return new Key(publicKey, privateKey, password, keys);
+    }
+
+    private static string DecryptPrivateEncKey(string encryptedPrivateKey, string password)
+    {
+        using var rsa = RSA.Create();
+        var privateKeyBytes = Convert.FromBase64String(encryptedPrivateKey);
+        rsa.ImportEncryptedPkcs8PrivateKey(password, privateKeyBytes, out _);
+        return Convert.ToBase64String(rsa.ExportPkcs8PrivateKey());
+    }
+
+    private static string EncryptFilePassword(string userPublicKey, byte[] filePassword)
+    {
+        using var rsaPublic = RSA.Create();
+        rsaPublic.ImportSubjectPublicKeyInfo(Convert.FromBase64String(userPublicKey), out _);
+        var encryptedFilePassword = rsaPublic.Encrypt(filePassword, RSAEncryptionPadding.OaepSHA256);
+        return Convert.ToBase64String(encryptedFilePassword);
+    }
+
+    private static byte[] DecryptFilePassword(string encryptedFilePassword, string userPrivateKey)
+    {
+        using var rsa = RSA.Create();
+        var privateKeyBytes = Convert.FromBase64String(userPrivateKey);
+        rsa.ImportPkcs8PrivateKey(privateKeyBytes, out _);
+        var decryptedBytes = rsa.Decrypt(Convert.FromBase64String(encryptedFilePassword), RSAEncryptionPadding.OaepSHA256);
+        return decryptedBytes;
+    }
+
+    private static bool AreStreamsEqual(Stream stream1, Stream stream2)
+    {
+        stream1.Position = 0;
+        stream2.Position = 0;
+
+        using var sha256 = SHA256.Create();
+        var hash1 = sha256.ComputeHash(stream1);
+
+        stream2.Position = 0;
+        var hash2 = sha256.ComputeHash(stream2);
+
+        return hash1.SequenceEqual(hash2);
+    }
+}
+
+public record Key(string PublicKey, string PrivateKey, string Password, List<EncryptionKeyDto> Keys);

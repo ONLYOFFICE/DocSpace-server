@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.Core.Common.Notify.Engine;
+
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -79,6 +81,7 @@ public class Startup
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddAiIntegrationServices();
         services.AddBaseDbContextPool<ApiKeysDbContext>();
 
         _diHelper.Configure(services);
@@ -146,9 +149,11 @@ public class Startup
         services.AddScoped(_ => UrlEncoder.Default);
 
         services.AddBillingHttpClient();
-        services.AddAccountingHttpClient();
+        services.AddAccountingHttpClient(_configuration);
 
         services.AddApiSystemAuthServices();
+
+        services.ConfigureNotificationServices();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

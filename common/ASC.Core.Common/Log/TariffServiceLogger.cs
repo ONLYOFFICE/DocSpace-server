@@ -34,8 +34,8 @@
 namespace ASC.Core.Common.Log;
 internal static partial class TariffServiceLogger
 {
-    [LoggerMessage(LogLevel.Information, "Accounting tenant {tenantId}: {message}")]
-    public static partial void InfoAccountingTenant(this ILogger<TariffService> logger, string tenantId, string message);
+    [LoggerMessage(LogLevel.Debug, "Accounting tenant {tenantId}: {message}")]
+    public static partial void DebugAccountingTenant(this ILogger<TariffService> logger, string tenantId, string message);
 
     [LoggerMessage(LogLevel.Debug, "Payment tenant {tenantId} not found: {message}")]
     public static partial void DebugPaymentTenant(this ILogger<TariffService> logger, string tenantId, string message);

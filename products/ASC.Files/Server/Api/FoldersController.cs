@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.AuditTrail;
@@ -277,7 +277,7 @@ public abstract class FoldersController<T>(
             formsItemDto = new FormsItemDto(inDto.FormsItemKey, inDto.FormsItemType);
         }
 
-        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, inDto.WithSubFolders ?? true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location);
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, inDto.WithSubFolders ?? true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location, inDto.ParentId, inDto.FolderType);
         return folder.NotFoundIfNull();
     }
 
@@ -565,26 +565,6 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the detailed list of files and folders located in the "Private Room" section.
-    /// </remarks>
-    /// <summary>Get the "Private Room" section</summary>
-    /// <path>api/2.0/files/@privacy</path>
-    [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The \"Private Room\" section contents", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
-    [SwaggerResponse(404, "The required folder was not found")]
-    [HttpGet("@privacy")]
-    public async Task<FolderContentDto<int>> GetPrivacyFolder(GetCommonFolderRequestDto inDto)
-    {
-        if (PrivacyRoomSettings.IsAvailable())
-        {
-            throw new SecurityException();
-        }
-
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivacyAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
-    }
-
-    /// <remarks>
     /// Returns the detailed list of files and folders located in the "In projects" section.
     /// </remarks>
     /// <summary>Get the "In projects" section</summary>
@@ -684,6 +664,21 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
+    /// <remarks>
+    /// Returns the detailed list of rooms used for filling out forms located in the "Forms" section.
+    /// </remarks>
+    /// <summary>Get the "Forms" section</summary>
+    /// <path>api/2.0/files/@forms</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "The \"Forms\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
+    [HttpGet("@forms")]
+    public async Task<FolderContentDto<int>> GetFormsFolder(GetCommonFolderRequestDto inDto)
+    {
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFormsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+    }
+
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var aiAccessSettingsTask = settingsManager.LoadAsync<TenantAiAccessSettings>();
@@ -714,6 +709,7 @@ public class FoldersControllerCommon(
         }
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
+        yield return await globalFolderHelper.FolderFormsAsync;
         yield return await globalFolderHelper.FolderArchiveAsync;
 
         var aiAccessSettings = await aiAccessSettingsTask;

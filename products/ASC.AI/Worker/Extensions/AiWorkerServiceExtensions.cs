@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.AI.Core.MdTextToDocx;
+
 using AiDbContext = ASC.AI.Core.Database.AiDbContext;
 
 namespace ASC.AI.Worker.Extensions;
@@ -43,12 +45,14 @@ public static class AiWorkerServiceExtensions
     {
         services.AddBaseDbContextPool<AiDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddAiIntegrationServices();
         services.RegisterQuotaFeature();
 
         services.RegisterQueue<VectorizationTask>(20);
         services.RegisterQueue<ChatDeletionTask>(10);
         services.RegisterQueue<MessageExportTask>();
         services.RegisterQueue<ChatExportTask>();
+        services.RegisterQueue<MdTextToDocxTask>(10);
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
 
@@ -67,6 +71,8 @@ public static class AiWorkerServiceExtensions
                 MessageExportIntegrationEventHandler>(),
             eventBus.SubscribeAsync<ChatExportIntegrationEvent,
                 ChatExportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<MdTextToDocxIntegrationEvent,
+                TextToDocxIntegrationHandler>(),
             eventBus.SubscribeAsync<ChatDeletionIntegrationEvent,
                 ChatDeletionIntegrationEventHandler>());
     }

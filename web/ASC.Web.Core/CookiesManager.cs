@@ -120,6 +120,14 @@ public class CookiesManager(
                 options.SameSite = SameSiteMode.Strict;
             }
 
+            // CHIPS: when the cookie is used cross-site (SameSite=None over HTTPS, e.g. embedded in an iframe),
+            // mark it Partitioned so modern browsers (Chrome, Firefox, Safari 18.4+) keep it in a
+            // per-top-level-site jar instead of dropping it as a third-party tracking cookie.
+            if (options is { SameSite: SameSiteMode.None, Secure: true })
+            {
+                options.Extensions.Add("Partitioned");
+            }
+
             if (FromCors(httpContext.Request))
             {
                 options.Domain = $".{coreBaseSettings.Basedomain}";
@@ -167,11 +175,63 @@ public class CookiesManager(
             return;
         }
 
+        var httpContext = httpContextAccessor.HttpContext;
         var cookieName = GetFullCookiesName(type, itemId);
 
-        if (httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(cookieName))
+        if (!httpContext.Request.Cookies.ContainsKey(cookieName))
         {
-            httpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName, new CookieOptions { Expires = DateTime.Now.AddDays(-3) });
+            return;
+        }
+
+        var expires = DateTime.Now.AddDays(-3);
+        var isHttps = Uri.UriSchemeHttps.Equals(httpContext.Request.Url().Scheme, StringComparison.OrdinalIgnoreCase);
+
+        var domains = new List<string> { null };
+        if (!string.IsNullOrEmpty(coreBaseSettings.Basedomain))
+        {
+            domains.Add($".{coreBaseSettings.Basedomain}");
+        }
+
+        // The cookie may exist as several distinct browser entries depending on how it was set (SetCookiesAsync):
+        //  - host-only vs Domain-scoped (FromCors / SaaS sub-domains),
+        //  - unpartitioned vs Partitioned (CHIPS, cross-site embedding over HTTPS).
+        // Emit a matching deletion for every combination; non-matching ones are harmless (already-expired) no-ops.
+        // Only the first header uses Delete (it deduplicates by name); the rest use Append so previously
+        // emitted deletion headers are not dropped.
+        var first = true;
+
+        foreach (var domain in domains)
+        {
+            Clear(domain, false);
+
+            if (isHttps)
+            {
+                Clear(domain, true);
+            }
+        }
+
+        return;
+
+        void Clear(string domain, bool partitioned)
+        {
+            var options = new CookieOptions { Expires = expires, Domain = domain };
+
+            if (partitioned)
+            {
+                options.Secure = true;
+                options.SameSite = SameSiteMode.None;
+                options.Extensions.Add("Partitioned");
+            }
+
+            if (first)
+            {
+                httpContext.Response.Cookies.Delete(cookieName, options);
+                first = false;
+            }
+            else
+            {
+                httpContext.Response.Cookies.Append(cookieName, string.Empty, options);
+            }
         }
     }
 

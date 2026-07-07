@@ -264,6 +264,9 @@
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Customer wallet top up settings updated</value>
   </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Subscription balance moved to wallet: {0}</value>
+  </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Custom Navigation Settings Updated</value>
   </data>
@@ -746,12 +749,6 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal Renamed</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Private Room is disabled</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Private Room is enabled</value>
   </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Products [{0}]. Access Opened</value>

@@ -35,31 +35,31 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<string> SourceIdAsync(int tenantId, string linkedId, Guid id)
     {
         return LinkQueries.SourceIdAsync(this, tenantId, linkedId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<string> LinkedIdAsync(int tenantId, string sourceId, Guid id)
     {
         return LinkQueries.LinkedIdAsync(this, tenantId, sourceId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbFilesLink> FilesLinksAsync(int tenantId, IEnumerable<string> sourceIds, Guid id)
     {
         return LinkQueries.FilesLinksAsync(this, tenantId, sourceIds, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbFilesLink> FileLinkAsync(int tenantId, string sourceId, Guid id)
     {
         return LinkQueries.FileLinkAsync(this, tenantId, sourceId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteFileLinks(int tenantId, string fileId)
     {
         return LinkQueries.DeleteFileLinks(this, tenantId, fileId);

@@ -915,6 +915,8 @@ public class VirtualRoomsCommonController(
         {
             SearchArea.Archive => await globalFolderHelper.GetFolderArchive(),
             SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
+            SearchArea.FormTemplates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
+            SearchArea.Forms => await globalFolderHelper.GetFolderFormsAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };
 
@@ -953,11 +955,11 @@ public class VirtualRoomsCommonController(
             tagNames,
             inDto.ExcludeSubject ?? false,
             inDto.Provider ?? ProviderFilter.None,
-            inDto.SubjectFilter,
             inDto.SubjectOwnerId,
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: inDto.StorageFilter ?? StorageFilter.None,
-            groupId: inDto.GroupId ?? null);
+            groupId: inDto.GroupId ?? null,
+            privacyFilter: inDto.PrivacyFilter ?? RoomPrivacyFilter.None);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 

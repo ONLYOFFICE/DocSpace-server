@@ -747,9 +747,6 @@
   <data name="PrivacyRoomDisable" xml:space="preserve">
     <value>Приватная комната отключена</value>
   </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Приватная комната включена</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Продукты [{0}]. Открыт доступ</value>
   </data>
@@ -971,6 +968,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Начат перенос портала в другой регион</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Баланс подписки перенесён в кошелёк: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Системная учетная запись</value>

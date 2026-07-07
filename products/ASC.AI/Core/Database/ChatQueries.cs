@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -35,121 +35,121 @@ namespace ASC.AI.Core.Database;
 
 public partial class AiDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbChat?> GetChatAsync(int tenantId, Guid chatId)
     {
         return Queries.GetChatAsync(this, tenantId, chatId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbChat> GetChatsAsync(int tenantId, int roomId, Guid userId, int offset, int limit)
     {
         return Queries.GetChatsAsync(this, tenantId, roomId, userId, offset, limit);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> GetChatsTotalCountAsync(int tenantId, int roomId, Guid userId)
     {
         return Queries.GetChatsTotalCountAsync(this, tenantId, roomId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task UpdateChatAsync(int tenantId, Guid chatId, DateTime date)
     {
         return Queries.UpdateChatDateAsync(this, tenantId, chatId, date);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task UpdateChatAsync(int tenantId, Guid chatId, string title, DateTime date)
     {
         return Queries.UpdateChatAsync(this, tenantId, chatId, title, date);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbChatMessage> GetMessagesAsync(Guid chatId, int offset, int limit)
     {
         return Queries.GetMessagesAsync(this, chatId, offset, limit);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbChatMessage> GetMessagesAsync(Guid chatId)
     {
         return Queries.GetAllMessagesAsync(this, chatId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> GetMessagesTotalCountAsync(Guid chatId)
     {
         return Queries.GetMessagesTotalCountAsync(this, chatId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public async Task<bool> MarkChatAsDeletedAsync(int tenantId, Guid chatId, Guid userId, DateTime deletedOn)
     {
         return await Queries.MarkChatAsDeletedAsync(this, tenantId, chatId, userId, deletedOn) > 0;
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbChatMessage?> GetMessageAsync(int messageId, Guid userId)
     {
         return Queries.GetMessageAsync(this, messageId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbChat?> GetChatByMessageIdAsync(int messageId)
     {
         return Queries.GetChatByMessageIdAsync(this, messageId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbUserChatSettings?> GetUserChatSettingsAsync(int tenantId, Guid userId, int roomId)
     {
         return Queries.GetUserChatSettingsAsync(this, tenantId, userId, roomId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    [PreCompileQuery]
     public Task UpdateChatTitleAsync(int tenantId, Guid chatId, string title)
     {
         return Queries.UpdateChatTitleAsync(this, tenantId, chatId, title);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbChatMessage?> GetUserMessageByAssistantMessageIdAsync(int assistantMessageId, Guid chatId)
     {
         return Queries.GetUserMessageByAssistantMessageIdAsync(this, assistantMessageId, chatId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<int> GetChatAttachmentFileIdsAsync(int tenantId, Guid chatId)
     {
         return Queries.GetChatAttachmentFileIdsAsync(this, tenantId, chatId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> HardDeleteChatAsync(int tenantId, Guid chatId, Guid userId)
     {
         return Queries.HardDeleteChatAsync(this, tenantId, chatId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, 0L, null, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task<int> LinkAttachmentsToMessageAsync(int tenantId, Guid chatId, long messageId, IEnumerable<int> fileIds, DateTime modifiedOn)
     {
         return Queries.LinkAttachmentsToMessageAsync(this, tenantId, chatId, messageId, fileIds, modifiedOn);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<(int TenantId, Guid UserId, Guid ChatId)> GetDeletedChatsAsync(DateTime cutoffDate, int limit)
     {
         return Queries.GetDeletedChatsAsync(this, cutoffDate, limit);
     }
 
-    [PreCompileQuery([null, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task<int> UpdateDeletedChatsDeletedOnAsync(IEnumerable<Guid> chatIds, DateTime deletedOn)
     {
         return Queries.UpdateDeletedChatsDeletedOnAsync(this, chatIds, deletedOn);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public IAsyncEnumerable<(int TenantId, int FileId)> GetOrphanedAttachmentsAsync(DateTime cutoffDate)
     {
         return Queries.GetOrphanedAttachmentsAsync(this, cutoffDate);

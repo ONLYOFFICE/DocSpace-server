@@ -32,6 +32,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 #nullable enable
+
+using HttpMethod = OpenSearch.Net.HttpMethod;
+
 namespace ASC.ElasticSearch.VectorData;
 
 public class VectorStoreCollection<TRecord>(
@@ -94,14 +97,7 @@ public class VectorStoreCollection<TRecord>(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         EnsureClientConfigured();
-
-        ArgumentNullException.ThrowIfNull(propertySelector);
-        ArgumentNullException.ThrowIfNull(vector);
-
-        if (top <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(top), @"Top must be greater than 0.");
-        }
+        ValidateSearchArguments(propertySelector, vector, top);
         
         var query = new KnnQuery
         {
@@ -130,6 +126,64 @@ public class VectorStoreCollection<TRecord>(
         }
     }
 
+    public async IAsyncEnumerable<TRecord> HybridSearchAsync(
+        HybridSearchQuery<TRecord> searchQuery,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        EnsureClientConfigured();
+        ValidateHybridSearchQuery(searchQuery);
+
+        var vectorField = ResolveFieldName(searchQuery.VectorField);
+        var lexicalFields = searchQuery.LexicalFields
+            .Select(ResolveFieldName)
+            .ToArray();
+        
+        var k = searchQuery.K ?? searchQuery.Top;
+
+        var builder = new HybridSearchRequestBuilder(searchQuery.Top)
+            .AddMultiMatch(searchQuery.LexicalQuery, lexicalFields)
+            .AddKnn(vectorField, searchQuery.Vector, k);
+
+        if (searchQuery.Filter != null)
+        {
+            var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient!.Infer);
+            builder.WithFilter(translator.TranslateToJsonElement(searchQuery.Filter));
+        }
+
+        var request = builder.Build();
+        
+        var requestParameters = new SearchRequestParameters
+        {
+            QueryString = new Dictionary<string, object>
+            {
+                ["search_pipeline"] = HybridSearchPipeline.Name
+            }
+        };
+
+        var response = await OperationHandler.RunAsync<SearchResponse<TRecord>, OpenSearchClientException>(
+            name,
+            "hybrid_search",
+            async () => await ((IOpenSearchClient)openSearchClient!).LowLevel.DoRequestAsync<SearchResponse<TRecord>>(
+                HttpMethod.POST,
+                $"/{Uri.EscapeDataString(name)}/_search",
+                cancellationToken,
+                PostData.String(JsonSerializer.Serialize(request)),
+                requestParameters));
+
+        if (response.Hits == null)
+        {
+            yield break;
+        }
+
+        foreach (var hit in response.Hits)
+        {
+            if (hit.Source != null)
+            {
+                yield return hit.Source;
+            }
+        }
+    }
+
     public async Task DeleteAsync(VectorSearchOptions<TRecord>? searchOptions = null, bool immediate = false,
         CancellationToken cancellationToken = default)
     {
@@ -140,26 +194,24 @@ public class VectorStoreCollection<TRecord>(
 
         if (immediate)
         {
-            await DeleteAsync(searchOptions, cancellationToken);
+            await DeleteCoreAsync(searchOptions, cancellationToken);
             return;
         }
-        
-        var task = new Task(async void () =>
+
+        _ = Task.Factory.StartNew(async () =>
         {
             try
             {
-                await DeleteAsync(searchOptions, cancellationToken);
+                await DeleteCoreAsync(searchOptions, cancellationToken);
             }
             catch (Exception e)
             {
                 logger.ErrorWithException("Failed to delete file vector data", e);
             }
-        }, cancellationToken, TaskCreationOptions.LongRunning);
-        
-        task.Start(scheduler);
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, scheduler).Unwrap();
     }
 
-    private async Task DeleteAsync(VectorSearchOptions<TRecord>? searchOptions = null, CancellationToken cancellationToken = default)
+    private async Task DeleteCoreAsync(VectorSearchOptions<TRecord>? searchOptions = null, CancellationToken cancellationToken = default)
     {
         var request = new DeleteByQueryRequest(name);
         
@@ -192,5 +244,179 @@ public class VectorStoreCollection<TRecord>(
         {
             throw new InvalidOperationException("OpenSearch is not configured. Check the OpenSearch connection settings.");
         }
+    }
+
+    private static void ValidateSearchArguments(Expression<Func<TRecord, object>> propertySelector, float[] vector, int top)
+    {
+        ArgumentNullException.ThrowIfNull(propertySelector);
+        ArgumentNullException.ThrowIfNull(vector);
+
+        if (top <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(top), @"Top must be greater than 0.");
+        }
+    }
+
+    private static void ValidateHybridSearchQuery(HybridSearchQuery<TRecord> searchQuery)
+    {
+        ArgumentNullException.ThrowIfNull(searchQuery);
+        ValidateSearchArguments(searchQuery.VectorField, searchQuery.Vector, searchQuery.Top);
+        ArgumentException.ThrowIfNullOrWhiteSpace(searchQuery.LexicalQuery);
+        ArgumentNullException.ThrowIfNull(searchQuery.LexicalFields);
+
+        if (searchQuery.LexicalFields.Count <= 0)
+        {
+            throw new ArgumentException(@"At least one lexical field must be specified.", nameof(searchQuery));
+        }
+
+        if (searchQuery.K is <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(searchQuery), @"K must be greater than 0.");
+        }
+    }
+
+    private string ResolveFieldName(Expression<Func<TRecord, object>> selector)
+    {
+        var property = selector.Body switch
+        {
+            MemberExpression { Member: PropertyInfo propertyInfo } => propertyInfo,
+            UnaryExpression 
+            { 
+                NodeType: ExpressionType.Convert, Operand: MemberExpression 
+                { 
+                    Member: PropertyInfo propertyInfo 
+                } 
+            } => propertyInfo,
+            _ => throw new NotSupportedException("Only direct property selectors are supported.")
+        };
+
+        return openSearchClient!.Infer.Field(property);
+    }
+
+    private sealed class HybridSearchRequestBuilder(int size)
+    {
+        private readonly List<HybridSearchQueryNode> _queries = [];
+        private JsonElement? _filter;
+
+        public HybridSearchRequestBuilder AddMultiMatch(string query, string[] fields)
+        {
+            _queries.Add(new HybridSearchQueryNode
+            {
+                MultiMatch = new HybridMultiMatchNode { Query = query, Fields = fields }
+            });
+
+            return this;
+        }
+
+        public HybridSearchRequestBuilder AddKnn(string field, float[] vector, int k)
+        {
+            _queries.Add(new HybridSearchQueryNode
+            {
+                Knn = new HybridKnnNode
+                {
+                    Fields = new Dictionary<string, JsonElement>
+                    {
+                        [field] = JsonSerializer.SerializeToElement(new HybridKnnFieldNode { Vector = vector, K = k })
+                    }
+                }
+            });
+
+            return this;
+        }
+
+        public HybridSearchRequestBuilder WithFilter(JsonElement filter)
+        {
+            _filter = filter;
+
+            return this;
+        }
+
+        public HybridSearchRequest Build()
+        {
+            var queries = _filter.HasValue
+                ? _queries.Select(q => new HybridSearchQueryNode
+                {
+                    Bool = new HybridBoolNode { Must = [q], Filter = [_filter.Value] }
+                }).ToArray()
+                : _queries.ToArray();
+
+            return new HybridSearchRequest
+            {
+                Size = size,
+                Query = new HybridSearchQueryNode
+                {
+                    Hybrid = new HybridNode { Queries = queries }
+                }
+            };
+        }
+    }
+
+    private sealed class HybridSearchRequest
+    {
+        [JsonPropertyName("size")]
+        public required int Size { get; init; }
+
+        [JsonPropertyName("query")]
+        public required HybridSearchQueryNode Query { get; init; }
+    }
+
+    private sealed class HybridSearchQueryNode
+    {
+        [JsonPropertyName("hybrid")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridNode? Hybrid { get; init; }
+
+        [JsonPropertyName("bool")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridBoolNode? Bool { get; init; }
+
+        [JsonPropertyName("multi_match")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridMultiMatchNode? MultiMatch { get; init; }
+
+        [JsonPropertyName("knn")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridKnnNode? Knn { get; init; }
+    }
+
+    private sealed class HybridNode
+    {
+        [JsonPropertyName("queries")]
+        public required HybridSearchQueryNode[] Queries { get; init; }
+    }
+
+    private sealed class HybridBoolNode
+    {
+        [JsonPropertyName("must")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public HybridSearchQueryNode[]? Must { get; init; }
+
+        [JsonPropertyName("filter")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public JsonElement[]? Filter { get; init; }
+    }
+
+    private sealed class HybridMultiMatchNode
+    {
+        [JsonPropertyName("query")]
+        public required string Query { get; init; }
+
+        [JsonPropertyName("fields")]
+        public required string[] Fields { get; init; }
+    }
+
+    private sealed class HybridKnnNode
+    {
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement> Fields { get; init; } = [];
+    }
+
+    private sealed class HybridKnnFieldNode
+    {
+        [JsonPropertyName("vector")]
+        public required float[] Vector { get; init; }
+
+        [JsonPropertyName("k")]
+        public required int K { get; init; }
     }
 }

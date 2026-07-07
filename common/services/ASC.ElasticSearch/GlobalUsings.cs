@@ -38,6 +38,8 @@ global using System.Linq.Expressions;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Text;
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
 
 global using ASC.Common;
 global using ASC.Common.Caching;
@@ -50,6 +52,7 @@ global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.ElasticSearch.Core;
+global using ASC.ElasticSearch.Engine.Pipelines;
 global using ASC.ElasticSearch.Log;
 global using ASC.ElasticSearch.Service;
 

@@ -29,6 +29,7 @@
   <Project Path="common/ASC.AppHost/ASC.AppHost.csproj" />
   <Project Path="common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj" />
   <Project Path="common/Tools/ASC.Data.Stress/ASC.Data.Stress.csproj" />
+  <Project Path="products/ASC.AI/ASC.AI.Tests/ASC.AI.Tests.csproj" />
   <Project Path="products/ASC.AI/Core/ASC.AI.Core.csproj" />
   <Project Path="products/ASC.AI/Server/ASC.AI.csproj" />
   <Project Path="products/ASC.AI/Worker/ASC.AI.Worker.csproj" />

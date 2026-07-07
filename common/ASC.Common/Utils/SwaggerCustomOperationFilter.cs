@@ -43,9 +43,15 @@ public class SwaggerCustomOperationFilter : IOperationFilter
     {
         foreach (var parameter in operation.Parameters)
         {
-            if (parameter.In == ParameterLocation.Query && parameter.Schema.Type == JsonSchemaType.Array)
+            if (parameter.In == ParameterLocation.Query && parameter.Schema?.Type == JsonSchemaType.Array)
             {
-                (parameter as OpenApiParameter)?.Style = ParameterStyle.DeepObject;
+                // "deepObject" is only valid for arrays of objects. For arrays of primitives/enums
+                // it produces a style that generators can't serialize, so keep the default "form" +
+                // "explode: true" (repeated parameters, e.g. ?folderType=USER&folderType=CustomRoom),
+                // which is what the server's default model binding expects.
+                var isObjectArray = parameter.Schema.Items?.Type == JsonSchemaType.Object;
+
+                (parameter as OpenApiParameter)?.Style = isObjectArray ? ParameterStyle.DeepObject : ParameterStyle.Form;
                 (parameter as OpenApiParameter)?.Explode = true;
             }
 

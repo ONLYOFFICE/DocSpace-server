@@ -120,7 +120,7 @@ public class CreateAgentRequestDto
     /// The chat settings.
     /// </summary>
     /// <example>{"model": "gpt-4", "temperature": 0.7}</example>
-    public required ChatSettings ChatSettings { get; set; }
+    public ChatSettings? ChatSettings { get; set; }
 
     /// <summary>
     /// Specifies whether to attach default tools to the agent or not.

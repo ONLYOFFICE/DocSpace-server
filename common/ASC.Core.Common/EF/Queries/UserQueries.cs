@@ -35,249 +35,249 @@ namespace ASC.Core.Common.EF;
 
 public partial class UserDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DateTime?> LastModifiedAsync(int tenantId, Guid userId)
     {
         return Queries.LastModifiedAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<byte[]> PhotoAsync(int tenantId, Guid userId)
     {
         return Queries.PhotoAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<Guid> GroupIdsAsync(int tenantId, Guid parentId)
     {
         return Queries.GroupIdsAsync(this, tenantId, parentId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteAclByIdsAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return Queries.DeleteAclByIdsAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteSubscriptionsByIdsAsync(int tenantId, IEnumerable<string> ids)
     {
         return Queries.DeleteSubscriptionsByIdsAsync(this, tenantId, ids);
     }
 
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteDbSubscriptionMethodsByIdsAsync(int tenantId, IEnumerable<string> ids)
     {
         return Queries.DeleteDbSubscriptionMethodsByIdsAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteUserGroupsByIdsAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return Queries.DeleteUserGroupsByIdsAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> UpdateUserGroupsByIdsAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return Queries.UpdateUserGroupsByIdsAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteDbGroupsAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return Queries.DeleteDbGroupsAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> UpdateDbGroupsAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return Queries.UpdateDbGroupsAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteAclAsync(int tenantId, Guid id)
     {
         return Queries.DeleteAclAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteSubscriptionsAsync(int tenantId, string id)
     {
         return Queries.DeleteSubscriptionsAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteDbSubscriptionMethodsAsync(int tenantId, string id)
     {
         return Queries.DeleteDbSubscriptionMethodsAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteUserPhotosAsync(int tenantId, Guid userId)
     {
         return Queries.DeleteUserPhotosAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([null])]
+    [PreCompileQuery]
     public Task<int> DeleteAccountLinksAsync(string id)
     {
         return Queries.DeleteAccountLinksAsync(this, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteUserGroupsAsync(int tenantId, Guid userId)
     {
         return Queries.DeleteUserGroupsAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> UpdateUserGroupsAsync(int tenantId, Guid userId)
     {
         return Queries.UpdateUserGroupsAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteUsersAsync(int tenantId, Guid userId)
     {
         return Queries.DeleteUsersAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> UpdateUsersAsync(int tenantId, Guid userId)
     {
         return Queries.UpdateUsersAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteUserSecuritiesAsync(int tenantId, Guid userId)
     {
         return Queries.DeleteUserSecuritiesAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, UserGroupRefType.Contains])]
+    [PreCompileQuery]
     public Task<int> DeleteUserGroupsByGroupIdAsync(int tenantId, Guid userId, Guid groupId, UserGroupRefType refType)
     {
         return Queries.DeleteUserGroupsByGroupIdAsync(this, tenantId, userId, groupId, refType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, UserGroupRefType.Contains])]
+    [PreCompileQuery]
     public Task<int> UpdateUserGroupsByGroupIdAsync(int tenantId, Guid userId, Guid groupId, UserGroupRefType refType)
     {
         return Queries.UpdateUserGroupsByGroupIdAsync(this, tenantId, userId, groupId, refType);
     }
 
-    //[PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    //[PreCompileQuery]
     public Task<User> UserAsync(int tenantId, Guid userId)
     {
         return Queries.UserAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<User> UserByIdAsync(int tenantId, Guid userId)
     {
         return Queries.UserByIdAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<UserGroup> GroupsByTenantAsync(int tenantId)
     {
         return Queries.GroupsByTenantAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<User> UserByEmailAsync(int tenantId, string email)
     {
         return Queries.UserByEmailAsync(this, tenantId, email);
     }
 
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<User> UserByUserNameAsync(int tenantId, string userName)
     {
         return Queries.UserByUserNameAsync(this, tenantId, userName);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<User> UserByTenantAsync(int tenantId)
     {
         return Queries.UserByTenantAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<bool> AnyUsersAsync(int tenantId, string userName, Guid id)
     {
         return Queries.AnyUsersAsync(this, tenantId, userName, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<bool> AnyUsersByEmailAsync(int tenantId, string email, Guid id)
     {
         return Queries.AnyUsersByEmailAsync(this, tenantId, email, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<User> FirstOrDefaultUserAsync(int tenantId, Guid id)
     {
         return Queries.FirstOrDefaultUserAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<UserPhoto> UserPhotoAsync(int tenantId, Guid userId)
     {
         return Queries.UserPhotoAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<string> EmailsAsync(int tenantId)
     {
         return Queries.EmailsAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task DeleteUserRelationsAsync(int tenantId, Guid userId)
     {
         return Queries.DeleteUserRelationsAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
     {
         return Queries.DeleteUserRelationAsync(this, tenantId, sourceUserId, targetUserId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<InvitationLink> GetInvitationLinkAsync(int tenantId, Guid id)
     {
         return Queries.GetInvitationLinkByIdAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, EmployeeType.User])]
+    [PreCompileQuery]
     public Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType)
     {
         return Queries.GetInvitationLinkByTypeAsync(this, tenantId, employeeType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<InvitationLink> GetInvitationLinksAsync(int tenantId)
     {
         return Queries.GetInvitationLinksAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int? maxUseCount)
     {
         return Queries.UpdateInvitationLinkAsync(this, tenantId, id, expiration, maxUseCount);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> IncreaseInvitationLinkUsageAsync(int tenantId, Guid id)
     {
         return Queries.IncreaseInvitationLinkUsageAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<int> DeleteInvitationLinkAsync(int tenantId, Guid id)
     {
         return Queries.DeleteInvitationLinkAsync(this, tenantId, id);

@@ -1680,7 +1680,7 @@ $TrulyYours</value>
 
 Het geplande back-up proces voor uw DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" is mislukt.
 
-We raden aan de instellingen voor "Back-up":"${__VirtualRootPath}/portal-settings/backup/data-backup" en "Services":"${__VirtualRootPath}/portal-settings/services" te controleren.
+We raden aan de instellingen voor "Back-up":"${__VirtualRootPath}/portal-settings/backup/data-backup" en "Services":"${__VirtualRootPath}/portal-settings/payments/services" te controleren.
 
 Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via "${__SupportLink}":"${__SupportLink}".
 
@@ -1691,7 +1691,7 @@ $TrulyYours</value>
 
 Het geplande back-up proces voor uw DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) is mislukt.
 
-We raden aan de instellingen voor [Back-up](${__VirtualRootPath}/portal-settings/backup/data-backup) en [Services](${__VirtualRootPath}/portal-settings/services) te controleren.
+We raden aan de instellingen voor [Back-up](${__VirtualRootPath}/portal-settings/backup/data-backup) en [Services](${__VirtualRootPath}/portal-settings/payments/services) te controleren.
 
 Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via [${__SupportLink}](${__SupportLink})
 

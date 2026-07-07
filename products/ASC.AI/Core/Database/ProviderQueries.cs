@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -45,67 +45,67 @@ public class DefaultProviderQueryResult
 
 public partial class AiDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbAiProvider?> GetProviderAsync(int tenantId, int id)
     {
         return Queries.GetProviderAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
     {
         return Queries.GetProvidersAsync(this, tenantId, offset, limit);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> GetProvidersTotalCountAsync(int tenantId)
     {
         return Queries.GetProvidersTotalCountAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<bool> IsProviderNameExistsAsync(int tenantId, string title, int excludedProviderId)
     {
         return Queries.IsProviderNameExistsAsync(this, tenantId, title, excludedProviderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<bool> HasProvidersAsync(int tenantId)
     {
         return Queries.HasProvidersAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int?> GetFirstProviderIdAsync(int tenantId)
     {
         return Queries.GetFirstProviderIdAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, null, null, PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public Task UpdateProviderAsync(int tenantId, int id, string title, string? url, string key, DateTime modifiedOn)
     {
         return Queries.UpdateProviderAsync(this, tenantId, id, title, url, key, modifiedOn);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task DeleteProvidersAsync(int tenantId, IEnumerable<int> ids)
     {
         return Queries.DeleteProvidersAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<string> GetProviderKeysAsync(int tenantId)
     {
         return Queries.GetProviderKeysAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DefaultProviderQueryResult?> GetDefaultProviderAsync(int tenantId)
     {
         return Queries.GetDefaultProviderAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task DeleteDefaultProvidersByProviderIdsAsync(int tenantId, IEnumerable<int> providerIds)
     {
         return Queries.DeleteDefaultProvidersByProviderIdsAsync(this, tenantId, providerIds);

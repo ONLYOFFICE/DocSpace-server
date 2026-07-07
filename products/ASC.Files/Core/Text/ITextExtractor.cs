@@ -36,5 +36,5 @@ namespace ASC.Files.Core.Text;
 
 public interface ITextExtractor
 {
-    Task<string?> ExtractAsync(Memory<byte> content);
+    public Task<string?> ExtractAsync(Stream content, long contentLength);
 }

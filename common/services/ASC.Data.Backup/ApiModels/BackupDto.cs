@@ -87,6 +87,24 @@ public class BackupsCountDto
 }
 
 /// <summary>
+/// The number of backups.
+/// </summary>
+public class BackupsCountResultDto
+{
+    /// <summary>
+    /// The number of free backups.
+    /// </summary>
+    /// <example>3</example>
+    public int Free { get; set; }
+
+    /// <summary>
+    /// The number of paid backups.
+    /// </summary>
+    /// <example>5</example>
+    public int Paid { get; set; }
+}
+
+/// <summary>
 /// Backup service state.
 /// </summary>
 public class BackupServiceStateDto

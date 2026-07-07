@@ -35,18 +35,12 @@ namespace ASC.AI.Core.Database;
 
 public partial class AiDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> UpdateRoomSettingsAsync(int tenantId, IEnumerable<int> providersIds)
     {
         return Queries.UpdateRoomSettingsAsync(this, tenantId, providersIds);
     }
-    
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt,  PreCompileQuery.DefaultGuid, null])]
-    public IAsyncEnumerable<DbMcpServerSettings> GetToolsSettings(int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds)
-    {
-        return Queries.GetToolsSettings(this, tenantId, roomId, userId, serversIds);
     }
-}
 
 static file class Queries
 {
@@ -56,9 +50,4 @@ static file class Queries
                 .Where(x => x.TenantId == tenantId && providersIds.Contains(x.ChatProviderId))
                 .ExecuteUpdate(x => 
                     x.SetProperty(y => y.ChatProviderId, 0)));
-    
-    public static readonly Func<AiDbContext, int, int, Guid, IEnumerable<Guid>, IAsyncEnumerable<DbMcpServerSettings>> GetToolsSettings =
-        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds) => 
-            ctx.RoomMcpServerSettings.Where(x => 
-                x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && serversIds.Contains(x.ServerId)));
 }

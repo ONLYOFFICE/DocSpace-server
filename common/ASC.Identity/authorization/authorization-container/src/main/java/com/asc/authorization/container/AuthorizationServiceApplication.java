@@ -33,11 +33,14 @@
 
 package com.asc.authorization.container;
 
+import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -51,11 +54,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableCaching
 @EnableScheduling
 @EnableTransactionManagement
+@ImportRuntimeHints(AuthorizationServiceRuntimeHints.class)
 @EntityScan(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
 @EnableJpaRepositories(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
 @SpringBootApplication(
     scanBasePackages = {"com.asc.authorization", "com.asc.common"},
-    exclude = {GrpcServerSecurityAutoConfiguration.class})
+    exclude = {
+      GrpcServerSecurityAutoConfiguration.class,
+      GrpcServerMetricAutoConfiguration.class,
+      GrpcClientMetricAutoConfiguration.class
+    })
 public class AuthorizationServiceApplication {
 
   /**
@@ -64,6 +72,8 @@ public class AuthorizationServiceApplication {
    * @param args command line arguments passed to the application
    */
   public static void main(String[] args) {
+    // TODO: Upgrade the dependency and remove the property
+    System.setProperty("io.grpc.netty.shaded.io.netty.noUnsafe", "true");
     SpringApplication.run(AuthorizationServiceApplication.class, args);
   }
 }

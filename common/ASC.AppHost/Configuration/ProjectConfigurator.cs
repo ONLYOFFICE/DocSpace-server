@@ -79,7 +79,8 @@ public class ProjectConfigurator(
         var isStandalone = string.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
         project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
-            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp");
+            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort, "mcp").Uri.ToString())
+            .WithEnvironment("ai:mcpInternalHost", Constants.HostDockerInternal);
 
         ConfigureForwardedHeadersNetworks(project);
 
@@ -136,7 +137,8 @@ public class ProjectConfigurator(
             .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
             .WithEnvironment("pathToConf", "/buildtools/config/")
-            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
+            .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort, "mcp").Uri.ToString())
+            .WithEnvironment("ai:mcpInternalHost", Constants.OpenRestyContainer)
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
             .WithEntrypoint("dotnet");
 
@@ -278,6 +280,47 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             ApplyServiceName(resourceBuilder);
+        }
+
+        return this;
+    }
+
+    public ProjectConfigurator AddNewAi()
+    {
+        var name = "onlyoffice-newAi";
+        var path = Path.Combine("..", "ASC.NewAi");
+        var port = Constants.NewAiPort;
+
+        if (isDocker)
+        {
+            var resourceBuilder = builder
+                .AddDockerfile(name, path)
+                .WithImageTag("dev")
+                .WithEnvironment("log:dir", "/logs")
+                .WithEnvironment("log:name", "newAi")
+                .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
+                .WithEnvironment("AI_SERVICE_URL", new UriBuilder(Uri.UriSchemeHttp, GetProjectName<ASC_AI>(), Constants.AiPort).ToString())
+                .WithEnvironment("app:appsettings", "/buildtools/config")
+                // `__` form, not `:` — NewAi's nconf would otherwise nest a
+                // `:`-keyed var and turn the `ai.mcp` array into an object.
+                .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
+                .WithHttpEndpoint(port, port, isProxied: false)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            AddBaseBind(resourceBuilder);
+        }
+        else
+        {
+            builder.AddJavaScriptApp(name, path, "dev")
+                .WithYarn()
+                .WithEnvironment("NODE_ENV", "development")
+                // `__` form, not `:` — NewAi's nconf would otherwise nest a
+                // `:`-keyed var and turn the `ai.mcp` array into an object.
+                .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp")
+                .WithHttpEndpoint(targetPort: port)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
         }
 
         return this;

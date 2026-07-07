@@ -469,7 +469,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         if (data is ISearchItemDocument)
         {
-            result.Pipeline("attachments");
+            result.Pipeline(AttachmentPipeline.Name);
         }
 
         return result;
@@ -480,7 +480,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         if (data is ISearchItemDocument { Document: not null })
         {
-            result.Pipeline("attachments");
+            result.Pipeline(AttachmentPipeline.Name);
         }
 
         return result;

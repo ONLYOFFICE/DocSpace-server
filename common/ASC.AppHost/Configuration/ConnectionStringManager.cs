@@ -242,7 +242,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true, bool withDataVolume = true)
     {
         OpensearchResource = builder
-            .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
+            .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "3.5.0")
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
             .WithEnvironment("discovery.type", "single-node")
@@ -299,7 +299,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithExplicitStart();
 
@@ -420,7 +420,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.E2ETestsUiPort.ToString())
             .WithExplicitStart();
@@ -445,9 +445,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         bool includeMigrate = true,
         bool includeRabbitMq = true,
         bool includeRedis = true,
-        bool includeEditors = true,
+        bool includeEditors = false,
         bool includeOpensearch = true,
-        bool includeMailPit = true
+        bool includeMailPit = false
         )  where T : IResourceWithWaitSupport
     {
         if (includeMigrate && MigrateResource != null)
@@ -584,7 +584,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => Redis?.Password ?? string.Empty);
         }
 
-        AddWaitFor(resourceBuilder, includeEditors: false);
+        AddWaitFor(resourceBuilder);
     }
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);

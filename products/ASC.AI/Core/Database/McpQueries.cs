@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -35,121 +35,121 @@ namespace ASC.AI.Core.Database;
 
 public partial class AiDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbMcpServerUnit?> GetServerAsync(int tenantId, Guid id)
     {
         return McpQueries.GetServerAsync(this, tenantId, id);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMcpServerUnit> GetServersAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return McpQueries.GetServersByIdsAsync(this, tenantId, ids);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> GetRoomServersCountAsync(int tenantId, int roomId)
     {
         return McpQueries.GetRoomServersCount(this, tenantId, roomId);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbRoomServerUnit?> GetRoomServerAsync(int tenantId, int roomId, Guid userId, Guid serverId)
     {
         return McpQueries.GetRoomServerAsync(this, tenantId, roomId, userId, serverId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbRoomServerUnit> GetRoomServersAsync(int tenantId, int roomId, Guid userId)
     {
         return McpQueries.GetRoomServersAsync(this, tenantId, roomId, userId);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteServersAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return McpQueries.DeleteServersAsync(this, tenantId, ids);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteSettingsAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return McpQueries.DeleteSettingsAsync(this, tenantId, ids);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteSettingsAsync(int tenantId, int roomId, IEnumerable<Guid> ids)
     {
         return McpQueries.DeleteSettingsByRoomAsync(this, tenantId, roomId, ids);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteRoomServersAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return McpQueries.DeleteRoomServersAsync(this, tenantId, ids);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteRoomServersAsync(int tenantId, int roomId, IEnumerable<Guid> ids)
     {
         return McpQueries.DeleteRoomServersByRoomAsync(this, tenantId, roomId, ids);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<int> DeleteServersStatesAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return McpQueries.DeleteServersStatesAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMcpServerUnit> GetServersAsync(int tenantId, int offset, int count)
     {
         return McpQueries.GetServersAsync(this, tenantId, offset, count);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> GetServersCountAsync(int tenantId)
     {
         return McpQueries.GetServersCountAsync(this, tenantId);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMcpServerUnit> GetActiveServersAsync(int tenantId, int offset, int count)
     {
         return McpQueries.GetActiveServersAsync(this, tenantId, offset, count);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> GetActiveServersTotalCountAsync(int tenantId)
     {
         return McpQueries.GetActiveServersTotalCountAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbMcpServerState?> GetServerStateAsync(int tenantId, Guid id)
     {
         return McpQueries.GetServerStateAsync(this, tenantId, id);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbMcpServerState> GetServersStatesAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return McpQueries.GetServersStatesAsync(this, tenantId, ids);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null])]
+    [PreCompileQuery]
     public Task<int> UpdateOauthCredentialsAsync(int tenantId, int roomId, Guid userId, Guid serverId, string token)
     {
         return McpQueries.UpdateOauthCredentials(this, tenantId, roomId, userId, serverId, token);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<McpServerShort?> GetServerByNameAsync(int tenantId, string name)
     {
         return McpQueries.GetServerByNameAsync(this, tenantId, name);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<McpIconState> GetIconStatesAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return McpQueries.GetIconStatesAsync(this, tenantId, ids);

@@ -38,6 +38,7 @@ extern alias ASCFilesService;
 global using System.Data.Common;
 global using System.Net;
 global using System.Net.Http.Headers;
+global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
 global using System.Web;
@@ -62,6 +63,7 @@ global using DocSpace.API.SDK.Model;
 global using FluentAssertions;
 
 global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
 
 global using MySql.Data.MySqlClient;
 
@@ -73,6 +75,7 @@ global using Respawn.Graph;
 global using Xunit;
 
 global using ASC.Core.Common.EF;
+global using ASC.Files.Core.Text;
 global using ASC.Files.Tests.ApiFactories;
 
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;

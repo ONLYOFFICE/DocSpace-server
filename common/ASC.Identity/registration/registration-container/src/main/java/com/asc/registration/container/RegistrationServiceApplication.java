@@ -42,11 +42,14 @@ import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import io.swagger.v3.oas.annotations.servers.Server;
+import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -58,16 +61,21 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @EnableCaching
 @EnableTransactionManagement
+@ImportRuntimeHints(RegistrationServiceRuntimeHints.class)
 @EntityScan(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
 @EnableJpaRepositories(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
 @SpringBootApplication(
     scanBasePackages = {"com.asc.registration", "com.asc.common"},
-    exclude = {GrpcServerSecurityAutoConfiguration.class})
+    exclude = {
+      GrpcServerSecurityAutoConfiguration.class,
+      GrpcServerMetricAutoConfiguration.class,
+      GrpcClientMetricAutoConfiguration.class
+    })
 @OpenAPIDefinition(
     info =
         @Info(
             title = "ASC.Identity.Registration",
-            version = "1.1.1",
+            version = "1.2.0",
             description = "API for managing oauth2 clients",
             termsOfService = "",
             contact =
@@ -100,6 +108,8 @@ public class RegistrationServiceApplication {
    * @param args command-line arguments passed to the application.
    */
   public static void main(String[] args) {
+    // TODO: Upgrade the dependency and remove the property
+    System.setProperty("io.grpc.netty.shaded.io.netty.noUnsafe", "true");
     SpringApplication.run(RegistrationServiceApplication.class, args);
   }
 }

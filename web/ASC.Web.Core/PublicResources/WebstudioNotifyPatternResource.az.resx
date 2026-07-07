@@ -1680,7 +1680,7 @@ $TrulyYours</value>
 
 DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" üçün planlaşdırılmış ehtiyat nüsxələmə prosesi uğursuz olub.
 
-Biz "Ehtiyat nüsxə":"${__VirtualRootPath}/portal-settings/backup/data-backup" və "Xidmətlər":"${__VirtualRootPath}/portal-settings/services" parametrlərini yoxlamağı tövsiyə edirik.
+Biz "Ehtiyat nüsxə":"${__VirtualRootPath}/portal-settings/backup/data-backup" və "Xidmətlər":"${__VirtualRootPath}/portal-settings/payments/services" parametrlərini yoxlamağı tövsiyə edirik.
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, lütfən, "${__SupportLink}":"${__SupportLink}" vasitəsilə bizimlə əlaqə saxlamaqdan çəkinməyin.
 
@@ -1691,7 +1691,7 @@ $TrulyYours</value>
 
 DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) üçün planlaşdırılmış ehtiyat nüsxələmə prosesi uğursuz olub.
 
-Biz [Ehtiyat nüsxə](${__VirtualRootPath}/portal-settings/backup/data-backup) və [Xidmətlər](${__VirtualRootPath}/portal-settings/services) parametrlərini yoxlamağı tövsiyə edirik.
+Biz [Ehtiyat nüsxə](${__VirtualRootPath}/portal-settings/backup/data-backup) və [Xidmətlər](${__VirtualRootPath}/portal-settings/payments/services) parametrlərini yoxlamağı tövsiyə edirik.
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, lütfən, [${__SupportLink}](${__SupportLink}) vasitəsilə bizimlə əlaqə saxlamaqdan çəkinməyin.
 

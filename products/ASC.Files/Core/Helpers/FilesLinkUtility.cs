@@ -47,6 +47,7 @@ public class FilesLinkUtility
     private readonly CoreSettings _coreSettings;
     private readonly IConfiguration _configuration;
     private readonly InstanceCrypto _instanceCrypto;
+    private readonly TenantManager _tenantManager;
 
     public FilesLinkUtility(
         CommonLinkUtility commonLinkUtility,
@@ -54,7 +55,8 @@ public class FilesLinkUtility
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,
         IConfiguration configuration,
-        InstanceCrypto instanceCrypto)
+        InstanceCrypto instanceCrypto,
+        TenantManager tenantManager)
     {
         _commonLinkUtility = commonLinkUtility;
         _baseCommonLinkUtility = baseCommonLinkUtility;
@@ -62,6 +64,7 @@ public class FilesLinkUtility
         _coreSettings = coreSettings;
         _configuration = configuration;
         _instanceCrypto = instanceCrypto;
+        _tenantManager = tenantManager;
         DefaultLinkLifeTime = !TimeSpan.TryParse(configuration["externalLink:defaultLifetime"], out var defaultLifetime) ? TimeSpan.FromDays(7) : defaultLifetime;
     }
 
@@ -469,14 +472,14 @@ public class FilesLinkUtility
     private string FileUploaderHandlerVirtualPath => "/ChunkedUploader.ashx";
 
 
+    private int GetCurrentTenantId()
+    {
+        return _coreBaseSettings.Standalone ? Tenant.DefaultTenant : _tenantManager.GetCurrentTenantId();
+    }
+
     private string GetUrlSetting(FilesUrlKeys key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = _coreSettings.GetSetting(GetSettingsKey(key.ToStringLowerFast()));
-        }
+        var value = _coreSettings.GetSetting(GetSettingsKey(key.ToStringLowerFast()), GetCurrentTenantId());
 
         if (string.IsNullOrEmpty(value))
         {
@@ -488,12 +491,7 @@ public class FilesLinkUtility
 
     private async Task<string> GetUrlSettingAsync(FilesUrlKeys key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key.ToStringLowerFast()));
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(key.ToStringLowerFast()), GetCurrentTenantId());
 
         if (string.IsNullOrEmpty(value))
         {
@@ -505,12 +503,7 @@ public class FilesLinkUtility
 
     private async Task<bool> IsDefaultUrlSettingAsync(string key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key));
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(key), GetCurrentTenantId());
 
         return string.IsNullOrEmpty(value);
     }
@@ -530,11 +523,6 @@ public class FilesLinkUtility
 
     private async Task SetUrlSettingAsync(FilesUrlKeys key, string value = null)
     {
-        if (!_coreBaseSettings.Standalone)
-        {
-            throw new NotSupportedException("Method for server edition only.");
-        }
-
         value = (value ?? "").Trim();
         if (string.IsNullOrEmpty(value))
         {
@@ -552,18 +540,13 @@ public class FilesLinkUtility
 
         if (await GetUrlSettingAsync(key) != value)
         {
-            await _coreSettings.SaveSettingAsync(GetSettingsKey(key.ToStringLowerFast()), value);
+            await _coreSettings.SaveSettingAsync(GetSettingsKey(key.ToStringLowerFast()), value, GetCurrentTenantId());
         }
     }
 
     private string GetSignatureSetting(string key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = _coreSettings.GetSetting(GetSettingsKey(key));
-        }
+        var value = _coreSettings.GetSetting(GetSettingsKey(key), GetCurrentTenantId());
 
         if (string.IsNullOrEmpty(value))
         {
@@ -575,12 +558,7 @@ public class FilesLinkUtility
 
     private async Task<string> GetSignatureSettingAsync(string key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key));
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(key), GetCurrentTenantId());
 
         if (string.IsNullOrEmpty(value))
         {
@@ -592,12 +570,7 @@ public class FilesLinkUtility
 
     private async Task<bool> IsDefaultSignatureSettingAsync(string key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key));
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(key), GetCurrentTenantId());
 
         return string.IsNullOrEmpty(value);
     }
@@ -609,10 +582,6 @@ public class FilesLinkUtility
 
     private async Task SetSignatureSettingAsync(string key, string value)
     {
-        if (!_coreBaseSettings.Standalone)
-        {
-            throw new NotSupportedException("Method for server edition only.");
-        }
         value = (value ?? "").Trim();
         if (string.IsNullOrEmpty(value))
         {
@@ -630,20 +599,17 @@ public class FilesLinkUtility
 
         if (await GetSignatureSettingAsync(key) != value)
         {
-            await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value);
+            await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value, GetCurrentTenantId());
         }
     }
 
     private async Task<bool> GetSslVerificationSettingAsync()
     {
-        if (_coreBaseSettings.Standalone)
-        {
-            var value = await _coreSettings.GetSettingAsync(GetSettingsKey(SslVerificationKey));
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(SslVerificationKey), GetCurrentTenantId());
 
-            if (bool.TryParse(value, out var result))
-            {
-                return result;
-            }
+        if (bool.TryParse(value, out var result))
+        {
+            return result;
         }
 
         return GetDefaultSslVerificationSetting();
@@ -651,16 +617,9 @@ public class FilesLinkUtility
 
     private async Task<bool> IsDefaultSslVerificationAsync()
     {
-        if (_coreBaseSettings.Standalone)
-        {
-            var value = await _coreSettings.GetSettingAsync(GetSettingsKey(SslVerificationKey));
-            if (bool.TryParse(value, out _))
-            {
-                return false;
-            }
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(SslVerificationKey), GetCurrentTenantId());
 
-        return true;
+        return !bool.TryParse(value, out _);
     }
 
     private bool GetDefaultSslVerificationSetting()
@@ -672,14 +631,9 @@ public class FilesLinkUtility
 
     private async Task SetSslVerificationSettingAsync(bool value)
     {
-        if (!_coreBaseSettings.Standalone)
-        {
-            throw new NotSupportedException("Method for server edition only.");
-        }
-
         var def = GetDefaultSslVerificationSetting();
 
-        await _coreSettings.SaveSettingAsync(GetSettingsKey(SslVerificationKey), def == value ? null : value.ToString());
+        await _coreSettings.SaveSettingAsync(GetSettingsKey(SslVerificationKey), def == value ? null : value.ToString(), GetCurrentTenantId());
     }
 
     private string GetSettingsKey(string key)

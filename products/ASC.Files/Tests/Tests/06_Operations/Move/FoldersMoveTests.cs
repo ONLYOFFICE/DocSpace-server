@@ -141,7 +141,7 @@ public class FoldersMoveTests(
         // Act
         var copyParams = new BatchRequestDto
         {
-            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolderId),
+            DestFolderId = new(targetFolderId),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
             FolderIds = [new(sourceFolder.Id)],
@@ -188,7 +188,7 @@ public class FoldersMoveTests(
         // Act
         var moveParams = new BatchRequestDto
         {
-            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
+            DestFolderId = new(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
             FolderIds = [new(sourceFolder.Id)],

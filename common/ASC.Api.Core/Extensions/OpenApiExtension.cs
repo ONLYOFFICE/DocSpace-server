@@ -436,7 +436,10 @@ public static class OpenApiExtension
                 return;
             }
 
-            var openApiSchema = schema as OpenApiSchema;
+            if (schema is not OpenApiSchema openApiSchema)
+            {
+                return;
+            }
 
             var baseTypeSchema = context.SchemaGenerator.GenerateSchema(baseType, context.SchemaRepository);
 
@@ -456,7 +459,7 @@ public static class OpenApiExtension
                 Required = new HashSet<string>()
             };
 
-            foreach (var prop in originalProperties)
+            foreach (var prop in originalProperties ?? Enumerable.Empty<KeyValuePair<string, IOpenApiSchema>>())
             {
                 if (!baseProperties.Contains(prop.Key.ToLowerInvariant()))
                 {

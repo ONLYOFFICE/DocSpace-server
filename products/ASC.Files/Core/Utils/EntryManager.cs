@@ -355,14 +355,16 @@ public class EntryManager(IDaoFactory daoFactory,
         IEnumerable<string> tagNames = null,
         bool excludeSubject = false,
         ProviderFilter provider = ProviderFilter.None,
-        SubjectFilter? subjectFilter = null,
         Guid subjectOwnerId = default,
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
         StorageFilter storageFilter = StorageFilter.None,
         FormsItemDto formsItemDto = null,
         Location? location = null,
-        int? groupId = null)
+        int? groupId = null,
+        T parentFolderId = default,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        List<FolderType> folderType = null)
     {
         int total;
         var withShared = true;
@@ -373,11 +375,6 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         if (parent.ProviderEntry && !await filesSettingsHelper.GetEnableThirdParty())
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
-        }
-
-        if (parent.RootFolderType == FolderType.Privacy && (!PrivacyRoomSettings.IsAvailable() || !await PrivacyRoomSettings.GetEnabledAsync(settingsManager)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
@@ -416,7 +413,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var userId = authContext.CurrentAccount.ID;
 
             total = 0;
-            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0, new OrderBy(SortedByType.LastOpened, false), from, count);
+            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0, parentFolderId, folderType, new OrderBy(SortedByType.LastOpened, false), from, count);
 
             await foreach (var e in fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => t.Item1))
             {
@@ -441,7 +438,7 @@ public class EntryManager(IDaoFactory daoFactory,
             total = 0;
 
             var allFoldersCountTask = 0;
-            var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, orderBy, from, count);
+            var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, parentFolderId, folderType, orderBy, from, count);
             List<Folder<T>> folders = [];
 
             await foreach (var e in fileSecurity.CanReadAsync(foldersFromDb).Where(r => r.Item2).Select(t => t.Item1))
@@ -459,7 +456,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - allFoldersCountTask, 0);
 
-            var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, orderBy, filesOffset, filesCount);
+            var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, parentFolderId, folderType, orderBy, filesOffset, filesCount);
             List<File<T>> files = [];
 
             await foreach (var e in fileSecurity.CanReadAsync(filesFromDb).Where(r => r.Item2).Select(t => t.Item1))
@@ -517,10 +514,10 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
-        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents && !parent.ProviderEntry)
+        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.Forms && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
-                provider, subjectFilter, subjectOwnerId, quotaFilter, storageFilter, groupId);
+                provider, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter);
 
             CalculateTotal();
         }
@@ -577,8 +574,12 @@ public class EntryManager(IDaoFactory daoFactory,
                     filesFilterType = FilterType.FoldersOnly;
                 }
 
+                // The folderType filter is resolved against Origin tags, which only exist on items moved to Trash.
+                // Applying it to any other parent would silently empty the results, so it is ignored outside Trash.
+                var trashFolderType = parent.FolderType == FolderType.TRASH ? folderType : null;
+
                 var foldersTask = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders,
-                    excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType);
+                    excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType, folderType: trashFolderType);
 
                 var folders = await foldersTask.ToListAsync();
 
@@ -602,18 +603,18 @@ public class EntryManager(IDaoFactory daoFactory,
                 allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto,
                     applyFfrStartedFormsFilter ? FolderType.DEFAULT : containingMyFiles && withSubfolders ? parent.FolderType : FolderType.DEFAULT,
                     filesAdditionalFilter,
-                    applyFormStepFilter: applyFormStepFilter);
+                    applyFormStepFilter: applyFormStepFilter, folderType: trashFolderType);
 
                 allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId,
                     containingMyFiles ? parent.FolderType : FolderType.DEFAULT,
-                    containingMyFiles ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All);
+                    containingMyFiles ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All, folderType: trashFolderType);
 
                 var filesCount = count - folders.Count;
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
                     excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto,
-                    applyFormStepFilter: applyFormStepFilter, applyFfrStartedFormsFilter: applyFfrStartedFormsFilter);
+                    applyFormStepFilter: applyFormStepFilter, applyFfrStartedFormsFilter: applyFfrStartedFormsFilter, folderType: trashFolderType);
 
                 var files = await filesTask.ToListAsync();
 
@@ -1954,7 +1955,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if (file.Encrypted)
         {
-            throw new NotSupportedException();
+            return;
         }
 
         linkId ??= await externalShare.GetLinkIdAsync();
@@ -2521,7 +2522,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
             fileEntry.OriginId = data.OriginFolder.Id;
-            fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.MyFiles : data.OriginFolder.Title;
+            fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.Files : data.OriginFolder.Title;
         }
     }
 }

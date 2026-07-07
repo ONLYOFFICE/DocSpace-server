@@ -56,6 +56,8 @@ public class DbQuota : BaseEntity
 
     public bool Visible { get; set; }
     public bool Wallet { get; set; }
+    public bool Additional { get; set; }
+
     public override object[] GetKeys()
     {
         return [TenantId];
@@ -113,7 +115,8 @@ public static class DbQuotaExtension
                     Features = "total_size:1073741824",
                     Price = 0,
                     ProductId = "1004",
-                    Visible = false
+                    Visible = false,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -123,7 +126,8 @@ public static class DbQuotaExtension
                     Features = "manager:1",
                     Price = 0,
                     ProductId = "1005",
-                    Visible = false
+                    Visible = false,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -185,7 +189,8 @@ public static class DbQuotaExtension
                     ProductId = "1011",
                     ServiceName = "disk-storage",
                     Visible = true,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -197,7 +202,8 @@ public static class DbQuotaExtension
                     ProductId = null,
                     ServiceName = "backup",
                     Visible = true,
-                    Wallet = true
+                    Wallet = true,
+                    Additional = true
                 },
                 new DbQuota
                 {
@@ -205,12 +211,41 @@ public static class DbQuotaExtension
                     Name = "aitools",
                     Description = null,
                     Features = "aitools",
-                    Price = 1,
+                    Price = 0,
                     ProductId = null,
                     ServiceName = "ai-tools",
                     ServiceGroup = null,
-                    Visible = false,
-                    Wallet = true
+                    Visible = true,
+                    Wallet = true,
+                    Additional = true
+                },
+                new DbQuota
+                {
+                    TenantId = -14,
+                    Name = "adminwallet",
+                    Description = null,
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
+                    Price = 20,
+                    ProductId = "1013",
+                    ServiceName = "admin",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = false // primary quota, not additive
+                },
+                new DbQuota
+                {
+                    TenantId = -18,
+                    Name = "aisearch",
+                    Description = null,
+                    Features = "aisearch",
+                    Price = 0,
+                    ProductId = null,
+                    ServiceName = "ai-search",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = true
                 }
                 );
         return modelBuilder;
@@ -280,6 +315,11 @@ public static class DbQuotaExtension
                     .HasColumnName("wallet")
                     .HasColumnType("tinyint(1)")
                     .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Additional)
+                    .HasColumnName("additional")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
             });
         }
 
@@ -331,6 +371,11 @@ public static class DbQuotaExtension
 
                 entity.Property(e => e.Wallet)
                     .HasColumnName("wallet")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.Additional)
+                    .HasColumnName("additional")
                     .HasColumnType("boolean")
                     .HasDefaultValue(false);
             });
