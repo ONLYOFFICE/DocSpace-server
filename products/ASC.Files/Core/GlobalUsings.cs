@@ -63,6 +63,7 @@ global using System.Xml;
 
 global using ASC.AI.Integration.Database;
 global using ASC.AI.Integration.Database.Models;
+global using ASC.AI.Integration.Profiles;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;

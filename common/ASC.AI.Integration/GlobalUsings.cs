@@ -51,3 +51,5 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.DependencyInjection;
 
 global using NetEscapades.EnumGenerators;
+
+global using ZiggyCreatures.Caching.Fusion;
