@@ -91,13 +91,13 @@ public class DocsCloudClient(
         return info;
     }
 
-    public async Task<DocsCloudConfigDto> GetTenantConfigAsync(string portalId, bool refresh = false)
+    public async Task<DocsCloudConfig> GetTenantConfigAsync(string portalId, bool refresh = false)
     {
         EnsureConfigured();
 
         var key = GetTenantConfigCacheKey(portalId);
 
-        var config = refresh ? null : await GetFromCache<DocsCloudConfigDto>(key);
+        var config = refresh ? null : await GetFromCache<DocsCloudConfig>(key);
         if (config != null)
         {
             return config;
@@ -109,7 +109,7 @@ public class DocsCloudClient(
         return config;
     }
 
-    public async Task<DocsCloudConfigDto> UpdateTenantConfigAsync(string portalId, DocsCloudConfigDto config)
+    public async Task<DocsCloudConfig> UpdateTenantConfigAsync(string portalId, DocsCloudConfig config)
     {
         EnsureConfigured();
 
@@ -329,7 +329,7 @@ public class DocsCloudPayment
 /// <summary>
 /// Represents the configuration of a DocsCloud tenant.
 /// </summary>
-public class DocsCloudConfigDto
+public class DocsCloudConfig
 {
     /// <summary>
     /// The tenant name.
@@ -340,7 +340,7 @@ public class DocsCloudConfigDto
     /// <summary>
     /// The security configuration.
     /// </summary>
-    public DocsCloudSecurity Security { get; init; }
+    public DocsCloudSecurityConfig Security { get; init; }
 
     /// <summary>
     /// The server configuration.
@@ -350,19 +350,18 @@ public class DocsCloudConfigDto
     /// <summary>
     /// The WOPI configuration.
     /// </summary>
-    public WopiConfig Wopi { get; set; }
+    public DocsCloudWopiConfig Wopi { get; set; }
 
     /// <summary>
     /// The IP filter configuration.
     /// </summary>
-    /// <example>[{"address": "127.0.0.1", "allowed": true}]</example>
-    public List<IpFilterConfig> IpFilter { get; set; }
+    public DocsCloudIpFilterConfig IpFilter { get; set; }
 }
 
 /// <summary>
 /// Represents the security configuration of a DocsCloud tenant.
 /// </summary>
-public class DocsCloudSecurity
+public class DocsCloudSecurityConfig
 {
     /// <summary>
     /// The security secret.
@@ -399,7 +398,7 @@ public class DocsCloudServerConfig
 /// <summary>
 /// Represents the WOPI configuration of a DocsCloud tenant.
 /// </summary>
-public class WopiConfig
+public class DocsCloudWopiConfig
 {
     /// <summary>
     /// Whether WOPI is enabled.
@@ -411,7 +410,19 @@ public class WopiConfig
 /// <summary>
 /// Represents the IP filter configuration of a DocsCloud tenant.
 /// </summary>
-public class IpFilterConfig
+public class DocsCloudIpFilterConfig
+{
+    /// <summary>
+    /// The IP filter rules.
+    /// </summary>
+    /// <example>[{"address": "127.0.0.1", "allowed": true}]</example>
+    public List<DocsCloudIpFilterRule> Rules { get; set; }
+}
+
+/// <summary>
+/// Represents the IP filter rule of a DocsCloud tenant.
+/// </summary>
+public class DocsCloudIpFilterRule
 {
     /// <summary>
     /// The IP address.
