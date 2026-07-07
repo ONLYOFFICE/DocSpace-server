@@ -49,6 +49,7 @@ public static class NotifyServiceExtensions
 
         services.AddBaseDbContextPool<NotifyDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddAiIntegrationServices();
         services.RegisterQuotaFeature();
 
         services.AddScoped(_ => UrlEncoder.Default);

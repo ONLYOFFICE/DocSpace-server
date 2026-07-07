@@ -315,6 +315,11 @@ public static class DbQuotaExtension
                     .HasColumnName("wallet")
                     .HasColumnType("tinyint(1)")
                     .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Additional)
+                    .HasColumnName("additional")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
             });
         }
 
@@ -366,6 +371,11 @@ public static class DbQuotaExtension
 
                 entity.Property(e => e.Wallet)
                     .HasColumnName("wallet")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.Additional)
+                    .HasColumnName("additional")
                     .HasColumnType("boolean")
                     .HasDefaultValue(false);
             });
