@@ -355,6 +355,7 @@ public class DocsCloudConfigDto
     /// <summary>
     /// The IP filter configuration.
     /// </summary>
+    /// <example>[{"address": "127.0.0.1", "allowed": true}]</example>
     public List<IpFilterConfig> IpFilter { get; set; }
 }
 
@@ -391,6 +392,7 @@ public class DocsCloudServerConfig
     /// The maximum file size in bytes.
     /// </summary>
     /// <example>104857600</example>
+    [Range(0, 209715200)]
     public long FileSizeLimit { get; init; }
 }
 
