@@ -856,7 +856,7 @@ public class PaymentController(
         if (customerInfo != null)
         {
             var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
-            if (!currentQuota.NonProfit || !string.IsNullOrEmpty(customerInfo.Email))
+            if (!currentQuota.NonProfit && !string.IsNullOrEmpty(customerInfo.Email))
             {
                 await DemandPayerAsync(customerInfo);
             }

@@ -181,9 +181,9 @@ public class DocsCloudController(
     /// <summary>Get the DocsCloud tenant configuration</summary>
     /// <path>api/2.0/settings/docscloud/tenant/config</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "DocsCloud tenant configuration", typeof(DocsCloudConfigDto))]
+    [SwaggerResponse(200, "DocsCloud tenant configuration", typeof(DocsCloudConfig))]
     [HttpGet("tenant/config")]
-    public async Task<DocsCloudConfigDto> GetTenantConfig(bool refresh = false)
+    public async Task<DocsCloudConfig> GetTenantConfig(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -196,9 +196,9 @@ public class DocsCloudController(
     /// <summary>Update the DocsCloud tenant configuration</summary>
     /// <path>api/2.0/settings/docscloud/tenant/config</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "Updated DocsCloud tenant configuration", typeof(DocsCloudConfigDto))]
+    [SwaggerResponse(200, "Updated DocsCloud tenant configuration", typeof(DocsCloudConfig))]
     [HttpPut("tenant/config")]
-    public async Task<DocsCloudConfigDto> UpdateTenantConfig(DocsCloudConfigDto inDto)
+    public async Task<DocsCloudConfig> UpdateTenantConfig(DocsCloudConfig inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

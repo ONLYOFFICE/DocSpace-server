@@ -123,6 +123,7 @@ public class Startup
 
         services.AddBillingHttpClient(_configuration);
         services.AddAccountingHttpClient(_configuration);
+        services.AddDocsCloudHttpClient(_configuration);
 
         services
             .AddAuthentication()

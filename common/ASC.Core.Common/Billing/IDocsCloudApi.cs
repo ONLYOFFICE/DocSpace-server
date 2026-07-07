@@ -50,10 +50,10 @@ public interface IDocsCloudApi
     Task<DocsCloudTenantInfo> GetTenantInfoAsync([Query] string portalId);
 
     [Get("/tenant/config")]
-    Task<DocsCloudConfigDto> GetTenantConfigAsync([Query] string portalId);
+    Task<DocsCloudConfig> GetTenantConfigAsync([Query] string portalId);
 
     [Put("/tenant/config")]
-    Task<DocsCloudConfigDto> UpdateTenantConfigAsync([Query] string portalId, [Body] DocsCloudConfigDto config);
+    Task<DocsCloudConfig> UpdateTenantConfigAsync([Query] string portalId, [Body] DocsCloudConfig config);
 
     [Get("/tenant/quota")]
     Task<DocsCloudQuota> GetTenantQuotaAsync([Query] string portalId);
