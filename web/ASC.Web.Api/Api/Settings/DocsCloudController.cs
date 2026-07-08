@@ -360,7 +360,6 @@ public class DocsCloudController(
         await DemandPayerAsync(customerInfo);
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
-
         if (tariff.State > TariffState.Paid)
         {
             throw new BillingException("Tariff is not paid");
@@ -370,6 +369,12 @@ public class DocsCloudController(
         if (currentQuota == null)
         {
             throw new ArgumentException("DocsCloud subscription is not active");
+        }
+
+        const int minValue = 10;
+        if (currentQuota.Quantity < minValue)
+        {
+            throw new ArgumentException($"You must have at least {minValue} users in your current DocsCloud subscription");
         }
 
         if (tariff.Quotas.Any(q => q.Id == (int)to))
