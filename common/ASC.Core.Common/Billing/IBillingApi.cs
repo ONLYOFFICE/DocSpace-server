@@ -68,6 +68,12 @@ public interface IBillingApi
     [Post("/ChangeSubscription")]
     Task<bool> ChangeSubscriptionAsync([Body] Dictionary<string, List<string>> data);
 
+    [Post("/SwitchSubscription")]
+    Task<bool> SwitchSubscriptionAsync([Body] Dictionary<string, List<string>> data);
+
+    [Post("/CalculateSwitchSubscription")]
+    Task<PaymentCalculation> CalculateSwitchSubscriptionAsync([Body] Dictionary<string, List<string>> data);
+
     [Post("/CalculateSubscription")]
     Task<PaymentCalculation> CalculateSubscriptionAsync([Body] Dictionary<string, List<string>> data);
 
