@@ -249,7 +249,7 @@ public class PortalRegistrationService(
 
         model.Email = model.Email.Trim().ToLowerInvariant();
 
-        var providerName = (model.Provider.Name ?? "").Trim().ToLowerInvariant();
+        var providerName = (model.ProvisionProvider.Name ?? "").Trim().ToLowerInvariant();
         var consumer = consumerFactory.GetByKey(providerName);
         if (consumer is not ILoginProvider)
         {
@@ -309,9 +309,9 @@ public class PortalRegistrationService(
             tz,
             lang);
 
-        var cspDomains = string.IsNullOrEmpty(model.Provider.CspDomain)
+        var cspDomains = string.IsNullOrEmpty(model.ProvisionProvider.CspDomain)
             ? (IEnumerable<string>)null
-            : [model.Provider.CspDomain];
+            : [model.ProvisionProvider.CspDomain];
 
         var (t, reference, _, regError) = await RegisterPortalFlowAsync(info, model, model.AWSRegion, cspDomains);
         if (regError != null)
@@ -319,7 +319,7 @@ public class PortalRegistrationService(
             return (null, regError, StatusCodes.Status500InternalServerError);
         }
 
-        var (providerConfigured, providerConfigurationError) = await ConfigureOAuthAsync(consumer, model.Provider, portalName);
+        var (providerConfigured, providerConfigurationError) = await ConfigureOAuthAsync(consumer, model.ProvisionProvider, portalName);
 
         return (new PortalRegistrationResponseDto
         {
