@@ -64,11 +64,18 @@ public class DocsCloudClient(
         var tenant = refresh ? null : await GetFromCache<DocsCloudTenant>(key);
         if (tenant != null)
         {
-            return tenant;
+            return tenant.IsDefault() ? null : tenant;
         }
 
-        tenant = await docsCloudApi.GetTenantAsync(portalId);
-        await hybridCache.SetAsync(key, tenant, _longCacheExpiration);
+        try
+        {
+            tenant = await docsCloudApi.GetTenantAsync(portalId);
+            await hybridCache.SetAsync(key, tenant, _longCacheExpiration);
+        }
+        catch (DocsCloudNotFoundException)
+        {
+            await hybridCache.SetAsync(key, new DocsCloudTenant(), _longCacheExpiration);
+        }
 
         return tenant;
     }
@@ -167,9 +174,13 @@ public class DocsCloudClient(
     /// Drops the cached tenant so the next read reflects a just-changed subscription (e.g. a started trial or a
     /// DocsCloud/DocsCloudDevPack purchase).
     /// </summary>
-    public async Task ResetTenantCacheAsync(string portalId)
+    public async Task ClearCacheAsync(string portalId)
     {
         await hybridCache.RemoveAsync(GetTenantCacheKey(portalId));
+        await hybridCache.RemoveAsync(GetTenantInfoCacheKey(portalId));
+        await hybridCache.RemoveAsync(GetTenantConfigCacheKey(portalId));
+        await hybridCache.RemoveAsync(GetTenantQuotaCacheKey(portalId));
+        await hybridCache.RemoveAsync(GetTenantUsageCacheKey(portalId));
     }
 
     private static string GetTenantCacheKey(string portalId) => $"docscloud:{portalId}:tenant";
@@ -270,6 +281,11 @@ public class DocsCloudTenant
     /// The tenant payment information.
     /// </summary>
     public DocsCloudPayment Payment { get; init; }
+
+    public bool IsDefault()
+    {
+        return Alias == null || Address == null;
+    }
 }
 
 /// <summary>

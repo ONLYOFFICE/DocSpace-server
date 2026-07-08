@@ -365,7 +365,7 @@ public class TariffService(
 
             await ClearCacheAsync(tenantId);
 
-            await docsCloudClient.ResetTenantCacheAsync(portalId);
+            await docsCloudClient.ClearCacheAsync(portalId);
         }
         catch (Exception error)
         {
@@ -425,6 +425,59 @@ public class TariffService(
         return result;
     }
 
+    public async Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    {
+        if (!billingClient.Configured)
+        {
+            return false;
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            var switched = await billingClient.SwitchSubscriptionAsync(portalId, fromProductId, toProductId, quantity, customerParticipantName, metadata);
+
+            if (!switched)
+            {
+                return false;
+            }
+
+            await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity)
+    {
+        if (!billingClient.Configured)
+        {
+            return null;
+        }
+
+        try
+        {
+            var response = await billingClient.CalculateSwitchSubscriptionAsync(await coreSettings.GetKeyAsync(tenantId), fromProductId, toProductId, quantity);
+
+            return response;
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+
+            return null;
+        }
+    }
+
     public async Task<bool> GetDocsCloudTrialAsync(int tenantId)
     {
         if (!billingClient.Configured)
@@ -440,7 +493,7 @@ public class TariffService(
 
             await ClearCacheAsync(tenantId);
 
-            await docsCloudClient.ResetTenantCacheAsync(portalId);
+            await docsCloudClient.ClearCacheAsync(portalId);
 
             return result;
         }

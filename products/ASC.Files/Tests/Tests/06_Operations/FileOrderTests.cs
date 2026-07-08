@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._06_Operations;
 
-[Collection("Test Collection")]
 [Trait("Category", "Operations")]
 public class FileOrderTests(
     AspireAppFixture fixture)
@@ -43,7 +42,7 @@ public class FileOrderTests(
     public async Task SetFilesOrder_MultipleFiles_ReturnsOrderedFiles()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a test room and multiple files
         var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
@@ -83,7 +82,7 @@ public class FileOrderTests(
     public async Task SetOrderFile_SingleFile_ReturnsUpdatedFileOrder()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
         var file = await CreateFile("file_to_order.docx", virtualRoom.Id);
         var newOrder = 10; // Arbitrary order number
@@ -111,7 +110,7 @@ public class FileOrderTests(
     public async Task SetOrderFile_FolderWithMixedEntries_MaintainsCorrectOrder()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a test folder with mixed content (files and subfolders)
         var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
@@ -156,7 +155,7 @@ public class FileOrderTests(
     public async Task SetFilesOrder_InvalidEntryIds_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
         

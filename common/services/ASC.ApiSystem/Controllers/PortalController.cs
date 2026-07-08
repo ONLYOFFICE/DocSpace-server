@@ -214,6 +214,7 @@ public class PortalController(
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("provision")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
+    [Obsolete("Candidate for deletion. Used in integrations.")]
     public async ValueTask<IActionResult> ProvisionAsync(ProvisionPortalRequestDto model)
     {
         if (model == null)

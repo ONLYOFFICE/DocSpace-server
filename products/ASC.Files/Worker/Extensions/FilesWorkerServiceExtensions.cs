@@ -102,6 +102,7 @@ public static class FilesWorkerServiceExtensions
 
         services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddAiIntegrationServices();
         services.AddScoped<IWebItem, ProductEntryPoint>();
 
         services.AddSingleton(Channel.CreateBounded<FileData<int>>(new BoundedChannelOptions(500)

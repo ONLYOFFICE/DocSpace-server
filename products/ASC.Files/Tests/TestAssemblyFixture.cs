@@ -31,8 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Tests;
-
-[CollectionDefinition("Test Collection")]
-public class SharedTestCollection :
-    ICollectionFixture<AspireAppFixture>;
+// The single Aspire application is shared across the whole assembly via an assembly fixture
+// (instead of a collection fixture). This lets test classes run in parallel — each test still
+// registers and runs inside its own portal — while the expensive Aspire host starts only once.
+[assembly: AssemblyFixture(typeof(AspireAppFixture))]

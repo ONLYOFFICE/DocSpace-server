@@ -1,53 +1,52 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-//
+// 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-//
+// 
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-//
+// 
 // No trademark rights are granted under this License.
-//
+// 
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-//
+// 
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-//
+// 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-extern alias ASCWebApi;
 extern alias ASCPeople;
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
-using WizardRequestsDto = DocSpace.API.SDK.Model.WizardRequestsDto;
 
 namespace ASC.Files.Tests.Data;
 
 public static class Initializer
 {
-    public static readonly User Owner = new("test@example.com", "11111111")
-    {
-        Id = Guid.Parse("66faa6e4-f133-11ea-b126-00ffeec8b4ef")
-    };
+    public const string OwnerEmail = "test@example.com";
+    public const string OwnerPassword = "11111111";
 
-    private static bool _initialized;
     private static PasswordHasher _passwordHasherSettings = null!;
-    private static AspireAppFixture _fixture = null!;
+
+    // Maps each per-test HttpClient to the AuthenticationApi of the portal it belongs to, so the
+    // HttpClient.Authenticate(user) extension can sign in without any shared/ambient state. Entries
+    // are weakly held and removed when a test disposes its PortalClients.
+    private static readonly ConditionalWeakTable<HttpClient, AuthenticationApi> _authApis = new();
 
     public static readonly Faker<MemberRequestDto> FakerMember = new Faker<MemberRequestDto>()
         .RuleFor(x => x.FirstName, f => f.Person.FirstName)
@@ -55,113 +54,23 @@ public static class Initializer
         .RuleFor(x => x.Email, f => f.Person.Email)
         .RuleFor(x => x.Password, f => f.Internet.Password(8, 10));
 
-    private static readonly SemaphoreSlim _initLock = new(1, 1);
-
-    public static async Task InitializeAsync(AspireAppFixture fixture)
+    /// <summary>
+    /// Stores the (machine-key-derived, portal-independent) password-hash settings used to compute
+    /// client-side password hashes. Called once by the fixture before any test runs.
+    /// </summary>
+    internal static void InitializePasswordHasher(PasswordHasher settings)
     {
-        _fixture = fixture;
-
-        await _initLock.WaitAsync();
-        try
-        {
-            if (_initialized)
-            {
-                return;
-            }
-
-            var settings = (await fixture.CommonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-            if (!string.IsNullOrEmpty(settings.WizardToken))
-            {
-                fixture.WebApiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", settings.WizardToken);
-
-                _passwordHasherSettings = settings.PasswordHash;
-
-                await fixture.CommonSettingsApi.CompleteWizardAsync(new WizardRequestsDto(Owner.Email, GetClientPassword(Owner.Password)), TestContext.Current.CancellationToken);
-
-                fixture.WebApiHttpClient.DefaultRequestHeaders.Remove("confirm");
-            }
-        }
-        finally
-        {
-            _initLock.Release();
-        }
-
-        await fixture.FilesHttpClient.Authenticate(Owner);
-        var t1 = fixture.FoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
-        var t2 = fixture.RoomsApi.GetRoomsFolderAsync(searchArea: SearchArea.Templates, cancellationToken: TestContext.Current.CancellationToken);
-        var t3 = fixture.RoomsApi.GetRoomsFolderAsync(searchArea: SearchArea.FormTemplates, cancellationToken: TestContext.Current.CancellationToken);
-
-        await Task.WhenAll(t1, t2, t3);
-
-        await _initLock.WaitAsync();
-
-        try
-        {
-            if (_initialized)
-            {
-                return;
-            }
-
-            await fixture.BackupTables();
-            _initialized = true;
-        }
-        finally
-        {
-            _initLock.Release();
-        }
+        _passwordHasherSettings = settings;
     }
 
-    internal static async Task<User> InviteContact(EmployeeType employeeType, User? user = null)
+    internal static void RegisterAuthApi(HttpClient client, AuthenticationApi authApi)
     {
-        user ??= Owner;
-        await _fixture.WebApiHttpClient.Authenticate(user);
+        _authApis.AddOrUpdate(client, authApi);
+    }
 
-        var shortLink = (await _fixture.PortalUsersApi.GetInvitationLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
-        var fullLink = await _fixture.WebApiHttpClient.GetAsync(shortLink);
-        var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
-        if (confirmHeader == null)
-        {
-            throw new HttpRequestException($"Unable to get confirmation link for {employeeType}");
-        }
-
-        await _fixture.PeopleHttpClient.Authenticate(user);
-        _fixture.PeopleHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
-
-        var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
-        if (!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
-        {
-            parsedEmployeeType = EmployeeType.Guest;
-        }
-
-        var fakeMember = FakerMember.Generate();
-
-        var createMemberResponse = await _fixture.ProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
-        {
-            FromInviteLink = true,
-            CultureName = "en-US",
-            Spam = false,
-
-            Email = fakeMember.Email,
-            Password = fakeMember.Password,
-            FirstName = fakeMember.FirstName,
-            LastName = fakeMember.LastName,
-
-            Type = parsedEmployeeType,
-            Key = parsedQuery["key"] ?? "",
-        }, TestContext.Current.CancellationToken);
-
-        _fixture.PeopleHttpClient.DefaultRequestHeaders.Remove("confirm");
-
-        if (createMemberResponse.StatusCode != HttpStatusCode.OK)
-        {
-            throw new HttpRequestException($"Unable to invite user {employeeType}");
-        }
-
-        return new User(fakeMember.Email, fakeMember.Password)
-        {
-            Id = createMemberResponse.Data.Response.Id
-        };
+    internal static void UnregisterAuthApi(HttpClient client)
+    {
+        _authApis.Remove(client);
     }
 
     public static async ValueTask Authenticate(this HttpClient client, User? user)
@@ -172,18 +81,31 @@ public static class Initializer
             return;
         }
 
-        user.PasswordHash ??= GetClientPassword(user.Password);
+        if (!_authApis.TryGetValue(client, out var authApi))
+        {
+            throw new InvalidOperationException(
+                "The HttpClient is not associated with a portal. Create clients via AspireAppFixture.CreatePortalClients.");
+        }
 
-        var authMe = await _fixture.AuthenticationApi.AuthenticateMeAsync(new AuthRequestsDto
+        if (user.PasswordHash == null)
+        {
+            var hashSw = Stopwatch.StartNew();
+            user.PasswordHash = GetClientPassword(user.Password);
+            Timing.Write($"hash({user.Email})", hashSw.ElapsedMilliseconds);
+        }
+
+        var authSw = Stopwatch.StartNew();
+        var authMe = await authApi.AuthenticateMeAsync(new AuthRequestsDto
         {
             UserName = user.Email,
             PasswordHash = user.PasswordHash
         }, TestContext.Current.CancellationToken);
+        Timing.Write($"auth({user.Email})", authSw.ElapsedMilliseconds);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
     }
 
-    private static string GetClientPassword(string password)
+    public static string GetClientPassword(string password)
     {
         if (string.IsNullOrWhiteSpace(password))
         {
