@@ -261,7 +261,6 @@ public class FileStorageService //: IFileStorageService
         FormsItemDto formsItemDto = null,
         Location? location = null,
         int? groupId = null,
-        T parentFolderId = default,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
         List<FolderType> folderType = null)
     {
@@ -428,7 +427,6 @@ public class FileStorageService //: IFileStorageService
                 formsItemDto,
                 location,
                 groupId,
-                parentFolderId,
                 privacyFilter,
                 folderType);
         }
