@@ -46,7 +46,8 @@ public class DocsCloudController(
     MessageService messageService,
     CspSettingsHelper cspSettingsHelper,
     WebItemManager webItemManager,
-    IFusionCache fusionCache)
+    IFusionCache fusionCache,
+    IConfiguration configuration)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -371,7 +372,7 @@ public class DocsCloudController(
             throw new ArgumentException("DocsCloud subscription is not active");
         }
 
-        var minValue = Math.Max(currentQuota.Quantity, 10);
+        var minValue = Math.Max(currentQuota.Quantity, configuration.GetValue<int?>("core:docscloud:minDevPackQuantity") ?? 10);
         if (quantity < minValue)
         {
             throw new ArgumentException($"Invalid quantity: must be greater than or equal to {minValue}");

@@ -60,6 +60,7 @@ public class PaymentController(
     RegionHelper regionHelper,
     QuotaHelper tariffHelper,
     IFusionCache fusionCache,
+    IConfiguration configuration,
     MessageService messageService,
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext,
@@ -298,8 +299,8 @@ public class PaymentController(
 
         var minValue = quota.TenantId switch
         {
-            (int)TenantWalletService.Storage => 100,
-            (int)TenantWalletService.DocsCloudDevPack => 10,
+            (int)TenantWalletService.Storage => configuration.GetValue<int?>("core:accounting:minStorageQuantity") ?? 100,
+            (int)TenantWalletService.DocsCloudDevPack => configuration.GetValue<int?>("core:docscloud:minDevPackQuantity") ?? 10,
             _ => 1
         };
 
