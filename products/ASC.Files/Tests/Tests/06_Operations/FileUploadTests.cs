@@ -35,7 +35,6 @@ using System.Reflection;
 
 namespace ASC.Files.Tests.Tests._06_Operations;
 
-[Collection("Test Collection")]
 [Trait("Category", "Operations")]
 [Trait("Feature", "Files")]
 public class FileUploadTests(
@@ -45,10 +44,10 @@ public class FileUploadTests(
     [Fact]
     public async Task UploadFile_ReturnsValidFile()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
-        var myFolder = await GetUserFolderIdAsync(Initializer.Owner);
+        var myFolder = await GetUserFolderIdAsync(Owner);
         var fileName = "new.docx";
         
         var assembly = Assembly.GetExecutingAssembly();

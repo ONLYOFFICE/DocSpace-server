@@ -52,6 +52,7 @@ public static class BackupServiceExtensions
 
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddAiIntegrationServices();
         services.RegisterQuotaFeature();
         services.RegisterFreeBackupQuotaFeature();
 

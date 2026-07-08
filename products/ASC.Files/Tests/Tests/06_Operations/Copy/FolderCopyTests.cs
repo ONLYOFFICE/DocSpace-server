@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._06_Operations.Copy;
 
-[Collection("Test Collection")]
 [Trait("Category", "Operations")]
 [Trait("Feature", "Folders")]
 public class FolderCopyTests(
@@ -44,8 +43,8 @@ public class FolderCopyTests(
     public async Task CopyFolder_ToItsSubfolder_ReturnError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var sourceFolder = await CreateFolder("source_folder", FolderType.USER, Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var sourceFolder = await CreateFolder("source_folder", FolderType.USER, Owner);
         var subFolder = await CreateFolder("subfolder", sourceFolder.Id);
 
         // Act
@@ -71,11 +70,11 @@ public class FolderCopyTests(
     public async Task CopyFolder_NoCopyPermissions_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var targetFolder = await CreateFolderInMy("target_folder", Initializer.Owner);
-        var sourceFolder = await CreateFolderInMy("source_folder", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var targetFolder = await CreateFolderInMy("target_folder", Owner);
+        var sourceFolder = await CreateFolderInMy("source_folder", Owner);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
 
         // Act
@@ -102,7 +101,7 @@ public class FolderCopyTests(
     public async Task CopyFolder_ToFormFillingRoom_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var sourceRoom = await CreateFillingFormsRoom("source_room");
         var targertRoom = await CreateFillingFormsRoom("target_room");
 
@@ -129,8 +128,8 @@ public class FolderCopyTests(
     public async Task CopyFolder_FolderNotFound_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var targetFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var targetFolderId = await GetUserFolderIdAsync(Owner);
         var sourceFolderId = 999999999;
 
         // Act

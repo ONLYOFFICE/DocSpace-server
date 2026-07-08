@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._06_Operations;
 
-[Collection("Test Collection")]
 [Trait("Category", "Operations")]
 public class FileOperationsTests(
     AspireAppFixture fixture)
@@ -47,9 +46,9 @@ public class FileOperationsTests(
     public async Task GetPresignedUri_ValidFile_ReturnsDownloadUrl()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
-        var file = await CreateFileInMy("file_for_download.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_for_download.docx", Owner);
         
         // Act
         var downloadUrl = (await _filesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;

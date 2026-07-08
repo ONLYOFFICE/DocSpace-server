@@ -91,7 +91,7 @@ public class Login(
             var uriBuilder = new UriBuilder(context.Request.Url());
             var token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(_params)));
             uriBuilder.Query = "p=" + token;
-            context.Response.Redirect(uriBuilder.Uri.ToString(), true);
+            context.Response.Redirect(uriBuilder.Uri.ToString());
             await context.Response.CompleteAsync();
 
             return;

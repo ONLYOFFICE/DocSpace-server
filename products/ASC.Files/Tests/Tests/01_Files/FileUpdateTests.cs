@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._01_Files;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]
 public class FileUpdateTests(
@@ -56,9 +55,9 @@ public class FileUpdateTests(
     public async Task RenameFile_ValidTitle_ReturnsUpdatedFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
-        var createdFile = await CreateFileInMy("file_to_rename.docx", Initializer.Owner);
+        var createdFile = await CreateFileInMy("file_to_rename.docx", Owner);
         var newTitle = "renamed_file.docx";
         
         // Act
@@ -76,9 +75,9 @@ public class FileUpdateTests(
     public async Task RenameFile_NameLongerThan165Chars_Returns400()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
-        var createdFile = await CreateFileInMy("file_to_rename.docx", Initializer.Owner);
+        var createdFile = await CreateFileInMy("file_to_rename.docx", Owner);
         var longFileName = new string('a', 166) + ".docx"; // 166 characters + 5 for extension = 171 characters
         var updateParams = new UpdateFile { Title = longFileName };
         
@@ -96,9 +95,9 @@ public class FileUpdateTests(
     public async Task LockFile_InMy_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
-        var createdFile = await CreateFileInMy("file_to_lock.docx", Initializer.Owner);
+        var createdFile = await CreateFileInMy("file_to_lock.docx", Owner);
         
         // Act & Assert
         var result =  (await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
@@ -110,7 +109,7 @@ public class FileUpdateTests(
     public async Task LockFile_AsOwner_ReturnsSuccess()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var createdRoom = await CreateVirtualRoom("room_to_lock");
         var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
@@ -143,10 +142,10 @@ public class FileUpdateTests(
     public async Task LockFile_ReturnsSuccess(FileShare fileShare)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var createdRoom = await CreateVirtualRoom("room_to_lock");
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
         
         await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
         {
@@ -187,10 +186,10 @@ public class FileUpdateTests(
     public async Task LockFile_Returns403(FileShare fileShare)
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var createdRoom = await CreateVirtualRoom("room_to_lock");
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
         
         await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
         {
@@ -212,11 +211,11 @@ public class FileUpdateTests(
     [Fact]
     public async Task LockFileContentCreator_DifferentOwner_Returns403()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var createdRoom = await CreateVirtualRoom("room_to_lock");
-        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
-        var roomAdmin2 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin1 = await InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin2 = await InviteContact(EmployeeType.RoomAdmin);
         
         await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
         {
@@ -245,11 +244,11 @@ public class FileUpdateTests(
     public async Task LockFileRoomManager_DifferentOwner_ReturnsSuccess()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var createdRoom = await CreateVirtualRoom("room_to_lock");
-        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
-        var roomAdmin2 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin1 = await InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin2 = await InviteContact(EmployeeType.RoomAdmin);
         
         await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
         {
@@ -284,9 +283,9 @@ public class FileUpdateTests(
     public async Task UpdateComment_ValidComment_ReturnsUpdatedComment()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
-        var file = await CreateFileInMy("file_with_comment.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_with_comment.docx", Owner);
         var newComment = "This is a test comment";
         
         // Act
