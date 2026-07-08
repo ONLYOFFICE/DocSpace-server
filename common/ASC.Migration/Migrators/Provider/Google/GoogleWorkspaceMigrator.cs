@@ -122,18 +122,19 @@ public class GoogleWorkspaceMigrator : Migrator
                 {
                     foreach (var entry in archive.Entries)
                     {
+                        var destPath = GetSafeExtractPath(tmpFolder, entry.FullName);
                         if (string.IsNullOrEmpty(entry.Name))
                         {
-                            Directory.CreateDirectory(Path.Combine(tmpFolder, entry.FullName));
+                            Directory.CreateDirectory(destPath);
                         }
                         else
                         {
-                            var dir = Path.GetDirectoryName(Path.Combine(tmpFolder, entry.FullName));
+                            var dir = Path.GetDirectoryName(destPath);
                             if (!Directory.Exists(dir))
                             {
                                 Directory.CreateDirectory(dir);
                             }
-                            await entry.ExtractToFileAsync(Path.Combine(tmpFolder, entry.FullName), _cancellationToken);
+                            await entry.ExtractToFileAsync(destPath, _cancellationToken);
                         }
                         if (_cancellationToken.IsCancellationRequested && reportProgress)
                         {
