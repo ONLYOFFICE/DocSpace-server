@@ -58,6 +58,12 @@ public partial class AiIntegrationContext
     {
         return ProfileQueriesContainer.DeleteProfileAsync(this, tenantId, id);
     }
+
+    [PreCompileQuery]
+    public Task<bool> AnyProfileAsync(int tenantId)
+    {
+        return ProfileQueriesContainer.AnyProfileAsync(this, tenantId);
+    }
 }
 
 static file class ProfileQueriesContainer
@@ -88,4 +94,9 @@ static file class ProfileQueriesContainer
                 ctx.Profiles
                     .Where(x => x.TenantId == tenantId && x.Id == id)
                     .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, int, Task<bool>> AnyProfileAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId) =>
+                ctx.Profiles.Any(x => x.TenantId == tenantId));
 }

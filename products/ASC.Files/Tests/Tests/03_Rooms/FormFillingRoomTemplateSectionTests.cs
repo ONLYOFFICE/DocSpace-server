@@ -44,7 +44,6 @@ namespace ASC.Files.Tests.Tests._03_Rooms;
 /// stored folder type, it applies equally to templates created before the split was introduced
 /// and to newly created ones.
 /// </summary>
-[Collection("Test Collection")]
 [Trait("Category", "Rooms")]
 public class FormFillingRoomTemplateSectionTests(
     AspireAppFixture fixture)
@@ -54,7 +53,7 @@ public class FormFillingRoomTemplateSectionTests(
     public async Task FormRoomTemplate_AppearsInFormTemplatesSection()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
         var templateTitle = "Form Template " + Guid.NewGuid().ToString()[..8];
 
@@ -74,7 +73,7 @@ public class FormFillingRoomTemplateSectionTests(
     public async Task FormRoomTemplate_DoesNotAppearInRoomTemplatesSection()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
         var templateTitle = "Form Template " + Guid.NewGuid().ToString()[..8];
 
@@ -94,7 +93,7 @@ public class FormFillingRoomTemplateSectionTests(
     public async Task RegularRoomTemplate_AppearsInTemplatesSection_ButNotInFormTemplates()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
         var templateTitle = "Custom Template " + Guid.NewGuid().ToString()[..8];
 
@@ -119,7 +118,7 @@ public class FormFillingRoomTemplateSectionTests(
     public async Task FormAndRegularRoomTemplates_AreSplitBetweenSections()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
         var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
@@ -151,7 +150,7 @@ public class FormFillingRoomTemplateSectionTests(
     public async Task BrowseRoomTemplatesRootFolder_ById_ExcludesFormRoomTemplates()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
         var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
@@ -183,7 +182,7 @@ public class FormFillingRoomTemplateSectionTests(
     public async Task RoomCreatedFromFormRoomTemplate_AppearsInFormsSection()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
         var templateTitle = "Form Template " + Guid.NewGuid().ToString()[..8];

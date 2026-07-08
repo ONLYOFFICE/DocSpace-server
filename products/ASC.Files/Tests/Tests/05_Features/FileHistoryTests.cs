@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._05_Features;
 
-[Collection("Test Collection")]
 [Trait("Category", "Features")]
 public class FileHistoryTests(
     AspireAppFixture fixture)
@@ -43,10 +42,10 @@ public class FileHistoryTests(
     public async Task GetFileVersionInfo_ReturnsVersionHistory()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a file
-        var file = await CreateFileInMy("file_with_versions.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_with_versions.docx", Owner);
         
         // Add multiple versions by updating the file content
         await UpdateFileContent(file.Id, "Updated content 1");
@@ -73,10 +72,10 @@ public class FileHistoryTests(
     public async Task ChangeHistory_UpdatesVersionGroup_ReturnsSuccess()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a file with multiple versions
-        var file = await CreateFileInMy("version_history.docx",  Initializer.Owner);
+        var file = await CreateFileInMy("version_history.docx",  Owner);
         await UpdateFileContent(file.Id, "Updated content 1");
         await UpdateFileContent(file.Id, "Updated content 2");
         
@@ -103,10 +102,10 @@ public class FileHistoryTests(
     public async Task GetFileInfo_WithVersion_ReturnsSpecificVersion()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a file with multiple versions
-        var file = await CreateFileInMy("file_versions.docx",Initializer.Owner);
+        var file = await CreateFileInMy("file_versions.docx",Owner);
         await UpdateFileContent(file.Id, "Updated content 1");
         
         // Get the versions to identify the first version number
