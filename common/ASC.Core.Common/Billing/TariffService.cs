@@ -71,6 +71,7 @@ public class TariffService(
     private TimeSpan _cacheExpiration = _defaultCacheExpiration;
 
     private const int DefaultTrialPeriod = 30;
+    private const int MaxTopUpAttempts = 5;
 
     //private readonly int _activeUsersMin;
     //private readonly int _activeUsersMax;
@@ -1298,6 +1299,45 @@ public class TariffService(
         }
 
         return result;
+    }
+
+    public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null)
+    {
+        // The balance may be consumed concurrently, so the top-up is retried several times.
+        var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+
+        for (var attempt = 0; attempt < MaxTopUpAttempts && balanceAmount < requiredAmount; attempt++)
+        {
+            var topUpAmount = Math.Ceiling((requiredAmount - balanceAmount) * 100) / 100;
+
+            var toppedUp = await TopUpDepositAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
+            if (toppedUp)
+            {
+                var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+                await quotaSocketManager.TopUpWallet(auto);
+            }
+
+            balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+        }
+
+        return balanceAmount >= requiredAmount;
+    }
+
+    private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)
+    {
+        var balance = await GetCustomerBalanceAsync(tenantId, true);
+        if (balance == null)
+        {
+            throw new ItemNotFoundException("Balance could not be found");
+        }
+
+        var subAccount = balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency);
+        if (subAccount == null)
+        {
+            throw new ItemNotFoundException("Subaccount could not be found");
+        }
+
+        return subAccount.Amount;
     }
 
     #region Accounting

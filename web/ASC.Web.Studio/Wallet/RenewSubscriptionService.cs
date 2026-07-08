@@ -212,6 +212,21 @@ public class RenewSubscriptionService(
 
             var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoRenewal } };
 
+            if (!walletQuota.Additional)
+            {
+                // The user subscription is paid from the wallet, so make sure the wallet balance
+                // covers the renewal cost, topping it up for the missing amount if necessary.
+                var requiredAmount = walletQuota.Price * nextQuantity;
+
+                var coreSettings = scope.ServiceProvider.GetRequiredService<CoreSettings>();
+                var siteName = tenant.GetTenantDomain(coreSettings);
+
+                if (!await tariffService.EnsureWalletBalanceAsync(data.TenantId, requiredAmount, defaultCurrency, null, siteName, true, metadata))
+                {
+                    throw new BillingException("Insufficient balance");
+                }
+            }
+
             var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false, null, metadata);
 
             if (result)
