@@ -81,8 +81,7 @@ public class CustomerOperationsReportIntegrationEventHandler(
                     @event.Status,
                     @event.Metadata,
                     @event.OrderBy,
-                    @event.OrderType,
-                    @event.ServiceNameList);
+                    @event.OrderType);
 
                 var taskId = DocumentBuilderTaskManager.GetTaskId(@event.TenantId, @event.CreateBy, (int)@event.ReportType);
 

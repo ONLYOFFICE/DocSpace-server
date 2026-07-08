@@ -1074,22 +1074,15 @@ public class PaymentController(
             return null;
         }
 
-        if (!string.IsNullOrEmpty(inDto.ServiceName))
-        {
-            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
-            inDto.ServiceName = correctServiceName;
-        }
-
-        if (inDto.ServiceNameList is { Count: > 0 })
+        if (inDto.ServiceName is { Count: > 0 })
         {
             var correctedList = new List<string>();
-            foreach (var serviceName in inDto.ServiceNameList)
+            foreach (var serviceName in inDto.ServiceName)
             {
                 var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
                 correctedList.Add(correctServiceName);
             }
-
-            inDto.ServiceNameList = correctedList;
+            inDto.ServiceName = correctedList;
         }
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
@@ -1098,7 +1091,6 @@ public class PaymentController(
         var filter = new OperationFilter
         {
             ServiceName = inDto.ServiceName,
-            ServiceNameList = inDto.ServiceNameList,
             UtcStartDate = utcStartDate,
             UtcEndDate = utcEndDate,
             ParticipantName = inDto.ParticipantName,
@@ -1120,7 +1112,7 @@ public class PaymentController(
 
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, true);
 
-        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName);
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName?.FirstOrDefault());
     }
 
     /// <remarks>
@@ -1192,10 +1184,15 @@ public class PaymentController(
             return null;
         }
 
-        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        if (inDto.ServiceName is { Count: > 0 })
         {
-            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
-            inDto.ServiceName = correctServiceName;
+            var correctedList = new List<string>();
+            foreach (var serviceName in inDto.ServiceName)
+            {
+                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
+                correctedList.Add(correctServiceName);
+            }
+            inDto.ServiceName = correctedList;
         }
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
@@ -1250,22 +1247,15 @@ public class PaymentController(
 
         inDto ??= new CustomerOperationsReportRequestDto();
 
-        if (!string.IsNullOrEmpty(inDto.ServiceName))
-        {
-            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
-            inDto.ServiceName = correctServiceName;
-        }
-
-        if (inDto.ServiceNameList is { Count: > 0 })
+        if (inDto.ServiceName is { Count: > 0 })
         {
             var correctedList = new List<string>();
-            foreach (var serviceName in inDto.ServiceNameList)
+            foreach (var serviceName in inDto.ServiceName)
             {
                 var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
                 correctedList.Add(correctServiceName);
             }
-
-            inDto.ServiceNameList = correctedList;
+            inDto.ServiceName = correctedList;
         }
 
         var userId = securityContext.CurrentAccount.ID;
@@ -1296,8 +1286,7 @@ public class PaymentController(
             inDto.Status,
             orderBy: inDto.OrderBy,
             orderType: inDto.OrderType,
-            headers: headers,
-            serviceNameList: inDto.ServiceNameList);
+            headers: headers);
 
         await eventBus.PublishAsync(evt);
 
@@ -1360,10 +1349,15 @@ public class PaymentController(
 
         inDto ??= new CustomerServiceUsageReportRequestDto();
 
-        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        if (inDto.ServiceName is { Count: > 0 })
         {
-            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
-            inDto.ServiceName = correctServiceName;
+            var correctedList = new List<string>();
+            foreach (var serviceName in inDto.ServiceName)
+            {
+                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
+                correctedList.Add(correctServiceName);
+            }
+            inDto.ServiceName = correctedList;
         }
 
         var userId = securityContext.CurrentAccount.ID;

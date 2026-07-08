@@ -45,7 +45,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         int tenantId,
         string baseUri,
         ReportType reportType,
-        string serviceName = null,
+        List<string> serviceName = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
         string participantName = null,
@@ -57,14 +57,12 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         string orderBy = null,
         OperationOrderType? orderType = null,
         IDictionary<string, string> headers = null,
-        List<string> serviceNameList = null,
         bool terminate = false)
     : base(createBy, tenantId)
     {
         BaseUri = baseUri;
         ReportType = reportType;
         ServiceName = serviceName;
-        ServiceNameList = serviceNameList;
         StartDate = startDate;
         EndDate = endDate;
         ParticipantName = participantName;
@@ -104,7 +102,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
     public bool Terminate { get; set; }
 
     [ProtoMember(9)]
-    public string ServiceName { get; set; }
+    public List<string> ServiceName { get; set; }
 
     [ProtoMember(10)]
     public OperationType? Type { get; set; }
@@ -123,7 +121,4 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
 
     [ProtoMember(15)]
     public ReportType ReportType { get; set; }
-
-    [ProtoMember(16)]
-    public List<string> ServiceNameList { get; set; }
 }

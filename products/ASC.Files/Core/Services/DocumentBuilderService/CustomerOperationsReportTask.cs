@@ -218,7 +218,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 Resource.AccountingCustomerOperationCurrency
             };
 
-            var tenantWalletService = await GetTenantWalletService(tenantManager, taskData.ServiceName);
+            var tenantWalletService = await GetTenantWalletService(tenantManager, taskData.ServiceName?.FirstOrDefault());
             var addAgentColumn = tenantWalletService is TenantWalletService.AITools;
             if (addAgentColumn)
             {
@@ -240,7 +240,6 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                     var filter = new OperationFilter
                     {
                         ServiceName = taskData.ServiceName,
-                        ServiceNameList = taskData.ServiceNameList,
                         UtcStartDate = ctx.UtcStartDate,
                         UtcEndDate = ctx.UtcEndDate,
                         ParticipantName = taskData.ParticipantName,
@@ -384,7 +383,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
             foreach (var operation in report.Collection)
             {
-                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata);
+                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName?.FirstOrDefault(), operation.Metadata);
                 var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
 
                 operation.Description = description;
@@ -522,7 +521,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 public record CustomerOperationsReportTaskData(
     IDictionary<string, string> Headers,
     ReportType ReportType,
-    string ServiceName,
+    List<string> ServiceName,
     DateTime? StartDate,
     DateTime? EndDate,
     string ParticipantName,
@@ -532,6 +531,5 @@ public record CustomerOperationsReportTaskData(
     OperationStatus? Status,
     Dictionary<string, string> Metadata,
     string OrderBy,
-    OperationOrderType? OrderType,
-    List<string> ServiceNameList
+    OperationOrderType? OrderType
 );

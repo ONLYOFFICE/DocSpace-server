@@ -340,14 +340,10 @@ public class PagedFilter : DateRangeFilter
 public class OperationFilter : PagedFilter
 {
     /// <summary>
-    /// The service name.
-    /// </summary>
-    public string ServiceName { get; init; }
-
-    /// <summary>
     /// The service name list.
     /// </summary>
-    public List<string> ServiceNameList { get; init; }
+    [Query(CollectionFormat.Multi)]
+    public List<string> ServiceName { get; init; }
 
     /// <summary>
     /// Unique name of customer participant to filter by.
@@ -389,9 +385,10 @@ public class MonthlyUsageFilter : DateRangeFilter
 public class UsageFilter : PagedFilter
 {
     /// <summary>
-    /// The service name.
+    /// The service name list.
     /// </summary>
-    public string ServiceName { get; init; }
+    [Query(CollectionFormat.Multi)]
+    public List<string> ServiceName { get; init; }
     /// <summary>
     /// Unique name of customer participant to filter by.
     /// </summary>

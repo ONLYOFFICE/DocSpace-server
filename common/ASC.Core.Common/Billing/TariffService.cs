@@ -1455,10 +1455,11 @@ public class TariffService(
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            if (accountingClient.SubAccountsEnabled && !string.IsNullOrEmpty(filter.ServiceName))
+            var filterServiceName = filter.ServiceName?.FirstOrDefault();
+            if (accountingClient.SubAccountsEnabled && !string.IsNullOrEmpty(filterServiceName))
             {
                 var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-                if (aiQuota != null && aiQuota.ServiceName == filter.ServiceName)
+                if (aiQuota != null && aiQuota.ServiceName == filterServiceName)
                 {
                     return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
                 }
