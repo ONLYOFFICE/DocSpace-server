@@ -44,6 +44,7 @@ public class DocsCloudController(
     UserManager userManager,
     SecurityContext securityContext,
     MessageService messageService,
+    CspSettingsHelper cspSettingsHelper,
     WebItemManager webItemManager,
     IFusionCache fusionCache)
     : BaseSettingsController(fusionCache, webItemManager)
@@ -101,6 +102,10 @@ public class DocsCloudController(
         if (result)
         {
             messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{docsCloudTrialQuota.Name}");
+
+            var docsCloudTenant = await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), true);
+
+            await ChangeCspSettingsAsync(docsCloudTenant);
         }
 
         return result;
@@ -307,6 +312,22 @@ public class DocsCloudController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         return await docsCloudClient.GetTenantUsageAsync(await GetPortalIdAsync(), refresh);
+    }
+
+    private async Task ChangeCspSettingsAsync(DocsCloudTenant docsCloudTenant)
+    {
+        if (docsCloudTenant.IsDefault())
+        {
+            return;
+        }
+
+        var settings = await cspSettingsHelper.LoadAsync();
+
+        var currentDomains = settings.Domains?.ToList() ?? [];
+
+        currentDomains.Add(docsCloudTenant.Address);
+
+        _ = await cspSettingsHelper.SaveAsync(currentDomains.Distinct());
     }
 
     // DocsCloud identifies a portal by its Customer.UID, which maps to the core key of the current tenant.
