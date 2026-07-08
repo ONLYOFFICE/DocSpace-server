@@ -240,6 +240,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                     var filter = new OperationFilter
                     {
                         ServiceName = taskData.ServiceName,
+                        ServiceNameList = taskData.ServiceNameList,
                         UtcStartDate = ctx.UtcStartDate,
                         UtcEndDate = ctx.UtcEndDate,
                         ParticipantName = taskData.ParticipantName,
@@ -531,5 +532,6 @@ public record CustomerOperationsReportTaskData(
     OperationStatus? Status,
     Dictionary<string, string> Metadata,
     string OrderBy,
-    OperationOrderType? OrderType
+    OperationOrderType? OrderType,
+    List<string> ServiceNameList
 );

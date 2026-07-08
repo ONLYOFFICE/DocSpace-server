@@ -74,6 +74,12 @@ public class CustomerOperationsReportRequestDto
     public string ServiceName { get; set; }
 
     /// <summary>
+    /// The service name list.
+    /// </summary>
+    /// <example>[backup]</example>
+    public List<string> ServiceNameList { get; set; }
+
+    /// <summary>
     /// The report start date.
     /// </summary>
     /// <example>2024-01-01T00:00:00Z</example>

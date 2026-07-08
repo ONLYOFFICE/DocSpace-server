@@ -343,6 +343,12 @@ public class OperationFilter : PagedFilter
     /// The service name.
     /// </summary>
     public string ServiceName { get; init; }
+
+    /// <summary>
+    /// The service name list.
+    /// </summary>
+    public List<string> ServiceNameList { get; init; }
+
     /// <summary>
     /// Unique name of customer participant to filter by.
     /// </summary>

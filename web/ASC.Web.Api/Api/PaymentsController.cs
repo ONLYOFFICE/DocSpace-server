@@ -1080,12 +1080,25 @@ public class PaymentController(
             inDto.ServiceName = correctServiceName;
         }
 
+        if (inDto.ServiceNameList is { Count: > 0 })
+        {
+            var correctedList = new List<string>();
+            foreach (var serviceName in inDto.ServiceNameList)
+            {
+                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
+                correctedList.Add(correctServiceName);
+            }
+
+            inDto.ServiceNameList = correctedList;
+        }
+
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
 
         var filter = new OperationFilter
         {
             ServiceName = inDto.ServiceName,
+            ServiceNameList = inDto.ServiceNameList,
             UtcStartDate = utcStartDate,
             UtcEndDate = utcEndDate,
             ParticipantName = inDto.ParticipantName,
@@ -1243,6 +1256,18 @@ public class PaymentController(
             inDto.ServiceName = correctServiceName;
         }
 
+        if (inDto.ServiceNameList is { Count: > 0 })
+        {
+            var correctedList = new List<string>();
+            foreach (var serviceName in inDto.ServiceNameList)
+            {
+                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
+                correctedList.Add(correctServiceName);
+            }
+
+            inDto.ServiceNameList = correctedList;
+        }
+
         var userId = securityContext.CurrentAccount.ID;
 
         var task = serviceProvider.GetRequiredService<CustomerOperationsReportTask>();
@@ -1271,7 +1296,8 @@ public class PaymentController(
             inDto.Status,
             orderBy: inDto.OrderBy,
             orderType: inDto.OrderType,
-            headers: headers);
+            headers: headers,
+            serviceNameList: inDto.ServiceNameList);
 
         await eventBus.PublishAsync(evt);
 
