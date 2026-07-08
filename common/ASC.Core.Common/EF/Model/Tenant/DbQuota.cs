@@ -211,7 +211,7 @@ public static class DbQuotaExtension
                     Name = "aitools",
                     Description = null,
                     Features = "aitools",
-                    Price = 1,
+                    Price = 0,
                     ProductId = null,
                     ServiceName = "ai-tools",
                     ServiceGroup = null,
@@ -232,6 +232,20 @@ public static class DbQuotaExtension
                     Visible = true,
                     Wallet = true,
                     Additional = false // primary quota, not additive
+                },
+                new DbQuota
+                {
+                    TenantId = -18,
+                    Name = "aisearch",
+                    Description = null,
+                    Features = "aisearch",
+                    Price = 0,
+                    ProductId = null,
+                    ServiceName = "ai-search",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = true
                 }
                 );
         return modelBuilder;
@@ -301,6 +315,11 @@ public static class DbQuotaExtension
                     .HasColumnName("wallet")
                     .HasColumnType("tinyint(1)")
                     .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Additional)
+                    .HasColumnName("additional")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
             });
         }
 
@@ -352,6 +371,11 @@ public static class DbQuotaExtension
 
                 entity.Property(e => e.Wallet)
                     .HasColumnName("wallet")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.Additional)
+                    .HasColumnName("additional")
                     .HasColumnType("boolean")
                     .HasDefaultValue(false);
             });

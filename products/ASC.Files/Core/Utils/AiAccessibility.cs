@@ -43,6 +43,7 @@ public class AiStatus
 public class AiAccessibility(
     TenantManager tenantManager,
     AiGateway aiGateway,
+    ProfileStorage profileStorage,
     SettingsManager settingsManager)
 {
     public async Task<AiStatus> GetStatusAsync()
@@ -55,12 +56,14 @@ public class AiAccessibility(
             return new AiStatus { Enabled = false, GatewayEnabled = false };
         }
 
-        if (await aiGateway.IsEnabledAsync())
+        if (await aiGateway.IsAiEnabledAsync())
         {
             return new AiStatus { Enabled = true, GatewayEnabled = true };
         }
 
-        return new AiStatus { Enabled = false, GatewayEnabled = false };
+        var hasProfile = await profileStorage.AnyAsync(tenantId);
+
+        return new AiStatus { Enabled = hasProfile, GatewayEnabled = false };
     }
 
     public async Task<bool> IsVectorizationEnabledAsync()

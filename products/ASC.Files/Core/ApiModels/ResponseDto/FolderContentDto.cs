@@ -98,7 +98,6 @@ public class FolderContentDtoHelper(
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
-    AiModelSettingsLoader modelSettingsLoader,
     IDaoFactory daoFactory,
     IConfiguration configuration)
 {
@@ -140,13 +139,7 @@ public class FolderContentDtoHelper(
             await SetAgentsChatSettingsAsync(folderItems);
         }
 
-        var aiStatusTask = accessibility.GetStatusAsync();
-        var modelSettingsResultTask = modelSettingsLoader.LoadForEntriesAsync(folderItems.Entries, folderItems.FolderInfo);
-
-        await Task.WhenAll(aiStatusTask, modelSettingsResultTask);
-
-        var aiStatus = await aiStatusTask;
-        var modelSettingsResult = await modelSettingsResultTask;
+        var aiStatus = await accessibility.GetStatusAsync();
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {

@@ -1167,6 +1167,9 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Số lượng AI agent không được vượt quá {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Tìm kiếm AI</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Tính năng AI</value>
   </data>
@@ -1317,6 +1320,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Tìm kiếm web</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Tìm kiếm web</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Tín dụng AI</value>
   </data>
@@ -1324,6 +1330,9 @@
     <value>Nguồn</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Kết quả</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Kết quả</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1412,6 +1421,9 @@
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Truy cập nhiều mô hình AI thông qua tích hợp OpenRouter. Chỉ trả tiền cho những gì bạn sử dụng, được tính từ Ví của bạn.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Sử dụng công cụ tìm kiếm AI để nâng cao các cuộc trò chuyện AI với thông tin thời gian thực từ internet</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>

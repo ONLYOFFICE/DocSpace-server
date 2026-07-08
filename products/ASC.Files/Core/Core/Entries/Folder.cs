@@ -125,7 +125,10 @@ public enum FolderType
     AiAgents = 34,
 
     [Description("Default Templates")]
-    DefaultTemplates = 35
+    DefaultTemplates = 35,
+
+    [Description("Forms")]
+    Forms = 36
 }
 
 /// <summary>
@@ -278,16 +281,6 @@ public class Folder<T> : FileEntry<T>, IFolder
     public RoomDataLifetime SettingsLifetime { get; set; }
 
     public ChatSettings ChatSettings { get; set; }
-
-    /// <summary>
-    /// The chat provider ID configured for the folder.
-    /// </summary>
-    public int SettingsChatProviderId { get; set; }
-
-    /// <summary>
-    /// The chat parameters configured for the folder.
-    /// </summary>
-    public ChatParameters SettingsChatParameters { get; set; }
 
     /// <summary>
     /// Specifies if the files can be downloaded from this folder or not.

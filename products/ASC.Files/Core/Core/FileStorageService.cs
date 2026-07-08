@@ -371,10 +371,30 @@ public class FileStorageService //: IFileStorageService
         searchArea = parent.FolderType switch
         {
             FolderType.Archive => SearchArea.Archive,
-            FolderType.RoomTemplates => SearchArea.Templates,
+            // Virtual Rooms and Form Filling Rooms templates share the same physical RoomTemplates root,
+            // so the requested FormTemplates area must be preserved to keep the split.
+            FolderType.RoomTemplates => searchArea == SearchArea.FormTemplates ? SearchArea.FormTemplates : SearchArea.Templates,
             FolderType.AiAgents => SearchArea.AiAgents,
+            FolderType.Forms => SearchArea.Forms,
             _ => searchArea
         };
+
+        if (parent.FolderType == FolderType.Forms)
+        {
+            // Forms is a virtual section anchored on an empty folder: its rooms are resolved from the
+            // VirtualRooms tree. Browsing it with subfolders would expand the whole VirtualRooms subtree
+            // (including the container itself and other rooms' content), so it is kept as a flat room list.
+            withSubfolders = false;
+        }
+
+        if (parent.FolderType == FolderType.RoomTemplates)
+        {
+            // The templates listing always goes through the "for me" branch, where the subfolders query is
+            // built from shared entries only and loses the templates created by the current user (they are
+            // visible through the CreateBy condition that exists only in the flat query). The section is a
+            // flat list of templates anyway, so subfolder expansion is disabled.
+            withSubfolders = false;
+        }
 
         int total;
         IEnumerable<FileEntry> entries;
@@ -982,7 +1002,10 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                newFolder.SettingsChatParameters = chatSettings.Map();
+                newFolder.ChatSettings = new ChatSettings
+                {
+                    Prompt = chatSettings.Prompt
+                };
             }
 
             newFolder.SettingsLifetime = lifetime;
