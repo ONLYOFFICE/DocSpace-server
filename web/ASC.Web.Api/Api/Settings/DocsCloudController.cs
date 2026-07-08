@@ -46,7 +46,8 @@ public class DocsCloudController(
     MessageService messageService,
     CspSettingsHelper cspSettingsHelper,
     WebItemManager webItemManager,
-    IFusionCache fusionCache)
+    IFusionCache fusionCache,
+    IConfiguration configuration)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -128,17 +129,17 @@ public class DocsCloudController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "Customer or service could not be found")]
     [HttpPost("switchtodevpack")]
-    public async Task<bool> SwitchToDevPack()
+    public async Task<bool> SwitchToDevPack(DocsCloudDevPackRequestDto inDto)
     {
-        var (fromQuota, toQuota, quantity) = await PrepareSwitchAsync();
+        var (fromQuota, toQuota) = await PrepareSwitchAsync(inDto.Quantity);
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var result = await tariffService.SwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), quantity, securityContext.CurrentAccount.ID.ToString());
+        var result = await tariffService.SwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity, securityContext.CurrentAccount.ID.ToString());
 
         if (result)
         {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{toQuota.Name} {quantity}");
+            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{toQuota.Name} {inDto.Quantity}");
         }
 
         return result;
@@ -160,13 +161,13 @@ public class DocsCloudController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "Customer or service could not be found")]
     [HttpPost("calculatedevpack")]
-    public async Task<PaymentCalculation> CalculateDevPack()
+    public async Task<PaymentCalculation> CalculateDevPack(DocsCloudDevPackRequestDto inDto)
     {
-        var (fromQuota, toQuota, quantity) = await PrepareSwitchAsync();
+        var (fromQuota, toQuota) = await PrepareSwitchAsync(inDto.Quantity);
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        return await tariffService.CalculateSwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), quantity);
+        return await tariffService.CalculateSwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity);
     }
 
     /// <remarks>
@@ -338,7 +339,7 @@ public class DocsCloudController(
         return await coreSettings.GetKeyAsync(tenant.Id);
     }
 
-    private async Task<(TenantQuota FromQuota, TenantQuota ToQuota, int Quantity)> PrepareSwitchAsync()
+    private async Task<(TenantQuota FromQuota, TenantQuota ToQuota)> PrepareSwitchAsync(int quantity)
     {
         // Only the DocsCloud to DocsCloudDevPack transition is supported.
         const TenantWalletService from = TenantWalletService.DocsCloud;
@@ -360,7 +361,6 @@ public class DocsCloudController(
         await DemandPayerAsync(customerInfo);
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
-
         if (tariff.State > TariffState.Paid)
         {
             throw new BillingException("Tariff is not paid");
@@ -370,6 +370,12 @@ public class DocsCloudController(
         if (currentQuota == null)
         {
             throw new ArgumentException("DocsCloud subscription is not active");
+        }
+
+        var minValue = Math.Max(currentQuota.Quantity, configuration.GetValue<int?>("core:docscloud:minDevPackQuantity") ?? 10);
+        if (quantity < minValue)
+        {
+            throw new ArgumentException($"Invalid quantity: must be greater than or equal to {minValue}");
         }
 
         if (tariff.Quotas.Any(q => q.Id == (int)to))
@@ -387,7 +393,7 @@ public class DocsCloudController(
             throw new ItemNotFoundException("Service could not be found");
         }
 
-        return (fromQuota, toQuota, currentQuota.Quantity);
+        return (fromQuota, toQuota);
     }
 
     private async Task DemandPayerAsync(CustomerInfo customerInfo)

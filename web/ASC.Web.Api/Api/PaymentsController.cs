@@ -60,6 +60,7 @@ public class PaymentController(
     RegionHelper regionHelper,
     QuotaHelper tariffHelper,
     IFusionCache fusionCache,
+    IConfiguration configuration,
     MessageService messageService,
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext,
@@ -78,7 +79,6 @@ public class PaymentController(
 {
     private readonly int _maxCount = 10;
     private readonly int _expirationMinutes = 2;
-    private readonly int _maxTopUpAttempts = 5;
 
     /// <remarks>
     /// Returns the URL to the payment page.
@@ -298,8 +298,8 @@ public class PaymentController(
 
         var minValue = quota.TenantId switch
         {
-            (int)TenantWalletService.Storage => 100,
-            (int)TenantWalletService.DocsCloudDevPack => 10,
+            (int)TenantWalletService.Storage => configuration.GetValue<int?>("core:accounting:minStorageQuantity") ?? 100,
+            (int)TenantWalletService.DocsCloudDevPack => configuration.GetValue<int?>("core:docscloud:minDevPackQuantity") ?? 10,
             _ => 1
         };
 
@@ -580,25 +580,9 @@ public class PaymentController(
         await quotaSocketManager.TopUpWallet(false);
 
         // Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
-        // The balance may be consumed concurrently, so the top-up is retried several times.
-        var balanceAmount = await GetWalletBalanceAmountAsync(tenant.Id, defaultCurrency);
-
         var siteName = tenant.GetTenantDomain(coreSettings);
 
-        for (var attempt = 0; attempt < _maxTopUpAttempts && balanceAmount < requiredAmount; attempt++)
-        {
-            var topUpAmount = Math.Ceiling((requiredAmount - balanceAmount) * 100) / 100;
-
-            var toppedUp = await tariffService.TopUpDepositAsync(tenant.Id, topUpAmount, defaultCurrency, participant, siteName, null, true);
-            if (toppedUp)
-            {
-                await quotaSocketManager.TopUpWallet(false);
-            }
-
-            balanceAmount = await GetWalletBalanceAmountAsync(tenant.Id, defaultCurrency);
-        }
-
-        if (balanceAmount < requiredAmount)
+        if (!await tariffService.EnsureWalletBalanceAsync(tenant.Id, requiredAmount, defaultCurrency, participant, siteName, false))
         {
             throw new BillingException("Insufficient balance");
         }
@@ -1074,10 +1058,15 @@ public class PaymentController(
             return null;
         }
 
-        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        if (inDto.ServiceName is { Count: > 0 })
         {
-            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
-            inDto.ServiceName = correctServiceName;
+            var correctedList = new List<string>();
+            foreach (var serviceName in inDto.ServiceName)
+            {
+                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
+                correctedList.Add(correctServiceName);
+            }
+            inDto.ServiceName = correctedList;
         }
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
@@ -1107,7 +1096,7 @@ public class PaymentController(
 
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, true);
 
-        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName);
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, filter.ServiceName?.FirstOrDefault());
     }
 
     /// <remarks>
@@ -1179,10 +1168,15 @@ public class PaymentController(
             return null;
         }
 
-        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        if (inDto.ServiceName is { Count: > 0 })
         {
-            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
-            inDto.ServiceName = correctServiceName;
+            var correctedList = new List<string>();
+            foreach (var serviceName in inDto.ServiceName)
+            {
+                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
+                correctedList.Add(correctServiceName);
+            }
+            inDto.ServiceName = correctedList;
         }
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
@@ -1237,10 +1231,15 @@ public class PaymentController(
 
         inDto ??= new CustomerOperationsReportRequestDto();
 
-        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        if (inDto.ServiceName is { Count: > 0 })
         {
-            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
-            inDto.ServiceName = correctServiceName;
+            var correctedList = new List<string>();
+            foreach (var serviceName in inDto.ServiceName)
+            {
+                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
+                correctedList.Add(correctServiceName);
+            }
+            inDto.ServiceName = correctedList;
         }
 
         var userId = securityContext.CurrentAccount.ID;
@@ -1334,10 +1333,15 @@ public class PaymentController(
 
         inDto ??= new CustomerServiceUsageReportRequestDto();
 
-        if (!string.IsNullOrEmpty(inDto.ServiceName))
+        if (inDto.ServiceName is { Count: > 0 })
         {
-            var (_, correctServiceName)= await CheckWalletServiceName(inDto.ServiceName);
-            inDto.ServiceName = correctServiceName;
+            var correctedList = new List<string>();
+            foreach (var serviceName in inDto.ServiceName)
+            {
+                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
+                correctedList.Add(correctServiceName);
+            }
+            inDto.ServiceName = correctedList;
         }
 
         var userId = securityContext.CurrentAccount.ID;
@@ -1986,23 +1990,6 @@ public class PaymentController(
         }
 
         return quota.ProductId;
-    }
-
-    private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)
-    {
-        var balance = await tariffService.GetCustomerBalanceAsync(tenantId, true);
-        if (balance == null)
-        {
-            throw new ItemNotFoundException("Balance could not be found");
-        }
-
-        var subAccount = balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency);
-        if (subAccount == null)
-        {
-            throw new ItemNotFoundException("Subaccount could not be found");
-        }
-
-        return subAccount.Amount;
     }
 
     private async Task DemandPayerOrOwnerAsync(Tenant tenant, CustomerInfo customerInfo)

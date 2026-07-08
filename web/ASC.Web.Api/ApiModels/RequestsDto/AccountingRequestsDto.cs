@@ -68,10 +68,10 @@ public class CustomerOperationsRequestDto : CustomerOperationsReportRequestDto
 public class CustomerOperationsReportRequestDto
 {
     /// <summary>
-    /// The service name.
+    /// The service name list.
     /// </summary>
-    /// <example>backup</example>
-    public string ServiceName { get; set; }
+    /// <example>[backup]</example>
+    public List<string> ServiceName { get; set; }
 
     /// <summary>
     /// The report start date.
@@ -142,10 +142,10 @@ public class CustomerOperationsReportRequestDto
 public class CustomerServiceUsageReportRequestDto
 {
     /// <summary>
-    /// The service name.
+    /// The service name list.
     /// </summary>
-    /// <example>backup</example>
-    public string ServiceName { get; set; }
+    /// <example>[backup]</example>
+    public List<string> ServiceName { get; set; }
 
     /// <summary>
     /// The report start date.
@@ -255,10 +255,10 @@ public class CustomerMonthlyUsageRequestDto
 public class CustomerServiceUsageRequestDto
 {
     /// <summary>
-    /// The service name.
+    /// The service name list.
     /// </summary>
-    /// <example>backup</example>
-    public string ServiceName { get; set; }
+    /// <example>[backup]</example>
+    public List<string> ServiceName { get; set; }
 
     /// <summary>
     /// The participant name.
