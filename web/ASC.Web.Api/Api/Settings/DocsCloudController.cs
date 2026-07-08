@@ -191,14 +191,7 @@ public class DocsCloudController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        try
-        {
-            return await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), refresh);
-        }
-        catch (DocsCloudNotFoundException)
-        {
-            return null;
-        }
+        return await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), refresh);
     }
 
     /// <remarks>

@@ -365,7 +365,7 @@ public class TariffService(
 
             await ClearCacheAsync(tenantId);
 
-            await docsCloudClient.ResetTenantCacheAsync(portalId);
+            await docsCloudClient.ClearCacheAsync(portalId);
         }
         catch (Exception error)
         {
@@ -445,7 +445,7 @@ public class TariffService(
 
             await ClearCacheAsync(tenantId);
 
-            await docsCloudClient.ResetTenantCacheAsync(portalId);
+            await docsCloudClient.ClearCacheAsync(portalId);
         }
         catch (Exception error)
         {
@@ -493,7 +493,7 @@ public class TariffService(
 
             await ClearCacheAsync(tenantId);
 
-            await docsCloudClient.ResetTenantCacheAsync(portalId);
+            await docsCloudClient.ClearCacheAsync(portalId);
 
             return result;
         }
