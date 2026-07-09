@@ -839,8 +839,7 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo != null)
         {
-            var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
-            if (!currentQuota.NonProfit && !string.IsNullOrEmpty(customerInfo.Email))
+            if (!string.IsNullOrEmpty(customerInfo.Email))
             {
                 await DemandPayerAsync(customerInfo);
             }
@@ -1961,7 +1960,7 @@ public class PaymentController(
     {
         var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
-        if (securityContext.CurrentAccount.ID != payer.Id)
+        if (payer == null || securityContext.CurrentAccount.ID != payer.Id)
         {
             throw new SecurityException("Access denied: insufficient permissions for this payment operation");
         }

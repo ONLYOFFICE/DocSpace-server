@@ -43,6 +43,7 @@ internal class AccountingAuthHandler(IOptions<AccountingConfiguration> configura
     {
         if (!string.IsNullOrEmpty(configuration.Value.Key))
         {
+            request.Headers.Remove("Authorization");
             request.Headers.Add("Authorization", CreateAuthToken(configuration.Value.Key, configuration.Value.Secret));
         }
 

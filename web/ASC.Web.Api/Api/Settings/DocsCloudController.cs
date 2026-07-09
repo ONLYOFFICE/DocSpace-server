@@ -358,7 +358,11 @@ public class DocsCloudController(
             throw new ItemNotFoundException("Customer could not be found");
         }
 
-        await DemandPayerAsync(customerInfo);
+        var payer = await userManager.GetUserByEmailAsync(customerInfo.Email);
+        if (payer == null || securityContext.CurrentAccount.ID != payer.Id)
+        {
+            throw new SecurityException("Access denied: insufficient permissions for this payment operation");
+        }
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
         if (tariff.State > TariffState.Paid)
@@ -394,15 +398,5 @@ public class DocsCloudController(
         }
 
         return (fromQuota, toQuota);
-    }
-
-    private async Task DemandPayerAsync(CustomerInfo customerInfo)
-    {
-        var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
-
-        if (securityContext.CurrentAccount.ID != payer.Id)
-        {
-            throw new SecurityException("Access denied: insufficient permissions for this payment operation");
-        }
     }
 }
