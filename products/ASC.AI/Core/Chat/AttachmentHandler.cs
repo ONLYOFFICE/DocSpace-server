@@ -56,10 +56,16 @@ public class AttachmentHandler(
     ILogger<AttachmentHandler> logger,
     FormFillingReportCreator formFillingReportCreator,
     ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     FormDataQueryTool formDataQueryTool,
     AggregateFormDataTool aggregateFormDataTool,
     SelfJoinFormDataTool selfJoinFormDataTool)
 {
+    private IFormsDatabaseClient? GetEnabledFormsDatabaseClient() =>
+        externalDatabaseClient.IsEnabled() ? externalDatabaseClient :
+        builtinFormsDatabaseClient.IsEnabled() ? builtinFormsDatabaseClient :
+        null;
+
     private static int? _maxAttachmentsCount;
     private int MaxAttachmentsCount => _maxAttachmentsCount ??= configuration.GetValue("ai:maxAttachmentsCount", 5);
 
@@ -286,7 +292,8 @@ public class AttachmentHandler(
 
     public async Task<(IReadOnlyList<ToolWrapper> Tools, string SchemaContext)?> GetFormDataToolsAsync(int fileId)
     {
-        if (!externalDatabaseClient.IsEnabled())
+        var client = GetEnabledFormsDatabaseClient();
+        if (client == null)
         {
             return null;
         }
@@ -308,7 +315,7 @@ public class AttachmentHandler(
 
         try
         {
-            return await BuildFormDataToolsAsync(fileId, file.Version);
+            return await BuildFormDataToolsAsync(fileId, file.Version, client);
         }
         catch (Exception e)
         {
@@ -333,14 +340,15 @@ public class AttachmentHandler(
             return (null, null);
         }
 
-        if (!externalDatabaseClient.IsEnabled())
+        var client = GetEnabledFormsDatabaseClient();
+        if (client == null)
         {
             return (null, null);
         }
 
         try
         {
-            var result = await BuildFormDataToolsAsync(intFile.Id, intFile.Version);
+            var result = await BuildFormDataToolsAsync(intFile.Id, intFile.Version, client);
             if (result == null)
             {
                 return (null, null);
@@ -355,21 +363,21 @@ public class AttachmentHandler(
         }
     }
 
-    private async Task<(IReadOnlyList<ToolWrapper> Tools, string SchemaContext)?> BuildFormDataToolsAsync(int fileId, int version)
+    private async Task<(IReadOnlyList<ToolWrapper> Tools, string SchemaContext)?> BuildFormDataToolsAsync(int fileId, int version, IFormsDatabaseClient client)
     {
         var tableName = FormFillingReportCreator.GetTableName(fileId, version);
-        if (!await externalDatabaseClient.TableExistsAsync(tableName))
+        if (!await client.TableExistsAsync(tableName))
         {
             return null;
         }
 
-        var rowCount = await externalDatabaseClient.CountAsync(tableName);
+        var rowCount = await client.CountAsync(tableName);
         var columns = await formFillingReportCreator.GetColumnDefinitionsAsync(fileId, version);
         var columnList = columns.ToList();
 
-        var queryTool = await formDataQueryTool.InitAsync(fileId, tableName, rowCount, columnList);
-        var aggregateTool = await aggregateFormDataTool.InitAsync(fileId, tableName, columnList);
-        var selfJoinTool = await selfJoinFormDataTool.InitAsync(fileId, tableName, columnList);
+        var queryTool = await formDataQueryTool.InitAsync(fileId, client, tableName, rowCount, columnList);
+        var aggregateTool = await aggregateFormDataTool.InitAsync(fileId, client, tableName, columnList);
+        var selfJoinTool = await selfJoinFormDataTool.InitAsync(fileId, client, tableName, columnList);
 
         if (queryTool == null && aggregateTool == null && selfJoinTool == null)
         {

@@ -35,14 +35,13 @@ namespace ASC.AI.Core.Tools.Retrieval;
 
 [Scope]
 public class AggregateFormDataTool(
-    ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ILogger<AggregateFormDataTool> logger)
 {
     public const string Name = "aggregated_form_data";
 
-    public async Task<AIFunction?> InitAsync(int fileId, string tableName, IEnumerable<DbColumnDefinition> columns)
+    public async Task<AIFunction?> InitAsync(int fileId, IFormsDatabaseClient client, string tableName, IEnumerable<DbColumnDefinition> columns)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -131,7 +130,7 @@ public class AggregateFormDataTool(
                 var allExcludeDatePartFilters = (excludeDatePartFilters ?? []).Concat(autoExcludeDatePartFilters);
                 var parsedExcludeFilters = normalExcludeFilters.Select(QueryFilter.Parse);
                 var parsedExcludeDatePartFilters = allExcludeDatePartFilters.Select(DatePartFilter.Parse);
-                var result = await externalDatabaseClient.AggregateAsync(
+                var result = await client.AggregateAsync(
                     tableName, allowedColumns, aggregateFunction, valueColumn, groupByColumn, parsedFilters,
                     groupByDatePart, secondGroupByColumn, secondGroupByDatePart,
                     parsedDatePartFilters, parsedDateDiffFilter, parsedDateDiffAggregate,

@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+#nullable enable
 namespace ASC.Files.Core.ExternalDatabase;
 
 public interface IFormsDatabaseClient
@@ -43,4 +44,53 @@ public interface IFormsDatabaseClient
     Task<long> GetTableCountAsync(string tableName);
 
     Task<IReadOnlySet<int>> GetExistingFormIdsAsync(string tableName);
+
+    Task<bool> TableExistsAsync(string tableName);
+
+    Task<long> CountAsync(string tableName);
+
+    Task<string> AggregateAsync(
+        string tableName,
+        IReadOnlyCollection<string> allowedColumns,
+        string aggregateFunction,
+        string? valueColumn,
+        string? groupByColumn,
+        IEnumerable<QueryFilter>? filters = null,
+        string? groupByDatePart = null,
+        string? secondGroupByColumn = null,
+        string? secondGroupByDatePart = null,
+        IEnumerable<DatePartFilter>? datePartFilters = null,
+        DateDiffFilter? dateDiffFilter = null,
+        DateDiffAggregate? dateDiffAggregate = null,
+        string? havingFilter = null,
+        string? thirdGroupByColumn = null,
+        string? thirdGroupByDatePart = null,
+        IEnumerable<QueryFilter>? excludeFilters = null,
+        IEnumerable<DatePartFilter>? excludeDatePartFilters = null,
+        bool countGroupsOnly = false);
+
+    Task<string> QueryAsync(
+        string tableName,
+        IReadOnlyCollection<string> allowedColumns,
+        IEnumerable<string>? selectColumns = null,
+        IEnumerable<QueryFilter>? filters = null,
+        string? orderByColumn = null,
+        bool orderByDescending = false,
+        string? thenByColumn = null,
+        bool thenByDescending = false,
+        int maxRows = 50,
+        int offset = 0,
+        IEnumerable<DatePartFilter>? datePartFilters = null,
+        DateDiffFilter? dateDiffFilter = null);
+
+    Task<string> SelfJoinAsync(
+        string tableName,
+        IReadOnlyCollection<string> allowedColumns,
+        string pkColumn,
+        IEnumerable<SelfJoinCondition> joinConditions,
+        IEnumerable<string>? displayColumns = null,
+        int limit = 100,
+        IEnumerable<QueryFilter>? filters = null,
+        IEnumerable<DatePartFilter>? datePartFilters = null,
+        string? countDistinctColumn = null);
 }

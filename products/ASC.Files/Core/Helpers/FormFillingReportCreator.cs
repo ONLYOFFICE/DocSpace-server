@@ -86,6 +86,38 @@ public class FormFillingReportCreator(
     public Task ExportToBuiltinDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
         => ExportToDbAsync(builtinFormsDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
 
+    /// <summary>
+    /// Writes pre-built submissions straight into the built-in forms database, bypassing the OpenSearch
+    /// round-trip that <see cref="ExportMissingFromOpenSearchBuiltinAsync"/> relies on. Used to seed demo
+    /// data, where the caller already holds the submissions in memory and does not need OpenSearch as an
+    /// intermediate durable store.
+    /// </summary>
+    public async Task SeedBuiltinDbDirectlyAsync(
+        int originalFormId,
+        int originalFormVersion,
+        IEnumerable<FormMetadata> metadata,
+        IEnumerable<(int FormId, DateTime CreatedOn, SubmitFormsData Data)> rows)
+    {
+        var tableName = GetTableName(originalFormId, originalFormVersion);
+        var normalizedMeta = NormalizeMetadata(metadata).ToList();
+        var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
+        var culture = tenantManager.GetCurrentTenant().GetCulture();
+
+        foreach (var (formId, createdOn, data) in rows)
+        {
+            var rowData = BuildRowData(data, normalizedMeta, formId, culture, createdOn);
+            await builtinFormsDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
+        }
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var properties = await fileDao.GetProperties(originalFormId);
+        if (properties?.FormFilling != null && properties.FormFilling.ExternalDbTableName != tableName)
+        {
+            properties.FormFilling.ExternalDbTableName = tableName;
+            await fileDao.SaveProperties(originalFormId, properties);
+        }
+    }
+
     private async Task ExportToDbAsync(IFormsDatabaseClient client, int fileId, int originalFormId, int originalFormVersion, string formsDataUrl)
     {
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime

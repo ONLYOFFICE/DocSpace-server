@@ -35,14 +35,13 @@ namespace ASC.AI.Core.Tools.Retrieval;
 
 [Scope]
 public class FormDataQueryTool(
-    ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ILogger<FormDataQueryTool> logger)
 {
     public const string Name = "query_form_data";
 
-    public async Task<AIFunction?> InitAsync(int fileId, string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
+    public async Task<AIFunction?> InitAsync(int fileId, IFormsDatabaseClient client, string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -83,7 +82,7 @@ public class FormDataQueryTool(
                 var parsedFilters = normalFilters.Select(QueryFilter.Parse);
                 var parsedDatePartFilters = allDatePartFilters.Select(DatePartFilter.Parse);
                 var parsedDateDiffFilter = dateDiffFilter != null ? DateDiffFilter.Parse(dateDiffFilter) : null;
-                var result = await externalDatabaseClient.QueryAsync(
+                var result = await client.QueryAsync(
                     tableName, allowedColumns, selectColumns, parsedFilters,
                     orderByColumn, orderByDescending, thenByColumn, thenByDescending, limit, offset,
                     parsedDatePartFilters, parsedDateDiffFilter);

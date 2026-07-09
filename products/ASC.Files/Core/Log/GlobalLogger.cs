@@ -48,4 +48,13 @@ internal static partial class GlobalLogger
 
     [LoggerMessage(LogLevel.Error, "SaveSampleFolder")]
     public static partial void ErrorSaveSampleFolder(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "CreateDemoFormRoom")]
+    public static partial void ErrorCreateDemoFormRoom(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Demo form room asset not found at template path {path}")]
+    public static partial void WarnDemoFormAssetMissing(this ILogger logger, string path);
+
+    [LoggerMessage(LogLevel.Warning, "Demo form room: best-effort OpenSearch indexing of synthetic submissions failed")]
+    public static partial void WarnDemoFormOpenSearchIndexingFailed(this ILogger logger, Exception exception);
 }

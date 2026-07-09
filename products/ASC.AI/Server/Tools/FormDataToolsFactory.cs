@@ -36,6 +36,7 @@ namespace ASC.AI.Tools;
 [Scope(typeof(IAiToolFactory))]
 public class FormDataToolsFactory(
     ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IDaoFactory daoFactory,
     FormFillingReportCreator formFillingReportCreator,
     ILogger<FormDataToolsFactory> logger) : IAiToolFactory
@@ -43,6 +44,11 @@ public class FormDataToolsFactory(
     private const string QueryName = "query_form_data";
     private const string AggregateName = "aggregated_form_data";
     private const string SelfJoinName = "self_join_form_data";
+
+    private IFormsDatabaseClient? GetEnabledFormsDatabaseClient() =>
+        externalDatabaseClient.IsEnabled() ? externalDatabaseClient :
+        builtinFormsDatabaseClient.IsEnabled() ? builtinFormsDatabaseClient :
+        null;
 
     private static readonly HashSet<string> _toolNames = new(StringComparer.Ordinal)
     {
@@ -201,12 +207,13 @@ public class FormDataToolsFactory(
 
     public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
-        if (context.Form is not File<int> form || !externalDatabaseClient.IsEnabled())
+        var client = GetEnabledFormsDatabaseClient();
+        if (context.Form is not File<int> form || client == null)
         {
             return ToolBundle.Empty;
         }
 
-        var init = await TryInitAsync(form);
+        var init = await TryInitAsync(form, client);
         if (init is null)
         {
             return ToolBundle.Empty;
@@ -224,19 +231,19 @@ public class FormDataToolsFactory(
 
         var tools = new List<AiTool>
         {
-            new(AggregateName, MakeAggregateFunction(tableName, allowedColumns, columns)),
-            new(QueryName, MakeQueryFunction(tableName, allowedColumns, columns, rowCount))
+            new(AggregateName, MakeAggregateFunction(client, tableName, allowedColumns, columns)),
+            new(QueryName, MakeQueryFunction(client, tableName, allowedColumns, columns, rowCount))
         };
 
         if (columns.Count >= 2)
         {
-            tools.Add(new AiTool(SelfJoinName, MakeSelfJoinFunction(tableName, allowedColumns, columns, pkColumn)));
+            tools.Add(new AiTool(SelfJoinName, MakeSelfJoinFunction(client, tableName, allowedColumns, columns, pkColumn)));
         }
 
         return new ToolBundle(prompt, tools);
     }
 
-    private async Task<InitData?> TryInitAsync(File<int> file)
+    private async Task<InitData?> TryInitAsync(File<int> file, IFormsDatabaseClient client)
     {
         try
         {
@@ -251,12 +258,12 @@ public class FormDataToolsFactory(
             }
 
             var tableName = FormFillingReportCreator.GetTableName(file.Id, file.Version);
-            if (!await externalDatabaseClient.TableExistsAsync(tableName))
+            if (!await client.TableExistsAsync(tableName))
             {
                 return null;
             }
 
-            var rowCount = await externalDatabaseClient.CountAsync(tableName);
+            var rowCount = await client.CountAsync(tableName);
             var columns = (await formFillingReportCreator.GetColumnDefinitionsAsync(file.Id, file.Version)).ToList();
             var allowedColumns = columns.Select(c => c.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -274,6 +281,7 @@ public class FormDataToolsFactory(
     }
 
     private AIFunction MakeAggregateFunction(
+        IFormsDatabaseClient client,
         string tableName,
         IReadOnlyCollection<string> allowedColumns,
         IReadOnlyList<DbColumnDefinition> columns)
@@ -356,7 +364,7 @@ public class FormDataToolsFactory(
             var parsedExcludeFilters = normalExcludeFilters.Select(QueryFilter.Parse);
             var parsedExcludeDatePartFilters = allExcludeDatePartFilters.Select(DatePartFilter.Parse);
 
-            return externalDatabaseClient.AggregateAsync(
+            return client.AggregateAsync(
                 tableName, allowedColumns, aggregateFunction, valueColumn, groupByColumn, parsedFilters,
                 groupByDatePart, secondGroupByColumn, secondGroupByDatePart,
                 parsedDatePartFilters, parsedDateDiffFilter, parsedDateDiffAggregate,
@@ -367,6 +375,7 @@ public class FormDataToolsFactory(
     }
 
     private AIFunction MakeQueryFunction(
+        IFormsDatabaseClient client,
         string tableName,
         IReadOnlyCollection<string> allowedColumns,
         IReadOnlyList<DbColumnDefinition> columns,
@@ -410,7 +419,7 @@ public class FormDataToolsFactory(
             var parsedDatePartFilters = allDatePartFilters.Select(DatePartFilter.Parse);
             var parsedDateDiffFilter = dateDiffFilter != null ? DateDiffFilter.Parse(dateDiffFilter) : null;
 
-            return externalDatabaseClient.QueryAsync(
+            return client.QueryAsync(
                 tableName, allowedColumns, selectColumns, parsedFilters,
                 orderByColumn, orderByDescending, thenByColumn, thenByDescending, limit, offset,
                 parsedDatePartFilters, parsedDateDiffFilter);
@@ -418,6 +427,7 @@ public class FormDataToolsFactory(
     }
 
     private AIFunction MakeSelfJoinFunction(
+        IFormsDatabaseClient client,
         string tableName,
         IReadOnlyCollection<string> allowedColumns,
         IReadOnlyList<DbColumnDefinition> columns,
@@ -473,7 +483,7 @@ public class FormDataToolsFactory(
 
             var parsedFilters = normalFilters.Select(QueryFilter.Parse);
             var parsedDatePartFilters = cleanDatePartFilters.Select(DatePartFilter.Parse);
-            return externalDatabaseClient.SelfJoinAsync(
+            return client.SelfJoinAsync(
                 tableName, allowedColumns, pkColumn, parsedJoinList, displayColumns, limit,
                 parsedFilters, parsedDatePartFilters, countDistinctColumn);
         }

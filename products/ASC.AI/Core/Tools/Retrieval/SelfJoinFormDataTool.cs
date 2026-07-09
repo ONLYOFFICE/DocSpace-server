@@ -35,14 +35,13 @@ namespace ASC.AI.Core.Tools.Retrieval;
 
 [Scope]
 public class SelfJoinFormDataTool(
-    ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ILogger<SelfJoinFormDataTool> logger)
 {
     public const string Name = "self_join_form_data";
 
-    public async Task<AIFunction?> InitAsync(int fileId, string tableName, IEnumerable<DbColumnDefinition> columns)
+    public async Task<AIFunction?> InitAsync(int fileId, IFormsDatabaseClient client, string tableName, IEnumerable<DbColumnDefinition> columns)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -127,7 +126,7 @@ public class SelfJoinFormDataTool(
 
                 var parsedFilters = normalFilters.Select(QueryFilter.Parse);
                 var parsedDatePartFilters = cleanDatePartFilters.Select(DatePartFilter.Parse);
-                var result = await externalDatabaseClient.SelfJoinAsync(
+                var result = await client.SelfJoinAsync(
                     tableName, allowedColumns, pkName, parsedJoinList, displayColumns, limit,
                     parsedFilters, parsedDatePartFilters, countDistinctColumn);
                 return new ToolResponse<string> { Data = result };

@@ -815,22 +815,248 @@ public class GlobalFolder(
 
         id = my ? await folderDao.GetFolderIDUserAsync(true) : await folderDao.GetFolderIDCommonAsync(true);
 
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        if (my && userId == tenantManager.GetCurrentTenant().OwnerId)
+        {
+            await TryScheduleDemoFormRoomAsync(tenantId, userId);
+        }
+
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).StartDocsEnabled)
         {
             return id;
         }
 
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var userId = authContext.CurrentAccount.ID;
+        RunFireAndForget(async () => await CreateSampleDocumentsAsync(serviceProvider, tenantId, userId, id, my));
 
-        var task = new Task(async () => await CreateSampleDocumentsAsync(serviceProvider, tenantId, userId, id, my),
-            TaskCreationOptions.LongRunning);
+        return id;
+    }
+
+    private static void RunFireAndForget(System.Action action)
+    {
+        var task = new Task(action, TaskCreationOptions.LongRunning);
 
         _ = task.ConfigureAwait(false);
 
         task.Start();
+    }
 
-        return id;
+    private async Task TryScheduleDemoFormRoomAsync(int tenantId, Guid userId)
+    {
+        var settings = await settingsManager.LoadAsync<DemoFormRoomSettings>(tenantId);
+        if (settings.IsCreated)
+        {
+            return;
+        }
+
+        settings.IsCreated = true;
+        await settingsManager.SaveAsync(settings, tenantId);
+
+        RunFireAndForget(async () => await CreateDemoFormRoomAsync(serviceProvider, tenantId, userId));
+    }
+
+    /// <summary>
+    /// Provisions the owner-only onboarding demo: a form-filling room with a sample form and a batch of
+    /// synthetic filled-in submissions synced to the built-in forms database.
+    /// </summary>
+    private async Task CreateDemoFormRoomAsync(IServiceProvider serviceProvider, int tenantId, Guid userId)
+    {
+        try
+        {
+            await using var scope = serviceProvider.CreateAsyncScope();
+
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+
+            await tenantManager.SetCurrentTenantAsync(tenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(userId);
+
+            var globalStore = scope.ServiceProvider.GetRequiredService<GlobalStore>();
+            var storeTemplate = await globalStore.GetStoreTemplateAsync();
+            var formPath = $"{FileConstant.StartDocPath}{FileConstant.StartDocDefaultPath}{FileConstant.DemoFormRoomPath}{FileConstant.DemoFormRoomFileName}";
+
+            if (!await storeTemplate.IsFileAsync("", formPath))
+            {
+                logger.WarnDemoFormAssetMissing(formPath);
+
+                // The asset may simply not have been deployed yet — un-flag as "created" so the next
+                // owner visit retries, instead of permanently skipping the demo for this tenant.
+                await ResetDemoFormRoomFlagAsync(tenantId);
+
+                return;
+            }
+
+            var (roomId, savedFile) = await CreateDemoFormRoomFileAsync(scope.ServiceProvider, storeTemplate, formPath);
+
+            await SeedDemoFormSubmissionsAsync(scope.ServiceProvider, tenantId, roomId, savedFile);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorCreateDemoFormRoom(e);
+
+            // Un-flag as "created" so a transient failure (unreachable service, quota, etc.) doesn't
+            // permanently skip the demo for this tenant — the next owner visit will retry.
+            await ResetDemoFormRoomFlagAsync(tenantId);
+        }
+    }
+
+    private async Task ResetDemoFormRoomFlagAsync(int tenantId)
+    {
+        try
+        {
+            var settings = await settingsManager.LoadAsync<DemoFormRoomSettings>(tenantId);
+            settings.IsCreated = false;
+            await settingsManager.SaveAsync(settings, tenantId);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorCreateDemoFormRoom(e);
+        }
+    }
+
+    private static async Task<(int RoomId, File<int> SavedFile)> CreateDemoFormRoomFileAsync(
+        IServiceProvider scopedProvider, IDataStore storeTemplate, string formPath)
+    {
+        var fileStorageService = scopedProvider.GetRequiredService<FileStorageService>();
+
+        var room = await fileStorageService.CreateRoomAsync(
+            "Demo: Customer Feedback", RoomType.FillingFormsRoom, privacy: false, indexing: true,
+            share: null, quota: null, lifetime: null, denyDownload: false, watermark: null,
+            color: null, cover: null, tags: ["demo"], logo: null, chatSettings: null,
+            sendFormToExternalDB: true, saveFormAsXLSX: false);
+
+        var fileDao = (FileDao)scopedProvider.GetRequiredService<IFileDao<int>>();
+        var fileMarker = scopedProvider.GetRequiredService<FileMarker>();
+        var socketManager = scopedProvider.GetRequiredService<SocketManager>();
+
+        var newFile = scopedProvider.GetRequiredService<File<int>>();
+        newFile.Title = FileConstant.DemoFormRoomFileName;
+        newFile.ParentId = room.Id;
+        newFile.Category = (int)FilterType.PdfForm;
+        newFile.Comment = FilesCommonResource.CommentCreate;
+
+        File<int> savedFile;
+        await using (var stream = await storeTemplate.GetReadStreamAsync("", formPath))
+        {
+            newFile.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync("", formPath);
+            savedFile = await fileDao.SaveFileAsync(newFile, stream, false, true);
+        }
+
+        await fileMarker.MarkAsNewAsync(savedFile);
+        await socketManager.CreateFileAsync(savedFile);
+
+        await fileStorageService.ManageFormFilling(savedFile.Id, FormFillingManageAction.Start);
+
+        return (room.Id, savedFile);
+    }
+
+    private async Task SeedDemoFormSubmissionsAsync(IServiceProvider scopedProvider, int tenantId, int roomId, File<int> savedFile)
+    {
+        var originalFormId = savedFile.Id;
+        var originalFormVersion = savedFile.Version;
+
+        var (metadata, submissions) = GenerateSyntheticSubmissions(tenantId, roomId, originalFormId, originalFormVersion);
+
+        // Best-effort: also index into OpenSearch so the demo data is consistent with what a real
+        // submission would produce (search, reconciliation) — but never block seeding on it, since
+        // it is not guaranteed to be reachable in every environment.
+        try
+        {
+            var factoryIndexerFormMetadata = scopedProvider.GetRequiredService<FactoryIndexerFormMetadata>();
+            await factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
+            {
+                Id = DbFormsMetadataSearch.ComputeId(originalFormId, originalFormVersion),
+                TenantId = tenantId,
+                OriginalFormId = originalFormId,
+                OriginalFormVersion = originalFormVersion,
+                RoomId = roomId,
+                Metadata = metadata
+            }, waitForCompletion: true);
+
+            var factoryIndexerForm = scopedProvider.GetRequiredService<FactoryIndexerForm>();
+            foreach (var submission in submissions)
+            {
+                await factoryIndexerForm.IndexAsync(submission, waitForCompletion: true);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.WarnDemoFormOpenSearchIndexingFailed(e);
+        }
+
+        // Write straight into the built-in Postgres DB — this is the path the AI tools actually read
+        // from, and it must not depend on OpenSearch being reachable.
+        var formFillingReportCreator = scopedProvider.GetRequiredService<FormFillingReportCreator>();
+        await formFillingReportCreator.SeedBuiltinDbDirectlyAsync(
+            originalFormId, originalFormVersion, metadata,
+            submissions.Select(s => (s.Id, s.CreateOn, (SubmitFormsData)s)));
+    }
+
+    private const int SyntheticSubmissionIdBase = 900_000_000;
+
+    private static (List<FormMetadata> Metadata, List<DbFormsItemDataSearch> Submissions) GenerateSyntheticSubmissions(
+        int tenantId, int roomId, int originalFormId, int originalFormVersion)
+    {
+        string[] satisfactionLevels = ["Excellent", "Good", "Average", "Poor"];
+        string[] comments =
+        [
+            "Great service, will definitely come back.",
+            "The support team resolved my issue quickly.",
+            "Delivery took longer than expected.",
+            "Exactly what I was looking for.",
+            "Could be better, but overall satisfied.",
+            "Outstanding experience from start to finish.",
+            "A few rough edges, but the team was helpful.",
+            "Not what I expected, needs improvement.",
+            "Very happy with the quality.",
+            "Average experience, nothing special.",
+            "Exceeded my expectations!",
+            "Support response time was slow.",
+            "Smooth process, no complaints.",
+            "Would recommend to a friend.",
+            "It was okay, could use more options."
+        ];
+
+        var metadata = new List<FormMetadata>
+        {
+            new() { Key = "FormNumber", Type = "text" },
+            new() { Key = "Satisfaction", Type = "radio", PossibleValues = [.. satisfactionLevels] },
+            new() { Key = "Comment", Type = "text" },
+            new() { Key = "SubmittedDate", Type = "dateTime", Format = "DD.MM.YYYY HH:mm" },
+            new() { Key = "WouldRecommend", Type = "checkBox" }
+        };
+
+        var random = new Random();
+        var submissions = new List<DbFormsItemDataSearch>();
+
+        for (var i = 1; i <= 15; i++)
+        {
+            var satisfaction = satisfactionLevels[random.Next(satisfactionLevels.Length)];
+            var recommend = satisfaction is "Excellent" or "Good" ? random.Next(100) < 85 : random.Next(100) < 30;
+            var submittedOn = DateTime.UtcNow.AddDays(-random.Next(1, 42)).AddHours(-random.Next(0, 24));
+
+            submissions.Add(new DbFormsItemDataSearch
+            {
+                Id = SyntheticSubmissionIdBase + i,
+                TenantId = tenantId,
+                ParentId = roomId,
+                OriginalFormId = originalFormId,
+                OriginalFormVersion = originalFormVersion,
+                RoomId = roomId,
+                CreateOn = submittedOn,
+                FormsData =
+                [
+                    new FormsItemData { Key = "FormNumber", Value = i.ToString(), Type = "text" },
+                    new FormsItemData { Key = "Satisfaction", Value = satisfaction, Type = "radio" },
+                    new FormsItemData { Key = "Comment", Value = comments[random.Next(comments.Length)], Type = "text" },
+                    new FormsItemData { Key = "SubmittedDate", Value = submittedOn.ToString("dd.MM.yyyy HH:mm"), Type = "dateTime" },
+                    new FormsItemData { Key = "WouldRecommend", Value = recommend.ToString(), Type = "checkBox" }
+                ]
+            });
+        }
+
+        return (metadata, submissions);
     }
 
     private async Task CreateSampleDocumentsAsync(IServiceProvider serviceProvider, int tenantId, Guid userId, int folderId, bool my)
