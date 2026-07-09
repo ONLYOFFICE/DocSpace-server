@@ -408,10 +408,13 @@ internal class FileDao(
     {
         ArgumentNullException.ThrowIfNull(file);
 
-        var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
-        if (checkQuota && maxChunkedUploadSize < file.ContentLength)
+        if (checkQuota)
         {
-            throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
+            var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
+            if (maxChunkedUploadSize < file.ContentLength)
+            {
+                throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
+            }
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -428,53 +431,58 @@ internal class FileDao(
         var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
         UserInfo user = null;
         string quotaLockKey;
+        TenantEntityQuotaSettings roomQuotaSettings = null;
+        TenantUserQuotaSettings userQuotaSettings = null;
+
+        Folder<int> currentRoom = null;
 
         if (roomId != -1)
         {
             quotaLockKey = $"room_{roomId}";
+            currentRoom = await folderDao.GetFolderAsync(roomId);
+            // the folder type is immutable, so the settings type can be picked outside the lock
+            roomQuotaSettings = currentRoom.FolderType is FolderType.AiRoom
+                ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
         }
         else
         {
             user = await _userManager.GetUsersAsync(file.Id == 0 ? _authContext.CurrentAccount.ID : file.CreateBy);
             quotaLockKey = $"user_{user.Id}";
+            userQuotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
         }
 
-        await using (await _distributedLockProvider.TryAcquireFairLockAsync(quotaLockKey))
+        // the fair lock only serializes the quota check with the write that consumes the quota;
+        // when no quota is enforced there is nothing to protect, so the lock is skipped
+        var quotaEnabled = roomQuotaSettings is { EnableQuota: true } || userQuotaSettings is { EnableQuota: true };
+
+        await using (quotaEnabled ? await _distributedLockProvider.TryAcquireFairLockAsync(quotaLockKey) : null)
         {
-            if (roomId != -1)
+            if (roomId != -1 && roomQuotaSettings is { EnableQuota: true })
             {
-                var currentRoom = await folderDao.GetFolderAsync(roomId);
-
-                TenantEntityQuotaSettings quotaSettings = currentRoom.FolderType is FolderType.AiRoom
-                   ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaSettings.EnableQuota)
+                var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? roomQuotaSettings.DefaultQuota : currentRoom.SettingsQuota;
+                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
-                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : currentRoom.SettingsQuota;
-                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                     {
-                        if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
+                        if ((roomQuotaLimit * 2 < currentRoom.Counter + file.ContentLength) || roomQuotaLimit < currentRoom.Counter)
                         {
-                            if ((roomQuotaLimit * 2 < currentRoom.Counter + file.ContentLength) || roomQuotaLimit < currentRoom.Counter)
-                            {
-                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToRoomQuota, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
-                                throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
-                            }
-                            await quotaSocketManager.RoomQuotaExceededAsync(roomId);
-                            await filesMessageService.SendAsync(MessageAction.FileSavedButRoomQuotaExceeded, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
-
+                            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToRoomQuota, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
+                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
                         }
+
+                        await quotaSocketManager.RoomQuotaExceededAsync(roomId);
+                        await filesMessageService.SendAsync(MessageAction.FileSavedButRoomQuotaExceeded, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
                     }
                 }
             }
-            else if (user != null)
+            else if (user != null && quotaEnabled)
             {
-                var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
-                if (quotaUserSettings.EnableQuota)
+                if (userQuotaSettings.EnableQuota)
                 {
                     var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
 
-                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? userQuotaSettings.DefaultQuota : userQuotaData.UserQuota;
 
                     if (userQuotaLimit != UserQuotaSettings.NoQuota)
                     {
@@ -657,8 +665,7 @@ internal class FileDao(
 
                     if (roomId != -1 && checkFolder)
                     {
-                        var currentRoom = await folderDao.GetFolderAsync(roomId);
-                        if (currentRoom.FolderType == FolderType.FillingFormsRoom && currentRoom.RootFolderType != FolderType.RoomTemplates)
+                        if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && currentRoom.RootFolderType != FolderType.RoomTemplates)
                         {
                             var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
