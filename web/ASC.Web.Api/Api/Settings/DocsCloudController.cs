@@ -227,7 +227,7 @@ public class DocsCloudController(
                 q.Id == (int)TenantWalletService.DocsCloud ||
                 q.Id == (int)TenantWalletService.DocsCloudDevPack))
         {
-            // for testing purposes
+            // paid tenants shouldn't show as trial
             info.License.Trial = false;
         }
 
