@@ -378,6 +378,7 @@ public class BaseTest(
         await _filesClient.Authenticate(user);
 
         var rootSw = Stopwatch.StartNew();
+
         if (folderType == FolderType.USER)
         {
             var myFolder = await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
@@ -396,6 +397,13 @@ public class BaseTest(
         {
             var recentFolder = await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
             Timing.Write($"getRecent({user.Email})", rootSw.ElapsedMilliseconds);
+            return recentFolder.Response.Current.Id;
+        }
+
+        if (folderType == FolderType.TRASH)
+        {
+            var recentFolder = await _foldersApi.GetTrashFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+            Timing.Write($"getTrash({user.Email})", rootSw.ElapsedMilliseconds);
             return recentFolder.Response.Current.Id;
         }
 
