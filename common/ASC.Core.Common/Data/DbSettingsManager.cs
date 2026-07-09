@@ -218,6 +218,52 @@ public class SettingsManager(
         }
     }
 
+    /// <summary>
+    /// Saves settings for a tenant that has just been created. No settings row can exist for it
+    /// yet, so data equal to the default needs no row at all, and non-default data is inserted
+    /// directly without the lookup queries of the regular save path.
+    /// </summary>
+    public async Task<bool> SaveForNewTenantAsync<T>(T settings, int tenantId) where T : class, ISettings<T>
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        try
+        {
+            var key = T.ID.ToString() + tenantId + Guid.Empty;
+            var data = Serialize(settings);
+            var def = GetDefault<T>();
+
+            var defaultData = Serialize(def);
+
+            if (!data.SequenceEqual(defaultData))
+            {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
+
+                var s = new DbWebstudioSettings
+                {
+                    Id = T.ID,
+                    UserId = Guid.Empty,
+                    TenantId = tenantId,
+                    Data = data,
+                    LastModified = DateTime.UtcNow
+                };
+
+                await context.WebstudioSettings.AddAsync(s);
+                await context.SaveChangesAsync();
+            }
+
+            await fusionCache.RemoveAsync(key);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorSaveSettingsFor(ex);
+
+            return false;
+        }
+    }
+
     private T Deserialize<T>(string data)
     {
         return JsonSerializer.Deserialize<T>(data, _options);

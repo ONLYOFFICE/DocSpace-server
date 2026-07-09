@@ -303,6 +303,17 @@ internal class CachedTenantService : ITenantService
         return tenant;
     }
 
+    public async Task<Tenant> RegisterTenantAsync(CoreSettings coreSettings, Tenant tenant, UserInfo owner, string ownerPasswordHash)
+    {
+        tenant = await _service.RegisterTenantAsync(coreSettings, tenant, owner, ownerPasswordHash);
+
+        // no user-cache invalidation: the tenant id and the owner id are brand new,
+        // so nothing can be cached under their tags yet
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = tenant.Id }, CacheNotifyAction.InsertOrUpdate);
+
+        return tenant;
+    }
+
     public async Task RemoveTenantAsync(Tenant tenant, bool auto = false)
     {
         await _service.RemoveTenantAsync(tenant, auto);

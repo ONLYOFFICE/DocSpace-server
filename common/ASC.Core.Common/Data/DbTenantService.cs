@@ -240,6 +240,102 @@ public class DbTenantService(
         return tenant;
     }
 
+    public async Task<Tenant> RegisterTenantAsync(CoreSettings coreSettings, Tenant tenant, UserInfo owner, string ownerPasswordHash)
+    {
+        ArgumentNullException.ThrowIfNull(tenant);
+        ArgumentNullException.ThrowIfNull(owner);
+        ArgumentException.ThrowIfNullOrEmpty(ownerPasswordHash);
+
+        if (string.IsNullOrEmpty(owner.UserName))
+        {
+            throw new ArgumentNullException(nameof(owner.UserName));
+        }
+
+        if (!string.IsNullOrEmpty(tenant.MappedDomain))
+        {
+            var baseUrl = coreSettings.GetBaseDomain(tenant.HostedRegion);
+
+            if (baseUrl != null && tenant.MappedDomain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
+            {
+                await ValidateDomainAsync(tenant.MappedDomain[..(tenant.MappedDomain.Length - baseUrl.Length - 1)], tenant.Id, false);
+            }
+            else
+            {
+                await ValidateDomainAsync(tenant.MappedDomain, tenant.Id, false);
+            }
+        }
+
+        // the default tenant version is static reference data mapped only in TenantDbContext,
+        // so it is read outside the registration transaction
+        await using (var tenantDbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            tenant.Version = await tenantDbContext.VersionIdAsync();
+        }
+
+        if (owner.Id == Guid.Empty)
+        {
+            owner.Id = Guid.NewGuid();
+        }
+
+        if (owner.CreateDate == default)
+        {
+            owner.CreateDate = DateTime.UtcNow;
+        }
+
+        owner.UserName = owner.UserName.Trim();
+        owner.Email = owner.Email.Trim();
+
+        tenant.OwnerId = owner.Id;
+
+        await using var userDbContext = await userDbContextFactory.CreateDbContextAsync();
+
+        var strategy = userDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await userDbContext.Database.BeginTransactionAsync();
+
+            tenant.LastModified = DateTime.UtcNow;
+
+            var dbTenant = tenant.Map();
+            dbTenant.Id = 0;
+
+            await userDbContext.Tenants.AddAsync(dbTenant);
+
+            // the first SaveChanges is needed to obtain the identity-generated tenant id
+            // for the owner rows; the transaction keeps the whole registration atomic
+            await userDbContext.SaveChangesAsync();
+
+            tenant.Id = dbTenant.Id;
+
+            owner.TenantId = tenant.Id;
+            owner.LastModified = DateTime.UtcNow;
+
+            await userDbContext.Users.AddAsync(owner.Map());
+
+            await userDbContext.UserSecurity.AddAsync(new UserSecurity
+            {
+                TenantId = tenant.Id,
+                UserId = owner.Id,
+                PwdHash = GetPasswordHash(owner.Id, ownerPasswordHash),
+                LastModified = DateTime.UtcNow
+            });
+
+            var adminGroupRef = new UserGroupRef(owner.Id, Users.Constants.GroupAdmin.ID, UserGroupRefType.Contains)
+            {
+                TenantId = tenant.Id,
+                LastModified = DateTime.UtcNow
+            };
+
+            await userDbContext.UserGroups.AddAsync(adminGroupRef.Map());
+
+            await userDbContext.SaveChangesAsync();
+            await tx.CommitAsync();
+        });
+
+        return tenant;
+    }
+
     public async Task RemoveTenantAsync(Tenant tenant, bool auto = false)
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
