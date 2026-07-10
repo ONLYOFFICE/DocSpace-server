@@ -81,7 +81,7 @@ public class ReportDto
     /// <example>1</example>
     public int CurrentPage { get; set; }
 
-    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string filterServiceName)
+    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -95,7 +95,7 @@ public class ReportDto
         {
             foreach (var operation in report.Collection)
             {
-                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames, filterServiceName));
+                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames));
             }
         }
     }
@@ -177,9 +177,9 @@ public class OperationDto
     /// <example>Unknown</example>
     public OperationType Type { get; set; }
 
-    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string filterServiceName)
+    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
-        var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filterServiceName, operation.Metadata);
+        var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, operation.Metadata);
         var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
 
         Date = apiDateTimeHelper.Get(operation.Date);

@@ -218,7 +218,9 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 Resource.AccountingCustomerOperationCurrency
             };
 
-            var tenantWalletService = await GetTenantWalletService(tenantManager, taskData.ServiceName?.FirstOrDefault());
+            var tenantWalletService = taskData.ServiceName is { Count: 1 }
+                ? await GetTenantWalletService(tenantManager, taskData.ServiceName.First())
+                : null;
             var addAgentColumn = tenantWalletService is TenantWalletService.AITools;
             if (addAgentColumn)
             {
@@ -383,7 +385,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
             foreach (var operation in report.Collection)
             {
-                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName?.FirstOrDefault(), operation.Metadata);
+                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, operation.Metadata);
                 var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
 
                 operation.Description = description;

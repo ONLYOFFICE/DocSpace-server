@@ -1495,13 +1495,16 @@ public class TariffService(
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            var filterServiceName = filter.ServiceName?.FirstOrDefault();
-            if (accountingClient.SubAccountsEnabled && !string.IsNullOrEmpty(filterServiceName))
+            if (accountingClient.SubAccountsEnabled && filter.ServiceName is { Count: 1 })
             {
-                var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-                if (aiQuota != null && aiQuota.ServiceName == filterServiceName)
+                var filterServiceName = filter.ServiceName.First();
+                if (!string.IsNullOrEmpty(filterServiceName))
                 {
-                    return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
+                    var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+                    if (aiQuota != null && aiQuota.ServiceName == filterServiceName)
+                    {
+                        return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
+                    }
                 }
             }
 
