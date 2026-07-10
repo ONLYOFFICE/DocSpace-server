@@ -916,6 +916,8 @@ public class TariffService(
 
             await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
 
+            var changed = false;
+
             foreach (var q in tariffInfo.Quotas)
             {
                 if (q.Id == quotaId)
@@ -931,7 +933,14 @@ public class TariffService(
                         NextQuantity = nextQuantity,
                         TenantId = tenant
                     });
+
+                    changed = true;
                 }
+            }
+
+            if (!changed)
+            {
+                return false;
             }
 
             await dbContext.SaveChangesAsync();
