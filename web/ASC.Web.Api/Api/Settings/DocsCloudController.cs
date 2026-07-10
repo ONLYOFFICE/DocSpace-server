@@ -46,7 +46,8 @@ public class DocsCloudController(
     CspSettingsHelper cspSettingsHelper,
     WebItemManager webItemManager,
     IFusionCache fusionCache,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    IDistributedLockProvider distributedLockProvider)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -125,11 +126,17 @@ public class DocsCloudController(
     [HttpPost("switchtodevpack")]
     public async Task<bool> SwitchToDevPack(DocsCloudDevPackRequestDto inDto)
     {
-        var (fromQuota, toQuota) = await PrepareSwitchAsync(inDto.Quantity);
-
         var tenant = tenantManager.GetCurrentTenant();
 
-        return await paymentHelper.SwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity, securityContext.CurrentAccount.ID.ToString(), toQuota.Name);
+        // Serialize concurrent switch requests per tenant so the check-then-switch sequence in
+        // PrepareSwitchAsync cannot run twice in parallel (which would double-charge the wallet).
+        // A second request waits, then re-runs the check and hits the "already set" guard.
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"docscloud_switchtodevpack_{tenant.Id}"))
+        {
+            var (fromQuota, toQuota) = await PrepareSwitchAsync(inDto.Quantity);
+
+            return await paymentHelper.SwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity, securityContext.CurrentAccount.ID.ToString(), toQuota.Name);
+        }
     }
 
     /// <remarks>
