@@ -92,7 +92,7 @@ public class PaymentController(
 
         await paymentHelper.DemandAdminAsync();
 
-        ArgumentNullException.ThrowIfNull(inDto?.Quantity);
+        ArgumentNullException.ThrowIfNull(inDto);
 
         if (inDto.Quantity.Any(item => item.Value <= 0))
         {
@@ -114,10 +114,7 @@ public class PaymentController(
             .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Wallet && !q.Year)
             .ToList();
 
-        // TODO: Temporary restriction.
-        // Possibility to buy only one product per transaction.
         // Only monthly tariff available for purchase.
-        DemandSingleProduct(inDto.Quantity);
         if (monthQuotas.All(q => q.Name != inDto.Quantity.First().Key))
         {
             throw new ArgumentException("Only monthly product can be purchased per transaction");
@@ -156,11 +153,6 @@ public class PaymentController(
         var tenant = tenantManager.GetCurrentTenant();
 
         await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
-
-        // TODO: Temporary restriction.
-        // Possibility to buy only one product per transaction.
-        // For the current paid tariff only quota change is available.
-        DemandSingleProduct(inDto.Quantity);
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
@@ -213,11 +205,6 @@ public class PaymentController(
         var tenant = tenantManager.GetCurrentTenant();
 
         await paymentHelper.DemandCustomerPayerAsync(tenant.Id, refresh: true);
-
-        // TODO: Temporary restriction.
-        // Possibility to buy only one product per transaction.
-        // Wallet tariffs are always available for purchase.
-        DemandSingleProduct(inDto.Quantity);
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
@@ -315,11 +302,6 @@ public class PaymentController(
 
         await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
-        // TODO: Temporary restriction.
-        // Possibility to buy only one product per transaction.
-        // Wallet tariffs are always available for purchase.
-        DemandSingleProduct(inDto.Quantity);
-
         var product = inDto.Quantity.First();
         var productName = product.Key;
         var productQty = product.Value;
@@ -387,10 +369,6 @@ public class PaymentController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> MoveSubscriptionToWallet(QuantityRequestDto inDto)
     {
-        // TODO: Temporary restriction.
-        // Possibility to buy only one product per transaction.
-        DemandSingleProduct(inDto.Quantity);
-
         var tenant = tenantManager.GetCurrentTenant();
 
         var customerInfo = await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
@@ -650,16 +628,6 @@ public class PaymentController(
         if (!inDto.Email.TestEmailRegex())
         {
             throw new ArgumentException(Resource.ErrorNotCorrectEmail);
-        }
-
-        if (string.IsNullOrEmpty(inDto.UserName))
-        {
-            throw new ArgumentException(Resource.ErrorIncorrectUserName);
-        }
-
-        if (string.IsNullOrEmpty(inDto.Message))
-        {
-            throw new ArgumentException(Resource.ErrorEmptyMessage);
         }
 
         await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
@@ -1533,13 +1501,5 @@ public class PaymentController(
         await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         return await paymentHelper.SetRestrictedAiModelsAsync(inDto.Models);
-    }
-
-    private static void DemandSingleProduct<T>(Dictionary<string, T> quantity)
-    {
-        if (quantity is not { Count: 1 })
-        {
-            throw new ArgumentException("Only one product can be purchased per transaction");
-        }
     }
 }
