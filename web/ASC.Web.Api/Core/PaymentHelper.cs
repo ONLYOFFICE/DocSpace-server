@@ -215,7 +215,7 @@ public class PaymentHelper(
         var quotaList = (await tenantManager.GetTenantQuotasAsync(all: false, wallet: true)).ToList();
 
         var correctedList = new List<string>();
-        foreach (var serviceName in serviceNames)
+        foreach (var serviceName in serviceNames.Where(serviceName => !string.IsNullOrEmpty(serviceName)))
         {
             var (_, correctServiceName) = CheckWalletServiceName(quotaList, serviceName);
             correctedList.Add(correctServiceName);
