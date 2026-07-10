@@ -31,7 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Core.Common.AI;
 using ASC.Files.Core.ApiModels.ResponseDto;
 using ASC.Files.Core.IntegrationEvents.Events;
 using ASC.Files.Core.Services.DocumentBuilderService;
@@ -59,7 +58,6 @@ public class PaymentController(
     SecurityContext securityContext,
     RegionHelper regionHelper,
     QuotaHelper tariffHelper,
-    IFusionCache fusionCache,
     IConfiguration configuration,
     MessageService messageService,
     StudioNotifyService studioNotifyService,
@@ -73,13 +71,9 @@ public class PaymentController(
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider,
-    WalletStaticProvider walletStaticProvider,
-    QuotaSocketManager quotaSocketManager)
+    PaymentHelper paymentHelper)
     : ControllerBase
 {
-    private readonly int _maxCount = 10;
-    private readonly int _expirationMinutes = 2;
-
     /// <remarks>
     /// Returns the URL to the payment page.
     /// </remarks>
@@ -94,12 +88,9 @@ public class PaymentController(
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrl(PaymentUrlRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         ArgumentNullException.ThrowIfNull(inDto?.Quantity);
 
@@ -126,9 +117,10 @@ public class PaymentController(
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // Only monthly tariff available for purchase.
-        if (inDto.Quantity.Count != 1 || monthQuotas.All(q => q.Name != inDto.Quantity.First().Key))
+        DemandSingleProduct(inDto.Quantity);
+        if (monthQuotas.All(q => q.Name != inDto.Quantity.First().Key))
         {
-            throw new ArgumentException();
+            throw new ArgumentException("Only monthly product can be purchased per transaction");
         }
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
@@ -161,39 +153,19 @@ public class PaymentController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdatePayment(QuantityRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        await DemandPayerAsync(customerInfo);
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // For the current paid tariff only quota change is available.
-        if (inDto.Quantity.Count != 1)
-        {
-            throw new ArgumentException();
-        }
+        DemandSingleProduct(inDto.Quantity);
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
         var productQty = product.Value;
-        var quota = (await quotaService.GetTenantQuotasAsync())
-            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
-
-        if (quota == null || quota.Wallet)
-        {
-            throw new ArgumentException("Invalid product");
-        }
+        var quota = await paymentHelper.GetQuotaByProductNameAsync(productName, wallet: false);
 
         var currentQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
@@ -211,14 +183,7 @@ public class PaymentController(
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency, true, securityContext.CurrentAccount.ID.ToString());
-
-        if (result)
-        {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
-        }
-
-        return result;
+        return await paymentHelper.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency, true, securityContext.CurrentAccount.ID.ToString());
     }
 
     /// <remarks>
@@ -238,10 +203,7 @@ public class PaymentController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
         if (inDto.ProductQuantityType is ProductQuantityType.Renew or ProductQuantityType.Sub)
         {
@@ -250,32 +212,17 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id, refresh: true);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        await DemandPayerAsync(customerInfo);
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id, refresh: true);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // Wallet tariffs are always available for purchase.
-        if (inDto.Quantity.Count != 1)
-        {
-            throw new ArgumentException();
-        }
+        DemandSingleProduct(inDto.Quantity);
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
         var productQty = product.Value;
-        var quota = (await quotaService.GetTenantQuotasAsync())
-            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
-
-        if (quota is not { Wallet: true })
-        {
-            throw new ArgumentException("Invalid product");
-        }
+        var quota = await paymentHelper.GetQuotaByProductNameAsync(productName, wallet: true);
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
 
@@ -311,14 +258,7 @@ public class PaymentController(
             }
 
             // saving null value is equivalent to resetting to default
-            var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
-
-            if (updated)
-            {
-                messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
-            }
-
-            return updated;
+            return await paymentHelper.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty, productName);
         }
 
         // inDto.ProductQuantityType === ProductQuantityType.Add
@@ -339,30 +279,14 @@ public class PaymentController(
             throw new ArgumentException("Invalid quantity");
         }
 
-        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id, refresh: true);
-        if (balance == null)
-        {
-            throw new ItemNotFoundException("Balance could not be found");
-        }
-
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
-        if (subAccount == null)
-        {
-            throw new ItemNotFoundException("Subaccount could not be found");
-        }
+
+        await paymentHelper.GetSubAccountRequiredAsync(tenant.Id, defaultCurrency, refresh: true);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString());
-
-        if (result)
-        {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
-        }
-
-        return result;
+        return await paymentHelper.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString());
     }
 
     /// <remarks>
@@ -380,10 +304,7 @@ public class PaymentController(
     [HttpPut("calculatewallet")]
     public async Task<PaymentCalculation> CalculateWalletPayment(WalletQuantityRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
         if (inDto.ProductQuantityType is not ProductQuantityType.Add)
         {
@@ -392,51 +313,28 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        await DemandPayerAsync(customerInfo);
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // Wallet tariffs are always available for purchase.
-        if (inDto.Quantity.Count != 1)
-        {
-            throw new ArgumentException();
-        }
+        DemandSingleProduct(inDto.Quantity);
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
         var productQty = product.Value;
-        var quota = (await quotaService.GetTenantQuotasAsync())
-            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
 
-        if (quota is not { Wallet: true })
-        {
-            throw new ArgumentException("Invalid product");
-        }
+        await paymentHelper.GetQuotaByProductNameAsync(productName, wallet: true);
 
         if (productQty is null or <= 0)
         {
             throw new ArgumentException("Invalid quantity");
         }
 
-        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
-        if (balance == null)
-        {
-            throw new ItemNotFoundException("Balance could not be found");
-        }
-
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
-        if (subAccount == null)
-        {
-            throw new ItemNotFoundException("Subaccount could not be found");
-        }
+
+        await paymentHelper.GetSubAccountRequiredAsync(tenant.Id, defaultCurrency);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
@@ -461,22 +359,11 @@ public class PaymentController(
     [HttpGet("subscription/balance")]
     public async Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfo()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
-        await DemandPayerAsync(customerInfo);
-
-        var productId = await GetCurrentSubscriptionProductIdAsync(tenant.Id);
+        var productId = await paymentHelper.GetCurrentSubscriptionProductIdAsync(tenant.Id);
 
         return await tariffService.GetSubscriptionBalanceInfoAsync(tenant.Id, productId);
     }
@@ -500,41 +387,26 @@ public class PaymentController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> MoveSubscriptionToWallet(QuantityRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
-        if (inDto.Quantity is not { Count: 1 })
-        {
-            throw new ArgumentException();
-        }
+        DemandSingleProduct(inDto.Quantity);
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        var customerInfo = await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         if (customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
         {
             throw new InvalidOperationException("Customer payment method is not set");
         }
 
-        await DemandPayerAsync(customerInfo);
-
         var product = inDto.Quantity.First();
         var productName = product.Key;
         var productQty = product.Value;
 
-        var quota = (await quotaService.GetTenantQuotasAsync())
-            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
+        var quota = await paymentHelper.GetQuotaByProductNameAsync(productName, wallet: true);
 
-        if (quota is not { Wallet: true } || quota.TenantId != (int)TenantWalletService.Admin)
+        if (quota.TenantId != (int)TenantWalletService.Admin)
         {
             throw new ArgumentException("Invalid product");
         }
@@ -552,7 +424,7 @@ public class PaymentController(
         }
 
         // Resolve the current Stripe subscription product before it is cancelled.
-        var productId = await GetCurrentSubscriptionProductIdAsync(tenant.Id);
+        var productId = await paymentHelper.GetCurrentSubscriptionProductIdAsync(tenant.Id);
 
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
@@ -569,15 +441,7 @@ public class PaymentController(
         var requiredAmount = unitPrice * productQty;
 
         // Move the unused subscription balance to the wallet.
-        var transfer = await tariffService.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
-        if (transfer == null)
-        {
-            throw new BillingException("Failed to move the subscription balance to the wallet");
-        }
-
-        messageService.Send(MessageAction.SubscriptionBalanceMovedToWallet, $"{transfer.Amount} {transfer.Currency}");
-
-        await quotaSocketManager.TopUpWallet(false);
+        await paymentHelper.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
 
         // Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
         var siteName = tenant.GetTenantDomain(coreSettings);
@@ -588,13 +452,7 @@ public class PaymentController(
         }
 
         // Purchase the requested admins from the wallet.
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Add, defaultCurrency, false, participant);
-        if (result)
-        {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
-        }
-
-        return result;
+        return await paymentHelper.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Add, defaultCurrency, false, participant);
     }
 
     /// <remarks>
@@ -610,10 +468,7 @@ public class PaymentController(
     [HttpGet("account")]
     public async Task<string> GetPaymentAccount(PaymentAccountRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -623,7 +478,7 @@ public class PaymentController(
             return null;
         }
 
-        await DemandPayerOrOwnerAsync(tenant, customerInfo);
+        await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
 
         var result = "payment.ashx";
         return !string.IsNullOrEmpty(inDto.BackUrl) ? $"{result}?backUrl={inDto.BackUrl}" : result;
@@ -649,7 +504,6 @@ public class PaymentController(
             .ToDictionary(pr => pr.Key, pr => pr.Value.GetValueOrDefault(currency, 0));
         return result;
     }
-
 
     /// <remarks>
     /// Returns the available portal currencies.
@@ -788,9 +642,10 @@ public class PaymentController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(429, "Request limit is exceeded")]
     [HttpPost("request")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task SendPaymentRequest(SalesRequestsDto inDto)
     {
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         if (!inDto.Email.TestEmailRegex())
         {
@@ -807,12 +662,9 @@ public class PaymentController(
             throw new ArgumentException(Resource.ErrorEmptyMessage);
         }
 
-        await CheckCache("salesrequest");
-
         await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
         messageService.Send(MessageAction.ContactSalesMailSent);
     }
-
 
     /// <remarks>
     /// Returns the URL to the checkout setup page.
@@ -827,12 +679,9 @@ public class PaymentController(
     [HttpGet("checkoutsetupurl")]
     public async Task<Uri> GetCheckoutSetupUrl(CheckoutSetupUrlRequestsDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -841,7 +690,7 @@ public class PaymentController(
         {
             if (!string.IsNullOrEmpty(customerInfo.Email))
             {
-                await DemandPayerAsync(customerInfo);
+                await paymentHelper.DemandPayerAsync(customerInfo);
             }
 
             if (customerInfo.PaymentMethodStatus == PaymentMethodStatus.Set)
@@ -885,7 +734,7 @@ public class PaymentController(
             return null;
         }
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -923,10 +772,7 @@ public class PaymentController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> TopUpDeposit(TopUpDepositRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
         var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
         if (!supportedCurrencies.Contains(inDto.Currency))
@@ -936,32 +782,16 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        var customerInfo = await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         if (customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
         {
             throw new InvalidOperationException("Customer payment method is not set");
         }
 
-        await DemandPayerAsync(customerInfo);
-
         var siteName = tenant.GetTenantDomain(coreSettings);
 
-        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName, null, true);
-
-        if (result)
-        {
-            var description = $"{inDto.Amount} {inDto.Currency}";
-            messageService.Send(MessageAction.CustomerWalletToppedUp, description);
-
-            await quotaSocketManager.TopUpWallet(false);
-        }
-
-        return result;
+        return await paymentHelper.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName);
     }
 
     /// <remarks>
@@ -977,12 +807,9 @@ public class PaymentController(
     [HttpGet("customer/balance")]
     public async Task<Balance> GetCustomerBalance(PaymentInformationRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -992,8 +819,7 @@ public class PaymentController(
             return null;
         }
 
-        var result = await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh);
-        return result;
+        return await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh);
     }
 
     /// <remarks>
@@ -1009,12 +835,9 @@ public class PaymentController(
     [HttpGet("customer/aibalance")]
     public async Task<Balance> GetCustomerAiBalance(PaymentInformationRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -1024,8 +847,7 @@ public class PaymentController(
             return null;
         }
 
-        var result = await tariffService.GetCustomerAiBalanceAsync(tenant.Id, inDto.Refresh);
-        return result;
+        return await tariffService.GetCustomerAiBalanceAsync(tenant.Id, inDto.Refresh);
     }
 
     /// <remarks>
@@ -1042,12 +864,9 @@ public class PaymentController(
     [HttpGet("customer/operations")]
     public async Task<ReportDto> GetCustomerOperations([FromQuery]CustomerOperationsRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -1057,7 +876,7 @@ public class PaymentController(
             return null;
         }
 
-        inDto.ServiceName = await GetCorrectServiceNames(inDto.ServiceName);
+        inDto.ServiceName = await paymentHelper.GetCorrectServiceNamesAsync(inDto.ServiceName);
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
@@ -1103,12 +922,9 @@ public class PaymentController(
     [HttpGet("customer/usage/monthly")]
     public async Task<List<CustomerMonthlyUsageDto>> GetCustomerMonthlyUsage([FromQuery] CustomerMonthlyUsageRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -1143,12 +959,9 @@ public class PaymentController(
     [HttpGet("customer/usage")]
     public async Task<CustomerServiceUsageReportDto> GetCustomerServiceUsage([FromQuery] CustomerServiceUsageRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -1158,7 +971,7 @@ public class PaymentController(
             return null;
         }
 
-        inDto.ServiceName = await GetCorrectServiceNames(inDto.ServiceName);
+        inDto.ServiceName = await paymentHelper.GetCorrectServiceNamesAsync(inDto.ServiceName);
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
@@ -1208,11 +1021,11 @@ public class PaymentController(
     [HttpPost("customer/operationsreport")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
-        var tenantId = await EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         inDto ??= new CustomerOperationsReportRequestDto();
 
-        inDto.ServiceName = await GetCorrectServiceNames(inDto.ServiceName);
+        inDto.ServiceName = await paymentHelper.GetCorrectServiceNamesAsync(inDto.ServiceName);
 
         var userId = securityContext.CurrentAccount.ID;
 
@@ -1261,7 +1074,7 @@ public class PaymentController(
     [HttpGet("customer/operationsreport")]
     public async Task<DocumentBuilderTaskDto> GetCustomerOperationsReport()
     {
-        var tenantId = await EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID, (int)ReportType.Operations);
 
@@ -1280,7 +1093,7 @@ public class PaymentController(
     [HttpDelete("customer/operationsreport")]
     public async Task TerminateCustomerOperationsReport()
     {
-        var tenantId = await EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, ReportType.Operations, terminate: true);
 
@@ -1301,11 +1114,11 @@ public class PaymentController(
     [HttpPost("customer/usage/report")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerServiceUsageReport(CustomerServiceUsageReportRequestDto inDto)
     {
-        var tenantId = await EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         inDto ??= new CustomerServiceUsageReportRequestDto();
 
-        inDto.ServiceName = await GetCorrectServiceNames(inDto.ServiceName);
+        inDto.ServiceName = await paymentHelper.GetCorrectServiceNamesAsync(inDto.ServiceName);
 
         var userId = securityContext.CurrentAccount.ID;
 
@@ -1352,7 +1165,7 @@ public class PaymentController(
     [HttpGet("customer/usage/report")]
     public async Task<DocumentBuilderTaskDto> GetCustomerServiceUsageReport()
     {
-        var tenantId = await EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID, (int)ReportType.ServiceUsage);
 
@@ -1371,7 +1184,7 @@ public class PaymentController(
     [HttpDelete("customer/usage/report")]
     public async Task TerminateCustomerServiceUsageReport()
     {
-        var tenantId = await EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, ReportType.ServiceUsage, terminate: true);
 
@@ -1392,7 +1205,7 @@ public class PaymentController(
     [HttpPost("customer/usage/monthly/report")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerMonthlyUsageReport(CustomerMonthlyUsageReportRequestDto inDto)
     {
-        var tenantId = await EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         inDto ??= new CustomerMonthlyUsageReportRequestDto();
 
@@ -1435,7 +1248,7 @@ public class PaymentController(
     [HttpGet("customer/usage/monthly/report")]
     public async Task<DocumentBuilderTaskDto> GetCustomerMonthlyUsageReport()
     {
-        var tenantId = await EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID, (int)ReportType.MonthlyUsage);
 
@@ -1454,7 +1267,7 @@ public class PaymentController(
     [HttpDelete("customer/usage/monthly/report")]
     public async Task TerminateCustomerMonthlyUsageReport()
     {
-        var tenantId = await EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, ReportType.MonthlyUsage, terminate: true);
 
@@ -1475,12 +1288,9 @@ public class PaymentController(
     [HttpGet("accounting/currencies")]
     public async Task<List<Currency>> GetAccountingCurrencies()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
 
@@ -1502,7 +1312,7 @@ public class PaymentController(
     [HttpGet("topupsettings")]
     public async Task<TenantWalletSettings> GetTenantWalletSettings()
     {
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         var result = await settingsManager.LoadAsync<TenantWalletSettings>();
         return result;
@@ -1524,26 +1334,15 @@ public class PaymentController(
     [HttpPost("topupsettings")]
     public async Task<TenantWalletSettings> SetTenantWalletSettings(TenantWalletSettingsWrapper inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
         if (balance == null)
         {
             throw new ItemNotFoundException("Balance could not be found");
         }
-
-        await DemandPayerAsync(customerInfo);
 
         var settings = inDto?.Settings ?? new TenantWalletSettings();
 
@@ -1553,7 +1352,6 @@ public class PaymentController(
 
         return settings;
     }
-
 
     /// <summary>
     /// Gets the wallet service settings for the tenant.
@@ -1568,16 +1366,11 @@ public class PaymentController(
     [HttpGet("servicessettings")]
     public async Task<TenantWalletServiceSettings> GetTenantWalletServiceSettings()
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
-
-        return settings;
+        return await settingsManager.LoadAsync<TenantWalletServiceSettings>();
     }
 
     /// <summary>
@@ -1596,87 +1389,15 @@ public class PaymentController(
     [HttpPost("servicestate")]
     public async Task<TenantWalletServiceSettings> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
-        await DemandPayerAsync(customerInfo);
-
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
-
-        settings.EnabledServices ??= [];
-
-        if (inDto.Enabled && !settings.EnabledServices.Contains(inDto.Service))
-        {
-            if (inDto.Service == TenantWalletService.AISearch && !settings.EnabledServices.Contains(TenantWalletService.AITools))
-            {
-                throw new InvalidOperationException("AI Tools service must be enabled before Search");
-            }
-
-            settings.EnabledServices.Add(inDto.Service);
-        }
-
-        if (!inDto.Enabled && settings.EnabledServices.Contains(inDto.Service))
-        {
-            settings.EnabledServices.Remove(inDto.Service);
-
-            if (inDto.Service == TenantWalletService.AITools && settings.EnabledServices.Contains(TenantWalletService.AISearch))
-            {
-                settings.EnabledServices.Remove(TenantWalletService.AISearch);
-            }
-        }
-
-        if (settings.EnabledServices.Count == 0)
-        {
-            settings.EnabledServices = null;
-        }
-
-        var result = await settingsManager.SaveAsync(settings);
-
-        if (!result)
-        {
-            throw new InvalidOperationException("Failed to save tenant wallet service settings");
-        }
-
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
-
-        if (inDto.Service == TenantWalletService.AITools)
-        {
-            await quotaSocketManager.ChangeAiConfigAsync();
-        }
-
-        return settings;
-    }
-
-    private async Task EnableAiToolsServiceAsync()
-    {
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
-
-        settings.EnabledServices ??= [];
-
-        if (settings.EnabledServices.Contains(TenantWalletService.AITools))
-        {
-            return;
-        }
-
-        settings.EnabledServices.Add(TenantWalletService.AITools);
-
-        await settingsManager.SaveAsync(settings);
-
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
-
-        await quotaSocketManager.ChangeAiConfigAsync();
+        return await paymentHelper.ChangeWalletServiceStateAsync(inDto.Service, inDto.Enabled);
     }
 
     /// <summary>
@@ -1696,20 +1417,9 @@ public class PaymentController(
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<ServicePayment> CreditAiBalance(CreditAiBalanceRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        await DemandPayerAsync(customerInfo);
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
         if (balance == null)
@@ -1748,16 +1458,7 @@ public class PaymentController(
             throw new ItemNotFoundException("AiTools quota not found");
         }
 
-        var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
-        var result = await tariffService.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency, customerParticipantName, metadata: null);
-        if (result != null)
-        {
-            var details = $"{aiToolsQuota.ServiceName} {inDto.Amount} {inDto.Currency}";
-            messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
-            await EnableAiToolsServiceAsync();
-        }
-
-        return result;
+        return await paymentHelper.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), aiToolsQuota.ServiceName);
     }
 
     /// <summary>
@@ -1775,79 +1476,11 @@ public class PaymentController(
     [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()
     {
-        DemandAiGatewayConfiguration();
+        paymentHelper.DemandAiGatewayConfiguration();
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
-        var aiPrices = await aiGateway.GetPricesAsync();
-        var icons = new Dictionary<string, string>();
-
-        var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower())
-            .Concat(aiPrices.Image.Select(m => m.OwnedBy.ToLower()))
-            .Distinct();
-
-        var searchTypes = aiPrices.Search.Select(s => s.Id).Distinct();
-
-        foreach (var provider in providers)
-        {
-            icons[provider] = await walletStaticProvider.GetImageAsync(provider);
-        }
-
-        foreach (var searchType in searchTypes)
-        {
-            icons[searchType] = await walletStaticProvider.GetImageAsync(searchType);
-        }
-
-        var chat = aiPrices.Chat.Select(m => new AiEntryPricingDto<AiChatPriceDto>
-        {
-            Id = m.Id,
-            Image = icons[m.OwnedBy.ToLower()],
-            Alias = m.Alias,
-            Provider = m.Provider,
-            Price = new AiChatPriceDto { Prompt = m.Price.Prompt, Completion = m.Price.Completion },
-            Link = m.Link
-        }).ToList();
-
-        var embeddingImage = await walletStaticProvider.GetImageAsync("embedding");
-
-        var embedding = aiPrices.Embedding.Select(e => new AiEntryPricingDto<AiEmbeddingPriceDto>
-        {
-            Id = e.Id,
-            Alias = e.Alias,
-            Provider = e.Provider,
-            Image = embeddingImage,
-            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt },
-            Link = e.Link
-        }).ToList();
-
-        var image = aiPrices.Image.Select(m => new AiEntryPricingDto<AiImagePriceDto>
-        {
-            Id = m.Id,
-            Image = icons[m.OwnedBy.ToLower()],
-            Alias = m.Alias,
-            Provider = m.Provider,
-            Price = new AiImagePriceDto { Prompt = m.Price.Prompt, Image = m.Price.Image },
-            Link = m.Link
-        }).ToList();
-
-        var search = aiPrices.Search.Select(s => new AiEntryPricingDto<decimal>
-        {
-            Id = s.Id,
-            Alias = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{s.Id}"),
-            Image = icons[s.Id],
-            Provider = s.Provider,
-            Price = s.Price,
-            Link = s.Link
-        }).ToList();
-
-        return new AiPricesDto
-        {
-            Chat = chat,
-            Embedding = embedding,
-            Image = image,
-            WebSearch = search,
-            Currency = aiPrices.Currency
-        };
+        return await paymentHelper.GetAiPricesAsync();
     }
 
     /// <summary>
@@ -1870,7 +1503,7 @@ public class PaymentController(
             return new RestrictedModelsResponse { Models = [] };
         }
 
-        await DemandAdminAsync();
+        await paymentHelper.DemandAdminAsync();
 
         return await aiGateway.GetRestrictedModelsAsync();
     }
@@ -1891,180 +1524,22 @@ public class PaymentController(
     [HttpPut("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {
-        DemandAiGatewayConfiguration();
+        paymentHelper.DemandAiGatewayConfiguration();
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
-        await DemandPayerAsync(customerInfo);
-
-        var result = await aiGateway.SetRestrictedModelsAsync(inDto.Models);
-
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
-
-        return result;
+        return await paymentHelper.SetRestrictedAiModelsAsync(inDto.Models);
     }
 
-    private async Task DemandAdminAsync()
+    private static void DemandSingleProduct<T>(Dictionary<string, T> quantity)
     {
-        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        if (quantity is not { Count: 1 })
         {
-            throw new SecurityException();
+            throw new ArgumentException("Only one product can be purchased per transaction");
         }
-    }
-
-    private async Task DemandPayerAsync(CustomerInfo customerInfo)
-    {
-        var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
-
-        if (payer == null || securityContext.CurrentAccount.ID != payer.Id)
-        {
-            throw new SecurityException("Access denied: insufficient permissions for this payment operation");
-        }
-    }
-
-    private async Task<string> GetCurrentSubscriptionProductIdAsync(int tenantId)
-    {
-        var tariff = await tariffService.GetTariffAsync(tenantId);
-
-        if (tariff.State != TariffState.Paid)
-        {
-            throw new BillingException("Tariff is not paid");
-        }
-
-        var mainQuotaRow = tariff.Quotas.FirstOrDefault(q => !q.Additional);
-        if (mainQuotaRow == null)
-        {
-            throw new ItemNotFoundException("Subscription could not be found");
-        }
-
-        // Resolve the TenantQuota for the authoritative Wallet flag and ProductId
-        var quota = await quotaService.GetTenantQuotaAsync(mainQuotaRow.Id);
-        if (quota == null || quota.Wallet || string.IsNullOrEmpty(quota.ProductId))
-        {
-            throw new ArgumentException("Invalid product");
-        }
-
-        return quota.ProductId;
-    }
-
-    private async Task DemandPayerOrOwnerAsync(Tenant tenant, CustomerInfo customerInfo)
-    {
-        if (securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
-
-            if (securityContext.CurrentAccount.ID != payer.Id)
-            {
-                throw new SecurityException("Access denied: insufficient permissions for this payment operation");
-            }
-        }
-    }
-
-    private void DemandAiGatewayConfiguration()
-    {
-        if (!tariffService.IsConfigured() || !aiGateway.Configured)
-        {
-            throw new InvalidOperationException("Tariff service or AI gateway is not configured");
-        }
-    }
-
-    private async Task CheckCache(string baseKey)
-    {
-        var key = HttpContext.Connection.RemoteIpAddress + baseKey;
-        var countFromCache = await fusionCache.TryGetAsync<int>(key);
-        var count = countFromCache.HasValue ? countFromCache.Value : 0;
-        if (count > _maxCount)
-        {
-            throw new Exception(Resource.ErrorRequestLimitExceeded);
-        }
-
-        await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
-    }
-
-    /// <summary>
-    /// Ensures that the current tenant has a customer and the current user has administrator rights.
-    /// </summary>
-    /// <remarks>
-    /// This method verifies that the tariff service is configured, validates that the current user has administrator permissions,
-    /// retrieves the current tenant ID, and confirms that customer information exists for the tenant.
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">Thrown when the tariff service is not configured.</exception>
-    /// <exception cref="SecurityException">Thrown when the current user does not have administrator rights.</exception>
-    /// <returns>The tenant ID of the validated customer.</returns>
-    private async Task<int> EnsureCustomerAndAdminRightsAsync()
-    {
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
-        await DemandAdminAsync();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        return tenantId;
-    }
-
-    /// <summary>
-    /// Validates the service name and returns the corresponding tenant wallet service with the correct service name
-    /// </summary>
-    /// <remarks>
-    /// Checks if the provided service name matches any tenant quota service name and verifies that the corresponding tenant ID is a valid TenantWalletService enum value.
-    /// </remarks>
-    /// <param name="serviceName">The service name to validate</param>
-    /// <return>The corresponding TenantWalletService enum value and correct service name</return>
-    /// <exception cref="ItemNotFoundException">Thrown when the quota with the corresponding service name is hidden or not found in the database.</exception>
-    private async Task<(TenantWalletService, string)> CheckWalletServiceName(string serviceName)
-    {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
-
-        var selectedQuota = quotaList.FirstOrDefault(x =>
-            x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
-
-        // for testing purposes
-        if (selectedQuota == null)
-        {
-            serviceName += "-1-hour";
-            selectedQuota = quotaList.FirstOrDefault(x =>
-                x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
-        {
-            return ((TenantWalletService)selectedQuota.TenantId, serviceName);
-        }
-
-        throw new ItemNotFoundException("Service could not be found");
-    }
-
-    private async Task<List<string>> GetCorrectServiceNames(List<string> serviceNames)
-    {
-        if (serviceNames is not { Count: > 0 })
-        {
-            return serviceNames;
-        }
-
-        var correctedList = new List<string>();
-        foreach (var serviceName in serviceNames)
-        {
-            var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
-            correctedList.Add(correctServiceName);
-        }
-
-        return correctedList;
     }
 }

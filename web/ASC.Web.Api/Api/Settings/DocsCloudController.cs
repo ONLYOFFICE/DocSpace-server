@@ -41,9 +41,9 @@ public class DocsCloudController(
     DocsCloudClient docsCloudClient,
     ITariffService tariffService,
     IQuotaService quotaService,
-    UserManager userManager,
     SecurityContext securityContext,
     MessageService messageService,
+    PaymentHelper paymentHelper,
     CspSettingsHelper cspSettingsHelper,
     WebItemManager webItemManager,
     IFusionCache fusionCache,
@@ -68,10 +68,7 @@ public class DocsCloudController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -98,12 +95,10 @@ public class DocsCloudController(
             throw new ArgumentException("Quota is already set");
         }
 
-        var result = await tariffService.GetDocsCloudTrialAsync(tenant.Id);
+        var result = await paymentHelper.GetDocsCloudTrialAsync(tenant.Id, docsCloudTrialQuota.Name);
 
         if (result)
         {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{docsCloudTrialQuota.Name}");
-
             var docsCloudTenant = await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), true);
 
             await ChangeCspSettingsAsync(docsCloudTenant);
@@ -135,14 +130,7 @@ public class DocsCloudController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var result = await tariffService.SwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity, securityContext.CurrentAccount.ID.ToString());
-
-        if (result)
-        {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{toQuota.Name} {inDto.Quantity}");
-        }
-
-        return result;
+        return await paymentHelper.SwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity, securityContext.CurrentAccount.ID.ToString(), toQuota.Name);
     }
 
     /// <remarks>
@@ -345,24 +333,9 @@ public class DocsCloudController(
         const TenantWalletService from = TenantWalletService.DocsCloud;
         const TenantWalletService to = TenantWalletService.DocsCloudDevPack;
 
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        var payer = await userManager.GetUserByEmailAsync(customerInfo.Email);
-        if (payer == null || securityContext.CurrentAccount.ID != payer.Id)
-        {
-            throw new SecurityException("Access denied: insufficient permissions for this payment operation");
-        }
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
         if (tariff.State > TariffState.Paid)
