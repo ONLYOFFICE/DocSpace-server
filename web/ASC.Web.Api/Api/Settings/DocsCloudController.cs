@@ -41,13 +41,13 @@ public class DocsCloudController(
     DocsCloudClient docsCloudClient,
     ITariffService tariffService,
     IQuotaService quotaService,
-    UserManager userManager,
     SecurityContext securityContext,
-    MessageService messageService,
+    PaymentHelper paymentHelper,
     CspSettingsHelper cspSettingsHelper,
     WebItemManager webItemManager,
     IFusionCache fusionCache,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    IDistributedLockProvider distributedLockProvider)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -68,10 +68,7 @@ public class DocsCloudController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
+        paymentHelper.DemandConfigured();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -98,12 +95,10 @@ public class DocsCloudController(
             throw new ArgumentException("Quota is already set");
         }
 
-        var result = await tariffService.GetDocsCloudTrialAsync(tenant.Id);
+        var result = await paymentHelper.GetDocsCloudTrialAsync(tenant.Id, docsCloudTrialQuota.Name);
 
         if (result)
         {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{docsCloudTrialQuota.Name}");
-
             var docsCloudTenant = await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), true);
 
             await ChangeCspSettingsAsync(docsCloudTenant);
@@ -131,18 +126,17 @@ public class DocsCloudController(
     [HttpPost("switchtodevpack")]
     public async Task<bool> SwitchToDevPack(DocsCloudDevPackRequestDto inDto)
     {
-        var (fromQuota, toQuota) = await PrepareSwitchAsync(inDto.Quantity);
-
         var tenant = tenantManager.GetCurrentTenant();
 
-        var result = await tariffService.SwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity, securityContext.CurrentAccount.ID.ToString());
-
-        if (result)
+        // Serialize concurrent switch requests per tenant so the check-then-switch sequence in
+        // PrepareSwitchAsync cannot run twice in parallel (which would double-charge the wallet).
+        // A second request waits, then re-runs the check and hits the "already set" guard.
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"docscloud_switchtodevpack_{tenant.Id}"))
         {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{toQuota.Name} {inDto.Quantity}");
-        }
+            var (fromQuota, toQuota) = await PrepareSwitchAsync(inDto.Quantity);
 
-        return result;
+            return await paymentHelper.SwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity, securityContext.CurrentAccount.ID.ToString(), toQuota.Name);
+        }
     }
 
     /// <remarks>
@@ -227,7 +221,7 @@ public class DocsCloudController(
                 q.Id == (int)TenantWalletService.DocsCloud ||
                 q.Id == (int)TenantWalletService.DocsCloudDevPack))
         {
-            // for testing purposes
+            // paid tenants shouldn't show as trial
             info.License.Trial = false;
         }
 
@@ -261,11 +255,7 @@ public class DocsCloudController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var result = await docsCloudClient.UpdateTenantConfigAsync(await GetPortalIdAsync(), inDto);
-
-        messageService.Send(MessageAction.DocsCloudConfigUpdated);
-
-        return result;
+        return await paymentHelper.UpdateTenantConfigAsync(await GetPortalIdAsync(), inDto);
     }
 
     /// <remarks>
@@ -317,7 +307,7 @@ public class DocsCloudController(
 
     private async Task ChangeCspSettingsAsync(DocsCloudTenant docsCloudTenant)
     {
-        if (docsCloudTenant.IsDefault())
+        if (docsCloudTenant.IsDefault() || !Uri.IsWellFormedUriString(docsCloudTenant.Address, UriKind.Absolute))
         {
             return;
         }
@@ -345,20 +335,9 @@ public class DocsCloudController(
         const TenantWalletService from = TenantWalletService.DocsCloud;
         const TenantWalletService to = TenantWalletService.DocsCloudDevPack;
 
-        if (!tariffService.IsConfigured())
-        {
-            throw new InvalidOperationException("Tariff service is not configured");
-        }
-
         var tenant = tenantManager.GetCurrentTenant();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            throw new ItemNotFoundException("Customer could not be found");
-        }
-
-        await DemandPayerAsync(customerInfo);
+        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
         if (tariff.State > TariffState.Paid)
@@ -394,15 +373,5 @@ public class DocsCloudController(
         }
 
         return (fromQuota, toQuota);
-    }
-
-    private async Task DemandPayerAsync(CustomerInfo customerInfo)
-    {
-        var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
-
-        if (securityContext.CurrentAccount.ID != payer.Id)
-        {
-            throw new SecurityException("Access denied: insufficient permissions for this payment operation");
-        }
     }
 }

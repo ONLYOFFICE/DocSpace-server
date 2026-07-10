@@ -43,6 +43,7 @@ internal class DocsCloudAuthHandler(IOptions<DocsCloudConfiguration> configurati
     {
         if (!string.IsNullOrEmpty(configuration.Value.Secret))
         {
+            request.Headers.Remove("Authorization");
             request.Headers.Add("Authorization", CreateAuthToken(configuration.Value.Key, configuration.Value.Secret));
         }
 
