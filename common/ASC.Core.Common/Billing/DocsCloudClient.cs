@@ -74,7 +74,7 @@ public class DocsCloudClient(
         }
         catch (DocsCloudNotFoundException)
         {
-            await hybridCache.SetAsync(key, new DocsCloudTenant(), _longCacheExpiration);
+            await hybridCache.SetAsync(key, new DocsCloudTenant(), _shortCacheExpiration);
         }
 
         return tenant;

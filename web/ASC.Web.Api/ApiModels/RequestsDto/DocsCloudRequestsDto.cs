@@ -42,5 +42,6 @@ public class DocsCloudDevPackRequestDto
     /// The number of users for DocsCloudDevPack subscription.
     /// </summary>
     /// <example>10</example>
+    [Range(1, int.MaxValue)]
     public int Quantity { get; set; }
 }
