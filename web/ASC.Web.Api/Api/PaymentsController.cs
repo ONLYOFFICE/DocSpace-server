@@ -1057,16 +1057,7 @@ public class PaymentController(
             return null;
         }
 
-        if (inDto.ServiceName is { Count: > 0 })
-        {
-            var correctedList = new List<string>();
-            foreach (var serviceName in inDto.ServiceName)
-            {
-                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
-                correctedList.Add(correctServiceName);
-            }
-            inDto.ServiceName = correctedList;
-        }
+        inDto.ServiceName = await GetCorrectServiceNames(inDto.ServiceName);
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
@@ -1167,16 +1158,7 @@ public class PaymentController(
             return null;
         }
 
-        if (inDto.ServiceName is { Count: > 0 })
-        {
-            var correctedList = new List<string>();
-            foreach (var serviceName in inDto.ServiceName)
-            {
-                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
-                correctedList.Add(correctServiceName);
-            }
-            inDto.ServiceName = correctedList;
-        }
+        inDto.ServiceName = await GetCorrectServiceNames(inDto.ServiceName);
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
@@ -1230,16 +1212,7 @@ public class PaymentController(
 
         inDto ??= new CustomerOperationsReportRequestDto();
 
-        if (inDto.ServiceName is { Count: > 0 })
-        {
-            var correctedList = new List<string>();
-            foreach (var serviceName in inDto.ServiceName)
-            {
-                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
-                correctedList.Add(correctServiceName);
-            }
-            inDto.ServiceName = correctedList;
-        }
+        inDto.ServiceName = await GetCorrectServiceNames(inDto.ServiceName);
 
         var userId = securityContext.CurrentAccount.ID;
 
@@ -1332,16 +1305,7 @@ public class PaymentController(
 
         inDto ??= new CustomerServiceUsageReportRequestDto();
 
-        if (inDto.ServiceName is { Count: > 0 })
-        {
-            var correctedList = new List<string>();
-            foreach (var serviceName in inDto.ServiceName)
-            {
-                var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
-                correctedList.Add(correctServiceName);
-            }
-            inDto.ServiceName = correctedList;
-        }
+        inDto.ServiceName = await GetCorrectServiceNames(inDto.ServiceName);
 
         var userId = securityContext.CurrentAccount.ID;
 
@@ -2085,5 +2049,22 @@ public class PaymentController(
         }
 
         throw new ItemNotFoundException("Service could not be found");
+    }
+
+    private async Task<List<string>> GetCorrectServiceNames(List<string> serviceNames)
+    {
+        if (serviceNames is not { Count: > 0 })
+        {
+            return serviceNames;
+        }
+
+        var correctedList = new List<string>();
+        foreach (var serviceName in serviceNames)
+        {
+            var (_, correctServiceName) = await CheckWalletServiceName(serviceName);
+            correctedList.Add(correctServiceName);
+        }
+
+        return correctedList;
     }
 }
