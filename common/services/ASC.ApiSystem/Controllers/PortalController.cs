@@ -146,6 +146,61 @@ public class PortalController(
 
 
     /// <remarks>
+    /// Registers a new portal by OAuth with the parameters specified in the request.
+    /// </remarks>
+    /// <summary>
+    /// Register a portal by OAuth
+    /// </summary>
+    /// <path>apisystem/portal/registerbyoauth</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [HttpPost("registerbyoauth")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
+    public async ValueTask<IActionResult> RegisterByOAuthAsync(TenantModel model)
+    {
+        if (model == null)
+        {
+            return BadRequest(new ErrorDto
+            {
+                Error = "params",
+                Message = "Model is null"
+            });
+        }
+
+        var modelError = ValidateModelState(ModelState);
+        if (modelError != null)
+        {
+            return BadRequest(modelError);
+        }
+
+        // OAuth only: Provider + AccessToken or CodeOAuth is required
+        model.Email = null;
+        model.ThirdPartyProfile = null;
+
+        if (string.IsNullOrEmpty(model.Provider))
+        {
+            return BadRequest(new ErrorDto
+            {
+                Error = "params",
+                Message = "Provider is required"
+            });
+        }
+
+        if (string.IsNullOrEmpty(model.AccessToken) && string.IsNullOrEmpty(model.CodeOAuth))
+        {
+            return BadRequest(new ErrorDto
+            {
+                Error = "params",
+                Message = "AccessToken or CodeOAuth is required"
+            });
+        }
+
+        var (response, error, statusCode) = await portalRegistrationService.HandleRegisterByEmailAsync(model);
+        return error != null ? StatusCode(statusCode, error) : Ok(response);
+    }
+
+
+    /// <remarks>
     /// Registers a new portal and immediately configures the specified OAuth provider, so the owner can sign in
     /// without a password. Supports any provider registered in the system.
     /// Provider keys are matched to the consumer's managed keys by conventional suffix (clientId, clientSecret,
@@ -159,6 +214,7 @@ public class PortalController(
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("provision")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
+    [Obsolete("Candidate for deletion. Used in integrations.")]
     public async ValueTask<IActionResult> ProvisionAsync(ProvisionPortalRequestDto model)
     {
         if (model == null)

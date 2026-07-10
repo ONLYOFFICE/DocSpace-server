@@ -33,6 +33,7 @@
 
 global using System.Text.Json.Serialization;
 
+global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;

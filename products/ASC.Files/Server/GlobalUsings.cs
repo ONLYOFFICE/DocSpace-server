@@ -47,6 +47,7 @@ global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Routing;
 global using ASC.Api.Utils;
+global using ASC.AI.Integration.Extensions;
 global using ASC.Common;
 global using ASC.Common.Threading;
 global using ASC.Common.Web;

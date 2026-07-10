@@ -43,7 +43,6 @@ namespace ASC.Files.Tests.Tests._03_Rooms;
 /// purely on <see cref="FolderType.FillingFormsRoom"/>, this behavior applies equally to rooms created
 /// before the "Forms" section was introduced and to newly created ones.
 /// </summary>
-[Collection("Test Collection")]
 [Trait("Category", "Rooms")]
 public class FormFillingRoomSectionTests(
     AspireAppFixture fixture)
@@ -53,7 +52,7 @@ public class FormFillingRoomSectionTests(
     public async Task CreateFillingFormsRoom_DoesNotAppearInVirtualRoomsSection()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var roomTitle = "Form Room " + Guid.NewGuid().ToString()[..8];
 
         // Act
@@ -73,7 +72,7 @@ public class FormFillingRoomSectionTests(
     public async Task CreateFillingFormsRoom_AppearsInFormsSection()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var roomTitle = "Form Room " + Guid.NewGuid().ToString()[..8];
 
         // Act
@@ -93,7 +92,7 @@ public class FormFillingRoomSectionTests(
     public async Task GetFormsFolder_ReturnsOnlyFormFillingRooms()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
         var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
@@ -115,7 +114,7 @@ public class FormFillingRoomSectionTests(
     public async Task NonFormRoom_AppearsInVirtualRooms_ButNotInFormsSection()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var roomTitle = "Custom Room " + Guid.NewGuid().ToString()[..8];
 
         // Act
@@ -139,7 +138,7 @@ public class FormFillingRoomSectionTests(
     public async Task FormAndRegularRooms_AreSplitBetweenSections()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
         var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
@@ -168,7 +167,7 @@ public class FormFillingRoomSectionTests(
     public async Task FilteringRoomsByFillingFormsRoomType_InVirtualRooms_ReturnsNothing()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
 
         // Act - explicitly asking for form filling rooms within the Virtual Rooms section
@@ -186,7 +185,7 @@ public class FormFillingRoomSectionTests(
     public async Task RootFolders_ContainDedicatedFormsSection()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Act
         var rootFolders = (await _foldersApi.GetRootFoldersAsync(
@@ -202,7 +201,7 @@ public class FormFillingRoomSectionTests(
     public async Task FormsRootFolderId_IsConsistentAcrossEndpoints()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Act - the Forms root id can be obtained both from the @forms endpoint and the root folders list
         var formsFolder = (await _foldersApi.GetFormsFolderAsync(
@@ -224,12 +223,12 @@ public class FormFillingRoomSectionTests(
     public async Task BrowseFormsRootFolder_ById_ListsFormRoomsOnly()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
         var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
 
-        var formsRootId = await GetFolderIdAsync(FolderType.Forms, Initializer.Owner);
+        var formsRootId = await GetFolderIdAsync(FolderType.Forms, Owner);
 
         // Act - browse the Forms root folder directly by its id
         var formsContent = (await _foldersApi.GetFolderByFolderIdAsync(
@@ -248,12 +247,12 @@ public class FormFillingRoomSectionTests(
     public async Task BrowseVirtualRoomsRootFolder_ById_ExcludesFormRooms()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
         var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
 
-        var virtualRoomsRootId = await GetFolderIdAsync(FolderType.VirtualRooms, Initializer.Owner);
+        var virtualRoomsRootId = await GetFolderIdAsync(FolderType.VirtualRooms, Owner);
 
         // Act - browse the Virtual Rooms root folder directly by its id
         var roomsContent = (await _foldersApi.GetFolderByFolderIdAsync(
