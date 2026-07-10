@@ -44,6 +44,7 @@ public class PaymentHelper(
     MessageService messageService,
     QuotaSocketManager quotaSocketManager,
     AiGateway aiGateway,
+    DocsCloudClient docsCloudClient,
     WalletStaticProvider walletStaticProvider)
 {
     public void DemandConfigured()
@@ -440,6 +441,15 @@ public class PaymentHelper(
         var result = await aiGateway.SetRestrictedModelsAsync(models);
 
         messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+
+        return result;
+    }
+
+    public async Task<DocsCloudConfig> UpdateTenantConfig(string portalId, DocsCloudConfig docsCloudConfig)
+    {
+        var result = await docsCloudClient.UpdateTenantConfigAsync(portalId, docsCloudConfig);
+
+        messageService.Send(MessageAction.DocsCloudConfigUpdated);
 
         return result;
     }
