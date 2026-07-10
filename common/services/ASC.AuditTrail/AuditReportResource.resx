@@ -1209,4 +1209,7 @@
   <data name="DocsCloudConfigUpdated" xml:space="preserve">
     <value>Docs Connect config updated</value>
   </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect quota report downloaded</value>
+  </data>
 </root>

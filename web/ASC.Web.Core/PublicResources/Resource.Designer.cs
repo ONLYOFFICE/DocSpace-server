@@ -4063,5 +4063,14 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("WhatsNewSubscriptionName", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to DocsCloud Quota Report ({0}).
+        /// </summary>
+        public static string DocsCloudQuotaReportName {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportName", resourceCulture);
+            }
+        }
     }
 }

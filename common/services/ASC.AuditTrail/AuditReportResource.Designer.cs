@@ -707,6 +707,15 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("DocsCloudConfigUpdated", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Docs Connect quota report downloaded.
+        /// </summary>
+        public static string DocsCloudQuotaReportDownloaded {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportDownloaded", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Default template settings updated: {0}.

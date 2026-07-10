@@ -274,20 +274,18 @@ public class DocsCloudController(
     }
 
     /// <remarks>
-    /// Downloads the DocsCloud user quota of the current portal as a CSV file.
+    /// Generates the DocsCloud user quota report as a CSV file and saves it in "My Documents".
     /// </remarks>
-    /// <summary>Download the DocsCloud tenant quota</summary>
-    /// <path>api/2.0/settings/docscloud/tenant/quota/download</path>
+    /// <summary>Generate the DocsCloud tenant quota report</summary>
+    /// <path>api/2.0/settings/docscloud/tenant/quota/report</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "DocsCloud user quota CSV file", typeof(FileResult))]
-    [HttpGet("tenant/quota/download")]
-    public async Task<FileResult> DownloadTenantQuota()
+    [SwaggerResponse(200, "URL to the CSV report file", typeof(string))]
+    [HttpPost("tenant/quota/report")]
+    public async Task<string> CreateTenantQuotaReport()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var stream = await docsCloudClient.DownloadTenantQuotaAsync(await GetPortalIdAsync());
-
-        return File(stream, "text/csv", "quota.csv");
+        return await paymentHelper.CreateTenantQuotaReportAsync(await GetPortalIdAsync());
     }
 
     /// <remarks>
