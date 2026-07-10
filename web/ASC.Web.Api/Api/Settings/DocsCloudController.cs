@@ -248,7 +248,7 @@ public class DocsCloudController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await paymentHelper.UpdateTenantConfig(await GetPortalIdAsync(), inDto);
+        return await paymentHelper.UpdateTenantConfigAsync(await GetPortalIdAsync(), inDto);
     }
 
     /// <remarks>

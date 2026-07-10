@@ -445,7 +445,7 @@ public class PaymentHelper(
         return result;
     }
 
-    public async Task<DocsCloudConfig> UpdateTenantConfig(string portalId, DocsCloudConfig docsCloudConfig)
+    public async Task<DocsCloudConfig> UpdateTenantConfigAsync(string portalId, DocsCloudConfig docsCloudConfig)
     {
         var result = await docsCloudClient.UpdateTenantConfigAsync(portalId, docsCloudConfig);
 
