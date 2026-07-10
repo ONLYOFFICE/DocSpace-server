@@ -42,7 +42,6 @@ public class DocsCloudController(
     ITariffService tariffService,
     IQuotaService quotaService,
     SecurityContext securityContext,
-    MessageService messageService,
     PaymentHelper paymentHelper,
     CspSettingsHelper cspSettingsHelper,
     WebItemManager webItemManager,
