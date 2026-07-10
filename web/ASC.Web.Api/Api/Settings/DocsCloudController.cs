@@ -300,7 +300,7 @@ public class DocsCloudController(
 
     private async Task ChangeCspSettingsAsync(DocsCloudTenant docsCloudTenant)
     {
-        if (docsCloudTenant.IsDefault())
+        if (docsCloudTenant.IsDefault() || !Uri.IsWellFormedUriString(docsCloudTenant.Address, UriKind.Absolute))
         {
             return;
         }
