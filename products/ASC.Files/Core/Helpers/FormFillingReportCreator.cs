@@ -427,7 +427,7 @@ public class FormFillingReportCreator(
                 FormsData = formNumber.Concat(fromData.FormsData)
             };
 
-            await factoryIndexerForm.IndexAsync(searchItems, waitForCompletion: true);
+            await factoryIndexerForm.IndexAsync(searchItems);
             await factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
             {
                 Id = DbFormsMetadataSearch.ComputeId(originalFormId, originalFormVersion),
@@ -436,7 +436,7 @@ public class FormFillingReportCreator(
                 OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
                 Metadata = fromMetaData
-            }, waitForCompletion: true);
+            });
         }
 
         return (fromData, fromMetaData: fromMetaData);

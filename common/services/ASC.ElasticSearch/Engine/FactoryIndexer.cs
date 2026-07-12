@@ -77,8 +77,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
 
     protected readonly BaseIndexer<T> _indexer = baseIndexer;
 
-    private static readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, 10).ConcurrentScheduler;
-
     public async Task<(bool, IReadOnlyCollection<T>)> TrySelectAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
         IReadOnlyCollection<T> result;
@@ -324,13 +322,26 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         }
     }
 
-    public Task<bool> UpdateAsync(T data, UpdateAction action, Expression<Func<T, IList>> field, bool immediately = true)
+    public async Task<bool> UpdateAsync(T data, UpdateAction action, Expression<Func<T, IList>> field, bool immediately = true)
     {
         var t = serviceProvider.GetService<T>();
+        if (!await SupportAsync(t))
+        {
+            return false;
+        }
 
-        return !Support(t)
-            ? Task.FromResult(false)
-            : QueueAsync(() => _indexer.Update(data, action, field, immediately));
+        try
+        {
+            _indexer.Update(data, action, field, immediately);
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorUpdate(e);
+
+            return false;
+        }
     }
 
 
@@ -390,54 +401,66 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         }
     }
 
-    public Task IndexAsync(T data, bool immediately = true, bool waitForCompletion = false)
+    public async Task IndexAsync(T data, bool immediately = true)
     {
         var t = serviceProvider.GetService<T>();
-
-        if (!Support(t))
+        if (!await SupportAsync(t))
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        if (waitForCompletion)
+        try
         {
-            return Task.Factory.StartNew(
-                async () =>
-                {
-                    try
-                    {
-                        await _indexer.IndexAsync(data, immediately);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.ErrorIndex(e);
-                    }
-                },
-                CancellationToken.None,
-                TaskCreationOptions.LongRunning,
-                _scheduler
-            ).Unwrap();
+            await _indexer.IndexAsync(data, immediately);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorIndex(e);
+        }
+    }
+
+    public async Task<bool> UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
+    {
+        var t = serviceProvider.GetService<T>();
+        if (!await SupportAsync(t))
+        {
+            return false;
         }
 
-        return QueueAsync(() => _indexer.IndexAsync(data, immediately));
+        try
+        {
+            _indexer.Update(data, immediately, fields);
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorUpdate(e);
+
+            return false;
+        }
     }
 
-    public Task<bool> UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
+    public async Task<bool> DeleteAsync(T data, bool immediately = true)
     {
         var t = serviceProvider.GetService<T>();
+        if (!await SupportAsync(t))
+        {
+            return false;
+        }
 
-        return !Support(t)
-            ? Task.FromResult(false)
-            : QueueAsync(() => _indexer.Update(data, immediately, fields));
-    }
+        try
+        {
+            _indexer.Delete(data, immediately);
 
-    public Task<bool> DeleteAsync(T data, bool immediately = true)
-    {
-        var t = serviceProvider.GetService<T>();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorDelete(e);
 
-        return !Support(t)
-            ? Task.FromResult(false)
-            : QueueAsync(() => _indexer.Delete(data, immediately));
+            return false;
+        }
     }
 
     public async Task<bool> DeleteAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool immediately = true)
@@ -450,7 +473,18 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
 
         var tenant = tenantManager.GetCurrentTenantId();
 
-        return await QueueAsync(() => _indexer.Delete(expression, tenant, immediately));
+        try
+        {
+            _indexer.Delete(expression, tenant, immediately);
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorDelete(e);
+
+            return false;
+        }
     }
 
     public async Task DeleteAsync(int tenantId, bool immediately = true)
@@ -461,7 +495,14 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
             return;
         }
 
-        await QueueAsync(() => _indexer.Delete(r => r, tenantId, immediately));
+        try
+        {
+            _indexer.Delete(r => r, tenantId, immediately);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorDelete(e);
+        }
     }
 
     public void Flush()
@@ -534,53 +575,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
     public async Task<bool> SupportAsync(T t)
     {
         return await factoryIndexer.CheckStateAsync();
-    }
-
-    private Task<bool> QueueAsync(Action actionData)
-    {
-        var task = new Task<bool>(() =>
-        {
-            try
-            {
-                actionData();
-
-                return true;
-            }
-            catch (AggregateException agg)
-            {
-                foreach (var e in agg.InnerExceptions)
-                {
-                    Logger.ErrorQueue(e);
-                }
-
-                throw;
-            }
-        }, TaskCreationOptions.LongRunning);
-
-        task.ConfigureAwait(false);
-        task.Start(_scheduler);
-
-        return task;
-    }
-
-    private Task QueueAsync(Func<Task> actionData)
-    {
-        var task = new Task(async () =>
-        {
-            try
-            {
-                await actionData();
-            }
-            catch (Exception e)
-            {
-                Logger.ErrorQueue(e);
-            }
-        }, TaskCreationOptions.LongRunning);
-
-        task.ConfigureAwait(false);
-        task.Start(_scheduler);
-
-        return task;
     }
 }
 
