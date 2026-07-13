@@ -248,6 +248,8 @@ public class SettingsManager(
                     LastModified = DateTime.UtcNow
                 };
 
+                // plain insert (not upsert): the "brand-new tenant" precondition guarantees no row exists yet;
+                // a duplicate here means the contract was violated and will surface as a logged failure
                 await context.WebstudioSettings.AddAsync(s);
                 await context.SaveChangesAsync();
             }
