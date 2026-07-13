@@ -35,7 +35,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ASC.EventBus.RabbitMQ;
 
-public class EventBusRabbitMQ : IEventBus, IDisposable
+public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 {
     const string EXCHANGE_NAME = "asc_event_bus";
     const string DEAD_LETTER_EXCHANGE_NAME = "asc_event_bus_dlx";
@@ -47,6 +47,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     private readonly int _retryCount;
     private readonly IIntegrationEventSerializer _serializer;
 
+    private const int MaxPooledPublisherChannels = 16;
+
     private string _consumerTag;
     private IChannel _consumerChannel;
     private string _queueName;
@@ -54,6 +56,12 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
     private readonly Task _initializeTask;
     private readonly SemaphoreSlim _consumeSemaphore = new(1, 1);
+    private readonly ConcurrentBag<IChannel> _publisherChannelPool = [];
+    private int _pooledPublisherChannelCount;
+    private readonly ResiliencePipeline _publishPipeline;
+    private volatile bool _disposing;
+
+    private static readonly ResiliencePropertyKey<Guid> _eventIdPropertyKey = new("event-id");
 
     private static ConcurrentDictionary<Guid, byte[]> _rejectedEvents;
 
@@ -80,6 +88,40 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
         _serializer = serializer;
         _rejectedEvents = new ConcurrentDictionary<Guid, byte[]>();
+
+        _publishPipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = _retryCount,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential,
+                ShouldHandle = new PredicateBuilder()
+                    .Handle<BrokerUnreachableException>()
+                    .Handle<SocketException>(),
+                OnRetry = args =>
+                {
+                    args.Context.Properties.TryGetValue(_eventIdPropertyKey, out var eventId);
+                    _logger.WarningCouldNotPublishEvent(eventId, args.Duration.TotalSeconds, args.Outcome.Exception);
+
+                    return ValueTask.CompletedTask;
+                }
+            })
+            .AddRetry(new RetryStrategyOptions
+            {
+                // a dead pooled channel is replaced on the spot, so a single immediate retry is enough
+                MaxRetryAttempts = 1,
+                Delay = TimeSpan.Zero,
+                ShouldHandle = new PredicateBuilder().Handle<AlreadyClosedException>(),
+                OnRetry = args =>
+                {
+                    args.Context.Properties.TryGetValue(_eventIdPropertyKey, out var eventId);
+                    _logger.WarningCouldNotPublishEvent(eventId, args.Duration.TotalSeconds, args.Outcome.Exception);
+
+                    return ValueTask.CompletedTask;
+                }
+            })
+            .Build();
+
         _initializeTask = InitializeAsync();
     }
 
@@ -118,56 +160,95 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     {
         await _initializeTask;
 
+        var eventName = @event.GetType().Name;
+        var body = _serializer.Serialize(@event);
+
+        var context = ResilienceContextPool.Shared.Get();
+        context.Properties.Set(_eventIdPropertyKey, @event.Id);
+
+        try
+        {
+            await _publishPipeline.ExecuteAsync(async _ =>
+            {
+                var channel = await RentPublisherChannelAsync();
+
+                try
+                {
+                    var properties = new BasicProperties
+                    {
+                        DeliveryMode = DeliveryModes.Persistent,
+                        MessageId = Guid.NewGuid().ToString()
+                    };
+
+                    _logger.TracePublishingEvent(@event.Id);
+
+                    await channel.BasicPublishAsync(
+                        exchange: EXCHANGE_NAME,
+                        routingKey: eventName,
+                        mandatory: true,
+                        basicProperties: properties,
+                        body: body);
+                }
+                catch
+                {
+                    channel.Dispose();
+
+                    throw;
+                }
+
+                ReturnPublisherChannel(channel);
+            }, context);
+        }
+        finally
+        {
+            ResilienceContextPool.Shared.Return(context);
+        }
+    }
+
+    private async Task<IChannel> RentPublisherChannelAsync()
+    {
+        while (_publisherChannelPool.TryTake(out var channel))
+        {
+            Interlocked.Decrement(ref _pooledPublisherChannelCount);
+
+            if (channel.IsOpen)
+            {
+                return channel;
+            }
+
+            channel.Dispose();
+        }
+
         if (!_persistentConnection.IsConnected)
         {
             await _persistentConnection.TryConnectAsync();
         }
 
-        var builder = new ResiliencePipelineBuilder();
+        var newChannel = await _persistentConnection.CreateModelAsync();
 
-        var pipeline = builder.AddRetry(new RetryStrategyOptions
+        await newChannel.ExchangeDeclareAsync(exchange: EXCHANGE_NAME, type: "direct");
+
+        return newChannel;
+    }
+
+    private void ReturnPublisherChannel(IChannel channel)
+    {
+        if (!channel.IsOpen)
         {
-            MaxRetryAttempts = _retryCount,
-            Delay = TimeSpan.FromSeconds(1),
-            BackoffType = DelayBackoffType.Exponential,
-            ShouldHandle = new PredicateBuilder().Handle<BrokerUnreachableException>().Handle<SocketException>(),
-            OnRetry = args =>
-            {
-                _logger.WarningCouldNotPublishEvent(@event.Id, args.Duration.TotalSeconds, args.Outcome.Exception);
-                return ValueTask.CompletedTask;
-            }
-        }).Build();
+            channel.Dispose();
 
-        var eventName = @event.GetType().Name;
+            return;
+        }
 
-        _logger.TraceCreatingRabbitMQChannel(@event.Id, eventName);
-
-        await using var channel = await _persistentConnection.CreateModelAsync();
-
-        _logger.TraceDeclaringRabbitMQChannel(@event.Id);
-
-        await channel.ExchangeDeclareAsync(exchange: EXCHANGE_NAME, type: "direct");
-
-        var body = _serializer.Serialize(@event);
-
-        await pipeline.ExecuteAsync(async _ =>
+        if (Interlocked.Increment(ref _pooledPublisherChannelCount) > MaxPooledPublisherChannels)
         {
-            // TODO: check this method
-            var properties = new BasicProperties
-            {
-                DeliveryMode = DeliveryModes.Persistent,
-                MessageId = Guid.NewGuid().ToString()
-            };
+            Interlocked.Decrement(ref _pooledPublisherChannelCount);
+            channel.Dispose();
 
-            _logger.TracePublishingEvent(@event.Id);
+            return;
+        }
 
-            await channel.BasicPublishAsync(
-                exchange: EXCHANGE_NAME,
-                routingKey: eventName,
-                mandatory: true,
-                basicProperties: properties,
-                body: body);
-        });
+        _publisherChannelPool.Add(channel);
     }
 
     public async Task SubscribeDynamicAsync<TH>(string eventName)
@@ -239,9 +320,41 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
     public void Dispose()
     {
-        _consumerChannel?.Dispose();
+        DisposeAsync().AsTask().GetAwaiter().GetResult();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposing = true;
+
+        await CloseChannelAsync(_consumerChannel);
+
+        while (_publisherChannelPool.TryTake(out var channel))
+        {
+            await CloseChannelAsync(channel);
+        }
 
         _subsManager.Clear();
+    }
+
+    private static async Task CloseChannelAsync(IChannel channel)
+    {
+        if (channel == null)
+        {
+            return;
+        }
+
+        try
+        {
+            // abort: close locally without waiting for the broker reply — it may already be gone on shutdown
+            await channel.CloseAsync(Constants.ReplySuccess, "Goodbye", abort: true);
+        }
+        catch
+        {
+            // the channel is being thrown away, a failed close must not break shutdown
+        }
+
+        channel.Dispose();
     }
 
     private async Task StartBasicConsumeAsync()
@@ -285,7 +398,10 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
     private async Task Consumer_Shutdown(object sender, ShutdownEventArgs @event)
     {
-        _logger.WarningModelIsShutdown(@event.Cause?.ToString(), @event.Exception);
+        if (!_disposing)
+        {
+            _logger.WarningModelIsShutdown(@event.Cause?.ToString(), @event.Exception);
+        }
 
         await Task.CompletedTask;
     }
