@@ -50,7 +50,6 @@ public class AgentsController(
     SettingsManager settingsManager,
     SystemMcpConfig systemMcpConfig,
     McpService mcpService,
-    AiProviderService aiProviderService,
     ILogger<AgentsController> logger,
     ApiDateTimeHelper apiDateTimeHelper,
     RootNewItemsDtoHelper rootNewItemsDtoHelper,
