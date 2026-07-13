@@ -460,6 +460,9 @@ internal class FileDao(
         {
             if (roomId != -1 && roomQuotaSettings is { EnableQuota: true })
             {
+                // re-read the room inside the lock so Counter reflects writes from previously serialized uploads
+                currentRoom = await folderDao.GetFolderAsync(roomId);
+
                 var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? roomQuotaSettings.DefaultQuota : currentRoom.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
