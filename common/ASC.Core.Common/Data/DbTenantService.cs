@@ -289,27 +289,28 @@ public class DbTenantService(
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var tx = await userDbContext.Database.BeginTransactionAsync();
+            await using var context = await userDbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
 
             tenant.LastModified = DateTime.UtcNow;
 
             var dbTenant = tenant.Map();
             dbTenant.Id = 0;
 
-            await userDbContext.Tenants.AddAsync(dbTenant);
+            await context.Tenants.AddAsync(dbTenant);
 
             // the first SaveChanges is needed to obtain the identity-generated tenant id
             // for the owner rows; the transaction keeps the whole registration atomic
-            await userDbContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             tenant.Id = dbTenant.Id;
 
             owner.TenantId = tenant.Id;
             owner.LastModified = DateTime.UtcNow;
 
-            await userDbContext.Users.AddAsync(owner.Map());
+            await context.Users.AddAsync(owner.Map());
 
-            await userDbContext.UserSecurity.AddAsync(new UserSecurity
+            await context.UserSecurity.AddAsync(new UserSecurity
             {
                 TenantId = tenant.Id,
                 UserId = owner.Id,
@@ -323,9 +324,9 @@ public class DbTenantService(
                 LastModified = DateTime.UtcNow
             };
 
-            await userDbContext.UserGroups.AddAsync(adminGroupRef.Map());
+            await context.UserGroups.AddAsync(adminGroupRef.Map());
 
-            await userDbContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
             await tx.CommitAsync();
         });
 
