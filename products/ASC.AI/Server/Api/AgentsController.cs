@@ -34,10 +34,11 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class AgentsController(
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
@@ -56,14 +57,7 @@ public class AgentsController(
     FileSecurity fileSecurity)
     : ControllerBase
 {
-    /// <remarks>
-    /// Get ai agents
-    /// </remarks>
-    /// <summary>Get ai agents</summary>
-    /// <path>api/2.0/ai/agents</path>
-    [Tags("AI / Agents")]
-    [SwaggerResponse(200, "Agent information", typeof(FolderContentDto<int>))]
-    [HttpGet("agents")]
+    [HttpGet("integration/agents")]
     public async Task<FolderContentDto<int>> GetAgents(GetAgentListRequestDto inDto)
     {
         var parentId = await globalFolderHelper.GetFolderAiAgentsAsync();
@@ -112,14 +106,7 @@ public class AgentsController(
         return dto.NotFoundIfNull();
     }
 
-    /// <remarks>
-    /// Creates an ai agent.
-    /// </remarks>
-    /// <summary>Create an ai agent</summary>
-    /// <path>api/2.0/ai/agents</path>
-    [Tags("AI / Agents")]
-    [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
-    [HttpPost("agents")]
+    [HttpPost("integration/agents")]
     public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
     {
         await ValidateModelIdAsync(inDto.ChatSettings);
@@ -165,14 +152,7 @@ public class AgentsController(
         return await folderDtoHelper.GetAsync(room);
     }
 
-    /// <remarks>
-    /// Returns an ai agent.
-    /// </remarks>
-    /// <summary>Return an ai agent</summary>
-    /// <path>api/2.0/ai/agents/{id}</path>
-    [Tags("AI / Agents")]
-    [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
-    [HttpGet("agents/{id}")]
+    [HttpGet("integration/agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
     {
         var folder = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
@@ -180,14 +160,7 @@ public class AgentsController(
         return await folderDtoHelper.GetAsync(folder);
     }
 
-    /// <remarks>
-    /// Updates an ai agent.
-    /// </remarks>
-    /// <summary>Update an ai agent</summary>
-    /// <path>api/2.0/ai/agents/{id}</path>
-    [Tags("AI / Agents")]
-    [SwaggerResponse(200, "Updated agent information", typeof(FolderDto<int>))]
-    [HttpPut("agents/{id}")]
+    [HttpPut("integration/agents/{id}")]
     public async Task<FolderDto<int>> UpdateAgent(UpdateRoomRequestDto<int> inDto)
     {
         await ValidateModelIdAsync(inDto.UpdateRoom.ChatSettings);
@@ -197,14 +170,7 @@ public class AgentsController(
         return await folderDtoHelper.GetAsync(room);
     }
 
-    /// <remarks>
-    /// Removes an ai agent.
-    /// </remarks>
-    /// <summary>Remove an ai agent</summary>
-    /// <path>api/2.0/ai/agents/{id}</path>
-    [Tags("AI / Agents")]
-    [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
-    [HttpDelete("agents/{id}")]
+    [HttpDelete("integration/agents/{id}")]
     public async Task<FileOperationDto> DeleteAgent(DeleteRoomRequestDto<int> inDto)
     {
         var agent = await fileStorageService.GetFolderAsync(inDto.Id);
@@ -224,17 +190,7 @@ public class AgentsController(
     }
 
 
-    /// <remarks>
-    /// Changes the quota limit for the AI agents with the IDs specified in the request.
-    /// </remarks>
-    /// <summary>
-    /// Change the AI agent quota limit
-    /// </summary>
-    /// <path>api/2.0/ai/agents/agentquota</path>
-    /// <collection>list</collection>
-    [Tags("AI / Agents")]
-    [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
-    [HttpPut("agents/agentquota")]
+    [HttpPut("integration/agents/agentquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
     {
         var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
@@ -258,17 +214,7 @@ public class AgentsController(
         }
     }
 
-    /// <remarks>
-    /// Resets the quota limit for the AI agents with the IDs specified in the request.
-    /// </remarks>
-    /// <summary>
-    /// Reset the AI agents quota limit
-    /// </summary>
-    /// <path>api/2.0/ai/agents/resetquota</path>
-    /// <collection>list</collection>
-    [Tags("AI / Agents")]
-    [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
-    [HttpPut("agents/resetquota")]
+    [HttpPut("integration/agents/resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
     {
         var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
@@ -286,14 +232,7 @@ public class AgentsController(
         filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentDefault, quotaAiAgentSettings.DefaultQuota.ToString(), agentTitles.ToArray());
     }
 
-    /// <remarks>
-    /// Returns the room new items.
-    /// </remarks>
-    /// <summary>Get the room new items</summary>
-    /// <path>api/2.0/ai/agents/news</path>
-    [Tags("AI / Agents")]
-    [SwaggerResponse(200, "List of new items", typeof(List<NewItemsDto<AgentNewItemsDto>>))]
-    [HttpGet("agents/news")]
+    [HttpGet("integration/agents/news")]
     public async Task<List<NewItemsDto<AgentNewItemsDto>>> GetAgentsNewItems()
     {
         var rootId = await globalFolderHelper.FolderAiAgentsAsync;
