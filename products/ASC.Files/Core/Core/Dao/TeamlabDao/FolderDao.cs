@@ -558,7 +558,10 @@ internal class FolderDao(
         }
         else
         {
-            folderId = await InternalSaveFolderToDbAsync(dbContext, folder);
+            // A live transaction was passed in: the caller owns the commit, so we must not
+            // publish the index event here — the surrounding transaction is not committed yet.
+            // The caller publishes it after tx.CommitAsync().
+            return await InternalSaveFolderToDbAsync(dbContext, folder);
         }
 
         await PublishFolderIndexEventAsync(folder);
@@ -1765,6 +1768,8 @@ internal class FolderDao(
 
                     await tx.CommitAsync(); //Commit changes
                 });
+
+                await PublishFolderIndexEventAsync(folder); //Publish only after the transaction has committed
             }
 
             yield return newFolderId;
@@ -1893,6 +1898,8 @@ internal class FolderDao(
 
                 await tx.CommitAsync(); //Commit changes
             });
+
+            await PublishFolderIndexEventAsync(folder); //Publish only after the transaction has committed
         }
 
         return newFolderId;
