@@ -716,7 +716,7 @@ public class PortalRegistrationService(
             var tenant = await hostedSolution.RegisterTenantAsync(info);
             tenantManager.SetCurrentTenant(tenant);
 
-            await cspSettingsHelper.SaveAsync(cspDomains);
+            await cspSettingsHelper.SaveAsync(cspDomains, forNewTenant: true);
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             {
