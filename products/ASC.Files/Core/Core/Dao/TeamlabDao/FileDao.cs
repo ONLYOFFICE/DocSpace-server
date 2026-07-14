@@ -503,7 +503,6 @@ internal class FileDao(
             }
 
             var isNew = false;
-            DbFile toInsert = null;
             var cloneStreamForSave = new MemoryStream();
             var streamChange = false;
             var needVectorization = false;
@@ -581,7 +580,7 @@ internal class FileDao(
                             }
                         }
 
-                        toInsert = new DbFile
+                        var toInsert = new DbFile
                         {
                             Id = file.Id,
                             Version = file.Version,
@@ -650,8 +649,6 @@ internal class FileDao(
                     {
                         await filesDbContext.UpdateFoldersAsync(parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy, tenantId);
                     }
-
-                    toInsert.Folders = parentFolders;
 
                     if (isNew)
                     {
@@ -754,7 +751,12 @@ internal class FileDao(
                 }
             }
 
-            _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toInsert));
+            await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
+            {
+                FileId = file.Id,
+                Version = file.Version,
+                Action = FileIndexAction.Index
+            });
 
             if (needVectorization)
             {
@@ -848,7 +850,6 @@ internal class FileDao(
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
-        DbFile toUpdate = null;
 
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
@@ -876,7 +877,7 @@ internal class FileDao(
                     file.CreateOn = _tenantUtil.DateTimeNow();
                 }
 
-                toUpdate = await context.DbFileByVersionAsync(tenantId, file.Id, file.Version);
+                var toUpdate = await context.DbFileByVersionAsync(tenantId, file.Id, file.Version);
 
                 toUpdate.Version = file.Version;
                 toUpdate.VersionGroup = file.VersionGroup;
@@ -910,8 +911,6 @@ internal class FileDao(
             {
                 await filesDbContext.UpdateFoldersAsync(parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy, tenantId);
             }
-
-            toUpdate.Folders = parentFolders;
         }
 
         if (fileStream != null)
@@ -932,7 +931,12 @@ internal class FileDao(
             }
         }
 
-        _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toUpdate));
+        await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.ModifiedBy, tenantId)
+        {
+            FileId = file.Id,
+            Version = file.Version,
+            Action = FileIndexAction.Index
+        });
 
         return await GetFileAsync(file.Id);
     }
@@ -1021,12 +1025,6 @@ internal class FileDao(
             await context.DeleteTagLinksAsync(tenantId, fileId.ToString());
 
             var toDeleteFiles = await context.DbFilesAsync(tenantId, fileId).ToListAsync();
-            var toDeleteFile = toDeleteFiles.FirstOrDefault(r => r.CurrentVersion);
-
-            foreach (var d in toDeleteFiles)
-            {
-                await factoryIndexer.DeleteAsync(d);
-            }
 
             await context.DeleteVectorizationStatusAsync(tenantId, fileId);
             await DeleteVectorsAsync(tenantId, fileId);
@@ -1061,11 +1059,12 @@ internal class FileDao(
                 await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
             }
 
-            if (toDeleteFile != null)
-            {
-                await factoryIndexer.DeleteAsync(toDeleteFile);
-                await factoryIndexerFormData.DeleteAsync(r => r.Where(a => a.Id, toDeleteFile.Id));
-            }
+        });
+
+        await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FileId = fileId,
+            Action = FileIndexAction.Delete
         });
     }
 
@@ -1336,14 +1335,11 @@ internal class FileDao(
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
             }
 
-            var toUpdateFile = await q.FirstOrDefaultAsync(r => r.CurrentVersion);
-
-            if (toUpdateFile != null)
+            await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
             {
-                toUpdateFile.Folders = await context.DbFolderTreesAsync(toFolderId).ToListAsync();
-
-                _ = factoryIndexer.UpdateAsync(toUpdateFile, UpdateAction.Replace, w => w.Folders);
-            }
+                FileId = fileId,
+                Action = FileIndexAction.UpdateFolders
+            });
 
             if (needDeleteVectors)
             {
@@ -1480,7 +1476,11 @@ internal class FileDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        await factoryIndexer.UpdateAsync(toUpdate, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
+        await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FileId = file.Id,
+            Action = FileIndexAction.UpdateInfo
+        });
 
         if (!Path.HasExtension(file.Title))
         {
@@ -2600,12 +2600,12 @@ internal class FileDao(
                 return dbFile;
             }
 
-            using var ms = new MemoryStream();
+            var capacity = stream.CanSeek ? stream.Length : file.ContentLength;
+            using var ms = new MemoryStream(capacity > 0 ? (int)capacity : 0);
             await stream.CopyToAsync(ms);
-            var buffer = ms.GetBuffer();
             dbFile.Document = new Document
             {
-                Data = Convert.ToBase64String(buffer, 0, (int)ms.Length)
+                Data = Convert.ToBase64String(ms.GetBuffer(), 0, (int)ms.Length)
             };
         }
         catch (FileNotFoundException)

@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.ElasticSearch;
@@ -193,9 +193,9 @@ public abstract class BaseIndexer<T>(Client client,
         client.Instance.Indices.Flush(new FlushRequest(IndexName));
     }
 
-    public void Refresh()
+    public async Task RefreshAsync()
     {
-        client.Instance.Indices.Refresh(new RefreshRequest(IndexName));
+        await client.Instance.Indices.RefreshAsync(new RefreshRequest(IndexName));
     }
 
     internal async Task IndexAsync(T data, bool immediately = true)
@@ -316,54 +316,40 @@ public abstract class BaseIndexer<T>(Client client,
         }
     }
 
-    internal void Update(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
+    internal async Task UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
         if (!CheckExist(data))
         {
             return;
         }
 
-        client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, immediately, fields));
+        await client.Instance.UpdateAsync(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, immediately, fields));
     }
 
-    internal void Update(T data, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
+    internal async Task UpdateAsync(T data, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
     {
         if (!CheckExist(data))
         {
             return;
         }
 
-        client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, action, fields, immediately));
+        await client.Instance.UpdateAsync(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, action, fields, immediately));
     }
 
-    internal void Update(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
+    internal async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
         if (!CheckExist(data))
         {
             return;
         }
 
-        client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, immediately, fields));
+        await client.Instance.UpdateByQueryAsync(GetDescriptorForUpdate(data, expression, tenantId, immediately, fields));
     }
 
-    internal void Update(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
-    {
-        if (!CheckExist(data))
-        {
-            return;
-        }
 
-        client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, action, fields, immediately));
-    }
-
-    internal void Delete(T data, bool immediately = true)
+    internal async Task DeleteAsync(Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true)
     {
-        client.Instance.Delete<T>(data, r => GetMetaForDelete(r, immediately));
-    }
-
-    internal void Delete(Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true)
-    {
-        client.Instance.DeleteByQuery(GetDescriptorForDelete(expression, tenantId, immediately));
+        await client.Instance.DeleteByQueryAsync(GetDescriptorForDelete(expression, tenantId, immediately));
     }
 
     internal bool CheckExist(T data)
@@ -422,18 +408,6 @@ public abstract class BaseIndexer<T>(Client client,
         }
 
         return response.Count;
-    }
-
-    internal (IReadOnlyCollection<T>, long) SelectWithTotal(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
-    {
-        var func = expression.Compile();
-        var selector = new Selector<T>(serviceProvider);
-        var tenant = _tenantManager.GetCurrentTenant();
-        var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
-        var result = client.Instance.Search(descriptor.GetDescriptor(this, onlyId));
-        var total = result.Total;
-
-        return (result.Documents, total);
     }
 
     protected virtual Task<bool> BeforeIndexAsync(T data)
@@ -628,17 +602,6 @@ public abstract class BaseIndexer<T>(Client client,
         }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();
-    }
-
-    private IDeleteRequest GetMetaForDelete(DeleteDescriptor<T> request, bool immediately = true)
-    {
-        var result = request.Index(IndexName);
-        if (immediately)
-        {
-            result.Refresh(OpenSearch.Net.Refresh.True);
-        }
-
-        return result;
     }
 
     private Func<DeleteByQueryDescriptor<T>, IDeleteByQueryRequest> GetDescriptorForDelete(Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true)

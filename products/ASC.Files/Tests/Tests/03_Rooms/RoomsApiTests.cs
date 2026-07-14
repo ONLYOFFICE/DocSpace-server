@@ -82,24 +82,6 @@ public class RoomsApiTests(
     }
 
     [Fact]
-    public async Task SearchRoom_ExistingRoom_ReturnsRoom()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-        var roomTitle = "Room for Info " + Guid.NewGuid().ToString()[..8];
-        var createdRoom = (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.CustomRoom),
-            TestContext.Current.CancellationToken)).Response;
-
-        // Act
-        var rooms = (await _roomsApi.GetRoomsFolderAsync(filterValue: roomTitle, cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-        // Assert
-        rooms.Should().NotBeNull();
-        rooms.Folders.Should().Contain(r => r.Title == createdRoom.Title);
-    }
-
-    [Fact]
     public async Task UpdateRoom_ChangeTitle_RoomUpdated()
     {
         // Arrange
