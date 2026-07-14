@@ -2600,12 +2600,12 @@ internal class FileDao(
                 return dbFile;
             }
 
-            using var ms = new MemoryStream();
+            var capacity = stream.CanSeek ? stream.Length : file.ContentLength;
+            using var ms = new MemoryStream(capacity > 0 ? (int)capacity : 0);
             await stream.CopyToAsync(ms);
-            var buffer = ms.GetBuffer();
             dbFile.Document = new Document
             {
-                Data = Convert.ToBase64String(buffer, 0, (int)ms.Length)
+                Data = Convert.ToBase64String(ms.GetBuffer(), 0, (int)ms.Length)
             };
         }
         catch (FileNotFoundException)
