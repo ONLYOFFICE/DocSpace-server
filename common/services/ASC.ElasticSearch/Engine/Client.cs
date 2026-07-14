@@ -116,7 +116,10 @@ public class Client(ILogger<Client> logger, Settings settings)
                     {
                         _lastFailedConnect = DateTime.UtcNow;
 
-                        return client;
+                        // an unusable client must not escape: callers treat a non-null
+                        // Instance as a reachable OpenSearch (the exception path below
+                        // returns null as well)
+                        return null;
                     }
 
                     client.AddAttachmentPipeline();
