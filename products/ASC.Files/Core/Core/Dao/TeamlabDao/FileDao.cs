@@ -408,10 +408,13 @@ internal class FileDao(
     {
         ArgumentNullException.ThrowIfNull(file);
 
-        var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
-        if (checkQuota && maxChunkedUploadSize < file.ContentLength)
+        if (checkQuota)
         {
-            throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
+            var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
+            if (maxChunkedUploadSize < file.ContentLength)
+            {
+                throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
+            }
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -428,74 +431,78 @@ internal class FileDao(
         var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
         UserInfo user = null;
         string quotaLockKey;
+        TenantEntityQuotaSettings roomQuotaSettings = null;
+        TenantUserQuotaSettings userQuotaSettings = null;
+
+        Folder<int> currentRoom = null;
 
         if (roomId != -1)
         {
             quotaLockKey = $"room_{roomId}";
+            currentRoom = await folderDao.GetFolderAsync(roomId);
+            // the folder type is immutable, so the settings type can be picked outside the lock
+            roomQuotaSettings = currentRoom.FolderType is FolderType.AiRoom
+                ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
         }
         else
         {
             user = await _userManager.GetUsersAsync(file.Id == 0 ? _authContext.CurrentAccount.ID : file.CreateBy);
             quotaLockKey = $"user_{user.Id}";
+            userQuotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
         }
 
-        await using (await _distributedLockProvider.TryAcquireFairLockAsync(quotaLockKey))
+        // the fair lock only serializes the quota check with the write that consumes the quota;
+        // when no quota is enforced there is nothing to protect, so the lock is skipped
+        var quotaEnabled = roomQuotaSettings is { EnableQuota: true } || userQuotaSettings is { EnableQuota: true };
+
+        await using (quotaEnabled ? await _distributedLockProvider.TryAcquireFairLockAsync(quotaLockKey) : null)
         {
-            if (roomId != -1)
+            if (roomId != -1 && roomQuotaSettings is { EnableQuota: true })
             {
-                var currentRoom = await folderDao.GetFolderAsync(roomId);
+                // re-read the room inside the lock so Counter reflects writes from previously serialized uploads
+                currentRoom = await folderDao.GetFolderAsync(roomId);
 
-                TenantEntityQuotaSettings quotaSettings = currentRoom.FolderType is FolderType.AiRoom
-                   ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaSettings.EnableQuota)
+                var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? roomQuotaSettings.DefaultQuota : currentRoom.SettingsQuota;
+                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
-                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : currentRoom.SettingsQuota;
-                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                     {
-                        if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
+                        if ((roomQuotaLimit * 2 < currentRoom.Counter + file.ContentLength) || roomQuotaLimit < currentRoom.Counter)
                         {
-                            if ((roomQuotaLimit * 2 < currentRoom.Counter + file.ContentLength) || roomQuotaLimit < currentRoom.Counter)
-                            {
-                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToRoomQuota, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
-                                throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
-                            }
-                            await quotaSocketManager.RoomQuotaExceededAsync(roomId);
-                            await filesMessageService.SendAsync(MessageAction.FileSavedButRoomQuotaExceeded, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
-
+                            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToRoomQuota, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
+                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
                         }
+
+                        await quotaSocketManager.RoomQuotaExceededAsync(roomId);
+                        await filesMessageService.SendAsync(MessageAction.FileSavedButRoomQuotaExceeded, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
                     }
                 }
             }
-            else if (user != null)
+            else if (user != null && userQuotaSettings is { EnableQuota: true })
             {
-                var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
-                if (quotaUserSettings.EnableQuota)
+                var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
+
+                var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? userQuotaSettings.DefaultQuota : userQuotaData.UserQuota;
+
+                if (userQuotaLimit != UserQuotaSettings.NoQuota)
                 {
-                    var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
+                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
 
-                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-
-                    if (userQuotaLimit != UserQuotaSettings.NoQuota)
+                    if (userQuotaLimit - userUsedSpace < file.ContentLength)
                     {
-                        var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-
-                        if (userQuotaLimit - userUsedSpace < file.ContentLength)
+                        if ((userQuotaLimit * 2 < userUsedSpace + file.ContentLength) || userQuotaLimit < userUsedSpace)
                         {
-                            if ((userQuotaLimit * 2 < userUsedSpace + file.ContentLength) || userQuotaLimit < userUsedSpace)
-                            {
-                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToUserQuota, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
-                                throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
-                            }
-                            await quotaSocketManager.UserQuotaExceededAsync(file.CreateBy);
-                            await filesMessageService.SendAsync(MessageAction.FileSavedButUserQuotaExceeded, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+                            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToUserQuota, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+                            throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
                         }
+                        await quotaSocketManager.UserQuotaExceededAsync(file.CreateBy);
+                        await filesMessageService.SendAsync(MessageAction.FileSavedButUserQuotaExceeded, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
                     }
                 }
             }
 
             var isNew = false;
-            DbFile toInsert = null;
             var cloneStreamForSave = new MemoryStream();
             var streamChange = false;
             var needVectorization = false;
@@ -573,7 +580,7 @@ internal class FileDao(
                             }
                         }
 
-                        toInsert = new DbFile
+                        var toInsert = new DbFile
                         {
                             Id = file.Id,
                             Version = file.Version,
@@ -643,8 +650,6 @@ internal class FileDao(
                         await filesDbContext.UpdateFoldersAsync(parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy, tenantId);
                     }
 
-                    toInsert.Folders = parentFolders;
-
                     if (isNew)
                     {
                         file.Order = await SetCustomOrder(filesDbContext, file.Id, file.ParentId);
@@ -657,8 +662,7 @@ internal class FileDao(
 
                     if (roomId != -1 && checkFolder)
                     {
-                        var currentRoom = await folderDao.GetFolderAsync(roomId);
-                        if (currentRoom.FolderType == FolderType.FillingFormsRoom && currentRoom.RootFolderType != FolderType.RoomTemplates)
+                        if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && currentRoom.RootFolderType != FolderType.RoomTemplates)
                         {
                             var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
@@ -747,7 +751,12 @@ internal class FileDao(
                 }
             }
 
-            _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toInsert));
+            await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
+            {
+                FileId = file.Id,
+                Version = file.Version,
+                Action = FileIndexAction.Index
+            });
 
             if (needVectorization)
             {
@@ -841,7 +850,6 @@ internal class FileDao(
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
-        DbFile toUpdate = null;
 
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
@@ -869,7 +877,7 @@ internal class FileDao(
                     file.CreateOn = _tenantUtil.DateTimeNow();
                 }
 
-                toUpdate = await context.DbFileByVersionAsync(tenantId, file.Id, file.Version);
+                var toUpdate = await context.DbFileByVersionAsync(tenantId, file.Id, file.Version);
 
                 toUpdate.Version = file.Version;
                 toUpdate.VersionGroup = file.VersionGroup;
@@ -903,8 +911,6 @@ internal class FileDao(
             {
                 await filesDbContext.UpdateFoldersAsync(parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy, tenantId);
             }
-
-            toUpdate.Folders = parentFolders;
         }
 
         if (fileStream != null)
@@ -925,7 +931,12 @@ internal class FileDao(
             }
         }
 
-        _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toUpdate));
+        await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.ModifiedBy, tenantId)
+        {
+            FileId = file.Id,
+            Version = file.Version,
+            Action = FileIndexAction.Index
+        });
 
         return await GetFileAsync(file.Id);
     }
@@ -1014,12 +1025,6 @@ internal class FileDao(
             await context.DeleteTagLinksAsync(tenantId, fileId.ToString());
 
             var toDeleteFiles = await context.DbFilesAsync(tenantId, fileId).ToListAsync();
-            var toDeleteFile = toDeleteFiles.FirstOrDefault(r => r.CurrentVersion);
-
-            foreach (var d in toDeleteFiles)
-            {
-                await factoryIndexer.DeleteAsync(d);
-            }
 
             await context.DeleteVectorizationStatusAsync(tenantId, fileId);
             await DeleteVectorsAsync(tenantId, fileId);
@@ -1054,11 +1059,12 @@ internal class FileDao(
                 await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
             }
 
-            if (toDeleteFile != null)
-            {
-                await factoryIndexer.DeleteAsync(toDeleteFile);
-                await factoryIndexerFormData.DeleteAsync(r => r.Where(a => a.Id, toDeleteFile.Id));
-            }
+        });
+
+        await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FileId = fileId,
+            Action = FileIndexAction.Delete
         });
     }
 
@@ -1329,14 +1335,11 @@ internal class FileDao(
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
             }
 
-            var toUpdateFile = await q.FirstOrDefaultAsync(r => r.CurrentVersion);
-
-            if (toUpdateFile != null)
+            await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
             {
-                toUpdateFile.Folders = await context.DbFolderTreesAsync(toFolderId).ToListAsync();
-
-                _ = factoryIndexer.UpdateAsync(toUpdateFile, UpdateAction.Replace, w => w.Folders);
-            }
+                FileId = fileId,
+                Action = FileIndexAction.UpdateFolders
+            });
 
             if (needDeleteVectors)
             {
@@ -1473,7 +1476,11 @@ internal class FileDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        await factoryIndexer.UpdateAsync(toUpdate, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
+        await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FileId = file.Id,
+            Action = FileIndexAction.UpdateInfo
+        });
 
         if (!Path.HasExtension(file.Title))
         {
@@ -2593,12 +2600,12 @@ internal class FileDao(
                 return dbFile;
             }
 
-            using var ms = new MemoryStream();
+            var capacity = stream.CanSeek ? stream.Length : file.ContentLength;
+            using var ms = new MemoryStream(capacity > 0 ? (int)capacity : 0);
             await stream.CopyToAsync(ms);
-            var buffer = ms.GetBuffer();
             dbFile.Document = new Document
             {
-                Data = Convert.ToBase64String(buffer, 0, (int)ms.Length)
+                Data = Convert.ToBase64String(ms.GetBuffer(), 0, (int)ms.Length)
             };
         }
         catch (FileNotFoundException)

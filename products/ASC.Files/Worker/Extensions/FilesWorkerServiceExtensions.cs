@@ -113,6 +113,16 @@ public static class FilesWorkerServiceExtensions
         }));
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
+
+        services.AddSingleton(Channel.CreateBounded<IntegrationEvent>(new BoundedChannelOptions(1000)
+        {
+            FullMode = BoundedChannelFullMode.Wait,
+            SingleReader = true,
+            SingleWriter = false
+        }));
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<IntegrationEvent>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<IntegrationEvent>>().Writer);
+        services.AddHostedService<IndexEventProcessingService>();
         services.AddDocumentServiceHttpClient(configuration);
 
         services.AddScoped(_ => UrlEncoder.Default);
@@ -125,6 +135,10 @@ public static class FilesWorkerServiceExtensions
         await Task.WhenAll(
             eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent,
                 ThumbnailRequestedIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<FileIndexIntegrationEvent,
+                FileIndexIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<FolderIndexIntegrationEvent,
+                FolderIndexIntegrationEventHandler>(),
             eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent,
                 RoomIndexExportIntegrationEventHandler>(),
             eventBus.SubscribeAsync<DeleteIntegrationEvent,
