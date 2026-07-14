@@ -198,29 +198,6 @@ export async function aiServiceRequest(
   return jsonRequest(`${AI_BASE_URL}${API_PREFIX}`, method, path, options);
 }
 
-// Calls the public DocSpace API (`api/2.0/...`) through the proxy, acting
-// on behalf of the current user: `getForwardedHeaders` carries the caller's
-// `asc_auth_key` cookie, so authorization and tenant resolution happen on
-// the .NET side exactly as for a direct browser request.
-export async function docSpaceApiRequest(
-  method: string,
-  path: string,
-  options: RequestOptions = {},
-): Promise<unknown> {
-  return jsonRequest(`${PROXY_BASE_URL}/api/2.0`, method, path, options);
-}
-
-export const docSpaceApi = {
-  get: (path: string, opts?: RequestOptions): Promise<unknown> =>
-    docSpaceApiRequest("GET", path, opts),
-  post: (path: string, body: unknown, opts?: RequestOptions): Promise<unknown> =>
-    docSpaceApiRequest("POST", path, { ...opts, body }),
-  put: (path: string, body: unknown, opts?: RequestOptions): Promise<unknown> =>
-    docSpaceApiRequest("PUT", path, { ...opts, body }),
-  delete: (path: string, body?: unknown, opts?: RequestOptions): Promise<unknown> =>
-    docSpaceApiRequest("DELETE", path, { ...opts, body }),
-};
-
 export const aiService = {
   get: (path: string, opts?: RequestOptions): Promise<unknown> =>
     aiServiceRequest("GET", path, opts),
