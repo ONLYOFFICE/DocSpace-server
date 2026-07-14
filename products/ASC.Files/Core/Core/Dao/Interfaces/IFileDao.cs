@@ -224,6 +224,19 @@ public interface IFileDao<T>
     /// <param name="fileId">file id</param>
     /// <param name="ownerId">file owner id</param>
     Task DeleteFileAsync(T fileId, Guid ownerId);
+
+    /// <summary>
+    ///   Deletes a batch of files including all previous versions
+    /// </summary>
+    /// <param name="fileQuotaOwners">file id to quota owner id pairs</param>
+    async Task DeleteFilesAsync(IEnumerable<KeyValuePair<T, Guid>> fileQuotaOwners)
+    {
+        foreach (var (fileId, ownerId) in fileQuotaOwners)
+        {
+            await DeleteFileAsync(fileId, ownerId);
+        }
+    }
+
     /// <summary>
     ///     Checks whether or not file
     /// </summary>

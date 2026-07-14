@@ -161,6 +161,84 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<DbFile> DbFilesByIdsAsync(int tenantId, IEnumerable<int> fileIds)
+    {
+        return FileQueries.DbFilesByIdsAsync(this, tenantId, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteTagLinksByFileIdsAsync(int tenantId, IEnumerable<string> fileIds)
+    {
+        return FileQueries.DeleteTagLinksByFileIdsAsync(this, tenantId, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteSecurityByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
+    {
+        return FileQueries.DeleteSecurityByFileIdsAsync(this, tenantId, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteVectorizationStatusByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
+    {
+        return FileQueries.DeleteVectorizationStatusByFileIdsAsync(this, tenantId, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteMessageAttachmentsByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
+    {
+        return FileQueries.DeleteMessageAttachmentsByFileIdsAsync(this, tenantId, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteOrderByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
+    {
+        return FileQueries.DeleteOrderByFileIdsAsync(this, tenantId, fileIds);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> AuditEventsIdsByFileIdsAsync(IEnumerable<int> fileIds)
+    {
+        return FileQueries.AuditEventsIdsByFileIdsAsync(this, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteAuditReferencesByFileIdsAsync(IEnumerable<int> fileIds)
+    {
+        return FileQueries.DeleteAuditReferencesByFileIdsAsync(this, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteFileKeysByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
+    {
+        return FileQueries.DeleteFileKeysByFileIdsAsync(this, tenantId, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteDbFilesByIdsAsync(int tenantId, IEnumerable<int> fileIds)
+    {
+        return FileQueries.DeleteDbFilesByIdsAsync(this, tenantId, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteFilesPropertiesByIdsAsync(int tenantId, IEnumerable<string> entryIds)
+    {
+        return FileQueries.DeleteFilesPropertiesByIdsAsync(this, tenantId, entryIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteFileLinksByIdsAsync(int tenantId, IEnumerable<string> fileIds)
+    {
+        return FileQueries.DeleteFileLinksByIdsAsync(this, tenantId, fileIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteFormRoleMappingsByFileIdsAsync(int tenantId, IEnumerable<int> formIds)
+    {
+        return FileQueries.DeleteFormRoleMappingsByFileIdsAsync(this, tenantId, formIds);
+    }
+
+    [PreCompileQuery]
     public Task<bool> DbFilesAnyAsync(int tenantId, string title, int category, int folderId)
     {
         return FileQueries.DbFilesAnyAsync(this, tenantId, title, category, folderId);
@@ -703,6 +781,107 @@ static file class FileQueries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.InternalEntryId == fileId)
                     .Where(r => r.EntryType == FileEntryType.File)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFile>> DbFilesByIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
+                ctx.Files
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => fileIds.Contains(r.Id)));
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteTagLinksByFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> fileIds) =>
+                ctx.TagLink
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => fileIds.Contains(r.EntryId) && r.EntryType == FileEntryType.File)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteSecurityByFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
+                ctx.Security
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => fileIds.Contains(r.InternalEntryId))
+                    .Where(r => r.EntryType == FileEntryType.File)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteVectorizationStatusByFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
+                ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteMessageAttachmentsByFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
+                ctx.MessageAttachments
+                    .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteOrderByFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
+                ctx.FileOrder
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => fileIds.Contains(r.EntryId) && r.EntryType == FileEntryType.File)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, IEnumerable<int>, IAsyncEnumerable<int>> AuditEventsIdsByFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, IEnumerable<int> fileIds) =>
+                ctx.FilesAuditReference
+                    .Where(r => fileIds.Contains(r.EntryId))
+                    .Where(r => r.EntryType == (byte)FileEntryType.File)
+                    .Select(r => r.AuditEventId));
+
+    public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> DeleteAuditReferencesByFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, IEnumerable<int> fileIds) =>
+                ctx.FilesAuditReference
+                    .Where(r => fileIds.Contains(r.EntryId))
+                    .Where(r => r.EntryType == (byte)FileEntryType.File)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteFileKeysByFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
+                ctx.DbFileKeys
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => fileIds.Contains(r.FileId))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteDbFilesByIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
+                ctx.Files
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => fileIds.Contains(r.Id))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteFilesPropertiesByIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> entryIds) =>
+                ctx.FilesProperties
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => entryIds.Contains(r.EntryId))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteFileLinksByIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> fileIds) =>
+                ctx.FilesLink
+                    .Where(r => r.TenantId == tenantId && (fileIds.Contains(r.SourceId) || fileIds.Contains(r.LinkedId)))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteFormRoleMappingsByFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> formIds) =>
+                ctx.FilesFormRoleMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => formIds.Contains(r.FormId))
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, string, int, int, Task<bool>> DbFilesAnyAsync =

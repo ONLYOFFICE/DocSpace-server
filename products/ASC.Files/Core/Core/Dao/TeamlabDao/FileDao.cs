@@ -1062,6 +1062,72 @@ internal class FileDao(
         });
     }
 
+    public async Task DeleteFilesAsync(IEnumerable<KeyValuePair<int, Guid>> fileQuotaOwners)
+    {
+        var files = fileQuotaOwners.Where(f => f.Key != 0).ToList();
+        if (files.Count == 0)
+        {
+            return;
+        }
+
+        var fileIds = files.Select(f => f.Key).ToList();
+        var fileIdsStrings = fileIds.Select(id => id.ToString()).ToList();
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        List<DbFile> toDeleteFiles = null;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            toDeleteFiles = await context.DbFilesByIdsAsync(tenantId, fileIds).ToListAsync();
+
+            await context.DeleteTagLinksByFileIdsAsync(tenantId, fileIdsStrings);
+            await context.DeleteVectorizationStatusByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteDbFilesByIdsAsync(tenantId, fileIds);
+            await context.DeleteTagsAsync(tenantId);
+            await context.DeleteSecurityByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteOrderByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteMessageAttachmentsByFileIdsAsync(tenantId, fileIds);
+
+            var entryEventsIds = await context.AuditEventsIdsByFileIdsAsync(fileIds).ToListAsync();
+            await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
+            await context.DeleteAuditReferencesByFileIdsAsync(fileIds);
+            await context.DeleteFileKeysByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteFileLinksByIdsAsync(tenantId, fileIdsStrings);
+            await context.DeleteFilesPropertiesByIdsAsync(tenantId, fileIdsStrings);
+            await context.DeleteFormRoleMappingsByFileIdsAsync(tenantId, fileIds);
+
+            await tx.CommitAsync();
+        });
+
+        foreach (var folderGroup in toDeleteFiles.GroupBy(f => f.ParentId))
+        {
+            var filesCount = folderGroup.Select(f => f.Id).Distinct().Count();
+            await filesDbContext.ChangeFilesCountAsync(tenantId, folderGroup.Key, -filesCount);
+        }
+
+        foreach (var fileId in fileIds)
+        {
+            await DeleteVectorsAsync(tenantId, fileId);
+        }
+
+        tenantQuotaController.Init(tenantId, ThumbnailTitle);
+        var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
+
+        foreach (var (fileId, ownerId) in files)
+        {
+            await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
+        }
+
+        await factoryIndexer.DeleteAsync(r => r.In(a => a.Id, fileIds.ToArray()));
+        await factoryIndexerFormData.DeleteAsync(r => r.In(a => a.Id, fileIds.ToArray()));
+    }
+
     public async Task<bool> IsExistAsync(string title, int folderId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

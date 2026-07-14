@@ -96,6 +96,8 @@ public class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<
 
 internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 {
+    private const int DeleteBatchSize = 100;
+
     private int _trashId;
     private readonly bool _ignoreException;
     private readonly bool _immediately;
@@ -488,6 +490,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         var webhookTrigger = WebhookTrigger.All;
         IEnumerable<DbWebhooksConfig> webhookConfigs = null;
 
+        var toDeleteImmediately = new List<File<T>>();
+
         foreach (var fileId in fileIds)
         {
             CancellationToken.ThrowIfCancellationRequested();
@@ -507,14 +511,16 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             else
             {
                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
-                await LinkDao.DeleteAllLinkAsync(file.Id);
-                await FileDao.SaveProperties(file.Id, null);
-                if (file.IsForm)
-                {
-                    await FileDao.DeleteFormRolesAsync(file.Id);
-                }
+
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
+                    await LinkDao.DeleteAllLinkAsync(file.Id);
+                    await FileDao.SaveProperties(file.Id, null);
+                    if (file.IsForm)
+                    {
+                        await FileDao.DeleteFormRolesAsync(file.Id);
+                    }
+
                     try
                     {
                         if (isNeedSendActions)
@@ -551,59 +557,126 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                 }
                 else
                 {
-                    try
-                    {
-                        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
-                        var tagDao = daoFactory.GetTagDao<T>();
-                        var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom); //why no await?
-                        var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
-                        var hasHeaders = _headers is { Count: > 0 };
-
-                        if ((hasHeaders && isNeedSendActions) || !hasHeaders)
-                        {
-                            webhookTrigger = WebhookTrigger.FileDeleted;
-                            webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, file);
-                        }
-
-                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.DeleteFileAsync(file.Id, fromRoomTag == null ? file.GetFileQuotaOwner() : ASC.Core.Configuration.Constants.CoreSystem.ID));
-
-                        var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
-
-                        if (file.RootFolderType == FolderType.Archive)
-                        {
-                            var archiveId = await folderDao.GetFolderIDArchive(false);
-                            await folderDao.ChangeTreeFolderSizeAsync(archiveId, -1 * file.ContentLength);
-                        }
-                        else if (file.RootFolderType == FolderType.TRASH)
-                        {
-                            await folderDao.ChangeTreeFolderSizeAsync(_trashId, -1 * file.ContentLength);
-                        }
-
-                        if (hasHeaders)
-                        {
-                            if (isNeedSendActions)
-                            {
-                                await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
-                                await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, file);
-                            }
-                        }
-                        else
-                        {
-                            await filesMessageService.SendAsync(MessageAction.FileDeleted, file, MessageInitiator.AutoCleanUp, file.Title);
-                            await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, file);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Err = ex.Message;
-                        Logger.ErrorWithException(ex);
-                    }
+                    // links, properties, form roles and tag links are removed by the batched delete
+                    toDeleteImmediately.Add(file);
+                    continue;
                 }
 
                 ProcessedFile(fileId);
             }
 
             await ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
+        }
+
+        foreach (var chunk in toDeleteImmediately.Chunk(DeleteBatchSize))
+        {
+            await DeleteFileBatchAsync(chunk, scope, isNeedSendActions);
+        }
+    }
+
+    private async Task DeleteFileBatchAsync(IReadOnlyCollection<File<T>> files, IServiceScope scope, bool isNeedSendActions)
+    {
+        var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
+        var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
+        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+        var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
+
+        var tagDao = daoFactory.GetTagDao<T>();
+        var fromRoomFileIds = await tagDao.GetTagsAsync([TagType.FromRoom], files)
+            .Where(t => t.EntryType == FileEntryType.File && t.EntryId != null)
+            .Select(t => t.EntryId.ToString())
+            .ToHashSetAsync();
+
+        Guid GetQuotaOwner(File<T> file) =>
+            fromRoomFileIds.Contains(file.Id.ToString()) ? ASC.Core.Configuration.Constants.CoreSystem.ID : file.GetFileQuotaOwner();
+
+        var hasHeaders = _headers is { Count: > 0 };
+        var configsByFile = new Dictionary<T, IEnumerable<DbWebhooksConfig>>();
+
+        if ((hasHeaders && isNeedSendActions) || !hasHeaders)
+        {
+            foreach (var file in files)
+            {
+                configsByFile[file.Id] = await webhookManager.GetWebhookConfigsAsync(WebhookTrigger.FileDeleted, file);
+            }
+        }
+
+        var deleted = new List<File<T>>(files.Count);
+
+        try
+        {
+            await FileDao.DeleteFilesAsync(files.Select(f => KeyValuePair.Create(f.Id, GetQuotaOwner(f))));
+            deleted.AddRange(files);
+        }
+        catch (Exception ex)
+        {
+            Err = ex.Message;
+            Logger.ErrorWithException(ex);
+
+            // the batch is transactional and has rolled back; retry one by one so a single
+            // problematic file does not block the rest
+            foreach (var file in files)
+            {
+                try
+                {
+                    await FileDao.DeleteFileAsync(file.Id, GetQuotaOwner(file));
+                    deleted.Add(file);
+                }
+                catch (Exception e)
+                {
+                    Err = e.Message;
+                    Logger.ErrorWithException(e);
+                }
+            }
+        }
+
+        long archiveSize = 0, trashSize = 0;
+
+        foreach (var file in deleted)
+        {
+            await socketManager.DeleteFileAsync(file);
+
+            switch (file.RootFolderType)
+            {
+                case FolderType.Archive:
+                    archiveSize += file.ContentLength;
+                    break;
+                case FolderType.TRASH:
+                    trashSize += file.ContentLength;
+                    break;
+            }
+
+            if (hasHeaders)
+            {
+                if (isNeedSendActions)
+                {
+                    await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
+                    await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configsByFile[file.Id], file);
+                }
+            }
+            else
+            {
+                await filesMessageService.SendAsync(MessageAction.FileDeleted, file, MessageInitiator.AutoCleanUp, file.Title);
+                await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configsByFile[file.Id], file);
+            }
+        }
+
+        if (archiveSize != 0)
+        {
+            var archiveId = await folderDao.GetFolderIDArchive(false);
+            await folderDao.ChangeTreeFolderSizeAsync(archiveId, -archiveSize);
+        }
+
+        if (trashSize != 0)
+        {
+            await folderDao.ChangeTreeFolderSizeAsync(_trashId, -trashSize);
+        }
+
+        foreach (var file in files)
+        {
+            ProcessedFile(file.Id);
+            await ProgressStep(fileId: FolderDao.CanCalculateSubitems(file.Id) ? default : file.Id);
         }
     }
 
