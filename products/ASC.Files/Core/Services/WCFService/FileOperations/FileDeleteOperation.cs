@@ -286,10 +286,14 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                         // fast path: the whole subtree is checked and cleaned at once, folder rows are
                         // then removed by the single DeleteFolderAsync cascade below; per-folder recursion
                         // stays as a fallback for mixed/restricted subtrees
-                        var subtreeContentDeleted = folder.Id is int && (_immediately || folder.RootFolderType == FolderType.TRASH) &&
-                                                    await TryDeleteSubtreeContentAsync(folder, scope, checkPermissions);
+                        List<(Folder<T> Folder, IEnumerable<Guid> Users, IEnumerable<Guid> SharedUsers)> deletedSubtree = null;
 
-                        if (!subtreeContentDeleted)
+                        if (folder.Id is int && (_immediately || folder.RootFolderType == FolderType.TRASH))
+                        {
+                            deletedSubtree = await TryDeleteSubtreeContentAsync(folder, scope, checkPermissions);
+                        }
+
+                        if (deletedSubtree == null)
                         {
                             var files = await FileDao.GetFilesAsync(folder.Id).ToListAsync();
                             await DeleteFilesAsync(files, scope, checkPermissions: checkPermissions);
@@ -298,7 +302,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                             await DeleteFoldersAsync(folders.Select(f => f.Id).ToList(), scope, checkPermissions: checkPermissions);
                         }
 
-                        if (subtreeContentDeleted || await FolderDao.IsEmptyAsync(folder.Id))
+                        if (deletedSubtree != null || await FolderDao.IsEmptyAsync(folder.Id))
                         {
                             var aces = new List<AceWrapper>();
 
@@ -326,6 +330,18 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                 : folder.ParentId;
 
                             await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
+
+                            if (deletedSubtree != null)
+                            {
+                                // the cascade above has removed the subfolder rows —
+                                // only now their events and progress may be reported
+                                foreach (var (subfolder, users, sharedUsers) in deletedSubtree)
+                                {
+                                    await socketManager.DeleteFolder(subfolder, users, sharedUsers: sharedUsers);
+                                    ProcessedFolder(subfolder.Id);
+                                    await ProgressStep(FolderDao.CanCalculateSubitems(subfolder.Id) ? default : subfolder.Id);
+                                }
+                            }
 
                             if (isRoom && folder.RootFolderType == FolderType.VirtualRooms)
                             {
@@ -488,11 +504,13 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
     }
 
     // Deletes the content of the folder subtree without per-folder recursion: bulk permission check,
-    // batched deletion of all subtree files, then per-subfolder bookkeeping (new-markers, sockets,
-    // progress). The folder rows themselves are removed by the DeleteFolderAsync cascade on the root.
-    // Returns false when the subtree cannot be handled this way (restricted/hidden items, providers,
+    // batched deletion of all subtree files, then per-subfolder new-marker cleanup. The folder rows
+    // themselves are removed by the DeleteFolderAsync cascade on the root, so the returned subfolders
+    // (with their pre-resolved socket recipients) get their events and progress reported by the caller
+    // only after that cascade succeeds.
+    // Returns null when the subtree cannot be handled this way (restricted/hidden items, providers,
     // permission errors, files left behind) — the caller then falls back to the per-folder recursion.
-    private async Task<bool> TryDeleteSubtreeContentAsync(Folder<T> folder, IServiceScope scope, bool checkPermissions)
+    private async Task<List<(Folder<T> Folder, IEnumerable<Guid> Users, IEnumerable<Guid> SharedUsers)>> TryDeleteSubtreeContentAsync(Folder<T> folder, IServiceScope scope, bool checkPermissions)
     {
         var permissionsManager = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
@@ -505,44 +523,64 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         if (subfolders.Count == 0)
         {
             // flat folder: the regular path already deletes its files in batches
-            return false;
+            return null;
         }
 
         if (subfolders.Exists(f => f.ProviderEntry || f.IsRoom))
         {
-            return false;
+            return null;
         }
 
-        var subtreeFiles = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
+        var subtreeFilesCount = await FileDao.GetFilesCountAsync(folder.Id, FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true);
 
         // the queries above hide entries the current user is restricted from, while the folder cascade
         // would still remove them; the unfiltered count detects such entries and rejects the fast path
-        if (await FolderDao.GetItemsCountAsync(folder.Id) != subfolders.Count + subtreeFiles.Count)
+        if (await FolderDao.GetItemsCountAsync(folder.Id) != subfolders.Count + subtreeFilesCount)
         {
-            return false;
+            return null;
         }
 
         var errorMsg = await permissionsManager.CheckFolderPermissionsAsync(subfolders, _immediately, checkPermissions, !_ignoreException);
         if (errorMsg != null)
         {
-            return false;
+            return null;
         }
 
-        await DeleteFilesAsync(subtreeFiles.Select(f => f.Id), scope, checkPermissions: checkPermissions);
+        // files are deleted page by page instead of materializing the whole subtree;
+        // always the first page — deletion shifts the remaining files to the front.
+        // A page that fails to shrink means some files cannot be deleted — give up,
+        // the final count check below rejects the fast path then
+        var previousCount = int.MaxValue;
 
-        // every subtree file must be gone before the cascade removes the folder rows
-        if (await FolderDao.GetItemsCountAsync(folder.Id) != subfolders.Count)
+        while (true)
         {
-            return false;
+            var page = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true, count: DeleteBatchSize)
+                .Select(f => f.Id)
+                .ToListAsync();
+
+            if (page.Count == 0)
+            {
+                break;
+            }
+
+            await DeleteFilesAsync(page, scope, checkPermissions: checkPermissions);
+
+            var remaining = await FileDao.GetFilesCountAsync(folder.Id, FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true);
+            if (remaining >= previousCount)
+            {
+                break;
+            }
+
+            previousCount = remaining;
         }
 
         var tagDao = daoFactory.GetTagDao<T>();
         var newTags = await tagDao.GetTagsAsync([TagType.New], subfolders).ToListAsync();
+        var subfoldersById = subfolders.ToDictionary(f => f.Id.ToString());
 
         foreach (var tagGroup in newTags.Where(t => t.EntryId != null).GroupBy(t => t.EntryId.ToString()))
         {
-            var subfolder = subfolders.Find(f => f.Id.ToString() == tagGroup.Key);
-            if (subfolder == null)
+            if (!subfoldersById.TryGetValue(tagGroup.Key, out var subfolder))
             {
                 continue;
             }
@@ -553,14 +591,23 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             }
         }
 
+        // socket recipients come from security records that the root cascade removes
+        var result = new List<(Folder<T>, IEnumerable<Guid>, IEnumerable<Guid>)>(subfolders.Count);
+
         foreach (var subfolder in subfolders)
         {
-            await socketManager.DeleteFolder(subfolder);
-            ProcessedFolder(subfolder.Id);
-            await ProgressStep(FolderDao.CanCalculateSubitems(subfolder.Id) ? default : subfolder.Id);
+            var (users, sharedUsers) = await socketManager.GetDeleteRecipientsAsync(subfolder);
+            result.Add((subfolder, users, sharedUsers));
         }
 
-        return true;
+        // every subtree file must be gone before the cascade removes the folder rows;
+        // checked last to keep the race window with concurrent uploads minimal
+        if (await FolderDao.GetItemsCountAsync(folder.Id) != subfolders.Count)
+        {
+            return null;
+        }
+
+        return result;
     }
 
     private async Task DeleteFilesAsync(IEnumerable<T> fileIds, IServiceScope scope, bool isNeedSendActions = false, bool checkPermissions = true)
@@ -663,6 +710,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
     {
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
+        var webhookPublisher = scope.ServiceProvider.GetService<IWebhookPublisher>();
         var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
@@ -681,9 +729,40 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
         if ((hasHeaders && isNeedSendActions) || !hasHeaders)
         {
+            // per-file configs re-read the entry, so skip the loop entirely when
+            // the tenant has no webhooks for the trigger at all
+            var anyConfigs = (await webhookPublisher.GetWebhookConfigsAsync<File<T>>(WebhookTrigger.FileDeleted, null, null)).Any();
+
+            if (anyConfigs)
+            {
+                foreach (var file in files)
+                {
+                    configsByFile[file.Id] = await webhookManager.GetWebhookConfigsAsync(WebhookTrigger.FileDeleted, file);
+                }
+            }
+        }
+
+        // socket recipients are resolved from security records that the deletion below
+        // removes, so they are captured up front (the old per-file path did the same by
+        // wrapping the deletion into the socket call)
+        var socketRecipients = new Dictionary<T, (IEnumerable<Guid> Users, IEnumerable<Guid> SharedUsers)>();
+
+        foreach (var file in files)
+        {
+            socketRecipients[file.Id] = await socketManager.GetDeleteRecipientsAsync(file);
+        }
+
+        if (typeof(T) != typeof(int))
+        {
+            // third-party daos delete files one by one and do not touch these tables
             foreach (var file in files)
             {
-                configsByFile[file.Id] = await webhookManager.GetWebhookConfigsAsync(WebhookTrigger.FileDeleted, file);
+                await LinkDao.DeleteAllLinkAsync(file.Id);
+                await FileDao.SaveProperties(file.Id, null);
+                if (file.IsForm)
+                {
+                    await FileDao.DeleteFormRolesAsync(file.Id);
+                }
             }
         }
 
@@ -696,11 +775,11 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         }
         catch (Exception ex)
         {
-            Err = ex.Message;
+            // the deletion transaction has failed and rolled back (post-commit follow-ups
+            // are best-effort inside the dao and do not throw); retry one by one so a single
+            // problematic file does not block the rest, and report only files that really failed
             Logger.ErrorWithException(ex);
 
-            // the batch is transactional and has rolled back; retry one by one so a single
-            // problematic file does not block the rest
             foreach (var file in files)
             {
                 try
@@ -720,7 +799,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
         foreach (var file in deleted)
         {
-            await socketManager.DeleteFileAsync(file);
+            var (users, sharedUsers) = socketRecipients[file.Id];
+            await socketManager.DeleteFileAsync(file, users: users, sharedUsers: sharedUsers);
 
             switch (file.RootFolderType)
             {
@@ -737,13 +817,21 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                 if (isNeedSendActions)
                 {
                     await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
-                    await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configsByFile[file.Id], file);
+
+                    if (configsByFile.TryGetValue(file.Id, out var configs))
+                    {
+                        await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configs, file);
+                    }
                 }
             }
             else
             {
                 await filesMessageService.SendAsync(MessageAction.FileDeleted, file, MessageInitiator.AutoCleanUp, file.Title);
-                await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configsByFile[file.Id], file);
+
+                if (configsByFile.TryGetValue(file.Id, out var configs))
+                {
+                    await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configs, file);
+                }
             }
         }
 

@@ -96,14 +96,21 @@ public class SocketManager(
         await MakeRequest("update-folder", folder, true, users: users);
     }
 
-    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null, IEnumerable<Guid> users = null)
+    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null, IEnumerable<Guid> users = null, IEnumerable<Guid> sharedUsers = null)
     {
-        await MakeRequest("delete-file", file, users: users, action: action);
+        await MakeRequest("delete-file", file, users: users, action: action, sharedUsers: sharedUsers);
     }
 
-    public async Task DeleteFolder<T>(Folder<T> folder, IEnumerable<Guid> users = null, Func<Task> action = null)
+    // recipients are resolved from files_security, so when an entry is deleted in bulk
+    // they must be captured before the deletion removes the security records
+    public async Task<(IEnumerable<Guid> users, IEnumerable<Guid> sharedUsers)> GetDeleteRecipientsAsync<T>(FileEntry<T> entry)
     {
-        await MakeRequest("delete-folder", folder, users: users, action: action);
+        return await WhoCanRead(entry, entry.FolderIdDisplay);
+    }
+
+    public async Task DeleteFolder<T>(Folder<T> folder, IEnumerable<Guid> users = null, Func<Task> action = null, IEnumerable<Guid> sharedUsers = null)
+    {
+        await MakeRequest("delete-folder", folder, users: users, action: action, sharedUsers: sharedUsers);
     }
 
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
@@ -276,7 +283,7 @@ public class SocketManager(
         });
 
     }
-    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null, T folderIdDisplay = default)
+    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null, T folderIdDisplay = default, IEnumerable<Guid> sharedUsers = null)
     {
         if (Equals(folderIdDisplay, default(T)))
         {
@@ -284,8 +291,6 @@ public class SocketManager(
         }
 
         var room = FolderRoom(folderIdDisplay);
-
-        IEnumerable<Guid> sharedUsers = null;
 
         if (users == null)
         {
