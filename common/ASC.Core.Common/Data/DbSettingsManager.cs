@@ -229,7 +229,6 @@ public class SettingsManager(
 
         try
         {
-            var key = T.ID.ToString() + tenantId + Guid.Empty;
             var data = Serialize(settings);
             var def = GetDefault<T>();
 
