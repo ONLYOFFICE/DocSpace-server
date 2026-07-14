@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
+import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getString } from "../narrow.js";
 import type { McpServersStorage, McpServerConfig } from "@onlyoffice/ai-chat/core";
 
@@ -89,7 +90,7 @@ export class HttpMcpServersStorage implements McpServersStorage {
   // (each `{ name, config }`), so we have to assemble the name → config map
   // client-side rather than reading an object back.
   async readAll(entityId?: string): Promise<Record<string, McpServerConfig>> {
-    const query = entityIdQuery(entityId);
+    const query = entityIdQuery(await resolveAgentEntityId(entityId));
     const raw = await aiService.get(PATH, query ? { query } : undefined);
     if (!Array.isArray(raw)) {
       return {};
