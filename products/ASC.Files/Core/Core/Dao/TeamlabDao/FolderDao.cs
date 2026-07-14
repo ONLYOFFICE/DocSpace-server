@@ -35,6 +35,7 @@ namespace ASC.Files.Core.Data;
 
 [Scope(typeof(IFolderDao<int>))]
 internal class FolderDao(
+        ILogger<FolderDao> logger,
         FactoryIndexerFolder factoryIndexer,
         UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -955,11 +956,6 @@ internal class FolderDao(
 
             var folderToDelete = await filesDbContext.DbFoldersForDeleteAsync(tenantId, subfolders).ToListAsync();
 
-            foreach (var f in folderToDelete)
-            {
-                await factoryIndexer.DeleteAsync(f);
-            }
-
             context.Folders.RemoveRange(folderToDelete);
 
             await filesDbContext.DeleteOrderAsync(subfolders);
@@ -994,9 +990,18 @@ internal class FolderDao(
             await context.SaveChangesAsync();
             await tx.CommitAsync();
             await RecalculateFoldersCountAsync(parent, tenantId);
-        });
 
-        //FactoryIndexer.DeleteAsync(new FoldersWrapper { Id = id });
+            // the search index is external: it is cleaned outside the transaction and
+            // must not fail the deletion when OpenSearch is unreachable
+            try
+            {
+                await factoryIndexer.DeleteAsync(r => r.In(a => a.Id, subfolders.ToArray()));
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        });
     }
 
     public async Task<TTo> MoveFolderAsync<TTo>(int folderId, TTo toFolderId, CancellationToken? cancellationToken)
@@ -2558,6 +2563,7 @@ public record FolderReassignInfo
 
 [Scope(typeof(ICacheFolderDao<int>))]
 internal class CacheFolderDao(
+    ILogger<FolderDao> logger,
     FactoryIndexerFolder factoryIndexer,
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,
@@ -2578,6 +2584,7 @@ internal class CacheFolderDao(
     IDistributedLockProvider distributedLockProvider,
     StorageFactory storageFactory)
     : FolderDao(
+        logger,
         factoryIndexer,
         userManager,
         dbContextManager,

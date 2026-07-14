@@ -1018,11 +1018,6 @@ internal class FileDao(
             var toDeleteFiles = await context.DbFilesAsync(tenantId, fileId).ToListAsync();
             var toDeleteFile = toDeleteFiles.FirstOrDefault(r => r.CurrentVersion);
 
-            foreach (var d in toDeleteFiles)
-            {
-                await factoryIndexer.DeleteAsync(d);
-            }
-
             await context.DeleteVectorizationStatusAsync(tenantId, fileId);
             await DeleteVectorsAsync(tenantId, fileId);
 
@@ -1058,8 +1053,17 @@ internal class FileDao(
 
             if (toDeleteFile != null)
             {
-                await factoryIndexer.DeleteAsync(toDeleteFile);
-                await factoryIndexerFormData.DeleteAsync(r => r.Where(a => a.Id, toDeleteFile.Id));
+                // the search index is external: it is cleaned outside the transaction and
+                // must not fail the deletion when OpenSearch is unreachable
+                try
+                {
+                    await factoryIndexer.DeleteAsync(r => r.Where(a => a.Id, toDeleteFile.Id));
+                    await factoryIndexerFormData.DeleteAsync(r => r.Where(a => a.Id, toDeleteFile.Id));
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorWithException(e);
+                }
             }
         });
     }
