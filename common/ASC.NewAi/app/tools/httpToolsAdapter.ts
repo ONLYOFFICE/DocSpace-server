@@ -204,14 +204,17 @@ export class HttpToolsAdapter implements ToolsAdapter {
             return `Tool "${toolName}" failed: ${error}`;
         }
         const value = "result" in result ? result["result"] : result["Result"];
+        // Contract: a tool result must reach the engine as a string — the
+        // same shape MCP tools produce. An object here would be spliced
+        // verbatim into the tool message's `content` and break providers
+        // that expect text (or text-part arrays).
+        const text = typeof value === "string" ? value : JSON.stringify(value ?? null);
         logger.info(
             `docspaceTools.callTool name=${toolName} ok in ${
                 Date.now() - started
-            }ms (resultLength=${
-                typeof value === "string" ? value.length : "n/a"
-            })`,
+            }ms (resultLength=${text.length})`,
         );
-        return value;
+        return text;
     }
 
     /**
