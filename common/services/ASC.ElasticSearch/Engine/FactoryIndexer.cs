@@ -551,7 +551,15 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
                 foreach (var e in agg.InnerExceptions)
                 {
                     Logger.ErrorQueue(e);
+                    MarkUnavailableOnConnectionFailure(e);
                 }
+
+                throw;
+            }
+            catch (Exception e)
+            {
+                Logger.ErrorQueue(e);
+                MarkUnavailableOnConnectionFailure(e);
 
                 throw;
             }
@@ -574,6 +582,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
             catch (Exception e)
             {
                 Logger.ErrorQueue(e);
+                MarkUnavailableOnConnectionFailure(e);
             }
         }, TaskCreationOptions.LongRunning);
 
@@ -581,6 +590,14 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         task.Start(_scheduler);
 
         return task;
+    }
+
+    private void MarkUnavailableOnConnectionFailure(Exception e)
+    {
+        if (e is OpenSearchClientException && e.InnerException is System.Net.Http.HttpRequestException or System.Net.Sockets.SocketException or TaskCanceledException)
+        {
+            factoryIndexer.MarkUnavailable();
+        }
     }
 }
 
@@ -617,6 +634,15 @@ public class FactoryIndexer
         {
             Log.CriticalFactoryIndexer(e);
         }
+    }
+
+    // Circuit breaker: called when an already issued request fails with a connection
+    // error. The state cache may still say "available" for up to 15 minutes after
+    // OpenSearch went down, and every request to a dead node costs seconds in retries —
+    // so the first failure short-circuits the following calls for a while.
+    public void MarkUnavailable()
+    {
+        _cache.Insert("elasticsearch", "false", DateTime.UtcNow.AddMinutes(1));
     }
 
     public bool CheckState(bool cacheState = true)
