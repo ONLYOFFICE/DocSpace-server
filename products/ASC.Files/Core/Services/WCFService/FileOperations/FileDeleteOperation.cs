@@ -283,13 +283,22 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                     var immediately = _immediately || !FolderDao.UseTrashForRemoveAsync(folder);
                     if (immediately && FolderDao.UseRecursiveOperation(folder.Id, default(T)))
                     {
-                        var files = await FileDao.GetFilesAsync(folder.Id).ToListAsync();
-                        await DeleteFilesAsync(files, scope, checkPermissions: checkPermissions);
+                        // fast path: the whole subtree is checked and cleaned at once, folder rows are
+                        // then removed by the single DeleteFolderAsync cascade below; per-folder recursion
+                        // stays as a fallback for mixed/restricted subtrees
+                        var subtreeContentDeleted = folder.Id is int && (_immediately || folder.RootFolderType == FolderType.TRASH) &&
+                                                    await TryDeleteSubtreeContentAsync(folder, scope, checkPermissions);
 
-                        var folders = await FolderDao.GetFoldersAsync(folder.Id).ToListAsync();
-                        await DeleteFoldersAsync(folders.Select(f => f.Id).ToList(), scope, checkPermissions: checkPermissions);
+                        if (!subtreeContentDeleted)
+                        {
+                            var files = await FileDao.GetFilesAsync(folder.Id).ToListAsync();
+                            await DeleteFilesAsync(files, scope, checkPermissions: checkPermissions);
 
-                        if (await FolderDao.IsEmptyAsync(folder.Id))
+                            var folders = await FolderDao.GetFoldersAsync(folder.Id).ToListAsync();
+                            await DeleteFoldersAsync(folders.Select(f => f.Id).ToList(), scope, checkPermissions: checkPermissions);
+                        }
+
+                        if (subtreeContentDeleted || await FolderDao.IsEmptyAsync(folder.Id))
                         {
                             var aces = new List<AceWrapper>();
 
@@ -476,6 +485,82 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
             await ProgressStep(canCalculate);
         }
+    }
+
+    // Deletes the content of the folder subtree without per-folder recursion: bulk permission check,
+    // batched deletion of all subtree files, then per-subfolder bookkeeping (new-markers, sockets,
+    // progress). The folder rows themselves are removed by the DeleteFolderAsync cascade on the root.
+    // Returns false when the subtree cannot be handled this way (restricted/hidden items, providers,
+    // permission errors, files left behind) — the caller then falls back to the per-folder recursion.
+    private async Task<bool> TryDeleteSubtreeContentAsync(Folder<T> folder, IServiceScope scope, bool checkPermissions)
+    {
+        var permissionsManager = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
+        var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+        var scopeClass = scope.ServiceProvider.GetService<FileDeleteOperationScope>();
+        var (fileMarker, _, _) = scopeClass;
+
+        var subfolders = await FolderDao.GetFoldersAsync(folder.Id, null, FilterType.FoldersOnly, false, Guid.Empty, string.Empty, withSubfolders: true).ToListAsync();
+
+        if (subfolders.Count == 0)
+        {
+            // flat folder: the regular path already deletes its files in batches
+            return false;
+        }
+
+        if (subfolders.Exists(f => f.ProviderEntry || f.IsRoom))
+        {
+            return false;
+        }
+
+        var subtreeFiles = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
+
+        // the queries above hide entries the current user is restricted from, while the folder cascade
+        // would still remove them; the unfiltered count detects such entries and rejects the fast path
+        if (await FolderDao.GetItemsCountAsync(folder.Id) != subfolders.Count + subtreeFiles.Count)
+        {
+            return false;
+        }
+
+        var errorMsg = await permissionsManager.CheckFolderPermissionsAsync(subfolders, _immediately, checkPermissions, !_ignoreException);
+        if (errorMsg != null)
+        {
+            return false;
+        }
+
+        await DeleteFilesAsync(subtreeFiles.Select(f => f.Id), scope, checkPermissions: checkPermissions);
+
+        // every subtree file must be gone before the cascade removes the folder rows
+        if (await FolderDao.GetItemsCountAsync(folder.Id) != subfolders.Count)
+        {
+            return false;
+        }
+
+        var tagDao = daoFactory.GetTagDao<T>();
+        var newTags = await tagDao.GetTagsAsync([TagType.New], subfolders).ToListAsync();
+
+        foreach (var tagGroup in newTags.Where(t => t.EntryId != null).GroupBy(t => t.EntryId.ToString()))
+        {
+            var subfolder = subfolders.Find(f => f.Id.ToString() == tagGroup.Key);
+            if (subfolder == null)
+            {
+                continue;
+            }
+
+            foreach (var owner in tagGroup.Select(t => t.Owner).Distinct())
+            {
+                await fileMarker.RemoveMarkAsNewAsync(subfolder, owner);
+            }
+        }
+
+        foreach (var subfolder in subfolders)
+        {
+            await socketManager.DeleteFolder(subfolder);
+            ProcessedFolder(subfolder.Id);
+            await ProgressStep(FolderDao.CanCalculateSubitems(subfolder.Id) ? default : subfolder.Id);
+        }
+
+        return true;
     }
 
     private async Task DeleteFilesAsync(IEnumerable<T> fileIds, IServiceScope scope, bool isNeedSendActions = false, bool checkPermissions = true)
