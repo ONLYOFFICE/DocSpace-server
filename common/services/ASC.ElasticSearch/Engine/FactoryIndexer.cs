@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.ElasticSearch;
@@ -66,8 +66,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
         BaseIndexer<T> baseIndexer,
-        IServiceProvider serviceProvider,
-        ICache cache)
+        IServiceProvider serviceProvider)
     : IFactoryIndexer
     where T : class, ISearchItem
 {
@@ -81,7 +80,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
     {
         IReadOnlyCollection<T> result;
         var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
+        if (!await SupportAsync() || !_indexer.CheckExist(t))
         {
             return (false, []);
         }
@@ -103,7 +102,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
     public async Task<(bool Success, long Count)> TryCountAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
         var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
+        if (!await SupportAsync() || !_indexer.CheckExist(t))
         {
             return (false, 0);
         }
@@ -126,7 +125,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
     {
         List<int> result;
         var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
+        if (!await SupportAsync() || !_indexer.CheckExist(t))
         {
             result = [];
 
@@ -148,45 +147,14 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         return (true, result);
     }
 
-    public async Task<(bool, List<int>, long)> TrySelectIdsWithTotalAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
-    {
-        List<int> result;
-        long total;
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
-        {
-            result = [];
-            total = 0;
-
-            return (false, result, total);
-        }
-
-        try
-        {
-            (var r, total) = _indexer.SelectWithTotal(expression, true);
-            result = r.Select(entry => entry.Id).ToList();
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorSelect(e);
-            total = 0;
-            result = [];
-
-            return (false, result, total);
-        }
-
-        return (true, result, total);
-    }
-
     public virtual async Task<bool> CanIndexByContentAsync(T t)
     {
-        return await SupportAsync(t) && await searchSettingsHelper.CanIndexByContentAsync<T>();
+        return await SupportAsync() && await searchSettingsHelper.CanIndexByContentAsync<T>();
     }
 
     public async Task<bool> Index(T data, bool immediately = true)
     {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t))
+        if (!await SupportAsync())
         {
             return false;
         }
@@ -207,8 +175,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
 
     public async Task Index(List<T> data, bool immediately = true, int retry = 0)
     {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t) || data.Count == 0)
+        if (!await SupportAsync() || data.Count == 0)
         {
             return;
         }
@@ -286,53 +253,16 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         }
     }
 
-    public void Update(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
-    {
-        var t = serviceProvider.GetService<T>();
-        if (!Support(t))
-        {
-            return;
-        }
-
-        try
-        {
-            _indexer.Update(data, immediately, fields);
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorUpdate(e);
-        }
-    }
-
-    public void Update(T data, UpdateAction action, Expression<Func<T, IList>> field, bool immediately = true)
-    {
-        var t = serviceProvider.GetService<T>();
-        if (!Support(t))
-        {
-            return;
-        }
-
-        try
-        {
-            _indexer.Update(data, action, field, immediately);
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorUpdate(e);
-        }
-    }
-
     public async Task<bool> UpdateAsync(T data, UpdateAction action, Expression<Func<T, IList>> field, bool immediately = true)
     {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t))
+        if (!await SupportAsync())
         {
             return false;
         }
 
         try
         {
-            _indexer.Update(data, action, field, immediately);
+            await _indexer.UpdateAsync(data, action, field, immediately);
 
             return true;
         }
@@ -347,8 +277,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
 
     public async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t))
+        if (!await SupportAsync())
         {
             return;
         }
@@ -356,7 +285,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         try
         {
             var tenant = tenantManager.GetCurrentTenantId();
-            _indexer.Update(data, expression, tenant, immediately, fields);
+            await _indexer.Update(data, expression, tenant, immediately, fields);
         }
         catch (Exception e)
         {
@@ -364,47 +293,10 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         }
     }
 
-    public async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
-    {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t))
-        {
-            return;
-        }
-
-        try
-        {
-            var tenant = tenantManager.GetCurrentTenantId();
-            _indexer.Update(data, expression, tenant, action, fields, immediately);
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorUpdate(e);
-        }
-    }
-
-    public void Delete(T data, bool immediately = true)
-    {
-        var t = serviceProvider.GetService<T>();
-        if (!Support(t))
-        {
-            return;
-        }
-
-        try
-        {
-            _indexer.Delete(data, immediately);
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorDelete(e);
-        }
-    }
 
     public async Task IndexAsync(T data, bool immediately = true)
     {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t))
+        if (!await SupportAsync())
         {
             return;
         }
@@ -421,15 +313,14 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
 
     public async Task<bool> UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t))
+        if (!await SupportAsync())
         {
             return false;
         }
 
         try
         {
-            _indexer.Update(data, immediately, fields);
+            await _indexer.UpdateAsync(data, immediately, fields);
 
             return true;
         }
@@ -441,32 +332,9 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         }
     }
 
-    public async Task<bool> DeleteAsync(T data, bool immediately = true)
-    {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t))
-        {
-            return false;
-        }
-
-        try
-        {
-            _indexer.Delete(data, immediately);
-
-            return true;
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorDelete(e);
-
-            return false;
-        }
-    }
-
     public async Task<bool> DeleteAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool immediately = true)
     {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t))
+        if (!await SupportAsync())
         {
             return false;
         }
@@ -475,7 +343,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
 
         try
         {
-            _indexer.Delete(expression, tenant, immediately);
+            await _indexer.DeleteAsync(expression, tenant, immediately);
 
             return true;
         }
@@ -489,15 +357,14 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
 
     public async Task DeleteAsync(int tenantId, bool immediately = true)
     {
-        var t = serviceProvider.GetService<T>();
-        if (!await SupportAsync(t))
+        if (!await SupportAsync())
         {
             return;
         }
 
         try
         {
-            _indexer.Delete(r => r, tenantId, immediately);
+            await _indexer.DeleteAsync(r => r, tenantId, immediately);
         }
         catch (Exception e)
         {
@@ -505,26 +372,15 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         }
     }
 
-    public void Flush()
+
+    public async Task RefreshAsync()
     {
-        var t = serviceProvider.GetService<T>();
-        if (!Support(t))
+        if (!await SupportAsync())
         {
             return;
         }
 
-        _indexer.Flush();
-    }
-
-    public void Refresh()
-    {
-        var t = serviceProvider.GetService<T>();
-        if (!Support(t))
-        {
-            return;
-        }
-
-        _indexer.Refresh();
+        await _indexer.RefreshAsync();
     }
 
     public virtual Task IndexAllAsync()
@@ -537,42 +393,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         await _indexer.ReIndexAsync();
     }
 
-    public bool Support(T t)
-    {
-        if (!factoryIndexer.CheckState())
-        {
-            return false;
-        }
-
-        var cacheTime = DateTime.UtcNow.AddMinutes(15);
-        var key = "elasticsearch " + t.IndexName;
-        try
-        {
-            var cacheValue = cache.Get<string>(key);
-            if (!string.IsNullOrEmpty(cacheValue))
-            {
-                return Convert.ToBoolean(cacheValue);
-            }
-
-            //TODO:
-            //var service = new Service.Service();
-
-            //var result = service.Support(t.IndexName);
-
-            //Cache.Insert(key, result.ToString(CultureInfo.InvariantCulture).ToLower(), cacheTime);
-
-            return true;
-        }
-        catch (Exception e)
-        {
-            cache.Insert(key, "false", cacheTime);
-            Logger.ErrorFactoryIndexerCheckState(e);
-
-            return false;
-        }
-    }
-
-    public async Task<bool> SupportAsync(T t)
+    public async Task<bool> SupportAsync()
     {
         return await factoryIndexer.CheckStateAsync();
     }
