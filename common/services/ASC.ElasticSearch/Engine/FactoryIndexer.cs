@@ -285,7 +285,7 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         try
         {
             var tenant = tenantManager.GetCurrentTenantId();
-            await _indexer.Update(data, expression, tenant, immediately, fields);
+            await _indexer.UpdateAsync(data, expression, tenant, immediately, fields);
         }
         catch (Exception e)
         {

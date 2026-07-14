@@ -336,7 +336,7 @@ public abstract class BaseIndexer<T>(Client client,
         await client.Instance.UpdateAsync(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, action, fields, immediately));
     }
 
-    internal async Task Update(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
+    internal async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
         if (!CheckExist(data))
         {
