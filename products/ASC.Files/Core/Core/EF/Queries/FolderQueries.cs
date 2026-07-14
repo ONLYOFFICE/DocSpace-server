@@ -270,6 +270,24 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<int> DeleteBunchObjectsByIdsAsync(int tenantId, IEnumerable<string> ids)
+    {
+        return FolderQueries.DeleteBunchObjectsByIdsAsync(this, tenantId, ids);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteOrderByFolderIdsAsync(int tenantId, IEnumerable<int> folderIds)
+    {
+        return FolderQueries.DeleteOrderByFolderIdsAsync(this, tenantId, folderIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteAuditReferencesByFolderIdsAsync(IEnumerable<int> folderIds)
+    {
+        return FolderQueries.DeleteAuditReferencesByFolderIdsAsync(this, folderIds);
+    }
+
+    [PreCompileQuery]
     public Task<int> DeleteFilesSecurityAsync(int tenantId, IEnumerable<int> subfolders)
     {
         return FolderQueries.DeleteFilesSecurityAsync(this, tenantId, subfolders);
@@ -653,6 +671,30 @@ static file class FolderQueries
                 ctx.BunchObjects
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.LeftNode == id)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteBunchObjectsByIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> ids) =>
+                ctx.BunchObjects
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => ids.Contains(r.LeftNode))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteOrderByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
+                ctx.FileOrder
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => folderIds.Contains(r.EntryId) && r.EntryType == FileEntryType.Folder)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> DeleteAuditReferencesByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, IEnumerable<int> folderIds) =>
+                ctx.FilesAuditReference
+                    .Where(r => folderIds.Contains(r.EntryId))
+                    .Where(r => r.EntryType == (byte)FileEntryType.Folder)
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, int, int, Guid, Task<int>> UpdateFoldersAsync =

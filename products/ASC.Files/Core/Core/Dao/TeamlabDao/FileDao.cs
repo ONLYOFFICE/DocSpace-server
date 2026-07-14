@@ -990,7 +990,9 @@ internal class FileDao(
 
     public async Task DeleteFileAsync(int fileId, Guid ownerId)
     {
-        await DeleteFileAsync(fileId, true, ownerId);
+        // single deletion goes through the batched path so that the set of cleaned-up
+        // tables lives in one place
+        await DeleteFilesAsync([KeyValuePair.Create(fileId, ownerId)]);
     }
 
     private async ValueTask DeleteFileAsync(int fileId, bool deleteFolder, Guid ownerId)
@@ -1105,10 +1107,20 @@ internal class FileDao(
             await tx.CommitAsync();
         });
 
+        // the rows are already deleted at this point: every follow-up step below is
+        // best-effort on its own, so one failure must not skip the others or make the
+        // caller believe the deletion itself failed and retry it
         foreach (var folderGroup in toDeleteFiles.GroupBy(f => f.ParentId))
         {
-            var filesCount = folderGroup.Select(f => f.Id).Distinct().Count();
-            await filesDbContext.ChangeFilesCountAsync(tenantId, folderGroup.Key, -filesCount);
+            try
+            {
+                var filesCount = folderGroup.Select(f => f.Id).Distinct().Count();
+                await filesDbContext.ChangeFilesCountAsync(tenantId, folderGroup.Key, -filesCount);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
         }
 
         foreach (var fileId in fileIds)
@@ -1116,16 +1128,38 @@ internal class FileDao(
             await DeleteVectorsAsync(tenantId, fileId);
         }
 
-        tenantQuotaController.Init(tenantId, ThumbnailTitle);
-        var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
-
-        foreach (var (fileId, ownerId) in files)
+        try
         {
-            await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
+            tenantQuotaController.Init(tenantId, ThumbnailTitle);
+            var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
+
+            foreach (var (fileId, ownerId) in files)
+            {
+                try
+                {
+                    await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorWithException(e);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
         }
 
-        await factoryIndexer.DeleteAsync(r => r.In(a => a.Id, fileIds.ToArray()));
-        await factoryIndexerFormData.DeleteAsync(r => r.In(a => a.Id, fileIds.ToArray()));
+        try
+        {
+            var fileIdsArray = fileIds.ToArray();
+            await factoryIndexer.DeleteAsync(r => r.In(a => a.Id, fileIdsArray));
+            await factoryIndexerFormData.DeleteAsync(r => r.In(a => a.Id, fileIdsArray));
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
     }
 
     public async Task<bool> IsExistAsync(string title, int folderId)

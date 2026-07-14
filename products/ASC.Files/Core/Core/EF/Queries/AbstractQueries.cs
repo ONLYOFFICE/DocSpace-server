@@ -132,6 +132,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task DeleteChatsByRoomIdsAsync(IEnumerable<int> folderIds)
+    {
+        return AbstractQueries.DeleteChatsByRoomIdsAsync(this, folderIds);
+    }
+
+    [PreCompileQuery]
     public Task DeleteFileKeysAsync(int entryId, int tenantId)
     {
         return AbstractQueries.DeleteFileKeysAsync(this, entryId, tenantId);
@@ -282,6 +288,12 @@ static file class AbstractQueries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int folderId) =>
             ctx.Chats
                 .Where(x => x.RoomId == folderId)
+                .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, IEnumerable<int>, Task> DeleteChatsByRoomIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, IEnumerable<int> folderIds) =>
+            ctx.Chats
+                .Where(x => folderIds.Contains(x.RoomId))
                 .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, int, Task> DeleteFileKeysAsync =
