@@ -479,28 +479,25 @@ internal class FileDao(
                     }
                 }
             }
-            else if (user != null && quotaEnabled)
+            else if (user != null && userQuotaSettings is { EnableQuota: true })
             {
-                if (userQuotaSettings.EnableQuota)
+                var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
+
+                var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? userQuotaSettings.DefaultQuota : userQuotaData.UserQuota;
+
+                if (userQuotaLimit != UserQuotaSettings.NoQuota)
                 {
-                    var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
+                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
 
-                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? userQuotaSettings.DefaultQuota : userQuotaData.UserQuota;
-
-                    if (userQuotaLimit != UserQuotaSettings.NoQuota)
+                    if (userQuotaLimit - userUsedSpace < file.ContentLength)
                     {
-                        var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-
-                        if (userQuotaLimit - userUsedSpace < file.ContentLength)
+                        if ((userQuotaLimit * 2 < userUsedSpace + file.ContentLength) || userQuotaLimit < userUsedSpace)
                         {
-                            if ((userQuotaLimit * 2 < userUsedSpace + file.ContentLength) || userQuotaLimit < userUsedSpace)
-                            {
-                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToUserQuota, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
-                                throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
-                            }
-                            await quotaSocketManager.UserQuotaExceededAsync(file.CreateBy);
-                            await filesMessageService.SendAsync(MessageAction.FileSavedButUserQuotaExceeded, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+                            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToUserQuota, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+                            throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
                         }
+                        await quotaSocketManager.UserQuotaExceededAsync(file.CreateBy);
+                        await filesMessageService.SendAsync(MessageAction.FileSavedButUserQuotaExceeded, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
                     }
                 }
             }
