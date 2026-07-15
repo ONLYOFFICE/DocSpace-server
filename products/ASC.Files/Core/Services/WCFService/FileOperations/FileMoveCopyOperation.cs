@@ -254,8 +254,9 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                     var isThirdPartyRoom = isRoom && folder.ProviderEntry;
                     var parentFolderTask = FolderDao.GetFolderAsync(folder.ParentId);
 
-                    var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
-                    var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync(files, false);
+                    // streamed: the subtree can be arbitrarily large and is only needed for this check
+                    var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync(
+                        FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true), false);
 
                     try
                     {
@@ -676,7 +677,36 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
-        foreach (var fileId in fileIds)
+
+        // files of one operation usually share a handful of parents
+        var parentFoldersCache = new Dictionary<T, Folder<T>>();
+
+        async Task<Folder<T>> GetParentFolderAsync(T parentId)
+        {
+            if (!parentFoldersCache.TryGetValue(parentId, out var parent))
+            {
+                parent = await FolderDao.GetFolderAsync(parentId);
+                parentFoldersCache.Add(parentId, parent);
+            }
+
+            return parent;
+        }
+
+        var fileIdsToProcess = fileIds;
+
+        // fast path: plain move inside the internal dao without conflicts, quota owner or
+        // room changes; anything more complex falls back to the per-file loop below.
+        // Duplicate resolve type skips conflict detection for files entirely, so it is
+        // batched as well
+        if (!copy && typeof(T) == typeof(int) && toFolder.Id is int &&
+            !toFolder.ProviderEntry &&
+            toFolder.RootFolderType is not (FolderType.TRASH or FolderType.Archive or FolderType.Privacy) &&
+            toFolder.FolderType is not FolderType.Knowledge)
+        {
+            fileIdsToProcess = await MoveFileBatchAsync(scope, fileIds, toFolder, toParentFolders, needToMark, sb, GetParentFolderAsync, checkPermissions);
+        }
+
+        foreach (var fileId in fileIdsToProcess)
         {
             CancellationToken.ThrowIfCancellationRequested();
 
@@ -700,7 +730,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                 var deleteLinks = file.RootFolderType == FolderType.USER &&
                                   toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
 
-                var parentFolder = await FolderDao.GetFolderAsync(file.ParentId);
+                var parentFolder = await GetParentFolderAsync(file.ParentId);
                 try
                 {
                     var conflict = _resolveType == FileConflictResolveType.Duplicate ||
@@ -1014,6 +1044,203 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         Result = sb.ToString();
 
         return needToMark;
+    }
+
+    private const int MoveBatchSize = 100;
+
+    // Moves the plain files in chunks through FileDao.MoveFilesAsync and reports their
+    // events. Returns the ids that must go through the regular per-file path instead:
+    // name conflicts, forms, room/owner changes, permission errors.
+    private async Task<List<T>> MoveFileBatchAsync<TTo>(
+        AsyncServiceScope scope,
+        List<T> fileIds,
+        Folder<TTo> toFolder,
+        List<Folder<TTo>> toParentFolders,
+        List<FileEntry<TTo>> needToMark,
+        StringBuilder sb,
+        Func<T, Task<Folder<T>>> getParentFolder,
+        bool checkPermissions)
+    {
+        var scopeClass = scope.ServiceProvider.GetService<FileMoveCopyOperationScope>();
+        var (filesMessageService, fileMarker, _, _, _, _) = scopeClass;
+        var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
+        var webhookPublisher = scope.ServiceProvider.GetService<IWebhookPublisher>();
+        var fileDao = scope.ServiceProvider.GetService<IFileDao<TTo>>();
+        var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
+        var permissionsManager = scope.ServiceProvider.GetService<PermissionCheckStarter<T, TTo>>();
+
+        if (toFolder.RootFolderType == FolderType.VirtualRooms && toParentFolders.Exists(folder => folder.FolderType == FolderType.FillingFormsRoom))
+        {
+            // only forms are allowed there — the per-file path reports that properly
+            return fileIds;
+        }
+
+        var toRoomId = (int)(object)(await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder)).RoomId;
+
+        if (toRoomId != -1)
+        {
+            var toRoom = toFolder.IsRoom ? toFolder : await folderDao.GetFolderAsync((TTo)(object)toRoomId);
+            if (toRoom == null || toRoom.SettingsIndexing)
+            {
+                // custom order in indexed rooms is maintained per file
+                return fileIds;
+            }
+        }
+
+        var fallback = new List<T>();
+        var candidates = new List<(File<T> File, Folder<T> Parent)>();
+        var parentRoomCache = new Dictionary<T, int>();
+
+        foreach (var fileId in fileIds)
+        {
+            CancellationToken.ThrowIfCancellationRequested();
+
+            var file = await FileDao.GetFileAsync(fileId);
+
+            if (file == null ||
+                file.IsForm ||
+                file.Encrypted ||
+                file.ProviderEntry ||
+                file.RootFolderType is FolderType.Privacy or FolderType.TRASH ||
+                Equals(file.ParentId, toFolder.Id))
+            {
+                fallback.Add(fileId);
+                continue;
+            }
+
+            var parent = await getParentFolder(file.ParentId);
+
+            if (parent == null ||
+                parent.RootFolderType is FolderType.TRASH ||
+                parent.FolderType is FolderType.Knowledge ||
+                parent.RootCreateBy != toFolder.RootCreateBy)
+            {
+                fallback.Add(fileId);
+                continue;
+            }
+
+            if (!parentRoomCache.TryGetValue(parent.Id, out var fromRoomId))
+            {
+                fromRoomId = (int)(object)(await FolderDao.GetParentRoomInfoFromFileEntryAsync(parent)).RoomId;
+                parentRoomCache.Add(parent.Id, fromRoomId);
+            }
+
+            if (fromRoomId != toRoomId)
+            {
+                fallback.Add(fileId);
+                continue;
+            }
+
+            var err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy, _resolveType);
+            var securityErr = err ?? await permissionsManager.CheckFilesSecurityPermissionsAsync([file], checkPermissions);
+
+            if (securityErr != null)
+            {
+                // the regular path re-checks and reports the error
+                fallback.Add(fileId);
+                continue;
+            }
+
+            candidates.Add((file, parent));
+        }
+
+        if (candidates.Count == 0)
+        {
+            return fallback;
+        }
+
+        var toMove = candidates;
+
+        // Duplicate mode moves files regardless of name collisions (same as the per-file
+        // path, which skips conflict detection for it); otherwise — one conflict lookup
+        // per destination instead of one per file, matching the case-insensitive db comparison
+        if (_resolveType != FileConflictResolveType.Duplicate)
+        {
+            var existingTitles = new HashSet<string>(
+                await fileDao.GetExistingTitlesAsync(toFolder.Id, candidates.Select(c => c.File.Title)),
+                StringComparer.OrdinalIgnoreCase);
+
+            var conflicted = candidates.Where(c => existingTitles.Contains(c.File.Title)).ToList();
+            fallback.AddRange(conflicted.Select(c => c.File.Id));
+
+            toMove = candidates.Except(conflicted).ToList();
+        }
+
+        var anyWebhooks = (await webhookPublisher.GetWebhookConfigsAsync<File<TTo>>(WebhookTrigger.FileMoved, null, null)).Any();
+        var isToFolder = Equals(toFolder.Id, _daoFolderId);
+
+        foreach (var chunk in toMove.Chunk(MoveBatchSize))
+        {
+            CancellationToken.ThrowIfCancellationRequested();
+
+            var socketRecipients = new Dictionary<T, (IEnumerable<Guid> Users, IEnumerable<Guid> SharedUsers)>();
+
+            foreach (var (file, _) in chunk)
+            {
+                await fileMarker.RemoveMarkAsNewForAllAsync(file);
+                socketRecipients[file.Id] = await socketManager.GetDeleteRecipientsAsync(file);
+            }
+
+            try
+            {
+                await FileDao.MoveFilesAsync(chunk.Select(c => c.File.Id), (T)(object)toFolder.Id);
+            }
+            catch (Exception ex)
+            {
+                // the batch transaction has rolled back: these files go the regular way
+                Logger.ErrorWithException(ex);
+                fallback.AddRange(chunk.Select(c => c.File.Id));
+                continue;
+            }
+
+            var newFiles = new Dictionary<TTo, File<TTo>>();
+
+            await foreach (var newFile in fileDao.GetFilesAsync(chunk.Select(c => (TTo)(object)c.File.Id)))
+            {
+                newFiles[newFile.Id] = newFile;
+            }
+
+            foreach (var (file, parent) in chunk)
+            {
+                if (!newFiles.TryGetValue((TTo)(object)file.Id, out var newFile))
+                {
+                    continue;
+                }
+
+                var (users, sharedUsers) = socketRecipients[file.Id];
+                await socketManager.DeleteFileAsync(file, users: users, sharedUsers: sharedUsers);
+
+                await filesMessageService.SendMoveMessageAsync(newFile, parent, toFolder, toParentFolders, false, _headers, [file.Title, parent.Title, toFolder.Title, toFolder.Id.ToString()]);
+
+                if (anyWebhooks)
+                {
+                    await webhookManager.PublishAsync(WebhookTrigger.FileMoved, newFile);
+                }
+
+                if (isToFolder)
+                {
+                    // the gate guarantees the source and destination rooms are the same,
+                    // so entries staying within one room are not marked as new
+                    var withinRoom = file.RootFolderType == FolderType.VirtualRooms && toFolder.RootFolderType == FolderType.VirtualRooms;
+                    if (!withinRoom)
+                    {
+                        needToMark.Add(newFile);
+                    }
+                }
+
+                await socketManager.CreateFileAsync(newFile);
+
+                if (ProcessedFile(file.Id))
+                {
+                    sb.Append($"file_{newFile.Id}{SplitChar}");
+                }
+
+                await ProgressStep(fileId: FolderDao.CanCalculateSubitems(file.Id) ? default : file.Id);
+            }
+        }
+
+        return fallback;
     }
 }
 

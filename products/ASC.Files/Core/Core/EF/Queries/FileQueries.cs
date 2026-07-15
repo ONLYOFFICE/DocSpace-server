@@ -239,6 +239,18 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<int> UpdateFilesFolderIdAsync(int tenantId, IEnumerable<int> fileIds, int parentId)
+    {
+        return FileQueries.UpdateFilesFolderIdAsync(this, tenantId, fileIds, parentId);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<string> ConflictTitlesAsync(int tenantId, int parentId, IEnumerable<string> titles)
+    {
+        return FileQueries.ConflictTitlesAsync(this, tenantId, parentId, titles);
+    }
+
+    [PreCompileQuery]
     public Task<bool> DbFilesAnyAsync(int tenantId, string title, int category, int folderId)
     {
         return FileQueries.DbFilesAnyAsync(this, tenantId, title, category, folderId);
@@ -883,6 +895,22 @@ static file class FileQueries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => formIds.Contains(r.FormId))
                     .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, int, Task<int>> UpdateFilesFolderIdAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, int parentId) =>
+                ctx.Files
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => fileIds.Contains(r.Id))
+                    .ExecuteUpdate(f => f.SetProperty(p => p.ParentId, parentId)));
+
+    public static readonly Func<FilesDbContext, int, int, IEnumerable<string>, IAsyncEnumerable<string>> ConflictTitlesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentId, IEnumerable<string> titles) =>
+                ctx.Files
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentId == parentId && r.CurrentVersion && titles.Contains(r.Title))
+                    .Select(r => r.Title));
 
     public static readonly Func<FilesDbContext, int, string, int, int, Task<bool>> DbFilesAnyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

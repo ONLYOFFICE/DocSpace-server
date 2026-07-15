@@ -1306,8 +1306,6 @@ internal class FileDao(
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
-                await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
-
                 if (trashId.Equals(toFolderId))
                 {
                     await q.ExecuteUpdateAsync(f => f
@@ -1336,9 +1334,18 @@ internal class FileDao(
                     await context.FileVectorization.AddOrUpdateAsync(vectorization);
                 }
 
-                var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
-                var (toFolderRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
-                var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                // reuse the values already resolved before the transaction: toFolder has not
+                // changed, and oldFolder differs from fromFolder only on a concurrent move
+                var toFolderRoomId = toRoomId;
+                var oldFolder = fromFolder;
+                var roomId = fromRoomId;
+
+                if (oldParentId.HasValue && oldParentId.Value != fromFolder.Id)
+                {
+                    oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
+                    (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                }
+
                 var archiveId = await folderDao.GetFolderIDArchive(false);
 
                 if (toFolderId == trashId && oldParentId.HasValue)
@@ -1457,6 +1464,96 @@ internal class FileDao(
         });
 
         return fileId;
+    }
+
+    // Plain batched move: parents, owner and room stay compatible (checked by the caller),
+    // so counters and sizes are aggregated and no quota/tag/link work is needed
+    public async Task MoveFilesAsync(IEnumerable<int> fileIds, int toFolderId)
+    {
+        var ids = fileIds.Where(id => id != 0).Distinct().ToList();
+        if (ids.Count == 0 || toFolderId == 0)
+        {
+            return;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        List<DbFile> movedFiles = null;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            movedFiles = await context.DbFilesByIdsAsync(tenantId, ids).ToListAsync();
+
+            await context.UpdateFilesFolderIdAsync(tenantId, ids, toFolderId);
+
+            await tx.CommitAsync();
+        });
+
+        // the rows are already moved: the follow-ups below are best-effort each
+        var movedTotalCount = 0;
+        long movedTotalSize = 0;
+
+        foreach (var parentGroup in movedFiles.GroupBy(f => f.ParentId).Where(g => g.Key != toFolderId))
+        {
+            try
+            {
+                var count = parentGroup.Select(f => f.Id).Distinct().Count();
+                var size = parentGroup.Where(f => f.CurrentVersion).Sum(f => f.ContentLength);
+
+                await filesDbContext.ChangeFilesCountAsync(tenantId, parentGroup.Key, -count);
+                await folderDao.ChangeTreeFolderSizeAsync(parentGroup.Key, -size);
+
+                movedTotalCount += count;
+                movedTotalSize += size;
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        try
+        {
+            if (movedTotalCount != 0)
+            {
+                await filesDbContext.ChangeFilesCountAsync(tenantId, toFolderId, movedTotalCount);
+                await folderDao.ChangeTreeFolderSizeAsync(toFolderId, movedTotalSize);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+
+        try
+        {
+            var toUpdate = movedFiles.FirstOrDefault(f => f.CurrentVersion);
+            if (toUpdate != null)
+            {
+                toUpdate.Folders = await filesDbContext.DbFolderTreesAsync(toFolderId).ToListAsync();
+
+                await factoryIndexer.UpdateAsync(toUpdate, r => r.In(a => a.Id, ids.ToArray()), UpdateAction.Replace, w => w.Folders);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+    }
+
+    public async Task<IEnumerable<string>> GetExistingTitlesAsync(int parentId, IEnumerable<string> titles)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.ConflictTitlesAsync(tenantId, parentId, titles.Distinct().ToList()).ToListAsync();
     }
 
     public async Task<string> MoveFileAsync(int fileId, string toFolderId, bool deleteLinks = false)
