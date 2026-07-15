@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 #nullable enable
@@ -36,6 +36,21 @@
 using HttpMethod = OpenSearch.Net.HttpMethod;
 
 namespace ASC.ElasticSearch.VectorData;
+
+internal static class ExistingCollectionsCache
+{
+    private static readonly ConcurrentDictionary<string, byte> _collections = new();
+
+    public static bool Contains(string name)
+    {
+        return _collections.ContainsKey(name);
+    }
+
+    public static void Add(string name)
+    {
+        _collections.TryAdd(name, 0);
+    }
+}
 
 public class VectorStoreCollection<TRecord>(
     OpenSearchClient? openSearchClient,
@@ -48,28 +63,18 @@ public class VectorStoreCollection<TRecord>(
     public async Task EnsureCollectionExistsAsync(CancellationToken cancellationToken = default)
     {
         EnsureClientConfigured();
-        
-        if (await CollectionExistsAsync(cancellationToken))
+
+        if (ExistingCollectionsCache.Contains(name))
         {
             return;
         }
 
-        var properties = OpenSearchVectorMapper.BuildPropertyMappings(typeof(TRecord), options.Dimension);
-        var meta = new Dictionary<string, object> { { "model", options.ModelId } };
+        if (!await CollectionExistsAsync(cancellationToken))
+        {
+            await CreateCollectionAsync(cancellationToken);
+        }
 
-        await OperationHandler.RunAsync<CreateIndexResponse, OpenSearchClientException>(
-            name,
-            "create_collection", 
-            async () => await openSearchClient!.Indices
-                .CreateAsync(new CreateIndexRequest(name) 
-                {
-                    Settings = _settings,
-                    Mappings = new TypeMapping
-                    {
-                        Properties = properties,
-                        Meta = meta
-                    }
-                }, cancellationToken));
+        ExistingCollectionsCache.Add(name);
     }
 
     public async Task UpsertAsync(List<TRecord> records, CancellationToken cancellationToken = default)
@@ -91,19 +96,19 @@ public class VectorStoreCollection<TRecord>(
         Expression<Func<TRecord, object>> propertySelector,
         float[] vector,
         int top,
-        VectorSearchOptions<TRecord>? searchOptions = null, 
+        VectorSearchOptions<TRecord>? searchOptions = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         EnsureClientConfigured();
         ValidateSearchArguments(propertySelector, vector, top);
-        
+
         var query = new KnnQuery
         {
             Vector = vector,
             Field = propertySelector.Body,
             K = top
         };
-        
+
         if (searchOptions is { Filter: not null })
         {
             var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient!.Infer);
@@ -115,7 +120,7 @@ public class VectorStoreCollection<TRecord>(
             name,
             "semantic_search",
             async () => await openSearchClient!.SearchAsync<TRecord>(
-                new SearchRequest(name) { Query = query, Size = top }, 
+                new SearchRequest(name) { Query = query, Size = top },
                 cancellationToken));
 
         foreach (var hit in response.Hits)
@@ -135,7 +140,7 @@ public class VectorStoreCollection<TRecord>(
         var lexicalFields = searchQuery.LexicalFields
             .Select(ResolveFieldName)
             .ToArray();
-        
+
         var k = searchQuery.K ?? searchQuery.Top;
 
         var builder = new HybridSearchRequestBuilder(searchQuery.Top)
@@ -149,7 +154,7 @@ public class VectorStoreCollection<TRecord>(
         }
 
         var request = builder.Build();
-        
+
         var requestParameters = new SearchRequestParameters
         {
             QueryString = new Dictionary<string, object>
@@ -209,7 +214,37 @@ public class VectorStoreCollection<TRecord>(
             "bulk_delete",
             async () => await openSearchClient!.DeleteByQueryAsync(request, cancellationToken));
     }
-    
+
+    private async Task CreateCollectionAsync(CancellationToken cancellationToken)
+    {
+        var properties = OpenSearchVectorMapper.BuildPropertyMappings(typeof(TRecord), options.Dimension);
+        var meta = new Dictionary<string, object> { { "model", options.ModelId } };
+
+        try
+        {
+            await OperationHandler.RunAsync<CreateIndexResponse, OpenSearchClientException>(
+                name,
+                "create_collection",
+                async () => await openSearchClient!.Indices
+                    .CreateAsync(new CreateIndexRequest(name)
+                    {
+                        Settings = _settings,
+                        Mappings = new TypeMapping
+                        {
+                            Properties = properties,
+                            Meta = meta
+                        }
+                    }, cancellationToken));
+        }
+        catch (VectorStoreException)
+        {
+            if (!await CollectionExistsAsync(cancellationToken))
+            {
+                throw;
+            }
+        }
+    }
+
     private async Task<bool> CollectionExistsAsync(CancellationToken cancellationToken = default)
     {
         var response = await OperationHandler.RunAsync<ExistsResponse, OpenSearchClientException>(
@@ -262,12 +297,12 @@ public class VectorStoreCollection<TRecord>(
         var property = selector.Body switch
         {
             MemberExpression { Member: PropertyInfo propertyInfo } => propertyInfo,
-            UnaryExpression 
-            { 
-                NodeType: ExpressionType.Convert, Operand: MemberExpression 
-                { 
-                    Member: PropertyInfo propertyInfo 
-                } 
+            UnaryExpression
+            {
+                NodeType: ExpressionType.Convert, Operand: MemberExpression
+                {
+                    Member: PropertyInfo propertyInfo
+                }
             } => propertyInfo,
             _ => throw new NotSupportedException("Only direct property selectors are supported.")
         };
