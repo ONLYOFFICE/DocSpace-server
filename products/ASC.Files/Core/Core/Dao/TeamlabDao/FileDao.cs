@@ -1241,6 +1241,7 @@ internal class FileDao(
                     };
 
                     await context.FileVectorization.AddOrUpdateAsync(vectorization);
+                    await context.SaveChangesAsync();
                 }
 
                 var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
