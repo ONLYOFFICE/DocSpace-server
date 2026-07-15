@@ -60,6 +60,16 @@ public static class AiWorkerServiceExtensions
         services.AddActivePassiveHostedService<DeletedChatCleanerService>(configuration);
         services.AddActivePassiveHostedService<OrphanVectorsCleanerService>(configuration);
 
+        services.AddSingleton(Channel.CreateBounded<VectorsDeletionIntegrationEvent>(new BoundedChannelOptions(1000)
+        {
+            FullMode = BoundedChannelFullMode.Wait,
+            SingleReader = true,
+            SingleWriter = false
+        }));
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<VectorsDeletionIntegrationEvent>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<VectorsDeletionIntegrationEvent>>().Writer);
+        services.AddHostedService<VectorsDeletionProcessingService>();
+
         return services;
     }
 

@@ -48,6 +48,7 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Hosting;
 global using ASC.Common;
 global using ASC.Common.DependencyInjection;
+global using ASC.Common.Log;
 
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.HeartBeat.Abstractions;
@@ -73,5 +74,6 @@ global using Microsoft.EntityFrameworkCore;
 global using NLog;
 
 global using System.Text;
+global using System.Threading.Channels;
 
 global using ASC.Web.Files.Utils;

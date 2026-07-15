@@ -31,22 +31,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Chunk = ASC.Files.Core.Vectorization.Data.Chunk;
-
 namespace ASC.AI.Worker.Handlers;
 
 [Scope]
 public class VectorsDeletionIntegrationEventHandler(
     ILogger<VectorsDeletionIntegrationEventHandler> logger,
-    TenantManager tenantManager,
-    IHeartBeatFactory heartBeatFactory,
-    IDbContextFactory<FilesDbContext> dbContextFactory,
-    VectorStore vectorStore)
+    ChannelWriter<VectorsDeletionIntegrationEvent> channelWriter)
     : IIntegrationEventHandler<VectorsDeletionIntegrationEvent>
 {
-    private static TimeSpan Timeout => TimeSpan.FromMinutes(1);
-    private static TimeSpan PulseInterval => Timeout / 3;
-
     public async Task Handle(VectorsDeletionIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
@@ -54,41 +46,7 @@ public class VectorsDeletionIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-
-            IHeartBeat heartBeat;
-            try
-            {
-                var key = VectorizationHelper.GetVectorizationKey(@event.FileId);
-                heartBeat = await heartBeatFactory.CreateAsync(key, Timeout, PulseInterval);
-            }
-            catch (HeartBeatExistsException)
-            {
-                return;
-            }
-
-            try
-            {
-                await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-
-                if (!await filesDbContext.IsVectorizationDeletedAsync(@event.TenantId, @event.FileId))
-                {
-                    return;
-                }
-
-                var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
-                await collection.DeleteAsync(
-                    new VectorSearchOptions<Chunk>
-                    {
-                        Filter = x => x.TenantId == @event.TenantId && x.FileId == @event.FileId
-                    });
-
-                await filesDbContext.DeleteVectorizationIfDeletedAsync(@event.TenantId, @event.FileId);
-            }
-            finally
-            {
-                await heartBeat.StopAsync();
-            }
+            await channelWriter.WriteAsync(@event);
         }
     }
 }
