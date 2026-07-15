@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
+import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
 import type { ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
 
@@ -43,8 +44,8 @@ function entityIdQuery(entityId: string | undefined): Record<string, QueryValue>
   return entityId ? { entityId } : undefined;
 }
 
-function readToolPrefsRaw(entityId: string | undefined): Promise<unknown> {
-  const query = entityIdQuery(entityId);
+async function readToolPrefsRaw(entityId: string | undefined): Promise<unknown> {
+  const query = entityIdQuery(await resolveAgentEntityId(entityId));
   return aiService.get(BASE_PATH, query ? { query } : undefined);
 }
 
