@@ -40,6 +40,8 @@ import type {
 import { getMcpServers } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { withTimeout } from "../storage/httpClient.js";
+import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
+import { getAgentMcpServerNames } from "../storage/docspaceAiApi.js";
 import logger from "../log.js";
 
 // docspace-mcp resolves the target portal from the `Referer` header — it
@@ -211,6 +213,58 @@ const source = new SystemToolsSource({
   fetch: forwardingFetch,
 });
 
+// Agent rooms carry an MCP whitelist: only the servers attached to the room
+// (managed by the agent create/edit dialog via `api/2.0/ai/rooms/{id}/servers`)
+// are served to that agent's chat. Returns `undefined` when `entityId` is
+// absent or not an agent room — no filtering, the full configured set stays
+// available. Fails closed: if the whitelist cannot be resolved, an agent
+// gets no system MCP tools rather than all of them.
+async function agentServerWhitelist(
+  entityId: string | undefined,
+): Promise<Set<string> | undefined> {
+  if (!entityId) {
+    return undefined;
+  }
+  const agentId = await resolveAgentEntityId(entityId);
+  if (!agentId) {
+    return undefined;
+  }
+  try {
+    return new Set(await getAgentMcpServerNames(agentId));
+  } catch (err) {
+    logger.error(
+      `systemTools: failed to resolve MCP whitelist for agent ${agentId}: ${
+        err instanceof Error ? err.message : String(err)
+      } — serving no system tools`,
+    );
+    return new Set();
+  }
+}
+
+function filterByWhitelist<T>(
+  grouped: Record<string, T>,
+  whitelist: Set<string> | undefined,
+): Record<string, T> {
+  if (!whitelist) {
+    return grouped;
+  }
+  const filtered: Record<string, T> = {};
+  const dropped: string[] = [];
+  for (const [serverType, items] of Object.entries(grouped)) {
+    if (whitelist.has(serverType)) {
+      filtered[serverType] = items;
+    } else {
+      dropped.push(serverType);
+    }
+  }
+  if (dropped.length > 0) {
+    logger.info(
+      `systemTools: servers [${dropped.join(", ")}] are not enabled for this agent — filtered out`,
+    );
+  }
+  return filtered;
+}
+
 // Diagnostic wrapper around the source: logs enumeration and invocation so
 // we can see whether the engine is even offered the system tools and
 // whether calls reach the MCP server. Delegates everything to `source`;
@@ -231,7 +285,8 @@ export const systemToolsSource: ToolsAdapter & {
     const started = Date.now();
     let grouped: Awaited<ReturnType<typeof source.getTools>>;
     try {
-      grouped = await source.getTools();
+      const whitelist = await agentServerWhitelist(entityId);
+      grouped = filterByWhitelist(await source.getTools(), whitelist);
     } catch (err) {
       logger.error(
         `systemTools.getTools failed after ${Date.now() - started}ms: ${err instanceof Error ? err.message : String(err)}`,
@@ -257,6 +312,22 @@ export const systemToolsSource: ToolsAdapter & {
       )}] entityId=${entityId ?? "-"}`,
     );
     try {
+      // Enforce the agent whitelist on execution too — the tool list is
+      // rebuilt per stream, but a call by name must not slip through for a
+      // server the agent has disabled.
+      const whitelist = await agentServerWhitelist(entityId);
+      if (whitelist) {
+        const grouped = await source.getTools();
+        const owner = Object.entries(grouped).find(
+          ([, items]) => items.some((t) => t.name === toolName),
+        )?.[0];
+        if (owner !== undefined && !whitelist.has(owner)) {
+          logger.warn(
+            `systemTools.callTool name=${toolName} denied: server "${owner}" is not enabled for this agent`,
+          );
+          return `Tool "${toolName}" is not available: its MCP server is not enabled for this agent.`;
+        }
+      }
       const result = await source.callTool(toolName, args);
       logger.info(`systemTools.callTool name=${toolName} ok`);
       return result;
