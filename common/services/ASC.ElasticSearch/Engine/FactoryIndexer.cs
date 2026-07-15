@@ -594,7 +594,9 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
 
     private void MarkUnavailableOnConnectionFailure(Exception e)
     {
-        if (e is OpenSearchClientException && e.InnerException is System.Net.Http.HttpRequestException or System.Net.Sockets.SocketException or TaskCanceledException)
+        // only genuine connection failures count: a request timeout (TaskCanceledException)
+        // may come from a live but busy cluster and must not silence the whole indexer
+        if (e is OpenSearchClientException && e.InnerException is System.Net.Http.HttpRequestException or System.Net.Sockets.SocketException)
         {
             factoryIndexer.MarkUnavailable();
         }
@@ -766,12 +768,24 @@ public class FactoryIndexer
             state.LastIndexed = tenantUtil.DateTimeFromUtc(state.LastIndexed.Value);
         }
 
-        indices = _client.Instance.Cat.Indices(new CatIndicesRequest { SortByColumns = ["index"] }).Records
+        var client = _client.Instance;
+
+        if (client == null)
+        {
+            return new
+            {
+                state,
+                indices,
+                status = false
+            };
+        }
+
+        indices = client.Cat.Indices(new CatIndicesRequest { SortByColumns = ["index"] }).Records
             .Select(r => new
             {
                 r.Index,
                 Count = count.GetValueOrDefault(r.Index, 0),
-                DocsCount = _client.Instance.Count(new CountRequest(r.Index)).Count,
+                DocsCount = client.Count(new CountRequest(r.Index)).Count,
                 r.StoreSize
             })
             .Where(r => r.Count > 0);

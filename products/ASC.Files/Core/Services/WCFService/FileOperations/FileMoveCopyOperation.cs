@@ -1088,17 +1088,25 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
             }
         }
 
+        var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
+        var lockerManager = scope.ServiceProvider.GetService<LockerManager>();
+
         var fallback = new List<T>();
         var candidates = new List<(File<T> File, Folder<T> Parent)>();
         var parentRoomCache = new Dictionary<T, int>();
+
+        var filesByIds = new Dictionary<T, File<T>>();
+
+        await foreach (var file in FileDao.GetFilesAsync(fileIds))
+        {
+            filesByIds[file.Id] = file;
+        }
 
         foreach (var fileId in fileIds)
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            var file = await FileDao.GetFileAsync(fileId);
-
-            if (file == null ||
+            if (!filesByIds.TryGetValue(fileId, out var file) ||
                 file.IsForm ||
                 file.Encrypted ||
                 file.ProviderEntry ||
@@ -1132,10 +1140,16 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                 continue;
             }
 
-            var err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy, _resolveType);
-            var securityErr = err ?? await permissionsManager.CheckFilesSecurityPermissionsAsync([file], checkPermissions);
+            // CanMove is already part of the destination check, so only the lock remains here;
+            // the editing state is re-checked right before each chunk is moved
+            var err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, toParentFolders, _copy, _resolveType);
 
-            if (securityErr != null)
+            if (err == null && checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
+            {
+                err = FilesCommonResource.ErrorMessage_LockedFile;
+            }
+
+            if (err != null)
             {
                 // the regular path re-checks and reports the error
                 fallback.Add(fileId);
@@ -1154,37 +1168,73 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
         // Duplicate mode moves files regardless of name collisions (same as the per-file
         // path, which skips conflict detection for it); otherwise — one conflict lookup
-        // per destination instead of one per file, matching the case-insensitive db comparison
+        // per destination instead of one per file, matching the case-insensitive db comparison.
+        // Same-titled files within the selection itself would collide right after the first
+        // of them is moved, so only one of them may go through the batch
         if (_resolveType != FileConflictResolveType.Duplicate)
         {
             var existingTitles = new HashSet<string>(
                 await fileDao.GetExistingTitlesAsync(toFolder.Id, candidates.Select(c => c.File.Title)),
                 StringComparer.OrdinalIgnoreCase);
 
-            var conflicted = candidates.Where(c => existingTitles.Contains(c.File.Title)).ToList();
-            fallback.AddRange(conflicted.Select(c => c.File.Id));
+            var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            toMove = [];
 
-            toMove = candidates.Except(conflicted).ToList();
+            foreach (var candidate in candidates)
+            {
+                if (existingTitles.Contains(candidate.File.Title) || !seenTitles.Add(candidate.File.Title))
+                {
+                    fallback.Add(candidate.File.Id);
+                }
+                else
+                {
+                    toMove.Add(candidate);
+                }
+            }
         }
 
         var anyWebhooks = (await webhookPublisher.GetWebhookConfigsAsync<File<TTo>>(WebhookTrigger.FileMoved, null, null)).Any();
         var isToFolder = Equals(toFolder.Id, _daoFolderId);
 
-        foreach (var chunk in toMove.Chunk(MoveBatchSize))
+        foreach (var candidateChunk in toMove.Chunk(MoveBatchSize))
         {
             CancellationToken.ThrowIfCancellationRequested();
+
+            // the editing state may have changed while previous chunks were being processed
+            var chunk = new List<(File<T> File, Folder<T> Parent)>(candidateChunk.Length);
+
+            foreach (var candidate in candidateChunk)
+            {
+                if (await fileTracker.IsEditingAsync(candidate.File.Id, false))
+                {
+                    fallback.Add(candidate.File.Id);
+                }
+                else
+                {
+                    chunk.Add(candidate);
+                }
+            }
+
+            if (chunk.Count == 0)
+            {
+                continue;
+            }
 
             var socketRecipients = new Dictionary<T, (IEnumerable<Guid> Users, IEnumerable<Guid> SharedUsers)>();
 
             foreach (var (file, _) in chunk)
             {
-                await fileMarker.RemoveMarkAsNewForAllAsync(file);
                 socketRecipients[file.Id] = await socketManager.GetDeleteRecipientsAsync(file);
             }
 
+            List<T> movedIds;
+
             try
             {
-                await FileDao.MoveFilesAsync(chunk.Select(c => c.File.Id), (T)(object)toFolder.Id);
+                movedIds = (await FileDao.MoveFilesAsync(
+                    chunk.Select(c => c.File.Id),
+                    (T)(object)toFolder.Id,
+                    chunk.Select(c => c.Parent.Id).Distinct())).ToList();
             }
             catch (Exception ex)
             {
@@ -1194,17 +1244,33 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                 continue;
             }
 
+            // files whose parent changed concurrently were not touched by the batch
+            var skipped = chunk.Where(c => !movedIds.Contains(c.File.Id)).ToList();
+            fallback.AddRange(skipped.Select(c => c.File.Id));
+
+            var moved = chunk.Where(c => movedIds.Contains(c.File.Id)).ToList();
+
+            // unread markers are removed only for the files that were actually moved
+            foreach (var (file, _) in moved)
+            {
+                await fileMarker.RemoveMarkAsNewForAllAsync(file);
+            }
+
             var newFiles = new Dictionary<TTo, File<TTo>>();
 
-            await foreach (var newFile in fileDao.GetFilesAsync(chunk.Select(c => (TTo)(object)c.File.Id)))
+            await foreach (var newFile in fileDao.GetFilesAsync(moved.Select(c => (TTo)(object)c.File.Id)))
             {
                 newFiles[newFile.Id] = newFile;
             }
 
-            foreach (var (file, parent) in chunk)
+            foreach (var (file, parent) in moved)
             {
                 if (!newFiles.TryGetValue((TTo)(object)file.Id, out var newFile))
                 {
+                    // moved by the batch but gone already (deleted concurrently) — the move
+                    // itself happened, so the progress must still account for the file
+                    Logger.InformationUnableFileMoveCopyOperation(file.Id.ToString(), "the file is missing after the batched move");
+                    await ProgressStep(fileId: FolderDao.CanCalculateSubitems(file.Id) ? default : file.Id);
                     continue;
                 }
 

@@ -239,9 +239,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateFilesFolderIdAsync(int tenantId, IEnumerable<int> fileIds, int parentId)
+    public Task<int> UpdateFilesFolderIdAsync(int tenantId, IEnumerable<int> fileIds, IEnumerable<int> fromParentIds, int parentId)
     {
-        return FileQueries.UpdateFilesFolderIdAsync(this, tenantId, fileIds, parentId);
+        return FileQueries.UpdateFilesFolderIdAsync(this, tenantId, fileIds, fromParentIds, parentId);
     }
 
     [PreCompileQuery]
@@ -896,12 +896,14 @@ static file class FileQueries
                     .Where(r => formIds.Contains(r.FormId))
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, int, Task<int>> UpdateFilesFolderIdAsync =
+    // the parent guard keeps files moved concurrently (their parent no longer matches the
+    // caller's snapshot) untouched — such files need the full per-file move handling
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IEnumerable<int>, int, Task<int>> UpdateFilesFolderIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, int parentId) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, IEnumerable<int> fromParentIds, int parentId) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => fileIds.Contains(r.Id))
+                    .Where(r => fileIds.Contains(r.Id) && fromParentIds.Contains(r.ParentId))
                     .ExecuteUpdate(f => f.SetProperty(p => p.ParentId, parentId)));
 
     public static readonly Func<FilesDbContext, int, int, IEnumerable<string>, IAsyncEnumerable<string>> ConflictTitlesAsync =

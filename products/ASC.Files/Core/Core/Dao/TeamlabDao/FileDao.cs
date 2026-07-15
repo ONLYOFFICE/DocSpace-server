@@ -1127,9 +1127,16 @@ internal class FileDao(
             }
         }
 
-        foreach (var fileId in fileIds)
+        try
         {
-            await DeleteVectorsAsync(tenantId, fileId);
+            foreach (var fileId in fileIds)
+            {
+                await DeleteVectorsAsync(tenantId, fileId);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
         }
 
         try
@@ -1467,13 +1474,15 @@ internal class FileDao(
     }
 
     // Plain batched move: parents, owner and room stay compatible (checked by the caller),
-    // so counters and sizes are aggregated and no quota/tag/link work is needed
-    public async Task MoveFilesAsync(IEnumerable<int> fileIds, int toFolderId)
+    // so counters and sizes are aggregated and no quota/tag/link work is needed.
+    // Only files whose parent still matches the caller's snapshot are moved; the rest
+    // (moved concurrently) are excluded from the returned set.
+    public async Task<IEnumerable<int>> MoveFilesAsync(IEnumerable<int> fileIds, int toFolderId, IEnumerable<int> fromParentIds = null)
     {
         var ids = fileIds.Where(id => id != 0).Distinct().ToList();
         if (ids.Count == 0 || toFolderId == 0)
         {
-            return;
+            return [];
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -1489,29 +1498,44 @@ internal class FileDao(
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
 
-            movedFiles = await context.DbFilesByIdsAsync(tenantId, ids).ToListAsync();
+            var rows = await context.DbFilesByIdsAsync(tenantId, ids).ToListAsync();
+            var parents = (fromParentIds ?? rows.Select(r => r.ParentId)).Distinct().ToList();
 
-            await context.UpdateFilesFolderIdAsync(tenantId, ids, toFolderId);
+            movedFiles = rows.Where(r => parents.Contains(r.ParentId)).ToList();
+
+            await context.UpdateFilesFolderIdAsync(tenantId, ids, parents, toFolderId);
 
             await tx.CommitAsync();
         });
 
-        // the rows are already moved: the follow-ups below are best-effort each
-        var movedTotalCount = 0;
-        long movedTotalSize = 0;
+        var movedIds = movedFiles.Select(f => f.Id).Distinct().ToList();
+
+        if (movedIds.Count == 0)
+        {
+            return movedIds;
+        }
+
+        // the rows are already moved: the follow-ups below are best-effort each,
+        // and a failed source update must not distort the destination totals
+        var currentVersions = movedFiles.Where(f => f.CurrentVersion).ToList();
 
         foreach (var parentGroup in movedFiles.GroupBy(f => f.ParentId).Where(g => g.Key != toFolderId))
         {
+            var count = parentGroup.Select(f => f.Id).Distinct().Count();
+            var size = parentGroup.Where(f => f.CurrentVersion).Sum(f => f.ContentLength);
+
             try
             {
-                var count = parentGroup.Select(f => f.Id).Distinct().Count();
-                var size = parentGroup.Where(f => f.CurrentVersion).Sum(f => f.ContentLength);
-
                 await filesDbContext.ChangeFilesCountAsync(tenantId, parentGroup.Key, -count);
-                await folderDao.ChangeTreeFolderSizeAsync(parentGroup.Key, -size);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
 
-                movedTotalCount += count;
-                movedTotalSize += size;
+            try
+            {
+                await folderDao.ChangeTreeFolderSizeAsync(parentGroup.Key, -size);
             }
             catch (Exception e)
             {
@@ -1521,11 +1545,7 @@ internal class FileDao(
 
         try
         {
-            if (movedTotalCount != 0)
-            {
-                await filesDbContext.ChangeFilesCountAsync(tenantId, toFolderId, movedTotalCount);
-                await folderDao.ChangeTreeFolderSizeAsync(toFolderId, movedTotalSize);
-            }
+            await filesDbContext.ChangeFilesCountAsync(tenantId, toFolderId, movedIds.Count);
         }
         catch (Exception e)
         {
@@ -1534,18 +1554,29 @@ internal class FileDao(
 
         try
         {
-            var toUpdate = movedFiles.FirstOrDefault(f => f.CurrentVersion);
+            await folderDao.ChangeTreeFolderSizeAsync(toFolderId, currentVersions.Sum(f => f.ContentLength));
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+
+        try
+        {
+            var toUpdate = currentVersions.FirstOrDefault();
             if (toUpdate != null)
             {
                 toUpdate.Folders = await filesDbContext.DbFolderTreesAsync(toFolderId).ToListAsync();
 
-                await factoryIndexer.UpdateAsync(toUpdate, r => r.In(a => a.Id, ids.ToArray()), UpdateAction.Replace, w => w.Folders);
+                await factoryIndexer.UpdateAsync(toUpdate, r => r.In(a => a.Id, movedIds.ToArray()), UpdateAction.Replace, w => w.Folders);
             }
         }
         catch (Exception e)
         {
             logger.ErrorWithException(e);
         }
+
+        return movedIds;
     }
 
     public async Task<IEnumerable<string>> GetExistingTitlesAsync(int parentId, IEnumerable<string> titles)

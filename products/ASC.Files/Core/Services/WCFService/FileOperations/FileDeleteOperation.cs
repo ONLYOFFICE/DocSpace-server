@@ -550,7 +550,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         // always the first page — deletion shifts the remaining files to the front.
         // A page that fails to shrink means some files cannot be deleted — give up,
         // the final count check below rejects the fast path then
-        var previousCount = int.MaxValue;
+        var previousCount = subtreeFilesCount;
 
         while (true)
         {

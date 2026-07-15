@@ -530,7 +530,20 @@ public class PermissionCheckStarter<T, TTo>(
         FileConflictResolveType resolveType,
         bool check = false)
     {
-        var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
+        return await CheckFilesPermissionsAsync(file, toFolder, null, copy, resolveType, check);
+    }
+
+    public async Task<string> CheckFilesPermissionsAsync(
+        File<T> file,
+        Folder<TTo> toFolder,
+        List<Folder<TTo>> toFolderParents,
+        bool copy,
+        FileConflictResolveType resolveType,
+        bool check = false)
+    {
+        // the destination does not change between the files of one operation,
+        // so the caller may pass its parent chain once
+        var parentFolders = toFolderParents ?? await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
 
         string errorMsg = null;
 

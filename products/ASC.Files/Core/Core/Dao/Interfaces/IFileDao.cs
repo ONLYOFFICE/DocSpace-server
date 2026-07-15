@@ -275,15 +275,22 @@ public interface IFileDao<T>
     Task<int> MoveFileAsync(T fileId, int toFolderId, bool deleteLinks = false);
 
     /// <summary>
-    ///   Moves a batch of files into the given folder. Covers only the plain case:
-    ///   no link deletion, no conflict resolution, no quota owner change.
+    ///   Moves a batch of files into the given folder and returns the ids that were
+    ///   actually moved. Covers only the plain case: no link deletion, no conflict
+    ///   resolution, no quota owner change. Files whose parent no longer matches
+    ///   the given snapshot are left untouched.
     /// </summary>
-    async Task MoveFilesAsync(IEnumerable<T> fileIds, T toFolderId)
+    async Task<IEnumerable<T>> MoveFilesAsync(IEnumerable<T> fileIds, T toFolderId, IEnumerable<T> fromParentIds = null)
     {
+        var moved = new List<T>();
+
         foreach (var fileId in fileIds)
         {
             await MoveFileAsync(fileId, toFolderId);
+            moved.Add(fileId);
         }
+
+        return moved;
     }
 
     /// <summary>
