@@ -90,12 +90,15 @@ global using ASC.Files.Core.Utils;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.Web.Core.Files;
+global using ASC.Web.Studio.Core;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Helpers;
+global using ASC.Web.Files.Services.DocumentService;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
+global using ASC.Web.Files.Utils;
 
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
@@ -103,6 +106,7 @@ global using Microsoft.Extensions.AI;
 
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
+global using System.Globalization;
 global using System.Net.Http.Headers;
 global using System.Text;
 global using System.Text.Json;

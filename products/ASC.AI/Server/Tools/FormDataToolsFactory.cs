@@ -39,11 +39,17 @@ public class FormDataToolsFactory(
     BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IDaoFactory daoFactory,
     FormFillingReportCreator formFillingReportCreator,
+    TenantManager tenantManager,
+    GlobalFolderHelper globalFolderHelper,
+    DocumentServiceConnector docService,
+    FileConverter fileConverter,
+    PathProvider pathProvider,
     ILogger<FormDataToolsFactory> logger) : IAiToolFactory
 {
     private const string QueryName = "query_form_data";
     private const string AggregateName = "aggregated_form_data";
     private const string SelfJoinName = "self_join_form_data";
+    private const string SaveReportName = "save_form_analysis_report";
 
     private IFormsDatabaseClient? GetEnabledFormsDatabaseClient() =>
         externalDatabaseClient.IsEnabled() ? externalDatabaseClient :
@@ -54,7 +60,8 @@ public class FormDataToolsFactory(
     {
         QueryName,
         AggregateName,
-        SelfJoinName
+        SelfJoinName,
+        SaveReportName
     };
 
     private const string FormDataRules =
@@ -142,6 +149,13 @@ public class FormDataToolsFactory(
           - **Timeout recovery:** if the self-join returns a timeout error, do NOT give up. First retry with IS NOT NULL filters on all join columns. Only add `datePartFilters` year restriction if the same-entity AND same-day cross-row conditions are NOT already in `joinConditions` — those conditions already make the query highly selective and a year filter is not needed.
 
         **Planning step:** If the question requires 3+ tool calls, outline the plan before calling. Make all calls before the final answer.
+
+        #### Saving an analysis report
+        When the user explicitly asks to save, export, or download a report/summary of the analysis (e.g. "save this as a report", "export the analysis", "save this to my documents"):
+        1. Compose a complete, well-structured Markdown report of the analysis already performed in this conversation — headings, bullet lists, and tables where appropriate. Do not just paste raw tool output.
+        2. Call `{SaveReportName}` once with the full Markdown as `reportMarkdown`.
+        3. Confirm to the user that the report was saved as a Word document in "My Documents", naming the file.
+        Do NOT call `{SaveReportName}` unless the user explicitly asked to save/export/download a report.
 
         #### Column names and schema
         - **NEVER invent or guess column names.** Use ONLY the exact names listed under "Available columns" in the schema above. Column names are plain strings — no quotes. If none matches the question, tell the user — do NOT fabricate a plausible name. Common mistake: using `date_diff`, `start_date`, `employee_name` when the actual column is `col_datediff`, `col_start`, `col_employee`.
@@ -238,6 +252,11 @@ public class FormDataToolsFactory(
         if (columns.Count >= 2)
         {
             tools.Add(new AiTool(SelfJoinName, MakeSelfJoinFunction(client, tableName, allowedColumns, columns, pkColumn)));
+        }
+
+        if ((await tenantManager.GetCurrentTenantQuotaAsync()).AutomationApi)
+        {
+            tools.Add(new AiTool(SaveReportName, MakeSaveReportFunction(form)));
         }
 
         return new ToolBundle(prompt, tools);
@@ -486,6 +505,59 @@ public class FormDataToolsFactory(
             return client.SelfJoinAsync(
                 tableName, allowedColumns, pkColumn, parsedJoinList, displayColumns, limit,
                 parsedFilters, parsedDatePartFilters, countDistinctColumn);
+        }
+    }
+
+    private AIFunction MakeSaveReportFunction(File<int> form)
+    {
+        const string description =
+            "Saves a written analysis report as a Word (.docx) document in the user's My Documents folder. " +
+            "Call this ONLY when the user explicitly asks to save, export, or download a report/summary " +
+            "of the form-data analysis — never automatically. Compose a complete, well-formatted Markdown " +
+            "report of the analysis already performed in this conversation (use headings, lists, and tables " +
+            "as appropriate) and pass it as reportMarkdown; do not just restate raw tool output.";
+
+        return AIFunctionFactory.Create(Function, new AIFunctionFactoryOptions
+        {
+            Name = SaveReportName,
+            Description = description
+        });
+
+        async Task<string> Function(
+            [Description("The full report content, formatted as Markdown (headings, lists, tables).")] string reportMarkdown,
+            [Description("File name without extension. Defaults to the form's title with \" - Analysis Report\" appended.")] string? fileName = null)
+        {
+            if (string.IsNullOrWhiteSpace(reportMarkdown))
+            {
+                throw new ArgumentException("reportMarkdown must not be empty.");
+            }
+
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var folder = await folderDao.GetFolderAsync(await globalFolderHelper.FolderMyAsync)
+                ?? throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
+
+            var bytes = Encoding.UTF8.GetBytes(reportMarkdown);
+
+            var maxUploadSize = await folderDao.GetMaxUploadSizeAsync(folder.Id);
+            if (bytes.Length > maxUploadSize)
+            {
+                throw FileSizeComment.GetFileSizeException(maxUploadSize);
+            }
+
+            await using var ms = new MemoryStream(bytes);
+            var mdUri = await pathProvider.GetTempUrlAsync(ms, ".md");
+
+            var (_, outFileUri, outFileType) = await docService.GetConvertedUriAsync(
+                mdUri, "md", "docx", Guid.NewGuid().ToString("n"), null,
+                CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
+
+            var title = string.IsNullOrWhiteSpace(fileName)
+                ? $"{Path.GetFileNameWithoutExtension(form.Title)} - Analysis Report"
+                : fileName;
+
+            var saved = await fileConverter.SaveConvertedFileAsync(folder, outFileUri, outFileType, title, updateIfExist: false);
+
+            return JsonSerializer.Serialize(new GeneratedFileResult { Id = saved.Id, Title = saved.Title, Extension = $".{outFileType}" });
         }
     }
 
