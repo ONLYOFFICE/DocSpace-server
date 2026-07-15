@@ -58,6 +58,7 @@ public static class AiWorkerServiceExtensions
 
         services.AddActivePassiveHostedService<OrphanAttachmentCleanerService>(configuration);
         services.AddActivePassiveHostedService<DeletedChatCleanerService>(configuration);
+        services.AddActivePassiveHostedService<OrphanVectorsCleanerService>(configuration);
 
         return services;
     }
@@ -67,6 +68,8 @@ public static class AiWorkerServiceExtensions
         await Task.WhenAll(
             eventBus.SubscribeAsync<VectorizationIntegrationEvent,
                 VectorizationIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<VectorsDeletionIntegrationEvent,
+                VectorsDeletionIntegrationEventHandler>(),
             eventBus.SubscribeAsync<MessageExportIntegrationEvent,
                 MessageExportIntegrationEventHandler>(),
             eventBus.SubscribeAsync<ChatExportIntegrationEvent,

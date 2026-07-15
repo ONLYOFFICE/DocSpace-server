@@ -40,8 +40,6 @@ namespace ASC.ElasticSearch.VectorData;
 public class VectorStoreCollection<TRecord>(
     OpenSearchClient? openSearchClient,
     VectorCollectionOptions options,
-    TaskScheduler scheduler,
-    ILogger<VectorStore> logger,
     string name) where TRecord: class
 {
     // ReSharper disable once StaticMemberInGenericType
@@ -184,7 +182,7 @@ public class VectorStoreCollection<TRecord>(
         }
     }
 
-    public async Task DeleteAsync(VectorSearchOptions<TRecord>? searchOptions = null, bool immediate = false,
+    public async Task DeleteAsync(VectorSearchOptions<TRecord>? searchOptions = null,
         CancellationToken cancellationToken = default)
     {
         if (openSearchClient is null)
@@ -192,29 +190,13 @@ public class VectorStoreCollection<TRecord>(
             return;
         }
 
-        if (immediate)
-        {
-            await DeleteCoreAsync(searchOptions, cancellationToken);
-            return;
-        }
+        await OperationHandler.RunAsync<RefreshResponse, OpenSearchClientException>(
+            name,
+            "refresh",
+            async () => await openSearchClient!.Indices.RefreshAsync(name, ct: cancellationToken));
 
-        _ = Task.Factory.StartNew(async () =>
-        {
-            try
-            {
-                await DeleteCoreAsync(searchOptions, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                logger.ErrorWithException("Failed to delete file vector data", e);
-            }
-        }, CancellationToken.None, TaskCreationOptions.LongRunning, scheduler).Unwrap();
-    }
-
-    private async Task DeleteCoreAsync(VectorSearchOptions<TRecord>? searchOptions = null, CancellationToken cancellationToken = default)
-    {
         var request = new DeleteByQueryRequest(name);
-        
+
         if (searchOptions is { Filter: not null })
         {
             var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient!.Infer);

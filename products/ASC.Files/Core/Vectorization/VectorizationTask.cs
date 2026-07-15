@@ -139,6 +139,14 @@ public class VectorizationTask : DistributedTaskProgress
             }
 
             await collection.EnsureCollectionExistsAsync(CancellationToken);
+
+            await collection.DeleteAsync(
+                new VectorSearchOptions<Chunk>
+                {
+                    Filter = x => x.TenantId == _tenantId && x.FileId == _fileId
+                },
+                CancellationToken);
+
             var embeddingGenerator = await generatorFactory.CreateAsync(agent);
 
             await using var stream = await fileDao.GetFileStreamAsync(file);
@@ -204,8 +212,7 @@ public class VectorizationTask : DistributedTaskProgress
                         new VectorSearchOptions<Chunk>
                         {
                             Filter = x => x.TenantId == _tenantId && x.FileId == _fileId
-                        },
-                        true);
+                        });
                 }
 
                 if (file != null && socketManager != null)
