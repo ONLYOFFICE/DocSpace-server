@@ -286,7 +286,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                         // fast path: the whole subtree is checked and cleaned at once, folder rows are
                         // then removed by the single DeleteFolderAsync cascade below; per-folder recursion
                         // stays as a fallback for mixed/restricted subtrees
-                        List<(Folder<T> Folder, IEnumerable<Guid> Users, IEnumerable<Guid> SharedUsers)> deletedSubtree = null;
+                        List<Folder<T>> deletedSubtree = null;
 
                         if (folder.Id is int && (_immediately || folder.RootFolderType == FolderType.TRASH))
                         {
@@ -329,15 +329,24 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                 ? await FolderDao.GetFolderIDFormsAsync(true)
                                 : folder.ParentId;
 
-                            await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
+                            // socket events only for the operation's top-level folders: nested ones
+                            // (reached via recursion) are not shown on the client by themselves
+                            if (Folders.Contains(folderId))
+                            {
+                                await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
+                            }
+                            else
+                            {
+                                await FolderDao.DeleteFolderAsync(folder.Id);
+                            }
 
                             if (deletedSubtree != null)
                             {
                                 // the cascade above has removed the subfolder rows —
-                                // only now their events and progress may be reported
-                                foreach (var (subfolder, users, sharedUsers) in deletedSubtree)
+                                // only now their progress may be reported (no per-subfolder
+                                // socket events: nested items are not shown on the client)
+                                foreach (var subfolder in deletedSubtree)
                                 {
-                                    await socketManager.DeleteFolder(subfolder, users, sharedUsers: sharedUsers);
                                     ProcessedFolder(subfolder.Id);
                                     await ProgressStep(FolderDao.CanCalculateSubitems(subfolder.Id) ? default : subfolder.Id);
                                 }
@@ -438,7 +447,16 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                     ? await FolderDao.GetFolderIDFormsAsync(true)
                                     : folder.ParentId;
 
-                                await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
+                                // socket events only for the operation's top-level folders: nested ones
+                                // (reached via recursion) are not shown on the client by themselves
+                                if (Folders.Contains(folderId))
+                                {
+                                    await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
+                                }
+                                else
+                                {
+                                    await FolderDao.DeleteFolderAsync(folder.Id);
+                                }
 
                                 if (isRoom && folder.RootFolderType == FolderType.VirtualRooms)
                                 {
@@ -506,14 +524,13 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
     // Deletes the content of the folder subtree without per-folder recursion: bulk permission check,
     // batched deletion of all subtree files, then per-subfolder new-marker cleanup. The folder rows
     // themselves are removed by the DeleteFolderAsync cascade on the root, so the returned subfolders
-    // (with their pre-resolved socket recipients) get their events and progress reported by the caller
-    // only after that cascade succeeds.
+    // get their progress reported by the caller only after that cascade succeeds. No socket events are
+    // sent for them: nested items are not displayed anywhere on the client by themselves.
     // Returns null when the subtree cannot be handled this way (restricted/hidden items, providers,
     // permission errors, files left behind) — the caller then falls back to the per-folder recursion.
-    private async Task<List<(Folder<T> Folder, IEnumerable<Guid> Users, IEnumerable<Guid> SharedUsers)>> TryDeleteSubtreeContentAsync(Folder<T> folder, IServiceScope scope, bool checkPermissions)
+    private async Task<List<Folder<T>>> TryDeleteSubtreeContentAsync(Folder<T> folder, IServiceScope scope, bool checkPermissions)
     {
         var permissionsManager = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
-        var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var scopeClass = scope.ServiceProvider.GetService<FileDeleteOperationScope>();
         var (fileMarker, _, _) = scopeClass;
@@ -591,15 +608,6 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             }
         }
 
-        // socket recipients come from security records that the root cascade removes
-        var result = new List<(Folder<T>, IEnumerable<Guid>, IEnumerable<Guid>)>(subfolders.Count);
-
-        foreach (var subfolder in subfolders)
-        {
-            var (users, sharedUsers) = await socketManager.GetDeleteRecipientsAsync(subfolder);
-            result.Add((subfolder, users, sharedUsers));
-        }
-
         // every subtree file must be gone before the cascade removes the folder rows;
         // checked last to keep the race window with concurrent uploads minimal
         if (await FolderDao.GetItemsCountAsync(folder.Id) != subfolders.Count)
@@ -607,7 +615,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             return null;
         }
 
-        return result;
+        return subfolders;
     }
 
     private async Task DeleteFilesAsync(IEnumerable<T> fileIds, IServiceScope scope, bool isNeedSendActions = false, bool checkPermissions = true)
@@ -785,12 +793,15 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             }
         }
 
-        // socket recipients are resolved from security records that the deletion below
-        // removes, so they are captured up front (the old per-file path did the same by
+        // socket events are sent only for the operation's top-level files: nested items are not
+        // displayed anywhere on the client by themselves, their subtree disappears with the root.
+        // Recipients are resolved from security records that the deletion below removes,
+        // so they are captured up front (the old per-file path did the same by
         // wrapping the deletion into the socket call)
+        var rootFileIds = Files.ToHashSet();
         var socketRecipients = new Dictionary<T, (IEnumerable<Guid> Users, IEnumerable<Guid> SharedUsers)>();
 
-        foreach (var file in files)
+        foreach (var file in files.Where(f => rootFileIds.Contains(f.Id)))
         {
             socketRecipients[file.Id] = await socketManager.GetDeleteRecipientsAsync(file);
         }
@@ -844,8 +855,10 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
         foreach (var file in deleted)
         {
-            var (users, sharedUsers) = socketRecipients[file.Id];
-            await socketManager.DeleteFileAsync(file, users: users, sharedUsers: sharedUsers);
+            if (socketRecipients.TryGetValue(file.Id, out var recipients))
+            {
+                await socketManager.DeleteFileAsync(file, users: recipients.Users, sharedUsers: recipients.SharedUsers);
+            }
 
             switch (file.RootFolderType)
             {
