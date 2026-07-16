@@ -47,6 +47,7 @@ import {
 import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import logger from "./log.js";
 import { agentsController } from "./controllers/agentsController.js";
+import { textToDocxController } from "./controllers/textToDocxController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
@@ -164,6 +165,11 @@ export default function registerRoutes(app: Application): void {
   // Literal sub-paths (`news`, `agentquota`, `resetquota`) are registered
   // before the parameterized `/agents/:id` so Express does not capture them
   // as an id.
+  // Async markdown → docx export via the .NET AI Worker (see
+  // textToDocxController); completion is signalled by the files socket
+  // create event, not by this response.
+  router.post("/text-to-docx", textToDocxController.start);
+
   router.get("/agents", agentsController.getAgents);
   router.get("/agents/news", agentsController.getAgentsNews);
   router.get("/agents/:id", agentsController.getAgentInfo);
