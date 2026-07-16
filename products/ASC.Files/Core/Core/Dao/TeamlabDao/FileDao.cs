@@ -1129,16 +1129,16 @@ internal class FileDao(
             }
         }
 
-        try
+        foreach (var fileId in fileIds)
         {
-            foreach (var fileId in fileIds)
+            try
             {
                 await DeleteVectorsAsync(tenantId, fileId);
             }
-        }
-        catch (Exception e)
-        {
-            logger.ErrorWithException(e);
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
         }
 
         try
