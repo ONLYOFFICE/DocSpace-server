@@ -70,10 +70,9 @@ public class FactoryIndexerFile(
     BaseIndexerFile baseIndexer,
     IServiceProvider serviceProvider,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    ICache cache,
     Settings settings,
     FileUtility fileUtility)
-    : FactoryIndexer<DbFile>(loggerFactory, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
+    : FactoryIndexer<DbFile>(loggerFactory, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider)
 {
     public override async Task IndexAllAsync()
     {
