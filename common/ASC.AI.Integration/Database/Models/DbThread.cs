@@ -91,8 +91,8 @@ public static class DbThreadExtension
             entity.Property(e => e.Title)
                 .HasColumnName("title")
                 .HasColumnType("varchar(255)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasCharSet("utf8mb4")
+                .UseCollation("utf8mb4_general_ci");
 
             entity.Property(e => e.ProfileId)
                 .HasColumnName("profile_id")
