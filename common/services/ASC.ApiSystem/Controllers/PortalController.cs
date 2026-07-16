@@ -533,24 +533,26 @@ public class PortalController(
                 }
             }
 
-            if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
+            try
             {
-                try
+                var (profile, _) = await portalRegistrationService.ProcessThirdPartyProfileAsync(model);
+                if (profile != null)
                 {
-                    var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
-                    if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                    var tenantWrappersByProfile = await GetTenantsByThirdPartyProfileAsync(profile);
+                    return Ok(new
                     {
-                        var tenantWrappersByProfile = await GetTenantsByThirdPartyProfileAsync(profile);
-                        return Ok(new
-                        {
-                            tenants = tenantWrappersByProfile
-                        });
-                    }
+                        tenants = tenantWrappersByProfile
+                    });
                 }
-                catch (Exception e)
-                {
-                    logger.ErrorWithThirdPartyProfile(e);
-                }
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithThirdPartyProfile(e);
+            }
+
+            if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.PasswordHash))
+            {
+                return BadRequest(new ErrorDto { Error = "params", Message = "Empty credentials" });
             }
 
             var tenants = await commonMethods.GetTenantsAsync(model.Email, model.PasswordHash);
