@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using Chunk = ASC.Files.Core.Vectorization.Data.Chunk;
@@ -64,6 +64,7 @@ public class VectorizationTask : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<VectorizationTask>>();
+        var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
 
         SocketManager socketManager = null;
         IFileDao<int> fileDao = null;
@@ -98,7 +99,12 @@ public class VectorizationTask : DistributedTaskProgress
             fileDao = daoFactory.GetFileDao<int>();
             var folderDao = daoFactory.GetFolderDao<int>();
 
-            var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
+            if (await DeleteVectorsIfCanceledAsync())
+            {
+                logger.InformationVectorizationCanceled(_fileId);
+                return;
+            }
+
             var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
             var textProcessor = scope.ServiceProvider.GetRequiredService<TextProcessor>();
             var tokenizerFactory = scope.ServiceProvider.GetRequiredService<TokenizerFactory>();
@@ -139,25 +145,39 @@ public class VectorizationTask : DistributedTaskProgress
             }
 
             await collection.EnsureCollectionExistsAsync(CancellationToken);
+
+            await collection.DeleteAsync(
+                new VectorSearchOptions<Chunk>
+                {
+                    Filter = x => x.TenantId == _tenantId && x.FileId == _fileId
+                },
+                CancellationToken);
+
             var embeddingGenerator = await generatorFactory.CreateAsync(agent);
 
             await using var stream = await fileDao.GetFileStreamAsync(file);
 
             var fileExtension = FileUtility.GetFileExtension(file.Title);
             var textChunks = textProcessor.ProcessAsync(
-                stream, 
-                file.ContentLength, 
-                fileExtension, 
+                stream,
+                file.ContentLength,
+                fileExtension,
                 chunkerSettings,
                 CancellationToken);
 
             await foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
             {
+                if (await DeleteVectorsIfCanceledAsync())
+                {
+                    logger.InformationVectorizationCanceled(_fileId);
+                    return;
+                }
+
                 var embeddings = await embeddingGenerator.GenerateAsync(batch, cancellationToken: CancellationToken);
                 var chunks = batch.Select((text, index) =>
                     new Chunk
                     {
-                        Id = Guid.NewGuid(),
+                        Id = Guid.CreateVersion7(),
                         TenantId = _tenantId,
                         RoomId = agent.Id,
                         Title = file.Title,
@@ -204,8 +224,7 @@ public class VectorizationTask : DistributedTaskProgress
                         new VectorSearchOptions<Chunk>
                         {
                             Filter = x => x.TenantId == _tenantId && x.FileId == _fileId
-                        },
-                        true);
+                        });
                 }
 
                 if (file != null && socketManager != null)
@@ -225,6 +244,11 @@ public class VectorizationTask : DistributedTaskProgress
 
             try
             {
+                if (fileDao != null)
+                {
+                    await DeleteVectorsIfCanceledAsync();
+                }
+
                 await PublishChanges();
                 if (heartBeat != null)
                 {
@@ -235,6 +259,27 @@ public class VectorizationTask : DistributedTaskProgress
             {
                 logger.ErrorWithException(e);
             }
+        }
+
+        return;
+
+        async Task<bool> DeleteVectorsIfCanceledAsync()
+        {
+            if (!await fileDao.IsVectorizationDeletedAsync(_fileId))
+            {
+                return false;
+            }
+
+            var chunks = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
+
+            await chunks.DeleteAsync(
+                new VectorSearchOptions<Chunk>
+                {
+                    Filter = x => x.TenantId == _tenantId && x.FileId == _fileId
+                });
+
+            await fileDao.DeleteVectorizationIfDeletedAsync(_fileId);
+            return true;
         }
     }
 }

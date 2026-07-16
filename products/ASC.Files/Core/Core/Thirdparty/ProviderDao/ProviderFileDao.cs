@@ -628,6 +628,20 @@ internal class ProviderFileDao(
         var fileDao = selector.GetFileDao(fileId);
         return fileDao.SetVectorizationStatusAsync(selector.ConvertId(fileId), status);
     }
+
+    public Task<bool> IsVectorizationDeletedAsync(string fileId)
+    {
+        var selector = _selectorFactory.GetSelector(fileId);
+        var fileDao = selector.GetFileDao(fileId);
+        return fileDao.IsVectorizationDeletedAsync(selector.ConvertId(fileId));
+    }
+
+    public Task DeleteVectorizationIfDeletedAsync(string fileId)
+    {
+        var selector = _selectorFactory.GetSelector(fileId);
+        var fileDao = selector.GetFileDao(fileId);
+        return fileDao.DeleteVectorizationIfDeletedAsync(selector.ConvertId(fileId));
+    }
     
     public Task SetFileKey(string fileId, IEnumerable<FileKeyData> keys)
     {

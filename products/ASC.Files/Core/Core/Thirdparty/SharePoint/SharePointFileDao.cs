@@ -545,6 +545,16 @@ internal class SharePointFileDao(
     {
         return Task.CompletedTask;
     }
+
+    public Task<bool> IsVectorizationDeletedAsync(string fileId)
+    {
+        return Task.FromResult(false);
+    }
+
+    public Task DeleteVectorizationIfDeletedAsync(string fileId)
+    {
+        return Task.CompletedTask;
+    }
     
     public Task SetFileKey(string fileId, IEnumerable<FileKeyData> keys)
     {
