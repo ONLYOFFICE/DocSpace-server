@@ -1138,16 +1138,13 @@ internal class FileDao(
             }
         }
 
-        foreach (var fileId in deletedIds)
+        try
         {
-            try
-            {
-                await DeleteVectorsAsync(tenantId, fileId);
-            }
-            catch (Exception e)
-            {
-                logger.ErrorWithException(e);
-            }
+            await DeleteVectorsAsync(tenantId, deletedIds);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
         }
 
         try
@@ -3203,6 +3200,15 @@ internal class FileDao(
         await collection.DeleteAsync(new VectorSearchOptions<VectorChunk>
         {
             Filter = x => x.TenantId == tenantId && x.FileId == fileId
+        });
+    }
+
+    private async ValueTask DeleteVectorsAsync(int tenantId, IReadOnlyCollection<int> fileIds)
+    {
+        var collection = vectorStore.GetCollection<VectorChunk>(VectorChunk.IndexName, null);
+        await collection.DeleteAsync(new VectorSearchOptions<VectorChunk>
+        {
+            Filter = x => x.TenantId == tenantId && fileIds.Contains(x.FileId)
         });
     }
 }
