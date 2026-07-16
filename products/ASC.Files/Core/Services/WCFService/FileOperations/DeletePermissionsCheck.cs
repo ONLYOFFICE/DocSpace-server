@@ -35,7 +35,14 @@ namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folderDao, LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security)
+public class DeletePermissionsCheck<T>(
+    IFileDao<T> fileDao,
+    IFolderDao<T> folderDao,
+    LockerManager lockerManager,
+    FileTrackerHelper fileTracker,
+    FileSecurity security,
+    IDaoFactory daoFactory,
+    AuthContext authContext)
     : IPermissionsChecker<FileDeleteOperationData<T>, T>
 {
     public async Task RunPermissionCheckAsync(FileDeleteOperationData<T> data)
@@ -74,6 +81,65 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
             var file = await fileDao.GetFileAsync(fileId);
             await CheckFilePermissionsAsync([file], false, true, true);
         }
+    }
+
+    // Batched analog of CheckFilePermissionsAsync: per-file verdicts with the same error precedence
+    // (delete rights -> lock -> editing), but delete rights and lock tags are resolved for the whole
+    // set at once instead of one query per file. Missing files are the caller's concern.
+    public async Task<Dictionary<T, string>> CheckFilesPermissionsAsync(IReadOnlyCollection<File<T>> files, bool checkPermissions)
+    {
+        var errors = new Dictionary<T, string>();
+
+        if (files.Count == 0)
+        {
+            return errors;
+        }
+
+        HashSet<T> denied = null;
+        HashSet<string> lockedForMe = null;
+
+        if (checkPermissions)
+        {
+            denied = [];
+
+            await foreach (var (entry, allowed) in security.CanDeleteAsync(files.ToAsyncEnumerable()))
+            {
+                if (!allowed)
+                {
+                    denied.Add(entry.Id);
+                }
+            }
+
+            var userId = authContext.CurrentAccount.ID;
+            var tagDao = daoFactory.GetTagDao<T>();
+
+            lockedForMe = await tagDao.GetTagsAsync([TagType.Locked], files)
+                .Where(t => t.EntryType == FileEntryType.File && t.EntryId != null && t.Owner != Guid.Empty && t.Owner != userId)
+                .Select(t => t.EntryId.ToString())
+                .ToHashSetAsync();
+        }
+
+        foreach (var file in files)
+        {
+            if (checkPermissions && denied.Contains(file.Id))
+            {
+                errors[file.Id] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFile;
+                continue;
+            }
+
+            if (checkPermissions && lockedForMe.Contains(file.Id.ToString()))
+            {
+                errors[file.Id] = FilesCommonResource.ErrorMessage_LockedFile;
+                continue;
+            }
+
+            if (await fileTracker.IsEditingAsync(file.Id, false))
+            {
+                errors[file.Id] = FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile;
+            }
+        }
+
+        return errors;
     }
 
     public async Task<string> CheckFilePermissionsAsync(IEnumerable<File<T>> files, bool folder, bool checkPermissions, bool throwException = false)

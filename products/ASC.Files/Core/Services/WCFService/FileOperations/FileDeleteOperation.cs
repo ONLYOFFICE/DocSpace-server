@@ -616,6 +616,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
         var security = scope.ServiceProvider.GetService<DeletePermissionsCheck<T>>();
+        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
 
         var (fileMarker, filesMessageService, _) = scopeClass;
 
@@ -624,14 +625,58 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
         var toDeleteImmediately = new List<File<T>>();
 
-        foreach (var fileId in fileIds)
+        var ids = fileIds as IReadOnlyCollection<T> ?? fileIds?.ToList() ?? [];
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        // Intentional re-read: must use current file state at execution time (TOCTOU mitigation).
+        // Pre-check was done before enqueue, but permissions/locks/existence may have changed.
+        // The re-read and the permission checks are batched: one query for the whole set instead
+        // of several per file.
+        var filesById = new Dictionary<T, File<T>>(ids.Count);
+        await foreach (var loaded in FileDao.GetFilesAsync(ids))
+        {
+            filesById.TryAdd(loaded.Id, loaded);
+        }
+
+        var loadedFiles = filesById.Values.ToList();
+        var errors = await security.CheckFilesPermissionsAsync(loadedFiles, checkPermissions);
+
+        // New-markers: one tag query for the whole set; per-owner removal runs only for
+        // files that actually have them and will actually be processed
+        var processable = loadedFiles
+            .Where(f => !errors.TryGetValue(f.Id, out var e) || (_ignoreException && e != FilesCommonResource.ErrorMessage_FileNotFound))
+            .ToList();
+
+        if (processable.Count > 0)
+        {
+            var tagDao = daoFactory.GetTagDao<T>();
+            var newTags = await tagDao.GetTagsAsync([TagType.New], processable).ToListAsync();
+            var processableById = processable.ToDictionary(f => f.Id.ToString());
+
+            foreach (var tagGroup in newTags.Where(t => t.EntryId != null && t.EntryType == FileEntryType.File).GroupBy(t => t.EntryId.ToString()))
+            {
+                if (!processableById.TryGetValue(tagGroup.Key, out var taggedFile))
+                {
+                    continue;
+                }
+
+                foreach (var owner in tagGroup.Select(t => t.Owner).Distinct())
+                {
+                    await fileMarker.RemoveMarkAsNewAsync(taggedFile, owner);
+                }
+            }
+        }
+
+        foreach (var fileId in ids)
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            // Intentional re-read: must use current file state at execution time (TOCTOU mitigation).
-            // Pre-check was done before enqueue, but permissions/locks/existence may have changed.
-            var file = await FileDao.GetFileAsync(fileId);
-            var errorMsg = await security.CheckFilePermissionsAsync([file], false, checkPermissions);
+            filesById.TryGetValue(fileId, out var file);
+            var errorMsg = file == null ? FilesCommonResource.ErrorMessage_FileNotFound : errors.GetValueOrDefault(file.Id);
+
             if (errorMsg == FilesCommonResource.ErrorMessage_FileNotFound)
             {
                 Err = errorMsg;
@@ -642,8 +687,6 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             }
             else
             {
-                await fileMarker.RemoveMarkAsNewForAllAsync(file);
-
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
                     await LinkDao.DeleteAllLinkAsync(file.Id);
