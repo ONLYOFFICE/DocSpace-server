@@ -31,42 +31,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService } from "../storage/httpClient.js";
-import { getForwardedHeaders } from "../requestContext.js";
 import { asyncHandler } from "./_helpers.js";
 import { isObject } from "../narrow.js";
 import logger from "../log.js";
-
-// The .NET publisher captures `CommonLinkUtility.ServerRootPath` as the
-// conversion task's BaseUri, and `Request.Url()` (ASC.Common
-// HttpRequestExtensions) lets an `?origin=<absolute uri>` query override the
-// scheme/host/port it is derived from. Our internal call hits the AI service
-// on its internal address (the `Host` header is hop-by-hop and not
-// forwarded), so without the override the portal root would resolve from
-// the internal host / tenant fallback. Derive the client-facing origin from
-// the forwarded headers, the same way the MCP `Referer` is derived in
-// systemTools.
-function resolvePortalOrigin(): string | undefined {
-  const headers = getForwardedHeaders();
-  const origin = headers["origin"];
-  if (origin) {
-    return origin.replace(/\/+$/, "");
-  }
-  const xfHost = headers["x-forwarded-host"]?.split(",")[0]?.trim();
-  if (xfHost) {
-    const proto = headers["x-forwarded-proto"]?.split(",")[0]?.trim() || "https";
-    return `${proto}://${xfHost}`;
-  }
-  const referer = headers["referer"];
-  if (referer) {
-    try {
-      const parsed = new URL(referer);
-      return `${parsed.protocol}//${parsed.host}`;
-    } catch {
-      // malformed referer — fall through
-    }
-  }
-  return undefined;
-}
 
 // Proxy for the .NET md→docx export pipeline
 // (`POST internal/ai/integration/text-to-docx/start`,
@@ -75,7 +42,9 @@ function resolvePortalOrigin(): string | undefined {
 // the AI Worker converts the markdown via DocumentService and saves the
 // resulting .docx into the target folder (an agent room resolves to its
 // Result Storage subfolder); completion surfaces to the client as the
-// standard `s:modify-folder` create-file socket event.
+// standard `s:modify-folder` create-file socket event. The source URL the
+// worker hands to DocumentService is rebased via ReplaceCommunityAddress
+// (`files.docservice.url.portal`) on the .NET side.
 export const textToDocxController = {
   start: asyncHandler(async (req, res) => {
     const body = isObject(req.body) ? req.body : {};
@@ -92,15 +61,19 @@ export const textToDocxController = {
       return;
     }
 
-    const origin = resolvePortalOrigin();
     logger.info(
-      `textToDocx.start title="${title}" folderId=${folderId} contentLength=${content.length} origin=${origin ?? "-"}`,
+      `textToDocx.start title="${title}" folderId=${folderId} contentLength=${content.length}`,
     );
-    await aiService.post(
-      "/integration/text-to-docx/start",
-      { title, content, folderId },
-      origin ? { query: { origin } } : undefined,
-    );
+    // No `?origin=` override: forwarded Origin/X-Forwarded-Host/Referer are
+    // client-controlled, and the .NET side would turn them into the task's
+    // BaseUri (the host DocumentService downloads the export source from) —
+    // an SSRF vector. The portal root resolves on the .NET side instead
+    // (tenant domain fallback / `files.docservice.url.portal`).
+    await aiService.post("/integration/text-to-docx/start", {
+      title,
+      content,
+      folderId,
+    });
 
     // The publish is fire-and-forget on the .NET side (202-style semantics):
     // the conversion result arrives later via the files socket events.
