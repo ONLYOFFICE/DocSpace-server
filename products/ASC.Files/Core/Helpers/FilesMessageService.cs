@@ -369,7 +369,9 @@ public class FilesMessageService(
     private async Task<FileEntryData> GetAdditionalEntryDataAsync(FileEntry<int> entry, MessageAction action, string oldTitle = null, Guid userid = default,
         FileShare userRole = FileShare.None, FolderType? parentType = null)
     {
-        var folderDao = daoFactory.GetFolderDao<int>();
+        // the caching dao keeps parent chains per ParentId for the scope lifetime: bulk operations
+        // (empty trash, batched delete) emit an audit event per entry, and most entries share parents
+        var folderDao = daoFactory.GetCacheFolderDao<int>();
 
         var parents = await folderDao.GetParentFoldersAsync(entry.ParentId).ToListAsync();
 
