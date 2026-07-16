@@ -41,7 +41,7 @@ import { getMcpServers } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { withTimeout } from "../storage/httpClient.js";
 import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
-import { getAgentMcpServerNames } from "../storage/docspaceAiApi.js";
+import { storage } from "../storage/index.js";
 import logger from "../log.js";
 
 // docspace-mcp resolves the target portal from the `Referer` header — it
@@ -202,6 +202,19 @@ function buildServers(): Record<string, McpHttpServerConfig> {
 const servers = buildServers();
 const serverNames = Object.keys(servers);
 
+/**
+ * Canonical config of a configured system MCP server, by name. The tools
+ * controller uses it to pin entity-scoped whitelist markers for system
+ * servers to the real endpoint instead of trusting a client-provided
+ * config — so a marker entry never shadows the system group with a broken
+ * connection.
+ */
+export function getSystemServerConfig(
+  name: string,
+): McpHttpServerConfig | undefined {
+  return servers[name];
+}
+
 if (serverNames.length > 0) {
   logger.info(`System MCP tools configured: ${serverNames.join(", ")}`);
 } else {
@@ -213,12 +226,15 @@ const source = new SystemToolsSource({
   fetch: forwardingFetch,
 });
 
-// Agent rooms carry an MCP whitelist: only the servers attached to the room
-// (managed by the agent create/edit dialog via `api/2.0/ai/rooms/{id}/servers`)
-// are served to that agent's chat. Returns `undefined` when `entityId` is
-// absent or not an agent room — no filtering, the full configured set stays
-// available. Fails closed: if the whitelist cannot be resolved, an agent
-// gets no system MCP tools rather than all of them.
+// Agent rooms carry an MCP whitelist: only the servers enabled for the
+// agent are served to its chat. The whitelist is the agent's per-entity
+// custom-servers map in `/integration/mcp-servers` (managed by the agent
+// create/edit dialog through the new-ai `tools/*` routes): an entry whose
+// name matches a system server acts as the "enabled" marker for it.
+// Returns `undefined` when `entityId` is absent or not an agent room — no
+// filtering, the full configured set stays available. Fails closed: if the
+// whitelist cannot be resolved, an agent gets no system MCP tools rather
+// than all of them.
 async function agentServerWhitelist(
   entityId: string | undefined,
 ): Promise<Set<string> | undefined> {
@@ -230,7 +246,8 @@ async function agentServerWhitelist(
     return undefined;
   }
   try {
-    return new Set(await getAgentMcpServerNames(agentId));
+    const servers = await storage.mcpServers.readAll(agentId);
+    return new Set(Object.keys(servers));
   } catch (err) {
     logger.error(
       `systemTools: failed to resolve MCP whitelist for agent ${agentId}: ${
