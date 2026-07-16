@@ -39,6 +39,7 @@ public class DbFileVectorization : BaseEntity
     public int FileId { get; set; }
     public VectorizationStatus Status { get; set; }
     public DateTime UpdatedOn { get; set; }
+    public DateTime? DeletedOn { get; set; }
     
     public DbTenant Tenant { get; set; }
     
@@ -92,9 +93,16 @@ public static class DbFileVectorizationExtension
             entity.Property(e => e.UpdatedOn)
                 .HasColumnName("updated_on")
                 .HasColumnType("datetime");
-            
+
+            entity.Property(e => e.DeletedOn)
+                .HasColumnName("deleted_on")
+                .HasColumnType("datetime");
+
             entity.HasIndex(e => new { e.FileId })
                 .HasDatabaseName("IX_file_id");
+
+            entity.HasIndex(e => e.DeletedOn)
+                .HasDatabaseName("IX_deleted_on");
         });
     }
 }
