@@ -58,6 +58,11 @@ public abstract class FileOperation : DistributedTaskProgress
     protected int _processed;
     public int Total { get; set; }
 
+    // progress publications go to the distributed cache and re-serialize the whole task;
+    // per-item publishing makes large operations O(N^2), so intermediate ones are rate-limited
+    private const int PublishIntervalMs = 300;
+    private long _lastPublishedAt;
+
     public FileOperation()
     {
 
@@ -92,6 +97,17 @@ public abstract class FileOperation : DistributedTaskProgress
         _processed++;
         var progress = Total != 0 ? 100 * _processed / Total : 0;
         Progress = progress < 100 ? progress : 100;
+    }
+
+    protected async Task PublishChangesThrottled()
+    {
+        if (Environment.TickCount64 - _lastPublishedAt < PublishIntervalMs)
+        {
+            return;
+        }
+
+        _lastPublishedAt = Environment.TickCount64;
+        await PublishChanges();
     }
 
     protected abstract Task DoJob(AsyncServiceScope serviceScope);
@@ -408,7 +424,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
             || !Equals(fileId, default(TId)) && Files.Contains(fileId))
         {
             IncrementProgress();
-            await PublishChanges();
+            await PublishChangesThrottled();
         }
     }
 
