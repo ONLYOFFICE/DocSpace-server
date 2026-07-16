@@ -96,6 +96,7 @@ internal class FileDao(
     private const string FilePathPart = "file_";
     private const string FolderPathPart = "folder_";
     private const string FileIdGroupName = "id";
+    private const int StorageDeleteParallelism = 8;
 
     private static readonly Regex _pattern = new($"{FilePathPart}(?'id'\\d+)", RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -1152,22 +1153,25 @@ internal class FileDao(
             tenantQuotaController.Init(tenantId, ThumbnailTitle);
             var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
 
-            foreach (var (fileId, ownerId) in files)
-            {
-                if (!deletedIds.Contains(fileId))
-                {
-                    continue;
-                }
+            var deletedIdsSet = deletedIds.ToHashSet();
 
-                try
+            // file directories are independent of each other, so they are removed concurrently;
+            // each removal stays best-effort on its own (the quota accounting inside only
+            // decrements counters, no limit checks happen on the delete path)
+            await Parallel.ForEachAsync(
+                files.Where(f => deletedIdsSet.Contains(f.Key)),
+                new ParallelOptions { MaxDegreeOfParallelism = StorageDeleteParallelism },
+                async (file, _) =>
                 {
-                    await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
-                }
-                catch (Exception e)
-                {
-                    logger.ErrorWithException(e);
-                }
-            }
+                    try
+                    {
+                        await store.DeleteDirectoryAsync(file.Value, GetUniqFileDirectory(file.Key));
+                    }
+                    catch (Exception e)
+                    {
+                        logger.ErrorWithException(e);
+                    }
+                });
         }
         catch (Exception e)
         {
