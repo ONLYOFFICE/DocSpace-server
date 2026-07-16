@@ -93,10 +93,10 @@ public class VectorsDeletionProcessingService(
 
         try
         {
-            var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<FilesDbContext>>();
-            await using var filesDbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+            var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
+            var fileDao = daoFactory.GetFileDao<int>();
 
-            if (!await filesDbContext.IsVectorizationDeletedAsync(@event.TenantId, @event.FileId))
+            if (!await fileDao.IsVectorizationDeletedAsync(@event.FileId))
             {
                 return;
             }
@@ -111,7 +111,7 @@ public class VectorsDeletionProcessingService(
                 },
                 cancellationToken);
 
-            await filesDbContext.DeleteVectorizationIfDeletedAsync(@event.TenantId, @event.FileId);
+            await fileDao.DeleteVectorizationIfDeletedAsync(@event.FileId);
         }
         finally
         {

@@ -64,6 +64,7 @@ public class VectorizationTask : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<VectorizationTask>>();
+        var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
 
         SocketManager socketManager = null;
         IFileDao<int> fileDao = null;
@@ -98,7 +99,12 @@ public class VectorizationTask : DistributedTaskProgress
             fileDao = daoFactory.GetFileDao<int>();
             var folderDao = daoFactory.GetFolderDao<int>();
 
-            var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
+            if (await DeleteVectorsIfCanceledAsync())
+            {
+                logger.InformationVectorizationCanceled(_fileId);
+                return;
+            }
+
             var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
             var textProcessor = scope.ServiceProvider.GetRequiredService<TextProcessor>();
             var tokenizerFactory = scope.ServiceProvider.GetRequiredService<TokenizerFactory>();
@@ -161,6 +167,12 @@ public class VectorizationTask : DistributedTaskProgress
 
             await foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
             {
+                if (await DeleteVectorsIfCanceledAsync())
+                {
+                    logger.InformationVectorizationCanceled(_fileId);
+                    return;
+                }
+
                 var embeddings = await embeddingGenerator.GenerateAsync(batch, cancellationToken: CancellationToken);
                 var chunks = batch.Select((text, index) =>
                     new Chunk
@@ -232,6 +244,11 @@ public class VectorizationTask : DistributedTaskProgress
 
             try
             {
+                if (fileDao != null)
+                {
+                    await DeleteVectorsIfCanceledAsync();
+                }
+
                 await PublishChanges();
                 if (heartBeat != null)
                 {
@@ -242,6 +259,27 @@ public class VectorizationTask : DistributedTaskProgress
             {
                 logger.ErrorWithException(e);
             }
+        }
+
+        return;
+
+        async Task<bool> DeleteVectorsIfCanceledAsync()
+        {
+            if (!await fileDao.IsVectorizationDeletedAsync(_fileId))
+            {
+                return false;
+            }
+
+            var chunks = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
+
+            await chunks.DeleteAsync(
+                new VectorSearchOptions<Chunk>
+                {
+                    Filter = x => x.TenantId == _tenantId && x.FileId == _fileId
+                });
+
+            await fileDao.DeleteVectorizationIfDeletedAsync(_fileId);
+            return true;
         }
     }
 }

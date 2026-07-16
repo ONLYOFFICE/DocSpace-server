@@ -2049,6 +2049,22 @@ internal class FileDao(
         });
     }
 
+    public async Task<bool> IsVectorizationDeletedAsync(int fileId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.IsVectorizationDeletedAsync(tenantId, fileId);
+    }
+
+    public async Task DeleteVectorizationIfDeletedAsync(int fileId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.DeleteVectorizationIfDeletedAsync(tenantId, fileId);
+    }
+
     public async Task SetFileKey(int fileId, IEnumerable<FileKeyData> keys)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
