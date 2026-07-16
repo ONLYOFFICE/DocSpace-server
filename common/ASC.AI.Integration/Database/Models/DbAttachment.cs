@@ -103,14 +103,14 @@ public static class DbAttachmentExtension
             entity.Property(e => e.Title)
                 .HasColumnName("title")
                 .HasColumnType("varchar(255)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasCharSet("utf8mb4")
+                .UseCollation("utf8mb4_general_ci");
 
             entity.Property(e => e.Content)
                 .HasColumnName("content")
                 .HasColumnType("longtext")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasCharSet("utf8mb4")
+                .UseCollation("utf8mb4_general_ci");
 
             entity.Property(e => e.MessageId)
                 .HasColumnName("message_id")
