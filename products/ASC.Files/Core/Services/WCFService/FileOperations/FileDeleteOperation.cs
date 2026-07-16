@@ -770,8 +770,10 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
         try
         {
-            await FileDao.DeleteFilesAsync(files.Select(f => KeyValuePair.Create(f.Id, GetQuotaOwner(f))));
-            deleted.AddRange(files);
+            // events are reported only for files this batch actually deleted: ids removed
+            // by a concurrent flow in the meantime must not produce duplicate notifications
+            var actuallyDeleted = (await FileDao.DeleteFilesAsync(files.Select(f => KeyValuePair.Create(f.Id, GetQuotaOwner(f))))).ToHashSet();
+            deleted.AddRange(files.Where(f => actuallyDeleted.Contains(f.Id)));
         }
         catch (Exception ex)
         {

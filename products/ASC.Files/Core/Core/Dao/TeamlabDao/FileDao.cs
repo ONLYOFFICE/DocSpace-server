@@ -1070,12 +1070,12 @@ internal class FileDao(
         });
     }
 
-    public async Task DeleteFilesAsync(IEnumerable<KeyValuePair<int, Guid>> fileQuotaOwners)
+    public async Task<IEnumerable<int>> DeleteFilesAsync(IEnumerable<KeyValuePair<int, Guid>> fileQuotaOwners)
     {
         var files = fileQuotaOwners.Where(f => f.Key != 0).ToList();
         if (files.Count == 0)
         {
-            return;
+            return [];
         }
 
         var fileIds = files.Select(f => f.Key).ToList();
@@ -1113,6 +1113,15 @@ internal class FileDao(
             await tx.CommitAsync();
         });
 
+        // ids missing from the read (already deleted by a concurrent flow) get no follow-ups
+        // and are excluded from the returned set, so the caller does not report them again
+        var deletedIds = toDeleteFiles.Select(f => f.Id).Distinct().ToHashSet();
+
+        if (deletedIds.Count == 0)
+        {
+            return deletedIds;
+        }
+
         // the rows are already deleted at this point: every follow-up step below is
         // best-effort on its own, so one failure must not skip the others or make the
         // caller believe the deletion itself failed and retry it
@@ -1129,7 +1138,7 @@ internal class FileDao(
             }
         }
 
-        foreach (var fileId in fileIds)
+        foreach (var fileId in deletedIds)
         {
             try
             {
@@ -1148,6 +1157,11 @@ internal class FileDao(
 
             foreach (var (fileId, ownerId) in files)
             {
+                if (!deletedIds.Contains(fileId))
+                {
+                    continue;
+                }
+
                 try
                 {
                     await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
@@ -1165,7 +1179,7 @@ internal class FileDao(
 
         try
         {
-            var fileIdsArray = fileIds.ToArray();
+            var fileIdsArray = deletedIds.ToArray();
             await factoryIndexer.DeleteAsync(r => r.In(a => a.Id, fileIdsArray));
             await factoryIndexerFormData.DeleteAsync(r => r.In(a => a.Id, fileIdsArray));
         }
@@ -1173,6 +1187,8 @@ internal class FileDao(
         {
             logger.ErrorWithException(e);
         }
+
+        return deletedIds;
     }
 
     public async Task<bool> IsExistAsync(string title, int folderId)
