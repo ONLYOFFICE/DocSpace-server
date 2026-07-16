@@ -94,6 +94,39 @@ public class AspireAppFixture : IAsyncLifetime
         _apiSystemClient = CreateRawClient(ResolveBaseAddress(OnlyofficeApiSystem), origin: null);
 
         await InitializePasswordSaltAsync();
+
+        // Warm up the full portal flow ONCE, serially, before any test runs. Without this, the moment
+        // the host goes healthy every parallel test class fires portal/register simultaneously against
+        // a completely cold system (JIT of the large registration flow, EF model init, first DB pool
+        // open, cache population). That thundering herd of cold registrations contends heavily and can
+        // stall. Paying those one-time costs once here keeps the parallel flood hitting warm code paths.
+        await WarmUpAsync();
+    }
+
+    /// <summary>
+    /// Exercises the same end-to-end path a test does (register a throwaway portal, authenticate its
+    /// owner, provision the owner's folder tree) so all the cold, one-time code paths are warm before
+    /// the parallel test run begins. Failures are non-fatal: warmup is an optimization, not a gate.
+    /// </summary>
+    private async Task WarmUpAsync()
+    {
+        try
+        {
+            await Timing.Measure("warmup.total", async () =>
+            {
+                using var clients = await CreatePortalAsync();
+
+                await clients.FilesHttpClient.Authenticate(clients.Owner);
+
+                // Touch the owner's root folder tree — it is provisioned lazily on first access, so this
+                // warms that path too (the one every test hits right after registration).
+                await clients.FoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
+            });
+        }
+        catch (Exception e)
+        {
+            Timing.Write($"warmup.failed({e.GetType().Name}: {e.Message})", 0);
+        }
     }
 
     /// <summary>

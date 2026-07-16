@@ -48,7 +48,7 @@ public class CspSettingsHelper(
     IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration)
 {
-    public async Task<string> SaveAsync(IEnumerable<string> domains, bool updateInDb = true)
+    public async Task<string> SaveAsync(IEnumerable<string> domains, bool updateInDb = true, bool forNewTenant = false)
     {
         var tenant = tenantManager.GetCurrentTenant();
         var domain = tenant.GetTenantDomain(coreSettings);
@@ -134,10 +134,22 @@ public class CspSettingsHelper(
 
         if (updateInDb)
         {
-            await settingsManager.ManageAsync<CspSettings>(current =>
+            if (forNewTenant)
             {
-                current.Domains = domains;
-            });
+                // a freshly registered tenant has no CSP settings row yet, so the
+                // load-modify-save roundtrips of ManageAsync can be skipped
+                var settings = settingsManager.GetDefault<CspSettings>();
+                settings.Domains = domains;
+
+                await settingsManager.SaveForNewTenantAsync(settings, tenant.Id);
+            }
+            else
+            {
+                await settingsManager.ManageAsync<CspSettings>(current =>
+                {
+                    current.Domains = domains;
+                });
+            }
         }
 
         return headerValue;
