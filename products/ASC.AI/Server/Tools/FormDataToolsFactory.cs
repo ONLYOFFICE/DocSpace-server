@@ -39,7 +39,6 @@ public class FormDataToolsFactory(
     BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IDaoFactory daoFactory,
     FormFillingReportCreator formFillingReportCreator,
-    TenantManager tenantManager,
     GlobalFolderHelper globalFolderHelper,
     DocumentServiceConnector docService,
     FileConverter fileConverter,
@@ -254,10 +253,7 @@ public class FormDataToolsFactory(
             tools.Add(new AiTool(SelfJoinName, MakeSelfJoinFunction(client, tableName, allowedColumns, columns, pkColumn)));
         }
 
-        if ((await tenantManager.GetCurrentTenantQuotaAsync()).AutomationApi)
-        {
-            tools.Add(new AiTool(SaveReportName, MakeSaveReportFunction(form)));
-        }
+        tools.Add(new AiTool(SaveReportName, MakeSaveReportFunction(form)));
 
         return new ToolBundle(prompt, tools);
     }
