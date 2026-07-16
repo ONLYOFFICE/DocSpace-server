@@ -409,10 +409,26 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
     private void MarkUnavailableOnConnectionFailure(Exception e)
     {
         // only genuine connection failures count: a request timeout (TaskCanceledException)
-        // may come from a live but busy cluster and must not silence the whole indexer
-        if (e is OpenSearchClientException && e.InnerException is System.Net.Http.HttpRequestException or System.Net.Sockets.SocketException)
+        // may come from a live but busy cluster and must not silence the whole indexer.
+        // The client surfaces the transport failure via Response.OriginalException and often
+        // wraps it (e.g. in a PipelineException), so both places are checked down the chain
+        if (e is OpenSearchClientException oce &&
+            (IsConnectionFailure(oce.Response?.OriginalException) || IsConnectionFailure(oce.InnerException)))
         {
             factoryIndexer.MarkUnavailable();
+        }
+
+        static bool IsConnectionFailure(Exception exception)
+        {
+            for (var current = exception; current != null; current = current.InnerException)
+            {
+                if (current is System.Net.Http.HttpRequestException or System.Net.Sockets.SocketException)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
