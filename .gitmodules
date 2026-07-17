@@ -1,7 +1,7 @@
 [submodule "sdk/docspace-api-sdk-python"]
 	path = sdk/docspace-api-sdk-python
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-python.git
-	branch = release/v3.7.0
+	branch = develop
 [submodule "sdk/docspace-api-sdk-kotlin"]
 	path = sdk/docspace-api-sdk-kotlin
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-kotlin.git
