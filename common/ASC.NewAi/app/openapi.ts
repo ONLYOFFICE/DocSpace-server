@@ -121,6 +121,10 @@ const UNAUTHORIZED_RESPONSE: Json = jsonResponse(
   "Missing `asc_auth_key` cookie or `Authorization` header.",
 );
 
+function capitalize(name: string): string {
+  return name.length > 0 ? name.charAt(0).toUpperCase() + name.slice(1) : name;
+}
+
 // Turn a `camelCase`/`kebab` token into a human title, e.g.
 // `sendWithStream` → "Send with stream".
 function humanize(name: string): string {
@@ -171,7 +175,9 @@ function engineOperation(
   const isGet = spec.method === "GET";
   const operation: Record<string, Json> = {
     tags: [engine.tag],
-    operationId: `newAi_${engine.name}_${methodName}`,
+    // lowerCamelCase, `newAi`-scoped so it stays unique across engines and
+    // does not clash with the .NET services' ids once merged.
+    operationId: `newAi${capitalize(engine.name)}${capitalize(methodName)}`,
     summary: humanize(methodName),
     responses: {
       "200": jsonResponse("Success."),
@@ -254,14 +260,14 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
   // security requirement.
   addOperation(paths, key("/health"), "get", {
     tags: ["System"],
-    operationId: "newAi_health",
+    operationId: "newAiHealth",
     summary: "Health check",
     security: [],
     responses: { "200": jsonResponse("Service is healthy.") },
   });
   addOperation(paths, key("/isLife"), "get", {
     tags: ["System"],
-    operationId: "newAi_isLife",
+    operationId: "newAiIsLife",
     summary: "Liveness probe",
     security: [],
     responses: { "200": { description: "Service is alive." } },

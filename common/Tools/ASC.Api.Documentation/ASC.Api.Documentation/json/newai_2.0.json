@@ -100,7 +100,7 @@
         "tags": [
           "AI"
         ],
-        "operationId": "newAi_ai_send",
+        "operationId": "newAiAiSend",
         "summary": "Send",
         "responses": {
           "200": {
@@ -144,7 +144,7 @@
         "tags": [
           "AI"
         ],
-        "operationId": "newAi_ai_sendCustom",
+        "operationId": "newAiAiSendCustom",
         "summary": "Send custom",
         "responses": {
           "200": {
@@ -188,7 +188,7 @@
         "tags": [
           "AI"
         ],
-        "operationId": "newAi_ai_sendWithStream",
+        "operationId": "newAiAiSendWithStream",
         "summary": "Send with stream",
         "responses": {
           "200": {
@@ -232,7 +232,7 @@
         "tags": [
           "AI"
         ],
-        "operationId": "newAi_ai_sendWithStreamOpenAI",
+        "operationId": "newAiAiSendWithStreamOpenAI",
         "summary": "Send with stream open ai",
         "responses": {
           "200": {
@@ -276,7 +276,7 @@
         "tags": [
           "AI"
         ],
-        "operationId": "newAi_ai_regenerateStream",
+        "operationId": "newAiAiRegenerateStream",
         "summary": "Regenerate stream",
         "responses": {
           "200": {
@@ -320,7 +320,7 @@
         "tags": [
           "AI"
         ],
-        "operationId": "newAi_ai_approveToolCall",
+        "operationId": "newAiAiApproveToolCall",
         "summary": "Approve tool call",
         "responses": {
           "200": {
@@ -364,7 +364,7 @@
         "tags": [
           "AI"
         ],
-        "operationId": "newAi_ai_denyToolCall",
+        "operationId": "newAiAiDenyToolCall",
         "summary": "Deny tool call",
         "responses": {
           "200": {
@@ -408,7 +408,7 @@
         "tags": [
           "Assignments"
         ],
-        "operationId": "newAi_assignments_resolveForAction",
+        "operationId": "newAiAssignmentsResolveForAction",
         "summary": "Resolve for action",
         "responses": {
           "200": {
@@ -459,7 +459,7 @@
         "tags": [
           "Assignments"
         ],
-        "operationId": "newAi_assignments_tryResolveForAction",
+        "operationId": "newAiAssignmentsTryResolveForAction",
         "summary": "Try resolve for action",
         "responses": {
           "200": {
@@ -510,7 +510,7 @@
         "tags": [
           "Assignments"
         ],
-        "operationId": "newAi_assignments_assign",
+        "operationId": "newAiAssignmentsAssign",
         "summary": "Assign",
         "responses": {
           "200": {
@@ -554,7 +554,7 @@
         "tags": [
           "Assignments"
         ],
-        "operationId": "newAi_assignments_unassign",
+        "operationId": "newAiAssignmentsUnassign",
         "summary": "Unassign",
         "responses": {
           "200": {
@@ -598,7 +598,7 @@
         "tags": [
           "Assignments"
         ],
-        "operationId": "newAi_assignments_bulkAssign",
+        "operationId": "newAiAssignmentsBulkAssign",
         "summary": "Bulk assign",
         "responses": {
           "200": {
@@ -642,7 +642,7 @@
         "tags": [
           "Assignments"
         ],
-        "operationId": "newAi_assignments_getAssignment",
+        "operationId": "newAiAssignmentsGetAssignment",
         "summary": "Get assignment",
         "responses": {
           "200": {
@@ -685,7 +685,7 @@
         "tags": [
           "Assignments"
         ],
-        "operationId": "newAi_assignments_getAllAssignments",
+        "operationId": "newAiAssignmentsGetAllAssignments",
         "summary": "Get all assignments",
         "responses": {
           "200": {
@@ -728,7 +728,7 @@
         "tags": [
           "Assignments"
         ],
-        "operationId": "newAi_assignments_cascadeProfileDelete",
+        "operationId": "newAiAssignmentsCascadeProfileDelete",
         "summary": "Cascade profile delete",
         "responses": {
           "200": {
@@ -772,7 +772,7 @@
         "tags": [
           "Attachments"
         ],
-        "operationId": "newAi_attachments_saveFile",
+        "operationId": "newAiAttachmentsSaveFile",
         "summary": "Save file",
         "responses": {
           "200": {
@@ -816,7 +816,7 @@
         "tags": [
           "Attachments"
         ],
-        "operationId": "newAi_attachments_saveFilesMany",
+        "operationId": "newAiAttachmentsSaveFilesMany",
         "summary": "Save files many",
         "responses": {
           "200": {
@@ -860,7 +860,7 @@
         "tags": [
           "Attachments"
         ],
-        "operationId": "newAi_attachments_saveImage",
+        "operationId": "newAiAttachmentsSaveImage",
         "summary": "Save image",
         "responses": {
           "200": {
@@ -904,7 +904,7 @@
         "tags": [
           "Attachments"
         ],
-        "operationId": "newAi_attachments_saveImagesMany",
+        "operationId": "newAiAttachmentsSaveImagesMany",
         "summary": "Save images many",
         "responses": {
           "200": {
@@ -948,7 +948,7 @@
         "tags": [
           "Attachments"
         ],
-        "operationId": "newAi_attachments_get",
+        "operationId": "newAiAttachmentsGet",
         "summary": "Get",
         "responses": {
           "200": {
@@ -992,7 +992,7 @@
         "tags": [
           "Attachments"
         ],
-        "operationId": "newAi_attachments_getMany",
+        "operationId": "newAiAttachmentsGetMany",
         "summary": "Get many",
         "responses": {
           "200": {
@@ -1036,7 +1036,7 @@
         "tags": [
           "Attachments"
         ],
-        "operationId": "newAi_attachments_delete",
+        "operationId": "newAiAttachmentsDelete",
         "summary": "Delete",
         "responses": {
           "200": {
@@ -1080,7 +1080,7 @@
         "tags": [
           "Attachments"
         ],
-        "operationId": "newAi_attachments_deleteMany",
+        "operationId": "newAiAttachmentsDeleteMany",
         "summary": "Delete many",
         "responses": {
           "200": {
@@ -1124,7 +1124,7 @@
         "tags": [
           "Attachments"
         ],
-        "operationId": "newAi_attachments_linkToMessage",
+        "operationId": "newAiAttachmentsLinkToMessage",
         "summary": "Link to message",
         "responses": {
           "200": {
@@ -1168,7 +1168,7 @@
         "tags": [
           "Preferences"
         ],
-        "operationId": "newAi_preferences_getDeepMode",
+        "operationId": "newAiPreferencesGetDeepMode",
         "summary": "Get deep mode",
         "responses": {
           "200": {
@@ -1211,7 +1211,7 @@
         "tags": [
           "Preferences"
         ],
-        "operationId": "newAi_preferences_setDeepMode",
+        "operationId": "newAiPreferencesSetDeepMode",
         "summary": "Set deep mode",
         "responses": {
           "200": {
@@ -1255,7 +1255,7 @@
         "tags": [
           "Preferences"
         ],
-        "operationId": "newAi_preferences_clearDeepMode",
+        "operationId": "newAiPreferencesClearDeepMode",
         "summary": "Clear deep mode",
         "responses": {
           "200": {
@@ -1299,7 +1299,7 @@
         "tags": [
           "Preferences"
         ],
-        "operationId": "newAi_preferences_isDeepModeSet",
+        "operationId": "newAiPreferencesIsDeepModeSet",
         "summary": "Is deep mode set",
         "responses": {
           "200": {
@@ -1342,7 +1342,7 @@
         "tags": [
           "Profiles"
         ],
-        "operationId": "newAi_profiles_create",
+        "operationId": "newAiProfilesCreate",
         "summary": "Create",
         "responses": {
           "200": {
@@ -1386,7 +1386,7 @@
         "tags": [
           "Profiles"
         ],
-        "operationId": "newAi_profiles_update",
+        "operationId": "newAiProfilesUpdate",
         "summary": "Update",
         "responses": {
           "200": {
@@ -1430,7 +1430,7 @@
         "tags": [
           "Profiles"
         ],
-        "operationId": "newAi_profiles_delete",
+        "operationId": "newAiProfilesDelete",
         "summary": "Delete",
         "responses": {
           "200": {
@@ -1474,7 +1474,7 @@
         "tags": [
           "Profiles"
         ],
-        "operationId": "newAi_profiles_listModels",
+        "operationId": "newAiProfilesListModels",
         "summary": "List models",
         "responses": {
           "200": {
@@ -1517,7 +1517,7 @@
         "tags": [
           "Profiles"
         ],
-        "operationId": "newAi_profiles_listProviderModels",
+        "operationId": "newAiProfilesListProviderModels",
         "summary": "List provider models",
         "responses": {
           "200": {
@@ -1561,7 +1561,7 @@
         "tags": [
           "Profiles"
         ],
-        "operationId": "newAi_profiles_testConnection",
+        "operationId": "newAiProfilesTestConnection",
         "summary": "Test connection",
         "responses": {
           "200": {
@@ -1605,7 +1605,7 @@
         "tags": [
           "Profiles"
         ],
-        "operationId": "newAi_profiles_getById",
+        "operationId": "newAiProfilesGetById",
         "summary": "Get by id",
         "responses": {
           "200": {
@@ -1648,7 +1648,7 @@
         "tags": [
           "Profiles"
         ],
-        "operationId": "newAi_profiles_list",
+        "operationId": "newAiProfilesList",
         "summary": "List",
         "responses": {
           "200": {
@@ -1681,7 +1681,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_create",
+        "operationId": "newAiPromptsCreate",
         "summary": "Create",
         "responses": {
           "200": {
@@ -1725,7 +1725,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_update",
+        "operationId": "newAiPromptsUpdate",
         "summary": "Update",
         "responses": {
           "200": {
@@ -1769,7 +1769,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_move",
+        "operationId": "newAiPromptsMove",
         "summary": "Move",
         "responses": {
           "200": {
@@ -1813,7 +1813,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_delete",
+        "operationId": "newAiPromptsDelete",
         "summary": "Delete",
         "responses": {
           "200": {
@@ -1857,7 +1857,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_list",
+        "operationId": "newAiPromptsList",
         "summary": "List",
         "responses": {
           "200": {
@@ -1900,7 +1900,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_createFolder",
+        "operationId": "newAiPromptsCreateFolder",
         "summary": "Create folder",
         "responses": {
           "200": {
@@ -1944,7 +1944,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_renameFolder",
+        "operationId": "newAiPromptsRenameFolder",
         "summary": "Rename folder",
         "responses": {
           "200": {
@@ -1988,7 +1988,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_deleteFolder",
+        "operationId": "newAiPromptsDeleteFolder",
         "summary": "Delete folder",
         "responses": {
           "200": {
@@ -2032,7 +2032,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_listFolders",
+        "operationId": "newAiPromptsListFolders",
         "summary": "List folders",
         "responses": {
           "200": {
@@ -2065,7 +2065,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_export",
+        "operationId": "newAiPromptsExport",
         "summary": "Export",
         "responses": {
           "200": {
@@ -2098,7 +2098,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_importBundle",
+        "operationId": "newAiPromptsImportBundle",
         "summary": "Import bundle",
         "responses": {
           "200": {
@@ -2142,7 +2142,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_getById",
+        "operationId": "newAiPromptsGetById",
         "summary": "Get by id",
         "responses": {
           "200": {
@@ -2185,7 +2185,7 @@
         "tags": [
           "Prompts"
         ],
-        "operationId": "newAi_prompts_getFolderById",
+        "operationId": "newAiPromptsGetFolderById",
         "summary": "Get folder by id",
         "responses": {
           "200": {
@@ -2228,7 +2228,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_create",
+        "operationId": "newAiThreadsCreate",
         "summary": "Create",
         "responses": {
           "200": {
@@ -2272,7 +2272,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_openOrCreate",
+        "operationId": "newAiThreadsOpenOrCreate",
         "summary": "Open or create",
         "responses": {
           "200": {
@@ -2316,7 +2316,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_appendUserMessage",
+        "operationId": "newAiThreadsAppendUserMessage",
         "summary": "Append user message",
         "responses": {
           "200": {
@@ -2360,7 +2360,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_touch",
+        "operationId": "newAiThreadsTouch",
         "summary": "Touch",
         "responses": {
           "200": {
@@ -2404,7 +2404,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_rename",
+        "operationId": "newAiThreadsRename",
         "summary": "Rename",
         "responses": {
           "200": {
@@ -2448,7 +2448,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_delete",
+        "operationId": "newAiThreadsDelete",
         "summary": "Delete",
         "responses": {
           "200": {
@@ -2492,7 +2492,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_clearMessages",
+        "operationId": "newAiThreadsClearMessages",
         "summary": "Clear messages",
         "responses": {
           "200": {
@@ -2536,7 +2536,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_regenerateTitle",
+        "operationId": "newAiThreadsRegenerateTitle",
         "summary": "Regenerate title",
         "responses": {
           "200": {
@@ -2580,7 +2580,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_list",
+        "operationId": "newAiThreadsList",
         "summary": "List",
         "responses": {
           "200": {
@@ -2623,7 +2623,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_readMessages",
+        "operationId": "newAiThreadsReadMessages",
         "summary": "Read messages",
         "responses": {
           "200": {
@@ -2682,7 +2682,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_getById",
+        "operationId": "newAiThreadsGetById",
         "summary": "Get by id",
         "responses": {
           "200": {
@@ -2725,7 +2725,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_getMessageById",
+        "operationId": "newAiThreadsGetMessageById",
         "summary": "Get message by id",
         "responses": {
           "200": {
@@ -2768,7 +2768,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_updateMessage",
+        "operationId": "newAiThreadsUpdateMessage",
         "summary": "Update message",
         "responses": {
           "200": {
@@ -2812,7 +2812,7 @@
         "tags": [
           "Threads"
         ],
-        "operationId": "newAi_threads_deleteMessage",
+        "operationId": "newAiThreadsDeleteMessage",
         "summary": "Delete message",
         "responses": {
           "200": {
@@ -2856,7 +2856,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_addCustomServer",
+        "operationId": "newAiToolsAddCustomServer",
         "summary": "Add custom server",
         "responses": {
           "200": {
@@ -2900,7 +2900,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_updateCustomServer",
+        "operationId": "newAiToolsUpdateCustomServer",
         "summary": "Update custom server",
         "responses": {
           "200": {
@@ -2944,7 +2944,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_removeCustomServer",
+        "operationId": "newAiToolsRemoveCustomServer",
         "summary": "Remove custom server",
         "responses": {
           "200": {
@@ -2988,7 +2988,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_getCustomServer",
+        "operationId": "newAiToolsGetCustomServer",
         "summary": "Get custom server",
         "responses": {
           "200": {
@@ -3039,7 +3039,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_listCustomServers",
+        "operationId": "newAiToolsListCustomServers",
         "summary": "List custom servers",
         "responses": {
           "200": {
@@ -3082,7 +3082,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_listSystemTools",
+        "operationId": "newAiToolsListSystemTools",
         "summary": "List system tools",
         "responses": {
           "200": {
@@ -3125,7 +3125,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_replaceAllCustomServers",
+        "operationId": "newAiToolsReplaceAllCustomServers",
         "summary": "Replace all custom servers",
         "responses": {
           "200": {
@@ -3169,7 +3169,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_setDisabled",
+        "operationId": "newAiToolsSetDisabled",
         "summary": "Set disabled",
         "responses": {
           "200": {
@@ -3213,7 +3213,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_getDisabled",
+        "operationId": "newAiToolsGetDisabled",
         "summary": "Get disabled",
         "responses": {
           "200": {
@@ -3256,7 +3256,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_isToolDisabled",
+        "operationId": "newAiToolsIsToolDisabled",
         "summary": "Is tool disabled",
         "responses": {
           "200": {
@@ -3315,7 +3315,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_setAllowAlways",
+        "operationId": "newAiToolsSetAllowAlways",
         "summary": "Set allow always",
         "responses": {
           "200": {
@@ -3359,7 +3359,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_getAllowAlways",
+        "operationId": "newAiToolsGetAllowAlways",
         "summary": "Get allow always",
         "responses": {
           "200": {
@@ -3402,7 +3402,7 @@
         "tags": [
           "Tools"
         ],
-        "operationId": "newAi_tools_isAllowAlways",
+        "operationId": "newAiToolsIsAllowAlways",
         "summary": "Is allow always",
         "responses": {
           "200": {
@@ -3461,7 +3461,7 @@
         "tags": [
           "Web search"
         ],
-        "operationId": "newAi_webSearch_getActiveConfig",
+        "operationId": "newAiWebSearchGetActiveConfig",
         "summary": "Get active config",
         "responses": {
           "200": {
@@ -3504,7 +3504,7 @@
         "tags": [
           "Web search"
         ],
-        "operationId": "newAi_webSearch_isConfigured",
+        "operationId": "newAiWebSearchIsConfigured",
         "summary": "Is configured",
         "responses": {
           "200": {
@@ -3547,7 +3547,7 @@
         "tags": [
           "Web search"
         ],
-        "operationId": "newAi_webSearch_testConnection",
+        "operationId": "newAiWebSearchTestConnection",
         "summary": "Test connection",
         "responses": {
           "200": {
@@ -3591,7 +3591,7 @@
         "tags": [
           "Web search"
         ],
-        "operationId": "newAi_webSearch_configure",
+        "operationId": "newAiWebSearchConfigure",
         "summary": "Configure",
         "responses": {
           "200": {
@@ -3635,7 +3635,7 @@
         "tags": [
           "Web search"
         ],
-        "operationId": "newAi_webSearch_setActiveConfig",
+        "operationId": "newAiWebSearchSetActiveConfig",
         "summary": "Set active config",
         "responses": {
           "200": {
@@ -3679,7 +3679,7 @@
         "tags": [
           "Web search"
         ],
-        "operationId": "newAi_webSearch_clear",
+        "operationId": "newAiWebSearchClear",
         "summary": "Clear",
         "responses": {
           "200": {
@@ -3723,7 +3723,7 @@
         "tags": [
           "Export"
         ],
-        "operationId": "newAi_export_textToDocx",
+        "operationId": "newAiExportTextToDocx",
         "summary": "Start markdown → docx export",
         "responses": {
           "200": {
@@ -3767,7 +3767,7 @@
         "tags": [
           "Agents"
         ],
-        "operationId": "newAi_agents_list",
+        "operationId": "newAiAgentsList",
         "summary": "List agents",
         "responses": {
           "200": {
@@ -3798,7 +3798,7 @@
         "tags": [
           "Agents"
         ],
-        "operationId": "newAi_agents_create",
+        "operationId": "newAiAgentsCreate",
         "summary": "Create an agent",
         "responses": {
           "200": {
@@ -3842,7 +3842,7 @@
         "tags": [
           "Agents"
         ],
-        "operationId": "newAi_agents_news",
+        "operationId": "newAiAgentsNews",
         "summary": "List agent news items",
         "responses": {
           "200": {
@@ -3875,7 +3875,7 @@
         "tags": [
           "Agents"
         ],
-        "operationId": "newAi_agents_get",
+        "operationId": "newAiAgentsGet",
         "summary": "Get an agent",
         "responses": {
           "200": {
@@ -3916,7 +3916,7 @@
         "tags": [
           "Agents"
         ],
-        "operationId": "newAi_agents_update",
+        "operationId": "newAiAgentsUpdate",
         "summary": "Update an agent",
         "responses": {
           "200": {
@@ -3968,7 +3968,7 @@
         "tags": [
           "Agents"
         ],
-        "operationId": "newAi_agents_delete",
+        "operationId": "newAiAgentsDelete",
         "summary": "Delete an agent",
         "responses": {
           "200": {
@@ -4022,7 +4022,7 @@
         "tags": [
           "Agents"
         ],
-        "operationId": "newAi_agents_updateQuota",
+        "operationId": "newAiAgentsUpdateQuota",
         "summary": "Update agents' quota",
         "responses": {
           "200": {
@@ -4066,7 +4066,7 @@
         "tags": [
           "Agents"
         ],
-        "operationId": "newAi_agents_resetQuota",
+        "operationId": "newAiAgentsResetQuota",
         "summary": "Reset agents' quota",
         "responses": {
           "200": {
@@ -4110,7 +4110,7 @@
         "tags": [
           "System"
         ],
-        "operationId": "newAi_health",
+        "operationId": "newAiHealth",
         "summary": "Health check",
         "security": [],
         "responses": {
@@ -4133,7 +4133,7 @@
         "tags": [
           "System"
         ],
-        "operationId": "newAi_isLife",
+        "operationId": "newAiIsLife",
         "summary": "Liveness probe",
         "security": [],
         "responses": {

@@ -67,18 +67,18 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
 
 // Routes registered explicitly in `routes.ts` that are not backed by an
 // engine. Kept in sync by hand with those `router.<verb>(...)` calls.
-// `operationId`s are `newAi`-scoped so they never clash with the .NET AI
-// service's ids (e.g. its own `getAgents`) once the documents are merged.
+// `operationId`s are lowerCamelCase and `newAi`-scoped so they never clash
+// with the .NET AI service's ids (e.g. its own `getAgents`) once merged.
 export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
-  { method: "POST", path: "/text-to-docx", tag: "Export", operationId: "newAi_export_textToDocx", summary: "Start markdown → docx export", hasBody: true },
-  { method: "GET", path: "/agents", tag: "Agents", operationId: "newAi_agents_list", summary: "List agents" },
-  { method: "POST", path: "/agents", tag: "Agents", operationId: "newAi_agents_create", summary: "Create an agent", hasBody: true },
-  { method: "GET", path: "/agents/news", tag: "Agents", operationId: "newAi_agents_news", summary: "List agent news items" },
-  { method: "GET", path: "/agents/{id}", tag: "Agents", operationId: "newAi_agents_get", summary: "Get an agent", pathParams: ["id"] },
-  { method: "PUT", path: "/agents/{id}", tag: "Agents", operationId: "newAi_agents_update", summary: "Update an agent", pathParams: ["id"], hasBody: true },
-  { method: "DELETE", path: "/agents/{id}", tag: "Agents", operationId: "newAi_agents_delete", summary: "Delete an agent", pathParams: ["id"], hasBody: true },
-  { method: "PUT", path: "/agents/agentquota", tag: "Agents", operationId: "newAi_agents_updateQuota", summary: "Update agents' quota", hasBody: true },
-  { method: "PUT", path: "/agents/resetquota", tag: "Agents", operationId: "newAi_agents_resetQuota", summary: "Reset agents' quota", hasBody: true },
+  { method: "POST", path: "/text-to-docx", tag: "Export", operationId: "newAiExportTextToDocx", summary: "Start markdown → docx export", hasBody: true },
+  { method: "GET", path: "/agents", tag: "Agents", operationId: "newAiAgentsList", summary: "List agents" },
+  { method: "POST", path: "/agents", tag: "Agents", operationId: "newAiAgentsCreate", summary: "Create an agent", hasBody: true },
+  { method: "GET", path: "/agents/news", tag: "Agents", operationId: "newAiAgentsNews", summary: "List agent news items" },
+  { method: "GET", path: "/agents/{id}", tag: "Agents", operationId: "newAiAgentsGet", summary: "Get an agent", pathParams: ["id"] },
+  { method: "PUT", path: "/agents/{id}", tag: "Agents", operationId: "newAiAgentsUpdate", summary: "Update an agent", pathParams: ["id"], hasBody: true },
+  { method: "DELETE", path: "/agents/{id}", tag: "Agents", operationId: "newAiAgentsDelete", summary: "Delete an agent", pathParams: ["id"], hasBody: true },
+  { method: "PUT", path: "/agents/agentquota", tag: "Agents", operationId: "newAiAgentsUpdateQuota", summary: "Update agents' quota", hasBody: true },
+  { method: "PUT", path: "/agents/resetquota", tag: "Agents", operationId: "newAiAgentsResetQuota", summary: "Reset agents' quota", hasBody: true },
 ];
 
 // Base path the service is mounted under (the DocSpace nginx route). Shared
