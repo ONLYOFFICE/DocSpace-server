@@ -50,8 +50,7 @@ public class PortalController(
         CsvFileHelper csvFileHelper,
         CsvFileUploader csvFileUploader,
         PortalRegistrationService portalRegistrationService,
-        UserFormatter userFormatter,
-        LoginProfileTransport loginProfileTransport)
+        UserFormatter userFormatter)
     : ControllerBase
 {
 
