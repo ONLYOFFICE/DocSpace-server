@@ -46,8 +46,7 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
             filter.Body,
             createMatch: (field, value) => new MatchQuery { Field = field, Query = value?.ToString() },
             createAnd: (left, right) => new BoolQuery { Must = [left, right] },
-            createOr: (left, right) => new BoolQuery { Should = [left, right] },
-            createTerms: (field, values) => new TermsQuery { Field = field, Terms = values });
+            createOr: (left, right) => new BoolQuery { Should = [left, right] });
     }
 
     public JsonElement TranslateToJsonElement(Expression<Func<T, bool>> filter)
@@ -70,10 +69,6 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
             createOr: (left, right) => new Dictionary<string, object?>
             {
                 ["bool"] = new Dictionary<string, object?> { ["should"] = new[] { left, right } }
-            },
-            createTerms: (field, values) => new Dictionary<string, object?>
-            {
-                ["terms"] = new Dictionary<string, object?> { [field] = values }
             }));
     }
 
@@ -81,8 +76,7 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
         Expression node,
         Func<string, object?, TResult> createMatch,
         Func<TResult, TResult, TResult> createAnd,
-        Func<TResult, TResult, TResult> createOr,
-        Func<string, IReadOnlyCollection<object?>, TResult> createTerms)
+        Func<TResult, TResult, TResult> createOr)
     {
         return node switch
         {
@@ -90,48 +84,14 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
                 TranslateCoreEqual(equal.Left, equal.Right, createMatch),
             BinaryExpression { NodeType: ExpressionType.AndAlso } andAlso =>
                 createAnd(
-                    TranslateCore(andAlso.Left, createMatch, createAnd, createOr, createTerms),
-                    TranslateCore(andAlso.Right, createMatch, createAnd, createOr, createTerms)),
+                    TranslateCore(andAlso.Left, createMatch, createAnd, createOr),
+                    TranslateCore(andAlso.Right, createMatch, createAnd, createOr)),
             BinaryExpression { NodeType: ExpressionType.OrElse } orElse =>
                 createOr(
-                    TranslateCore(orElse.Left, createMatch, createAnd, createOr, createTerms),
-                    TranslateCore(orElse.Right, createMatch, createAnd, createOr, createTerms)),
-            MethodCallExpression { Method.Name: nameof(Enumerable.Contains) } contains =>
-                TranslateCoreContains(contains, createTerms),
+                    TranslateCore(orElse.Left, createMatch, createAnd, createOr),
+                    TranslateCore(orElse.Right, createMatch, createAnd, createOr)),
             _ => throw new NotSupportedException($"Unsupported expression: {node.NodeType}")
         };
-    }
-
-    private TResult TranslateCoreContains<TResult>(
-        MethodCallExpression call,
-        Func<string, IReadOnlyCollection<object?>, TResult> createTerms)
-    {
-        Expression collectionExpr;
-        Expression itemExpr;
-
-        if (call.Object != null && call.Arguments.Count == 1)
-        {
-            collectionExpr = call.Object;
-            itemExpr = call.Arguments[0];
-        }
-        else if (call.Object == null && call.Arguments.Count == 2)
-        {
-            collectionExpr = call.Arguments[0];
-            itemExpr = call.Arguments[1];
-        }
-        else
-        {
-            throw new NotSupportedException("Unsupported Contains expression");
-        }
-
-        if (TryGetPropertyInfo(itemExpr, out var propertyInfo) &&
-            TryGetValue(collectionExpr, out var collection) &&
-            collection is IEnumerable items)
-        {
-            return createTerms(inferrer.Field(propertyInfo), items.Cast<object?>().ToArray());
-        }
-
-        throw new NotSupportedException("Invalid Contains expression");
     }
 
     private TResult TranslateCoreEqual<TResult>(
