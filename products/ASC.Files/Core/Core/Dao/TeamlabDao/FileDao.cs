@@ -32,8 +32,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using Document = ASC.ElasticSearch.Document;
-using VectorChunk = ASC.Files.Core.Vectorization.Data.Chunk;
-
 namespace ASC.Files.Core.Data;
 
 [Scope(typeof(IFileDao<int>))]
@@ -76,7 +74,6 @@ internal class FileDao(
         FilesMessageService filesMessageService,
         QuotaSocketManager quotaSocketManager,
         CustomQuota customQuota,
-        VectorStore vectorStore,
         IEventBus eventBus,
         VectorizationGlobalSettings vectorizationGlobalSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -797,7 +794,7 @@ internal class FileDao(
                     filesDbContext.FileVectorization,
                     f => f.Id,
                     v => v.FileId, (f, v) => new { f, v })
-                .Where(x => x.v.Status == VectorizationStatus.Completed)
+                .Where(x => x.v.Status == VectorizationStatus.Completed && x.v.DeletedOn == null)
                 .Select(x => x.f);
         }
 
@@ -1017,6 +1014,7 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
+        var vectorsMarkedDeleted = 0;
 
         await strategy.ExecuteAsync(async () =>
         {
@@ -1029,8 +1027,7 @@ internal class FileDao(
 
             var toDeleteFiles = await context.DbFilesAsync(tenantId, fileId).ToListAsync();
 
-            await context.DeleteVectorizationStatusAsync(tenantId, fileId);
-            await DeleteVectorsAsync(tenantId, fileId);
+            vectorsMarkedDeleted = await context.MarkVectorizationDeletedAsync(tenantId, fileId);
 
             context.RemoveRange(toDeleteFiles);
 
@@ -1069,6 +1066,14 @@ internal class FileDao(
             FileId = fileId,
             Action = FileIndexAction.Delete
         });
+
+        if (vectorsMarkedDeleted > 0)
+        {
+            await eventBus.PublishAsync(new VectorsDeletionIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+            {
+                FileId = fileId
+            });
+        }
     }
 
     public async Task<IEnumerable<int>> DeleteFilesAsync(IEnumerable<KeyValuePair<int, Guid>> fileQuotaOwners)
@@ -1087,6 +1092,7 @@ internal class FileDao(
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         List<DbFile> toDeleteFiles = null;
+        List<int> vectorizedFileIds = null;
 
         await strategy.ExecuteAsync(async () =>
         {
@@ -1096,7 +1102,15 @@ internal class FileDao(
             toDeleteFiles = await context.DbFilesByIdsAsync(tenantId, fileIds).ToListAsync();
 
             await context.DeleteTagLinksByFileIdsAsync(tenantId, fileIdsStrings);
-            await context.DeleteVectorizationStatusByFileIdsAsync(tenantId, fileIds);
+
+            // vectorization rows are marked deleted (not removed): the vector store cleanup is
+            // asynchronous, the background service purges the vectors and then the rows themselves
+            vectorizedFileIds = await context.VectorizedFileIdsAsync(tenantId, fileIds).ToListAsync();
+            if (vectorizedFileIds.Count > 0)
+            {
+                await context.MarkVectorizationDeletedByFileIdsAsync(tenantId, vectorizedFileIds);
+            }
+
             await context.DeleteDbFilesByIdsAsync(tenantId, fileIds);
             await context.DeleteTagsAsync(tenantId);
             await context.DeleteSecurityByFileIdsAsync(tenantId, fileIds);
@@ -1139,13 +1153,19 @@ internal class FileDao(
             }
         }
 
-        try
+        foreach (var fileId in vectorizedFileIds)
         {
-            await DeleteVectorsAsync(tenantId, deletedIds);
-        }
-        catch (Exception e)
-        {
-            logger.ErrorWithException(e);
+            try
+            {
+                await eventBus.PublishAsync(new VectorsDeletionIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = fileId
+                });
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
         }
 
         try
@@ -1358,6 +1378,7 @@ internal class FileDao(
                     };
 
                     await context.FileVectorization.AddOrUpdateAsync(vectorization);
+                    await context.SaveChangesAsync();
                 }
 
                 // reuse the values already resolved before the transaction: toFolder has not
@@ -1443,7 +1464,7 @@ internal class FileDao(
 
                 if (needDeleteVectors)
                 {
-                    await context.DeleteVectorizationStatusAsync(tenantId, fileId);
+                    needDeleteVectors = await context.MarkVectorizationDeletedAsync(tenantId, fileId) > 0;
                 }
 
                 await tx.CommitAsync();
@@ -1474,7 +1495,10 @@ internal class FileDao(
 
             if (needDeleteVectors)
             {
-                await DeleteVectorsAsync(tenantId, fileId);
+                await eventBus.PublishAsync(new VectorsDeletionIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = fileId
+                });
             }
 
             if (needVectorization)
@@ -2279,6 +2303,22 @@ internal class FileDao(
         });
     }
 
+    public async Task<bool> IsVectorizationDeletedAsync(int fileId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.IsVectorizationDeletedAsync(tenantId, fileId);
+    }
+
+    public async Task DeleteVectorizationIfDeletedAsync(int fileId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.DeleteVectorizationIfDeletedAsync(tenantId, fileId);
+    }
+
     public async Task SetFileKey(int fileId, IEnumerable<FileKeyData> keys)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -2714,7 +2754,7 @@ internal class FileDao(
                 ).FirstOrDefault(),
                 VectorizationStatus = attachVectorizationStatus
                     ? filesDbContext.FileVectorization
-                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
+                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id && x.DeletedOn == null).Status
                     : null
             });
     }
@@ -2784,7 +2824,7 @@ internal class FileDao(
                 ).FirstOrDefault(),
                 VectorizationStatus = attachVectorizationStatus
                     ? filesDbContext.FileVectorization
-                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
+                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id && x.DeletedOn == null).Status
                     : null
             });
     }
@@ -3198,23 +3238,6 @@ internal class FileDao(
         return q;
     }
 
-    private async ValueTask DeleteVectorsAsync(int tenantId, int fileId)
-    {
-        var collection = vectorStore.GetCollection<VectorChunk>(VectorChunk.IndexName, null);
-        await collection.DeleteAsync(new VectorSearchOptions<VectorChunk>
-        {
-            Filter = x => x.TenantId == tenantId && x.FileId == fileId
-        });
-    }
-
-    private async ValueTask DeleteVectorsAsync(int tenantId, IReadOnlyCollection<int> fileIds)
-    {
-        var collection = vectorStore.GetCollection<VectorChunk>(VectorChunk.IndexName, null);
-        await collection.DeleteAsync(new VectorSearchOptions<VectorChunk>
-        {
-            Filter = x => x.TenantId == tenantId && fileIds.Contains(x.FileId)
-        });
-    }
 }
 
 public class DbFileQuery
@@ -3294,7 +3317,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         FilesMessageService filesMessageService,
         QuotaSocketManager quotaSocketManager,
         CustomQuota customQuota,
-        VectorStore vectorStore,
         IEventBus eventBus,
         VectorizationGlobalSettings vectorizationGlobalSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -3337,7 +3359,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         filesMessageService,
         quotaSocketManager,
         customQuota,
-        vectorStore,
         eventBus,
         vectorizationGlobalSettings,
         displayUserSettingsHelper), ICacheFileDao<int>

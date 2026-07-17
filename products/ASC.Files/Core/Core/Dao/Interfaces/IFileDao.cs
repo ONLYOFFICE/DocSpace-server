@@ -511,6 +511,10 @@ public interface IFileDao<T>
 
     Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status, Func<Task> action = null);
 
+    Task<bool> IsVectorizationDeletedAsync(T fileId);
+
+    Task DeleteVectorizationIfDeletedAsync(T fileId);
+
     Task SetFileKey(T fileId, IEnumerable<FileKeyData> keys);
     Task<List<FileKeys>> GetFileKeys(T fileId, Guid userId);
 

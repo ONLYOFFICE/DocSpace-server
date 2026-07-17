@@ -34,14 +34,12 @@
 namespace ASC.ElasticSearch.VectorData;
 
 [Singleton]
-public class VectorStore(Client client, ILogger<VectorStore> logger)
+public class VectorStore(Client client)
 {
     private OpenSearchClient OpenSearchClient => client.Instance;
-    private static readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(
-        TaskScheduler.Default, 10).ConcurrentScheduler;
 
     public VectorStoreCollection<T> GetCollection<T>(string name, VectorCollectionOptions options) where T: class
     {
-        return new VectorStoreCollection<T>(OpenSearchClient, options, _scheduler, logger, name);
+        return new VectorStoreCollection<T>(OpenSearchClient, options, name);
     }
 }

@@ -39,6 +39,12 @@ export interface RequestContext {
   // provider profile's `headers` (onlyoffice provider only) so they reach the
   // upstream provider with each chat-stream request.
   forwardHeadersToProvider?: boolean;
+  // Form entry id resolved from the current message's attachment refs by
+  // `httpToolsAdapter.toContext`. Request-scoped on purpose: `callTool`
+  // (per the `ToolsAdapter` interface) doesn't receive attachment refs, but
+  // every in-stream tool call runs within the same HTTP request as the
+  // `getTools` that resolved them.
+  resolvedFormId?: number;
 }
 
 export interface AppConfig {

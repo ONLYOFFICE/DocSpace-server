@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20260715100047_MigrationContext_Upgrade88")]
+    partial class MigrationContext_Upgrade88
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -204,8 +207,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<string>("Content")
                         .HasColumnType("longtext")
                         .HasColumnName("content")
-                        .UseCollation("utf8mb4_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
@@ -237,8 +240,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("title")
-                        .UseCollation("utf8mb4_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
@@ -491,8 +494,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("name")
-                        .UseCollation("utf8mb4_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -502,8 +505,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("text")
-                        .UseCollation("utf8mb4_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime")
@@ -549,8 +552,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("name")
-                        .UseCollation("utf8mb4_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -612,8 +615,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("title")
-                        .UseCollation("utf8mb4_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
