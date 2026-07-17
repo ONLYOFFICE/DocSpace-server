@@ -27,70 +27,82 @@
   ],
   "tags": [
     {
-      "name": "AI",
-      "description": "Chat completions and tool-call approval."
+      "name": "New AI / AI",
+      "description": "Chat completions and tool-call approval.",
+      "x-displayName": "AI"
     },
     {
-      "name": "Assignments",
-      "description": "Profile-to-entity assignment resolution."
+      "name": "New AI / Assignments",
+      "description": "Profile-to-entity assignment resolution.",
+      "x-displayName": "Assignments"
     },
     {
-      "name": "Attachments",
-      "description": "Message file and image attachments."
+      "name": "New AI / Attachments",
+      "description": "Message file and image attachments.",
+      "x-displayName": "Attachments"
     },
     {
-      "name": "Preferences",
-      "description": "Per-entity chat preferences (e.g. deep mode)."
+      "name": "New AI / Preferences",
+      "description": "Per-entity chat preferences (e.g. deep mode).",
+      "x-displayName": "Preferences"
     },
     {
-      "name": "Profiles",
-      "description": "AI provider profiles and model discovery."
+      "name": "New AI / Profiles",
+      "description": "AI provider profiles and model discovery.",
+      "x-displayName": "Profiles"
     },
     {
-      "name": "Prompts",
-      "description": "Saved prompts and prompt folders."
+      "name": "New AI / Prompts",
+      "description": "Saved prompts and prompt folders.",
+      "x-displayName": "Prompts"
     },
     {
-      "name": "Threads",
-      "description": "Chat threads and their messages."
+      "name": "New AI / Threads",
+      "description": "Chat threads and their messages.",
+      "x-displayName": "Threads"
     },
     {
-      "name": "Tools",
-      "description": "MCP custom servers and system tool preferences."
+      "name": "New AI / Tools",
+      "description": "MCP custom servers and system tool preferences.",
+      "x-displayName": "Tools"
     },
     {
-      "name": "Web search",
-      "description": "Web-search provider configuration."
+      "name": "New AI / Web search",
+      "description": "Web-search provider configuration.",
+      "x-displayName": "Web search"
     },
     {
-      "name": "Agents",
-      "description": "AI agent rooms (delegated to the .NET AI service)."
+      "name": "New AI / Agents",
+      "description": "AI agent rooms (delegated to the .NET AI service).",
+      "x-displayName": "Agents"
     },
     {
-      "name": "Export",
-      "description": "Markdown → docx export."
+      "name": "New AI / Export",
+      "description": "Markdown → docx export.",
+      "x-displayName": "Export"
     },
     {
-      "name": "System",
-      "description": "Health and liveness probes."
+      "name": "New AI / System",
+      "description": "Health and liveness probes.",
+      "x-displayName": "System"
     }
   ],
   "x-tagGroups": [
     {
       "name": "New AI",
       "tags": [
-        "AI",
-        "Assignments",
-        "Attachments",
-        "Preferences",
-        "Profiles",
-        "Prompts",
-        "Threads",
-        "Tools",
-        "Web search",
-        "Agents",
-        "Export",
-        "System"
+        "New AI / AI",
+        "New AI / Assignments",
+        "New AI / Attachments",
+        "New AI / Preferences",
+        "New AI / Profiles",
+        "New AI / Prompts",
+        "New AI / Threads",
+        "New AI / Tools",
+        "New AI / Web search",
+        "New AI / Agents",
+        "New AI / Export",
+        "New AI / System"
       ]
     }
   ],
@@ -98,7 +110,7 @@
     "/api/2.0/new-ai/ai/send": {
       "post": {
         "tags": [
-          "AI"
+          "New AI / AI"
         ],
         "operationId": "newAiAiSend",
         "summary": "Send",
@@ -142,7 +154,7 @@
     "/api/2.0/new-ai/ai/send-custom": {
       "post": {
         "tags": [
-          "AI"
+          "New AI / AI"
         ],
         "operationId": "newAiAiSendCustom",
         "summary": "Send custom",
@@ -186,7 +198,7 @@
     "/api/2.0/new-ai/ai/send-with-stream": {
       "post": {
         "tags": [
-          "AI"
+          "New AI / AI"
         ],
         "operationId": "newAiAiSendWithStream",
         "summary": "Send with stream",
@@ -230,7 +242,7 @@
     "/api/2.0/new-ai/ai/send-with-stream-openai": {
       "post": {
         "tags": [
-          "AI"
+          "New AI / AI"
         ],
         "operationId": "newAiAiSendWithStreamOpenAI",
         "summary": "Send with stream open ai",
@@ -274,7 +286,7 @@
     "/api/2.0/new-ai/ai/regenerate-stream": {
       "post": {
         "tags": [
-          "AI"
+          "New AI / AI"
         ],
         "operationId": "newAiAiRegenerateStream",
         "summary": "Regenerate stream",
@@ -318,7 +330,7 @@
     "/api/2.0/new-ai/ai/approve-tool-call": {
       "post": {
         "tags": [
-          "AI"
+          "New AI / AI"
         ],
         "operationId": "newAiAiApproveToolCall",
         "summary": "Approve tool call",
@@ -362,7 +374,7 @@
     "/api/2.0/new-ai/ai/deny-tool-call": {
       "post": {
         "tags": [
-          "AI"
+          "New AI / AI"
         ],
         "operationId": "newAiAiDenyToolCall",
         "summary": "Deny tool call",
@@ -406,7 +418,7 @@
     "/api/2.0/new-ai/assignments/resolve-for-action": {
       "get": {
         "tags": [
-          "Assignments"
+          "New AI / Assignments"
         ],
         "operationId": "newAiAssignmentsResolveForAction",
         "summary": "Resolve for action",
@@ -457,7 +469,7 @@
     "/api/2.0/new-ai/assignments/try-resolve-for-action": {
       "get": {
         "tags": [
-          "Assignments"
+          "New AI / Assignments"
         ],
         "operationId": "newAiAssignmentsTryResolveForAction",
         "summary": "Try resolve for action",
@@ -508,7 +520,7 @@
     "/api/2.0/new-ai/assignments/assign": {
       "put": {
         "tags": [
-          "Assignments"
+          "New AI / Assignments"
         ],
         "operationId": "newAiAssignmentsAssign",
         "summary": "Assign",
@@ -552,7 +564,7 @@
     "/api/2.0/new-ai/assignments/unassign": {
       "delete": {
         "tags": [
-          "Assignments"
+          "New AI / Assignments"
         ],
         "operationId": "newAiAssignmentsUnassign",
         "summary": "Unassign",
@@ -596,7 +608,7 @@
     "/api/2.0/new-ai/assignments/bulk-assign": {
       "put": {
         "tags": [
-          "Assignments"
+          "New AI / Assignments"
         ],
         "operationId": "newAiAssignmentsBulkAssign",
         "summary": "Bulk assign",
@@ -640,7 +652,7 @@
     "/api/2.0/new-ai/assignments/get-assignment": {
       "get": {
         "tags": [
-          "Assignments"
+          "New AI / Assignments"
         ],
         "operationId": "newAiAssignmentsGetAssignment",
         "summary": "Get assignment",
@@ -683,7 +695,7 @@
     "/api/2.0/new-ai/assignments/get-all-assignments": {
       "get": {
         "tags": [
-          "Assignments"
+          "New AI / Assignments"
         ],
         "operationId": "newAiAssignmentsGetAllAssignments",
         "summary": "Get all assignments",
@@ -726,7 +738,7 @@
     "/api/2.0/new-ai/assignments/cascade-profile-delete": {
       "delete": {
         "tags": [
-          "Assignments"
+          "New AI / Assignments"
         ],
         "operationId": "newAiAssignmentsCascadeProfileDelete",
         "summary": "Cascade profile delete",
@@ -770,7 +782,7 @@
     "/api/2.0/new-ai/attachments/save-file": {
       "post": {
         "tags": [
-          "Attachments"
+          "New AI / Attachments"
         ],
         "operationId": "newAiAttachmentsSaveFile",
         "summary": "Save file",
@@ -814,7 +826,7 @@
     "/api/2.0/new-ai/attachments/save-files-many": {
       "post": {
         "tags": [
-          "Attachments"
+          "New AI / Attachments"
         ],
         "operationId": "newAiAttachmentsSaveFilesMany",
         "summary": "Save files many",
@@ -858,7 +870,7 @@
     "/api/2.0/new-ai/attachments/save-image": {
       "post": {
         "tags": [
-          "Attachments"
+          "New AI / Attachments"
         ],
         "operationId": "newAiAttachmentsSaveImage",
         "summary": "Save image",
@@ -902,7 +914,7 @@
     "/api/2.0/new-ai/attachments/save-images-many": {
       "post": {
         "tags": [
-          "Attachments"
+          "New AI / Attachments"
         ],
         "operationId": "newAiAttachmentsSaveImagesMany",
         "summary": "Save images many",
@@ -946,7 +958,7 @@
     "/api/2.0/new-ai/attachments/get": {
       "post": {
         "tags": [
-          "Attachments"
+          "New AI / Attachments"
         ],
         "operationId": "newAiAttachmentsGet",
         "summary": "Get",
@@ -990,7 +1002,7 @@
     "/api/2.0/new-ai/attachments/get-many": {
       "post": {
         "tags": [
-          "Attachments"
+          "New AI / Attachments"
         ],
         "operationId": "newAiAttachmentsGetMany",
         "summary": "Get many",
@@ -1034,7 +1046,7 @@
     "/api/2.0/new-ai/attachments/delete": {
       "delete": {
         "tags": [
-          "Attachments"
+          "New AI / Attachments"
         ],
         "operationId": "newAiAttachmentsDelete",
         "summary": "Delete",
@@ -1078,7 +1090,7 @@
     "/api/2.0/new-ai/attachments/delete-many": {
       "delete": {
         "tags": [
-          "Attachments"
+          "New AI / Attachments"
         ],
         "operationId": "newAiAttachmentsDeleteMany",
         "summary": "Delete many",
@@ -1122,7 +1134,7 @@
     "/api/2.0/new-ai/attachments/link-to-message": {
       "post": {
         "tags": [
-          "Attachments"
+          "New AI / Attachments"
         ],
         "operationId": "newAiAttachmentsLinkToMessage",
         "summary": "Link to message",
@@ -1166,7 +1178,7 @@
     "/api/2.0/new-ai/preferences/get-deep-mode": {
       "get": {
         "tags": [
-          "Preferences"
+          "New AI / Preferences"
         ],
         "operationId": "newAiPreferencesGetDeepMode",
         "summary": "Get deep mode",
@@ -1209,7 +1221,7 @@
     "/api/2.0/new-ai/preferences/set-deep-mode": {
       "put": {
         "tags": [
-          "Preferences"
+          "New AI / Preferences"
         ],
         "operationId": "newAiPreferencesSetDeepMode",
         "summary": "Set deep mode",
@@ -1253,7 +1265,7 @@
     "/api/2.0/new-ai/preferences/clear-deep-mode": {
       "delete": {
         "tags": [
-          "Preferences"
+          "New AI / Preferences"
         ],
         "operationId": "newAiPreferencesClearDeepMode",
         "summary": "Clear deep mode",
@@ -1297,7 +1309,7 @@
     "/api/2.0/new-ai/preferences/is-deep-mode-set": {
       "get": {
         "tags": [
-          "Preferences"
+          "New AI / Preferences"
         ],
         "operationId": "newAiPreferencesIsDeepModeSet",
         "summary": "Is deep mode set",
@@ -1340,7 +1352,7 @@
     "/api/2.0/new-ai/profiles/create": {
       "post": {
         "tags": [
-          "Profiles"
+          "New AI / Profiles"
         ],
         "operationId": "newAiProfilesCreate",
         "summary": "Create",
@@ -1384,7 +1396,7 @@
     "/api/2.0/new-ai/profiles/update": {
       "put": {
         "tags": [
-          "Profiles"
+          "New AI / Profiles"
         ],
         "operationId": "newAiProfilesUpdate",
         "summary": "Update",
@@ -1428,7 +1440,7 @@
     "/api/2.0/new-ai/profiles/delete": {
       "delete": {
         "tags": [
-          "Profiles"
+          "New AI / Profiles"
         ],
         "operationId": "newAiProfilesDelete",
         "summary": "Delete",
@@ -1472,7 +1484,7 @@
     "/api/2.0/new-ai/profiles/list-models": {
       "get": {
         "tags": [
-          "Profiles"
+          "New AI / Profiles"
         ],
         "operationId": "newAiProfilesListModels",
         "summary": "List models",
@@ -1515,7 +1527,7 @@
     "/api/2.0/new-ai/profiles/list-provider-models": {
       "post": {
         "tags": [
-          "Profiles"
+          "New AI / Profiles"
         ],
         "operationId": "newAiProfilesListProviderModels",
         "summary": "List provider models",
@@ -1559,7 +1571,7 @@
     "/api/2.0/new-ai/profiles/test-connection": {
       "post": {
         "tags": [
-          "Profiles"
+          "New AI / Profiles"
         ],
         "operationId": "newAiProfilesTestConnection",
         "summary": "Test connection",
@@ -1603,7 +1615,7 @@
     "/api/2.0/new-ai/profiles/get-by-id": {
       "get": {
         "tags": [
-          "Profiles"
+          "New AI / Profiles"
         ],
         "operationId": "newAiProfilesGetById",
         "summary": "Get by id",
@@ -1646,7 +1658,7 @@
     "/api/2.0/new-ai/profiles/list": {
       "get": {
         "tags": [
-          "Profiles"
+          "New AI / Profiles"
         ],
         "operationId": "newAiProfilesList",
         "summary": "List",
@@ -1679,7 +1691,7 @@
     "/api/2.0/new-ai/prompts/create": {
       "post": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsCreate",
         "summary": "Create",
@@ -1723,7 +1735,7 @@
     "/api/2.0/new-ai/prompts/update": {
       "put": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsUpdate",
         "summary": "Update",
@@ -1767,7 +1779,7 @@
     "/api/2.0/new-ai/prompts/move": {
       "put": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsMove",
         "summary": "Move",
@@ -1811,7 +1823,7 @@
     "/api/2.0/new-ai/prompts/delete": {
       "delete": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsDelete",
         "summary": "Delete",
@@ -1855,7 +1867,7 @@
     "/api/2.0/new-ai/prompts/list": {
       "get": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsList",
         "summary": "List",
@@ -1898,7 +1910,7 @@
     "/api/2.0/new-ai/prompts/create-folder": {
       "post": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsCreateFolder",
         "summary": "Create folder",
@@ -1942,7 +1954,7 @@
     "/api/2.0/new-ai/prompts/rename-folder": {
       "put": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsRenameFolder",
         "summary": "Rename folder",
@@ -1986,7 +1998,7 @@
     "/api/2.0/new-ai/prompts/delete-folder": {
       "delete": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsDeleteFolder",
         "summary": "Delete folder",
@@ -2030,7 +2042,7 @@
     "/api/2.0/new-ai/prompts/list-folders": {
       "get": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsListFolders",
         "summary": "List folders",
@@ -2063,7 +2075,7 @@
     "/api/2.0/new-ai/prompts/export": {
       "get": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsExport",
         "summary": "Export",
@@ -2096,7 +2108,7 @@
     "/api/2.0/new-ai/prompts/import-bundle": {
       "post": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsImportBundle",
         "summary": "Import bundle",
@@ -2140,7 +2152,7 @@
     "/api/2.0/new-ai/prompts/get-by-id": {
       "get": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsGetById",
         "summary": "Get by id",
@@ -2183,7 +2195,7 @@
     "/api/2.0/new-ai/prompts/get-folder-by-id": {
       "get": {
         "tags": [
-          "Prompts"
+          "New AI / Prompts"
         ],
         "operationId": "newAiPromptsGetFolderById",
         "summary": "Get folder by id",
@@ -2226,7 +2238,7 @@
     "/api/2.0/new-ai/threads/create": {
       "post": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsCreate",
         "summary": "Create",
@@ -2270,7 +2282,7 @@
     "/api/2.0/new-ai/threads/open-or-create": {
       "post": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsOpenOrCreate",
         "summary": "Open or create",
@@ -2314,7 +2326,7 @@
     "/api/2.0/new-ai/threads/append-user-message": {
       "post": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsAppendUserMessage",
         "summary": "Append user message",
@@ -2358,7 +2370,7 @@
     "/api/2.0/new-ai/threads/touch": {
       "post": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsTouch",
         "summary": "Touch",
@@ -2402,7 +2414,7 @@
     "/api/2.0/new-ai/threads/rename": {
       "put": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsRename",
         "summary": "Rename",
@@ -2446,7 +2458,7 @@
     "/api/2.0/new-ai/threads/delete": {
       "delete": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsDelete",
         "summary": "Delete",
@@ -2490,7 +2502,7 @@
     "/api/2.0/new-ai/threads/clear-messages": {
       "delete": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsClearMessages",
         "summary": "Clear messages",
@@ -2534,7 +2546,7 @@
     "/api/2.0/new-ai/threads/regenerate-title": {
       "post": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsRegenerateTitle",
         "summary": "Regenerate title",
@@ -2578,7 +2590,7 @@
     "/api/2.0/new-ai/threads/list": {
       "get": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsList",
         "summary": "List",
@@ -2621,7 +2633,7 @@
     "/api/2.0/new-ai/threads/read-messages": {
       "get": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsReadMessages",
         "summary": "Read messages",
@@ -2680,7 +2692,7 @@
     "/api/2.0/new-ai/threads/get-by-id": {
       "get": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsGetById",
         "summary": "Get by id",
@@ -2723,7 +2735,7 @@
     "/api/2.0/new-ai/threads/get-message-by-id": {
       "get": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsGetMessageById",
         "summary": "Get message by id",
@@ -2766,7 +2778,7 @@
     "/api/2.0/new-ai/threads/update-message": {
       "put": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsUpdateMessage",
         "summary": "Update message",
@@ -2810,7 +2822,7 @@
     "/api/2.0/new-ai/threads/delete-message": {
       "delete": {
         "tags": [
-          "Threads"
+          "New AI / Threads"
         ],
         "operationId": "newAiThreadsDeleteMessage",
         "summary": "Delete message",
@@ -2854,7 +2866,7 @@
     "/api/2.0/new-ai/tools/add-custom-server": {
       "post": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsAddCustomServer",
         "summary": "Add custom server",
@@ -2898,7 +2910,7 @@
     "/api/2.0/new-ai/tools/update-custom-server": {
       "put": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsUpdateCustomServer",
         "summary": "Update custom server",
@@ -2942,7 +2954,7 @@
     "/api/2.0/new-ai/tools/remove-custom-server": {
       "delete": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsRemoveCustomServer",
         "summary": "Remove custom server",
@@ -2986,7 +2998,7 @@
     "/api/2.0/new-ai/tools/get-custom-server": {
       "get": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsGetCustomServer",
         "summary": "Get custom server",
@@ -3037,7 +3049,7 @@
     "/api/2.0/new-ai/tools/list-custom-servers": {
       "get": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsListCustomServers",
         "summary": "List custom servers",
@@ -3080,7 +3092,7 @@
     "/api/2.0/new-ai/tools/list-system-tools": {
       "get": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsListSystemTools",
         "summary": "List system tools",
@@ -3123,7 +3135,7 @@
     "/api/2.0/new-ai/tools/replace-all-custom-servers": {
       "put": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsReplaceAllCustomServers",
         "summary": "Replace all custom servers",
@@ -3167,7 +3179,7 @@
     "/api/2.0/new-ai/tools/set-disabled": {
       "put": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsSetDisabled",
         "summary": "Set disabled",
@@ -3211,7 +3223,7 @@
     "/api/2.0/new-ai/tools/get-disabled": {
       "get": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsGetDisabled",
         "summary": "Get disabled",
@@ -3254,7 +3266,7 @@
     "/api/2.0/new-ai/tools/is-tool-disabled": {
       "get": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsIsToolDisabled",
         "summary": "Is tool disabled",
@@ -3313,7 +3325,7 @@
     "/api/2.0/new-ai/tools/set-allow-always": {
       "put": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsSetAllowAlways",
         "summary": "Set allow always",
@@ -3357,7 +3369,7 @@
     "/api/2.0/new-ai/tools/get-allow-always": {
       "get": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsGetAllowAlways",
         "summary": "Get allow always",
@@ -3400,7 +3412,7 @@
     "/api/2.0/new-ai/tools/is-allow-always": {
       "get": {
         "tags": [
-          "Tools"
+          "New AI / Tools"
         ],
         "operationId": "newAiToolsIsAllowAlways",
         "summary": "Is allow always",
@@ -3459,7 +3471,7 @@
     "/api/2.0/new-ai/web-search/get-active-config": {
       "get": {
         "tags": [
-          "Web search"
+          "New AI / Web search"
         ],
         "operationId": "newAiWebSearchGetActiveConfig",
         "summary": "Get active config",
@@ -3502,7 +3514,7 @@
     "/api/2.0/new-ai/web-search/is-configured": {
       "get": {
         "tags": [
-          "Web search"
+          "New AI / Web search"
         ],
         "operationId": "newAiWebSearchIsConfigured",
         "summary": "Is configured",
@@ -3545,7 +3557,7 @@
     "/api/2.0/new-ai/web-search/test-connection": {
       "post": {
         "tags": [
-          "Web search"
+          "New AI / Web search"
         ],
         "operationId": "newAiWebSearchTestConnection",
         "summary": "Test connection",
@@ -3589,7 +3601,7 @@
     "/api/2.0/new-ai/web-search/configure": {
       "put": {
         "tags": [
-          "Web search"
+          "New AI / Web search"
         ],
         "operationId": "newAiWebSearchConfigure",
         "summary": "Configure",
@@ -3633,7 +3645,7 @@
     "/api/2.0/new-ai/web-search/set-active-config": {
       "put": {
         "tags": [
-          "Web search"
+          "New AI / Web search"
         ],
         "operationId": "newAiWebSearchSetActiveConfig",
         "summary": "Set active config",
@@ -3677,7 +3689,7 @@
     "/api/2.0/new-ai/web-search/clear": {
       "delete": {
         "tags": [
-          "Web search"
+          "New AI / Web search"
         ],
         "operationId": "newAiWebSearchClear",
         "summary": "Clear",
@@ -3721,7 +3733,7 @@
     "/api/2.0/new-ai/text-to-docx": {
       "post": {
         "tags": [
-          "Export"
+          "New AI / Export"
         ],
         "operationId": "newAiExportTextToDocx",
         "summary": "Start markdown → docx export",
@@ -3765,7 +3777,7 @@
     "/api/2.0/new-ai/agents": {
       "get": {
         "tags": [
-          "Agents"
+          "New AI / Agents"
         ],
         "operationId": "newAiAgentsList",
         "summary": "List agents",
@@ -3796,7 +3808,7 @@
       },
       "post": {
         "tags": [
-          "Agents"
+          "New AI / Agents"
         ],
         "operationId": "newAiAgentsCreate",
         "summary": "Create an agent",
@@ -3840,7 +3852,7 @@
     "/api/2.0/new-ai/agents/news": {
       "get": {
         "tags": [
-          "Agents"
+          "New AI / Agents"
         ],
         "operationId": "newAiAgentsNews",
         "summary": "List agent news items",
@@ -3873,7 +3885,7 @@
     "/api/2.0/new-ai/agents/{id}": {
       "get": {
         "tags": [
-          "Agents"
+          "New AI / Agents"
         ],
         "operationId": "newAiAgentsGet",
         "summary": "Get an agent",
@@ -3914,7 +3926,7 @@
       },
       "put": {
         "tags": [
-          "Agents"
+          "New AI / Agents"
         ],
         "operationId": "newAiAgentsUpdate",
         "summary": "Update an agent",
@@ -3966,7 +3978,7 @@
       },
       "delete": {
         "tags": [
-          "Agents"
+          "New AI / Agents"
         ],
         "operationId": "newAiAgentsDelete",
         "summary": "Delete an agent",
@@ -4020,7 +4032,7 @@
     "/api/2.0/new-ai/agents/agentquota": {
       "put": {
         "tags": [
-          "Agents"
+          "New AI / Agents"
         ],
         "operationId": "newAiAgentsUpdateQuota",
         "summary": "Update agents' quota",
@@ -4064,7 +4076,7 @@
     "/api/2.0/new-ai/agents/resetquota": {
       "put": {
         "tags": [
-          "Agents"
+          "New AI / Agents"
         ],
         "operationId": "newAiAgentsResetQuota",
         "summary": "Reset agents' quota",
@@ -4108,7 +4120,7 @@
     "/api/2.0/new-ai/health": {
       "get": {
         "tags": [
-          "System"
+          "New AI / System"
         ],
         "operationId": "newAiHealth",
         "summary": "Health check",
@@ -4131,7 +4143,7 @@
     "/api/2.0/new-ai/isLife": {
       "get": {
         "tags": [
-          "System"
+          "New AI / System"
         ],
         "operationId": "newAiIsLife",
         "summary": "Liveness probe",

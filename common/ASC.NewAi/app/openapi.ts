@@ -95,10 +95,15 @@ export interface OpenApiOptions {
   readonly customRoutes: readonly CustomRouteDoc[];
 }
 
-// All tags are grouped under this single heading (via `x-tagGroups`) in the
-// merged reference, so the group name carries the "New AI" namespace and the
-// individual tag names stay short (`AI`, `Assignments`, …).
+// Tags are grouped under this single heading (via `x-tagGroups`) and each
+// tag name is namespaced with the same prefix (`New AI / AI`, …) so they
+// stay distinct from the .NET AI service's `AI / *` tags once merged.
 const TAG_GROUP = "New AI";
+const TAG_PREFIX = `${TAG_GROUP} / `;
+
+function tag(name: string): string {
+  return `${TAG_PREFIX}${name}`;
+}
 
 // Query params known to be optional; everything else in a `RouteSpec.params`
 // list is treated as required. Numeric params get an `integer` schema.
@@ -174,7 +179,7 @@ function engineOperation(
 ): Json {
   const isGet = spec.method === "GET";
   const operation: Record<string, Json> = {
-    tags: [engine.tag],
+    tags: [tag(engine.tag)],
     // lowerCamelCase, `newAi`-scoped so it stays unique across engines and
     // does not clash with the .NET services' ids once merged.
     operationId: `newAi${capitalize(engine.name)}${capitalize(methodName)}`,
@@ -195,7 +200,7 @@ function engineOperation(
 
 function customOperation(route: CustomRouteDoc): Json {
   const operation: Record<string, Json> = {
-    tags: [route.tag],
+    tags: [tag(route.tag)],
     operationId: route.operationId,
     summary: route.summary,
     responses: {
@@ -259,25 +264,34 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
   // Health probes are open (registered before the auth gate) and carry no
   // security requirement.
   addOperation(paths, key("/health"), "get", {
-    tags: ["System"],
+    tags: [tag("System")],
     operationId: "newAiHealth",
     summary: "Health check",
     security: [],
     responses: { "200": jsonResponse("Service is healthy.") },
   });
   addOperation(paths, key("/isLife"), "get", {
-    tags: ["System"],
+    tags: [tag("System")],
     operationId: "newAiIsLife",
     summary: "Liveness probe",
     security: [],
     responses: { "200": { description: "Service is alive." } },
   });
 
+  // `name` carries the full `New AI / …` value (used by operations, the
+  // `x-tagGroups` grouping and the URL slug); `x-displayName` is the short
+  // label the docs UI shows in the sidebar (matching the .NET services).
+  const tagEntry = (name: string, description: string): Json => ({
+    name: tag(name),
+    description,
+    "x-displayName": name,
+  });
+
   const tags: Json[] = [
-    ...engines.map((e) => ({ name: e.tag, description: e.description })),
-    { name: "Agents", description: "AI agent rooms (delegated to the .NET AI service)." },
-    { name: "Export", description: "Markdown → docx export." },
-    { name: "System", description: "Health and liveness probes." },
+    ...engines.map((e) => tagEntry(e.tag, e.description)),
+    tagEntry("Agents", "AI agent rooms (delegated to the .NET AI service)."),
+    tagEntry("Export", "Markdown → docx export."),
+    tagEntry("System", "Health and liveness probes."),
   ];
 
   // Group every tag under a single "New AI" heading in the merged reference
