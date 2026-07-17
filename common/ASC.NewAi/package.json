@@ -9,6 +9,7 @@
     "start": "node server.js",
     "dev": "tsx watch app.ts",
     "serve": "tsx app.ts",
+    "openapi": "tsx scripts/generate-openapi.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -46,4 +47,3 @@
   },
   "packageManager": "yarn@4.1.0"
 }
-
