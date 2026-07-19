@@ -35,8 +35,17 @@ import express from "express";
 import type { Application, RequestHandler, Router } from "express";
 import logger from "./log.js";
 import { buildOpenApiDocument, docsHtml } from "./openapi.js";
-import type { EngineDoc } from "./openapi.js";
+import type { EngineDoc, OpenApiSchemaBundle } from "./openapi.js";
+import { createRequire } from "module";
 import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS } from "./apiCatalog.js";
+
+// Concrete request/response schemas, produced by the build-time generator
+// (`yarn openapi`) and committed. Backs the served document with real types;
+// if regenerated stale it simply loses precision, never breaks. Loaded via
+// `require` to sidestep JSON import-attribute/module constraints under tsx.
+const openApiSchemas = createRequire(import.meta.url)(
+  "./generated/openapi-schemas.json",
+) as OpenApiSchemaBundle;
 import { agentsController } from "./controllers/agentsController.js";
 import { textToDocxController } from "./controllers/textToDocxController.js";
 import { aiController } from "./controllers/aiController.js";
@@ -127,6 +136,7 @@ export default function registerRoutes(app: Application): void {
     apiPrefix: API_PREFIX,
     engines: ENGINE_DOCS,
     customRoutes: CUSTOM_ROUTE_DOCS,
+    schemas: openApiSchemas,
   });
   router.get("/openapi.json", (_req, res) => {
     res.json(openApiDocument);

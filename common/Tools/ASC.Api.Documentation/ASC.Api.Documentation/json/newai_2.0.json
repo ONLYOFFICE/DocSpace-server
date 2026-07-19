@@ -428,8 +428,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiResolvedAssignment"
                 }
               }
             }
@@ -479,8 +478,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NewAiResolvedAssignment"
+                    }
+                  ]
                 }
               }
             }
@@ -530,8 +533,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiAssignmentMutationResult"
                 }
               }
             }
@@ -554,7 +556,21 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "actionType": {
+                    "$ref": "#/components/schemas/NewAiActionType",
+                    "description": "Action the assignment applies to."
+                  },
+                  "profileId": {
+                    "type": "string",
+                    "description": "Profile id to bind."
+                  }
+                },
+                "required": [
+                  "actionType",
+                  "profileId"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -597,8 +613,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/NewAiActionType"
               }
             }
           }
@@ -618,8 +633,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiBulkAssignmentResult"
                 }
               }
             }
@@ -642,7 +656,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "additionalProperties": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -662,8 +678,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "nullable": true,
+                  "type": "string"
                 }
               }
             }
@@ -706,7 +722,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true
+                  "additionalProperties": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -771,8 +789,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -792,8 +809,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiAttachment"
                 }
               }
             }
@@ -816,7 +832,44 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "description": "Storage path/key of the file."
+                      },
+                      "content": {
+                        "type": "string",
+                        "description": "File contents."
+                      },
+                      "type": {
+                        "type": "number",
+                        "description": "File type discriminator."
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Optional display title."
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "content",
+                      "type"
+                    ],
+                    "additionalProperties": false,
+                    "description": "A file attachment draft to persist."
+                  },
+                  "entityId": {
+                    "type": "string",
+                    "description": "Optional entity (room) scope."
+                  }
+                },
+                "required": [
+                  "input"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -836,8 +889,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NewAiAttachment"
+                  }
                 }
               }
             }
@@ -860,7 +915,46 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "inputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "description": "Storage path/key of the file."
+                        },
+                        "content": {
+                          "type": "string",
+                          "description": "File contents."
+                        },
+                        "type": {
+                          "type": "number",
+                          "description": "File type discriminator."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Optional display title."
+                        }
+                      },
+                      "required": [
+                        "path",
+                        "content",
+                        "type"
+                      ],
+                      "additionalProperties": false,
+                      "description": "A file attachment draft to persist."
+                    }
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "inputs"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -880,8 +974,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiAttachment"
                 }
               }
             }
@@ -904,7 +997,38 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Image name."
+                      },
+                      "base64": {
+                        "type": "string",
+                        "description": "Full `data:image/...;base64,…` data URL."
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Optional display title."
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "base64"
+                    ],
+                    "additionalProperties": false,
+                    "description": "An image attachment draft to persist."
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "input"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -924,8 +1048,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NewAiAttachment"
+                  }
                 }
               }
             }
@@ -948,7 +1074,41 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "inputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Image name."
+                        },
+                        "base64": {
+                          "type": "string",
+                          "description": "Full `data:image/...;base64,…` data URL."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Optional display title."
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "base64"
+                      ],
+                      "additionalProperties": false,
+                      "description": "An image attachment draft to persist."
+                    }
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "inputs"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -968,8 +1128,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NewAiAttachment"
+                    }
+                  ]
                 }
               }
             }
@@ -991,8 +1155,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -1012,8 +1175,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "nullable": true,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/NewAiAttachment"
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -1035,8 +1205,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -1079,8 +1251,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -1123,8 +1294,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -1168,7 +1341,29 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Attachment ids to bind."
+                  },
+                  "messageId": {
+                    "type": "string",
+                    "description": "Owning message id."
+                  },
+                  "threadId": {
+                    "type": "string",
+                    "description": "Owning thread id."
+                  }
+                },
+                "required": [
+                  "ids",
+                  "messageId",
+                  "threadId"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -1188,8 +1383,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "boolean"
                 }
               }
             }
@@ -1255,7 +1449,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "value": {
+                    "type": "boolean",
+                    "description": "New deep-mode value."
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -1298,8 +1504,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -1319,8 +1524,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "boolean"
                 }
               }
             }
@@ -1362,8 +1566,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiProfileMutationResult"
                 }
               }
             }
@@ -1385,8 +1588,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/NewAiCreateProfileInput"
               }
             }
           }
@@ -1406,8 +1608,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiProfileMutationResult"
                 }
               }
             }
@@ -1429,8 +1630,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/NewAiProfile"
               }
             }
           }
@@ -1473,8 +1673,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -1494,8 +1693,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NewAiModel"
+                  }
                 }
               }
             }
@@ -1537,8 +1738,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NewAiModel"
+                  }
                 }
               }
             }
@@ -1561,7 +1764,26 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "providerType": {
+                    "$ref": "#/components/schemas/NewAiProviderType",
+                    "description": "Provider whose catalog to list."
+                  },
+                  "baseUrl": {
+                    "type": "string",
+                    "description": "Provider API base URL."
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Provider API key."
+                  }
+                },
+                "required": [
+                  "providerType",
+                  "baseUrl",
+                  "apiKey"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -1581,8 +1803,23 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "anyOf": [
+                    {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
                 }
               }
             }
@@ -1604,8 +1841,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -1625,8 +1861,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiProfile"
                 }
               }
             }
@@ -1668,8 +1903,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NewAiProfile"
+                  }
                 }
               }
             }
@@ -1701,8 +1938,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiPromptMutationResult"
                 }
               }
             }
@@ -1724,8 +1960,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/NewAiCreatePromptInput"
               }
             }
           }
@@ -1745,8 +1980,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiPromptMutationResult"
                 }
               }
             }
@@ -1769,7 +2003,34 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Prompt id to update."
+                  },
+                  "updates": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "folderId": {
+                        "nullable": true,
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Fields to change."
+                  }
+                },
+                "required": [
+                  "id",
+                  "updates"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -1789,8 +2050,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiPromptMutationResult"
                 }
               }
             }
@@ -1813,7 +2073,22 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Prompt id to move."
+                  },
+                  "folderId": {
+                    "nullable": true,
+                    "type": "string",
+                    "description": "Target folder id, or `null` for root."
+                  }
+                },
+                "required": [
+                  "id",
+                  "folderId"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -1856,8 +2131,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -1877,8 +2151,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NewAiPrompt"
+                  }
                 }
               }
             }
@@ -1920,8 +2196,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiFolderMutationResult"
                 }
               }
             }
@@ -1943,8 +2218,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -1964,8 +2238,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiFolderMutationResult"
                 }
               }
             }
@@ -1988,7 +2261,21 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Folder id to rename."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "New folder name."
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2031,8 +2318,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -2052,8 +2338,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NewAiPromptFolder"
+                  }
                 }
               }
             }
@@ -2085,8 +2373,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiPromptBundle"
                 }
               }
             }
@@ -2118,8 +2405,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiImportResult"
                 }
               }
             }
@@ -2142,7 +2428,26 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "bundle": {
+                    "$ref": "#/components/schemas/NewAiPromptBundle",
+                    "description": "Bundle to restore."
+                  },
+                  "options": {
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "$ref": "#/components/schemas/NewAiImportMode"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Import options."
+                  }
+                },
+                "required": [
+                  "bundle"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2162,8 +2467,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NewAiPrompt"
+                    }
+                  ]
                 }
               }
             }
@@ -2205,8 +2514,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NewAiPromptFolder"
+                    }
+                  ]
                 }
               }
             }
@@ -2248,8 +2561,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiThread"
                 }
               }
             }
@@ -2272,7 +2584,24 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Thread title."
+                  },
+                  "profileId": {
+                    "type": "string",
+                    "description": "Optional profile to bind."
+                  },
+                  "entityId": {
+                    "type": "string",
+                    "description": "Optional entity (room) scope."
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2292,8 +2621,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiOpenOrCreateResult"
                 }
               }
             }
@@ -2315,8 +2643,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/NewAiOpenOrCreateInput"
               }
             }
           }
@@ -2336,8 +2663,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiThreadMessageLike"
                 }
               }
             }
@@ -2360,7 +2686,23 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "threadId": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "$ref": "#/components/schemas/NewAiThreadMessageLike",
+                    "description": "Message to persist (id/createdAt are storage-assigned)."
+                  },
+                  "profileId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "threadId",
+                  "message"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2404,7 +2746,18 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "threadId": {
+                    "type": "string"
+                  },
+                  "profileId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "threadId"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2448,7 +2801,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "threadId": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "New thread title."
+                  }
+                },
+                "required": [
+                  "threadId",
+                  "title"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2491,8 +2857,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -2535,8 +2900,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -2556,8 +2920,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "string"
                 }
               }
             }
@@ -2580,7 +2943,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "threadId": {
+                    "type": "string"
+                  },
+                  "profile": {
+                    "$ref": "#/components/schemas/NewAiProfile",
+                    "description": "Profile used to regenerate the title."
+                  }
+                },
+                "required": [
+                  "threadId",
+                  "profile"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2600,8 +2976,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NewAiThread"
+                  }
                 }
               }
             }
@@ -2643,8 +3021,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NewAiThreadMessageLike"
+                  }
                 }
               }
             }
@@ -2702,8 +3082,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NewAiThread"
+                    }
+                  ]
                 }
               }
             }
@@ -2745,8 +3129,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NewAiThreadMessageLike"
+                    }
+                  ]
                 }
               }
             }
@@ -2812,7 +3200,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "messageId": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "$ref": "#/components/schemas/NewAiThreadMessageLike",
+                    "description": "Replacement message content."
+                  }
+                },
+                "required": [
+                  "messageId",
+                  "message"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2855,8 +3256,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -2876,8 +3276,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiToolsMutationResult"
                 }
               }
             }
@@ -2900,7 +3299,24 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Server name (unique within scope)."
+                  },
+                  "config": {
+                    "$ref": "#/components/schemas/NewAiMcpServerConfig",
+                    "description": "Server transport configuration."
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "config"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2920,8 +3336,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiToolsMutationResult"
                 }
               }
             }
@@ -2944,7 +3359,22 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "config": {
+                    "$ref": "#/components/schemas/NewAiMcpServerConfig"
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "config"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2988,7 +3418,18 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -3008,8 +3449,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NewAiMcpServerConfig"
+                    }
+                  ]
                 }
               }
             }
@@ -3060,7 +3505,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/NewAiMcpServerConfig"
+                  }
                 }
               }
             }
@@ -3103,7 +3550,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/NewAiTMCPItem"
+                    }
+                  }
                 }
               }
             }
@@ -3145,8 +3597,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiToolsBulkResult"
                 }
               }
             }
@@ -3169,7 +3620,22 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "map": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/NewAiMcpServerConfig"
+                    },
+                    "description": "Full replacement set, keyed by server name."
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "map"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -3213,7 +3679,26 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "serverType": {
+                    "type": "string"
+                  },
+                  "toolNames": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Tool names to disable."
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "serverType",
+                  "toolNames"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -3234,7 +3719,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -3276,8 +3766,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "boolean"
                 }
               }
             }
@@ -3359,7 +3848,27 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "serverType": {
+                    "type": "string"
+                  },
+                  "toolName": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "boolean",
+                    "description": "Whether the tool is always allowed."
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "serverType",
+                  "toolName",
+                  "value"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -3379,8 +3888,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -3422,8 +3933,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "boolean"
                 }
               }
             }
@@ -3481,8 +3991,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NewAiWebSearchConfig"
+                    }
+                  ]
                 }
               }
             }
@@ -3524,8 +4038,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "boolean"
                 }
               }
             }
@@ -3567,8 +4080,23 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "anyOf": [
+                    {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
                 }
               }
             }
@@ -3590,8 +4118,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/NewAiWebSearchConfig"
               }
             }
           }
@@ -3611,8 +4138,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiWebSearchMutationResult"
                 }
               }
             }
@@ -3635,7 +4161,18 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "config": {
+                    "$ref": "#/components/schemas/NewAiWebSearchConfig"
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "config"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -3679,7 +4216,18 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "config": {
+                    "$ref": "#/components/schemas/NewAiWebSearchConfig"
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "config"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -3722,8 +4270,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "type": "string"
               }
             }
           }
@@ -3744,7 +4291,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": true
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Accepted-for-processing acknowledgement (conversion is asynchronous)."
                 }
               }
             }
@@ -3767,7 +4323,33 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Document title (also the file name)."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Markdown content to convert."
+                  },
+                  "folderId": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Target folder id (int or string)."
+                  }
+                },
+                "required": [
+                  "title",
+                  "content",
+                  "folderId"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -3842,7 +4424,83 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "additionalProperties": false,
+                "properties": {
+                  "profileId": {
+                    "type": "string",
+                    "description": "Profile id bound to the agent."
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "description": "Agent system prompt; stored as the room's `chatSettings.prompt`."
+                  },
+                  "private": {
+                    "type": "boolean",
+                    "description": "Whether the agent room is private."
+                  },
+                  "share": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "description": "Initial share entries (`FileShareParams`)."
+                  },
+                  "attachDefaultTools": {
+                    "type": "boolean",
+                    "description": "Whether to attach the default DocSpace MCP tool server."
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Agent (room) title."
+                  },
+                  "quota": {
+                    "type": "number",
+                    "description": "Room quota in bytes."
+                  },
+                  "indexing": {
+                    "type": "boolean",
+                    "description": "Whether room content is indexed for search."
+                  },
+                  "denyDownload": {
+                    "type": "boolean",
+                    "description": "Whether downloading room content is denied."
+                  },
+                  "lifetime": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Room data lifetime policy (`RoomDataLifetimeDto`)."
+                  },
+                  "watermark": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Watermark settings (`WatermarkRequestDto`)."
+                  },
+                  "logo": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Room logo (`LogoRequest`)."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Room tags."
+                  },
+                  "color": {
+                    "type": "string",
+                    "description": "Room accent color."
+                  },
+                  "cover": {
+                    "type": "string",
+                    "description": "Room cover image id."
+                  }
+                },
+                "required": [
+                  "profileId",
+                  "prompt"
+                ]
               }
             }
           }
@@ -3970,7 +4628,72 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "additionalProperties": false,
+                "properties": {
+                  "profileId": {
+                    "type": "string",
+                    "description": "Profile id to rebind (optional)."
+                  },
+                  "chatSettings": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Chat settings (`ChatSettings`); requires a valid provider/model."
+                  },
+                  "sendFormToExternalDB": {
+                    "type": "boolean",
+                    "description": "Whether form results are sent to an external DB."
+                  },
+                  "saveFormAsXLSX": {
+                    "type": "boolean",
+                    "description": "Whether forms are saved as XLSX."
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Agent (room) title."
+                  },
+                  "quota": {
+                    "type": "number",
+                    "description": "Room quota in bytes."
+                  },
+                  "indexing": {
+                    "type": "boolean",
+                    "description": "Whether room content is indexed for search."
+                  },
+                  "denyDownload": {
+                    "type": "boolean",
+                    "description": "Whether downloading room content is denied."
+                  },
+                  "lifetime": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Room data lifetime policy (`RoomDataLifetimeDto`)."
+                  },
+                  "watermark": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Watermark settings (`WatermarkRequestDto`)."
+                  },
+                  "logo": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Room logo (`LogoRequest`)."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Room tags."
+                  },
+                  "color": {
+                    "type": "string",
+                    "description": "Room accent color."
+                  },
+                  "cover": {
+                    "type": "string",
+                    "description": "Room cover image id."
+                  }
+                }
               }
             }
           }
@@ -4022,7 +4745,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "deleteAfter": {
+                    "type": "boolean",
+                    "description": "Delete the room after the editing session finishes."
+                  }
+                },
+                "additionalProperties": false
               }
             }
           }
@@ -4066,7 +4795,32 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "roomIds": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
+                    },
+                    "description": "Agent (room) ids to update."
+                  },
+                  "quota": {
+                    "type": "number",
+                    "description": "New quota in bytes; a negative value disables the custom quota."
+                  }
+                },
+                "required": [
+                  "roomIds",
+                  "quota"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -4110,7 +4864,27 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "roomIds": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
+                    },
+                    "description": "Agent (room) ids to reset to the tenant default quota."
+                  }
+                },
+                "required": [
+                  "roomIds"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -4168,6 +4942,955 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Bearer token or API key for programmatic callers."
+      }
+    },
+    "schemas": {
+      "NewAiResolvedAssignment": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/NewAiProfile"
+          }
+        },
+        "required": [
+          "profileId",
+          "profile"
+        ],
+        "additionalProperties": false,
+        "description": "Resolved profile for an action — both the storage row and its ID."
+      },
+      "NewAiProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique profile identifier (UUID)."
+          },
+          "name": {
+            "type": "string",
+            "description": "User-defined profile display name."
+          },
+          "providerType": {
+            "$ref": "#/components/schemas/NewAiProviderType",
+            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
+          },
+          "basedOn": {
+            "$ref": "#/components/schemas/NewAiBuiltinProviderType",
+            "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Base URL of the provider API."
+          },
+          "key": {
+            "type": "string",
+            "description": "API key or token. Optional for local providers."
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from  {@link  key  } . Honoured by the OpenAI-family providers."
+          },
+          "modelId": {
+            "type": "string",
+            "description": "Selected model ID within this provider."
+          },
+          "reasoning": {
+            "type": "boolean",
+            "description": "Whether extended thinking is enabled for this profile's model."
+          },
+          "capabilities": {
+            "type": "number",
+            "description": "Bitmask of capabilities supported by the selected model."
+          },
+          "canUseTool": {
+            "type": "boolean",
+            "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record)."
+          },
+          "useResponsesApi": {
+            "type": "boolean",
+            "description": "Result of the live Responses-API probe (parallel to  {@link  canUseTool  } ). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+          },
+          "isCloudProvider": {
+            "type": "boolean",
+            "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace)."
+          },
+          "useProxy": {
+            "type": "boolean",
+            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the  {@link  PlatformAdapter.fetchProxy  }  is not configured."
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Creation timestamp (ms since epoch). Used to sort the AI models list newest-first."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "providerType",
+          "baseUrl",
+          "modelId"
+        ],
+        "additionalProperties": false,
+        "description": "Complete AI provider + model configuration saved by the user. Profiles are the primary way users save and reuse provider configurations."
+      },
+      "NewAiProviderType": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/NewAiBuiltinProviderType"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Provider type identifier. Accepts all 17 built-in types with autocomplete, plus any custom `string` for dynamically registered providers."
+      },
+      "NewAiBuiltinProviderType": {
+        "type": "string",
+        "enum": [
+          "anthropic",
+          "ollama",
+          "openai",
+          "openaicompatible",
+          "together",
+          "openrouter",
+          "genai",
+          "deepseek",
+          "xai",
+          "lm-studio",
+          "mistral",
+          "groq",
+          "zhipu",
+          "stabilityai",
+          "gpt4all",
+          "onlyoffice",
+          "external"
+        ],
+        "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
+      },
+      "NewAiActionType": {
+        "type": "string",
+        "enum": [
+          "Default",
+          "Chat",
+          "Code",
+          "Summarization",
+          "Translation",
+          "TextAnalyze",
+          "ImageGeneration",
+          "OCR",
+          "Vision"
+        ]
+      },
+      "NewAiAssignmentMutationResult": {
+        "description": "Outcome of  {@link  AssignmentsEngine.assign }  /  {@link  AssignmentsEngine.unassign } . Either a success or a field-scoped error suitable for displaying in the profile editor.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/NewAiTErrorData"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "NewAiTErrorData": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "key",
+              "url",
+              "name"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "NewAiBulkAssignmentResult": {
+        "description": "Outcome of  {@link  AssignmentsEngine.bulkAssign } . Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "actionType": {
+                  "$ref": "#/components/schemas/NewAiActionType"
+                },
+                "error": {
+                  "$ref": "#/components/schemas/NewAiTErrorData"
+                }
+              },
+              "required": [
+                "actionType",
+                "error"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "NewAiAttachment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Storage-assigned UUID."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "file",
+              "image"
+            ],
+            "description": "\"file\" | \"image\"."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "user",
+              "tool"
+            ],
+            "description": "Origin of the attachment. `\"user\"` — uploaded by the user in the composer (the default when unset, for backward compatibility). `\"tool\"` — produced by a tool call (e.g. `generate_image`). Lets the integrator's adapter route or apply policies (separate bucket, quotas, TTL, CDN) per source."
+          },
+          "title": {
+            "type": "string",
+            "description": "Display label (filename or user-visible title)."
+          },
+          "content": {
+            "type": "string",
+            "description": "Extracted text for files."
+          },
+          "base64": {
+            "type": "string",
+            "description": "Base64 data URL for images."
+          },
+          "path": {
+            "type": "string",
+            "description": "Original host file path (for files)."
+          },
+          "type": {
+            "type": "number",
+            "description": "ONLYOFFICE file type code (for files)."
+          },
+          "messageId": {
+            "type": "string",
+            "description": "Owning message id once linked. Unset while the attachment is a draft."
+          },
+          "threadId": {
+            "type": "string",
+            "description": "Owning thread id once linked. Unset while the attachment is a draft."
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Opaque scope token (entity / \"room\") the attachment was created in. Drafts carry it so an entity switch keeps in-flight composer state isolated; once linked to a message the field is redundant with the thread's own entity binding."
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Storage-assigned creation timestamp."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "createdAt"
+        ],
+        "additionalProperties": false,
+        "description": "Persistent record for a single attachment (file or image) referenced from a user message. Files carry extracted text in `content`; images carry base64 data in `base64`. Metadata (`title`, `path`, `type`) is always present for display purposes regardless of whether the heavy payload is loaded."
+      },
+      "NewAiCreateProfileInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User-defined profile display name."
+          },
+          "providerType": {
+            "$ref": "#/components/schemas/NewAiProviderType",
+            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
+          },
+          "basedOn": {
+            "$ref": "#/components/schemas/NewAiBuiltinProviderType",
+            "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Base URL of the provider API."
+          },
+          "key": {
+            "type": "string",
+            "description": "API key or token. Optional for local providers."
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from  {@link  key  } . Honoured by the OpenAI-family providers."
+          },
+          "modelId": {
+            "type": "string",
+            "description": "Selected model ID within this provider."
+          },
+          "reasoning": {
+            "type": "boolean",
+            "description": "Whether extended thinking is enabled for this profile's model."
+          },
+          "capabilities": {
+            "type": "number",
+            "description": "Bitmask of capabilities supported by the selected model."
+          },
+          "canUseTool": {
+            "type": "boolean",
+            "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record)."
+          },
+          "useResponsesApi": {
+            "type": "boolean",
+            "description": "Result of the live Responses-API probe (parallel to  {@link  canUseTool  } ). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+          },
+          "isCloudProvider": {
+            "type": "boolean",
+            "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace)."
+          },
+          "useProxy": {
+            "type": "boolean",
+            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the  {@link  PlatformAdapter.fetchProxy  }  is not configured."
+          }
+        },
+        "required": [
+          "name",
+          "providerType",
+          "baseUrl",
+          "modelId"
+        ],
+        "additionalProperties": false,
+        "description": "Input for creating a new profile — the same shape as  {@link  Profile }  without the engine-generated fields (`id`, `createdAt`)."
+      },
+      "NewAiProfileMutationResult": {
+        "description": "Outcome of `create` / `update` — either a success carrying the persisted profile, or a failure with a field-level error description from the name check or the provider credential check.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/NewAiProfile"
+          },
+          "error": {
+            "$ref": "#/components/schemas/NewAiTErrorData"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "NewAiModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Model identifier as used by the provider API (e.g. `\"gpt-4o\"`, `\"claude-sonnet-4-20250514\"`)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable model name for display in the UI."
+          },
+          "provider": {
+            "$ref": "#/components/schemas/NewAiProviderType",
+            "description": "Provider that offers this model."
+          },
+          "reasoning": {
+            "type": "boolean",
+            "description": "Whether this model supports extended thinking / chain-of-thought reasoning."
+          },
+          "capabilities": {
+            "type": "number",
+            "description": "Bitmask of model capabilities (Chat, Image, Vision, Tools, etc.). Used to filter models per  {@link  ActionType  } ."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "provider"
+        ],
+        "additionalProperties": false,
+        "description": "AI model metadata. Describes a single model available from a provider."
+      },
+      "NewAiCreatePromptInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "folderId": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "text"
+        ],
+        "additionalProperties": false,
+        "description": "Input for creating a prompt — the engine generates `id`/`createdAt`/`updatedAt`."
+      },
+      "NewAiPromptMutationResult": {
+        "description": "Outcome of `create` / `update` / `move` on a prompt — either the persisted prompt or a field-scoped error.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "prompt": {
+            "$ref": "#/components/schemas/NewAiPrompt"
+          },
+          "error": {
+            "$ref": "#/components/schemas/NewAiTErrorData"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "NewAiPrompt": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique prompt identifier (UUID)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Prompt display name shown in the prompt picker."
+          },
+          "text": {
+            "type": "string",
+            "description": "Prompt template text. May contain placeholder tokens."
+          },
+          "folderId": {
+            "type": "string",
+            "description": "Optional parent folder ID. `undefined` means the prompt is at the root level."
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Timestamp (ms since epoch) when the prompt was created."
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Timestamp (ms since epoch) of the last prompt modification."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "text",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false,
+        "description": "Saved prompt template that users can quickly insert into the chat."
+      },
+      "NewAiFolderMutationResult": {
+        "description": "Outcome of `createFolder` / `renameFolder` — either the persisted folder or a field-scoped error.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "folder": {
+            "$ref": "#/components/schemas/NewAiPromptFolder"
+          },
+          "error": {
+            "$ref": "#/components/schemas/NewAiTErrorData"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "NewAiPromptFolder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique folder identifier (UUID)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Folder display name."
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Timestamp (ms since epoch) when the folder was created."
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Timestamp (ms since epoch) of the last folder modification."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false,
+        "description": "Folder for organizing saved prompts."
+      },
+      "NewAiPromptBundle": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiPromptFolder"
+            }
+          },
+          "prompts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiPrompt"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "folders",
+          "prompts"
+        ],
+        "additionalProperties": false,
+        "description": "Versioned, self-contained bundle of every saved prompt and folder. Stable wire format — `version` lets the import path migrate older shapes if the schema ever changes."
+      },
+      "NewAiImportMode": {
+        "type": "string",
+        "enum": [
+          "replace",
+          "merge"
+        ],
+        "description": "Mode passed to  {@link  PromptsEngine.importBundle } ."
+      },
+      "NewAiImportResult": {
+        "description": "Outcome of  {@link  PromptsEngine.importBundle } . Either every entry persisted with counts, or no entries persisted plus a per-entry error report.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "imported": {
+            "type": "object",
+            "properties": {
+              "folders": {
+                "type": "number"
+              },
+              "prompts": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "folders",
+              "prompts"
+            ],
+            "additionalProperties": false
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiImportError"
+            }
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "NewAiImportError": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "folder",
+              "prompt"
+            ],
+            "description": "`\"folder\"` or `\"prompt\"`, plus the offending name or id."
+          },
+          "ref": {
+            "type": "string"
+          },
+          "error": {
+            "$ref": "#/components/schemas/NewAiTErrorData"
+          }
+        },
+        "required": [
+          "kind",
+          "ref",
+          "error"
+        ],
+        "additionalProperties": false,
+        "description": "Per-entry error reported by  {@link  PromptsEngine.importBundle } ."
+      },
+      "NewAiThread": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string",
+            "description": "Unique thread identifier (UUID)."
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional thread title. Auto-generated from the first message if not set."
+          },
+          "lastEditDate": {
+            "type": "number",
+            "description": "Timestamp (ms since epoch) of the last message in this thread. Used for sorting."
+          },
+          "provider": {
+            "$ref": "#/components/schemas/NewAiTProvider",
+            "description": "Provider configuration at the time of last message. Used for thread-level provider display."
+          },
+          "model": {
+            "$ref": "#/components/schemas/NewAiModel",
+            "description": "Model info at the time of last message."
+          },
+          "profileId": {
+            "type": "string",
+            "description": "ID of the profile used for this thread. Links to  {@link  Profile.id } ."
+          }
+        },
+        "required": [
+          "threadId"
+        ],
+        "additionalProperties": false,
+        "description": "Chat conversation metadata. Represents a single chat session (thread)."
+      },
+      "NewAiTProvider": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/NewAiProviderType",
+            "description": "Provider type identifier."
+          },
+          "name": {
+            "type": "string",
+            "description": "User-defined display name for this provider connection."
+          },
+          "key": {
+            "type": "string",
+            "description": "API key or token. Optional for local providers (Ollama, LM Studio)."
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Base URL of the provider API."
+          }
+        },
+        "required": [
+          "type",
+          "name",
+          "baseUrl"
+        ],
+        "additionalProperties": false,
+        "description": "Minimal provider connection configuration. Used to connect to a provider API."
+      },
+      "NewAiOpenOrCreateInput": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/NewAiProfile"
+          },
+          "profileId": {
+            "type": "string"
+          },
+          "firstMessage": {
+            "$ref": "#/components/schemas/NewAiThreadMessageLike"
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Opaque scope token persisted on a freshly created thread. Ignored when `threadId` is provided (the existing thread keeps its scope)."
+          }
+        },
+        "required": [
+          "profile",
+          "profileId",
+          "firstMessage"
+        ],
+        "additionalProperties": false,
+        "description": "Input for  {@link  ThreadsEngine.openOrCreate } : open an existing thread if `threadId` is given, otherwise create a new one with an auto-generated title derived from `firstMessage`."
+      },
+      "NewAiThreadMessageLike": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Storage-assigned message id (absent on inbound drafts)."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant",
+              "system"
+            ],
+            "description": "Message author role."
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": {}
+                }
+              }
+            ],
+            "description": "Message content: either plain text or a list of typed content parts (text, image, tool-call, …). Parts are open-ended by content type."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Creation timestamp, ISO-8601 on the wire."
+          },
+          "status": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": {},
+            "description": "Delivery/generation status of the message."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Arbitrary per-message metadata."
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Attachments linked to the message."
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "additionalProperties": false
+      },
+      "NewAiOpenOrCreateResult": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "description": "Empty string for existing threads — the engine doesn't re-fetch."
+          },
+          "priorMessages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiThreadMessageLike"
+            }
+          }
+        },
+        "required": [
+          "threadId",
+          "title",
+          "priorMessages"
+        ],
+        "additionalProperties": false,
+        "description": "Resolved thread state returned by  {@link  ThreadsEngine.openOrCreate } ."
+      },
+      "NewAiMcpServerConfig": {
+        "type": "object",
+        "additionalProperties": {},
+        "description": "One MCP server configuration. The shape is intentionally open — MCP allows per-transport fields (`command`/`args` for stdio, `url` for HTTP, plus env, headers, etc.) and the storage layer stays agnostic to which transport is in use."
+      },
+      "NewAiToolsMutationResult": {
+        "description": "Outcome of an MCP-server CRUD call. Either success or a field-scoped error suitable for the settings form.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/NewAiTErrorData"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "NewAiTMCPItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tool name as registered on the MCP server (e.g. `\"web_search\"`, `\"insert_text\"`)."
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description shown to the AI model and in the tools list UI."
+          },
+          "inputSchema": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "JSON Schema describing the tool's input parameters."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this tool is currently enabled. Disabled tools are hidden from the AI model."
+          },
+          "requireApproval": {
+            "type": "boolean",
+            "description": "Whether the consumer must show an approval dialog before this tool runs. The engine reads it when deciding the `autoAllow` flag on a `tool-call-pending` event: `requireApproval === false` auto-allows the call (no dialog), `true` always prompts. `undefined` leaves the decision to the persisted \"always-allow\" list alone — so MCP / custom-server tools (which never set it) keep prompting as before, while host tools opt into auto-allow by default. Wire-serializable, so it survives a remote (server-side) engine."
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "inputSchema"
+        ],
+        "additionalProperties": false,
+        "description": "Descriptor for a tool exposed by an MCP server."
+      },
+      "NewAiToolsBulkResult": {
+        "description": "Outcome of  {@link  ToolsEngine.replaceAllCustomServers }  — either every entry persisted, or no entries persisted plus a per-key error report.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "error": {
+                  "$ref": "#/components/schemas/NewAiTErrorData"
+                }
+              },
+              "required": [
+                "name",
+                "error"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "NewAiWebSearchConfig": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "Provider identifier (e.g. `\"exa\"`)."
+          },
+          "key": {
+            "type": "string",
+            "description": "API key for the provider. Optional for self-hosted or keyless setups."
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Optional override for the provider's base URL."
+          },
+          "isCloudProvider": {
+            "type": "boolean",
+            "description": "Whether this provider is cloud-hosted (vs. self-hosted)."
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Extra HTTP headers sent with each request to the ONLYOFFICE / cloud backend (e.g. `X-Tenant`). Merged after the derived `Authorization` header, so a custom header of the same name wins."
+          }
+        },
+        "required": [
+          "provider"
+        ],
+        "additionalProperties": false,
+        "description": "Web-search provider configuration. Credentials and provider selection for the built-in web-search tool group."
+      },
+      "NewAiWebSearchMutationResult": {
+        "description": "Outcome of  {@link  WebSearchEngine.configure }  — either the persisted config or a field-scoped error suitable for the settings form.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "config": {
+            "$ref": "#/components/schemas/NewAiWebSearchConfig"
+          },
+          "error": {
+            "$ref": "#/components/schemas/NewAiTErrorData"
+          }
+        },
+        "required": [
+          "success"
+        ]
       }
     }
   }

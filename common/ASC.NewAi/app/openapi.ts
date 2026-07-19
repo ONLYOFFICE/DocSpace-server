@@ -93,6 +93,30 @@ export interface OpenApiOptions {
   readonly apiPrefix: string;
   readonly engines: readonly EngineDoc[];
   readonly customRoutes: readonly CustomRouteDoc[];
+  /**
+   * Generated schema bundle from the build-time generator (see
+   * `scripts/generate-openapi.ts`). Omit to emit the generic-object
+   * fallback for every body/response.
+   */
+  readonly schemas?: OpenApiSchemaBundle;
+}
+
+/** Per-operation request/response schemas, inlined into the document. */
+export interface OperationSchemas {
+  readonly request?: unknown;
+  readonly response?: unknown;
+}
+
+/**
+ * Generated schemas: shared named types go to `components.schemas`, while
+ * each operation's request/response schema is inlined at its media type.
+ * Inlining is deliberate — a component per operation would make SDK
+ * generators emit a model class for every bare `$ref`, primitive and array
+ * alias, which does not compile.
+ */
+export interface OpenApiSchemaBundle {
+  readonly components?: Readonly<Record<string, unknown>>;
+  readonly operations?: Readonly<Record<string, OperationSchemas>>;
 }
 
 // Tags are grouped under this single heading (via `x-tagGroups`) and each
@@ -115,10 +139,10 @@ const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex"]);
 // side. The spec documents the transport, not every field.
 const JSON_OBJECT_SCHEMA: Json = { type: "object", additionalProperties: true };
 
-function jsonResponse(description: string): Json {
+function jsonResponse(description: string, schema: Json = JSON_OBJECT_SCHEMA): Json {
   return {
     description,
-    content: { "application/json": { schema: JSON_OBJECT_SCHEMA } },
+    content: { "application/json": { schema } },
   };
 }
 
@@ -161,11 +185,28 @@ function pathParameters(names: readonly string[]): Json[] {
   }));
 }
 
-function jsonBody(): Json {
+function jsonBody(schema: Json = JSON_OBJECT_SCHEMA): Json {
   return {
     required: true,
-    content: { "application/json": { schema: JSON_OBJECT_SCHEMA } },
+    content: { "application/json": { schema } },
   };
+}
+
+// Concrete request/response schemas (from `ts-json-schema-generator`) are
+// inlined per operation. Operations without a generated schema (AI streaming,
+// `.NET`-forwarded agent listings) fall back to the generic object.
+type OperationSchemaLookup = Readonly<Record<string, OperationSchemas>>;
+
+function responseFor(operations: OperationSchemaLookup, operationId: string): Json {
+  const schema = operations[operationId]?.response;
+  return schema === undefined
+    ? jsonResponse("Success.")
+    : jsonResponse("Success.", schema as Json);
+}
+
+function requestBodyFor(operations: OperationSchemaLookup, operationId: string): Json {
+  const schema = operations[operationId]?.request;
+  return schema === undefined ? jsonBody() : jsonBody(schema as Json);
 }
 
 // Build the operation object for one engine route. GET routes expose their
@@ -176,16 +217,18 @@ function engineOperation(
   engine: EngineDoc,
   methodName: string,
   spec: RouteSpec,
+  operations: OperationSchemaLookup,
 ): Json {
   const isGet = spec.method === "GET";
+  // lowerCamelCase, `newAi`-scoped so it stays unique across engines and
+  // does not clash with the .NET services' ids once merged.
+  const operationId = `newAi${capitalize(engine.name)}${capitalize(methodName)}`;
   const operation: Record<string, Json> = {
     tags: [tag(engine.tag)],
-    // lowerCamelCase, `newAi`-scoped so it stays unique across engines and
-    // does not clash with the .NET services' ids once merged.
-    operationId: `newAi${capitalize(engine.name)}${capitalize(methodName)}`,
+    operationId,
     summary: humanize(methodName),
     responses: {
-      "200": jsonResponse("Success."),
+      "200": responseFor(operations, operationId),
       "401": UNAUTHORIZED_RESPONSE,
     },
   };
@@ -193,18 +236,18 @@ function engineOperation(
     operation["parameters"] = queryParameters(spec.params);
   }
   if (!isGet) {
-    operation["requestBody"] = jsonBody();
+    operation["requestBody"] = requestBodyFor(operations, operationId);
   }
   return operation;
 }
 
-function customOperation(route: CustomRouteDoc): Json {
+function customOperation(route: CustomRouteDoc, operations: OperationSchemaLookup): Json {
   const operation: Record<string, Json> = {
     tags: [tag(route.tag)],
     operationId: route.operationId,
     summary: route.summary,
     responses: {
-      "200": jsonResponse("Success."),
+      "200": responseFor(operations, route.operationId),
       "401": UNAUTHORIZED_RESPONSE,
     },
   };
@@ -216,7 +259,7 @@ function customOperation(route: CustomRouteDoc): Json {
     operation["parameters"] = params;
   }
   if (route.hasBody) {
-    operation["requestBody"] = jsonBody();
+    operation["requestBody"] = requestBodyFor(operations, route.operationId);
   }
   return operation;
 }
@@ -237,7 +280,8 @@ function addOperation(
 
 /** Build the full OpenAPI 3.0 document for the service. */
 export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
-  const { apiPrefix, engines, customRoutes } = options;
+  const { apiPrefix, engines, customRoutes, schemas } = options;
+  const operations: OperationSchemaLookup = schemas?.operations ?? {};
 
   // Path keys are absolute: prefixed with the service's proxy route so both
   // the docs UI and clients show the full `/api/2.0/new-ai/...` URL.
@@ -252,13 +296,13 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
         paths,
         key(`/${spec.path}`),
         spec.method,
-        engineOperation(engine, methodName, spec),
+        engineOperation(engine, methodName, spec, operations),
       );
     }
   }
 
   for (const route of customRoutes) {
-    addOperation(paths, key(route.path), route.method, customOperation(route));
+    addOperation(paths, key(route.path), route.method, customOperation(route, operations));
   }
 
   // Health probes are open (registered before the auth gate) and carry no
@@ -342,6 +386,9 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
           description: "Bearer token or API key for programmatic callers.",
         },
       },
+      // Shared named types referenced by the inlined operation schemas;
+      // empty when no schema bundle is supplied.
+      schemas: { ...(schemas?.components ?? {}) } as Json,
     },
   };
 }

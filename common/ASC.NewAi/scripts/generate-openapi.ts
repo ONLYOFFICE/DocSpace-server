@@ -51,8 +51,20 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { buildOpenApiDocument } from "../app/openapi.js";
 import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS } from "../app/apiCatalog.js";
+import { generateOpenApiSchemas } from "./lib/generate-schemas.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Concrete request/response schemas are also written here as a committed
+// artifact so the live service (`routes.ts`) serves the typed document
+// without running the generator at startup.
+const SCHEMAS_ARTIFACT = path.resolve(
+  __dirname,
+  "..",
+  "app",
+  "generated",
+  "openapi-schemas.json",
+);
 
 // Default output: the ASC.Api.Documentation `json/` folder consumed by the
 // joiner (../../Tools/... relative to this script). Overridable with
@@ -78,10 +90,17 @@ function parseOutput(argv: string[]): string {
 
 const output = parseOutput(process.argv.slice(2));
 
+// 1. Generate concrete request/response schemas from the TypeScript types.
+const schemas = generateOpenApiSchemas();
+mkdirSync(path.dirname(SCHEMAS_ARTIFACT), { recursive: true });
+writeFileSync(SCHEMAS_ARTIFACT, `${JSON.stringify(schemas, null, 2)}\n`, "utf8");
+
+// 2. Build the OpenAPI document, backing each operation with its schema.
 const document = buildOpenApiDocument({
   apiPrefix: API_PREFIX,
   engines: ENGINE_DOCS,
   customRoutes: CUSTOM_ROUTE_DOCS,
+  schemas,
 });
 
 mkdirSync(path.dirname(output), { recursive: true });
@@ -90,5 +109,10 @@ writeFileSync(output, `${JSON.stringify(document, null, 2)}\n`, "utf8");
 
 const operationCount = Object.values(document["paths"] as Record<string, object>)
   .reduce((sum, item) => sum + Object.keys(item).length, 0);
+const componentCount = Object.keys(schemas.components).length;
+const typedOperationCount = Object.keys(schemas.operations).length;
 
-console.log(`Wrote OpenAPI document (${operationCount} operations) to ${output}`);
+console.log(
+  `Wrote OpenAPI document (${operationCount} operations, ${typedOperationCount} typed, `
+  + `${componentCount} shared schemas) to ${output}`,
+);
