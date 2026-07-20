@@ -24938,11 +24938,59 @@
         },
         "additionalProperties": false
       },
+      "AiImageModelPricing": {
+        "required": [
+          "id",
+          "price"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "link": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiImagePrice"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiImagePrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          },
+          "image": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "AiPricesResponse": {
         "required": [
           "chat",
           "currency",
           "embedding",
+          "image",
           "search"
         ],
         "type": "object",
@@ -24958,6 +25006,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiEmbeddingModelPricing"
+            },
+            "nullable": true
+          },
+          "image": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiImageModelPricing"
             },
             "nullable": true
           },
@@ -25751,50 +25806,6 @@
           }
         }
       },
-      "BaseStorageSettingsCdnStorageSettings": {
-        "type": "object",
-        "properties": {
-          "module": {
-            "type": "string",
-            "nullable": true
-          },
-          "props": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string",
-              "nullable": true
-            },
-            "nullable": true
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
-      "BaseStorageSettingsStorageSettings": {
-        "type": "object",
-        "properties": {
-          "module": {
-            "type": "string",
-            "nullable": true
-          },
-          "props": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string",
-              "nullable": true
-            },
-            "nullable": true
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
       "BooleanWrapper": {
         "type": "object",
         "properties": {
@@ -25938,14 +25949,25 @@
         }
       },
       "CdnStorageSettings": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseStorageSettingsCdnStorageSettings"
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "nullable": true
           },
-          {
-            "type": "object"
+          "props": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "nullable": true
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
           }
-        ],
+        },
         "additionalProperties": false
       },
       "CdnStorageSettingsWrapper": {
@@ -28643,10 +28665,11 @@
               "Knowledge",
               "ResultStorage",
               "AiAgents",
-              "DefaultTemplates"
+              "DefaultTemplates",
+              "Forms"
             ],
             "type": "string",
-            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates]",
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]",
             "example": "DEFAULT"
           },
           {
@@ -28679,10 +28702,11 @@
               32,
               33,
               34,
-              35
+              35,
+              36
             ],
             "type": "integer",
-            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates]",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
             "example": 0,
             "x-enum-varnames": [
               "DEFAULT",
@@ -28713,7 +28737,8 @@
               "Knowledge",
               "ResultStorage",
               "AiAgents",
-              "DefaultTemplates"
+              "DefaultTemplates",
+              "Forms"
             ]
           }
         ],
@@ -34162,14 +34187,25 @@
         "description": "The request parameters for configuring the storage module settings."
       },
       "StorageSettings": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseStorageSettingsStorageSettings"
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "nullable": true
           },
-          {
-            "type": "object"
+          "props": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "nullable": true
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
           }
-        ],
+        },
         "additionalProperties": false
       },
       "StorageSettingsWrapper": {
@@ -35497,6 +35533,11 @@
             "type": "boolean",
             "description": "Specifies if the AI tools enabled as a wallet service or not.",
             "example": true
+          },
+          "aiSearch": {
+            "type": "boolean",
+            "description": "Specifies if the AI search enabled as a wallet service or not.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -35955,26 +35996,29 @@
         "oneOf": [
           {
             "enum": [
+              "AISearch",
               "Admin",
               "AITools",
               "Backup",
               "Storage"
             ],
             "type": "string",
-            "description": "[Admin - Admin, AITools - AITools, Backup - Backup, Storage - Storage]",
-            "example": "Admin"
+            "description": "[AISearch - AISearch, Admin - Admin, AITools - AITools, Backup - Backup, Storage - Storage]",
+            "example": "AISearch"
           },
           {
             "enum": [
+              -18,
               -14,
               -13,
               -12,
               -11
             ],
             "type": "integer",
-            "description": "[-14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
-            "example": -14,
+            "description": "[-18 - AISearch, -14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
+            "example": -18,
             "x-enum-varnames": [
+              "AISearch",
               "Admin",
               "AITools",
               "Backup",
@@ -35994,26 +36038,29 @@
               "anyOf": [
                 {
                   "enum": [
+                    "AISearch",
                     "Admin",
                     "AITools",
                     "Backup",
                     "Storage"
                   ],
                   "type": "string",
-                  "description": "[Admin - Admin, AITools - AITools, Backup - Backup, Storage - Storage]",
-                  "example": "Admin"
+                  "description": "[AISearch - AISearch, Admin - Admin, AITools - AITools, Backup - Backup, Storage - Storage]",
+                  "example": "AISearch"
                 },
                 {
                   "enum": [
+                    -18,
                     -14,
                     -13,
                     -12,
                     -11
                   ],
                   "type": "integer",
-                  "description": "[-14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
-                  "example": -14,
+                  "description": "[-18 - AISearch, -14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
+                  "example": -18,
                   "x-enum-varnames": [
+                    "AISearch",
                     "Admin",
                     "AITools",
                     "Backup",
