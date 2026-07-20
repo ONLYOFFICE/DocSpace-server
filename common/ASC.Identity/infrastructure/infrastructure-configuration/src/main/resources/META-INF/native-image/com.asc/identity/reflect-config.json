@@ -410,6 +410,16 @@
     "allPublicMethods": true
   },
   {
+    "name": "org.springframework.security.core.authority.FactorGrantedAuthority",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "org.springframework.security.jackson2.FactorGrantedAuthorityMixin",
+    "allDeclaredConstructors": true
+  },
+  {
     "name": "com.asc.registration.data.client.entity.ClientDynamoEntity",
     "allDeclaredConstructors": true,
     "allDeclaredFields": true,
