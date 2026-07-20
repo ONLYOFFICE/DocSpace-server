@@ -7037,16 +7037,6 @@
             }
           },
           {
-            "name": "parentId",
-            "in": "query",
-            "description": "The parent folder ID used to filter the folder contents by parent.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1
-            }
-          },
-          {
             "name": "folderType",
             "in": "query",
             "description": "The parent folder types used to filter the folder contents by folder type.",
@@ -7084,10 +7074,11 @@
                       "Knowledge",
                       "ResultStorage",
                       "AiAgents",
-                      "DefaultTemplates"
+                      "DefaultTemplates",
+                      "Forms"
                     ],
                     "type": "string",
-                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates]",
+                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]",
                     "example": "DEFAULT"
                   },
                   {
@@ -7120,10 +7111,11 @@
                       32,
                       33,
                       34,
-                      35
+                      35,
+                      36
                     ],
                     "type": "integer",
-                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates]",
+                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
                     "example": 0,
                     "x-enum-varnames": [
                       "DEFAULT",
@@ -7154,7 +7146,8 @@
                       "Knowledge",
                       "ResultStorage",
                       "AiAgents",
-                      "DefaultTemplates"
+                      "DefaultTemplates",
+                      "Forms"
                     ]
                   }
                 ]
@@ -8848,6 +8841,177 @@
         "responses": {
           "200": {
             "description": "The \"Trash\" section contents",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderContentIntegerWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to view the folder content"
+          },
+          "404": {
+            "description": "The required folder was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/@forms": {
+      "get": {
+        "tags": [
+          "Files / Folders"
+        ],
+        "summary": "Get the \"Forms\" section",
+        "description": "Returns the detailed list of rooms used for filling out forms located in the \"Forms\" section.",
+        "operationId": "getFormsFolder",
+        "parameters": [
+          {
+            "name": "userIdOrGroupId",
+            "in": "query",
+            "description": "The user or group ID.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
+            "name": "filterType",
+            "in": "query",
+            "description": "The filter type.",
+            "schema": {
+              "$ref": "#/components/schemas/FilterType"
+            },
+            "example": 1
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The maximum number of items to retrieve in the request.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 25
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The zero-based index of the first item to retrieve in a paginated list.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 0
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Specifies the field by which the folder content should be sorted.",
+            "schema": {
+              "type": "string",
+              "example": "DateAndTime"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The order in which the results are sorted.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            },
+            "example": 1
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The text used as a filter or search criterion for folder content queries.",
+            "schema": {
+              "type": "string",
+              "example": "My Document"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The \"Forms\" section contents",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -27379,7 +27543,12 @@
             "$ref": "#/components/schemas/EmbeddedConfig"
           },
           "encryptionKeys": {
-            "$ref": "#/components/schemas/EncryptionKeyDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EncryptionKeyDto"
+            },
+            "description": "The encryption keys of the editor configuration.",
+            "nullable": true
           },
           "lang": {
             "type": "string",
@@ -27963,8 +28132,7 @@
           },
           "cryptoEngineId": {
             "type": "string",
-            "nullable": true,
-            "readOnly": true
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -31343,6 +31511,9 @@
           },
           "aiAgentsUsedSpace": {
             "$ref": "#/components/schemas/FilesStatisticsFolder"
+          },
+          "formsUsedSpace": {
+            "$ref": "#/components/schemas/FilesStatisticsFolder"
           }
         },
         "additionalProperties": false,
@@ -32272,10 +32443,11 @@
               "Knowledge",
               "ResultStorage",
               "AiAgents",
-              "DefaultTemplates"
+              "DefaultTemplates",
+              "Forms"
             ],
             "type": "string",
-            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates]",
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]",
             "example": "DEFAULT"
           },
           {
@@ -32308,10 +32480,11 @@
               32,
               33,
               34,
-              35
+              35,
+              36
             ],
             "type": "integer",
-            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates]",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
             "example": 0,
             "x-enum-varnames": [
               "DEFAULT",
@@ -32342,7 +32515,8 @@
               "Knowledge",
               "ResultStorage",
               "AiAgents",
-              "DefaultTemplates"
+              "DefaultTemplates",
+              "Forms"
             ]
           }
         ],
@@ -34956,14 +35130,13 @@
         }
       },
       "NoContentResult": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/StatusCodeResult"
-          },
-          {
-            "type": "object"
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
           }
-        ],
+        },
         "additionalProperties": false
       },
       "NoContentResultWrapper": {
@@ -36129,7 +36302,8 @@
       },
       "RoomTemplateDto": {
         "required": [
-          "roomId"
+          "roomId",
+          "title"
         ],
         "type": "object",
         "properties": {
@@ -36140,9 +36314,10 @@
             "example": 1
           },
           "title": {
+            "maxLength": 400,
+            "minLength": 0,
             "type": "string",
             "description": "The room template title.",
-            "nullable": true,
             "example": "My Document"
           },
           "logo": {
@@ -36477,10 +36652,12 @@
               "Templates",
               "Knowledge",
               "ResultStorage",
-              "AiAgents"
+              "AiAgents",
+              "Forms",
+              "FormTemplates"
             ],
             "type": "string",
-            "description": "[Active - Active, Archive - Archive, Any - Any, RecentByLinks - Recent by links, Templates - Template, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AiAgents]",
+            "description": "[Active - Active, Archive - Archive, Any - Any, RecentByLinks - Recent by links, Templates - Template, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AiAgents, Forms - Forms, FormTemplates - Form templates]",
             "example": "Active"
           },
           {
@@ -36492,10 +36669,12 @@
               4,
               5,
               6,
-              7
+              7,
+              8,
+              9
             ],
             "type": "integer",
-            "description": "[0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents]",
+            "description": "[0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents, 8 - Forms, 9 - Form templates]",
             "example": 0,
             "x-enum-varnames": [
               "Active",
@@ -36505,7 +36684,9 @@
               "Templates",
               "Knowledge",
               "ResultStorage",
-              "AiAgents"
+              "AiAgents",
+              "Forms",
+              "FormTemplates"
             ]
           }
         ],
@@ -36950,16 +37131,6 @@
         ],
         "description": "The external data status.",
         "x-enum-type": "integer"
-      },
-      "StatusCodeResult": {
-        "type": "object",
-        "properties": {
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
       },
       "StorageFilter": {
         "oneOf": [
