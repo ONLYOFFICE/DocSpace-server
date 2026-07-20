@@ -87,6 +87,12 @@ public class FolderContentDto<T>
     public int New { get; set; }
 }
 
+[Singleton]
+public class FolderContentDtoHelperSettings(IConfiguration configuration)
+{
+    public int FoldersDtoParallelism { get; } = int.TryParse(configuration["files:folders-dto:parallelism"], out var parallelism) ? parallelism : 5;
+}
+
 [Scope]
 public class FolderContentDtoHelper(
     FileStorageService fileStorageService,
@@ -99,9 +105,8 @@ public class FolderContentDtoHelper(
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
     IDaoFactory daoFactory,
-    IConfiguration configuration)
+    FolderContentDtoHelperSettings settings)
 {
-    private readonly int _foldersDtoParallelism = int.TryParse(configuration["files:folders-dto:parallelism"], out var parallelism) ? parallelism : 5;
 
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, List<FolderType> folderType = null)
     {
@@ -215,7 +220,7 @@ public class FolderContentDtoHelper(
             var count = fileEntries.Count;
             var entryDtos = new FileEntryBaseDto[count];
             await Parallel.ForEachAsync(Enumerable.Range(0, count),
-                new ParallelOptions { MaxDegreeOfParallelism = _foldersDtoParallelism },
+                new ParallelOptions { MaxDegreeOfParallelism = settings.FoldersDtoParallelism },
                 async (i, _) =>
                 {
                     var e = fileEntries[i];
@@ -231,7 +236,7 @@ public class FolderContentDtoHelper(
             var count = fileEntries.Count;
             var fileDtos = new FileEntryBaseDto[count];
             await Parallel.ForEachAsync(Enumerable.Range(0, count),
-                new ParallelOptions { MaxDegreeOfParallelism = _foldersDtoParallelism },
+                new ParallelOptions { MaxDegreeOfParallelism = settings.FoldersDtoParallelism },
                 async (i, _) => fileDtos[i] = await GetFileDto(fileEntries[i], entriesOrder, contextFolder));
             return fileDtos;
         }
@@ -251,7 +256,7 @@ public class FolderContentDtoHelper(
             var count = folderEntries.Count;
             var folderDtos = new FileEntryBaseDto[count];
             await Parallel.ForEachAsync(Enumerable.Range(0, count),
-                new ParallelOptions { MaxDegreeOfParallelism = _foldersDtoParallelism },
+                new ParallelOptions { MaxDegreeOfParallelism = settings.FoldersDtoParallelism },
                 async (i, _) => folderDtos[i] = await GetFolderDto(folderEntries[i], entriesOrder, contextFolder: folderItems.FolderInfo));
             return folderDtos;
         }
