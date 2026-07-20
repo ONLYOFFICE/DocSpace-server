@@ -123,7 +123,7 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
     var clientIP = httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request));
     var browser = httpUtils.getClientBrowser(request);
     var platform = httpUtils.getClientOS(request);
-    var fullUrl = httpUtils.getFullURL(request);
+    var page = httpUtils.truncateQueryParams(httpUtils.getFullURL(request));
 
     authorizationLoginEventRegistrationService.registerLogin(
         LoginRegisteredEvent.builder()
@@ -135,7 +135,7 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
             .date(eventDate)
             .tenantId(signature.getTenantId())
             .userId(signature.getUserId())
-            .page(fullUrl)
+            .page(page)
             .action(LOGIN_REGISTERED_ACTION)
             .build(),
         AuditMessage.builder()
@@ -149,7 +149,7 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
             .userId(signature.getUserId())
             .userEmail(signature.getUserEmail())
             .userName(signature.getUserName())
-            .page(fullUrl)
+            .page(page)
             .action(AuditCode.GENERATE_AUTHORIZATION_CODE_TOKEN.getCode())
             .build());
   }
