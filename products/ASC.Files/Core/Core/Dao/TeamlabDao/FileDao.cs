@@ -1603,11 +1603,18 @@ internal class FileDao(
 
         foreach (var movedId in movedIds)
         {
-            await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+            try
             {
-                FileId = movedId,
-                Action = FileIndexAction.UpdateFolders
-            });
+                await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = movedId,
+                    Action = FileIndexAction.UpdateFolders
+                });
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
         }
 
         return movedIds;
