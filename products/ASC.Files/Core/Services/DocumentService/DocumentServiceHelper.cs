@@ -103,16 +103,22 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task<QuotaScope?> CheckCustomQuotaAsync<T>(Folder<T> rootFolder)
     {
-        var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
-        if (tenantQuotaSetting.EnableQuota)
+        var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenantManager.GetCurrentTenant().Id))
+            .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+            .Sum(r => r.Counter);
+
+        // portal (tariff) quota: once the tenant is over MaxTotalSize there is no room left to save
+        // (the save-time grace in FileDao is denied when used > MaxTotalSize), so open in viewer
+        var tenantQuota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (tenantQuota is { MaxTotalSize: > 0 } && tenantQuota.MaxTotalSize < usedSize)
         {
-            var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenantManager.GetCurrentTenant().Id))
-                .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
-                .Sum(r => r.Counter);
-            if (tenantQuotaSetting.Quota < usedSize)
-            {
-                return QuotaScope.Tenant;
-            }
+            return QuotaScope.Tenant;
+        }
+
+        var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+        if (tenantQuotaSetting.EnableQuota && tenantQuotaSetting.Quota < usedSize)
+        {
+            return QuotaScope.Tenant;
         }
         if (rootFolder.IsRoom && !rootFolder.ProviderEntry)
         {
