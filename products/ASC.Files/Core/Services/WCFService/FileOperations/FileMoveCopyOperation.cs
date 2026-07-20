@@ -1250,10 +1250,18 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
             var moved = chunk.Where(c => movedIds.Contains(c.File.Id)).ToList();
 
-            // unread markers are removed only for the files that were actually moved
+            // unread markers are removed only for the files that were actually moved;
+            // the move is already committed, so a marker failure must not abort the batch
             foreach (var (file, _) in moved)
             {
-                await fileMarker.RemoveMarkAsNewForAllAsync(file);
+                try
+                {
+                    await fileMarker.RemoveMarkAsNewForAllAsync(file);
+                }
+                catch (Exception e)
+                {
+                    Logger.ErrorWithException(e);
+                }
             }
 
             var newFiles = new Dictionary<TTo, File<TTo>>();
@@ -1274,28 +1282,38 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                     continue;
                 }
 
-                var (users, sharedUsers) = socketRecipients[file.Id];
-                await socketManager.DeleteFileAsync(file, users: users, sharedUsers: sharedUsers);
-
-                await filesMessageService.SendMoveMessageAsync(newFile, parent, toFolder, toParentFolders, false, _headers, [file.Title, parent.Title, toFolder.Title, toFolder.Id.ToString()]);
-
-                if (anyWebhooks)
+                // post-commit notifications are best-effort: a failure for one file must not
+                // abort the rest of the batch (which is already moved) nor the chunks after it.
+                // progress is tracked outside the guard so the move is always accounted for
+                try
                 {
-                    await webhookManager.PublishAsync(WebhookTrigger.FileMoved, newFile);
-                }
+                    var (users, sharedUsers) = socketRecipients[file.Id];
+                    await socketManager.DeleteFileAsync(file, users: users, sharedUsers: sharedUsers);
 
-                if (isToFolder)
-                {
-                    // the gate guarantees the source and destination rooms are the same,
-                    // so entries staying within one room are not marked as new
-                    var withinRoom = file.RootFolderType == FolderType.VirtualRooms && toFolder.RootFolderType == FolderType.VirtualRooms;
-                    if (!withinRoom)
+                    await filesMessageService.SendMoveMessageAsync(newFile, parent, toFolder, toParentFolders, false, _headers, [file.Title, parent.Title, toFolder.Title, toFolder.Id.ToString()]);
+
+                    if (anyWebhooks)
                     {
-                        needToMark.Add(newFile);
+                        await webhookManager.PublishAsync(WebhookTrigger.FileMoved, newFile);
                     }
-                }
 
-                await socketManager.CreateFileAsync(newFile);
+                    if (isToFolder)
+                    {
+                        // the gate guarantees the source and destination rooms are the same,
+                        // so entries staying within one room are not marked as new
+                        var withinRoom = file.RootFolderType == FolderType.VirtualRooms && toFolder.RootFolderType == FolderType.VirtualRooms;
+                        if (!withinRoom)
+                        {
+                            needToMark.Add(newFile);
+                        }
+                    }
+
+                    await socketManager.CreateFileAsync(newFile);
+                }
+                catch (Exception e)
+                {
+                    Logger.ErrorWithException(e);
+                }
 
                 if (ProcessedFile(file.Id))
                 {

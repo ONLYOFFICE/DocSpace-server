@@ -855,11 +855,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
         foreach (var file in deleted)
         {
-            if (socketRecipients.TryGetValue(file.Id, out var recipients))
-            {
-                await socketManager.DeleteFileAsync(file, users: recipients.Users, sharedUsers: recipients.SharedUsers);
-            }
-
+            // the rows are already committed as deleted, so the size accounting must
+            // not be lost even if a notification below throws
             switch (file.RootFolderType)
             {
                 case FolderType.Archive:
@@ -870,11 +867,30 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                     break;
             }
 
-            if (hasHeaders)
+            // post-commit notifications are best-effort: a failure for one file must not
+            // abort the rest of the batch (which is already deleted) nor the chunks after it
+            try
             {
-                if (isNeedSendActions)
+                if (socketRecipients.TryGetValue(file.Id, out var recipients))
                 {
-                    await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
+                    await socketManager.DeleteFileAsync(file, users: recipients.Users, sharedUsers: recipients.SharedUsers);
+                }
+
+                if (hasHeaders)
+                {
+                    if (isNeedSendActions)
+                    {
+                        await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
+
+                        if (configsByFile.TryGetValue(file.Id, out var configs))
+                        {
+                            await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configs, file);
+                        }
+                    }
+                }
+                else
+                {
+                    await filesMessageService.SendAsync(MessageAction.FileDeleted, file, MessageInitiator.AutoCleanUp, file.Title);
 
                     if (configsByFile.TryGetValue(file.Id, out var configs))
                     {
@@ -882,26 +898,28 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                     }
                 }
             }
-            else
+            catch (Exception e)
             {
-                await filesMessageService.SendAsync(MessageAction.FileDeleted, file, MessageInitiator.AutoCleanUp, file.Title);
-
-                if (configsByFile.TryGetValue(file.Id, out var configs))
-                {
-                    await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configs, file);
-                }
+                Logger.ErrorWithException(e);
             }
         }
 
-        if (archiveSize != 0)
+        try
         {
-            var archiveId = await folderDao.GetFolderIDArchive(false);
-            await folderDao.ChangeTreeFolderSizeAsync(archiveId, -archiveSize);
-        }
+            if (archiveSize != 0)
+            {
+                var archiveId = await folderDao.GetFolderIDArchive(false);
+                await folderDao.ChangeTreeFolderSizeAsync(archiveId, -archiveSize);
+            }
 
-        if (trashSize != 0)
+            if (trashSize != 0)
+            {
+                await folderDao.ChangeTreeFolderSizeAsync(_trashId, -trashSize);
+            }
+        }
+        catch (Exception e)
         {
-            await folderDao.ChangeTreeFolderSizeAsync(_trashId, -trashSize);
+            Logger.ErrorWithException(e);
         }
 
         foreach (var file in files)
