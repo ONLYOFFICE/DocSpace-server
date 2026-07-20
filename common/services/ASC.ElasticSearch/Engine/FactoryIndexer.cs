@@ -168,7 +168,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         catch (Exception e)
         {
             Logger.ErrorIndex(e);
-            MarkUnavailableOnConnectionFailure(e);
         }
 
         return false;
@@ -188,7 +187,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         catch (OpenSearchClientException e)
         {
             Logger.ErrorIndex(e);
-            MarkUnavailableOnConnectionFailure(e);
 
             if (e.Response != null)
             {
@@ -271,7 +269,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         catch (Exception e)
         {
             Logger.ErrorUpdate(e);
-            MarkUnavailableOnConnectionFailure(e);
 
             return false;
         }
@@ -293,7 +290,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         catch (Exception e)
         {
             Logger.ErrorUpdate(e);
-            MarkUnavailableOnConnectionFailure(e);
         }
     }
 
@@ -312,7 +308,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         catch (Exception e)
         {
             Logger.ErrorIndex(e);
-            MarkUnavailableOnConnectionFailure(e);
         }
     }
 
@@ -332,7 +327,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         catch (Exception e)
         {
             Logger.ErrorUpdate(e);
-            MarkUnavailableOnConnectionFailure(e);
 
             return false;
         }
@@ -356,7 +350,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         catch (Exception e)
         {
             Logger.ErrorDelete(e);
-            MarkUnavailableOnConnectionFailure(e);
 
             return false;
         }
@@ -376,7 +369,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
         catch (Exception e)
         {
             Logger.ErrorDelete(e);
-            MarkUnavailableOnConnectionFailure(e);
         }
     }
 
@@ -404,32 +396,6 @@ public abstract class FactoryIndexer<T>(ILoggerFactory loggerFactory,
     public async Task<bool> SupportAsync()
     {
         return await factoryIndexer.CheckStateAsync();
-    }
-
-    private void MarkUnavailableOnConnectionFailure(Exception e)
-    {
-        // only genuine connection failures count: a request timeout (TaskCanceledException)
-        // may come from a live but busy cluster and must not silence the whole indexer.
-        // The client surfaces the transport failure via Response.OriginalException and often
-        // wraps it (e.g. in a PipelineException), so both places are checked down the chain
-        if (e is OpenSearchClientException oce &&
-            (IsConnectionFailure(oce.Response?.OriginalException) || IsConnectionFailure(oce.InnerException)))
-        {
-            factoryIndexer.MarkUnavailable();
-        }
-
-        static bool IsConnectionFailure(Exception exception)
-        {
-            for (var current = exception; current != null; current = current.InnerException)
-            {
-                if (current is System.Net.Http.HttpRequestException or System.Net.Sockets.SocketException)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
     }
 }
 
@@ -466,15 +432,6 @@ public class FactoryIndexer
         {
             Log.CriticalFactoryIndexer(e);
         }
-    }
-
-    // Circuit breaker: called when an already issued request fails with a connection
-    // error. The state cache may still say "available" for up to 15 minutes after
-    // OpenSearch went down, and every request to a dead node costs seconds in retries —
-    // so the first failure short-circuits the following calls for a while.
-    public void MarkUnavailable()
-    {
-        _cache.Insert("elasticsearch", "false", DateTime.UtcNow.AddMinutes(1));
     }
 
     public bool CheckState(bool cacheState = true)
@@ -598,24 +555,12 @@ public class FactoryIndexer
             state.LastIndexed = tenantUtil.DateTimeFromUtc(state.LastIndexed.Value);
         }
 
-        var client = _client.Instance;
-
-        if (client == null)
-        {
-            return new
-            {
-                state,
-                indices,
-                status = false
-            };
-        }
-
-        indices = client.Cat.Indices(new CatIndicesRequest { SortByColumns = ["index"] }).Records
+        indices = _client.Instance.Cat.Indices(new CatIndicesRequest { SortByColumns = ["index"] }).Records
             .Select(r => new
             {
                 r.Index,
                 Count = count.GetValueOrDefault(r.Index, 0),
-                DocsCount = client.Count(new CountRequest(r.Index)).Count,
+                DocsCount = _client.Instance.Count(new CountRequest(r.Index)).Count,
                 r.StoreSize
             })
             .Where(r => r.Count > 0);

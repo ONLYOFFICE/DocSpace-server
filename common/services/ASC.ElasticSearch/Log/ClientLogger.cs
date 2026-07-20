@@ -42,7 +42,4 @@ internal static partial class ClientLogger
 
     [LoggerMessage(LogLevel.Error, "Client")]
     public static partial void ErrorClient(this ILogger logger, Exception exception);
-
-    [LoggerMessage(LogLevel.Debug, "Connect skipped: the previous attempt failed recently")]
-    public static partial void DebugConnectSkipped(this ILogger logger);
 }

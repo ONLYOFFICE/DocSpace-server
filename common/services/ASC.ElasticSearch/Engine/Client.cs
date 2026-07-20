@@ -36,11 +36,8 @@ namespace ASC.ElasticSearch;
 [Singleton]
 public class Client(ILogger<Client> logger, Settings settings)
 {
-    private static readonly TimeSpan _failedConnectRetryInterval = TimeSpan.FromSeconds(30);
-
     private volatile OpenSearchClient _client;
     private static readonly Lock _locker = new();
-    private DateTime _lastFailedConnect;
 
     public OpenSearchClient Instance
     {
@@ -60,14 +57,6 @@ public class Client(ILogger<Client> logger, Settings settings)
 
                 if (string.IsNullOrEmpty(settings.Scheme) || string.IsNullOrEmpty(settings.Host) || !settings.Port.HasValue)
                 {
-                    return null;
-                }
-
-                // Negative cache: a failed connect blocks the synchronous Ping below for seconds
-                // under this lock, so callers (every file delete/move) must not retry it per call.
-                if (DateTime.UtcNow - _lastFailedConnect < _failedConnectRetryInterval)
-                {
-                    logger.DebugConnectSkipped();
                     return null;
                 }
 
@@ -114,12 +103,7 @@ public class Client(ILogger<Client> logger, Settings settings)
                     var client = new OpenSearchClient(connectionSettings);
                     if (!Ping(client))
                     {
-                        _lastFailedConnect = DateTime.UtcNow;
-
-                        // an unusable client must not escape: callers treat a non-null
-                        // Instance as a reachable OpenSearch (the exception path below
-                        // returns null as well)
-                        return null;
+                        return client;
                     }
 
                     client.AddAttachmentPipeline();
@@ -133,7 +117,6 @@ public class Client(ILogger<Client> logger, Settings settings)
                 catch (Exception e)
                 {
                     logger.ErrorClient(e);
-                    _lastFailedConnect = DateTime.UtcNow;
                 }
 
                 return null;
