@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Constants = ASC.Core.Users.Constants;
-
 namespace ASC.Core;
 
 
@@ -119,7 +117,6 @@ public class HostedSolution(ITenantService tenantService,
 
         tenantService.ValidateTenantName(registrationInfo.Name);
 
-        // create tenant
         var tenant = new Tenant(registrationInfo.Address.ToLowerInvariant())
         {
             Name = registrationInfo.Name,
@@ -133,10 +130,7 @@ public class HostedSolution(ITenantService tenantService,
             Calls = registrationInfo.Calls
         };
 
-        tenant = await tenantService.SaveTenantAsync(coreSettings, tenant);
-
-        // create user
-        var user = new UserInfo
+        var owner = new UserInfo
         {
             UserName = registrationInfo.Email[..registrationInfo.Email.IndexOf('@')],
             LastName = registrationInfo.LastName,
@@ -148,16 +142,11 @@ public class HostedSolution(ITenantService tenantService,
             Spam = registrationInfo.Spam
         };
 
-        user = await userService.SaveUserAsync(tenant.Id, user);
-        await userService.SetUserPasswordHashAsync(tenant.Id, user.Id, registrationInfo.PasswordHash);
-        await userService.SaveUserGroupRefAsync(tenant.Id, new UserGroupRef(user.Id, Constants.GroupAdmin.ID, UserGroupRefType.Contains));
+        // the tenant, its owner, the password hash and the admin-group membership
+        // are inserted atomically in a single transaction
+        tenant = await tenantService.RegisterTenantAsync(coreSettings, tenant, owner, registrationInfo.PasswordHash);
 
-        // save tenant owner
-        tenant.OwnerId = user.Id;
-
-        await tenantService.SaveTenantAsync(coreSettings, tenant);
-
-        await settingsManager.SaveAsync(new TenantAccessSpaceSettings { LimitedAccessSpace = registrationInfo.LimitedAccessSpace }, tenant.Id);
+        await settingsManager.SaveForNewTenantAsync(new TenantAccessSpaceSettings { LimitedAccessSpace = registrationInfo.LimitedAccessSpace }, tenant.Id);
 
         return tenant;
     }

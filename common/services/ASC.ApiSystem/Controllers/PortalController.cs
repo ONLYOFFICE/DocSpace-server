@@ -50,8 +50,7 @@ public class PortalController(
         CsvFileHelper csvFileHelper,
         CsvFileUploader csvFileUploader,
         PortalRegistrationService portalRegistrationService,
-        UserFormatter userFormatter,
-        LoginProfileTransport loginProfileTransport)
+        UserFormatter userFormatter)
     : ControllerBase
 {
 
@@ -214,6 +213,7 @@ public class PortalController(
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("provision")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
+    [Obsolete("Candidate for deletion. Used in integrations.")]
     public async ValueTask<IActionResult> ProvisionAsync(ProvisionPortalRequestDto model)
     {
         if (model == null)
@@ -532,24 +532,26 @@ public class PortalController(
                 }
             }
 
-            if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
+            try
             {
-                try
+                var (profile, _) = await portalRegistrationService.ProcessThirdPartyProfileAsync(model);
+                if (profile != null)
                 {
-                    var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
-                    if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                    var tenantWrappersByProfile = await GetTenantsByThirdPartyProfileAsync(profile);
+                    return Ok(new
                     {
-                        var tenantWrappersByProfile = await GetTenantsByThirdPartyProfileAsync(profile);
-                        return Ok(new
-                        {
-                            tenants = tenantWrappersByProfile
-                        });
-                    }
+                        tenants = tenantWrappersByProfile
+                    });
                 }
-                catch (Exception e)
-                {
-                    logger.ErrorWithThirdPartyProfile(e);
-                }
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithThirdPartyProfile(e);
+            }
+
+            if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.PasswordHash))
+            {
+                return BadRequest(new ErrorDto { Error = "params", Message = "Empty credentials" });
             }
 
             var tenants = await commonMethods.GetTenantsAsync(model.Email, model.PasswordHash);

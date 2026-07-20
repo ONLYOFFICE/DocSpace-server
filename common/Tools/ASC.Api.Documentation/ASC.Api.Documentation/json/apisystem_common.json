@@ -207,6 +207,90 @@
         ]
       }
     },
+    "/portal/registerbyoauth": {
+      "post": {
+        "tags": [
+          "Portal"
+        ],
+        "summary": "Register a portal by OAuth",
+        "description": "Registers a new portal by OAuth with the parameters specified in the request.",
+        "operationId": "registerByOAuth",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantModel"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantModel"
+              }
+            },
+            "text/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantModel"
+              }
+            },
+            "application/*+xml": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IActionResultWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/portal/provision": {
       "post": {
         "tags": [
@@ -260,6 +344,7 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "deprecated": true,
         "security": [
           {
             "asc_auth_key": [
@@ -557,6 +642,33 @@
             "schema": {
               "type": "string",
               "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
+            }
+          },
+          {
+            "name": "Provider",
+            "in": "query",
+            "description": "The type of authentication provider (e.g., internal, Google, Azure).",
+            "schema": {
+              "type": "string",
+              "example": "google"
+            }
+          },
+          {
+            "name": "AccessToken",
+            "in": "query",
+            "description": "The access token used for authentication with external providers.",
+            "schema": {
+              "type": "string",
+              "example": "ya29.a0AfH6SMBx..."
+            }
+          },
+          {
+            "name": "CodeOAuth",
+            "in": "query",
+            "description": "The authorization code used for obtaining OAuth tokens.",
+            "schema": {
+              "type": "string",
+              "example": "4/0AY0e-g7..."
             }
           }
         ],
@@ -1014,6 +1126,33 @@
             "schema": {
               "type": "string",
               "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
+            }
+          },
+          {
+            "name": "Provider",
+            "in": "query",
+            "description": "The type of authentication provider (e.g., internal, Google, Azure).",
+            "schema": {
+              "type": "string",
+              "example": "google"
+            }
+          },
+          {
+            "name": "AccessToken",
+            "in": "query",
+            "description": "The access token used for authentication with external providers.",
+            "schema": {
+              "type": "string",
+              "example": "ya29.a0AfH6SMBx..."
+            }
+          },
+          {
+            "name": "CodeOAuth",
+            "in": "query",
+            "description": "The authorization code used for obtaining OAuth tokens.",
+            "schema": {
+              "type": "string",
+              "example": "4/0AY0e-g7..."
             }
           },
           {
@@ -1608,11 +1747,11 @@
           },
           {
             "required": [
-              "provider"
+              "provisionProvider"
             ],
             "type": "object",
             "properties": {
-              "provider": {
+              "provisionProvider": {
                 "$ref": "#/components/schemas/ProvisionProviderDto"
               }
             }
@@ -1912,6 +2051,24 @@
             "description": "The serialized third party profile.",
             "nullable": true,
             "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
+          },
+          "provider": {
+            "type": "string",
+            "description": "The type of authentication provider (e.g., internal, Google, Azure).",
+            "nullable": true,
+            "example": "google"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "The access token used for authentication with external providers.",
+            "nullable": true,
+            "example": "ya29.a0AfH6SMBx..."
+          },
+          "codeOAuth": {
+            "type": "string",
+            "description": "The authorization code used for obtaining OAuth tokens.",
+            "nullable": true,
+            "example": "4/0AY0e-g7..."
           }
         },
         "additionalProperties": false,

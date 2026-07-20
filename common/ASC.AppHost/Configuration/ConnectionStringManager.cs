@@ -65,7 +65,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     public bool HasOtelCollector => OtelCollectorResource != null;
 
 
-    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true)
+    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false)
     {
         var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
 
@@ -75,6 +75,13 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         if (withDataVolume)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
+        }
+        else if (withTmpfs)
+        {
+            // Keep the whole MySQL datadir in RAM: throwaway databases (integration tests) pay a lot
+            // for InnoDB fsync-heavy init and migrations when the datadir sits on the virtualized
+            // Docker Desktop disk. Data disappears with the container, which is fine without a volume.
+            mysqlResourceBuilder = mysqlResourceBuilder.WithContainerRuntimeArgs("--tmpfs", "/var/lib/mysql");
         }
 
         if (withDbGate)

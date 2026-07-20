@@ -362,9 +362,33 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> DeleteVectorizationStatusAsync(int tenantId, int fileId)
+    public Task<int> MarkVectorizationDeletedAsync(int tenantId, int fileId)
     {
-        return FileQueries.DeleteVectorizationStatusAsync(this, tenantId, fileId);
+        return FileQueries.MarkVectorizationDeletedAsync(this, tenantId, fileId, DateTime.UtcNow);
+    }
+
+    [PreCompileQuery]
+    public Task<bool> IsVectorizationDeletedAsync(int tenantId, int fileId)
+    {
+        return FileQueries.IsVectorizationDeletedAsync(this, tenantId, fileId);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteVectorizationIfDeletedAsync(int tenantId, int fileId)
+    {
+        return FileQueries.DeleteVectorizationIfDeletedAsync(this, tenantId, fileId);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<DbFileVectorization> GetDeletedVectorizationsAsync(DateTime cutoffDate, int take)
+    {
+        return FileQueries.GetDeletedVectorizationsAsync(this, cutoffDate, take);
+    }
+
+    [PreCompileQuery]
+    public Task<int> UpdateVectorizationsDeletedOnAsync(int tenantId, IEnumerable<int> fileIds, DateTime deletedOn)
+    {
+        return FileQueries.UpdateVectorizationsDeletedOnAsync(this, tenantId, fileIds, deletedOn);
     }
 
     [PreCompileQuery]
@@ -425,7 +449,7 @@ static file class FileQueries
                             .Select(a => a.CreateOn)
                             .FirstOrDefault(),
                         VectorizationStatus = ctx.FileVectorization
-                            .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
+                            .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id && x.DeletedOn == null).Status
                     })
                     .SingleOrDefault());
 
@@ -578,7 +602,7 @@ static file class FileQueries
                             select f.Order
                         ).FirstOrDefault(),
                         VectorizationStatus = ctx.FileVectorization
-                            .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
+                            .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id && x.DeletedOn == null).Status
                     }));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> FileIdsAsync =
@@ -1085,12 +1109,40 @@ static file class FileQueries
                         .SetProperty(x => x.Status, status)
                         .SetProperty(x => x.UpdatedOn, date)));
 
-    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteVectorizationStatusAsync =
+    public static readonly Func<FilesDbContext, int, int, DateTime, Task<int>> MarkVectorizationDeletedAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int fileId, DateTime deletedOn) =>
+                ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId && r.FileId == fileId)
+                    .ExecuteUpdate(f => f.SetProperty(x => x.DeletedOn, deletedOn)));
+
+    public static readonly Func<FilesDbContext, int, int, Task<bool>> IsVectorizationDeletedAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int fileId) =>
                 ctx.FileVectorization
-                    .Where(r => r.TenantId == tenantId && r.FileId == fileId)
+                    .Any(r => r.TenantId == tenantId && r.FileId == fileId && r.DeletedOn != null));
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteVectorizationIfDeletedAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int fileId) =>
+                ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId && r.FileId == fileId && r.DeletedOn != null)
                     .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, DateTime, int, IAsyncEnumerable<DbFileVectorization>> GetDeletedVectorizationsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, DateTime cutoffDate, int take) =>
+                ctx.FileVectorization
+                    .Where(r => r.DeletedOn != null && r.DeletedOn <= cutoffDate)
+                    .OrderBy(r => r.DeletedOn)
+                    .Take(take));
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, DateTime, Task<int>> UpdateVectorizationsDeletedOnAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, DateTime deletedOn) =>
+                ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
+                    .ExecuteUpdate(f => f.SetProperty(x => x.DeletedOn, deletedOn)));
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteMessageAttachmentsByFileIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

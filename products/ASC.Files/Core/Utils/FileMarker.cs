@@ -180,6 +180,13 @@ public class FileMarker(
                 userIDs.AddRange(additionalSubjects);
             }
 
+            if (userIDs.Count == 0 && additionalSubjects.Length == 0)
+            {
+                // no one to notify: the entry is visible to its creator only (e.g. a file in the
+                // personal section), so the per-parent security walk and tag writes are pointless
+                return;
+            }
+
             if (fileEntry.ProviderEntry)
             {
                 userIDs = await userIDs

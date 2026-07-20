@@ -204,8 +204,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<string>("Content")
                         .HasColumnType("longtext")
                         .HasColumnName("content")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
@@ -237,8 +237,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("title")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
@@ -491,8 +491,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("name")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -502,8 +502,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("text")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime")
@@ -549,8 +549,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("name")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -612,8 +612,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("title")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
@@ -1348,6 +1348,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant");
 
+                    b.Property<bool>("Additional")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("additional")
+                        .HasDefaultValueSql("'0'");
+
                     b.Property<string>("Description")
                         .HasMaxLength(128)
                         .HasColumnType("varchar")
@@ -1403,12 +1409,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("wallet")
-                        .HasDefaultValueSql("'0'");
-
-                    b.Property<bool>("Additional")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("additional")
                         .HasDefaultValueSql("'0'");
 
                     b.HasKey("TenantId")
@@ -4455,6 +4455,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("file_id");
 
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("deleted_on");
+
                     b.Property<int>("Status")
                         .HasColumnType("int")
                         .HasColumnName("status");
@@ -4465,6 +4469,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("TenantId", "FileId")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("DeletedOn")
+                        .HasDatabaseName("IX_deleted_on");
 
                     b.HasIndex("FileId")
                         .HasDatabaseName("IX_file_id");

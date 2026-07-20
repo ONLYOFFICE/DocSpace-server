@@ -136,29 +136,24 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
                     return true;
 
                 case MemberExpression m:
-                    switch (m.Expression)
                     {
-                        case ConstantExpression closure:
+                        object? container = null;
+
+                        if (m.Expression is null || TryGetValue(m.Expression, out container))
+                        {
+                            switch (m.Member)
                             {
-                                var container = closure.Value;
-                                switch (m.Member)
-                                {
-                                    case FieldInfo fi:
-                                        value = fi.GetValue(container);
-                                        return true;
-                                    case PropertyInfo pi:
-                                        value = pi.GetValue(container);
-                                        return true;
-                                }
-
-                                break;
+                                case FieldInfo fi:
+                                    value = fi.GetValue(container);
+                                    return true;
+                                case PropertyInfo pi:
+                                    value = pi.GetValue(container);
+                                    return true;
                             }
-                        case null when m.Member is FieldInfo staticFi:
-                            value = staticFi.GetValue(null);
-                            return true;
-                    }
+                        }
 
-                    break;
+                        break;
+                    }
 
                 case UnaryExpression { NodeType: ExpressionType.Convert } u:
                     expr = u.Operand;

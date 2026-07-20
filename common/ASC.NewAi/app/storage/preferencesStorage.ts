@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
+import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getBoolean } from "../narrow.js";
 import type { PreferencesStorage } from "@onlyoffice/ai-chat/core";
 
@@ -48,7 +49,7 @@ export class HttpPreferencesStorage implements PreferencesStorage {
 
   async readDeepMode(entityId?: string): Promise<boolean | null> {
     try {
-      const query = entityIdQuery(entityId);
+      const query = entityIdQuery(await resolveAgentEntityId(entityId));
       const raw = await aiService.get(PATH, query ? { query } : undefined);
       if (!isObject(raw)) {
         return null;

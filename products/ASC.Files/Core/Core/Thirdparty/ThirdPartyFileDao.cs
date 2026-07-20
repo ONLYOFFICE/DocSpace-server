@@ -808,7 +808,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, string parentId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
@@ -862,12 +862,22 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.CompletedTask;
     }
-    
+
+    public Task<bool> IsVectorizationDeletedAsync(string fileId)
+    {
+        return Task.FromResult(false);
+    }
+
+    public Task DeleteVectorizationIfDeletedAsync(string fileId)
+    {
+        return Task.CompletedTask;
+    }
+
     public Task SetFileKey(string fileId, IEnumerable<FileKeyData> keys)
     {
         return Task.CompletedTask;
     }
-    
+
     public Task<List<FileKeys>> GetFileKeys(string fileId, Guid userId)
     {
         return Task.FromResult<List<FileKeys>>([]);
