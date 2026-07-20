@@ -1015,6 +1015,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Portal [{0}]. File not saved: {1} – storage quota for portal exceeded..
+        /// </summary>
+        public static string FileNotSavedDueToTenantQuota {
+            get {
+                return ResourceManager.GetString("FileNotSavedDueToTenantQuota", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to File Opened For Change: {0}.
         /// </summary>
         public static string FileOpenedForChange {
@@ -1068,6 +1077,15 @@ namespace ASC.AuditTrail {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Portal [{0}]. File updated: {1}, exceeding the portal storage quota..
+        /// </summary>
+        public static string FileSavedButTenantQuotaExceeded {
+            get {
+                return ResourceManager.GetString("FileSavedButTenantQuotaExceeded", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Users [{0}]. File updated: {1}, exceeding the user storage quota..
         /// </summary>

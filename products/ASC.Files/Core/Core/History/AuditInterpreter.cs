@@ -129,7 +129,9 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.FileSavedButUserQuotaExceeded, _userFileUpdatedInterpreter },
         { (int)MessageAction.FileNotSavedDueToUserQuota, _userFileUpdatedInterpreter },
         { (int)MessageAction.FileSavedButRoomQuotaExceeded, _userFileUpdatedInterpreter },
-        { (int)MessageAction.FileNotSavedDueToRoomQuota, _userFileUpdatedInterpreter }
+        { (int)MessageAction.FileNotSavedDueToRoomQuota, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FileSavedButTenantQuotaExceeded, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FileNotSavedDueToTenantQuota, _userFileUpdatedInterpreter }
     }.ToFrozenDictionary();
 
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, DbFilesAuditReference reference)

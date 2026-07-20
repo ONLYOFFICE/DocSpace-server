@@ -36,9 +36,15 @@ namespace ASC.Data.Storage;
 [Transient]
 public class TenantQuotaController(TenantManager tenantManager, AuthContext authContext, SettingsManager settingsManager, QuotaSocketManager quotaSocketManager,
         TenantQuotaFeatureChecker<MaxFileSizeFeature, long> maxFileSizeChecker,
-        TenantQuotaFeatureChecker<MaxTotalSizeFeature, long> maxTotalSizeChecker)
+        TenantQuotaFeatureChecker<MaxTotalSizeFeature, long> maxTotalSizeChecker,
+        IConfiguration configuration)
     : IQuotaController
 {
+    // Grace applied on top of the portal (tariff) MaxTotalSize so a single write can overshoot the quota.
+    // Same config key/default as SetupInfo.AvailableFileSize (ASC.Web.Core is not referenceable from this layer).
+    private long AvailableFileSize =>
+        long.TryParse(configuration["web:available-file-size"], out var value) ? value : 100L * 1024L * 1024L;
+
     private long CurrentSize
     {
         get
@@ -152,6 +158,8 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
 
     public async Task<QuotaCheckResult> QuotaUsedCheckAsync(long size, bool quotaCheckFileSize, Guid ownerId)
     {
+        var result = QuotaCheckResult.Ok;
+
         var quota = await tenantManager.GetTenantQuotaAsync(_tenant);
         if (quota != null)
         {
@@ -162,13 +170,24 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
 
             if (quota.MaxTotalSize != 0)
             {
-                await maxTotalSizeChecker.CheckAddAsync(_tenant, CurrentSize + size);
+                var newTotal = CurrentSize + size;
+
+                // already over the limit OR beyond the grace -> hard fail (mirrors custom quota)
+                if (newTotal > quota.MaxTotalSize + AvailableFileSize || CurrentSize > quota.MaxTotalSize)
+                {
+                    await maxTotalSizeChecker.CheckAddAsync(_tenant, newTotal);
+                }
+                else if (newTotal > quota.MaxTotalSize)
+                {
+                    // soft overshoot within grace (only once): caller fires the socket notification
+                    result = QuotaCheckResult.QuotaExceeded;
+                }
             }
         }
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
         if (!tenantQuotaSetting.EnableQuota)
         {
-            return QuotaCheckResult.Ok;
+            return result;
         }
 
         if ((CurrentSize + size > 2 * tenantQuotaSetting.Quota )
@@ -183,7 +202,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
             return QuotaCheckResult.QuotaExceeded;
         }
 
-        return QuotaCheckResult.Ok;
+        return result;
     }
 
     public enum QuotaCheckResult

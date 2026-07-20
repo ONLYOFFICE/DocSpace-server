@@ -385,6 +385,42 @@ internal class FileDao(
 
         return await (await globalStore.GetStoreAsync(tenantId.Value)).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), 0);
     }
+    // Allows a single file save to overshoot the portal (tariff) total-size quota within a grace of
+    // SetupInfo.AvailableFileSize, mirroring the soft-overshoot behavior of custom room/user quota.
+    // Returns true when the overshoot is within grace (file saved with a warning); the caller throws otherwise.
+    private async Task<bool> TryAllowTenantQuotaGraceAsync(File<int> file)
+    {
+        var quota = await _tenantManager.GetCurrentTenantQuotaAsync();
+        if (quota == null || quota.MaxTotalSize == 0)
+        {
+            return false;
+        }
+
+        // the per-file cap stays absolute - no grace
+        if (quota.MaxFileSize != 0 && quota.MaxFileSize < file.ContentLength)
+        {
+            return false;
+        }
+
+        var used = await _maxTotalSizeStatistic.GetValueAsync();
+
+        // already over the limit -> no grace (soft save happens only once)
+        if (used > quota.MaxTotalSize)
+        {
+            return false;
+        }
+
+        if (used + file.ContentLength > quota.MaxTotalSize + _setupInfo.AvailableFileSize)
+        {
+            return false;
+        }
+
+        await quotaSocketManager.TenantQuotaExceededAsync();
+        await filesMessageService.SendAsync(MessageAction.FileSavedButTenantQuotaExceeded, file, MessageInitiator.DocsService, _tenantManager.GetCurrentTenant().Name, file.Title);
+
+        return true;
+    }
+
     public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, Guid chatId = default)
     {
         return await SaveFileAsync(file, fileStream, true, true, null, chatId);
@@ -408,8 +444,9 @@ internal class FileDao(
         if (checkQuota)
         {
             var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
-            if (maxChunkedUploadSize < file.ContentLength)
+            if (maxChunkedUploadSize < file.ContentLength && !await TryAllowTenantQuotaGraceAsync(file))
             {
+                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, _tenantManager.GetCurrentTenant().Name, file.Title);
                 throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
             }
         }
@@ -841,8 +878,9 @@ internal class FileDao(
 
         var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
 
-        if (maxChunkedUploadSize < file.ContentLength)
+        if (maxChunkedUploadSize < file.ContentLength && !await TryAllowTenantQuotaGraceAsync(file))
         {
+            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, _tenantManager.GetCurrentTenant().Name, file.Title);
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
         }
 
