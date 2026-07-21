@@ -39,955 +39,6 @@
     }
   ],
   "paths": {
-    "/api/2.0/ai/agents": {
-      "get": {
-        "tags": [
-          "AI / Agents"
-        ],
-        "summary": "Get ai agents",
-        "description": "Get ai agents",
-        "operationId": "getAgents",
-        "parameters": [
-          {
-            "name": "subjectId",
-            "in": "query",
-            "description": "The filter by user ID.",
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "example": "00000000-0000-0000-0000-000000000000"
-            }
-          },
-          {
-            "name": "subjectOwnerId",
-            "in": "query",
-            "description": "The filter by room owner ID.",
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "example": "00000000-0000-0000-0000-000000000000"
-            }
-          },
-          {
-            "name": "withoutTags",
-            "in": "query",
-            "description": "Specifies whether to search by tags or not.",
-            "schema": {
-              "type": "boolean",
-              "example": false
-            }
-          },
-          {
-            "name": "tags",
-            "in": "query",
-            "description": "The tags in the serialized format.",
-            "schema": {
-              "type": "string",
-              "example": "ai,assistant"
-            }
-          },
-          {
-            "name": "excludeSubject",
-            "in": "query",
-            "description": "Specifies whether to exclude search by user or group ID.",
-            "schema": {
-              "type": "boolean",
-              "example": false
-            }
-          },
-          {
-            "name": "quotaFilter",
-            "in": "query",
-            "description": "The filter by quota (All - 0, Default - 1, Custom - 2).",
-            "schema": {
-              "$ref": "#/components/schemas/QuotaFilter"
-            },
-            "example": 0
-          },
-          {
-            "name": "count",
-            "in": "query",
-            "description": "Specifies the maximum number of items to retrieve.",
-            "schema": {
-              "maximum": 100,
-              "minimum": 1,
-              "type": "integer",
-              "format": "int32",
-              "example": 25
-            }
-          },
-          {
-            "name": "startIndex",
-            "in": "query",
-            "description": "The index from which to start retrieving the room content.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 0
-            }
-          },
-          {
-            "name": "sortBy",
-            "in": "query",
-            "description": "Specifies the field by which the room content should be sorted.",
-            "schema": {
-              "type": "string",
-              "example": "DateAndTime"
-            }
-          },
-          {
-            "name": "sortOrder",
-            "in": "query",
-            "description": "The order in which the results are sorted.",
-            "schema": {
-              "$ref": "#/components/schemas/SortOrder"
-            },
-            "example": 1
-          },
-          {
-            "name": "filterValue",
-            "in": "query",
-            "description": "The text filter value used to refine search or query operations.",
-            "schema": {
-              "type": "string",
-              "example": "my agent"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Agent information",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1500
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1750000000
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FolderContentIntegerWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "type": "integer",
-                  "example": 30
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
-          "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "AI / Agents"
-        ],
-        "summary": "Create an ai agent",
-        "description": "Creates an ai agent.",
-        "operationId": "createAgent",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAgentRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Agent information",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1500
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1750000000
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "type": "integer",
-                  "example": 30
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
-          "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/ai/agents/{id}": {
-      "get": {
-        "tags": [
-          "AI / Agents"
-        ],
-        "summary": "Return an ai agent",
-        "description": "Returns an ai agent.",
-        "operationId": "getAgentInfo",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The room ID.",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Agent information",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1500
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1750000000
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "type": "integer",
-                  "example": 30
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
-          "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "AI / Agents"
-        ],
-        "summary": "Update an ai agent",
-        "description": "Updates an ai agent.",
-        "operationId": "updateAgent",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The room ID.",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": "file-id"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "The request parameters for updating a room.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoomRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Updated agent information",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1500
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1750000000
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "type": "integer",
-                  "example": 30
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
-          "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "AI / Agents"
-        ],
-        "summary": "Remove an ai agent",
-        "description": "Removes an ai agent.",
-        "operationId": "deleteAgent",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The room ID.",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 10
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "The parameters for deleting a room.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteRoomRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "File operation",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1500
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1750000000
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FileOperationWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "type": "integer",
-                  "example": 30
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
-          "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/ai/agents/agentquota": {
-      "put": {
-        "tags": [
-          "AI / Agents"
-        ],
-        "summary": "Change the AI agent quota limit",
-        "description": "Changes the quota limit for the AI agents with the IDs specified in the request.",
-        "operationId": "updateAgentsQuota",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoomsQuotaRequestDtoInteger"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "List of AI agents with the detailed information",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1500
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1750000000
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerArrayWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "type": "integer",
-                  "example": 30
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
-          "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/ai/agents/resetquota": {
-      "put": {
-        "tags": [
-          "AI / Agents"
-        ],
-        "summary": "Reset the AI agents quota limit",
-        "description": "Resets the quota limit for the AI agents with the IDs specified in the request.",
-        "operationId": "resetAgentsQuota",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoomsRoomIdsRequestDtoInteger"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "List of AI agents with the detailed information",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1500
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1750000000
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerArrayWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "type": "integer",
-                  "example": 30
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
-          "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/ai/agents/news": {
-      "get": {
-        "tags": [
-          "AI / Agents"
-        ],
-        "summary": "Get the room new items",
-        "description": "Returns the room new items.",
-        "operationId": "getAgentsNewItems",
-        "responses": {
-          "200": {
-            "description": "List of new items",
-            "headers": {
-              "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1500
-                }
-              },
-              "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1
-                }
-              },
-              "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "type": "integer",
-                  "example": 1750000000
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NewItemsAgentNewItemsArrayWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "429": {
-            "description": "Too Many Requests.",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "type": "integer",
-                  "example": 30
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
-          },
-          "503": {
-            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      }
-    },
     "/api/2.0/ai/rooms/{roomId}/chats": {
       "post": {
         "tags": [
@@ -7235,6 +6286,138 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Int32Wrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "From date must be less than to date"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/getbackupscountbypaid": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Get the number of free and paid backups",
+        "description": "Returns the number of free and paid backups for a period of time. The default is the current calendar month.",
+        "operationId": "getBackupsCounts",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "The from date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-01-01T00:00:00Z"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "The to date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-12-31T23:59:59Z"
+            }
+          },
+          {
+            "name": "paid",
+            "in": "query",
+            "description": "Specifies if the backups are paid or not.",
+            "schema": {
+              "type": "boolean",
+              "example": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Number of free and paid backups",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupsCountResultWrapper"
                 }
               }
             }
@@ -14398,16 +13581,6 @@
             }
           },
           {
-            "name": "parentId",
-            "in": "query",
-            "description": "The parent folder ID used to filter the folder contents by parent.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1
-            }
-          },
-          {
             "name": "folderType",
             "in": "query",
             "description": "The parent folder types used to filter the folder contents by folder type.",
@@ -14443,7 +13616,8 @@
                   32,
                   33,
                   34,
-                  35
+                  35,
+                  36
                 ],
                 "type": "integer",
                 "example": 0,
@@ -14476,9 +13650,10 @@
                   "Knowledge",
                   "ResultStorage",
                   "AiAgents",
-                  "DefaultTemplates"
+                  "DefaultTemplates",
+                  "Forms"
                 ],
-                "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates]"
+                "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]"
               },
               "example": [
                 2
@@ -16169,6 +15344,177 @@
         "responses": {
           "200": {
             "description": "The Trash section contents",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderContentIntegerWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to view the folder content"
+          },
+          "404": {
+            "description": "The required folder was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/@forms": {
+      "get": {
+        "tags": [
+          "Files / Folders"
+        ],
+        "summary": "Get the Forms section",
+        "description": "Returns the detailed list of rooms used for filling out forms located in the Forms section.",
+        "operationId": "getFormsFolder",
+        "parameters": [
+          {
+            "name": "userIdOrGroupId",
+            "in": "query",
+            "description": "The user or group ID.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          },
+          {
+            "name": "filterType",
+            "in": "query",
+            "description": "The filter type.",
+            "schema": {
+              "$ref": "#/components/schemas/FilterType"
+            },
+            "example": 1
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The maximum number of items to retrieve in the request.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 25
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The zero-based index of the first item to retrieve in a paginated list.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 0
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Specifies the field by which the folder content should be sorted.",
+            "schema": {
+              "type": "string",
+              "example": "DateAndTime"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The order in which the results are sorted.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            },
+            "example": 1
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The text used as a filter or search criterion for folder content queries.",
+            "schema": {
+              "type": "string",
+              "example": "My Document"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Forms section contents",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -68003,28 +67349,6 @@
         "additionalProperties": false,
         "description": "Parameters specifying which MCP servers to assign to the room."
       },
-      "AgentNewItemsDto": {
-        "required": [
-          "agent",
-          "items"
-        ],
-        "type": "object",
-        "properties": {
-          "agent": {
-            "$ref": "#/components/schemas/FileEntryBaseDto"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FileEntryBaseDto"
-            },
-            "description": "The list of file entry items.",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "The agent new item's information."
-      },
       "AiChatPrice": {
         "type": "object",
         "properties": {
@@ -68515,50 +67839,6 @@
         ],
         "description": "[]"
       },
-      "ChatSettings": {
-        "type": "object",
-        "properties": {
-          "providerId": {
-            "type": "integer",
-            "description": "The provider ID.",
-            "format": "int32",
-            "example": 1
-          },
-          "modelId": {
-            "type": "string",
-            "description": "The model ID.",
-            "nullable": true,
-            "example": "gpt-4"
-          },
-          "prompt": {
-            "type": "string",
-            "description": "The prompt.",
-            "nullable": true,
-            "example": "Please analyze this document"
-          },
-          "internal": {
-            "type": "boolean",
-            "description": "Specifies whether the provider is internal or not.",
-            "readOnly": true,
-            "example": false
-          }
-        },
-        "additionalProperties": false,
-        "description": "The chat settings."
-      },
-      "ChatSettingsDto": {
-        "type": "object",
-        "properties": {
-          "prompt": {
-            "type": "string",
-            "description": "The system prompt for the chat.",
-            "nullable": true,
-            "example": "You are a helpful assistant."
-          }
-        },
-        "additionalProperties": false,
-        "description": "The chat settings parameters."
-      },
       "ChatWrapper": {
         "type": "object",
         "properties": {
@@ -68659,107 +67939,6 @@
         },
         "additionalProperties": false,
         "description": "Parameters for continuing an AI chat session."
-      },
-      "CreateAgentRequestDto": {
-        "required": [
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "title": {
-            "maxLength": 170,
-            "minLength": 0,
-            "type": "string",
-            "description": "The room name.",
-            "nullable": true,
-            "example": "My AI Agent Room"
-          },
-          "quota": {
-            "type": "integer",
-            "description": "The room quota.",
-            "format": "int64",
-            "nullable": true,
-            "example": 10485760
-          },
-          "indexing": {
-            "type": "boolean",
-            "description": "Specifies whether to create a room with indexing.",
-            "nullable": true,
-            "example": true
-          },
-          "denyDownload": {
-            "type": "boolean",
-            "description": "Specifies whether to deny downloads from the room.",
-            "nullable": true,
-            "example": false
-          },
-          "lifetime": {
-            "$ref": "#/components/schemas/RoomDataLifetimeDto"
-          },
-          "watermark": {
-            "$ref": "#/components/schemas/WatermarkRequestDto"
-          },
-          "logo": {
-            "$ref": "#/components/schemas/LogoRequest"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The list of tags.",
-            "nullable": true,
-            "example": [
-              "ai",
-              "assistant"
-            ]
-          },
-          "color": {
-            "maxLength": 6,
-            "minLength": 0,
-            "type": "string",
-            "description": "The room color.",
-            "nullable": true,
-            "example": "FF6600"
-          },
-          "cover": {
-            "maxLength": 50,
-            "minLength": 0,
-            "type": "string",
-            "description": "The room cover.",
-            "nullable": true,
-            "example": "cover1.jpg"
-          },
-          "private": {
-            "type": "boolean",
-            "description": "Specifies whether the room to be created is private or not.",
-            "example": false
-          },
-          "share": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FileShareParams"
-            },
-            "description": "The collection of sharing parameters.",
-            "nullable": true,
-            "example": [
-              {
-                "shareId": "user@example.com",
-                "access": 1
-              }
-            ]
-          },
-          "chatSettings": {
-            "$ref": "#/components/schemas/ChatSettings"
-          },
-          "attachDefaultTools": {
-            "type": "boolean",
-            "description": "Specifies whether to attach default tools to the agent or not.",
-            "example": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "Request to create a new AI agent room."
       },
       "CreateProviderRequestDto": {
         "required": [
@@ -68909,18 +68088,6 @@
           }
         }
       },
-      "DeleteRoomRequest": {
-        "type": "object",
-        "properties": {
-          "deleteAfter": {
-            "type": "boolean",
-            "description": "Specifies whether to delete a room after the editing session is finished or not.",
-            "example": false
-          }
-        },
-        "additionalProperties": false,
-        "description": "The parameters for deleting a room."
-      },
       "DeleteRoomServersRequestBody": {
         "required": [
           "servers"
@@ -68967,25 +68134,6 @@
         "additionalProperties": false,
         "description": "Parameters specifying which MCP servers to delete."
       },
-      "DistributedTaskStatus": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
-          "Created",
-          "Running",
-          "Completed",
-          "Canceled",
-          "Failted"
-        ],
-        "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]"
-      },
       "EditorToolDecisionRequestBody": {
         "type": "object",
         "properties": {
@@ -68997,21 +68145,6 @@
         },
         "additionalProperties": false,
         "description": "Parameters for an editor file-generation tool decision."
-      },
-      "EmailInvitationDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "maxLength": 255,
-            "type": "string",
-            "description": "The email address.",
-            "format": "email",
-            "nullable": true,
-            "example": "user@example.com"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The email invitation parameters."
       },
       "EmbeddingProviderType": {
         "enum": [
@@ -69172,1060 +68305,6 @@
         "additionalProperties": false,
         "description": "Parameters for exporting an AI chat message to a document."
       },
-      "FileEntryBaseDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "The file entry title.",
-            "nullable": true,
-            "example": "Some title.txt"
-          },
-          "access": {
-            "$ref": "#/components/schemas/FileShare"
-          },
-          "sharedBy": {
-            "$ref": "#/components/schemas/EmployeeDto"
-          },
-          "ownedBy": {
-            "$ref": "#/components/schemas/EmployeeDto"
-          },
-          "shared": {
-            "type": "boolean",
-            "description": "Specifies if the file entry is shared via link or not.",
-            "example": false
-          },
-          "sharedForUser": {
-            "type": "boolean",
-            "description": "Specifies if the file entry is shared for user or not.",
-            "example": false
-          },
-          "sharedExternal": {
-            "type": "boolean",
-            "description": "Specifies if the file entry is shared via a public (non-internal) external link.",
-            "example": false
-          },
-          "parentShared": {
-            "type": "boolean",
-            "description": "Indicates whether the parent entity is shared.",
-            "example": false
-          },
-          "shortWebUrl": {
-            "type": "string",
-            "description": "The short Web URL.",
-            "format": "uri",
-            "nullable": true,
-            "example": "http://localhost/s/abc123"
-          },
-          "created": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "createdBy": {
-            "$ref": "#/components/schemas/EmployeeDto"
-          },
-          "updated": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "autoDelete": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "rootFolderType": {
-            "$ref": "#/components/schemas/FolderType"
-          },
-          "parentRoomType": {
-            "$ref": "#/components/schemas/FolderType"
-          },
-          "updatedBy": {
-            "$ref": "#/components/schemas/EmployeeDto"
-          },
-          "providerItem": {
-            "type": "boolean",
-            "description": "Specifies if the file entry provider is specified or not.",
-            "nullable": true,
-            "example": false
-          },
-          "providerKey": {
-            "type": "string",
-            "description": "The provider key of the file entry.",
-            "nullable": true,
-            "example": "google-drive"
-          },
-          "providerId": {
-            "type": "integer",
-            "description": "The provider ID of the file entry.",
-            "format": "int32",
-            "nullable": true,
-            "example": 1
-          },
-          "order": {
-            "type": "string",
-            "description": "The order of the file entry.",
-            "nullable": true,
-            "example": "1"
-          },
-          "isFavorite": {
-            "type": "boolean",
-            "description": "Specifies if the file is a favorite or not.",
-            "nullable": true,
-            "example": false
-          },
-          "fileEntryType": {
-            "$ref": "#/components/schemas/FileEntryType"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The file entry information.",
-        "x-derived": true,
-        "x-derived-types": [
-          "FileDtoInteger",
-          "FileDtoString",
-          "FolderDtoInteger",
-          "FolderDtoString"
-        ]
-      },
-      "FileEntryDtoInteger": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/FileEntryBaseDto"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "integer",
-                "description": "The file entry ID.",
-                "format": "int32",
-                "example": 10
-              },
-              "rootFolderId": {
-                "type": "integer",
-                "description": "The root folder ID of the file entry.",
-                "format": "int32",
-                "example": 1
-              },
-              "originId": {
-                "type": "integer",
-                "description": "The origin ID of the file entry.",
-                "format": "int32",
-                "example": 12
-              },
-              "originRoomId": {
-                "type": "integer",
-                "description": "The origin room ID of the file entry.",
-                "format": "int32",
-                "example": 22
-              },
-              "originTitle": {
-                "type": "string",
-                "description": "The origin title of the file entry.",
-                "nullable": true,
-                "example": "Original Title"
-              },
-              "originRoomTitle": {
-                "type": "string",
-                "description": "The origin room title of the file entry.",
-                "nullable": true,
-                "example": "Original Room"
-              },
-              "canShare": {
-                "type": "boolean",
-                "description": "Specifies if the file entry can be shared or not.",
-                "example": true
-              },
-              "shareSettings": {
-                "type": "object",
-                "properties": {
-                  "User": {
-                    "type": "integer",
-                    "format": "int32"
-                  },
-                  "ExternalLink": {
-                    "type": "integer",
-                    "format": "int32"
-                  },
-                  "Group": {
-                    "type": "integer",
-                    "format": "int32"
-                  },
-                  "InvitationLink": {
-                    "type": "integer",
-                    "format": "int32"
-                  },
-                  "PrimaryExternalLink": {
-                    "type": "integer",
-                    "format": "int32"
-                  }
-                },
-                "additionalProperties": false,
-                "description": "A dictionary representing the sharing settings for the file entry.",
-                "nullable": true,
-                "example": {
-                  "ExternalLink": 1,
-                  "InvitationLink": 2
-                }
-              },
-              "security": {
-                "type": "object",
-                "properties": {
-                  "Read": {
-                    "type": "boolean"
-                  },
-                  "Comment": {
-                    "type": "boolean"
-                  },
-                  "FillForms": {
-                    "type": "boolean"
-                  },
-                  "Review": {
-                    "type": "boolean"
-                  },
-                  "Create": {
-                    "type": "boolean"
-                  },
-                  "CreateFrom": {
-                    "type": "boolean"
-                  },
-                  "Edit": {
-                    "type": "boolean"
-                  },
-                  "Delete": {
-                    "type": "boolean"
-                  },
-                  "CustomFilter": {
-                    "type": "boolean"
-                  },
-                  "EditRoom": {
-                    "type": "boolean"
-                  },
-                  "Rename": {
-                    "type": "boolean"
-                  },
-                  "ReadHistory": {
-                    "type": "boolean"
-                  },
-                  "Lock": {
-                    "type": "boolean"
-                  },
-                  "EditHistory": {
-                    "type": "boolean"
-                  },
-                  "CopyTo": {
-                    "type": "boolean"
-                  },
-                  "Copy": {
-                    "type": "boolean"
-                  },
-                  "MoveTo": {
-                    "type": "boolean"
-                  },
-                  "Move": {
-                    "type": "boolean"
-                  },
-                  "Pin": {
-                    "type": "boolean"
-                  },
-                  "Mute": {
-                    "type": "boolean"
-                  },
-                  "EditAccess": {
-                    "type": "boolean"
-                  },
-                  "Duplicate": {
-                    "type": "boolean"
-                  },
-                  "SubmitToFormGallery": {
-                    "type": "boolean"
-                  },
-                  "Download": {
-                    "type": "boolean"
-                  },
-                  "Convert": {
-                    "type": "boolean"
-                  },
-                  "CopySharedLink": {
-                    "type": "boolean"
-                  },
-                  "ReadLinks": {
-                    "type": "boolean"
-                  },
-                  "Reconnect": {
-                    "type": "boolean"
-                  },
-                  "CreateRoomFrom": {
-                    "type": "boolean"
-                  },
-                  "CopyLink": {
-                    "type": "boolean"
-                  },
-                  "Embed": {
-                    "type": "boolean"
-                  },
-                  "ChangeOwner": {
-                    "type": "boolean"
-                  },
-                  "IndexExport": {
-                    "type": "boolean"
-                  },
-                  "StartFilling": {
-                    "type": "boolean"
-                  },
-                  "FillingStatus": {
-                    "type": "boolean"
-                  },
-                  "ResetFilling": {
-                    "type": "boolean"
-                  },
-                  "StopFilling": {
-                    "type": "boolean"
-                  },
-                  "OpenForm": {
-                    "type": "boolean"
-                  },
-                  "EditInternal": {
-                    "type": "boolean"
-                  },
-                  "EditExpiration": {
-                    "type": "boolean"
-                  },
-                  "Vectorization": {
-                    "type": "boolean"
-                  },
-                  "AskAi": {
-                    "type": "boolean"
-                  },
-                  "UseChat": {
-                    "type": "boolean"
-                  },
-                  "UpdateXlsx": {
-                    "type": "boolean"
-                  },
-                  "AnalyzeResponses": {
-                    "type": "boolean"
-                  },
-                  "CanUseAi": {
-                    "type": "boolean"
-                  }
-                },
-                "additionalProperties": false,
-                "description": "The actions that can be performed with the file entry.",
-                "nullable": true,
-                "example": {
-                  "Read": true,
-                  "Edit": false,
-                  "Delete": false
-                }
-              },
-              "availableShareRights": {
-                "type": "object",
-                "properties": {
-                  "User": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "ExternalLink": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "Group": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "InvitationLink": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "PrimaryExternalLink": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "additionalProperties": false,
-                "description": "The available external rights of the file entry.",
-                "nullable": true,
-                "example": {
-                  "ExternalLink": [
-                    "Read",
-                    "Edit"
-                  ]
-                }
-              },
-              "requestToken": {
-                "type": "string",
-                "description": "The request token of the file entry.",
-                "nullable": true,
-                "example": "token-abc-123"
-              },
-              "external": {
-                "type": "boolean",
-                "description": "Specifies if the folder can be accessed via an external link or not.",
-                "nullable": true,
-                "example": false
-              },
-              "expirationDate": {
-                "$ref": "#/components/schemas/ApiDateTime"
-              },
-              "isLinkExpired": {
-                "type": "boolean",
-                "description": "Indicates whether the shareable link associated with the file or folder has expired.",
-                "nullable": true,
-                "example": false
-              }
-            }
-          }
-        ],
-        "additionalProperties": false,
-        "description": "The generic file entry information."
-      },
-      "FileEntryType": {
-        "description": "[1 - Folder, 2 - File]",
-        "enum": [
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 1,
-        "x-enum-varnames": [
-          "Folder",
-          "File"
-        ]
-      },
-      "FileOperationDto": {
-        "required": [
-          "error",
-          "finished",
-          "id",
-          "Operation",
-          "processed",
-          "progress"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The file operation ID.",
-            "nullable": true,
-            "example": "00000000-0000-0000-0000-000000000000"
-          },
-          "Operation": {
-            "$ref": "#/components/schemas/FileOperationType"
-          },
-          "progress": {
-            "type": "integer",
-            "description": "The file operation progress in percentage.",
-            "format": "int32",
-            "example": 100
-          },
-          "error": {
-            "type": "string",
-            "description": "The file operation error message.",
-            "nullable": true,
-            "example": "File not found."
-          },
-          "processed": {
-            "type": "string",
-            "description": "The file operation processing status.",
-            "nullable": true,
-            "example": "1"
-          },
-          "finished": {
-            "type": "boolean",
-            "description": "Specifies if the file operation is finished or not.",
-            "example": true
-          },
-          "url": {
-            "type": "string",
-            "description": "The file operation URL.",
-            "format": "uri",
-            "nullable": true,
-            "example": "http://localhost/download"
-          },
-          "files": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FileEntryBaseDto"
-            },
-            "description": "The list of files of the file operation.",
-            "nullable": true,
-            "example": [
-              {
-                "id": 10,
-                "title": "document.docx"
-              }
-            ]
-          },
-          "folders": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FileEntryBaseDto"
-            },
-            "description": "The list of folders of the file operation.",
-            "nullable": true,
-            "example": [
-              {
-                "id": 20,
-                "title": "My Folder"
-              }
-            ]
-          },
-          "status": {
-            "$ref": "#/components/schemas/DistributedTaskStatus"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The file operation information."
-      },
-      "FileOperationType": {
-        "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
-          "Move",
-          "Copy",
-          "Delete",
-          "Download",
-          "MarkAsRead",
-          "Import",
-          "Convert",
-          "Duplicate"
-        ]
-      },
-      "FileOperationWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/FileOperationDto"
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        }
-      },
-      "FileShare": {
-        "description": "[0 - None, 1 - Read and write, 2 - Read, 3 - Restrict, 4 - Varies, 5 - Review, 6 - Comment, 7 - Fill forms, 8 - Custom filter, 9 - Room manager, 10 - Editing, 11 - Content creator]",
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
-          "None",
-          "ReadWrite",
-          "Read",
-          "Restrict",
-          "Varies",
-          "Review",
-          "Comment",
-          "FillForms",
-          "CustomFilter",
-          "RoomManager",
-          "Editing",
-          "ContentCreator"
-        ]
-      },
-      "FileShareParams": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/EmailInvitationDto"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "shareTo": {
-                "type": "string",
-                "description": "The ID of the user to whom the file will be shared.",
-                "format": "uuid",
-                "example": "00000000-0000-0000-0000-000000000000"
-              },
-              "access": {
-                "$ref": "#/components/schemas/FileShare"
-              }
-            }
-          }
-        ],
-        "additionalProperties": false,
-        "description": "The collection of file sharing parameters."
-      },
-      "FolderContentDtoInteger": {
-        "required": [
-          "pathParts",
-          "total"
-        ],
-        "type": "object",
-        "properties": {
-          "files": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FileEntryBaseDto"
-            },
-            "description": "The list of files in the folder.",
-            "nullable": true,
-            "example": [
-              {
-                "id": 10,
-                "title": "document.docx"
-              }
-            ]
-          },
-          "folders": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FileEntryBaseDto"
-            },
-            "description": "The list of folders in the folder.",
-            "nullable": true,
-            "example": [
-              {
-                "id": 20,
-                "title": "My Folder"
-              }
-            ]
-          },
-          "current": {
-            "$ref": "#/components/schemas/FolderDtoInteger"
-          },
-          "pathParts": {
-            "description": "The folder path.",
-            "nullable": true,
-            "example": "{key = \"Key\", path = \"//path//to//folder\"}"
-          },
-          "startIndex": {
-            "type": "integer",
-            "description": "The folder start index.",
-            "format": "int32",
-            "example": 0
-          },
-          "count": {
-            "type": "integer",
-            "description": "The number of folder elements.",
-            "format": "int32",
-            "example": 4
-          },
-          "total": {
-            "type": "integer",
-            "description": "The total number of elements in the folder.",
-            "format": "int32",
-            "example": 4
-          },
-          "new": {
-            "type": "integer",
-            "description": "The new element index in the folder.",
-            "format": "int32",
-            "example": 0
-          }
-        },
-        "additionalProperties": false,
-        "description": "The folder content information."
-      },
-      "FolderContentIntegerWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/FolderContentDtoInteger"
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        }
-      },
-      "FolderDtoInteger": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/FileEntryDtoInteger"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "parentId": {
-                "type": "integer",
-                "description": "The parent folder ID of the folder.",
-                "format": "int32",
-                "example": 10
-              },
-              "filesCount": {
-                "type": "integer",
-                "description": "The number of files that the folder contains.",
-                "format": "int32",
-                "example": 5
-              },
-              "foldersCount": {
-                "type": "integer",
-                "description": "The number of folders that the folder contains.",
-                "format": "int32",
-                "example": 7
-              },
-              "isShareable": {
-                "type": "boolean",
-                "description": "Specifies if the folder can be shared or not.",
-                "nullable": true,
-                "example": true
-              },
-              "new": {
-                "type": "integer",
-                "description": "The new element index in the folder.",
-                "format": "int32",
-                "example": 0
-              },
-              "mute": {
-                "type": "boolean",
-                "description": "Specifies if the folder notifications are enabled or not.",
-                "example": false
-              },
-              "tags": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "The list of tags of the folder.",
-                "nullable": true,
-                "example": [
-                  "tag1",
-                  "tag2"
-                ]
-              },
-              "logo": {
-                "$ref": "#/components/schemas/Logo"
-              },
-              "pinned": {
-                "type": "boolean",
-                "description": "Specifies if the folder is pinned or not.",
-                "example": false
-              },
-              "roomType": {
-                "$ref": "#/components/schemas/RoomType"
-              },
-              "private": {
-                "type": "boolean",
-                "description": "Specifies if the folder is private or not.",
-                "example": false
-              },
-              "indexing": {
-                "type": "boolean",
-                "description": "Specifies if the folder is indexed or not.",
-                "example": true
-              },
-              "denyDownload": {
-                "type": "boolean",
-                "description": "Specifies if the folder can be downloaded or not.",
-                "example": false
-              },
-              "lifetime": {
-                "$ref": "#/components/schemas/RoomDataLifetimeDto"
-              },
-              "watermark": {
-                "$ref": "#/components/schemas/WatermarkDto"
-              },
-              "type": {
-                "$ref": "#/components/schemas/FolderType"
-              },
-              "inRoom": {
-                "type": "boolean",
-                "description": "Specifies if the folder is placed in the room or not.",
-                "nullable": true,
-                "example": false
-              },
-              "quotaLimit": {
-                "type": "integer",
-                "description": "The folder quota limit.",
-                "format": "int64",
-                "nullable": true,
-                "example": 1073741824
-              },
-              "isCustomQuota": {
-                "type": "boolean",
-                "description": "Specifies if the folder room has a custom quota or not.",
-                "nullable": true,
-                "example": false
-              },
-              "usedSpace": {
-                "type": "integer",
-                "description": "How much folder space is used (counter).",
-                "format": "int64",
-                "nullable": true,
-                "example": 524288000
-              },
-              "passwordProtected": {
-                "type": "boolean",
-                "description": "Specifies if the folder is password protected or not.",
-                "nullable": true,
-                "example": false
-              },
-              "expired": {
-                "type": "boolean",
-                "description": "Specifies if an external link to the folder is expired or not.",
-                "nullable": true,
-                "example": false,
-                "deprecated": true
-              },
-              "chatSettings": {
-                "$ref": "#/components/schemas/ChatSettingsDto"
-              },
-              "rootRoomType": {
-                "$ref": "#/components/schemas/RoomType"
-              },
-              "saveFormAsXLSX": {
-                "type": "boolean",
-                "description": "Specifies whether to save form data as XLSX file.",
-                "nullable": true,
-                "example": false
-              },
-              "sendFormToExternalDB": {
-                "type": "boolean",
-                "description": "Specifies whether to send form data to external database.",
-                "nullable": true,
-                "example": false
-              },
-              "originalFormId": {
-                "type": "integer",
-                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
-                "format": "int32",
-                "nullable": true,
-                "example": 42
-              }
-            }
-          }
-        ],
-        "additionalProperties": false,
-        "description": "The folder parameters."
-      },
-      "FolderIntegerArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FolderDtoInteger"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        }
-      },
-      "FolderIntegerWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/FolderDtoInteger"
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        }
-      },
-      "FolderType": {
-        "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates]",
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          5,
-          6,
-          8,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16,
-          19,
-          20,
-          21,
-          22,
-          25,
-          26,
-          27,
-          28,
-          29,
-          30,
-          31,
-          32,
-          33,
-          34,
-          35
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
-          "DEFAULT",
-          "COMMON",
-          "BUNCH",
-          "TRASH",
-          "USER",
-          "SHARE",
-          "Projects",
-          "Favorites",
-          "Recent",
-          "Templates",
-          "Privacy",
-          "VirtualRooms",
-          "FillingFormsRoom",
-          "EditingRoom",
-          "CustomRoom",
-          "Archive",
-          "ThirdpartyBackup",
-          "PublicRoom",
-          "ReadyFormFolder",
-          "InProcessFormFolder",
-          "FormFillingFolderDone",
-          "FormFillingFolderInProgress",
-          "VirtualDataRoom",
-          "RoomTemplates",
-          "AiRoom",
-          "Knowledge",
-          "ResultStorage",
-          "AiAgents",
-          "DefaultTemplates"
-        ]
-      },
       "GeneratedFileDto": {
         "required": [
           "extension",
@@ -70322,123 +68401,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "Logo": {
-        "required": [
-          "large",
-          "medium",
-          "original",
-          "small"
-        ],
-        "type": "object",
-        "properties": {
-          "original": {
-            "type": "string",
-            "description": "The original logo.",
-            "nullable": true,
-            "example": "https://portal.example.com/logo/original.png"
-          },
-          "large": {
-            "type": "string",
-            "description": "The large logo.",
-            "nullable": true,
-            "example": "https://portal.example.com/logo/large.png"
-          },
-          "medium": {
-            "type": "string",
-            "description": "The medium logo.",
-            "nullable": true,
-            "example": "https://portal.example.com/logo/medium.png"
-          },
-          "small": {
-            "type": "string",
-            "description": "The small logo.",
-            "nullable": true,
-            "example": "https://portal.example.com/logo/small.png"
-          },
-          "color": {
-            "type": "string",
-            "description": "The logo color.",
-            "nullable": true,
-            "example": "#4781D1"
-          },
-          "cover": {
-            "$ref": "#/components/schemas/LogoCover"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The room logo information."
-      },
-      "LogoCover": {
-        "required": [
-          "data",
-          "id"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The logo cover ID.",
-            "nullable": true,
-            "example": "default_cover"
-          },
-          "data": {
-            "type": "string",
-            "description": "The logo cover data.",
-            "nullable": true,
-            "example": "base64-image-data..."
-          }
-        },
-        "additionalProperties": false,
-        "description": "The logo cover information."
-      },
-      "LogoRequest": {
-        "required": [
-          "tmpFile"
-        ],
-        "type": "object",
-        "properties": {
-          "tmpFile": {
-            "minLength": 1,
-            "type": "string",
-            "description": "The path to the temporary image file.",
-            "example": "/tmp/logo.png"
-          },
-          "x": {
-            "maximum": 1280,
-            "minimum": 0,
-            "type": "integer",
-            "description": "The X coordinate of the rectangle starting point.",
-            "format": "int32",
-            "example": 0
-          },
-          "y": {
-            "maximum": 1280,
-            "minimum": 0,
-            "type": "integer",
-            "description": "The Y coordinate of the rectangle starting point.",
-            "format": "int32",
-            "example": 0
-          },
-          "width": {
-            "maximum": 1280,
-            "minimum": 1,
-            "type": "integer",
-            "description": "The rectangle width.",
-            "format": "int32",
-            "example": 100
-          },
-          "height": {
-            "maximum": 1280,
-            "minimum": 1,
-            "type": "integer",
-            "description": "The rectangle height.",
-            "format": "int32",
-            "example": 100
-          }
-        },
-        "additionalProperties": false,
-        "description": "The logo request parameters."
       },
       "McpServerArrayWrapper": {
         "type": "object",
@@ -71186,71 +69148,6 @@
         "additionalProperties": false,
         "description": "A single model settings entry within a provider create or update request."
       },
-      "NewItemsAgentNewItemsArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NewItemsDtoAgentNewItemsDto"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        }
-      },
-      "NewItemsDtoAgentNewItemsDto": {
-        "required": [
-          "date",
-          "items"
-        ],
-        "type": "object",
-        "properties": {
-          "date": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AgentNewItemsDto"
-            },
-            "description": "The list of items.",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "The new item parameters."
-      },
       "PreviewProviderModelsRequestDto": {
         "required": [
           "key"
@@ -71362,21 +69259,6 @@
         ],
         "description": "[0 - PortalAi, 1 - OpenAi, 2 - TogetherAi, 3 - OpenAiCompatible, 4 - Anthropic, 5 - OpenRouter, 6 - DeepSeek, 7 - XAi, 8 - GoogleAi]"
       },
-      "QuotaFilter": {
-        "description": "[0 - All, 1 - Default, 2 - Custom]",
-        "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
-          "All",
-          "Default",
-          "Custom"
-        ]
-      },
       "RemoveProviderRequestDto": {
         "required": [
           "ids"
@@ -71431,72 +69313,6 @@
           "Assistant"
         ],
         "description": "[0 - User, 1 - Assistant]"
-      },
-      "RoomDataLifetimeDto": {
-        "type": "object",
-        "properties": {
-          "deletePermanently": {
-            "type": "boolean",
-            "description": "Specifies whether to permanently delete the room data or not.",
-            "example": true
-          },
-          "period": {
-            "$ref": "#/components/schemas/RoomDataLifetimePeriod"
-          },
-          "value": {
-            "maximum": 999,
-            "minimum": 1,
-            "type": "integer",
-            "description": "Specifies the time period value of the room data lifetime.",
-            "format": "int32",
-            "nullable": true,
-            "example": 33
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Specifies whether the room data lifetime setting is enabled or not.",
-            "nullable": true,
-            "example": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "The room data lifetime information."
-      },
-      "RoomDataLifetimePeriod": {
-        "description": "[0 - Day, 1 - Month, 2 - Year]",
-        "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
-          "Day",
-          "Month",
-          "Year"
-        ]
-      },
-      "RoomType": {
-        "description": "[1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]",
-        "enum": [
-          1,
-          2,
-          5,
-          6,
-          8,
-          9
-        ],
-        "type": "integer",
-        "example": 1,
-        "x-enum-varnames": [
-          "FillingFormsRoom",
-          "EditingRoom",
-          "CustomRoom",
-          "PublicRoom",
-          "VirtualDataRoom",
-          "AiRoom"
-        ]
       },
       "ServerType": {
         "enum": [
@@ -71637,19 +69453,6 @@
         "additionalProperties": false,
         "description": "Parameters for configuring web search settings."
       },
-      "SortOrder": {
-        "description": "[0 - Ascending, 1 - Descending]",
-        "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
-          "Ascending",
-          "Descending"
-        ]
-      },
       "StartNewChatBody": {
         "required": [
           "message"
@@ -71754,156 +69557,6 @@
         },
         "additionalProperties": false,
         "description": "Parameters for updating an AI provider's configuration."
-      },
-      "UpdateRoomRequest": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "maxLength": 170,
-            "minLength": 0,
-            "type": "string",
-            "description": "The room title.",
-            "nullable": true,
-            "example": "My Document"
-          },
-          "quota": {
-            "type": "integer",
-            "description": "The room quota.",
-            "format": "int64",
-            "nullable": true,
-            "example": 10485760
-          },
-          "indexing": {
-            "type": "boolean",
-            "description": "Specifies whether to create a third-party room with indexing.",
-            "nullable": true,
-            "example": true
-          },
-          "denyDownload": {
-            "type": "boolean",
-            "description": "Specifies whether to deny downloads from the third-party room.",
-            "nullable": true,
-            "example": true
-          },
-          "lifetime": {
-            "$ref": "#/components/schemas/RoomDataLifetimeDto"
-          },
-          "watermark": {
-            "$ref": "#/components/schemas/WatermarkRequestDto"
-          },
-          "logo": {
-            "$ref": "#/components/schemas/LogoRequest"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The list of tags.",
-            "nullable": true,
-            "example": [
-              "tag1",
-              "tag2"
-            ]
-          },
-          "color": {
-            "maxLength": 6,
-            "minLength": 0,
-            "type": "string",
-            "description": "The room color.",
-            "nullable": true,
-            "example": "#FF5733"
-          },
-          "cover": {
-            "maxLength": 50,
-            "minLength": 0,
-            "type": "string",
-            "description": "The room cover.",
-            "nullable": true,
-            "example": "cover1"
-          },
-          "chatSettings": {
-            "$ref": "#/components/schemas/ChatSettings"
-          },
-          "sendFormToExternalDB": {
-            "type": "boolean",
-            "description": "Specifies whether to send form data to external database.",
-            "nullable": true,
-            "example": false
-          },
-          "saveFormAsXLSX": {
-            "type": "boolean",
-            "description": "Specifies whether to save form data as XLSX file.",
-            "nullable": true,
-            "example": false
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for updating a room."
-      },
-      "UpdateRoomsQuotaRequestDtoInteger": {
-        "type": "object",
-        "properties": {
-          "roomIds": {
-            "type": "array",
-            "items": {
-              "anyOf": [
-                {
-                  "type": "integer",
-                  "example": 1234
-                },
-                {
-                  "type": "string",
-                  "example": "some text"
-                }
-              ]
-            },
-            "description": "The list of room IDs.",
-            "nullable": true,
-            "example": [
-              1,
-              2,
-              3
-            ]
-          },
-          "quota": {
-            "type": "integer",
-            "description": "The room quota.",
-            "format": "int64",
-            "example": 10485760
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for updating the room quota."
-      },
-      "UpdateRoomsRoomIdsRequestDtoInteger": {
-        "type": "object",
-        "properties": {
-          "roomIds": {
-            "type": "array",
-            "items": {
-              "anyOf": [
-                {
-                  "type": "integer",
-                  "example": 1234
-                },
-                {
-                  "type": "string",
-                  "example": "some text"
-                }
-              ]
-            },
-            "description": "The list of room IDs.",
-            "nullable": true,
-            "example": [
-              1,
-              2,
-              3
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for updating the rooms."
       },
       "UpdateServerRequestBody": {
         "type": "object",
@@ -72089,132 +69742,6 @@
         },
         "additionalProperties": false,
         "description": "Parameters for submitting files for vectorization."
-      },
-      "WatermarkAdditions": {
-        "description": "[1 - User name, 2 - User email, 4 - User ip adress, 8 - Current date, 16 - Room name]",
-        "enum": [
-          1,
-          2,
-          4,
-          8,
-          16
-        ],
-        "type": "integer",
-        "example": 1,
-        "x-enum-varnames": [
-          "UserName",
-          "UserEmail",
-          "UserIpAdress",
-          "CurrentDate",
-          "RoomName"
-        ]
-      },
-      "WatermarkDto": {
-        "required": [
-          "additions",
-          "imageHeight",
-          "imageScale",
-          "imageWidth",
-          "rotate"
-        ],
-        "type": "object",
-        "properties": {
-          "additions": {
-            "$ref": "#/components/schemas/WatermarkAdditions"
-          },
-          "text": {
-            "type": "string",
-            "description": "The watermark text.",
-            "nullable": true,
-            "example": "Confidential"
-          },
-          "rotate": {
-            "type": "integer",
-            "description": "The watermark text and image rotate.",
-            "format": "int32",
-            "example": 45
-          },
-          "imageScale": {
-            "type": "integer",
-            "description": "The watermark image scale.",
-            "format": "int32",
-            "example": 100
-          },
-          "imageUrl": {
-            "type": "string",
-            "description": "The watermark image url.",
-            "nullable": true,
-            "example": "http://localhost/watermark.png"
-          },
-          "imageHeight": {
-            "type": "number",
-            "description": "The watermark image height.",
-            "format": "double",
-            "example": 100.0
-          },
-          "imageWidth": {
-            "type": "number",
-            "description": "The watermark image width.",
-            "format": "double",
-            "example": 200.0
-          }
-        },
-        "additionalProperties": false,
-        "description": "The watermark settings."
-      },
-      "WatermarkRequestDto": {
-        "type": "object",
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "description": "Specifies whether watermarks are on or off.",
-            "nullable": true,
-            "example": true
-          },
-          "additions": {
-            "$ref": "#/components/schemas/WatermarkAdditions"
-          },
-          "text": {
-            "maxLength": 255,
-            "minLength": 0,
-            "type": "string",
-            "description": "The watermark text.",
-            "nullable": true,
-            "example": "Confidential"
-          },
-          "rotate": {
-            "type": "integer",
-            "description": "The watermark text and image rotate angle.",
-            "format": "int32",
-            "example": -45
-          },
-          "imageScale": {
-            "type": "integer",
-            "description": "The watermark image scale.",
-            "format": "int32",
-            "example": 100
-          },
-          "imageUrl": {
-            "type": "string",
-            "description": "The path to the temporary image file.",
-            "nullable": true,
-            "example": "/tmp/watermark.png"
-          },
-          "imageHeight": {
-            "type": "number",
-            "description": "The watermark image height.",
-            "format": "double",
-            "example": 100.0
-          },
-          "imageWidth": {
-            "type": "number",
-            "description": "The watermark image width.",
-            "format": "double",
-            "example": 200.0
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for adding watermarks."
       },
       "WebSearchSettingsDto": {
         "type": "object",
@@ -72668,6 +70195,65 @@
           "ThirdPartyConsumer"
         ]
       },
+      "BackupsCountResultDto": {
+        "type": "object",
+        "properties": {
+          "free": {
+            "type": "integer",
+            "description": "The number of free backups.",
+            "format": "int32",
+            "example": 3
+          },
+          "paid": {
+            "type": "integer",
+            "description": "The number of paid backups.",
+            "format": "int32",
+            "example": 5
+          }
+        },
+        "additionalProperties": false,
+        "description": "The number of backups."
+      },
+      "BackupsCountResultWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/BackupsCountResultDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "BooleanWrapper": {
         "type": "object",
         "properties": {
@@ -72752,6 +70338,25 @@
         },
         "additionalProperties": false,
         "description": "The backup cron parameters."
+      },
+      "DistributedTaskStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "Created",
+          "Running",
+          "Completed",
+          "Canceled",
+          "Failted"
+        ],
+        "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]"
       },
       "Int32Wrapper": {
         "type": "object",
@@ -73465,6 +71070,50 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for changing the file owner."
+      },
+      "ChatSettings": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "description": "The provider ID.",
+            "format": "int32",
+            "example": 1
+          },
+          "modelId": {
+            "type": "string",
+            "description": "The model ID.",
+            "nullable": true,
+            "example": "gpt-4"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The prompt.",
+            "nullable": true,
+            "example": "Please analyze this document"
+          },
+          "internal": {
+            "type": "boolean",
+            "description": "Specifies whether the provider is internal or not.",
+            "readOnly": true,
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The chat settings."
+      },
+      "ChatSettingsDto": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "The system prompt for the chat.",
+            "nullable": true,
+            "example": "You are a helpful assistant."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The chat settings parameters."
       },
       "CheckConversionRequestDtoInteger": {
         "type": "object",
@@ -75018,6 +72667,18 @@
         "additionalProperties": false,
         "description": "The parameters for deleting a folder."
       },
+      "DeleteRoomRequest": {
+        "type": "object",
+        "properties": {
+          "deleteAfter": {
+            "type": "boolean",
+            "description": "Specifies whether to delete a room after the editing session is finished or not.",
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The parameters for deleting a room."
+      },
       "DeleteVersionBatchRequestDto": {
         "allOf": [
           {
@@ -75848,7 +73509,12 @@
             "$ref": "#/components/schemas/EmbeddedConfig"
           },
           "encryptionKeys": {
-            "$ref": "#/components/schemas/EncryptionKeyDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EncryptionKeyDto"
+            },
+            "description": "The encryption keys of the editor configuration.",
+            "nullable": true
           },
           "lang": {
             "type": "string",
@@ -75940,6 +73606,21 @@
           "Mobile",
           "Embedded"
         ]
+      },
+      "EmailInvitationDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "The email address.",
+            "format": "email",
+            "nullable": true,
+            "example": "user@example.com"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The email invitation parameters."
       },
       "EmbeddedConfig": {
         "type": "object",
@@ -76301,8 +73982,7 @@
           },
           "cryptoEngineId": {
             "type": "string",
-            "nullable": true,
-            "readOnly": true
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -77118,6 +74798,117 @@
           }
         }
       },
+      "FileEntryBaseDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The file entry title.",
+            "nullable": true,
+            "example": "Some title.txt"
+          },
+          "access": {
+            "$ref": "#/components/schemas/FileShare"
+          },
+          "sharedBy": {
+            "$ref": "#/components/schemas/EmployeeDto"
+          },
+          "ownedBy": {
+            "$ref": "#/components/schemas/EmployeeDto"
+          },
+          "shared": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared via link or not.",
+            "example": false
+          },
+          "sharedForUser": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared for user or not.",
+            "example": false
+          },
+          "sharedExternal": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared via a public (non-internal) external link.",
+            "example": false
+          },
+          "parentShared": {
+            "type": "boolean",
+            "description": "Indicates whether the parent entity is shared.",
+            "example": false
+          },
+          "shortWebUrl": {
+            "type": "string",
+            "description": "The short Web URL.",
+            "format": "uri",
+            "nullable": true,
+            "example": "http://localhost/s/abc123"
+          },
+          "created": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/EmployeeDto"
+          },
+          "updated": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "autoDelete": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "rootFolderType": {
+            "$ref": "#/components/schemas/FolderType"
+          },
+          "parentRoomType": {
+            "$ref": "#/components/schemas/FolderType"
+          },
+          "updatedBy": {
+            "$ref": "#/components/schemas/EmployeeDto"
+          },
+          "providerItem": {
+            "type": "boolean",
+            "description": "Specifies if the file entry provider is specified or not.",
+            "nullable": true,
+            "example": false
+          },
+          "providerKey": {
+            "type": "string",
+            "description": "The provider key of the file entry.",
+            "nullable": true,
+            "example": "google-drive"
+          },
+          "providerId": {
+            "type": "integer",
+            "description": "The provider ID of the file entry.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1
+          },
+          "order": {
+            "type": "string",
+            "description": "The order of the file entry.",
+            "nullable": true,
+            "example": "1"
+          },
+          "isFavorite": {
+            "type": "boolean",
+            "description": "Specifies if the file is a favorite or not.",
+            "nullable": true,
+            "example": false
+          },
+          "fileEntryType": {
+            "$ref": "#/components/schemas/FileEntryType"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The file entry information.",
+        "x-derived": true,
+        "x-derived-types": [
+          "FileDtoInteger",
+          "FileDtoString",
+          "FolderDtoInteger",
+          "FolderDtoString"
+        ]
+      },
       "FileEntryBaseWrapper": {
         "type": "object",
         "properties": {
@@ -77157,6 +74948,309 @@
             "format": "int32"
           }
         }
+      },
+      "FileEntryDtoInteger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileEntryBaseDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "The file entry ID.",
+                "format": "int32",
+                "example": 10
+              },
+              "rootFolderId": {
+                "type": "integer",
+                "description": "The root folder ID of the file entry.",
+                "format": "int32",
+                "example": 1
+              },
+              "originId": {
+                "type": "integer",
+                "description": "The origin ID of the file entry.",
+                "format": "int32",
+                "example": 12
+              },
+              "originRoomId": {
+                "type": "integer",
+                "description": "The origin room ID of the file entry.",
+                "format": "int32",
+                "example": 22
+              },
+              "originTitle": {
+                "type": "string",
+                "description": "The origin title of the file entry.",
+                "nullable": true,
+                "example": "Original Title"
+              },
+              "originRoomTitle": {
+                "type": "string",
+                "description": "The origin room title of the file entry.",
+                "nullable": true,
+                "example": "Original Room"
+              },
+              "canShare": {
+                "type": "boolean",
+                "description": "Specifies if the file entry can be shared or not.",
+                "example": true
+              },
+              "shareSettings": {
+                "type": "object",
+                "properties": {
+                  "User": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "ExternalLink": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "Group": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "InvitationLink": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "PrimaryExternalLink": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "A dictionary representing the sharing settings for the file entry.",
+                "nullable": true,
+                "example": {
+                  "ExternalLink": 1,
+                  "InvitationLink": 2
+                }
+              },
+              "security": {
+                "type": "object",
+                "properties": {
+                  "Read": {
+                    "type": "boolean"
+                  },
+                  "Comment": {
+                    "type": "boolean"
+                  },
+                  "FillForms": {
+                    "type": "boolean"
+                  },
+                  "Review": {
+                    "type": "boolean"
+                  },
+                  "Create": {
+                    "type": "boolean"
+                  },
+                  "CreateFrom": {
+                    "type": "boolean"
+                  },
+                  "Edit": {
+                    "type": "boolean"
+                  },
+                  "Delete": {
+                    "type": "boolean"
+                  },
+                  "CustomFilter": {
+                    "type": "boolean"
+                  },
+                  "EditRoom": {
+                    "type": "boolean"
+                  },
+                  "Rename": {
+                    "type": "boolean"
+                  },
+                  "ReadHistory": {
+                    "type": "boolean"
+                  },
+                  "Lock": {
+                    "type": "boolean"
+                  },
+                  "EditHistory": {
+                    "type": "boolean"
+                  },
+                  "CopyTo": {
+                    "type": "boolean"
+                  },
+                  "Copy": {
+                    "type": "boolean"
+                  },
+                  "MoveTo": {
+                    "type": "boolean"
+                  },
+                  "Move": {
+                    "type": "boolean"
+                  },
+                  "Pin": {
+                    "type": "boolean"
+                  },
+                  "Mute": {
+                    "type": "boolean"
+                  },
+                  "EditAccess": {
+                    "type": "boolean"
+                  },
+                  "Duplicate": {
+                    "type": "boolean"
+                  },
+                  "SubmitToFormGallery": {
+                    "type": "boolean"
+                  },
+                  "Download": {
+                    "type": "boolean"
+                  },
+                  "Convert": {
+                    "type": "boolean"
+                  },
+                  "CopySharedLink": {
+                    "type": "boolean"
+                  },
+                  "ReadLinks": {
+                    "type": "boolean"
+                  },
+                  "Reconnect": {
+                    "type": "boolean"
+                  },
+                  "CreateRoomFrom": {
+                    "type": "boolean"
+                  },
+                  "CopyLink": {
+                    "type": "boolean"
+                  },
+                  "Embed": {
+                    "type": "boolean"
+                  },
+                  "ChangeOwner": {
+                    "type": "boolean"
+                  },
+                  "IndexExport": {
+                    "type": "boolean"
+                  },
+                  "StartFilling": {
+                    "type": "boolean"
+                  },
+                  "FillingStatus": {
+                    "type": "boolean"
+                  },
+                  "ResetFilling": {
+                    "type": "boolean"
+                  },
+                  "StopFilling": {
+                    "type": "boolean"
+                  },
+                  "OpenForm": {
+                    "type": "boolean"
+                  },
+                  "EditInternal": {
+                    "type": "boolean"
+                  },
+                  "EditExpiration": {
+                    "type": "boolean"
+                  },
+                  "Vectorization": {
+                    "type": "boolean"
+                  },
+                  "AskAi": {
+                    "type": "boolean"
+                  },
+                  "UseChat": {
+                    "type": "boolean"
+                  },
+                  "UpdateXlsx": {
+                    "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
+                    "type": "boolean"
+                  },
+                  "CanUseAi": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "The actions that can be performed with the file entry.",
+                "nullable": true,
+                "example": {
+                  "Read": true,
+                  "Edit": false,
+                  "Delete": false
+                }
+              },
+              "availableShareRights": {
+                "type": "object",
+                "properties": {
+                  "User": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "Group": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "InvitationLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "PrimaryExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false,
+                "description": "The available external rights of the file entry.",
+                "nullable": true,
+                "example": {
+                  "ExternalLink": [
+                    "Read",
+                    "Edit"
+                  ]
+                }
+              },
+              "requestToken": {
+                "type": "string",
+                "description": "The request token of the file entry.",
+                "nullable": true,
+                "example": "token-abc-123"
+              },
+              "external": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be accessed via an external link or not.",
+                "nullable": true,
+                "example": false
+              },
+              "expirationDate": {
+                "$ref": "#/components/schemas/ApiDateTime"
+              },
+              "isLinkExpired": {
+                "type": "boolean",
+                "description": "Indicates whether the shareable link associated with the file or folder has expired.",
+                "nullable": true,
+                "example": false
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The generic file entry information."
       },
       "FileEntryDtoString": {
         "allOf": [
@@ -77504,6 +75598,19 @@
           }
         }
       },
+      "FileEntryType": {
+        "description": "[1 - Folder, 2 - File]",
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "example": 1,
+        "x-enum-varnames": [
+          "Folder",
+          "File"
+        ]
+      },
       "FileIntegerArrayWrapper": {
         "type": "object",
         "properties": {
@@ -77780,6 +75887,91 @@
           }
         }
       },
+      "FileOperationDto": {
+        "required": [
+          "error",
+          "finished",
+          "id",
+          "Operation",
+          "processed",
+          "progress"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The file operation ID.",
+            "nullable": true,
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "Operation": {
+            "$ref": "#/components/schemas/FileOperationType"
+          },
+          "progress": {
+            "type": "integer",
+            "description": "The file operation progress in percentage.",
+            "format": "int32",
+            "example": 100
+          },
+          "error": {
+            "type": "string",
+            "description": "The file operation error message.",
+            "nullable": true,
+            "example": "File not found."
+          },
+          "processed": {
+            "type": "string",
+            "description": "The file operation processing status.",
+            "nullable": true,
+            "example": "1"
+          },
+          "finished": {
+            "type": "boolean",
+            "description": "Specifies if the file operation is finished or not.",
+            "example": true
+          },
+          "url": {
+            "type": "string",
+            "description": "The file operation URL.",
+            "format": "uri",
+            "nullable": true,
+            "example": "http://localhost/download"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of files of the file operation.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of folders of the file operation.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/DistributedTaskStatus"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The file operation information."
+      },
       "FileOperationRequestBaseDto": {
         "type": "object",
         "properties": {
@@ -77791,6 +75983,71 @@
         },
         "additionalProperties": false,
         "description": "The base operation request parameters."
+      },
+      "FileOperationType": {
+        "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "Move",
+          "Copy",
+          "Delete",
+          "Download",
+          "MarkAsRead",
+          "Import",
+          "Convert",
+          "Duplicate"
+        ]
+      },
+      "FileOperationWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FileOperationDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "FileReference": {
         "type": "object",
@@ -77914,6 +76171,39 @@
             "format": "int32"
           }
         }
+      },
+      "FileShare": {
+        "description": "[0 - None, 1 - Read and write, 2 - Read, 3 - Restrict, 4 - Varies, 5 - Review, 6 - Comment, 7 - Fill forms, 8 - Custom filter, 9 - Room manager, 10 - Editing, 11 - Content creator]",
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "None",
+          "ReadWrite",
+          "Read",
+          "Restrict",
+          "Varies",
+          "Review",
+          "Comment",
+          "FillForms",
+          "CustomFilter",
+          "RoomManager",
+          "Editing",
+          "ContentCreator"
+        ]
       },
       "FileShareArrayWrapper": {
         "type": "object",
@@ -78112,6 +76402,29 @@
         },
         "additionalProperties": false,
         "description": "A shareable link for a file with its configuration and status."
+      },
+      "FileShareParams": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmailInvitationDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "shareTo": {
+                "type": "string",
+                "description": "The ID of the user to whom the file will be shared.",
+                "format": "uuid",
+                "example": "00000000-0000-0000-0000-000000000000"
+              },
+              "access": {
+                "$ref": "#/components/schemas/FileShare"
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The collection of file sharing parameters."
       },
       "FileShareWrapper": {
         "type": "object",
@@ -78883,6 +77196,9 @@
           },
           "aiAgentsUsedSpace": {
             "$ref": "#/components/schemas/FilesStatisticsFolder"
+          },
+          "formsUsedSpace": {
+            "$ref": "#/components/schemas/FilesStatisticsFolder"
           }
         },
         "additionalProperties": false,
@@ -79056,6 +77372,77 @@
           "AiRooms"
         ]
       },
+      "FolderContentDtoInteger": {
+        "required": [
+          "pathParts",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of files in the folder.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of folders in the folder.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
+          },
+          "current": {
+            "$ref": "#/components/schemas/FolderDtoInteger"
+          },
+          "pathParts": {
+            "description": "The folder path.",
+            "nullable": true,
+            "example": "{key = \"Key\", path = \"//path//to//folder\"}"
+          },
+          "startIndex": {
+            "type": "integer",
+            "description": "The folder start index.",
+            "format": "int32",
+            "example": 0
+          },
+          "count": {
+            "type": "integer",
+            "description": "The number of folder elements.",
+            "format": "int32",
+            "example": 4
+          },
+          "total": {
+            "type": "integer",
+            "description": "The total number of elements in the folder.",
+            "format": "int32",
+            "example": 4
+          },
+          "new": {
+            "type": "integer",
+            "description": "The new element index in the folder.",
+            "format": "int32",
+            "example": 0
+          }
+        },
+        "additionalProperties": false,
+        "description": "The folder content information."
+      },
       "FolderContentIntegerArrayWrapper": {
         "type": "object",
         "properties": {
@@ -79098,6 +77485,206 @@
             "format": "int32"
           }
         }
+      },
+      "FolderContentIntegerWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FolderContentDtoInteger"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "FolderDtoInteger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileEntryDtoInteger"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "parentId": {
+                "type": "integer",
+                "description": "The parent folder ID of the folder.",
+                "format": "int32",
+                "example": 10
+              },
+              "filesCount": {
+                "type": "integer",
+                "description": "The number of files that the folder contains.",
+                "format": "int32",
+                "example": 5
+              },
+              "foldersCount": {
+                "type": "integer",
+                "description": "The number of folders that the folder contains.",
+                "format": "int32",
+                "example": 7
+              },
+              "isShareable": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be shared or not.",
+                "nullable": true,
+                "example": true
+              },
+              "new": {
+                "type": "integer",
+                "description": "The new element index in the folder.",
+                "format": "int32",
+                "example": 0
+              },
+              "mute": {
+                "type": "boolean",
+                "description": "Specifies if the folder notifications are enabled or not.",
+                "example": false
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The list of tags of the folder.",
+                "nullable": true,
+                "example": [
+                  "tag1",
+                  "tag2"
+                ]
+              },
+              "logo": {
+                "$ref": "#/components/schemas/Logo"
+              },
+              "pinned": {
+                "type": "boolean",
+                "description": "Specifies if the folder is pinned or not.",
+                "example": false
+              },
+              "roomType": {
+                "$ref": "#/components/schemas/RoomType"
+              },
+              "private": {
+                "type": "boolean",
+                "description": "Specifies if the folder is private or not.",
+                "example": false
+              },
+              "indexing": {
+                "type": "boolean",
+                "description": "Specifies if the folder is indexed or not.",
+                "example": true
+              },
+              "denyDownload": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be downloaded or not.",
+                "example": false
+              },
+              "lifetime": {
+                "$ref": "#/components/schemas/RoomDataLifetimeDto"
+              },
+              "watermark": {
+                "$ref": "#/components/schemas/WatermarkDto"
+              },
+              "type": {
+                "$ref": "#/components/schemas/FolderType"
+              },
+              "inRoom": {
+                "type": "boolean",
+                "description": "Specifies if the folder is placed in the room or not.",
+                "nullable": true,
+                "example": false
+              },
+              "quotaLimit": {
+                "type": "integer",
+                "description": "The folder quota limit.",
+                "format": "int64",
+                "nullable": true,
+                "example": 1073741824
+              },
+              "isCustomQuota": {
+                "type": "boolean",
+                "description": "Specifies if the folder room has a custom quota or not.",
+                "nullable": true,
+                "example": false
+              },
+              "usedSpace": {
+                "type": "integer",
+                "description": "How much folder space is used (counter).",
+                "format": "int64",
+                "nullable": true,
+                "example": 524288000
+              },
+              "passwordProtected": {
+                "type": "boolean",
+                "description": "Specifies if the folder is password protected or not.",
+                "nullable": true,
+                "example": false
+              },
+              "expired": {
+                "type": "boolean",
+                "description": "Specifies if an external link to the folder is expired or not.",
+                "nullable": true,
+                "example": false,
+                "deprecated": true
+              },
+              "chatSettings": {
+                "$ref": "#/components/schemas/ChatSettingsDto"
+              },
+              "rootRoomType": {
+                "$ref": "#/components/schemas/RoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true,
+                "example": false
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The folder parameters."
       },
       "FolderDtoString": {
         "allOf": [
@@ -79259,6 +77846,89 @@
         "additionalProperties": false,
         "description": "The folder parameters."
       },
+      "FolderIntegerArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FolderDtoInteger"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "FolderIntegerWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FolderDtoInteger"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
       "FolderLinkRequest": {
         "type": "object",
         "properties": {
@@ -79391,6 +78061,75 @@
             "format": "int32"
           }
         }
+      },
+      "FolderType": {
+        "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          5,
+          6,
+          8,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          19,
+          20,
+          21,
+          22,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "DEFAULT",
+          "COMMON",
+          "BUNCH",
+          "TRASH",
+          "USER",
+          "SHARE",
+          "Projects",
+          "Favorites",
+          "Recent",
+          "Templates",
+          "Privacy",
+          "VirtualRooms",
+          "FillingFormsRoom",
+          "EditingRoom",
+          "CustomRoom",
+          "Archive",
+          "ThirdpartyBackup",
+          "PublicRoom",
+          "ReadyFormFolder",
+          "InProcessFormFolder",
+          "FormFillingFolderDone",
+          "FormFillingFolderInProgress",
+          "VirtualDataRoom",
+          "RoomTemplates",
+          "AiRoom",
+          "Knowledge",
+          "ResultStorage",
+          "AiAgents",
+          "DefaultTemplates",
+          "Forms"
+        ]
       },
       "FormFillingManageAction": {
         "description": "[0 - Stop, 1 - Resume, 2 - Start, 3 - Edit]",
@@ -80310,6 +79049,52 @@
         "additionalProperties": false,
         "description": "The parameters for locking a file."
       },
+      "Logo": {
+        "required": [
+          "large",
+          "medium",
+          "original",
+          "small"
+        ],
+        "type": "object",
+        "properties": {
+          "original": {
+            "type": "string",
+            "description": "The original logo.",
+            "nullable": true,
+            "example": "https://portal.example.com/logo/original.png"
+          },
+          "large": {
+            "type": "string",
+            "description": "The large logo.",
+            "nullable": true,
+            "example": "https://portal.example.com/logo/large.png"
+          },
+          "medium": {
+            "type": "string",
+            "description": "The medium logo.",
+            "nullable": true,
+            "example": "https://portal.example.com/logo/medium.png"
+          },
+          "small": {
+            "type": "string",
+            "description": "The small logo.",
+            "nullable": true,
+            "example": "https://portal.example.com/logo/small.png"
+          },
+          "color": {
+            "type": "string",
+            "description": "The logo color.",
+            "nullable": true,
+            "example": "#4781D1"
+          },
+          "cover": {
+            "$ref": "#/components/schemas/LogoCover"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The room logo information."
+      },
       "LogoConfigDto": {
         "type": "object",
         "properties": {
@@ -80351,6 +79136,77 @@
         },
         "additionalProperties": false,
         "description": "The logo config parameters."
+      },
+      "LogoCover": {
+        "required": [
+          "data",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The logo cover ID.",
+            "nullable": true,
+            "example": "default_cover"
+          },
+          "data": {
+            "type": "string",
+            "description": "The logo cover data.",
+            "nullable": true,
+            "example": "base64-image-data..."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The logo cover information."
+      },
+      "LogoRequest": {
+        "required": [
+          "tmpFile"
+        ],
+        "type": "object",
+        "properties": {
+          "tmpFile": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The path to the temporary image file.",
+            "example": "/tmp/logo.png"
+          },
+          "x": {
+            "maximum": 1280,
+            "minimum": 0,
+            "type": "integer",
+            "description": "The X coordinate of the rectangle starting point.",
+            "format": "int32",
+            "example": 0
+          },
+          "y": {
+            "maximum": 1280,
+            "minimum": 0,
+            "type": "integer",
+            "description": "The Y coordinate of the rectangle starting point.",
+            "format": "int32",
+            "example": 0
+          },
+          "width": {
+            "maximum": 1280,
+            "minimum": 1,
+            "type": "integer",
+            "description": "The rectangle width.",
+            "format": "int32",
+            "example": 100
+          },
+          "height": {
+            "maximum": 1280,
+            "minimum": 1,
+            "type": "integer",
+            "description": "The rectangle height.",
+            "format": "int32",
+            "example": 100
+          }
+        },
+        "additionalProperties": false,
+        "description": "The logo request parameters."
       },
       "ManageFormFillingDtoInteger": {
         "required": [
@@ -81438,14 +80294,13 @@
         }
       },
       "NoContentResult": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/StatusCodeResult"
-          },
-          {
-            "type": "object"
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
           }
-        ],
+        },
         "additionalProperties": false
       },
       "NoContentResultWrapper": {
@@ -81890,6 +80745,21 @@
         ],
         "description": "[0 - None, 1 - Box, 2 - DropBox, 3 - GoogleDrive, 4 - kDrive, 5 - OneDrive, 6 - SharePoint, 7 - WebDav, 8 - Yandex, 9 - Storage]"
       },
+      "QuotaFilter": {
+        "description": "[0 - All, 1 - Default, 2 - Custom]",
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "All",
+          "Default",
+          "Custom"
+        ]
+      },
       "QuotaScope": {
         "description": "[0 - User, 1 - Room, 2 - Tenant]",
         "enum": [
@@ -81944,6 +80814,51 @@
         },
         "additionalProperties": false,
         "description": "Configuration for review display settings."
+      },
+      "RoomDataLifetimeDto": {
+        "type": "object",
+        "properties": {
+          "deletePermanently": {
+            "type": "boolean",
+            "description": "Specifies whether to permanently delete the room data or not.",
+            "example": true
+          },
+          "period": {
+            "$ref": "#/components/schemas/RoomDataLifetimePeriod"
+          },
+          "value": {
+            "maximum": 999,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Specifies the time period value of the room data lifetime.",
+            "format": "int32",
+            "nullable": true,
+            "example": 33
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Specifies whether the room data lifetime setting is enabled or not.",
+            "nullable": true,
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The room data lifetime information."
+      },
+      "RoomDataLifetimePeriod": {
+        "description": "[0 - Day, 1 - Month, 2 - Year]",
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "Day",
+          "Month",
+          "Year"
+        ]
       },
       "RoomFromTemplateStatusDto": {
         "required": [
@@ -82450,7 +81365,8 @@
       },
       "RoomTemplateDto": {
         "required": [
-          "roomId"
+          "roomId",
+          "title"
         ],
         "type": "object",
         "properties": {
@@ -82461,9 +81377,10 @@
             "example": 1
           },
           "title": {
+            "maxLength": 400,
+            "minLength": 0,
             "type": "string",
             "description": "The room template title.",
-            "nullable": true,
             "example": "My Document"
           },
           "logo": {
@@ -82617,6 +81534,27 @@
           }
         }
       },
+      "RoomType": {
+        "description": "[1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]",
+        "enum": [
+          1,
+          2,
+          5,
+          6,
+          8,
+          9
+        ],
+        "type": "integer",
+        "example": 1,
+        "x-enum-varnames": [
+          "FillingFormsRoom",
+          "EditingRoom",
+          "CustomRoom",
+          "PublicRoom",
+          "VirtualDataRoom",
+          "AiRoom"
+        ]
+      },
       "Run": {
         "type": "object",
         "properties": {
@@ -82748,7 +81686,7 @@
         "description": "The parameters for saving form role mapping."
       },
       "SearchArea": {
-        "description": "[0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents]",
+        "description": "[0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents, 8 - Forms, 9 - Form templates]",
         "enum": [
           0,
           1,
@@ -82757,7 +81695,9 @@
           4,
           5,
           6,
-          7
+          7,
+          8,
+          9
         ],
         "type": "integer",
         "example": 0,
@@ -82769,7 +81709,9 @@
           "Templates",
           "Knowledge",
           "ResultStorage",
-          "AiAgents"
+          "AiAgents",
+          "Forms",
+          "FormTemplates"
         ]
       },
       "SecurityInfoRequestDto": {
@@ -83002,6 +81944,19 @@
         "additionalProperties": false,
         "description": "Represents dimensions with width and height values."
       },
+      "SortOrder": {
+        "description": "[0 - Ascending, 1 - Descending]",
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "example": 0,
+        "x-enum-varnames": [
+          "Ascending",
+          "Descending"
+        ]
+      },
       "SortedByType": {
         "description": "[0 - Date and time, 1 - AZ, 2 - Size, 3 - Author, 4 - Type, 5 - New, 6 - Date and time creation, 7 - Room type, 8 - Tags, 9 - Room, 10 - Custom order, 11 - Last opened, 12 - Used space]",
         "enum": [
@@ -83099,16 +82054,6 @@
           "InvalidPassword",
           "ExternalAccessDenied"
         ]
-      },
-      "StatusCodeResult": {
-        "type": "object",
-        "properties": {
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
       },
       "StorageFilter": {
         "enum": [
@@ -83547,6 +82492,156 @@
           }
         },
         "additionalProperties": false
+      },
+      "UpdateRoomRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "maxLength": 170,
+            "minLength": 0,
+            "type": "string",
+            "description": "The room title.",
+            "nullable": true,
+            "example": "My Document"
+          },
+          "quota": {
+            "type": "integer",
+            "description": "The room quota.",
+            "format": "int64",
+            "nullable": true,
+            "example": 10485760
+          },
+          "indexing": {
+            "type": "boolean",
+            "description": "Specifies whether to create a third-party room with indexing.",
+            "nullable": true,
+            "example": true
+          },
+          "denyDownload": {
+            "type": "boolean",
+            "description": "Specifies whether to deny downloads from the third-party room.",
+            "nullable": true,
+            "example": true
+          },
+          "lifetime": {
+            "$ref": "#/components/schemas/RoomDataLifetimeDto"
+          },
+          "watermark": {
+            "$ref": "#/components/schemas/WatermarkRequestDto"
+          },
+          "logo": {
+            "$ref": "#/components/schemas/LogoRequest"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of tags.",
+            "nullable": true,
+            "example": [
+              "tag1",
+              "tag2"
+            ]
+          },
+          "color": {
+            "maxLength": 6,
+            "minLength": 0,
+            "type": "string",
+            "description": "The room color.",
+            "nullable": true,
+            "example": "#FF5733"
+          },
+          "cover": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string",
+            "description": "The room cover.",
+            "nullable": true,
+            "example": "cover1"
+          },
+          "chatSettings": {
+            "$ref": "#/components/schemas/ChatSettings"
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Specifies whether to send form data to external database.",
+            "nullable": true,
+            "example": false
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Specifies whether to save form data as XLSX file.",
+            "nullable": true,
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for updating a room."
+      },
+      "UpdateRoomsQuotaRequestDtoInteger": {
+        "type": "object",
+        "properties": {
+          "roomIds": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
+            },
+            "description": "The list of room IDs.",
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
+          },
+          "quota": {
+            "type": "integer",
+            "description": "The room quota.",
+            "format": "int64",
+            "example": 10485760
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for updating the room quota."
+      },
+      "UpdateRoomsRoomIdsRequestDtoInteger": {
+        "type": "object",
+        "properties": {
+          "roomIds": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
+            },
+            "description": "The list of room IDs.",
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for updating the rooms."
       },
       "UpdateTagRequestDto": {
         "required": [
@@ -84002,6 +83097,78 @@
         ],
         "description": "[0 - In Progress, 1 - Completed, 2 - Failed]"
       },
+      "WatermarkAdditions": {
+        "description": "[1 - User name, 2 - User email, 4 - User ip adress, 8 - Current date, 16 - Room name]",
+        "enum": [
+          1,
+          2,
+          4,
+          8,
+          16
+        ],
+        "type": "integer",
+        "example": 1,
+        "x-enum-varnames": [
+          "UserName",
+          "UserEmail",
+          "UserIpAdress",
+          "CurrentDate",
+          "RoomName"
+        ]
+      },
+      "WatermarkDto": {
+        "required": [
+          "additions",
+          "imageHeight",
+          "imageScale",
+          "imageWidth",
+          "rotate"
+        ],
+        "type": "object",
+        "properties": {
+          "additions": {
+            "$ref": "#/components/schemas/WatermarkAdditions"
+          },
+          "text": {
+            "type": "string",
+            "description": "The watermark text.",
+            "nullable": true,
+            "example": "Confidential"
+          },
+          "rotate": {
+            "type": "integer",
+            "description": "The watermark text and image rotate.",
+            "format": "int32",
+            "example": 45
+          },
+          "imageScale": {
+            "type": "integer",
+            "description": "The watermark image scale.",
+            "format": "int32",
+            "example": 100
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "The watermark image url.",
+            "nullable": true,
+            "example": "http://localhost/watermark.png"
+          },
+          "imageHeight": {
+            "type": "number",
+            "description": "The watermark image height.",
+            "format": "double",
+            "example": 100.0
+          },
+          "imageWidth": {
+            "type": "number",
+            "description": "The watermark image width.",
+            "format": "double",
+            "example": 200.0
+          }
+        },
+        "additionalProperties": false,
+        "description": "The watermark settings."
+      },
       "WatermarkOnDraw": {
         "type": "object",
         "properties": {
@@ -84077,6 +83244,60 @@
         },
         "additionalProperties": false,
         "description": "The document watermark parameters."
+      },
+      "WatermarkRequestDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Specifies whether watermarks are on or off.",
+            "nullable": true,
+            "example": true
+          },
+          "additions": {
+            "$ref": "#/components/schemas/WatermarkAdditions"
+          },
+          "text": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The watermark text.",
+            "nullable": true,
+            "example": "Confidential"
+          },
+          "rotate": {
+            "type": "integer",
+            "description": "The watermark text and image rotate angle.",
+            "format": "int32",
+            "example": -45
+          },
+          "imageScale": {
+            "type": "integer",
+            "description": "The watermark image scale.",
+            "format": "int32",
+            "example": 100
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "The path to the temporary image file.",
+            "nullable": true,
+            "example": "/tmp/watermark.png"
+          },
+          "imageHeight": {
+            "type": "number",
+            "description": "The watermark image height.",
+            "format": "double",
+            "example": 100.0
+          },
+          "imageWidth": {
+            "type": "number",
+            "description": "The watermark image width.",
+            "format": "double",
+            "example": 200.0
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for adding watermarks."
       },
       "XlsxReportResponseDto": {
         "type": "object",
@@ -86900,11 +86121,59 @@
         },
         "additionalProperties": false
       },
+      "AiImageModelPricing": {
+        "required": [
+          "id",
+          "price"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "link": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "$ref": "#/components/schemas/AiImagePrice"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiImagePrice": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "number",
+            "format": "double"
+          },
+          "image": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "AiPricesResponse": {
         "required": [
           "chat",
           "currency",
           "embedding",
+          "image",
           "search"
         ],
         "type": "object",
@@ -86920,6 +86189,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiEmbeddingModelPricing"
+            },
+            "nullable": true
+          },
+          "image": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiImageModelPricing"
             },
             "nullable": true
           },
@@ -87692,50 +86968,6 @@
           }
         }
       },
-      "BaseStorageSettingsCdnStorageSettings": {
-        "type": "object",
-        "properties": {
-          "module": {
-            "type": "string",
-            "nullable": true
-          },
-          "props": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string",
-              "nullable": true
-            },
-            "nullable": true
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
-      "BaseStorageSettingsStorageSettings": {
-        "type": "object",
-        "properties": {
-          "module": {
-            "type": "string",
-            "nullable": true
-          },
-          "props": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string",
-              "nullable": true
-            },
-            "nullable": true
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
       "CapabilitiesDto": {
         "required": [
           "identityServerEnabled",
@@ -87839,14 +87071,25 @@
         }
       },
       "CdnStorageSettings": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseStorageSettingsCdnStorageSettings"
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "nullable": true
           },
-          {
-            "type": "object"
+          "props": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "nullable": true
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
           }
-        ],
+        },
         "additionalProperties": false
       },
       "CdnStorageSettingsWrapper": {
@@ -94055,14 +93298,25 @@
         "description": "The request parameters for configuring the storage module settings."
       },
       "StorageSettings": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseStorageSettingsStorageSettings"
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "nullable": true
           },
-          {
-            "type": "object"
+          "props": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "nullable": true
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
           }
-        ],
+        },
         "additionalProperties": false
       },
       "StorageSettingsWrapper": {
@@ -95303,6 +94557,11 @@
             "type": "boolean",
             "description": "Specifies if the AI tools enabled as a wallet service or not.",
             "example": true
+          },
+          "aiSearch": {
+            "type": "boolean",
+            "description": "Specifies if the AI search enabled as a wallet service or not.",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -95722,16 +94981,18 @@
         }
       },
       "TenantWalletService": {
-        "description": "[-14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
+        "description": "[-18 - AISearch, -14 - Admin, -13 - AITools, -12 - Backup, -11 - Storage]",
         "enum": [
+          -18,
           -14,
           -13,
           -12,
           -11
         ],
         "type": "integer",
-        "example": -14,
+        "example": -18,
         "x-enum-varnames": [
+          "AISearch",
           "Admin",
           "AITools",
           "Backup",
@@ -95745,14 +95006,16 @@
             "type": "array",
             "items": {
               "enum": [
+                -18,
                 -14,
                 -13,
                 -12,
                 -11
               ],
               "type": "integer",
-              "example": -14,
+              "example": -18,
               "x-enum-varnames": [
+                "AISearch",
                 "Admin",
                 "AITools",
                 "Backup",
@@ -97914,11 +97177,6 @@
   },
   "tags": [
     {
-      "name": "AI / Agents",
-      "description": "Operations for working with AI agents.",
-      "x-displayName": "Agents"
-    },
-    {
       "name": "AI / Chat",
       "description": "Operations for working with AI chat.",
       "x-displayName": "Chat"
@@ -98302,7 +97560,6 @@
     {
       "name": "AI",
       "tags": [
-        "AI / Agents",
         "AI / Chat",
         "AI / MCP",
         "AI / Messages",

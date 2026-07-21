@@ -43,7 +43,7 @@ public class WalletServiceDescriptionManager
         { "image", "total_tokens" }
     };
 
-    public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, string filterServiceName, Dictionary<string, string> metadata)
+    public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, Dictionary<string, string> metadata)
     {
         if (operation == null)
         {
@@ -67,11 +67,6 @@ public class WalletServiceDescriptionManager
 
         if (serviceName == "ai-tools")
         {
-            if (!string.IsNullOrEmpty(filterServiceName))
-            {
-                serviceName = filterServiceName;
-            }
-
             if (metadata != null && metadata.TryGetValue(BillingClient.MetadataType, out var type))
             {
                 serviceName = type;
