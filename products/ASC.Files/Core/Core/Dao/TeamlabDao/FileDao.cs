@@ -1076,9 +1076,9 @@ internal class FileDao(
         }
     }
 
-    public async Task<IEnumerable<int>> DeleteFilesAsync(IEnumerable<KeyValuePair<int, Guid>> fileQuotaOwners)
+    public async Task<IEnumerable<int>> DeleteFilesAsync(IEnumerable<KeyValuePair<int, Guid>> owners)
     {
-        var files = fileQuotaOwners.Where(f => f.Key != 0).ToList();
+        var files = owners.Where(f => f.Key != 0).ToList();
         if (files.Count == 0)
         {
             return [];
