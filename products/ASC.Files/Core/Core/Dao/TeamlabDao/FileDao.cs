@@ -415,7 +415,9 @@ internal class FileDao(
             return false;
         }
 
-        await quotaSocketManager.TenantQuotaExceededAsync();
+        // the quota-row update path (TenantQuotaController.QuotaUsedCheckAsync) detects the same
+        // soft-overshoot and fires TenantQuotaExceededAsync, so the socket is not raised here to avoid
+        // notifying the client twice for a single save
         await filesMessageService.SendAsync(MessageAction.FileSavedButTenantQuotaExceeded, file, MessageInitiator.DocsService, file.Title);
 
         return true;
