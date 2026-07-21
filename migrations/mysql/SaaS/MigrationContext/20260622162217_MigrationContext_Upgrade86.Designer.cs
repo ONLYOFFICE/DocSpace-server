@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260622084927_MigrationContext_Upgrade85")]
-    partial class MigrationContext_Upgrade85
+    [Migration("20260622162217_MigrationContext_Upgrade86")]
+    partial class MigrationContext_Upgrade86
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1577,6 +1577,41 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             ServiceName = "admin",
                             Visible = true,
                             Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -15,
+                            Additional = true,
+                            Features = "docscloud:1",
+                            Name = "docscloud",
+                            Price = 8m,
+                            ProductId = "1014",
+                            ServiceName = "docscloud",
+                            Visible = true,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -16,
+                            Additional = true,
+                            Features = "docscloud:1,docsclouddevpack",
+                            Name = "docsclouddevpack",
+                            Price = 12m,
+                            ProductId = "1015",
+                            ServiceName = "docscloud-devpack",
+                            Visible = true,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -17,
+                            Additional = true,
+                            Features = "docscloud:1000,docsclouddevpack,docscloudtrial",
+                            Name = "docscloudtrial",
+                            Price = 0m,
+                            ProductId = "1016",
+                            Visible = false,
+                            Wallet = false
                         });
                 });
 

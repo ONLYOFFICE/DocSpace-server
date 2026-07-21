@@ -218,7 +218,9 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 Resource.AccountingCustomerOperationCurrency
             };
 
-            var tenantWalletService = await GetTenantWalletService(tenantManager, taskData.ServiceName);
+            var tenantWalletService = taskData.ServiceName is { Count: 1 }
+                ? await GetTenantWalletService(tenantManager, taskData.ServiceName.First())
+                : null;
             var addAgentColumn = tenantWalletService is TenantWalletService.AITools;
             if (addAgentColumn)
             {
@@ -338,7 +340,13 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 {
                     var tariffService = ctx.ServiceProvider.GetService<TariffService>();
 
-                    var records = await tariffService.GetCustomerMonthlyUsageAsync(ctx.Tenant.Id, ctx.UtcStartDate, ctx.UtcEndDate);
+                    var filter = new MonthlyUsageFilter
+                    {
+                        UtcStartDate = ctx.UtcStartDate,
+                        UtcEndDate = ctx.UtcEndDate
+                    };
+
+                    var records = await tariffService.GetCustomerMonthlyUsageAsync(ctx.Tenant.Id, filter);
 
                     if (records is { Count: > 0 })
                     {
@@ -377,7 +385,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
             foreach (var operation in report.Collection)
             {
-                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata);
+                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, operation.Metadata);
                 var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
 
                 operation.Description = description;
@@ -515,7 +523,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 public record CustomerOperationsReportTaskData(
     IDictionary<string, string> Headers,
     ReportType ReportType,
-    string ServiceName,
+    List<string> ServiceName,
     DateTime? StartDate,
     DateTime? EndDate,
     string ParticipantName,
