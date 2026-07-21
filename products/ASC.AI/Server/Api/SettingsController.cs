@@ -36,12 +36,12 @@ namespace ASC.AI.Api;
 [Scope]
 [InternalRoute]
 [ApiController]
-[AiFeature]
 [ControllerName("ai")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
     [HttpPut("config/vectorization")]
+    [AiFeature]
     public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)
     {
         var settings = await aiSettingsService.SetVectorizationSettingsAsync(inDto.Body.Type, inDto.Body.Key);
@@ -50,9 +50,17 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     }
 
     [HttpGet("config/vectorization")]
+    [AiFeature]
     public async Task<VectorizationSettingsDto> GetVectorizationSettingsAsync()
     {
         var settings = await aiSettingsService.GetVectorizationSettingsAsync();
+        return settings.MapToDto();
+    }
+
+    [HttpGet("config")]
+    public async Task<AiSettingsDto> GetAiSettingsAsync()
+    {
+        var settings = await aiSettingsService.GetAiSettingsAsync();
         return settings.MapToDto();
     }
 

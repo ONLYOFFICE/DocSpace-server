@@ -38,6 +38,13 @@ import { asyncHandler } from "./_helpers.js";
 // keeps the DocSpace `{ response, status, ... }` envelope so the client sees
 // the same shape it did when these were served directly from .NET.
 export const settingsController = {
+  // GET config → `GET internal/ai/config`. Reports the combined AI
+  // configuration/readiness for the portal.
+  getAiSettings: asyncHandler(async (_req, res) => {
+    const settings = await aiService.get("/config", { raw: true });
+    res.json(settings);
+  }),
+
   // GET config/vectorization → `GET internal/ai/config/vectorization`.
   getVectorizationSettings: asyncHandler(async (_req, res) => {
     const settings = await aiService.get("/config/vectorization", { raw: true });
