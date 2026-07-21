@@ -34,119 +34,28 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
+[AiFeature]
 [ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
-    /// <summary>
-    /// Update web search settings
-    /// </summary>
-    /// <remarks>
-    /// Configures the web search integration for AI chat sessions at the portal level.
-    /// Allows enabling or disabling web search, selecting the search engine type, and providing the API key for the chosen engine.
-    /// Only portal administrators can modify these settings.
-    /// </remarks>
-    /// <path>api/2.0/ai/config/web-search</path>
-    [Tags("AI / Settings")]
-    [SwaggerResponse(200, "Updated web search settings", typeof(WebSearchSettingsDto))]
-    [HttpPut("config/web-search")]
-    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    [AiFeature]
-    public async Task<WebSearchSettingsDto> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
-    {
-        var settings = await aiSettingsService.SetWebSearchSettingsAsync(
-            inDto.Body.Enabled, 
-            inDto.Body.Type, 
-            inDto.Body.Key);
-
-        return settings.MapToDto();
-    }
-    
-    /// <summary>
-    /// Get web search settings
-    /// </summary>
-    /// <remarks>
-    /// Retrieves the current web search integration settings for AI chat sessions,
-    /// including whether web search is enabled, the configured search engine type, and whether the API key needs to be reset.
-    /// </remarks>
-    /// <path>api/2.0/ai/config/web-search</path>
-    [Tags("AI / Settings")]
-    [SwaggerResponse(200, "Current web search settings", typeof(WebSearchSettingsDto))]
-    [HttpGet("config/web-search")]
-    [AiFeature]
-    public async Task<WebSearchSettingsDto> GetWebSearchSettingsAsync()
-    {
-        var settings = await aiSettingsService.GetWebSearchSettingsAsync();
-        return settings.MapToDto();
-    }
-    
-    /// <summary>
-    /// Update vectorization settings
-    /// </summary>
-    /// <remarks>
-    /// Configures the embedding provider used for document vectorization at the portal level.
-    /// Vectorization enables semantic search and knowledge retrieval capabilities in AI chat sessions.
-    /// Allows selecting the embedding provider type and providing the API key for the chosen provider.
-    /// Only portal administrators can modify these settings.
-    /// </remarks>
-    /// <path>api/2.0/ai/config/vectorization</path>
-    [Tags("AI / Settings")]
-    [SwaggerResponse(200, "Updated vectorization settings", typeof(VectorizationSettingsDto))]
     [HttpPut("config/vectorization")]
-    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    [AiFeature]
     public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)
     {
         var settings = await aiSettingsService.SetVectorizationSettingsAsync(inDto.Body.Type, inDto.Body.Key);
 
         return settings.MapToDto();
     }
-    
-    /// <summary>
-    /// Get vectorization settings
-    /// </summary>
-    /// <remarks>
-    /// Retrieves the current embedding provider settings used for document vectorization,
-    /// including the configured provider type and whether the API key needs to be reset.
-    /// </remarks>
-    /// <path>api/2.0/ai/config/vectorization</path>
-    [Tags("AI / Settings")]
-    [SwaggerResponse(200, "Current vectorization settings", typeof(VectorizationSettingsDto))]
+
     [HttpGet("config/vectorization")]
-    [AiFeature]
     public async Task<VectorizationSettingsDto> GetVectorizationSettingsAsync()
     {
         var settings = await aiSettingsService.GetVectorizationSettingsAsync();
         return settings.MapToDto();
     }
-    
-    /// <summary>
-    /// Get AI settings
-    /// </summary>
-    /// <remarks>
-    /// Retrieves the combined AI configuration for the current portal, including the status of web search,
-    /// vectorization, and AI readiness, along with tool names and the portal MCP server identifier.
-    /// </remarks>
-    /// <path>api/2.0/ai/config</path>
-    [Tags("AI / Settings")]
-    [SwaggerResponse(200, "Current AI settings", typeof(AiSettingsDto))]
-    [HttpGet("config")]
-    public async Task<AiSettingsDto> GetAiSettingsAsync()
-    {
-        var settings = await aiSettingsService.GetAiSettingsAsync();
-        return settings.MapToDto();
-    }
 
-    /// <summary>
-    /// Get per-user AI settings
-    /// </summary>
-    /// <remarks>
-    /// Retrieves the current user's AI settings, including the recommended model banner visibility preference.
-    /// </remarks>
-    /// <path>api/2.0/ai/config/user</path>
-    [Tags("AI / Settings")]
-    [SwaggerResponse(200, "Current per-user AI settings", typeof(AiUserSettingsDto))]
     [HttpGet("config/user")]
     public async Task<AiUserSettingsDto> GetAiUserSettingsAsync()
     {
@@ -154,16 +63,6 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
 
-    /// <summary>
-    /// Update per-user AI settings
-    /// </summary>
-    /// <remarks>
-    /// Updates the current user's AI recommended model banner visibility preferences.
-    /// Each user's settings are stored independently.
-    /// </remarks>
-    /// <path>api/2.0/ai/config/user</path>
-    [Tags("AI / Settings")]
-    [SwaggerResponse(200, "Updated per-user AI settings", typeof(AiUserSettingsDto))]
     [HttpPut("config/user")]
     public async Task<AiUserSettingsDto> SetAiUserSettingsAsync([FromBody] SetAiUserSettingsRequestDto inDto)
     {
