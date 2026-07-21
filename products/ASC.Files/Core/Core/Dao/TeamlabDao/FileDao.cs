@@ -698,8 +698,7 @@ internal class FileDao(
                             }
                             else
                             {
-                                var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                                await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+                                await DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
 
                                 throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
@@ -720,8 +719,7 @@ internal class FileDao(
                     {
                         if (isNew)
                         {
-                            var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                            await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+                            await DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
                         }
                         else if (!await IsExistOnStorageAsync(file))
                         {
@@ -1002,78 +1000,6 @@ internal class FileDao(
         // single deletion goes through the batched path so that the set of cleaned-up
         // tables lives in one place
         await DeleteFilesAsync([KeyValuePair.Create(fileId, ownerId)]);
-    }
-
-    private async ValueTask DeleteFileAsync(int fileId, bool deleteFolder, Guid ownerId)
-    {
-        if (fileId == 0)
-        {
-            return;
-        }
-
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var strategy = filesDbContext.Database.CreateExecutionStrategy();
-        var vectorsMarkedDeleted = 0;
-
-        await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await context.Database.BeginTransactionAsync();
-
-            var fromFolders = await context.ParentIdsAsync(tenantId, fileId).ToListAsync();
-
-            await context.DeleteTagLinksAsync(tenantId, fileId.ToString());
-
-            var toDeleteFiles = await context.DbFilesAsync(tenantId, fileId).ToListAsync();
-
-            vectorsMarkedDeleted = await context.MarkVectorizationDeletedAsync(tenantId, fileId);
-
-            context.RemoveRange(toDeleteFiles);
-
-            await context.DeleteTagsAsync(tenantId);
-
-            await context.DeleteSecurityAsync(tenantId, fileId);
-
-            await DeleteCustomOrder(filesDbContext, fileId);
-
-            await context.DeleteMessageAttachmentsByFileIdAsync(tenantId, fileId);
-
-            var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
-            await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
-            await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
-            await context.DeleteFileKeysAsync(tenantId, fileId);
-
-            await context.SaveChangesAsync();
-            await tx.CommitAsync();
-
-            foreach (var folderId in fromFolders)
-            {
-                await DecrementCountAsync(context, folderId, tenantId, FileEntryType.File);
-            }
-
-            if (deleteFolder)
-            {
-                tenantQuotaController.Init(tenantId, ThumbnailTitle);
-                var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
-                await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
-            }
-
-        });
-
-        await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
-        {
-            FileId = fileId,
-            Action = FileIndexAction.Delete
-        });
-
-        if (vectorsMarkedDeleted > 0)
-        {
-            await eventBus.PublishAsync(new VectorsDeletionIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
-            {
-                FileId = fileId
-            });
-        }
     }
 
     public async Task<IEnumerable<int>> DeleteFilesAsync(IEnumerable<KeyValuePair<int, Guid>> owners)
