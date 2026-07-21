@@ -1000,6 +1000,12 @@ public enum MessageAction
     [Description("Subscription balance moved to wallet")]
     SubscriptionBalanceMovedToWallet = 6100,
 
+    [Description("Docs Cloud config updated")]
+    DocsCloudConfigUpdated = 6101,
+
+    [Description("Docs Cloud quota report downloaded")]
+    DocsCloudQuotaReportDownloaded = 6102,
+
     #endregion
 
     #region others
