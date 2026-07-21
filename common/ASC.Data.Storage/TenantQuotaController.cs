@@ -179,7 +179,9 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
                 }
                 else if (newTotal > quota.MaxTotalSize)
                 {
-                    // soft overshoot within grace (only once): caller fires the socket notification
+                    // soft overshoot within grace: caller fires the socket notification.
+                    // The file-save path serializes the grace via a tenant-scoped lock
+                    // (see FileDao.TryAllowTenantQuotaGraceAsync) so it is consumed only once.
                     result = QuotaCheckResult.QuotaExceeded;
                 }
             }

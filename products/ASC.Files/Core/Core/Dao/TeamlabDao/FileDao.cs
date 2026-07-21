@@ -385,9 +385,12 @@ internal class FileDao(
 
         return await (await globalStore.GetStoreAsync(tenantId.Value)).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), 0);
     }
-    // Allows a single file save to overshoot the portal (tariff) total-size quota within a grace of
+    // Allows a file save to overshoot the portal (tariff) total-size quota within a grace of
     // SetupInfo.AvailableFileSize, mirroring the soft-overshoot behavior of custom room/user quota.
     // Returns true when the overshoot is within grace (file saved with a warning); the caller throws otherwise.
+    // Callers hold the tenant_quota_{tenantId} fair lock across this check and the write that consumes the
+    // quota, so the grace is granted at most once even under concurrent saves near the boundary (once
+    // used > MaxTotalSize the next open falls back to viewer and further saves are rejected).
     private async Task<bool> TryAllowTenantQuotaGraceAsync(File<int> file)
     {
         var quota = await _tenantManager.GetCurrentTenantQuotaAsync();
@@ -404,7 +407,7 @@ internal class FileDao(
 
         var used = await _maxTotalSizeStatistic.GetValueAsync();
 
-        // already over the limit -> no grace (soft save happens only once)
+        // already over the limit -> no grace (grace is consumed only once; serialized by the caller's lock)
         if (used > quota.MaxTotalSize)
         {
             return false;
@@ -443,17 +446,29 @@ internal class FileDao(
     {
         ArgumentNullException.ThrowIfNull(file);
 
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var overTenantQuota = false;
+        long maxChunkedUploadSize = 0;
         if (checkQuota)
         {
-            var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
-            if (maxChunkedUploadSize < file.ContentLength && !await TryAllowTenantQuotaGraceAsync(file))
-            {
-                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, file.Title);
-                throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
-            }
+            maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
+            overTenantQuota = maxChunkedUploadSize < file.ContentLength;
         }
 
-        var tenantId = _tenantManager.GetCurrentTenantId();
+        // when the file does not fit in the remaining tariff quota, serialize the grace check with the
+        // write that consumes it via a tenant-scoped fair lock (held until this method returns), so the
+        // one-time overshoot is granted at most once even under concurrent saves near the boundary
+        await using var tenantQuotaLock = overTenantQuota
+            ? await _distributedLockProvider.TryAcquireFairLockAsync($"tenant_quota_{tenantId}")
+            : null;
+
+        if (overTenantQuota && !await TryAllowTenantQuotaGraceAsync(file))
+        {
+            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, file.Title);
+            throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
+        }
+
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
@@ -878,15 +893,22 @@ internal class FileDao(
             throw new ArgumentException("No file id or folder id toFolderId determine provider");
         }
 
-        var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
-        if (maxChunkedUploadSize < file.ContentLength && !await TryAllowTenantQuotaGraceAsync(file))
+        var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
+        var overTenantQuota = maxChunkedUploadSize < file.ContentLength;
+
+        // hold a tenant-scoped fair lock across the grace check and the write that consumes it
+        // (see SaveFileAsync) so the one-time overshoot cannot be granted twice under concurrency
+        await using var tenantQuotaLock = overTenantQuota
+            ? await _distributedLockProvider.TryAcquireFairLockAsync($"tenant_quota_{tenantId}")
+            : null;
+
+        if (overTenantQuota && !await TryAllowTenantQuotaGraceAsync(file))
         {
             await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, file.Title);
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
         }
-
-        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
