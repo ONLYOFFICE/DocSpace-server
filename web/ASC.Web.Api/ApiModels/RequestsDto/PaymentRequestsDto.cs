@@ -66,7 +66,9 @@ public class PaymentUrlRequestDto
     /// <summary>
     /// The payment quantity.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{ "admin": 1 }</example>
+    [Length(1, 1)]
+    [Required]
     public Dictionary<string, int> Quantity { get; set; }
 }
 
@@ -126,7 +128,9 @@ public class QuantityRequestDto
     /// <summary>
     /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{ "admin": 1 }</example>
+    [Length(1, 1)]
+    [Required]
     public Dictionary<string, int> Quantity { get; set; }
 }
 
@@ -138,7 +142,9 @@ public class WalletQuantityRequestDto
     /// <summary>
     /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{ "admin": 1 }</example>
+    [Length(1, 1)]
+    [Required]
     public Dictionary<string, int?> Quantity { get; set; }
 
     /// <summary>

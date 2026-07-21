@@ -117,7 +117,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.InvitationSettingsUpdated,MessageAction.IPRestrictionsSettingsUpdated,MessageAction.LoginSettingsUpdated,
                     MessageAction.AIAccessEnabled,
                     MessageAction.AIAccessDisabled,
-                    MessageAction.UserUpdatedAiSettings
+                    MessageAction.UserUpdatedAiSettings,
+                    MessageAction.DocsCloudConfigUpdated
                 ]
             },
             {
@@ -159,7 +160,8 @@ internal class ProductsActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Download, [
-                    MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded, MessageAction.CustomerOperationsReportDownloaded
+                    MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded, MessageAction.CustomerOperationsReportDownloaded,
+                    MessageAction.DocsCloudQuotaReportDownloaded
                 ]
             },
             {

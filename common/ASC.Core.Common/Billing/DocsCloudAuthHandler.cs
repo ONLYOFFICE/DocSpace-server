@@ -34,14 +34,14 @@
 namespace ASC.Core.Billing;
 
 /// <summary>
-/// Adds the per-request ASC HMAC-SHA1 authorization header to every accounting request.
+/// Adds the per-request ASC HMAC-SHA1 authorization header to every DocsCloud request.
 /// The token embeds the current UTC timestamp, so it must be generated per call rather than as a static header.
 /// </summary>
-internal class AccountingAuthHandler(IOptions<AccountingConfiguration> configuration) : DelegatingHandler
+internal class DocsCloudAuthHandler(IOptions<DocsCloudConfiguration> configuration) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(configuration.Value.Key))
+        if (!string.IsNullOrEmpty(configuration.Value.Secret))
         {
             request.Headers.Remove("Authorization");
             request.Headers.Add("Authorization", CreateAuthToken(configuration.Value.Key, configuration.Value.Secret));
@@ -50,11 +50,11 @@ internal class AccountingAuthHandler(IOptions<AccountingConfiguration> configura
         return await base.SendAsync(request, cancellationToken);
     }
 
-    private static string CreateAuthToken(string pkey, string machinekey)
+    private static string CreateAuthToken(string pkey, string secret)
     {
-        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
+        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(secret));
         var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
+        var hash = Convert.ToBase64String(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
 
         return $"ASC {pkey}:{now}:{hash}";
     }
