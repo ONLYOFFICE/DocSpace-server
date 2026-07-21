@@ -31,24 +31,34 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Message = ASC.AI.Integration.Messages.Message;
+namespace ASC.AI.Api;
 
-namespace ASC.AI.Models.ResponseDto;
-
-public class MessageDto
+[Scope]
+[InternalRoute]
+[ApiController]
+[AiFeature]
+[ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class WebSearchStorageController(WebSearchStorageService webSearchStorageService) : ControllerBase
 {
-    public required Guid Id { get; init; }
-    public required Guid ThreadId { get; init; }
-    public required string Contents { get; init; }
-    public long Timestamp { get; init; }
-}
+    [HttpGet("integration/web-search")]
+    public async Task<WebSearchConfigDto?> ReadAsync()
+    {
+        var config = await webSearchStorageService.ReadAsync();
+        return config == null ? null : WebSearchConfigMapper.MapToDto(config);
+    }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class MessageMapper
-{
-    public static partial MessageDto MapToDto(Message message);
+    [HttpPut("integration/web-search")]
+    public async Task<IActionResult> UpsertAsync(UpsertWebSearchConfigRequestDto inDto)
+    {
+        await webSearchStorageService.UpsertAsync(WebSearchConfigMapper.MapToConfig(inDto));
+        return NoContent();
+    }
 
-    private static long MapDateTimeToMs(DateTime dateTime) =>
-        new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+    [HttpDelete("integration/web-search")]
+    public async Task<IActionResult> DeleteAsync()
+    {
+        await webSearchStorageService.DeleteAsync();
+        return NoContent();
+    }
 }

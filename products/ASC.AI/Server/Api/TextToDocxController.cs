@@ -31,24 +31,30 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Message = ASC.AI.Integration.Messages.Message;
+using ASC.AI.Core.MdTextToDocx;
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Api;
 
-public class MessageDto
+[Scope]
+[InternalRoute]
+[ApiController]
+[AiFeature]
+[ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class TextToDocxController(MdToDocxTaskPublisher mdToDocxTaskPublisher) : ControllerBase
 {
-    public required Guid Id { get; init; }
-    public required Guid ThreadId { get; init; }
-    public required string Contents { get; init; }
-    public long Timestamp { get; init; }
-}
+    [HttpPost("integration/text-to-docx/start")]
+    public async Task<IActionResult> PublishAsync(PublishTextToDocxRequestDto inDto)
+    {
+        if (inDto.FolderId.ValueKind == JsonValueKind.Number)
+        {
+            await mdToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetInt32());
+        }
+        else
+        {
+            await mdToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetString());
+        }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class MessageMapper
-{
-    public static partial MessageDto MapToDto(Message message);
-
-    private static long MapDateTimeToMs(DateTime dateTime) =>
-        new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+        return NoContent();
+    }
 }

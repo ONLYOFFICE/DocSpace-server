@@ -31,24 +31,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Message = ASC.AI.Integration.Messages.Message;
+namespace ASC.AI.Models.RequestDto;
 
-namespace ASC.AI.Models.ResponseDto;
-
-public class MessageDto
+public class CreateMcpServerRequestDto
 {
-    public required Guid Id { get; init; }
-    public required Guid ThreadId { get; init; }
-    public required string Contents { get; init; }
-    public long Timestamp { get; init; }
-}
+    public required string Name { get; init; }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class MessageMapper
-{
-    public static partial MessageDto MapToDto(Message message);
+    [MaxLength(AiIntegrationLimits.MaxConfigLength)]
+    public required string Config { get; init; }
 
-    private static long MapDateTimeToMs(DateTime dateTime) =>
-        new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+    public string? EntityId { get; init; }
 }

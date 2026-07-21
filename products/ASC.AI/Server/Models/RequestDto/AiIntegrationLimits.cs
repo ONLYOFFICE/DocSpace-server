@@ -31,24 +31,23 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Message = ASC.AI.Integration.Messages.Message;
+namespace ASC.AI.Models.RequestDto;
 
-namespace ASC.AI.Models.ResponseDto;
-
-public class MessageDto
+/// <summary>
+/// Upper bounds for the free-form, app-encrypted profile/MCP fields that are persisted as
+/// unbounded <c>text</c> columns (<c>DbProfile.Key</c>, <c>DbProfile.BaseUrl</c>,
+/// <c>DbMcpServer.Config</c>). Enforced at the request-validation layer on the plaintext value,
+/// before encryption, so oversized payloads are rejected with a 400 instead of reaching the
+/// database. The column type stays <c>text</c> on purpose, since encryption inflates the size.
+/// </summary>
+internal static class AiIntegrationLimits
 {
-    public required Guid Id { get; init; }
-    public required Guid ThreadId { get; init; }
-    public required string Contents { get; init; }
-    public long Timestamp { get; init; }
-}
+    /// <summary>Maximum length of a provider API key (plaintext, before encryption).</summary>
+    public const int MaxKeyLength = 4096;
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class MessageMapper
-{
-    public static partial MessageDto MapToDto(Message message);
+    /// <summary>Maximum length of a provider base URL.</summary>
+    public const int MaxBaseUrlLength = 2048;
 
-    private static long MapDateTimeToMs(DateTime dateTime) =>
-        new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+    /// <summary>Maximum length of an MCP server config payload (plaintext, before encryption).</summary>
+    public const int MaxConfigLength = 32768;
 }

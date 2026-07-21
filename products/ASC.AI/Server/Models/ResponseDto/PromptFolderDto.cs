@@ -31,23 +31,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Message = ASC.AI.Integration.Messages.Message;
-
 namespace ASC.AI.Models.ResponseDto;
 
-public class MessageDto
+public class PromptFolderDto
 {
     public required Guid Id { get; init; }
-    public required Guid ThreadId { get; init; }
-    public required string Contents { get; init; }
-    public long Timestamp { get; init; }
+    public required string Name { get; init; }
+    public long CreatedAt { get; init; }
+    public long UpdatedAt { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class MessageMapper
+public static partial class PromptFolderMapper
 {
-    public static partial MessageDto MapToDto(Message message);
+    public static partial PromptFolderDto MapToDto(PromptFolder folder);
 
     private static long MapDateTimeToMs(DateTime dateTime) =>
         new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();

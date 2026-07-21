@@ -31,24 +31,34 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Message = ASC.AI.Integration.Messages.Message;
+namespace ASC.AI.Api;
 
-namespace ASC.AI.Models.ResponseDto;
-
-public class MessageDto
+[Scope]
+[InternalRoute]
+[ApiController]
+[AiFeature]
+[ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class PreferencesStorageController(PreferencesStorageService preferencesStorageService) : ControllerBase
 {
-    public required Guid Id { get; init; }
-    public required Guid ThreadId { get; init; }
-    public required string Contents { get; init; }
-    public long Timestamp { get; init; }
-}
+    [HttpGet("integration/preferences")]
+    public async Task<PreferencesDto?> ReadAsync(ReadPreferencesRequestDto inDto)
+    {
+        var preferences = await preferencesStorageService.ReadAsync(inDto.EntityId);
+        return preferences == null ? null : PreferencesMapper.MapToDto(preferences);
+    }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class MessageMapper
-{
-    public static partial MessageDto MapToDto(Message message);
+    [HttpPut("integration/preferences")]
+    public async Task<IActionResult> UpsertAsync(UpsertPreferencesRequestDto inDto)
+    {
+        await preferencesStorageService.UpsertAsync(PreferencesMapper.MapToPreferences(inDto), inDto.EntityId);
+        return NoContent();
+    }
 
-    private static long MapDateTimeToMs(DateTime dateTime) =>
-        new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+    [HttpDelete("integration/preferences")]
+    public async Task<IActionResult> DeleteAsync(DeletePreferencesRequestDto inDto)
+    {
+        await preferencesStorageService.DeleteAsync(inDto.EntityId);
+        return NoContent();
+    }
 }

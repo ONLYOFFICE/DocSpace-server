@@ -31,23 +31,33 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Message = ASC.AI.Integration.Messages.Message;
+using AttachmentResult = ASC.AI.Service.AttachmentResult;
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class MessageDto
+public class AttachmentDto
 {
     public required Guid Id { get; init; }
-    public required Guid ThreadId { get; init; }
-    public required string Contents { get; init; }
-    public long Timestamp { get; init; }
+    public required string Kind { get; init; }
+    public required string Title { get; init; }
+    public string? Content { get; init; }
+    public string? DataUrl { get; init; }
+    public string? EntryId { get; init; }
+    public long CreatedAt { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class MessageMapper
+public static partial class AttachmentMapper
 {
-    public static partial MessageDto MapToDto(Message message);
+    [MapperIgnoreSource(nameof(AttachmentResult.ThirdpartyEntryId))]
+    [MapPropertyFromSource(nameof(AttachmentDto.EntryId), Use = nameof(MapEntryId))]
+    public static partial AttachmentDto MapToDto(AttachmentResult result);
+
+    private static string? MapEntryId(AttachmentResult result) =>
+        result.EntryId?.ToString() ?? result.ThirdpartyEntryId;
+
+    private static string MapKindToString(AttachmentKind kind) => kind.ToStringLowerFast();
 
     private static long MapDateTimeToMs(DateTime dateTime) =>
         new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();

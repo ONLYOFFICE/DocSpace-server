@@ -31,24 +31,25 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Message = ASC.AI.Integration.Messages.Message;
+namespace ASC.AI.Api;
 
-namespace ASC.AI.Models.ResponseDto;
-
-public class MessageDto
+[Scope]
+[InternalRoute]
+[ApiController]
+[AiFeature]
+[ControllerName("ai")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class ToolsController(ToolService toolService) : ControllerBase
 {
-    public required Guid Id { get; init; }
-    public required Guid ThreadId { get; init; }
-    public required string Contents { get; init; }
-    public long Timestamp { get; init; }
-}
+    [HttpPost("integration/tools/list")]
+    public async Task<ToolListResponse> ListAsync(ToolContext inDto)
+    {
+        return await toolService.GetToolsAsync(inDto);
+    }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class MessageMapper
-{
-    public static partial MessageDto MapToDto(Message message);
-
-    private static long MapDateTimeToMs(DateTime dateTime) =>
-        new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+    [HttpPost("integration/tools/call")]
+    public async Task<IReadOnlyList<ToolCallResult>> CallAsync(ToolsCallRequestDto inDto)
+    {
+        return await toolService.CallAsync(inDto.Calls, inDto);
+    }
 }

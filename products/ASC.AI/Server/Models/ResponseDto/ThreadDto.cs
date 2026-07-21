@@ -31,24 +31,29 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Message = ASC.AI.Integration.Messages.Message;
+using Thread = ASC.AI.Integration.Threads.Thread;
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class MessageDto
+public class ThreadDto
 {
     public required Guid Id { get; init; }
-    public required Guid ThreadId { get; init; }
-    public required string Contents { get; init; }
-    public long Timestamp { get; init; }
+    public required string Title { get; init; }
+    public Guid? ProfileId { get; init; }
+    public string? EntityId { get; init; }
+    public long LastEditDate { get; init; }
+    public long CreatedAt { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class MessageMapper
+public static partial class ThreadMapper
 {
-    public static partial MessageDto MapToDto(Message message);
+    [MapProperty(nameof(Thread.EntryId), nameof(ThreadDto.EntityId))]
+    public static partial ThreadDto MapToDto(Thread thread);
 
     private static long MapDateTimeToMs(DateTime dateTime) =>
         new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+
+    private static string? MapEntryIdToString(int? entryId) => entryId?.ToString();
 }
