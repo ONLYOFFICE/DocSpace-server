@@ -41,39 +41,39 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class McpServerStorageController(McpServerStorageService mcpServerStorageService) : ControllerBase
 {
-    [HttpPost("integration/mcp-servers")]
+    [HttpPost("mcp-servers")]
     public async Task CreateAsync(CreateMcpServerRequestDto inDto)
     {
         await mcpServerStorageService.CreateAsync(inDto.Name, inDto.Config, inDto.EntityId);
     }
 
-    [HttpGet("integration/mcp-servers/{name}")]
+    [HttpGet("mcp-servers/{name}")]
     public async Task<McpServerDto> ReadByNameAsync(ReadMcpServerRequestDto inDto)
     {
         var server = await mcpServerStorageService.ReadByNameAsync(inDto.Name, inDto.EntityId);
         return McpServerMapper.MapToDto(server);
     }
 
-    [HttpGet("integration/mcp-servers")]
+    [HttpGet("mcp-servers")]
     public async Task<IReadOnlyList<McpServerDto>> ReadAllAsync(ReadAllMcpServersRequestDto inDto)
     {
         var servers = await mcpServerStorageService.ReadAllAsync(inDto.EntityId);
         return servers.Select(McpServerMapper.MapToDto).ToList();
     }
 
-    [HttpPut("integration/mcp-servers/{name}")]
+    [HttpPut("mcp-servers/{name}")]
     public async Task UpdateAsync(UpdateMcpServerRequestDto inDto)
     {
         await mcpServerStorageService.UpdateAsync(inDto.Name, inDto.Body.Config, inDto.Body.EntityId);
     }
 
-    [HttpPut("integration/mcp-servers")]
+    [HttpPut("mcp-servers")]
     public async Task ReplaceAllAsync(ReplaceMcpServersRequestDto inDto)
     {
         await mcpServerStorageService.ReplaceAllAsync(inDto.Servers, inDto.EntityId);
     }
 
-    [HttpDelete("integration/mcp-servers/{name}")]
+    [HttpDelete("mcp-servers/{name}")]
     public async Task<IActionResult> DeleteAsync(DeleteMcpServerRequestDto inDto)
     {
         await mcpServerStorageService.DeleteAsync(inDto.Name, inDto.EntityId);

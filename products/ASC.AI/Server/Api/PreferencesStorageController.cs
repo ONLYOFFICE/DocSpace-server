@@ -41,21 +41,21 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class PreferencesStorageController(PreferencesStorageService preferencesStorageService) : ControllerBase
 {
-    [HttpGet("integration/preferences")]
+    [HttpGet("preferences")]
     public async Task<PreferencesDto?> ReadAsync(ReadPreferencesRequestDto inDto)
     {
         var preferences = await preferencesStorageService.ReadAsync(inDto.EntityId);
         return preferences == null ? null : PreferencesMapper.MapToDto(preferences);
     }
 
-    [HttpPut("integration/preferences")]
+    [HttpPut("preferences")]
     public async Task<IActionResult> UpsertAsync(UpsertPreferencesRequestDto inDto)
     {
         await preferencesStorageService.UpsertAsync(PreferencesMapper.MapToPreferences(inDto), inDto.EntityId);
         return NoContent();
     }
 
-    [HttpDelete("integration/preferences")]
+    [HttpDelete("preferences")]
     public async Task<IActionResult> DeleteAsync(DeletePreferencesRequestDto inDto)
     {
         await preferencesStorageService.DeleteAsync(inDto.EntityId);

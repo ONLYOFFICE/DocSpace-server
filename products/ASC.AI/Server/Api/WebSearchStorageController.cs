@@ -41,21 +41,21 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class WebSearchStorageController(WebSearchStorageService webSearchStorageService) : ControllerBase
 {
-    [HttpGet("integration/web-search")]
+    [HttpGet("web-search")]
     public async Task<WebSearchConfigDto?> ReadAsync()
     {
         var config = await webSearchStorageService.ReadAsync();
         return config == null ? null : WebSearchConfigMapper.MapToDto(config);
     }
 
-    [HttpPut("integration/web-search")]
+    [HttpPut("web-search")]
     public async Task<IActionResult> UpsertAsync(UpsertWebSearchConfigRequestDto inDto)
     {
         await webSearchStorageService.UpsertAsync(WebSearchConfigMapper.MapToConfig(inDto));
         return NoContent();
     }
 
-    [HttpDelete("integration/web-search")]
+    [HttpDelete("web-search")]
     public async Task<IActionResult> DeleteAsync()
     {
         await webSearchStorageService.DeleteAsync();

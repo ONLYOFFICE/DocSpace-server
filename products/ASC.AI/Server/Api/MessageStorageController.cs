@@ -41,42 +41,42 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class MessageStorageController(MessageStorageService messageStorageService) : ControllerBase
 {
-    [HttpPost("integration/threads/{threadId}/messages")]
+    [HttpPost("threads/{threadId}/messages")]
     public async Task<MessageDto> CreateAsync(CreateMessageRequestDto inDto)
     {
         var created = await messageStorageService.CreateAsync(inDto.ThreadId, inDto.Body.Contents);
         return MessageMapper.MapToDto(created);
     }
 
-    [HttpGet("integration/messages/{id}")]
+    [HttpGet("messages/{id}")]
     public async Task<MessageDto> ReadByIdAsync(ReadMessageRequestDto inDto)
     {
         var message = await messageStorageService.ReadByIdAsync(inDto.Id);
         return MessageMapper.MapToDto(message);
     }
 
-    [HttpGet("integration/threads/{threadId}/messages")]
+    [HttpGet("threads/{threadId}/messages")]
     public async Task<List<MessageDto>> ReadByThreadAsync(ReadMessagesByThreadRequestDto inDto)
     {
         var messages = await messageStorageService.ReadByThreadAsync(inDto.ThreadId, inDto.Limit, inDto.StartIndex);
         return messages.Select(MessageMapper.MapToDto).ToList();
     }
 
-    [HttpPut("integration/messages/{id}")]
+    [HttpPut("messages/{id}")]
     public async Task<IActionResult> UpdateAsync(UpdateMessageRequestDto inDto)
     {
         await messageStorageService.UpdateAsync(inDto.Id, inDto.Body.Contents);
         return NoContent();
     }
 
-    [HttpDelete("integration/messages/{id}")]
+    [HttpDelete("messages/{id}")]
     public async Task<IActionResult> DeleteAsync(DeleteMessageRequestDto inDto)
     {
         await messageStorageService.DeleteAsync(inDto.Id);
         return NoContent();
     }
 
-    [HttpDelete("integration/threads/{threadId}/messages")]
+    [HttpDelete("threads/{threadId}/messages")]
     public async Task<IActionResult> DeleteByThreadAsync(DeleteMessagesByThreadRequestDto inDto)
     {
         await messageStorageService.DeleteByThreadAsync(inDto.ThreadId);

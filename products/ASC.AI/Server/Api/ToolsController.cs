@@ -41,13 +41,13 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ToolsController(ToolService toolService) : ControllerBase
 {
-    [HttpPost("integration/tools/list")]
+    [HttpPost("tools/list")]
     public async Task<ToolListResponse> ListAsync(ToolContext inDto)
     {
         return await toolService.GetToolsAsync(inDto);
     }
 
-    [HttpPost("integration/tools/call")]
+    [HttpPost("tools/call")]
     public async Task<IReadOnlyList<ToolCallResult>> CallAsync(ToolsCallRequestDto inDto)
     {
         return await toolService.CallAsync(inDto.Calls, inDto);

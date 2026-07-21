@@ -41,42 +41,42 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class PromptFolderStorageController(PromptFolderStorageService promptFolderStorageService) : ControllerBase
 {
-    [HttpPost("integration/prompt-folders")]
+    [HttpPost("prompt-folders")]
     public async Task<PromptFolderDto> CreateAsync(CreatePromptFolderRequestDto inDto)
     {
         var created = await promptFolderStorageService.CreateAsync(inDto.Name);
         return PromptFolderMapper.MapToDto(created);
     }
 
-    [HttpPost("integration/prompt-folders/batch")]
+    [HttpPost("prompt-folders/batch")]
     public async Task<IReadOnlyList<PromptFolderDto>> CreateManyAsync(CreatePromptFoldersRequestDto inDto)
     {
         var created = await promptFolderStorageService.CreateManyAsync(inDto.Names);
         return created.Select(PromptFolderMapper.MapToDto).ToList();
     }
 
-    [HttpGet("integration/prompt-folders/{id}")]
+    [HttpGet("prompt-folders/{id}")]
     public async Task<PromptFolderDto> ReadByIdAsync(ReadPromptFolderRequestDto inDto)
     {
         var folder = await promptFolderStorageService.ReadByIdAsync(inDto.Id);
         return PromptFolderMapper.MapToDto(folder);
     }
 
-    [HttpGet("integration/prompt-folders")]
+    [HttpGet("prompt-folders")]
     public async Task<List<PromptFolderDto>> ReadAllAsync()
     {
         var folders = await promptFolderStorageService.ReadAllAsync();
         return folders.Select(PromptFolderMapper.MapToDto).ToList();
     }
 
-    [HttpPut("integration/prompt-folders/{id}")]
+    [HttpPut("prompt-folders/{id}")]
     public async Task<IActionResult> RenameAsync(RenamePromptFolderRequestDto inDto)
     {
         await promptFolderStorageService.RenameAsync(inDto.Id, inDto.Body.Name);
         return NoContent();
     }
 
-    [HttpDelete("integration/prompt-folders/{id}")]
+    [HttpDelete("prompt-folders/{id}")]
     public async Task<IActionResult> DeleteAsync(DeletePromptFolderRequestDto inDto)
     {
         await promptFolderStorageService.DeleteAsync(inDto.Id);

@@ -41,46 +41,46 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class AssignmentsStorageController(AssignmentsStorageService assignmentsStorageService) : ControllerBase
 {
-    [HttpPost("integration/assignments")]
+    [HttpPost("assignments")]
     public async Task CreateAsync(CreateAssignmentRequestDto inDto)
     {
         await assignmentsStorageService.CreateAsync(ParseActionType(inDto.ActionType), inDto.ProfileId, inDto.EntityId);
     }
 
-    [HttpGet("integration/assignments/{actionType}")]
+    [HttpGet("assignments/{actionType}")]
     public async Task<Guid?> ReadByTypeAsync(ReadAssignmentRequestDto inDto)
     {
         return await assignmentsStorageService.ReadByTypeAsync(ParseActionType(inDto.ActionType), inDto.EntityId);
     }
 
-    [HttpGet("integration/assignments")]
+    [HttpGet("assignments")]
     public async Task<Dictionary<string, Guid>> ReadAllAsync(ReadAllAssignmentsRequestDto inDto)
     {
         var assignments = await assignmentsStorageService.ReadAllAsync(inDto.EntityId);
         return assignments.ToDictionary(x => x.Key.ToStringFast(), x => x.Value);
     }
 
-    [HttpPut("integration/assignments/{actionType}")]
+    [HttpPut("assignments/{actionType}")]
     public async Task UpdateAsync(UpdateAssignmentRequestDto inDto)
     {
         await assignmentsStorageService.UpdateAsync(ParseActionType(inDto.ActionType), inDto.Body.ProfileId, inDto.Body.EntityId);
     }
 
-    [HttpPut("integration/assignments")]
+    [HttpPut("assignments")]
     public async Task UpsertManyAsync(UpsertAssignmentsRequestDto inDto)
     {
         var assignments = inDto.Assignments.ToDictionary(x => ParseActionType(x.Key), x => x.Value);
         await assignmentsStorageService.UpsertManyAsync(assignments, inDto.EntityId);
     }
 
-    [HttpDelete("integration/assignments/{actionType}")]
+    [HttpDelete("assignments/{actionType}")]
     public async Task<IActionResult> DeleteAsync(DeleteAssignmentRequestDto inDto)
     {
         await assignmentsStorageService.DeleteAsync(ParseActionType(inDto.ActionType));
         return NoContent();
     }
 
-    [HttpDelete("integration/assignments")]
+    [HttpDelete("assignments")]
     public async Task<IActionResult> DeleteManyAsync(DeleteAssignmentsRequestDto inDto)
     {
         var actionTypes = inDto.Body.ActionTypes.Select(ParseActionType).ToArray();

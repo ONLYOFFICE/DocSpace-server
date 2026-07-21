@@ -36,8 +36,8 @@ import { isObject, getString, getNumber } from "../narrow.js";
 import type { MessagesStorage } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 
-const THREADS_PATH = "/integration/threads";
-const MESSAGES_PATH = "/integration/messages";
+const THREADS_PATH = "/threads";
+const MESSAGES_PATH = "/messages";
 
 function serializeContents(message: unknown): string {
   return JSON.stringify(message);

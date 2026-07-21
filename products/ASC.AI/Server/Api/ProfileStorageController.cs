@@ -41,14 +41,14 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ProfileStorageController(ProfileStorageService profileStorageService) : ControllerBase
 {
-    [HttpPost("integration/profiles")]
+    [HttpPost("profiles")]
     public async Task<ProfileDto> CreateAsync(CreateProfileRequestDto inDto)
     {
         var created = await profileStorageService.CreateAsync(ProfileMapper.MapToProfileData(inDto));
         return ProfileMapper.MapToDto(created);
     }
 
-    [HttpPost("integration/profiles/batch")]
+    [HttpPost("profiles/batch")]
     public async Task<IReadOnlyList<ProfileDto>> CreateManyAsync(CreateProfilesRequestDto inDto)
     {
         var profiles = inDto.Profiles.Select(ProfileMapper.MapToProfileData).ToList();
@@ -56,28 +56,28 @@ public class ProfileStorageController(ProfileStorageService profileStorageServic
         return created.Select(ProfileMapper.MapToDto).ToList();
     }
 
-    [HttpGet("integration/profiles/{id}")]
+    [HttpGet("profiles/{id}")]
     public async Task<ProfileDto> ReadByIdAsync(ReadProfileRequestDto inDto)
     {
         var profile = await profileStorageService.ReadByIdAsync(inDto.Id);
         return ProfileMapper.MapToDto(profile);
     }
 
-    [HttpGet("integration/profiles")]
+    [HttpGet("profiles")]
     public async Task<List<ProfileDto>> ReadAllAsync()
     {
         var profiles = await profileStorageService.ReadAllAsync();
         return profiles.Select(ProfileMapper.MapToDto).ToList();
     }
 
-    [HttpPut("integration/profiles/{id}")]
+    [HttpPut("profiles/{id}")]
     public async Task<ProfileDto> UpdateAsync(UpdateProfileRequestDto inDto)
     {
         var updated = await profileStorageService.UpdateAsync(ProfileMapper.MapToProfile(inDto));
         return ProfileMapper.MapToDto(updated);
     }
 
-    [HttpDelete("integration/profiles/{id}")]
+    [HttpDelete("profiles/{id}")]
     public async Task<IActionResult> DeleteAsync(DeleteProfileRequestDto inDto)
     {
         await profileStorageService.DeleteAsync(inDto.Id);

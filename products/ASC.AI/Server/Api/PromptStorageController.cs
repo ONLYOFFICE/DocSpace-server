@@ -41,14 +41,14 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class PromptStorageController(PromptStorageService promptStorageService) : ControllerBase
 {
-    [HttpPost("integration/prompts")]
+    [HttpPost("prompts")]
     public async Task<PromptDto> CreateAsync(CreatePromptRequestDto inDto)
     {
         var created = await promptStorageService.CreateAsync(inDto.Name, inDto.Text, inDto.FolderId);
         return PromptMapper.MapToDto(created);
     }
 
-    [HttpPost("integration/prompts/batch")]
+    [HttpPost("prompts/batch")]
     public async Task<IEnumerable<PromptDto>> CreateManyAsync(CreatePromptsRequestDto inDto)
     {
         var prompts = inDto.Prompts.Select(PromptMapper.MapToCreateData).ToList();
@@ -56,35 +56,35 @@ public class PromptStorageController(PromptStorageService promptStorageService) 
         return created.Select(PromptMapper.MapToDto);
     }
 
-    [HttpGet("integration/prompts/{id}")]
+    [HttpGet("prompts/{id}")]
     public async Task<PromptDto> ReadByIdAsync(ReadPromptRequestDto inDto)
     {
         var prompt = await promptStorageService.ReadByIdAsync(inDto.Id);
         return PromptMapper.MapToDto(prompt);
     }
 
-    [HttpGet("integration/prompts")]
+    [HttpGet("prompts")]
     public async Task<IEnumerable<PromptDto>> ReadAllAsync()
     {
         var prompts = await promptStorageService.ReadAllAsync();
         return prompts.Select(PromptMapper.MapToDto);
     }
 
-    [HttpGet("integration/prompt-folders/{id}/prompts")]
+    [HttpGet("prompt-folders/{id}/prompts")]
     public async Task<IEnumerable<PromptDto>> ReadByFolderAsync(ReadPromptsByFolderRequestDto inDto)
     {
         var prompts = await promptStorageService.ReadByFolderIdAsync(inDto.Id);
         return prompts.Select(PromptMapper.MapToDto);
     }
 
-    [HttpPut("integration/prompts/{id}")]
+    [HttpPut("prompts/{id}")]
     public async Task<IActionResult> UpdateAsync(UpdatePromptRequestDto inDto)
     {
         await promptStorageService.UpdateAsync(inDto.Id, inDto.Body.Name, inDto.Body.Text, inDto.Body.ChangeFolder, inDto.Body.FolderId);
         return NoContent();
     }
 
-    [HttpDelete("integration/prompts/{id}")]
+    [HttpDelete("prompts/{id}")]
     public async Task<IActionResult> DeleteAsync(DeletePromptRequestDto inDto)
     {
         await promptStorageService.DeleteAsync(inDto.Id);

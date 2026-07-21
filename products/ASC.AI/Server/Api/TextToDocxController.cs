@@ -43,7 +43,7 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class TextToDocxController(MdToDocxTaskPublisher mdToDocxTaskPublisher) : ControllerBase
 {
-    [HttpPost("integration/text-to-docx/start")]
+    [HttpPost("text-to-docx/start")]
     public async Task<IActionResult> PublishAsync(PublishTextToDocxRequestDto inDto)
     {
         if (inDto.FolderId.ValueKind == JsonValueKind.Number)

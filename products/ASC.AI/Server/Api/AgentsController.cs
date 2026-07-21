@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -56,7 +56,7 @@ public class AgentsController(
     FileSecurity fileSecurity)
     : ControllerBase
 {
-    [HttpGet("integration/agents")]
+    [HttpGet("agents")]
     public async Task<FolderContentDto<int>> GetAgents(GetAgentListRequestDto inDto)
     {
         var parentId = await globalFolderHelper.GetFolderAiAgentsAsync();
@@ -105,7 +105,7 @@ public class AgentsController(
         return dto.NotFoundIfNull();
     }
 
-    [HttpPost("integration/agents")]
+    [HttpPost("agents")]
     public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
     {
         var lifetime = inDto.Lifetime.Map();
@@ -149,7 +149,7 @@ public class AgentsController(
         return await folderDtoHelper.GetAsync(room);
     }
 
-    [HttpGet("integration/agents/{id}")]
+    [HttpGet("agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
     {
         var folder = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
@@ -157,7 +157,7 @@ public class AgentsController(
         return await folderDtoHelper.GetAsync(folder);
     }
 
-    [HttpPut("integration/agents/{id}")]
+    [HttpPut("agents/{id}")]
     public async Task<FolderDto<int>> UpdateAgent(UpdateRoomRequestDto<int> inDto)
     {
         var room = await fileStorageService.UpdateRoomAsync(inDto.Id, inDto.UpdateRoom);
@@ -165,7 +165,7 @@ public class AgentsController(
         return await folderDtoHelper.GetAsync(room);
     }
 
-    [HttpDelete("integration/agents/{id}")]
+    [HttpDelete("agents/{id}")]
     public async Task<FileOperationDto> DeleteAgent(DeleteRoomRequestDto<int> inDto)
     {
         var agent = await fileStorageService.GetFolderAsync(inDto.Id);
@@ -185,7 +185,7 @@ public class AgentsController(
     }
 
 
-    [HttpPut("integration/agents/agentquota")]
+    [HttpPut("agents/agentquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
     {
         var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
@@ -209,7 +209,7 @@ public class AgentsController(
         }
     }
 
-    [HttpPut("integration/agents/resetquota")]
+    [HttpPut("agents/resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
     {
         var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
@@ -227,7 +227,7 @@ public class AgentsController(
         filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentDefault, quotaAiAgentSettings.DefaultQuota.ToString(), agentTitles.ToArray());
     }
 
-    [HttpGet("integration/agents/news")]
+    [HttpGet("agents/news")]
     public async Task<List<NewItemsDto<AgentNewItemsDto>>> GetAgentsNewItems()
     {
         var rootId = await globalFolderHelper.FolderAiAgentsAsync;

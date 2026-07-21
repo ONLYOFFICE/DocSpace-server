@@ -41,42 +41,42 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ThreadStorageController(ThreadStorageService threadStorageService) : ControllerBase
 {
-    [HttpPost("integration/threads")]
+    [HttpPost("threads")]
     public async Task<ThreadDto> CreateAsync(CreateThreadRequestDto inDto)
     {
         var created = await threadStorageService.CreateAsync(inDto.Title, inDto.ProfileId, inDto.EntityId);
         return ThreadMapper.MapToDto(created);
     }
 
-    [HttpGet("integration/threads/{id}")]
+    [HttpGet("threads/{id}")]
     public async Task<ThreadDto> ReadByIdAsync(ReadThreadRequestDto inDto)
     {
         var thread = await threadStorageService.ReadByIdAsync(inDto.Id);
         return ThreadMapper.MapToDto(thread);
     }
 
-    [HttpGet("integration/threads")]
+    [HttpGet("threads")]
     public async Task<IEnumerable<ThreadDto>> ReadAllAsync(ReadAllThreadsRequestDto inDto)
     {
         var threads = await threadStorageService.ReadAllAsync(inDto.EntityId);
         return threads.Select(ThreadMapper.MapToDto);
     }
 
-    [HttpPut("integration/threads/{id}")]
+    [HttpPut("threads/{id}")]
     public async Task<IActionResult> UpdateAsync(UpdateThreadRequestDto inDto)
     {
         await threadStorageService.UpdateAsync(inDto.Id, inDto.Body.Title);
         return NoContent();
     }
 
-    [HttpPatch("integration/threads/{id}/touch")]
+    [HttpPatch("threads/{id}/touch")]
     public async Task<IActionResult> TouchAsync(TouchThreadRequestDto inDto)
     {
         await threadStorageService.TouchAsync(inDto.Id, inDto.Body.LastEditDate, inDto.Body.ProfileId, inDto.Body.ClearProfile);
         return NoContent();
     }
 
-    [HttpDelete("integration/threads/{id}")]
+    [HttpDelete("threads/{id}")]
     public async Task<IActionResult> DeleteAsync(DeleteThreadRequestDto inDto)
     {
         await threadStorageService.DeleteAsync(inDto.Id);

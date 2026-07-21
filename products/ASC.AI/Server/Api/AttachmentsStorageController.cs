@@ -41,7 +41,7 @@ namespace ASC.AI.Api;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class AttachmentsStorageController(AttachmentsStorageService attachmentsStorageService) : ControllerBase
 {
-    [HttpPost("integration/attachments")]
+    [HttpPost("attachments")]
     public async Task<List<AttachmentDto>> CreateManyAsync(CreateAttachmentsRequestDto inDto)
     {
         return await attachmentsStorageService.CreateManyAsync(inDto.Body.EntryIds)
@@ -49,14 +49,14 @@ public class AttachmentsStorageController(AttachmentsStorageService attachmentsS
             .ToListAsync();
     }
 
-    [HttpGet("integration/attachments/{id}")]
+    [HttpGet("attachments/{id}")]
     public async Task<AttachmentDto> ReadByIdAsync(ReadAttachmentRequestDto inDto)
     {
         var attachment = await attachmentsStorageService.ReadByIdAsync(inDto.Id);
         return AttachmentMapper.MapToDto(attachment);
     }
 
-    [HttpPost("integration/attachments/read")]
+    [HttpPost("attachments/read")]
     public async Task<List<AttachmentDto>> ReadManyByIdsAsync(ReadAttachmentsRequestDto inDto)
     {
         return await attachmentsStorageService.ReadManyByIdsAsync(inDto.Body.Ids)
@@ -64,21 +64,21 @@ public class AttachmentsStorageController(AttachmentsStorageService attachmentsS
             .ToListAsync();
     }
 
-    [HttpPut("integration/attachments")]
+    [HttpPut("attachments")]
     public async Task<IActionResult> UpdateBindingAsync(UpdateAttachmentsBindingRequestDto inDto)
     {
         await attachmentsStorageService.UpdateManyAsync(inDto.Body.Ids, inDto.Body.MessageId);
         return NoContent();
     }
 
-    [HttpDelete("integration/attachments/{id}")]
+    [HttpDelete("attachments/{id}")]
     public async Task<IActionResult> DeleteAsync(DeleteAttachmentRequestDto inDto)
     {
         await attachmentsStorageService.DeleteAsync(inDto.Id);
         return NoContent();
     }
 
-    [HttpDelete("integration/attachments")]
+    [HttpDelete("attachments")]
     public async Task<IActionResult> DeleteManyAsync(DeleteAttachmentsRequestDto inDto)
     {
         await attachmentsStorageService.DeleteManyAsync(inDto.Body.Ids);
