@@ -1124,15 +1124,20 @@ internal class FileDao(
             logger.ErrorWithException(e);
         }
 
-        try
+        foreach (var deletedId in deletedIds)
         {
-            var fileIdsArray = deletedIds.ToArray();
-            await factoryIndexer.DeleteAsync(r => r.In(a => a.Id, fileIdsArray));
-            await factoryIndexerFormData.DeleteAsync(r => r.In(a => a.Id, fileIdsArray));
-        }
-        catch (Exception e)
-        {
-            logger.ErrorWithException(e);
+            try
+            {
+                await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = deletedId,
+                    Action = FileIndexAction.Delete
+                });
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
         }
 
         return deletedIds;
