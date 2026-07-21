@@ -42,8 +42,10 @@
     "/internal/ai/integration/agents": {
       "get": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
+        "summary": "Get ai agents",
+        "description": "Get ai agents",
         "operationId": "getAgents",
         "parameters": [
           {
@@ -154,7 +156,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Agent information",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -240,8 +242,10 @@
       },
       "post": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
+        "summary": "Create an ai agent",
+        "description": "Creates an ai agent.",
         "operationId": "createAgent",
         "requestBody": {
           "content": {
@@ -254,7 +258,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Agent information",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -342,8 +346,10 @@
     "/internal/ai/integration/agents/{id}": {
       "get": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
+        "summary": "Return an ai agent",
+        "description": "Returns an ai agent.",
         "operationId": "getAgentInfo",
         "parameters": [
           {
@@ -360,7 +366,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Agent information",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -446,8 +452,10 @@
       },
       "put": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
+        "summary": "Update an ai agent",
+        "description": "Updates an ai agent.",
         "operationId": "updateAgent",
         "parameters": [
           {
@@ -475,7 +483,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated agent information",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -561,8 +569,10 @@
       },
       "delete": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
+        "summary": "Remove an ai agent",
+        "description": "Removes an ai agent.",
         "operationId": "deleteAgent",
         "parameters": [
           {
@@ -590,7 +600,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "File operation",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -678,8 +688,10 @@
     "/internal/ai/integration/agents/agentquota": {
       "put": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
+        "summary": "Change the AI agent quota limit",
+        "description": "Changes the quota limit for the AI agents with the IDs specified in the request.",
         "operationId": "updateAgentsQuota",
         "requestBody": {
           "content": {
@@ -692,7 +704,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of AI agents with the detailed information",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -780,8 +792,10 @@
     "/internal/ai/integration/agents/resetquota": {
       "put": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
+        "summary": "Reset the AI agents quota limit",
+        "description": "Resets the quota limit for the AI agents with the IDs specified in the request.",
         "operationId": "resetAgentsQuota",
         "requestBody": {
           "content": {
@@ -794,7 +808,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of AI agents with the detailed information",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -882,12 +896,14 @@
     "/internal/ai/integration/agents/news": {
       "get": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
+        "summary": "Get the room new items",
+        "description": "Returns the room new items.",
         "operationId": "getAgentsNewItems",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of new items",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -10712,6 +10728,11 @@
   },
   "tags": [
     {
+      "name": "AI / Agents",
+      "description": "Operations for working with AI agents.",
+      "x-displayName": "Agents"
+    },
+    {
       "name": "AI / Chat",
       "description": "Operations for working with AI chat.",
       "x-displayName": "Chat"
@@ -10746,6 +10767,7 @@
     {
       "name": "AI",
       "tags": [
+        "AI / Agents",
         "AI / Chat",
         "AI / MCP",
         "AI / Messages",
