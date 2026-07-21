@@ -995,7 +995,7 @@ internal class FolderDao(
             await filesDbContext.DeleteOrderByFolderIdsAsync(tenantId, subfolders);
 
             await filesDbContext.DeleteAuditReferencesByFolderIdsAsync(subfolders);
-            await filesDbContext.DeleteChatsByRoomIdsAsync(subfolders);
+            await filesDbContext.DeleteChatsByRoomIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteAttachmentsByFolderIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteThreadsByFolderIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteAssignmentsByFolderIdsAsync(tenantId, subfolders);
