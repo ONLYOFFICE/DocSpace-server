@@ -60,7 +60,7 @@ import { toolsController } from "./controllers/toolsController.js";
 import { vectorizationController } from "./controllers/vectorizationController.js";
 import { webSearchController } from "./controllers/webSearchController.js";
 
-export const API_PREFIX = "/api/2.0/new-ai";
+export const API_PREFIX = "/api/2.0/ai";
 
 type RouteMap = Readonly<Record<string, RouteSpec>>;
 type ControllerMap = Readonly<Record<string, RequestHandler>>;
@@ -181,6 +181,7 @@ export default function registerRoutes(app: Application): void {
   router.put("/agents/:id", agentsController.updateAgent);
   router.delete("/agents/:id", agentsController.deleteAgent);
 
+  router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);
   router.put("/config/vectorization", settingsController.setVectorizationSettings);
   router.get("/config/user", settingsController.getUserSettings);
