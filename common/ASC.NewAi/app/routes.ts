@@ -57,6 +57,7 @@ import { promptsController } from "./controllers/promptsController.js";
 import { settingsController } from "./controllers/settingsController.js";
 import { threadsController } from "./controllers/threadsController.js";
 import { toolsController } from "./controllers/toolsController.js";
+import { vectorizationController } from "./controllers/vectorizationController.js";
 import { webSearchController } from "./controllers/webSearchController.js";
 
 export const API_PREFIX = "/api/2.0/new-ai";
@@ -184,6 +185,8 @@ export default function registerRoutes(app: Application): void {
   router.put("/config/vectorization", settingsController.setVectorizationSettings);
   router.get("/config/user", settingsController.getUserSettings);
   router.put("/config/user", settingsController.setUserSettings);
+
+  router.post("/vectorization/tasks", vectorizationController.startTask);
 
   let total = 0;
   for (const binding of ENGINE_BINDINGS) {
