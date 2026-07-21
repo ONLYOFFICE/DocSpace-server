@@ -63,6 +63,8 @@ import type {
   WebSearchConfig,
   ActionType,
   TMCPItem,
+  ChatEvent,
+  OpenAIStreamChunk,
   ProviderType,
   CreateProfileInput,
   ProfileMutationResult,
@@ -83,15 +85,126 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 
+/* ------------------------------ Common --------------------------------- */
+
+// Shared response envelopes, referenced by `openapi.ts` in place of the
+// opaque generic-object fallback. Every mutating endpoint with no richer
+// payload replies `{ success: true }` (see the controllers); every error
+// (401 without a session, and the generic error handler) replies
+// `{ error: <message> }`.
+
+/** Generic success acknowledgement for mutations that return no data. */
+export type SuccessResponse = { success: boolean };
+
+/** Error body — a single human-readable message. */
+export type ErrorResponse = { error: string };
+
 /* ------------------------------- AI ------------------------------------ */
 
-// The AI engine's request inputs (`SendInput`, `SendStreamInput`, …) carry
-// non-serializable fields (provider `fetch` hooks typed against DOM
-// `RequestInfo`/`Response`) that neither JSON Schema nor the schema
-// generator can represent. The AI operations are also streaming (ndjson /
-// SSE), so their responses are event streams rather than a single JSON body.
-// They are therefore left with the documented generic-object fallback rather
-// than a concrete schema. All other engines below are fully typed.
+// The AI engine's own request inputs (`SendInput`, `SendStreamInput`, …)
+// carry two non-serializable fields — `actionArgs.signal` (`AbortSignal`) and
+// `actionArgs.fetch` (a provider `fetch` hook typed against DOM
+// `RequestInfo`/`Response`) — that neither JSON Schema nor the generator can
+// represent, and that never travel on the wire: the server injects the abort
+// signal and provider fetch itself. Rather than import those library inputs
+// directly (which collapse to `{}` under `skipTypeCheck`), the bodies below
+// mirror their serializable wire subset. Streaming responses are typed by the
+// streamed event (`ChatEvent` / `OpenAIStreamChunk`); the stream media type
+// (ndjson / SSE) is applied per-operation in `openapi.ts`.
+
+// Wire-serializable subset of the engine's `ActionArgs` — drops the
+// engine-injected `signal`/`fetch`; `profile`/`messages` are owned by the
+// engine and never sent by the caller.
+export type AiActionArgs = {
+  /** Extra tools offered to the model for this request. */
+  tools?: TMCPItem[];
+  /** Enable extended thinking / reasoning for this request. */
+  isReasoning?: boolean;
+  /** Override the action's baked-in system prompt (replace or append). */
+  prompt?: { mode: "replace" | "append"; text: string };
+};
+
+export type Req_newAiAiSend = {
+  /** Which AI action to run — selects the assignment slot and action. */
+  actionType: ActionType;
+  /** The user turn to send. */
+  userMessage: ThreadMessageLike;
+  actionArgs?: AiActionArgs;
+  /** Optional entity (room) scope for profile resolution. */
+  entityId?: string;
+};
+export type Res_newAiAiSend = ThreadMessageLike;
+
+export type Req_newAiAiSendCustom = {
+  /** Stream the reply (ndjson) when true, else return a single message. */
+  isStream: boolean;
+  /** Caller-supplied system prompt for this one-turn call. */
+  systemPrompt: string;
+  userMessage: ThreadMessageLike;
+  actionArgs?: AiActionArgs;
+};
+/**
+ * One-shot mode (`isStream: false`) returns the assistant message shown here;
+ * streaming mode instead emits a newline-delimited `ChatEvent` stream.
+ */
+export type Res_newAiAiSendCustom = ThreadMessageLike;
+
+// Shared body of the two streaming send endpoints (`sendWithStream` and its
+// OpenAI-framed twin) — the `Chat` action is implied, so there is no
+// `actionType`.
+export type AiSendStreamBody = {
+  /** Target thread; a new one is created (with an auto title) when omitted. */
+  threadId?: string;
+  /** The user turn to send. */
+  userMessage: ThreadMessageLike;
+  actionArgs?: AiActionArgs;
+  /** Optional entity (room) scope for profile resolution. */
+  entityId?: string;
+  /** Session-level profile override for this request only. */
+  profileId?: string;
+};
+
+export type Req_newAiAiSendWithStream = AiSendStreamBody;
+export type Res_newAiAiSendWithStream = ChatEvent;
+
+export type Req_newAiAiSendWithStreamOpenAI = AiSendStreamBody;
+export type Res_newAiAiSendWithStreamOpenAI = OpenAIStreamChunk;
+
+export type Req_newAiAiRegenerateStream = {
+  /** Target thread (must already exist). */
+  threadId: string;
+  actionArgs?: AiActionArgs;
+  entityId?: string;
+  profileId?: string;
+};
+export type Res_newAiAiRegenerateStream = ChatEvent;
+
+// Identifies a pending tool call to resume — mirrors the library
+// `ToolCallData` (its serializable fields).
+export type AiToolCallData = {
+  /** Thread the assistant message belongs to. */
+  threadId: string;
+  /** Storage id of the assistant message holding the tool call. */
+  messageId: string;
+  /** Index of the tool-call content part inside `message.content`. */
+  idx: number;
+  /** Snapshot of the assistant message at the time the tool call surfaced. */
+  message: ThreadMessageLike;
+  actionArgs?: AiActionArgs;
+  entityId?: string;
+  profileId?: string;
+};
+
+export type Req_newAiAiApproveToolCall = AiToolCallData & {
+  /** Final result of the tool call, as the model should see it. */
+  result: unknown;
+  /** Persist auto-approve for this tool's name. */
+  allowAlways?: boolean;
+};
+export type Res_newAiAiApproveToolCall = ChatEvent;
+
+export type Req_newAiAiDenyToolCall = AiToolCallData;
+export type Res_newAiAiDenyToolCall = ChatEvent;
 
 /* --------------------------- Assignments ------------------------------- */
 

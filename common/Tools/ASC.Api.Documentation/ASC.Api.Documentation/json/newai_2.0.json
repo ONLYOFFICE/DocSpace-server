@@ -80,11 +80,6 @@
       "name": "New AI / Export",
       "description": "Markdown → docx export.",
       "x-displayName": "Export"
-    },
-    {
-      "name": "New AI / System",
-      "description": "Health and liveness probes.",
-      "x-displayName": "System"
     }
   ],
   "x-tagGroups": [
@@ -101,8 +96,7 @@
         "New AI / Tools",
         "New AI / Web search",
         "New AI / Agents",
-        "New AI / Export",
-        "New AI / System"
+        "New AI / Export"
       ]
     }
   ],
@@ -120,8 +114,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiThreadMessageLike"
                 }
               }
             }
@@ -131,8 +124,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -144,7 +136,28 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "actionType": {
+                    "$ref": "#/components/schemas/NewAiActionType",
+                    "description": "Which AI action to run — selects the assignment slot and action."
+                  },
+                  "userMessage": {
+                    "$ref": "#/components/schemas/NewAiThreadMessageLike",
+                    "description": "The user turn to send."
+                  },
+                  "actionArgs": {
+                    "$ref": "#/components/schemas/NewAiAiActionArgs"
+                  },
+                  "entityId": {
+                    "type": "string",
+                    "description": "Optional entity (room) scope for profile resolution."
+                  }
+                },
+                "required": [
+                  "actionType",
+                  "userMessage"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -164,8 +177,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiThreadMessageLike",
+                  "description": "One-shot mode (`isStream: false`) returns the assistant message shown here; streaming mode instead emits a newline-delimited `ChatEvent` stream."
                 }
               }
             }
@@ -175,8 +188,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -188,7 +200,28 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "isStream": {
+                    "type": "boolean",
+                    "description": "Stream the reply (ndjson) when true, else return a single message."
+                  },
+                  "systemPrompt": {
+                    "type": "string",
+                    "description": "Caller-supplied system prompt for this one-turn call."
+                  },
+                  "userMessage": {
+                    "$ref": "#/components/schemas/NewAiThreadMessageLike"
+                  },
+                  "actionArgs": {
+                    "$ref": "#/components/schemas/NewAiAiActionArgs"
+                  }
+                },
+                "required": [
+                  "isStream",
+                  "systemPrompt",
+                  "userMessage"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -204,12 +237,11 @@
         "summary": "Send with stream",
         "responses": {
           "200": {
-            "description": "Success.",
+            "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
             "content": {
-              "application/json": {
+              "application/x-ndjson": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiChatEvent"
                 }
               }
             }
@@ -219,8 +251,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -231,8 +262,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/NewAiAiSendStreamBody"
               }
             }
           }
@@ -248,12 +278,11 @@
         "summary": "Send with stream open ai",
         "responses": {
           "200": {
-            "description": "Success.",
+            "description": "Server-sent events stream of OpenAI `chat.completion.chunk` objects, terminated by a `[DONE]` sentinel.",
             "content": {
-              "application/json": {
+              "text/event-stream": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiOpenAIStreamChunk"
                 }
               }
             }
@@ -263,8 +292,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -275,8 +303,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/NewAiAiSendStreamBody"
               }
             }
           }
@@ -292,12 +319,11 @@
         "summary": "Regenerate stream",
         "responses": {
           "200": {
-            "description": "Success.",
+            "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
             "content": {
-              "application/json": {
+              "application/x-ndjson": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiChatEvent"
                 }
               }
             }
@@ -307,8 +333,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -320,7 +345,25 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "properties": {
+                  "threadId": {
+                    "type": "string",
+                    "description": "Target thread (must already exist)."
+                  },
+                  "actionArgs": {
+                    "$ref": "#/components/schemas/NewAiAiActionArgs"
+                  },
+                  "entityId": {
+                    "type": "string"
+                  },
+                  "profileId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "threadId"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -336,12 +379,11 @@
         "summary": "Approve tool call",
         "responses": {
           "200": {
-            "description": "Success.",
+            "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
             "content": {
-              "application/json": {
+              "application/x-ndjson": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiChatEvent"
                 }
               }
             }
@@ -351,8 +393,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -364,7 +405,48 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": true
+                "additionalProperties": false,
+                "properties": {
+                  "result": {
+                    "description": "Final result of the tool call, as the model should see it."
+                  },
+                  "allowAlways": {
+                    "type": "boolean",
+                    "description": "Persist auto-approve for this tool's name."
+                  },
+                  "threadId": {
+                    "type": "string",
+                    "description": "Thread the assistant message belongs to."
+                  },
+                  "messageId": {
+                    "type": "string",
+                    "description": "Storage id of the assistant message holding the tool call."
+                  },
+                  "idx": {
+                    "type": "number",
+                    "description": "Index of the tool-call content part inside `message.content`."
+                  },
+                  "message": {
+                    "$ref": "#/components/schemas/NewAiThreadMessageLike",
+                    "description": "Snapshot of the assistant message at the time the tool call surfaced."
+                  },
+                  "actionArgs": {
+                    "$ref": "#/components/schemas/NewAiAiActionArgs"
+                  },
+                  "entityId": {
+                    "type": "string"
+                  },
+                  "profileId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "idx",
+                  "message",
+                  "messageId",
+                  "result",
+                  "threadId"
+                ]
               }
             }
           }
@@ -380,12 +462,11 @@
         "summary": "Deny tool call",
         "responses": {
           "200": {
-            "description": "Success.",
+            "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
             "content": {
-              "application/json": {
+              "application/x-ndjson": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiChatEvent"
                 }
               }
             }
@@ -395,8 +476,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -407,8 +487,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/NewAiAiToolCallData"
               }
             }
           }
@@ -438,8 +517,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -493,8 +571,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -543,8 +620,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -590,8 +666,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -601,8 +676,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -643,8 +717,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -689,8 +762,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -734,8 +806,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -766,8 +837,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -777,8 +847,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -819,8 +888,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -902,8 +970,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -984,8 +1051,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1061,8 +1127,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1143,8 +1208,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1193,8 +1257,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1228,8 +1291,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -1239,8 +1301,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1271,8 +1332,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -1282,8 +1342,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1317,8 +1376,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -1328,8 +1386,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1393,8 +1450,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1425,8 +1481,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -1436,8 +1491,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1481,8 +1535,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -1492,8 +1545,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1534,8 +1586,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1576,8 +1627,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1618,8 +1668,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1650,8 +1699,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -1661,8 +1709,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1706,8 +1753,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1751,8 +1797,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1829,8 +1874,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1871,8 +1915,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1916,8 +1959,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1948,8 +1990,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -1990,8 +2031,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2060,8 +2100,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2108,8 +2147,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -2119,8 +2157,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2164,8 +2201,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2206,8 +2242,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2248,8 +2283,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2295,8 +2329,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -2306,8 +2339,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2351,8 +2383,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2383,8 +2414,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2415,8 +2445,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2482,8 +2511,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2529,8 +2557,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2571,8 +2598,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2631,8 +2657,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2673,8 +2698,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2722,8 +2746,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -2733,8 +2756,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2777,8 +2799,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -2788,8 +2809,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2834,8 +2854,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -2845,8 +2864,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2877,8 +2895,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -2888,8 +2905,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2930,8 +2946,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -2989,8 +3004,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3034,8 +3048,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3097,8 +3110,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3144,8 +3156,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3176,8 +3187,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -3187,8 +3197,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3233,8 +3242,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -3244,8 +3252,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3286,8 +3293,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3346,8 +3352,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3394,8 +3399,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -3405,8 +3409,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3464,8 +3467,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3517,8 +3519,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3565,8 +3566,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3607,8 +3607,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3655,8 +3654,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -3666,8 +3664,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3734,8 +3731,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3776,8 +3772,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3824,8 +3819,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -3835,8 +3829,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3901,8 +3894,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -3943,8 +3935,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4006,8 +3997,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4048,8 +4038,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4106,8 +4095,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4148,8 +4136,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4192,8 +4179,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -4203,8 +4189,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4247,8 +4232,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
                 }
               }
             }
@@ -4258,8 +4242,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4310,8 +4293,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4369,8 +4351,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiFolderContentIntegerWrapper"
                 }
               }
             }
@@ -4380,8 +4361,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4400,8 +4380,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
                 }
               }
             }
@@ -4411,8 +4390,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4441,8 +4419,7 @@
                   "share": {
                     "type": "array",
                     "items": {
-                      "type": "object",
-                      "additionalProperties": {}
+                      "type": "object"
                     },
                     "description": "Initial share entries (`FileShareParams`)."
                   },
@@ -4468,17 +4445,14 @@
                   },
                   "lifetime": {
                     "type": "object",
-                    "additionalProperties": {},
                     "description": "Room data lifetime policy (`RoomDataLifetimeDto`)."
                   },
                   "watermark": {
                     "type": "object",
-                    "additionalProperties": {},
                     "description": "Watermark settings (`WatermarkRequestDto`)."
                   },
                   "logo": {
                     "type": "object",
-                    "additionalProperties": {},
                     "description": "Room logo (`LogoRequest`)."
                   },
                   "tags": {
@@ -4520,8 +4494,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiNewItemsAgentNewItemsArrayWrapper"
                 }
               }
             }
@@ -4531,8 +4504,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4553,8 +4525,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
                 }
               }
             }
@@ -4564,8 +4535,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4594,8 +4564,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
                 }
               }
             }
@@ -4605,8 +4574,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4636,7 +4604,6 @@
                   },
                   "chatSettings": {
                     "type": "object",
-                    "additionalProperties": {},
                     "description": "Chat settings (`ChatSettings`); requires a valid provider/model."
                   },
                   "sendFormToExternalDB": {
@@ -4665,17 +4632,14 @@
                   },
                   "lifetime": {
                     "type": "object",
-                    "additionalProperties": {},
                     "description": "Room data lifetime policy (`RoomDataLifetimeDto`)."
                   },
                   "watermark": {
                     "type": "object",
-                    "additionalProperties": {},
                     "description": "Watermark settings (`WatermarkRequestDto`)."
                   },
                   "logo": {
                     "type": "object",
-                    "additionalProperties": {},
                     "description": "Room logo (`LogoRequest`)."
                   },
                   "tags": {
@@ -4711,8 +4675,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiFileOperationWrapper"
                 }
               }
             }
@@ -4722,8 +4685,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4771,8 +4733,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiFolderIntegerArrayWrapper"
                 }
               }
             }
@@ -4782,8 +4743,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4840,8 +4800,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiFolderIntegerArrayWrapper"
                 }
               }
             }
@@ -4851,8 +4810,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
                 }
               }
             }
@@ -4890,44 +4848,6 @@
           }
         }
       }
-    },
-    "/api/2.0/new-ai/health": {
-      "get": {
-        "tags": [
-          "New AI / System"
-        ],
-        "operationId": "newAiHealth",
-        "summary": "Health check",
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Service is healthy.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/2.0/new-ai/isLife": {
-      "get": {
-        "tags": [
-          "New AI / System"
-        ],
-        "operationId": "newAiIsLife",
-        "summary": "Liveness probe",
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Service is alive."
-          }
-        }
-      }
     }
   },
   "components": {
@@ -4945,6 +4865,472 @@
       }
     },
     "schemas": {
+      "NewAiSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "additionalProperties": false,
+        "description": "Generic success acknowledgement for mutations that return no data."
+      },
+      "NewAiErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false,
+        "description": "Error body — a single human-readable message."
+      },
+      "NewAiAiActionArgs": {
+        "type": "object",
+        "properties": {
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiTMCPItem"
+            },
+            "description": "Extra tools offered to the model for this request."
+          },
+          "isReasoning": {
+            "type": "boolean",
+            "description": "Enable extended thinking / reasoning for this request."
+          },
+          "prompt": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "replace",
+                  "append"
+                ]
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "mode",
+              "text"
+            ],
+            "additionalProperties": false,
+            "description": "Override the action's baked-in system prompt (replace or append)."
+          }
+        },
+        "additionalProperties": false
+      },
+      "NewAiTMCPItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tool name as registered on the MCP server (e.g. `\"web_search\"`, `\"insert_text\"`)."
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description shown to the AI model and in the tools list UI."
+          },
+          "inputSchema": {
+            "type": "object",
+            "description": "JSON Schema describing the tool's input parameters."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this tool is currently enabled. Disabled tools are hidden from the AI model."
+          },
+          "requireApproval": {
+            "type": "boolean",
+            "description": "Whether the consumer must show an approval dialog before this tool runs. The engine reads it when deciding the `autoAllow` flag on a `tool-call-pending` event: `requireApproval === false` auto-allows the call (no dialog), `true` always prompts. `undefined` leaves the decision to the persisted \"always-allow\" list alone — so MCP / custom-server tools (which never set it) keep prompting as before, while host tools opt into auto-allow by default. Wire-serializable, so it survives a remote (server-side) engine."
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "inputSchema"
+        ],
+        "additionalProperties": false,
+        "description": "Descriptor for a tool exposed by an MCP server."
+      },
+      "NewAiActionType": {
+        "type": "string",
+        "enum": [
+          "Default",
+          "Chat",
+          "Code",
+          "Summarization",
+          "Translation",
+          "TextAnalyze",
+          "ImageGeneration",
+          "OCR",
+          "Vision"
+        ]
+      },
+      "NewAiThreadMessageLike": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Storage-assigned message id (absent on inbound drafts)."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant",
+              "system"
+            ],
+            "description": "Message author role."
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              }
+            ],
+            "description": "Message content: either plain text or a list of typed content parts (text, image, tool-call, …). Parts are open-ended by content type."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Creation timestamp, ISO-8601 on the wire."
+          },
+          "status": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "description": "Delivery/generation status of the message."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Arbitrary per-message metadata."
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Attachments linked to the message."
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "additionalProperties": false
+      },
+      "NewAiAiSendStreamBody": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string",
+            "description": "Target thread; a new one is created (with an auto title) when omitted."
+          },
+          "userMessage": {
+            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "description": "The user turn to send."
+          },
+          "actionArgs": {
+            "$ref": "#/components/schemas/NewAiAiActionArgs"
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Optional entity (room) scope for profile resolution."
+          },
+          "profileId": {
+            "type": "string",
+            "description": "Session-level profile override for this request only."
+          }
+        },
+        "required": [
+          "userMessage"
+        ],
+        "additionalProperties": false
+      },
+      "NewAiChatEvent": {
+        "description": "Discriminated event emitted by the streaming methods of  {@link  AIEngine } . The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a  {@link  ChatEvent }  so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via  {@link  AIEngine.approveToolCall }  or  {@link  AIEngine.denyToolCall } .\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant   reply lifecycle.\n- `message-incomplete` — the provider returned an error or   incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": [
+              "user-message-stored",
+              "message-start",
+              "message-delta",
+              "message-end",
+              "message-incomplete",
+              "tool-call-pending",
+              "thread-title"
+            ],
+            "type": "string",
+            "description": "Emitted once per `sendWithStream` call, immediately after the user message has been persisted by storage and before the assistant stream starts. Carries the storage-assigned `id` and `createdAt`. The UI uses it to render the user bubble — no client-side optimistic placeholder is needed, which keeps the runtime tree free of phantom nodes from index-fallback ids."
+          },
+          "message": {
+            "$ref": "#/components/schemas/NewAiThreadMessageLike"
+          },
+          "messageId": {
+            "type": "string"
+          },
+          "idx": {
+            "type": "number"
+          },
+          "threadId": {
+            "type": "string"
+          },
+          "autoAllow": {
+            "type": "boolean",
+            "description": "The consumer should execute the tool without prompting the user. True when the tool is in the persisted \"always-allow\" list, or the tool itself opts in via `TMCPItem.requireApproval === false` (host tools default to this). For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
+          },
+          "serverExecuted": {
+            "type": "boolean",
+            "description": "Set when the tool is served by a server-side system source: the consumer must NOT execute it locally — only show the approval UI (unless `autoAllow`) and resume via `approveToolCall` (no `result` needed) / `denyToolCall`. The engine runs it in-engine."
+          },
+          "title": {
+            "type": "string"
+          },
+          "profileId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "NewAiOpenAIStreamChunk": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/NewAiOpenAIChatCompletionChunk"
+          },
+          {
+            "$ref": "#/components/schemas/NewAiOpenAIStreamError"
+          }
+        ],
+        "description": "A chunk or the terminal error envelope emitted on a failed stream."
+      },
+      "NewAiOpenAIChatCompletionChunk": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "chat.completion.chunk"
+            ]
+          },
+          "created": {
+            "type": "number"
+          },
+          "model": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiOpenAIChunkChoice"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "created",
+          "model",
+          "choices"
+        ],
+        "additionalProperties": false
+      },
+      "NewAiOpenAIChunkChoice": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number"
+          },
+          "delta": {
+            "$ref": "#/components/schemas/NewAiOpenAIChoiceDelta"
+          },
+          "finish_reason": {
+            "$ref": "#/components/schemas/NewAiOpenAIFinishReason"
+          }
+        },
+        "required": [
+          "index",
+          "delta",
+          "finish_reason"
+        ],
+        "additionalProperties": false
+      },
+      "NewAiOpenAIChoiceDelta": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "assistant"
+            ]
+          },
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "tool_calls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiOpenAIToolCallDelta"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "NewAiOpenAIToolCallDelta": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "function"
+            ]
+          },
+          "function": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "arguments": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "index"
+        ],
+        "additionalProperties": false
+      },
+      "NewAiOpenAIFinishReason": {
+        "nullable": true,
+        "type": "string",
+        "enum": [
+          "stop",
+          "length",
+          "tool_calls",
+          "content_filter",
+          null
+        ],
+        "description": "OpenAI Chat Completions streaming shapes.\n\n {@link  toOpenAIChatCompletionStream }  maps the engine's transport-agnostic  {@link  ChatEvent }  stream onto these chunks so a host can expose an OpenAI-compatible `POST /v1/chat/completions` (`stream: true`) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent."
+      },
+      "NewAiOpenAIStreamError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "code": {
+                "nullable": true,
+                "type": "string"
+              },
+              "param": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "message",
+              "type",
+              "code",
+              "param"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false,
+        "description": "OpenAI streaming error envelope. When the upstream request fails mid-stream the OpenAI API emits a single `data:` line carrying an `error` object (no `choices`), then closes the stream — the official SDK turns this into a thrown `APIError`. Mirrors that shape so a host exposing an OpenAI-compatible endpoint stays wire-compatible."
+      },
+      "NewAiAiToolCallData": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string",
+            "description": "Thread the assistant message belongs to."
+          },
+          "messageId": {
+            "type": "string",
+            "description": "Storage id of the assistant message holding the tool call."
+          },
+          "idx": {
+            "type": "number",
+            "description": "Index of the tool-call content part inside `message.content`."
+          },
+          "message": {
+            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "description": "Snapshot of the assistant message at the time the tool call surfaced."
+          },
+          "actionArgs": {
+            "$ref": "#/components/schemas/NewAiAiActionArgs"
+          },
+          "entityId": {
+            "type": "string"
+          },
+          "profileId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "threadId",
+          "messageId",
+          "idx",
+          "message"
+        ],
+        "additionalProperties": false
+      },
       "NewAiResolvedAssignment": {
         "type": "object",
         "properties": {
@@ -5072,20 +5458,6 @@
           "external"
         ],
         "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
-      },
-      "NewAiActionType": {
-        "type": "string",
-        "enum": [
-          "Default",
-          "Chat",
-          "Code",
-          "Summarization",
-          "Translation",
-          "TextAnalyze",
-          "ImageGeneration",
-          "OCR",
-          "Vision"
-        ]
       },
       "NewAiAssignmentMutationResult": {
         "description": "Outcome of  {@link  AssignmentsEngine.assign }  /  {@link  AssignmentsEngine.unassign } . Either a success or a field-scoped error suitable for displaying in the profile editor.",
@@ -5653,85 +6025,6 @@
         "additionalProperties": false,
         "description": "Input for  {@link  ThreadsEngine.openOrCreate } : open an existing thread if `threadId` is given, otherwise create a new one with an auto-generated title derived from `firstMessage`."
       },
-      "NewAiThreadMessageLike": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Storage-assigned message id (absent on inbound drafts)."
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "user",
-              "assistant",
-              "system"
-            ],
-            "description": "Message author role."
-          },
-          "content": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string"
-                    },
-                    "text": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "type"
-                  ],
-                  "additionalProperties": {}
-                }
-              }
-            ],
-            "description": "Message content: either plain text or a list of typed content parts (text, image, tool-call, …). Parts are open-ended by content type."
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "Creation timestamp, ISO-8601 on the wire."
-          },
-          "status": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "type"
-            ],
-            "additionalProperties": {},
-            "description": "Delivery/generation status of the message."
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": {},
-            "description": "Arbitrary per-message metadata."
-          },
-          "attachments": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": {}
-            },
-            "description": "Attachments linked to the message."
-          }
-        },
-        "required": [
-          "role",
-          "content"
-        ],
-        "additionalProperties": false
-      },
       "NewAiOpenOrCreateResult": {
         "type": "object",
         "properties": {
@@ -5759,7 +6052,6 @@
       },
       "NewAiMcpServerConfig": {
         "type": "object",
-        "additionalProperties": {},
         "description": "One MCP server configuration. The shape is intentionally open — MCP allows per-transport fields (`command`/`args` for stdio, `url` for HTTP, plus env, headers, etc.) and the storage layer stays agnostic to which transport is in use."
       },
       "NewAiToolsMutationResult": {
@@ -5776,39 +6068,6 @@
         "required": [
           "success"
         ]
-      },
-      "NewAiTMCPItem": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Tool name as registered on the MCP server (e.g. `\"web_search\"`, `\"insert_text\"`)."
-          },
-          "description": {
-            "type": "string",
-            "description": "Human-readable description shown to the AI model and in the tools list UI."
-          },
-          "inputSchema": {
-            "type": "object",
-            "additionalProperties": {},
-            "description": "JSON Schema describing the tool's input parameters."
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether this tool is currently enabled. Disabled tools are hidden from the AI model."
-          },
-          "requireApproval": {
-            "type": "boolean",
-            "description": "Whether the consumer must show an approval dialog before this tool runs. The engine reads it when deciding the `autoAllow` flag on a `tool-call-pending` event: `requireApproval === false` auto-allows the call (no dialog), `true` always prompts. `undefined` leaves the decision to the persisted \"always-allow\" list alone — so MCP / custom-server tools (which never set it) keep prompting as before, while host tools opt into auto-allow by default. Wire-serializable, so it survives a remote (server-side) engine."
-          }
-        },
-        "required": [
-          "name",
-          "description",
-          "inputSchema"
-        ],
-        "additionalProperties": false,
-        "description": "Descriptor for a tool exposed by an MCP server."
       },
       "NewAiToolsBulkResult": {
         "description": "Outcome of  {@link  ToolsEngine.replaceAllCustomServers }  — either every entry persisted, or no entries persisted plus a per-key error report.",
@@ -5891,6 +6150,1622 @@
         "required": [
           "success"
         ]
+      },
+      "NewAiFolderIntegerArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiFolderDtoInteger"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "NewAiFolderDtoInteger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NewAiFileEntryDtoInteger"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "parentId": {
+                "type": "integer",
+                "description": "The parent folder ID of the folder.",
+                "format": "int32",
+                "example": 10
+              },
+              "filesCount": {
+                "type": "integer",
+                "description": "The number of files that the folder contains.",
+                "format": "int32",
+                "example": 5
+              },
+              "foldersCount": {
+                "type": "integer",
+                "description": "The number of folders that the folder contains.",
+                "format": "int32",
+                "example": 7
+              },
+              "isShareable": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be shared or not.",
+                "nullable": true,
+                "example": true
+              },
+              "new": {
+                "type": "integer",
+                "description": "The new element index in the folder.",
+                "format": "int32",
+                "example": 0
+              },
+              "mute": {
+                "type": "boolean",
+                "description": "Specifies if the folder notifications are enabled or not.",
+                "example": false
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The list of tags of the folder.",
+                "nullable": true,
+                "example": [
+                  "tag1",
+                  "tag2"
+                ]
+              },
+              "logo": {
+                "$ref": "#/components/schemas/NewAiLogo"
+              },
+              "pinned": {
+                "type": "boolean",
+                "description": "Specifies if the folder is pinned or not.",
+                "example": false
+              },
+              "roomType": {
+                "$ref": "#/components/schemas/NewAiRoomType"
+              },
+              "private": {
+                "type": "boolean",
+                "description": "Specifies if the folder is private or not.",
+                "example": false
+              },
+              "indexing": {
+                "type": "boolean",
+                "description": "Specifies if the folder is indexed or not.",
+                "example": true
+              },
+              "denyDownload": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be downloaded or not.",
+                "example": false
+              },
+              "lifetime": {
+                "$ref": "#/components/schemas/NewAiRoomDataLifetimeDto"
+              },
+              "watermark": {
+                "$ref": "#/components/schemas/NewAiWatermarkDto"
+              },
+              "type": {
+                "$ref": "#/components/schemas/NewAiFolderType"
+              },
+              "inRoom": {
+                "type": "boolean",
+                "description": "Specifies if the folder is placed in the room or not.",
+                "nullable": true,
+                "example": false
+              },
+              "quotaLimit": {
+                "type": "integer",
+                "description": "The folder quota limit.",
+                "format": "int64",
+                "nullable": true,
+                "example": 1073741824
+              },
+              "isCustomQuota": {
+                "type": "boolean",
+                "description": "Specifies if the folder room has a custom quota or not.",
+                "nullable": true,
+                "example": false
+              },
+              "usedSpace": {
+                "type": "integer",
+                "description": "How much folder space is used (counter).",
+                "format": "int64",
+                "nullable": true,
+                "example": 524288000
+              },
+              "passwordProtected": {
+                "type": "boolean",
+                "description": "Specifies if the folder is password protected or not.",
+                "nullable": true,
+                "example": false
+              },
+              "expired": {
+                "type": "boolean",
+                "description": "Specifies if an external link to the folder is expired or not.",
+                "nullable": true,
+                "example": false,
+                "deprecated": true
+              },
+              "chatSettings": {
+                "$ref": "#/components/schemas/NewAiChatSettingsDto"
+              },
+              "rootRoomType": {
+                "$ref": "#/components/schemas/NewAiRoomType"
+              },
+              "saveFormAsXLSX": {
+                "type": "boolean",
+                "description": "Specifies whether to save form data as XLSX file.",
+                "nullable": true,
+                "example": false
+              },
+              "sendFormToExternalDB": {
+                "type": "boolean",
+                "description": "Specifies whether to send form data to external database.",
+                "nullable": true,
+                "example": false
+              },
+              "originalFormId": {
+                "type": "integer",
+                "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+                "format": "int32",
+                "nullable": true,
+                "example": 42
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The folder parameters."
+      },
+      "NewAiChatSettingsDto": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "The system prompt for the chat.",
+            "nullable": true,
+            "example": "You are a helpful assistant."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The chat settings parameters."
+      },
+      "NewAiFolderType": {
+        "oneOf": [
+          {
+            "enum": [
+              "DEFAULT",
+              "COMMON",
+              "BUNCH",
+              "TRASH",
+              "USER",
+              "SHARE",
+              "Projects",
+              "Favorites",
+              "Recent",
+              "Templates",
+              "Privacy",
+              "VirtualRooms",
+              "FillingFormsRoom",
+              "EditingRoom",
+              "CustomRoom",
+              "Archive",
+              "ThirdpartyBackup",
+              "PublicRoom",
+              "ReadyFormFolder",
+              "InProcessFormFolder",
+              "FormFillingFolderDone",
+              "FormFillingFolderInProgress",
+              "VirtualDataRoom",
+              "RoomTemplates",
+              "AiRoom",
+              "Knowledge",
+              "ResultStorage",
+              "AiAgents",
+              "DefaultTemplates"
+            ],
+            "type": "string",
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates]",
+            "example": "DEFAULT"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              5,
+              6,
+              8,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              19,
+              20,
+              21,
+              22,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35
+            ],
+            "type": "integer",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates]",
+            "example": 0,
+            "x-enum-varnames": [
+              "DEFAULT",
+              "COMMON",
+              "BUNCH",
+              "TRASH",
+              "USER",
+              "SHARE",
+              "Projects",
+              "Favorites",
+              "Recent",
+              "Templates",
+              "Privacy",
+              "VirtualRooms",
+              "FillingFormsRoom",
+              "EditingRoom",
+              "CustomRoom",
+              "Archive",
+              "ThirdpartyBackup",
+              "PublicRoom",
+              "ReadyFormFolder",
+              "InProcessFormFolder",
+              "FormFillingFolderDone",
+              "FormFillingFolderInProgress",
+              "VirtualDataRoom",
+              "RoomTemplates",
+              "AiRoom",
+              "Knowledge",
+              "ResultStorage",
+              "AiAgents",
+              "DefaultTemplates"
+            ]
+          }
+        ],
+        "description": "The folder type.",
+        "x-enum-type": "integer"
+      },
+      "NewAiWatermarkDto": {
+        "required": [
+          "additions",
+          "imageHeight",
+          "imageScale",
+          "imageWidth",
+          "rotate"
+        ],
+        "type": "object",
+        "properties": {
+          "additions": {
+            "$ref": "#/components/schemas/NewAiWatermarkAdditions"
+          },
+          "text": {
+            "type": "string",
+            "description": "The watermark text.",
+            "nullable": true,
+            "example": "Confidential"
+          },
+          "rotate": {
+            "type": "integer",
+            "description": "The watermark text and image rotate.",
+            "format": "int32",
+            "example": 45
+          },
+          "imageScale": {
+            "type": "integer",
+            "description": "The watermark image scale.",
+            "format": "int32",
+            "example": 100
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "The watermark image url.",
+            "nullable": true,
+            "example": "http://localhost/watermark.png"
+          },
+          "imageHeight": {
+            "type": "number",
+            "description": "The watermark image height.",
+            "format": "double",
+            "example": 100
+          },
+          "imageWidth": {
+            "type": "number",
+            "description": "The watermark image width.",
+            "format": "double",
+            "example": 200
+          }
+        },
+        "additionalProperties": false,
+        "description": "The watermark settings."
+      },
+      "NewAiWatermarkAdditions": {
+        "oneOf": [
+          {
+            "enum": [
+              "UserName",
+              "UserEmail",
+              "UserIpAdress",
+              "CurrentDate",
+              "RoomName"
+            ],
+            "type": "string",
+            "description": "[UserName - User name, UserEmail - User email, UserIpAdress - User ip adress, CurrentDate - Current date, RoomName - Room name]",
+            "example": "UserName"
+          },
+          {
+            "enum": [
+              1,
+              2,
+              4,
+              8,
+              16
+            ],
+            "type": "integer",
+            "description": "[1 - User name, 2 - User email, 4 - User ip adress, 8 - Current date, 16 - Room name]",
+            "example": 1,
+            "x-enum-varnames": [
+              "UserName",
+              "UserEmail",
+              "UserIpAdress",
+              "CurrentDate",
+              "RoomName"
+            ]
+          }
+        ],
+        "description": "The watermark additions.",
+        "x-enum-type": "integer"
+      },
+      "NewAiRoomDataLifetimeDto": {
+        "type": "object",
+        "properties": {
+          "deletePermanently": {
+            "type": "boolean",
+            "description": "Specifies whether to permanently delete the room data or not.",
+            "example": true
+          },
+          "period": {
+            "$ref": "#/components/schemas/NewAiRoomDataLifetimePeriod"
+          },
+          "value": {
+            "maximum": 999,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Specifies the time period value of the room data lifetime.",
+            "format": "int32",
+            "nullable": true,
+            "example": 33
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Specifies whether the room data lifetime setting is enabled or not.",
+            "nullable": true,
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The room data lifetime information."
+      },
+      "NewAiRoomDataLifetimePeriod": {
+        "oneOf": [
+          {
+            "enum": [
+              "Day",
+              "Month",
+              "Year"
+            ],
+            "type": "string",
+            "description": "[Day - Day, Month - Month, Year - Year]",
+            "example": "Day"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - Day, 1 - Month, 2 - Year]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Day",
+              "Month",
+              "Year"
+            ]
+          }
+        ],
+        "description": "The room data lifetime period.",
+        "x-enum-type": "integer"
+      },
+      "NewAiRoomType": {
+        "oneOf": [
+          {
+            "enum": [
+              "FillingFormsRoom",
+              "EditingRoom",
+              "CustomRoom",
+              "PublicRoom",
+              "VirtualDataRoom",
+              "AiRoom"
+            ],
+            "type": "string",
+            "description": "[FillingFormsRoom - Form filling room, EditingRoom - Collaboration room, CustomRoom - Custom room, PublicRoom - Public room, VirtualDataRoom - Virtual data room, AiRoom - AI Room]",
+            "example": "FillingFormsRoom"
+          },
+          {
+            "enum": [
+              1,
+              2,
+              5,
+              6,
+              8,
+              9
+            ],
+            "type": "integer",
+            "description": "[1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]",
+            "example": 1,
+            "x-enum-varnames": [
+              "FillingFormsRoom",
+              "EditingRoom",
+              "CustomRoom",
+              "PublicRoom",
+              "VirtualDataRoom",
+              "AiRoom"
+            ]
+          }
+        ],
+        "description": "The room type.",
+        "x-enum-type": "integer"
+      },
+      "NewAiLogo": {
+        "required": [
+          "large",
+          "medium",
+          "original",
+          "small"
+        ],
+        "type": "object",
+        "properties": {
+          "original": {
+            "type": "string",
+            "description": "The original logo.",
+            "nullable": true,
+            "example": "https://portal.example.com/logo/original.png"
+          },
+          "large": {
+            "type": "string",
+            "description": "The large logo.",
+            "nullable": true,
+            "example": "https://portal.example.com/logo/large.png"
+          },
+          "medium": {
+            "type": "string",
+            "description": "The medium logo.",
+            "nullable": true,
+            "example": "https://portal.example.com/logo/medium.png"
+          },
+          "small": {
+            "type": "string",
+            "description": "The small logo.",
+            "nullable": true,
+            "example": "https://portal.example.com/logo/small.png"
+          },
+          "color": {
+            "type": "string",
+            "description": "The logo color.",
+            "nullable": true,
+            "example": "#4781D1"
+          },
+          "cover": {
+            "$ref": "#/components/schemas/NewAiLogoCover"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The room logo information."
+      },
+      "NewAiLogoCover": {
+        "required": [
+          "data",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The logo cover ID.",
+            "nullable": true,
+            "example": "default_cover"
+          },
+          "data": {
+            "type": "string",
+            "description": "The logo cover data.",
+            "nullable": true,
+            "example": "base64-image-data..."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The logo cover information."
+      },
+      "NewAiFileEntryDtoInteger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "The file entry ID.",
+                "format": "int32",
+                "example": 10
+              },
+              "rootFolderId": {
+                "type": "integer",
+                "description": "The root folder ID of the file entry.",
+                "format": "int32",
+                "example": 1
+              },
+              "originId": {
+                "type": "integer",
+                "description": "The origin ID of the file entry.",
+                "format": "int32",
+                "example": 12
+              },
+              "originRoomId": {
+                "type": "integer",
+                "description": "The origin room ID of the file entry.",
+                "format": "int32",
+                "example": 22
+              },
+              "originTitle": {
+                "type": "string",
+                "description": "The origin title of the file entry.",
+                "nullable": true,
+                "example": "Original Title"
+              },
+              "originRoomTitle": {
+                "type": "string",
+                "description": "The origin room title of the file entry.",
+                "nullable": true,
+                "example": "Original Room"
+              },
+              "canShare": {
+                "type": "boolean",
+                "description": "Specifies if the file entry can be shared or not.",
+                "example": true
+              },
+              "shareSettings": {
+                "type": "object",
+                "properties": {
+                  "User": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "ExternalLink": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "Group": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "InvitationLink": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "PrimaryExternalLink": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "A dictionary representing the sharing settings for the file entry.",
+                "nullable": true,
+                "example": {
+                  "ExternalLink": 1,
+                  "InvitationLink": 2
+                }
+              },
+              "security": {
+                "type": "object",
+                "properties": {
+                  "Read": {
+                    "type": "boolean"
+                  },
+                  "Comment": {
+                    "type": "boolean"
+                  },
+                  "FillForms": {
+                    "type": "boolean"
+                  },
+                  "Review": {
+                    "type": "boolean"
+                  },
+                  "Create": {
+                    "type": "boolean"
+                  },
+                  "CreateFrom": {
+                    "type": "boolean"
+                  },
+                  "Edit": {
+                    "type": "boolean"
+                  },
+                  "Delete": {
+                    "type": "boolean"
+                  },
+                  "CustomFilter": {
+                    "type": "boolean"
+                  },
+                  "EditRoom": {
+                    "type": "boolean"
+                  },
+                  "Rename": {
+                    "type": "boolean"
+                  },
+                  "ReadHistory": {
+                    "type": "boolean"
+                  },
+                  "Lock": {
+                    "type": "boolean"
+                  },
+                  "EditHistory": {
+                    "type": "boolean"
+                  },
+                  "CopyTo": {
+                    "type": "boolean"
+                  },
+                  "Copy": {
+                    "type": "boolean"
+                  },
+                  "MoveTo": {
+                    "type": "boolean"
+                  },
+                  "Move": {
+                    "type": "boolean"
+                  },
+                  "Pin": {
+                    "type": "boolean"
+                  },
+                  "Mute": {
+                    "type": "boolean"
+                  },
+                  "EditAccess": {
+                    "type": "boolean"
+                  },
+                  "Duplicate": {
+                    "type": "boolean"
+                  },
+                  "SubmitToFormGallery": {
+                    "type": "boolean"
+                  },
+                  "Download": {
+                    "type": "boolean"
+                  },
+                  "Convert": {
+                    "type": "boolean"
+                  },
+                  "CopySharedLink": {
+                    "type": "boolean"
+                  },
+                  "ReadLinks": {
+                    "type": "boolean"
+                  },
+                  "Reconnect": {
+                    "type": "boolean"
+                  },
+                  "CreateRoomFrom": {
+                    "type": "boolean"
+                  },
+                  "CopyLink": {
+                    "type": "boolean"
+                  },
+                  "Embed": {
+                    "type": "boolean"
+                  },
+                  "ChangeOwner": {
+                    "type": "boolean"
+                  },
+                  "IndexExport": {
+                    "type": "boolean"
+                  },
+                  "StartFilling": {
+                    "type": "boolean"
+                  },
+                  "FillingStatus": {
+                    "type": "boolean"
+                  },
+                  "ResetFilling": {
+                    "type": "boolean"
+                  },
+                  "StopFilling": {
+                    "type": "boolean"
+                  },
+                  "OpenForm": {
+                    "type": "boolean"
+                  },
+                  "EditInternal": {
+                    "type": "boolean"
+                  },
+                  "EditExpiration": {
+                    "type": "boolean"
+                  },
+                  "Vectorization": {
+                    "type": "boolean"
+                  },
+                  "AskAi": {
+                    "type": "boolean"
+                  },
+                  "UseChat": {
+                    "type": "boolean"
+                  },
+                  "UpdateXlsx": {
+                    "type": "boolean"
+                  },
+                  "AnalyzeResponses": {
+                    "type": "boolean"
+                  },
+                  "CanUseAi": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "The actions that can be performed with the file entry.",
+                "nullable": true,
+                "example": {
+                  "Read": true,
+                  "Edit": false,
+                  "Delete": false
+                }
+              },
+              "availableShareRights": {
+                "type": "object",
+                "properties": {
+                  "User": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "Group": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "InvitationLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "PrimaryExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false,
+                "description": "The available external rights of the file entry.",
+                "nullable": true,
+                "example": {
+                  "ExternalLink": [
+                    "Read",
+                    "Edit"
+                  ]
+                }
+              },
+              "requestToken": {
+                "type": "string",
+                "description": "The request token of the file entry.",
+                "nullable": true,
+                "example": "token-abc-123"
+              },
+              "external": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be accessed via an external link or not.",
+                "nullable": true,
+                "example": false
+              },
+              "expirationDate": {
+                "$ref": "#/components/schemas/NewAiApiDateTime"
+              },
+              "isLinkExpired": {
+                "type": "boolean",
+                "description": "Indicates whether the shareable link associated with the file or folder has expired.",
+                "nullable": true,
+                "example": false
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The generic file entry information."
+      },
+      "NewAiApiDateTime": {
+        "type": "object",
+        "properties": {
+          "utcTime": {
+            "type": "string",
+            "description": "The time in UTC format.",
+            "format": "date-time",
+            "readOnly": true,
+            "example": "2018-01-01T00:00:00.0000000Z"
+          },
+          "timeZoneOffset": {
+            "type": "string",
+            "description": "The time zone offset.",
+            "format": "date-span",
+            "readOnly": true,
+            "example": "00:00:00"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The API date and time parameters."
+      },
+      "NewAiFileEntryBaseDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The file entry title.",
+            "nullable": true,
+            "example": "Some title.txt"
+          },
+          "access": {
+            "$ref": "#/components/schemas/NewAiFileShare"
+          },
+          "sharedBy": {
+            "$ref": "#/components/schemas/NewAiEmployeeDto"
+          },
+          "ownedBy": {
+            "$ref": "#/components/schemas/NewAiEmployeeDto"
+          },
+          "shared": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared via link or not.",
+            "example": false
+          },
+          "sharedForUser": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared for user or not.",
+            "example": false
+          },
+          "sharedExternal": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared via a public (non-internal) external link.",
+            "example": false
+          },
+          "parentShared": {
+            "type": "boolean",
+            "description": "Indicates whether the parent entity is shared.",
+            "example": false
+          },
+          "shortWebUrl": {
+            "type": "string",
+            "description": "The short Web URL.",
+            "format": "uri",
+            "nullable": true,
+            "example": "http://localhost/s/abc123"
+          },
+          "created": {
+            "$ref": "#/components/schemas/NewAiApiDateTime"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/NewAiEmployeeDto"
+          },
+          "updated": {
+            "$ref": "#/components/schemas/NewAiApiDateTime"
+          },
+          "autoDelete": {
+            "$ref": "#/components/schemas/NewAiApiDateTime"
+          },
+          "rootFolderType": {
+            "$ref": "#/components/schemas/NewAiFolderType"
+          },
+          "parentRoomType": {
+            "$ref": "#/components/schemas/NewAiFolderType"
+          },
+          "updatedBy": {
+            "$ref": "#/components/schemas/NewAiEmployeeDto"
+          },
+          "providerItem": {
+            "type": "boolean",
+            "description": "Specifies if the file entry provider is specified or not.",
+            "nullable": true,
+            "example": false
+          },
+          "providerKey": {
+            "type": "string",
+            "description": "The provider key of the file entry.",
+            "nullable": true,
+            "example": "google-drive"
+          },
+          "providerId": {
+            "type": "integer",
+            "description": "The provider ID of the file entry.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1
+          },
+          "order": {
+            "type": "string",
+            "description": "The order of the file entry.",
+            "nullable": true,
+            "example": "1"
+          },
+          "isFavorite": {
+            "type": "boolean",
+            "description": "Specifies if the file is a favorite or not.",
+            "nullable": true,
+            "example": false
+          },
+          "fileEntryType": {
+            "$ref": "#/components/schemas/NewAiFileEntryType"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The file entry information.",
+        "x-derived": true,
+        "x-derived-types": [
+          "FileDtoInteger",
+          "FileDtoString",
+          "FolderDtoInteger",
+          "FolderDtoString"
+        ]
+      },
+      "NewAiFileEntryType": {
+        "oneOf": [
+          {
+            "enum": [
+              "Folder",
+              "File"
+            ],
+            "type": "string",
+            "description": "[Folder - Folder, File - File]",
+            "example": "Folder"
+          },
+          {
+            "enum": [
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[1 - Folder, 2 - File]",
+            "example": 1,
+            "x-enum-varnames": [
+              "Folder",
+              "File"
+            ]
+          }
+        ],
+        "description": "The file entry type.",
+        "x-enum-type": "integer"
+      },
+      "NewAiEmployeeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The user ID.",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
+            "nullable": true,
+            "example": "Mike Zanyatski"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "The user avatar.",
+            "nullable": true,
+            "example": "https://example.com/avatar.jpg"
+          },
+          "avatarOriginal": {
+            "type": "string",
+            "description": "The user original size avatar.",
+            "nullable": true,
+            "example": "https://example.com/avatar_original.jpg"
+          },
+          "avatarMax": {
+            "type": "string",
+            "description": "The user maximum size avatar.",
+            "nullable": true,
+            "example": "https://example.com/avatar_max.jpg"
+          },
+          "avatarMedium": {
+            "type": "string",
+            "description": "The user medium size avatar.",
+            "nullable": true,
+            "example": "https://example.com/avatar_medium.jpg"
+          },
+          "avatarSmall": {
+            "type": "string",
+            "description": "The user small size avatar.",
+            "nullable": true,
+            "example": "https://example.com/avatar_small.jpg"
+          },
+          "profileUrl": {
+            "type": "string",
+            "description": "The user profile URL.",
+            "nullable": true,
+            "example": "https://example.com/profile/user123"
+          },
+          "hasAvatar": {
+            "type": "boolean",
+            "description": "Specifies if the user has an avatar or not.",
+            "example": true
+          },
+          "isAnonim": {
+            "type": "boolean",
+            "description": "Specifies if the user is anonymous or not.",
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The user parameters."
+      },
+      "NewAiFileShare": {
+        "oneOf": [
+          {
+            "enum": [
+              "None",
+              "ReadWrite",
+              "Read",
+              "Restrict",
+              "Varies",
+              "Review",
+              "Comment",
+              "FillForms",
+              "CustomFilter",
+              "RoomManager",
+              "Editing",
+              "ContentCreator"
+            ],
+            "type": "string",
+            "description": "[None - None, ReadWrite - Read and write, Read - Read, Restrict - Restrict, Varies - Varies, Review - Review, Comment - Comment, FillForms - Fill forms, CustomFilter - Custom filter, RoomManager - Room manager, Editing - Editing, ContentCreator - Content creator]",
+            "example": "None"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11
+            ],
+            "type": "integer",
+            "description": "[0 - None, 1 - Read and write, 2 - Read, 3 - Restrict, 4 - Varies, 5 - Review, 6 - Comment, 7 - Fill forms, 8 - Custom filter, 9 - Room manager, 10 - Editing, 11 - Content creator]",
+            "example": 0,
+            "x-enum-varnames": [
+              "None",
+              "ReadWrite",
+              "Read",
+              "Restrict",
+              "Varies",
+              "Review",
+              "Comment",
+              "FillForms",
+              "CustomFilter",
+              "RoomManager",
+              "Editing",
+              "ContentCreator"
+            ]
+          }
+        ],
+        "description": "The access rights type.",
+        "x-enum-type": "integer"
+      },
+      "NewAiFileOperationWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/NewAiFileOperationDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "NewAiFileOperationDto": {
+        "required": [
+          "error",
+          "finished",
+          "id",
+          "Operation",
+          "processed",
+          "progress"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The file operation ID.",
+            "nullable": true,
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "Operation": {
+            "$ref": "#/components/schemas/NewAiFileOperationType"
+          },
+          "progress": {
+            "type": "integer",
+            "description": "The file operation progress in percentage.",
+            "format": "int32",
+            "example": 100
+          },
+          "error": {
+            "type": "string",
+            "description": "The file operation error message.",
+            "nullable": true,
+            "example": "File not found."
+          },
+          "processed": {
+            "type": "string",
+            "description": "The file operation processing status.",
+            "nullable": true,
+            "example": "1"
+          },
+          "finished": {
+            "type": "boolean",
+            "description": "Specifies if the file operation is finished or not.",
+            "example": true
+          },
+          "url": {
+            "type": "string",
+            "description": "The file operation URL.",
+            "format": "uri",
+            "nullable": true,
+            "example": "http://localhost/download"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            },
+            "description": "The list of files of the file operation.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            },
+            "description": "The list of folders of the file operation.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/NewAiDistributedTaskStatus"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The file operation information."
+      },
+      "NewAiDistributedTaskStatus": {
+        "oneOf": [
+          {
+            "enum": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ],
+            "type": "string",
+            "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]",
+            "example": "Created"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
+      "NewAiFileOperationType": {
+        "oneOf": [
+          {
+            "enum": [
+              "Move",
+              "Copy",
+              "Delete",
+              "Download",
+              "MarkAsRead",
+              "Import",
+              "Convert",
+              "Duplicate"
+            ],
+            "type": "string",
+            "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate]",
+            "example": "Move"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "type": "integer",
+            "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Move",
+              "Copy",
+              "Delete",
+              "Download",
+              "MarkAsRead",
+              "Import",
+              "Convert",
+              "Duplicate"
+            ]
+          }
+        ],
+        "description": "The file operation type.",
+        "x-enum-type": "integer"
+      },
+      "NewAiNewItemsAgentNewItemsArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiNewItemsDtoAgentNewItemsDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "NewAiNewItemsDtoAgentNewItemsDto": {
+        "required": [
+          "date",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "$ref": "#/components/schemas/NewAiApiDateTime"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiAgentNewItemsDto"
+            },
+            "description": "The list of items.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The new item parameters."
+      },
+      "NewAiAgentNewItemsDto": {
+        "required": [
+          "agent",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "agent": {
+            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            },
+            "description": "The list of file entry items.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The agent new item's information."
+      },
+      "NewAiFolderIntegerWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/NewAiFolderDtoInteger"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "NewAiFolderContentIntegerWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/NewAiFolderContentDtoInteger"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "NewAiFolderContentDtoInteger": {
+        "required": [
+          "pathParts",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            },
+            "description": "The list of files in the folder.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            },
+            "description": "The list of folders in the folder.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
+          },
+          "current": {
+            "$ref": "#/components/schemas/NewAiFolderDtoInteger"
+          },
+          "pathParts": {
+            "description": "The folder path.",
+            "nullable": true,
+            "example": "{key = \"Key\", path = \"//path//to//folder\"}"
+          },
+          "startIndex": {
+            "type": "integer",
+            "description": "The folder start index.",
+            "format": "int32",
+            "example": 0
+          },
+          "count": {
+            "type": "integer",
+            "description": "The number of folder elements.",
+            "format": "int32",
+            "example": 4
+          },
+          "total": {
+            "type": "integer",
+            "description": "The total number of elements in the folder.",
+            "format": "int32",
+            "example": 4
+          },
+          "new": {
+            "type": "integer",
+            "description": "The new element index in the folder.",
+            "format": "int32",
+            "example": 0
+          }
+        },
+        "additionalProperties": false,
+        "description": "The folder content information."
       }
     }
   }

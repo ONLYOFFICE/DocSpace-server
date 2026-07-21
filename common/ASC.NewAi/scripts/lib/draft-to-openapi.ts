@@ -112,17 +112,51 @@ function normalizeNullableUnion(node: JsonObject): JsonObject {
 // Widen two schemas for the same property name across union members: keep a
 // shared `type` but drop value constraints that only held for one branch
 // (e.g. the `success: true` / `success: false` discriminator literals).
+//
+// Exception: string-literal discriminators (a `type: "message-start" | …`
+// field, emitted as single-value `enum`s) have their value sets UNIONed
+// instead of dropped — this preserves the discriminator's allowed values
+// (e.g. every `ChatEvent.type`) while still collapsing to one SDK-friendly
+// object. Non-string discriminators (booleans) keep the widen-to-`type`
+// behaviour.
 function widen(a: Json, b: Json): Json {
   if (JSON.stringify(a) === JSON.stringify(b)) {
     return a;
   }
-  if (isObject(a) && isObject(b) && a["type"] === b["type"] && a["type"] !== undefined) {
-    const merged: JsonObject = { type: a["type"] };
-    const description = a["description"] ?? b["description"];
-    if (description !== undefined) {
-      merged["description"] = description;
+  if (isObject(a) && isObject(b)) {
+    const aEnum = a["enum"];
+    const bEnum = b["enum"];
+    if (
+      Array.isArray(aEnum) && Array.isArray(bEnum)
+      && aEnum.every((v) => typeof v === "string")
+      && bEnum.every((v) => typeof v === "string")
+    ) {
+      const seen = new Set<string>();
+      const values = [...aEnum, ...bEnum].filter((v) => {
+        if (seen.has(v as string)) {
+          return false;
+        }
+        seen.add(v as string);
+        return true;
+      });
+      const merged: JsonObject = { enum: values };
+      if (a["type"] === b["type"] && a["type"] !== undefined) {
+        merged["type"] = a["type"];
+      }
+      const description = a["description"] ?? b["description"];
+      if (description !== undefined) {
+        merged["description"] = description;
+      }
+      return merged;
     }
-    return merged;
+    if (a["type"] === b["type"] && a["type"] !== undefined) {
+      const merged: JsonObject = { type: a["type"] };
+      const description = a["description"] ?? b["description"];
+      if (description !== undefined) {
+        merged["description"] = description;
+      }
+      return merged;
+    }
   }
   return {};
 }
@@ -235,6 +269,20 @@ function convertNode(node: Json): Json {
         break;
     }
   }
+
+  // An empty-schema `additionalProperties: {}` (emitted for `Record<string,
+  // unknown>` / index signatures / an arbitrary JSON blob) means "any extra
+  // property, any value" — identical to omitting the keyword, but the docs UI
+  // renders the empty map as noise (`additionalProp1/2/3`). Drop it so such a
+  // field shows as a plain open object. A TYPED map (`{ type: "string" }`,
+  // e.g. `headers`) or `additionalProperties: false` is meaningful and kept.
+  if (
+    isObject(out["additionalProperties"])
+    && Object.keys(out["additionalProperties"] as JsonObject).length === 0
+  ) {
+    delete out["additionalProperties"];
+  }
+
   return flattenObjectUnion(normalizeNullableUnion(out));
 }
 

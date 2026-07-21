@@ -139,6 +139,13 @@ const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex"]);
 // side. The spec documents the transport, not every field.
 const JSON_OBJECT_SCHEMA: Json = { type: "object", additionalProperties: true };
 
+// Shared response components emitted from `schemaTypes.ts` (the generator
+// namespaces every schema with the `NewAi` prefix). Referenced in place of
+// the opaque generic object so the 401 and the no-body success fallback carry
+// a concrete shape: `{ error }` and `{ success }` respectively.
+const ERROR_RESPONSE_REF: Json = { $ref: "#/components/schemas/NewAiErrorResponse" };
+const SUCCESS_RESPONSE_REF: Json = { $ref: "#/components/schemas/NewAiSuccessResponse" };
+
 function jsonResponse(description: string, schema: Json = JSON_OBJECT_SCHEMA): Json {
   return {
     description,
@@ -148,6 +155,7 @@ function jsonResponse(description: string, schema: Json = JSON_OBJECT_SCHEMA): J
 
 const UNAUTHORIZED_RESPONSE: Json = jsonResponse(
   "Missing `asc_auth_key` cookie or `Authorization` header.",
+  ERROR_RESPONSE_REF,
 );
 
 function capitalize(name: string): string {
@@ -193,14 +201,53 @@ function jsonBody(schema: Json = JSON_OBJECT_SCHEMA): Json {
 }
 
 // Concrete request/response schemas (from `ts-json-schema-generator`) are
-// inlined per operation. Operations without a generated schema (AI streaming,
-// `.NET`-forwarded agent listings) fall back to the generic object.
+// inlined per operation. Operations without a generated schema (`.NET`-
+// forwarded agent listings, dual-mode `sendCustom`) fall back to the generic
+// object.
 type OperationSchemaLookup = Readonly<Record<string, OperationSchemas>>;
+
+// AI operations whose 200 body is a stream, not a single JSON document. The
+// generated `Res_*` schema describes ONE streamed item; the media type here
+// reflects the framing (newline-delimited JSON vs. SSE). Applied by
+// `responseFor` when building the success response.
+const STREAMING_RESPONSES: Readonly<Record<string, { mediaType: string; description: string }>> = {
+  newAiAiSendWithStream: {
+    mediaType: "application/x-ndjson",
+    description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
+  },
+  newAiAiRegenerateStream: {
+    mediaType: "application/x-ndjson",
+    description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
+  },
+  newAiAiApproveToolCall: {
+    mediaType: "application/x-ndjson",
+    description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
+  },
+  newAiAiDenyToolCall: {
+    mediaType: "application/x-ndjson",
+    description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
+  },
+  newAiAiSendWithStreamOpenAI: {
+    mediaType: "text/event-stream",
+    description: "Server-sent events stream of OpenAI `chat.completion.chunk` objects, terminated by a `[DONE]` sentinel.",
+  },
+};
 
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {
   const schema = operations[operationId]?.response;
+  const streaming = STREAMING_RESPONSES[operationId];
+  if (streaming && schema !== undefined) {
+    // The schema types a single streamed item; the media type frames the
+    // stream. (A JSON `content` block would misrepresent the wire format.)
+    return {
+      description: streaming.description,
+      content: { [streaming.mediaType]: { schema: schema as Json } },
+    };
+  }
+  // No generated schema ⇒ a `void` engine method; every such controller
+  // replies `{ success: true }`, so document that rather than a generic object.
   return schema === undefined
-    ? jsonResponse("Success.")
+    ? jsonResponse("Success.", SUCCESS_RESPONSE_REF)
     : jsonResponse("Success.", schema as Json);
 }
 
@@ -305,22 +352,10 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
     addOperation(paths, key(route.path), route.method, customOperation(route, operations));
   }
 
-  // Health probes are open (registered before the auth gate) and carry no
-  // security requirement.
-  addOperation(paths, key("/health"), "get", {
-    tags: [tag("System")],
-    operationId: "newAiHealth",
-    summary: "Health check",
-    security: [],
-    responses: { "200": jsonResponse("Service is healthy.") },
-  });
-  addOperation(paths, key("/isLife"), "get", {
-    tags: [tag("System")],
-    operationId: "newAiIsLife",
-    summary: "Liveness probe",
-    security: [],
-    responses: { "200": { description: "Service is alive." } },
-  });
+  // The `/health` and `/isLife` probes are intentionally left out of the
+  // document: they are infrastructure endpoints (registered before the auth
+  // gate) and not part of the public API surface. They remain served by the
+  // app — this only hides them from the generated docs/SDKs.
 
   // `name` carries the full `New AI / …` value (used by operations, the
   // `x-tagGroups` grouping and the URL slug); `x-displayName` is the short
@@ -335,7 +370,6 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
     ...engines.map((e) => tagEntry(e.tag, e.description)),
     tagEntry("Agents", "AI agent rooms (delegated to the .NET AI service)."),
     tagEntry("Export", "Markdown → docx export."),
-    tagEntry("System", "Health and liveness probes."),
   ];
 
   // Group every tag under a single "New AI" heading in the merged reference
