@@ -38,7 +38,6 @@ namespace ASC.AI.Api;
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]
-[ApiExplorerSettings(IgnoreApi = true)]
 public class AgentsController(
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
