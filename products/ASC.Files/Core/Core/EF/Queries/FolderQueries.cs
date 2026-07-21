@@ -132,12 +132,6 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbFile> DbFilesAsync(int tenantId, int folderId, int conflict)
-    {
-        return FolderQueries.DbFilesAsync(this, tenantId, folderId, conflict);
-    }
-
-    [PreCompileQuery]
     public IAsyncEnumerable<OriginData> OriginsDataAsync(int tenantId, IEnumerable<int> entriesIds)
     {
         return FolderQueries.OriginsDataAsync(this, tenantId, entriesIds);
@@ -261,12 +255,6 @@ public partial class FilesDbContext
     public Task<int> DeleteTagOriginAsync(int tenantId, string id, IEnumerable<string> subfolders)
     {
         return FolderQueries.DeleteTagOriginAsync(this, tenantId, id, subfolders);
-    }
-
-    [PreCompileQuery]
-    public Task<int> DeleteBunchObjectsAsync(int tenantId, string id)
-    {
-        return FolderQueries.DeleteBunchObjectsAsync(this, tenantId, id);
     }
 
     [PreCompileQuery]
@@ -665,14 +653,6 @@ static file class FolderQueries
                     .Where(r => r.EntryType == FileEntryType.Folder)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteBunchObjectsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string id) =>
-                ctx.BunchObjects
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.LeftNode == id)
-                    .ExecuteDelete());
-
     public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteBunchObjectsByIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<string> ids) =>
@@ -757,15 +737,6 @@ static file class FolderQueries
                     .Where(r => r.ParentId == parentId)
                     .Select(r => r.Id)
                     .FirstOrDefault());
-
-    public static readonly Func<FilesDbContext, int, int, int, IAsyncEnumerable<DbFile>> DbFilesAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, int conflict) =>
-                ctx.Files
-                    .Join(ctx.Files, f1 => f1.Title.ToLower(), f2 => f2.Title.ToLower(), (f1, f2) => new { f1, f2 })
-                    .Where(r => r.f1.TenantId == tenantId && r.f1.CurrentVersion && r.f1.ParentId == folderId)
-                    .Where(r => r.f2.TenantId == tenantId && r.f2.CurrentVersion && r.f2.ParentId == conflict)
-                    .Select(r => r.f1));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> ArrayAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -144,20 +144,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbFile> DbFilesAsync(int tenantId, int fileId)
-    {
-        return FileQueries.DbFilesAsync(this, tenantId, fileId);
-    }
-    [PreCompileQuery]
     public IAsyncEnumerable<int> PdfTenantFileIdsAsync(int tenantId)
     {
         return FileQueries.PdfTenantFileIdsAsync(this, tenantId);
-    }
-
-    [PreCompileQuery]
-    public Task<int> DeleteSecurityAsync(int tenantId, int fileId)
-    {
-        return FileQueries.DeleteSecurityAsync(this, tenantId, fileId);
     }
 
     [PreCompileQuery]
@@ -487,11 +476,6 @@ public partial class FilesDbContext
         return FileQueries.UpdateVectorizationsDeletedOnAsync(this, tenantId, fileIds, deletedOn);
     }
 
-    [PreCompileQuery]
-    public Task<int> DeleteMessageAttachmentsByFileIdAsync(int tenantId, int fileId)
-    {
-        return FileQueries.DeleteMessageAttachmentsByFileIdAsync(this, tenantId, fileId);
-    }
 }
 
 static file class FileQueries
@@ -800,13 +784,6 @@ static file class FileQueries
                     .Where(l => l.EntryType == entryType)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFile>> DbFilesAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == fileId));
-
     public static readonly Func<FilesDbContext, int, IAsyncEnumerable<int>> PdfTenantFileIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId) =>
@@ -815,15 +792,6 @@ static file class FileQueries
                     .Where(r => r.Category == (int)FilterType.None)
                     .Where(r => r.Title.EndsWith(".pdf"))
                     .Select(r => r.Id));
-
-    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteSecurityAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId) =>
-                ctx.Security
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.InternalEntryId == fileId)
-                    .Where(r => r.EntryType == FileEntryType.File)
-                    .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFile>> DbFilesByIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -1366,10 +1334,4 @@ static file class FileQueries
                     .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
                     .ExecuteUpdate(f => f.SetProperty(x => x.DeletedOn, deletedOn)));
 
-    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteMessageAttachmentsByFileIdAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId) =>
-                ctx.MessageAttachments
-                    .Where(r => r.TenantId == tenantId && r.FileId == fileId)
-                    .ExecuteDelete());
 }
