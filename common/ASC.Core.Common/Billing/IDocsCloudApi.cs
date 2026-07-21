@@ -34,28 +34,33 @@
 namespace ASC.Core.Billing;
 
 /// <summary>
-/// Adds the per-request ASC HMAC-SHA1 authorization header to every accounting request.
-/// The token embeds the current UTC timestamp, so it must be generated per call rather than as a static header.
+/// Type-safe REST contract for the external DocsCloud service, implemented by Refit.
+/// All paths are relative — the base address, authentication and resilience are configured in
+/// <see cref="DocsCloudHttpClientExtension.AddDocsCloudHttpClient"/>. The public wrapper is <see cref="DocsCloudClient"/>.
 /// </summary>
-internal class AccountingAuthHandler(IOptions<AccountingConfiguration> configuration) : DelegatingHandler
+public interface IDocsCloudApi
 {
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        if (!string.IsNullOrEmpty(configuration.Value.Key))
-        {
-            request.Headers.Remove("Authorization");
-            request.Headers.Add("Authorization", CreateAuthToken(configuration.Value.Key, configuration.Value.Secret));
-        }
+    [Get("/healthcheck")]
+    Task HealthCheckAsync();
 
-        return await base.SendAsync(request, cancellationToken);
-    }
+    [Get("/tenant")]
+    Task<DocsCloudTenant> GetTenantAsync([Query] string portalId);
 
-    private static string CreateAuthToken(string pkey, string machinekey)
-    {
-        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
-        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
+    [Get("/tenant/info")]
+    Task<DocsCloudTenantInfo> GetTenantInfoAsync([Query] string portalId);
 
-        return $"ASC {pkey}:{now}:{hash}";
-    }
+    [Get("/tenant/config")]
+    Task<DocsCloudConfig> GetTenantConfigAsync([Query] string portalId);
+
+    [Put("/tenant/config")]
+    Task<DocsCloudConfig> UpdateTenantConfigAsync([Query] string portalId, [Body] DocsCloudConfig config);
+
+    [Get("/tenant/quota")]
+    Task<DocsCloudQuota> GetTenantQuotaAsync([Query] string portalId);
+
+    [Get("/tenant/quota/download")]
+    Task<Stream> DownloadTenantQuotaAsync([Query] string portalId);
+
+    [Get("/tenant/usage")]
+    Task<DocsCloudUsage> GetTenantUsageAsync([Query] string portalId);
 }

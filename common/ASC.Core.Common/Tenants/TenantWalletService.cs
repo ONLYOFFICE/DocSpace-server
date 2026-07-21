@@ -51,6 +51,12 @@ public enum TenantWalletService
     [Description("Admin")]
     Admin = -14,
 
+    [Description("DocsCloud")]
+    DocsCloud = -15,
+
+    [Description("DocsCloudDevPack")]
+    DocsCloudDevPack = -16,
+
     [Description("AISearch")]
     AISearch = -18
 }

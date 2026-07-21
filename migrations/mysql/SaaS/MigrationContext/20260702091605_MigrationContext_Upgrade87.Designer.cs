@@ -1580,6 +1580,41 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         },
                         new
                         {
+                            TenantId = -15,
+                            Additional = true,
+                            Features = "docscloud:1",
+                            Name = "docscloud",
+                            Price = 8m,
+                            ProductId = "1014",
+                            ServiceName = "docscloud",
+                            Visible = true,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -16,
+                            Additional = true,
+                            Features = "docscloud:1,docsclouddevpack",
+                            Name = "docsclouddevpack",
+                            Price = 12m,
+                            ProductId = "1015",
+                            ServiceName = "docscloud-devpack",
+                            Visible = true,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -17,
+                            Additional = true,
+                            Features = "docscloud:1000,docsclouddevpack,docscloudtrial",
+                            Name = "docscloudtrial",
+                            Price = 0m,
+                            ProductId = "1016",
+                            Visible = false,
+                            Wallet = false
+                        },
+                        new
+                        {
                             TenantId = -18,
                             Additional = true,
                             Features = "aisearch",
