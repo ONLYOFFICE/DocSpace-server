@@ -416,7 +416,7 @@ internal class FileDao(
         }
 
         await quotaSocketManager.TenantQuotaExceededAsync();
-        await filesMessageService.SendAsync(MessageAction.FileSavedButTenantQuotaExceeded, file, MessageInitiator.DocsService, _tenantManager.GetCurrentTenant().Alias, file.Title);
+        await filesMessageService.SendAsync(MessageAction.FileSavedButTenantQuotaExceeded, file, MessageInitiator.DocsService, file.Title);
 
         return true;
     }
@@ -446,7 +446,7 @@ internal class FileDao(
             var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
             if (maxChunkedUploadSize < file.ContentLength && !await TryAllowTenantQuotaGraceAsync(file))
             {
-                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, _tenantManager.GetCurrentTenant().Alias, file.Title);
+                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, file.Title);
                 throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
             }
         }
@@ -880,7 +880,7 @@ internal class FileDao(
 
         if (maxChunkedUploadSize < file.ContentLength && !await TryAllowTenantQuotaGraceAsync(file))
         {
-            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, _tenantManager.GetCurrentTenant().Alias, file.Title);
+            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, file.Title);
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
         }
 
