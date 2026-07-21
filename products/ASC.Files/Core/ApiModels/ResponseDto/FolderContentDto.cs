@@ -257,7 +257,7 @@ public class FolderContentDtoHelper(
             var folderDtos = new FileEntryBaseDto[count];
             await Parallel.ForEachAsync(Enumerable.Range(0, count),
                 new ParallelOptions { MaxDegreeOfParallelism = settings.FoldersDtoParallelism },
-                async (i, _) => folderDtos[i] = await GetFolderDto(folderEntries[i], entriesOrder, contextFolder: folderItems.FolderInfo));
+                async (i, _) => folderDtos[i] = await GetFolderDto(folderEntries[i], entriesOrder, contextFolder));
             return folderDtos;
         }
 
