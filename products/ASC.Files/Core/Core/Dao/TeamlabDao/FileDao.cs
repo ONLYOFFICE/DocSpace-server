@@ -1101,6 +1101,10 @@ internal class FileDao(
 
             var deletedIdsSet = deletedIds.ToHashSet();
 
+            // warm up the quota running total on this thread so the concurrent quota decrements
+            // below only contend on the controller's in-memory arithmetic, not the blocking DB seed
+            tenantQuotaController.PreloadCurrentSize();
+
             // file directories are independent of each other, so they are removed concurrently;
             // each removal stays best-effort on its own (the quota accounting inside only
             // decrements counters, no limit checks happen on the delete path)
