@@ -31,56 +31,36 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.IntegrationEvents.Events;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-[ProtoContract]
-public record BuiltinDbFormSubmissionIntegrationEvent : IntegrationEvent
+#nullable enable
+
+/// <summary>
+/// The result of a form data recovery attempt for a single completed form.
+/// </summary>
+public class FormRecoveryFormResultDto
 {
-    private BuiltinDbFormSubmissionIntegrationEvent() : base() { }
-
-    public BuiltinDbFormSubmissionIntegrationEvent(
-        Guid createBy,
-        int tenantId,
-        int originalFormId,
-        int originalFormVersion,
-        int roomId,
-        int fileId,
-        int resultFormNumber,
-        string formsDataUrl,
-        DateTime? filledOn = null)
-        : base(createBy, tenantId)
-    {
-        OriginalFormId = originalFormId;
-        OriginalFormVersion = originalFormVersion;
-        RoomId = roomId;
-        FileId = fileId;
-        ResultFormNumber = resultFormNumber;
-        FormsDataUrl = formsDataUrl;
-        FilledOn = filledOn;
-    }
-
-    [ProtoMember(1)]
-    public int OriginalFormId { get; set; }
-
-    [ProtoMember(2)]
-    public int OriginalFormVersion { get; set; }
-
-    [ProtoMember(3)]
-    public int RoomId { get; set; }
-
-    [ProtoMember(4)]
-    public int FileId { get; set; }
-
-    [ProtoMember(5)]
-    public int ResultFormNumber { get; set; }
-
-    [ProtoMember(6)]
-    public string FormsDataUrl { get; set; }
+    /// <summary>
+    /// The completed form file ID.
+    /// </summary>
+    /// <example>42</example>
+    public int Id { get; set; }
 
     /// <summary>
-    /// The UTC time the form was actually filled. Null for a live submission (the export stamps "now");
-    /// set by form recovery so a recovered row keeps its original fill time instead of the recovery time.
+    /// The completed form file title.
     /// </summary>
-    [ProtoMember(7)]
-    public DateTime? FilledOn { get; set; }
+    /// <example>1 - Application (01-01-2026 12-00).pdf</example>
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Specifies whether the recovery succeeded for this form.
+    /// </summary>
+    /// <example>true</example>
+    public bool Success { get; set; }
+
+    /// <summary>
+    /// The error message if the recovery failed for this form.
+    /// </summary>
+    /// <example>The source form template could not be resolved for this file.</example>
+    public string? Error { get; set; }
 }

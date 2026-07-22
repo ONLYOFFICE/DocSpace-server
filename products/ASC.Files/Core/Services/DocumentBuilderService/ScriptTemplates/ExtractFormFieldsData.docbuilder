@@ -1,0 +1,20 @@
+builder.OpenFile(${sourceFileUrl});
+
+// The docbuilder engine only ever tracks a single active document — closing this one and creating
+// a second (as an earlier version of this script did) silently drops every variable captured before
+// the switch. So the extracted data is embedded straight into THIS document (as an extra paragraph)
+// and the whole thing is saved as txt, instead of building a second file to hold the result.
+var oDocument = Api.GetDocument();
+
+// GetFormsData() returns exactly the { key, tag, type, value } shape Document Server posts to its
+// submit callback, so radio groups collapse to a single entry whose value is the selected choice.
+// A per-widget GetAllForms() loop would instead emit one true/false IsChecked() row per radio button
+// in the group (e.g. "false, true, false" instead of "Choice2").
+var result = oDocument.GetFormsData();
+
+var oParagraph = Api.CreateParagraph();
+oParagraph.AddText("${resultMarkerStart}" + JSON.stringify({ formsdata: result }) + "${resultMarkerEnd}");
+oDocument.Push(oParagraph);
+
+builder.SaveFile("txt", "${tempFileName}");
+builder.CloseFile();

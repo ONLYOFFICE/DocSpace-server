@@ -615,9 +615,24 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 {
                     try
                     {
+                        // A DocBuilder script's builder.OpenFile(url) fetch can't attach custom headers, so
+                        // also accept the same signed token as a query parameter.
+                        var queryToken = context.Request.Query[FilesLinkUtility.SignatureQueryKey].FirstOrDefault();
+
                         var signatureHeader = filesLinkUtility.DocServiceSignatureHeader;
                         var header = context.Request.Headers[signatureHeader].FirstOrDefault();
-                        if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
+                        var viaQueryToken = false;
+
+                        if (!string.IsNullOrEmpty(header) && header.StartsWith("Bearer "))
+                        {
+                            header = header["Bearer ".Length..];
+                        }
+                        else if (!string.IsNullOrEmpty(queryToken))
+                        {
+                            header = queryToken;
+                            viaQueryToken = true;
+                        }
+                        else
                         {
                             var requestHeaderTrace = new StringBuilder();
 
@@ -632,8 +647,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
                             throw new Exception(exceptionMessage);
                         }
-
-                        header = header["Bearer ".Length..];
 
                         var stringPayload = JsonWebToken.Decode(header, signatureSecret);
 
@@ -656,6 +669,19 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         //{
                         //    throw new SecurityException(string.Format("DocService StreamFile header id not equals: {0} and {1}", context.Request.Url.Query, signedQuery));
                         //}
+
+                        if (viaQueryToken)
+                        {
+                            // This token travels in the URL (unlike the header), so it's minted bound to one
+                            // specific file id — confirm it matches the file being requested.
+                            var payload = JObject.Parse(stringPayload);
+                            var signedFileId = payload["fileId"]?.ToString();
+
+                            if (string.IsNullOrEmpty(signedFileId) || signedFileId != id.ToString())
+                            {
+                                throw new SecurityException("DocService StreamFile query signature file id mismatch.");
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {

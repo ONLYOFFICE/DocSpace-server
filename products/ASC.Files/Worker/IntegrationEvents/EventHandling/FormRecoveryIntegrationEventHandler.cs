@@ -31,56 +31,41 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.IntegrationEvents.Events;
+namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 
-[ProtoContract]
-public record BuiltinDbFormSubmissionIntegrationEvent : IntegrationEvent
+[Scope]
+public class FormRecoveryIntegrationEventHandler(
+    ILogger<FormRecoveryIntegrationEventHandler> logger,
+    TenantManager tenantManager,
+    FormRecoveryTaskManager taskManager,
+    IServiceProvider serviceProvider)
+    : IIntegrationEventHandler<FormRecoveryIntegrationEvent>
 {
-    private BuiltinDbFormSubmissionIntegrationEvent() : base() { }
-
-    public BuiltinDbFormSubmissionIntegrationEvent(
-        Guid createBy,
-        int tenantId,
-        int originalFormId,
-        int originalFormVersion,
-        int roomId,
-        int fileId,
-        int resultFormNumber,
-        string formsDataUrl,
-        DateTime? filledOn = null)
-        : base(createBy, tenantId)
+    public async Task Handle(FormRecoveryIntegrationEvent @event)
     {
-        OriginalFormId = originalFormId;
-        OriginalFormVersion = originalFormVersion;
-        RoomId = roomId;
-        FileId = fileId;
-        ResultFormNumber = resultFormNumber;
-        FormsDataUrl = formsDataUrl;
-        FilledOn = filledOn;
+        CustomSynchronizationContext.CreateContext();
+
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+
+            if (!@event.Redelivered && await taskManager.IsTooBusy())
+            {
+                throw new IntegrationEventRejectExeption(@event.Id);
+            }
+
+            try
+            {
+                await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+
+                var task = serviceProvider.GetService<FormRecoveryTask>();
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, @event.RoomId, FormRecoveryTaskManager.GetTaskId(@event.TenantId, @event.RoomId));
+                await taskManager.EnqueueTaskAsync(task);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
+        }
     }
-
-    [ProtoMember(1)]
-    public int OriginalFormId { get; set; }
-
-    [ProtoMember(2)]
-    public int OriginalFormVersion { get; set; }
-
-    [ProtoMember(3)]
-    public int RoomId { get; set; }
-
-    [ProtoMember(4)]
-    public int FileId { get; set; }
-
-    [ProtoMember(5)]
-    public int ResultFormNumber { get; set; }
-
-    [ProtoMember(6)]
-    public string FormsDataUrl { get; set; }
-
-    /// <summary>
-    /// The UTC time the form was actually filled. Null for a live submission (the export stamps "now");
-    /// set by form recovery so a recovered row keeps its original fill time instead of the recovery time.
-    /// </summary>
-    [ProtoMember(7)]
-    public DateTime? FilledOn { get; set; }
 }

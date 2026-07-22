@@ -58,7 +58,8 @@ public class BuiltinDbFormSubmissionIntegrationEventHandler(
                     @event.OriginalFormVersion,
                     @event.RoomId,
                     @event.ResultFormNumber,
-                    @event.FormsDataUrl);
+                    @event.FormsDataUrl,
+                    @event.FilledOn);
 
                 await formFillingReportCreator.ExportMissingFromOpenSearchBuiltinAsync(
                     @event.OriginalFormId,

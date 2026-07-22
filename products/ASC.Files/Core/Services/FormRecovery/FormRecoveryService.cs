@@ -31,56 +31,37 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.IntegrationEvents.Events;
+namespace ASC.Files.Core.Services.FormRecovery;
 
-[ProtoContract]
-public record BuiltinDbFormSubmissionIntegrationEvent : IntegrationEvent
+[Transient]
+public class FormRecoveryService(
+    TenantManager tenantManager,
+    IEventBus eventBus,
+    FormRecoveryTaskManager taskManager,
+    AuthContext authContext,
+    CommonLinkUtility commonLinkUtility)
 {
-    private BuiltinDbFormSubmissionIntegrationEvent() : base() { }
-
-    public BuiltinDbFormSubmissionIntegrationEvent(
-        Guid createBy,
-        int tenantId,
-        int originalFormId,
-        int originalFormVersion,
-        int roomId,
-        int fileId,
-        int resultFormNumber,
-        string formsDataUrl,
-        DateTime? filledOn = null)
-        : base(createBy, tenantId)
+    public async Task<FormRecoveryTask> StartRecoveryAsync(int roomId)
     {
-        OriginalFormId = originalFormId;
-        OriginalFormVersion = originalFormVersion;
-        RoomId = roomId;
-        FileId = fileId;
-        ResultFormNumber = resultFormNumber;
-        FormsDataUrl = formsDataUrl;
-        FilledOn = filledOn;
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var existingTask = await taskManager.GetTask(tenantId, roomId);
+        if (existingTask is { IsCompleted: false })
+        {
+            return existingTask;
+        }
+
+        var userId = authContext.CurrentAccount.ID;
+        var baseUri = commonLinkUtility.ServerRootPath;
+
+        await eventBus.PublishAsync(new FormRecoveryIntegrationEvent(userId, tenantId, roomId, baseUri));
+
+        return new FormRecoveryTask { Id = FormRecoveryTaskManager.GetTaskId(tenantId, roomId), Status = DistributedTaskStatus.Created };
     }
 
-    [ProtoMember(1)]
-    public int OriginalFormId { get; set; }
-
-    [ProtoMember(2)]
-    public int OriginalFormVersion { get; set; }
-
-    [ProtoMember(3)]
-    public int RoomId { get; set; }
-
-    [ProtoMember(4)]
-    public int FileId { get; set; }
-
-    [ProtoMember(5)]
-    public int ResultFormNumber { get; set; }
-
-    [ProtoMember(6)]
-    public string FormsDataUrl { get; set; }
-
-    /// <summary>
-    /// The UTC time the form was actually filled. Null for a live submission (the export stamps "now");
-    /// set by form recovery so a recovered row keeps its original fill time instead of the recovery time.
-    /// </summary>
-    [ProtoMember(7)]
-    public DateTime? FilledOn { get; set; }
+    public async Task<FormRecoveryTask> GetTaskAsync(int roomId)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        return await taskManager.GetTask(tenantId, roomId);
+    }
 }

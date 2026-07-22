@@ -235,6 +235,40 @@ public class VirtualRoomsInternalController(
         var task = await _fileStorageService.GetExternalDbSyncTaskAsync(inDto.Id);
         return ExternalDbSyncTaskDto.Get(task);
     }
+
+    /// <remarks>
+    /// Triggers recovery of form field data for completed forms in the "Complete" folders of the specified
+    /// filling forms room that have no indexed submission data (e.g. restored from a backup or copied in
+    /// manually, bypassing the normal submit flow).
+    /// </remarks>
+    /// <summary>Start form data recovery</summary>
+    /// <path>api/2.0/files/rooms/{id}/formRecovery</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Recovery task information", typeof(FormRecoveryTaskDto))]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [SwaggerResponse(404, "Room not found")]
+    [HttpPost("{id}/formRecovery")]
+    public async Task<FormRecoveryTaskDto> StartFormRecovery(RoomIdRequestDto<int> inDto)
+    {
+        var task = await _fileStorageService.StartFormRecoveryAsync(inDto.Id);
+        return FormRecoveryTaskDto.Get(task);
+    }
+
+    /// <remarks>
+    /// Returns the status of the form data recovery task for the specified filling forms room.
+    /// </remarks>
+    /// <summary>Get form data recovery status</summary>
+    /// <path>api/2.0/files/rooms/{id}/formRecovery</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Recovery task information", typeof(FormRecoveryTaskDto))]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [SwaggerResponse(404, "Room not found")]
+    [HttpGet("{id}/formRecovery")]
+    public async Task<FormRecoveryTaskDto> GetFormRecoveryStatus(RoomIdRequestDto<int> inDto)
+    {
+        var task = await _fileStorageService.GetFormRecoveryTaskAsync(inDto.Id);
+        return FormRecoveryTaskDto.Get(task);
+    }
 }
 
 public class VirtualRoomsThirdPartyController(

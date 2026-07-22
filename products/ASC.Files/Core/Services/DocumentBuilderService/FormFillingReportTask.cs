@@ -138,7 +138,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         return resultFile;
     }
 
-    private static async Task<object> GetFormFillingReportData(IServiceProvider serviceProvider, Guid userId, int roomId, int originalFormId, int originalFormVersion)
+    public static async Task<object> GetFormFillingReportData(IServiceProvider serviceProvider, Guid userId, int roomId, int originalFormId, int originalFormVersion)
     {
         var userManager = serviceProvider.GetService<UserManager>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();

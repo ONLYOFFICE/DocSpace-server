@@ -86,6 +86,7 @@ public class FilesLinkUtility
     public const string View = "view";
     public const string ShardKey = "shardkey";
     public const string FillingSessionId = "fillingSessionId";
+    public const string SignatureQueryKey = "docservice_signature";
 
     public string FileHandlerPath => FilesBaseAbsolutePath + "filehandler.ashx";
 

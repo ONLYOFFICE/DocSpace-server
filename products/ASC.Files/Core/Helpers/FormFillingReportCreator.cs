@@ -48,9 +48,16 @@ public class FormFillingReportCreator(
     FactoryIndexerFormMetadata factoryIndexerFormMetadata)
 {
 
-    public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
+    /// <summary>
+    /// <paramref name="triggerXlsxUpdate"/>=false lets a batch caller index many rows and rebuild the xlsx
+    /// report once at the end instead of once per row.
+    /// <paramref name="filledOn"/> (UTC) overrides the submission timestamp stored in the report; a normal
+    /// submission leaves it null and gets "now", while form recovery passes the completed file's own
+    /// timestamp so a recovered form shows when it was actually filled, not when it was re-indexed.
+    /// </summary>
+    public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX, bool triggerXlsxUpdate = true, DateTime? filledOn = null)
     {
-        await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl);
+        await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl, filledOn);
 
         await MigrateFormVersionAsync(roomId, originalFormId, originalFormVersion);
 
@@ -64,27 +71,27 @@ public class FormFillingReportCreator(
             {
                 await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
                     userId, tenantId, originalFormId, originalFormVersion,
-                    roomId, fileId, resultFormNumber, formsDataUrl));
+                    roomId, fileId, resultFormNumber, formsDataUrl, filledOn));
             }
             else if (builtinFormsDatabaseClient.IsEnabled())
             {
                 await eventBus.PublishAsync(new BuiltinDbFormSubmissionIntegrationEvent(
                     userId, tenantId, originalFormId, originalFormVersion,
-                    roomId, fileId, resultFormNumber, formsDataUrl));
+                    roomId, fileId, resultFormNumber, formsDataUrl, filledOn));
             }
         }
 
-        if (settingsSaveFormAsXLSX)
+        if (settingsSaveFormAsXLSX && triggerXlsxUpdate)
         {
             await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion, isNewFile: false);
         }
     }
 
-    public Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
-        => ExportToDbAsync(externalDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
+    public Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, DateTime? filledOn = null)
+        => ExportToDbAsync(externalDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl, filledOn);
 
-    public Task ExportToBuiltinDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
-        => ExportToDbAsync(builtinFormsDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
+    public Task ExportToBuiltinDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, DateTime? filledOn = null)
+        => ExportToDbAsync(builtinFormsDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl, filledOn);
 
     /// <summary>
     /// Writes pre-built submissions straight into the built-in forms database, bypassing the OpenSearch
@@ -118,7 +125,7 @@ public class FormFillingReportCreator(
         }
     }
 
-    private async Task ExportToDbAsync(IFormsDatabaseClient client, int fileId, int originalFormId, int originalFormVersion, string formsDataUrl)
+    private async Task ExportToDbAsync(IFormsDatabaseClient client, int fileId, int originalFormId, int originalFormVersion, string formsDataUrl, DateTime? filledOn = null)
     {
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
@@ -142,7 +149,7 @@ public class FormFillingReportCreator(
         var normalizedMeta = NormalizeMetadata(parsed.MetaData).ToList();
         var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
         var culture = tenantManager.GetCurrentTenant().GetCulture();
-        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture);
+        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture, filledOn);
 
         await client.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
 
@@ -407,26 +414,52 @@ public class FormFillingReportCreator(
 
     public async Task<IEnumerable<DbColumnDefinition>> GetColumnDefinitionsAsync(int originalFormId, int originalFormVersion)
     {
-        factoryIndexerFormMetadata.Refresh();
-        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
-            r.Where(s => s.OriginalFormId, originalFormId)
-             .Where(s => s.OriginalFormVersion, originalFormVersion));
-
-        var metadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+        var metadata = await GetExistingMetadataAsync(originalFormId, originalFormVersion);
         return BuildColumnDefinitions(NormalizeMetadata(metadata));
     }
 
     public async Task<(IEnumerable<FormMetadata> Metadata, IEnumerable<SubmitFormsData> Submissions)> GetFormSnapshotAsync(int roomId, int originalFormId, int originalFormVersion)
     {
-        factoryIndexerFormMetadata.Refresh();
+        var metadata = await GetExistingMetadataAsync(originalFormId, originalFormVersion);
+        var submissions = await GetFormFillingResults(roomId, originalFormId, originalFormVersion);
+
+        return (metadata, submissions);
+    }
+
+    /// <summary>
+    /// Returns the set of field keys already indexed for the given form version (as stored in the search
+    /// index metadata), or <c>null</c> when nothing is indexed for it yet. Form recovery uses this as the
+    /// reference layout to route each orphaned completed form into the report of the version whose fields
+    /// it matches. Picture/signature fields are excluded so the set matches the report's own columns.
+    /// </summary>
+    public async Task<HashSet<string>> TryGetIndexedFieldKeysAsync(int originalFormId, int originalFormVersion)
+    {
+        var metadata = await GetExistingMetadataAsync(originalFormId, originalFormVersion);
+        var keys = metadata
+            .Where(m => !string.IsNullOrEmpty(m.Key) && m.Type != "picture" && m.Type != "signature")
+            .Select(m => m.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return keys.Count > 0 ? keys : null;
+    }
+
+    /// <summary>
+    /// <paramref name="refreshIndex"/>=false skips the comparatively expensive index-wide Refresh() for
+    /// callers that can tolerate a stale-by-seconds read (the metadata backfill in
+    /// <see cref="GetSubmitFormsData{T}"/>, run on every submission).
+    /// </summary>
+    private async Task<IEnumerable<FormMetadata>> GetExistingMetadataAsync(int originalFormId, int originalFormVersion, bool refreshIndex = true)
+    {
+        if (refreshIndex)
+        {
+            factoryIndexerFormMetadata.Refresh();
+        }
+
         var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
             r.Where(s => s.OriginalFormId, originalFormId)
              .Where(s => s.OriginalFormVersion, originalFormVersion));
 
-        var metadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
-        var submissions = await GetFormFillingResults(roomId, originalFormId, originalFormVersion);
-
-        return (metadata, submissions);
+        return metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
     }
 
     private async Task<(SubmitFormsData fromData, List<FormMetadata> fromMetaData)> GetSubmitFormsData<T>(
@@ -435,7 +468,8 @@ public class FormFillingReportCreator(
         int originalFormVersion,
         int roomId,
         int resultFormNumber,
-        string url)
+        string url,
+        DateTime? filledOn = null)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
@@ -464,7 +498,7 @@ public class FormFillingReportCreator(
             .Where(f => f.Type != "picture" && f.Type != "signature")
             .ToList();
 
-        var now = DateTime.UtcNow;
+        var now = filledOn ?? DateTime.UtcNow;
         var tenantId = tenantManager.GetCurrentTenantId();
 
         if (formsDataFile.Id is int id && formsDataFile.ParentId is int parentId)
@@ -482,6 +516,31 @@ public class FormFillingReportCreator(
             };
 
             await factoryIndexerForm.IndexAsync(searchItems, waitForCompletion: true);
+
+            // The metadata document is shared by every submission of this form+version and fully replaced
+            // below — backfill from what's already stored so a caller with partial per-field data (e.g. no
+            // dateTime format or comboBox options) doesn't erase it for every other submission.
+            var existingMetadata = await GetExistingMetadataAsync(originalFormId, originalFormVersion, refreshIndex: false);
+            var existingByKey = existingMetadata
+                .Where(m => !string.IsNullOrEmpty(m.Key))
+                .GroupBy(m => m.Key, StringComparer.Ordinal)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+
+            foreach (var meta in fromMetaData)
+            {
+                if (string.IsNullOrEmpty(meta.Key) || !existingByKey.TryGetValue(meta.Key, out var previous))
+                {
+                    continue;
+                }
+
+                meta.Format ??= previous.Format;
+
+                if ((meta.PossibleValues == null || meta.PossibleValues.Count == 0) && previous.PossibleValues is { Count: > 0 })
+                {
+                    meta.PossibleValues = previous.PossibleValues;
+                }
+            }
+
             await factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
             {
                 Id = DbFormsMetadataSearch.ComputeId(originalFormId, originalFormVersion),

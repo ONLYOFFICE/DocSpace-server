@@ -46,7 +46,8 @@ public record ExternalDbFormSubmissionIntegrationEvent : IntegrationEvent
         int roomId,
         int fileId,
         int resultFormNumber,
-        string formsDataUrl)
+        string formsDataUrl,
+        DateTime? filledOn = null)
         : base(createBy, tenantId)
     {
         OriginalFormId = originalFormId;
@@ -55,6 +56,7 @@ public record ExternalDbFormSubmissionIntegrationEvent : IntegrationEvent
         FileId = fileId;
         ResultFormNumber = resultFormNumber;
         FormsDataUrl = formsDataUrl;
+        FilledOn = filledOn;
     }
 
     [ProtoMember(1)]
@@ -74,4 +76,11 @@ public record ExternalDbFormSubmissionIntegrationEvent : IntegrationEvent
 
     [ProtoMember(6)]
     public string FormsDataUrl { get; set; }
+
+    /// <summary>
+    /// The UTC time the form was actually filled. Null for a live submission (the export stamps "now");
+    /// set by form recovery so a recovered row keeps its original fill time instead of the recovery time.
+    /// </summary>
+    [ProtoMember(7)]
+    public DateTime? FilledOn { get; set; }
 }

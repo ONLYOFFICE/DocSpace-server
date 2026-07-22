@@ -48,4 +48,7 @@ internal static partial class EntryManagerLogger
 
     [LoggerMessage(LogLevel.Information, "Move shared folder {fileId} from {parentId} to {toId}")]
     public static partial void InformationMoveSharedFile(this ILogger<EntryManager> logger, string fileId, string parentId, string toId);
+
+    [LoggerMessage(LogLevel.Error, "Failed to update the form filling report for form {formId} in room {roomId} (e.g. the search index is unavailable); the form submission itself was completed and the report can be regenerated later.")]
+    public static partial void ErrorFormFillingReportUpdate(this ILogger<EntryManager> logger, int formId, int roomId, Exception exception);
 }

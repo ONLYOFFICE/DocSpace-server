@@ -111,6 +111,7 @@ public class FileStorageService //: IFileStorageService
     FormFillingReportCreator formFillingReportCreator,
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService,
+    FormRecoveryService formRecoveryService,
     EncryptionLoginProvider encryptionLoginProvider)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
@@ -5620,16 +5621,23 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException();
         }
 
-        var completedForm = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.DateAndTime, false), FilterType.PdfForm, false, Guid.Empty, null, null, false, count: 1)
-            .FirstOrDefaultAsync();
+        // Fall back to any other completed form in the folder with resolvable properties, rather than
+        // failing the whole regeneration because the newest file lacks them (e.g. restored from a backup).
+        EntryProperties<int> completedFormProperties = null;
+        var originalFormId = 0;
 
-        if (completedForm == null)
+        await foreach (var completedForm in fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.DateAndTime, false), FilterType.PdfForm, false, Guid.Empty, null, null, false))
         {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
+            var candidateProperties = await fileDao.GetProperties(completedForm.Id);
+            var candidateFormId = candidateProperties?.FormFilling?.OriginalFormId ?? 0;
 
-        var completedFormProperties = await fileDao.GetProperties(completedForm.Id);
-        var originalFormId = completedFormProperties?.FormFilling?.OriginalFormId ?? 0;
+            if (candidateFormId != 0)
+            {
+                completedFormProperties = candidateProperties;
+                originalFormId = candidateFormId;
+                break;
+            }
+        }
 
         if (originalFormId == 0)
         {
@@ -5663,8 +5671,12 @@ public class FileStorageService //: IFileStorageService
 
         var properties = await fileDao.GetProperties(form.Id);
         var formFilling = properties?.FormFilling;
+        var resultsFolderId = formFilling?.ResultsFolderId ?? 0;
 
-        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != form.Id)
+        // Reject when the resolved template's ResultsFolderId points at a different (still-set) folder —
+        // the fallback above picked a foreign template's file misfiled here. A 0/desynced value falls
+        // through so EnsureFormFillingOutputAsync can self-heal into this already-validated Done folder.
+        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != form.Id || (resultsFolderId != 0 && resultsFolderId != folderId))
         {
             throw new InvalidOperationException();
         }
@@ -5719,6 +5731,42 @@ public class FileStorageService //: IFileStorageService
         }
 
         return await externalDbSyncService.GetTaskAsync(roomId);
+    }
+
+    public async Task<FormRecoveryTask> StartFormRecoveryAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+
+        if (room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (!await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return await formRecoveryService.StartRecoveryAsync(roomId);
+    }
+
+    public async Task<FormRecoveryTask> GetFormRecoveryTaskAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+
+        if (room.FolderType != FolderType.FillingFormsRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        if (!await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return await formRecoveryService.GetTaskAsync(roomId);
     }
 
     private async Task CheckRoomAvailability<T>(T roomId)

@@ -2242,15 +2242,25 @@ public class EntryManager(IDaoFactory daoFactory,
                         await fileDao.SaveProperties(originalFormId, origProperties);
                     }
 
-                    await formFillingReportCreator.UpdateFormFillingReport(
-                       origFormId,
-                       origProperties.FormFilling.OriginalFormVersion,
-                       rId,
-                       resProp.FormFilling.ResultFormNumber,
-                       formsDataUrl,
-                       result,
-                       room.SettingsSendFormToExternalDB,
-                       room.SettingsSaveFormAsXLSX);
+                    // The report/indexing pipeline is a best-effort side effect (it hits the search index,
+                    // which may be down). Isolate it so its failure can't abort the submission finalization
+                    // below — otherwise the filled draft would be left behind in the "In Process" folder.
+                    try
+                    {
+                        await formFillingReportCreator.UpdateFormFillingReport(
+                           origFormId,
+                           origProperties.FormFilling.OriginalFormVersion,
+                           rId,
+                           resProp.FormFilling.ResultFormNumber,
+                           formsDataUrl,
+                           result,
+                           room.SettingsSendFormToExternalDB,
+                           room.SettingsSaveFormAsXLSX);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.ErrorFormFillingReportUpdate(origFormId, rId, ex);
+                    }
                 }
 
                 if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
