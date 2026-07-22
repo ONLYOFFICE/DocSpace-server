@@ -103,6 +103,7 @@ public class BaseWorkerStartup(IConfiguration configuration)
 
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient(Configuration);
+        services.AddDocsCloudHttpClient(Configuration);
     }
 
     public virtual void Configure(IApplicationBuilder app)

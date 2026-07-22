@@ -68,10 +68,11 @@ public class CustomerOperationsRequestDto : CustomerOperationsReportRequestDto
 public class CustomerOperationsReportRequestDto
 {
     /// <summary>
-    /// The service name.
+    /// The service name list. A single string is also accepted for backward compatibility.
     /// </summary>
-    /// <example>backup</example>
-    public string ServiceName { get; set; }
+    /// <example>[backup]</example>
+    [JsonConverter(typeof(SingleOrArrayStringJsonConverter))]
+    public List<string> ServiceName { get; set; }
 
     /// <summary>
     /// The report start date.
@@ -142,10 +143,11 @@ public class CustomerOperationsReportRequestDto
 public class CustomerServiceUsageReportRequestDto
 {
     /// <summary>
-    /// The service name.
+    /// The service name list. A single string is also accepted for backward compatibility.
     /// </summary>
-    /// <example>backup</example>
-    public string ServiceName { get; set; }
+    /// <example>[backup]</example>
+    [JsonConverter(typeof(SingleOrArrayStringJsonConverter))]
+    public List<string> ServiceName { get; set; }
 
     /// <summary>
     /// The report start date.
@@ -255,10 +257,10 @@ public class CustomerMonthlyUsageRequestDto
 public class CustomerServiceUsageRequestDto
 {
     /// <summary>
-    /// The service name.
+    /// The service name list.
     /// </summary>
-    /// <example>backup</example>
-    public string ServiceName { get; set; }
+    /// <example>[backup]</example>
+    public List<string> ServiceName { get; set; }
 
     /// <summary>
     /// The participant name.
@@ -315,4 +317,28 @@ public class CustomerServiceUsageRequestDto
     /// </summary>
     /// <example>Descending</example>
     public OperationOrderType? OrderType { get; init; }
+}
+
+
+/// <summary>
+/// Deserializes a value that historically was a single JSON string but is now a list:
+/// accepts both <c>"backup"</c> and <c>["backup"]</c>, keeping the request contract
+/// backward compatible for existing clients. Always serializes as an array.
+/// </summary>
+public class SingleOrArrayStringJsonConverter : JsonConverter<List<string>>
+{
+    public override List<string> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            return [reader.GetString()];
+        }
+
+        return JsonSerializer.Deserialize<List<string>>(ref reader, options);
+    }
+
+    public override void Write(Utf8JsonWriter writer, List<string> value, JsonSerializerOptions options)
+    {
+        JsonSerializer.Serialize(writer, value, options);
+    }
 }
