@@ -60,6 +60,7 @@ public class TariffService(
     ILogger<TariffService> logger,
     BillingClient billingClient,
     AccountingClient accountingClient,
+    DocsCloudClient docsCloudClient,
     IServiceProvider serviceProvider,
     ResiliencePipelineProvider<string> resiliencePipelineProvider,
     TenantExtraConfig tenantExtraConfig)
@@ -144,12 +145,22 @@ public class TariffService(
                                 {
                                     var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
                                     asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
-                            }
+                                }
                             }
                             else
                             {
                                 var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
-                                asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+
+                                // track the DocsCloudTrial expiration per-quota so it becomes Overdue after the trial ends,
+                                // instead of being folded into the tariff-level DueDate (which would expire the whole tariff)
+                                if (quota.Additional)
+                                {
+                                    quotaDueDate = paymentEndDate;
+                                }
+                                else
+                                {
+                                    asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+                                }
                             }
 
                             asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
@@ -344,7 +355,9 @@ public class TariffService(
 
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            var changed = await billingClient.ChangePaymentAsync(portalId, productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
 
             if (!changed)
             {
@@ -352,6 +365,8 @@ public class TariffService(
             }
 
             await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
         }
         catch (Exception error)
         {
@@ -409,6 +424,86 @@ public class TariffService(
         await ClearCacheAsync(tenantId);
 
         return result;
+    }
+
+    public async Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    {
+        if (!billingClient.Configured)
+        {
+            return false;
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            var switched = await billingClient.SwitchSubscriptionAsync(portalId, fromProductId, toProductId, quantity, customerParticipantName, metadata);
+
+            if (!switched)
+            {
+                return false;
+            }
+
+            await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity)
+    {
+        if (!billingClient.Configured)
+        {
+            return null;
+        }
+
+        try
+        {
+            var response = await billingClient.CalculateSwitchSubscriptionAsync(await coreSettings.GetKeyAsync(tenantId), fromProductId, toProductId, quantity);
+
+            return response;
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+
+            return null;
+        }
+    }
+
+    public async Task<bool> GetDocsCloudTrialAsync(int tenantId)
+    {
+        if (!billingClient.Configured)
+        {
+            return false;
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            var result = await billingClient.GetDocsCloudTrialAsync(portalId);
+
+            await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
+
+            return result;
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+
+            return false;
+        }
     }
 
     public async Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null)
@@ -821,6 +916,8 @@ public class TariffService(
 
             await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
 
+            var changed = false;
+
             foreach (var q in tariffInfo.Quotas)
             {
                 if (q.Id == quotaId)
@@ -836,7 +933,14 @@ public class TariffService(
                         NextQuantity = nextQuantity,
                         TenantId = tenant
                     });
+
+                    changed = true;
                 }
+            }
+
+            if (!changed)
+            {
+                return false;
             }
 
             await dbContext.SaveChangesAsync();
@@ -1400,13 +1504,17 @@ public class TariffService(
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            if (accountingClient.SubAccountsEnabled && !string.IsNullOrEmpty(filter.ServiceName))
+            if (accountingClient.SubAccountsEnabled && filter.ServiceName is { Count: 1 })
             {
-                var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-                if (aiQuota != null && aiQuota.ServiceName == filter.ServiceName)
+                var filterServiceName = filter.ServiceName.First();
+                if (!string.IsNullOrEmpty(filterServiceName))
                 {
-                    return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
-            }
+                    var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+                    if (aiQuota != null && aiQuota.ServiceName == filterServiceName)
+                    {
+                        return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
+                    }
+                }
             }
 
             return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
@@ -1423,13 +1531,13 @@ public class TariffService(
         return null;
     }
 
-    public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, DateTime? utcStartDate, DateTime? utcEndDate)
+    public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, MonthlyUsageFilter filter)
     {
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            return await accountingClient.GetCustomerMonthlyUsageAsync(portalId, utcStartDate, utcEndDate);
+            return await accountingClient.GetCustomerMonthlyUsageAsync(portalId, filter);
         }
         catch (Exception error)
         {

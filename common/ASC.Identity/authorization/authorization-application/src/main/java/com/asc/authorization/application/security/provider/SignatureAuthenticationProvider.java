@@ -44,6 +44,7 @@ import com.asc.common.application.proto.ClientResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -57,6 +58,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -208,7 +210,9 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
         new UsernamePasswordAuthenticationToken(
             signature.getUserId(),
             signature,
-            List.of(new TenantAuthority(signature.getTenantId(), signature.getTenantUrl())));
+            List.of(
+                new TenantAuthority(signature.getTenantId(), signature.getTenantUrl()),
+                FactorGrantedAuthority.withFactor("signature").issuedAt(Instant.now()).build()));
     authenticationToken.setDetails(client.getClientId());
     return authenticationToken;
   }

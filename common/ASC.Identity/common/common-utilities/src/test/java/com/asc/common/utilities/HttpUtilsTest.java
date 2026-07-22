@@ -161,6 +161,21 @@ class HttpUtilsTest {
   }
 
   @Test
+  void givenUrlWithQueryParams_whenTruncatingQueryParams_thenReturnsUrlWithoutQuery() {
+    assertEquals(
+        "http://example.com/oauth2/authorize",
+        httpUtils.truncateQueryParams(
+            "http://example.com/oauth2/authorize?scope=openid&client_id=abc"));
+  }
+
+  @Test
+  void givenUrlWithoutQueryParams_whenTruncatingQueryParams_thenReturnsOriginalUrl() {
+    assertEquals(
+        "http://example.com/oauth2/authorize",
+        httpUtils.truncateQueryParams("http://example.com/oauth2/authorize"));
+  }
+
+  @Test
   void givenUrl_whenExtractingHostFromUrl_thenReturnsHost() {
     assertEquals("example.com", httpUtils.extractHostFromUrl("https://example.com/page"));
   }
