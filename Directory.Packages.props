@@ -159,8 +159,8 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.10.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.17.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.13.0-beta.1" />
-    <PackageVersion Include="OpenSearch.Client" Version="1.8.0" />
-    <PackageVersion Include="OpenSearch.Net" Version="1.8.0" />
+    <PackageVersion Include="OpenSearch.Client" Version="2.0.0" />
+    <PackageVersion Include="OpenSearch.Net" Version="2.0.0" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql.Json.Microsoft" Version="9.0.0" />
     <PackageVersion Include="protobuf-net" Version="3.2.56" />
