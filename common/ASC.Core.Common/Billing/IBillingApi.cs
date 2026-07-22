@@ -38,55 +38,54 @@ namespace ASC.Core.Billing;
 /// Every endpoint is a POST whose body is a multimap of string values, e.g.
 /// <c>{"PortalId":["x"],"ProductId":["a","b"]}</c>. Errors arrive as 200 OK with a
 /// <c>{"Message":"error...</c> body and are mapped to exceptions by the ExceptionFactory.
-/// All paths are relative — the base address (including the <c>/billing</c> segment), authentication
-/// and resilience are configured in <see cref="BillingHttpClientExtension.AddBillingHttpClient"/>.
-/// The public wrapper is <see cref="BillingClient"/>.
+/// All paths are relative — the base address, authentication and resilience are configured in
+/// <see cref="BillingHttpClientExtension.AddBillingHttpClient"/>. The public wrapper is <see cref="BillingClient"/>.
 /// </summary>
 public interface IBillingApi
 {
-    [Post("/GetAccountLink")]
+    [Post("/billing/GetAccountLink")]
     Task<string> GetAccountLinkAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/GetActiveResources")]
+    [Post("/billing/GetActiveResources")]
     Task<PaymentLast[]> GetActiveResourcesAsync(
         [Body] Dictionary<string, List<string>> data,
         [Property(BillingHttpClientExtension.RetryOptionKey)] bool refresh);
 
-    [Post("/GetPayments")]
+    [Post("/billing/GetPayments")]
     Task<List<PaymentInfo>> GetPaymentsAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/GetSinglePaymentUrl")]
+    [Post("/billing/GetSinglePaymentUrl")]
     Task<string> GetSinglePaymentUrlAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/GetCustomerInfo")]
+    [Post("/billing/GetCustomerInfo")]
     Task<CustomerInfo> GetCustomerInfoAsync([Body] Dictionary<string, List<string>> data);
 
     /// <remarks>Returns the raw response body; the billing service answers with the JSON string <c>"ok"</c> on success.</remarks>
-    [Post("/Deposit")]
+    [Post("/billing/Deposit")]
     Task<string> DepositAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/ChangeSubscription")]
+    [Post("/billing/ChangeSubscription")]
     Task<bool> ChangeSubscriptionAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/SwitchSubscription")]
+    [Post("/billing/SwitchSubscription")]
     Task<bool> SwitchSubscriptionAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/CalculateSwitchSubscription")]
+    [Post("/billing/CalculateSwitchSubscription")]
     Task<PaymentCalculation> CalculateSwitchSubscriptionAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/CalculateSubscription")]
+    [Post("/billing/CalculateSubscription")]
     Task<PaymentCalculation> CalculateSubscriptionAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/GetProductsPrices")]
+    [Post("/billing/GetProductsPrices")]
     Task<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>> GetProductsPricesAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/GetSubscriptionBalanceInfo")]
+    [Post("/billing/GetSubscriptionBalanceInfo")]
     Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync([Body] Dictionary<string, List<string>> data);
 
-    [Post("/SubscriptionBalanceToWallet")]
+    [Post("/billing/SubscriptionBalanceToWallet")]
     Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync([Body] Dictionary<string, List<string>> data);
 
     /// <remarks>Returns the raw response body; the billing service answers with the JSON string <c>"ok"</c> on success.</remarks>
-    [Post("/getwdocstrial")]
+    [Post("/billing/getwdocstrial")]
     Task<string> GetDocsCloudTrialAsync([Body] Dictionary<string, List<string>> data);
 }

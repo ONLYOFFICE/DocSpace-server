@@ -46,7 +46,7 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
     public const string MetadataAgentTitle = "agent_title";
     public const string MetadataAgentId = "agent_id";
 
-    public bool Configured { get => !string.IsNullOrEmpty((configuration.Value.Url ?? "").Trim().TrimEnd('/')); }
+    public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
     public async Task<string> GetAccountLinkAsync(string portalId, string backUrl)
     {
@@ -365,11 +365,11 @@ public static class BillingHttpClientExtension
             })
             .ConfigureHttpClient((_, client) =>
             {
-                var url = (paymentSettings?.Url ?? "").Trim().TrimEnd('/');
+                var url = paymentSettings?.Url;
 
                 if (!string.IsNullOrEmpty(url))
                 {
-                    client.BaseAddress = new Uri(url + "/billing");
+                    client.BaseAddress = new Uri(url);
                 }
 
                 client.Timeout = TimeSpan.FromMilliseconds(60000);

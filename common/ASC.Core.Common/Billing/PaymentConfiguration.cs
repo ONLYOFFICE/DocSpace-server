@@ -36,7 +36,16 @@ namespace ASC.Core.Billing;
 public class PaymentConfiguration
 {
     public bool Test { get; init; }
-    public string Url { get; init; }
+
+    public string Url
+    {
+        get;
+        init
+        {
+            field = (value ?? "").Trim().TrimEnd('/');
+        }
+    }
+
     public string Key { get; init; }
     public string Secret { get; init; }
     public int Delay { get; init; }
