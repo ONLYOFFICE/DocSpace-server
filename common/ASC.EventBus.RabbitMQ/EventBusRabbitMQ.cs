@@ -207,6 +207,9 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
     private async Task<IChannel> RentPublisherChannelAsync()
     {
+        // never hand out (or worse, reconnect for) a channel once shutdown has started
+        ObjectDisposedException.ThrowIf(_disposing, this);
+
         while (_publisherChannelPool.TryTake(out var channel))
         {
             Interlocked.Decrement(ref _pooledPublisherChannelCount);
@@ -233,7 +236,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
     private void ReturnPublisherChannel(IChannel channel)
     {
-        if (!channel.IsOpen)
+        if (_disposing || !channel.IsOpen)
         {
             channel.Dispose();
 
@@ -329,10 +332,17 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
         await CloseChannelAsync(_consumerChannel);
 
-        while (_publisherChannelPool.TryTake(out var channel))
+        // two passes: the second one picks up channels returned by in-flight publications
+        // that observed _disposing as not yet set
+        for (var i = 0; i < 2; i++)
         {
-            await CloseChannelAsync(channel);
+            while (_publisherChannelPool.TryTake(out var channel))
+            {
+                await CloseChannelAsync(channel);
+            }
         }
+
+        Interlocked.Exchange(ref _pooledPublisherChannelCount, 0);
 
         _subsManager.Clear();
     }
