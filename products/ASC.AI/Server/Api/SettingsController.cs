@@ -37,9 +37,15 @@ namespace ASC.AI.Api;
 [InternalRoute]
 [ApiController]
 [ControllerName("ai")]
-[ApiExplorerSettings(IgnoreApi = true)]
 public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
+    /// <remarks>
+    /// Configures the document vectorization embedding provider.
+    /// </remarks>
+    /// <summary>Set the vectorization settings</summary>
+    /// <path>api/2.0/ai/config/vectorization</path>
+    [Tags("AI / Settings")]
+    [SwaggerResponse(200, "Vectorization settings", typeof(VectorizationSettingsDto))]
     [HttpPut("config/vectorization")]
     [AiFeature]
     public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)
@@ -49,6 +55,13 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
 
+    /// <remarks>
+    /// Returns the document vectorization settings.
+    /// </remarks>
+    /// <summary>Get the vectorization settings</summary>
+    /// <path>api/2.0/ai/config/vectorization</path>
+    [Tags("AI / Settings")]
+    [SwaggerResponse(200, "Vectorization settings", typeof(VectorizationSettingsDto))]
     [HttpGet("config/vectorization")]
     [AiFeature]
     public async Task<VectorizationSettingsDto> GetVectorizationSettingsAsync()
@@ -57,6 +70,13 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
 
+    /// <remarks>
+    /// Returns the AI module settings.
+    /// </remarks>
+    /// <summary>Get the AI settings</summary>
+    /// <path>api/2.0/ai/config</path>
+    [Tags("AI / Settings")]
+    [SwaggerResponse(200, "AI settings", typeof(AiSettingsDto))]
     [HttpGet("config")]
     public async Task<AiSettingsDto> GetAiSettingsAsync()
     {
@@ -64,6 +84,13 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
 
+    /// <remarks>
+    /// Returns the per-user AI settings.
+    /// </remarks>
+    /// <summary>Get the user AI settings</summary>
+    /// <path>api/2.0/ai/config/user</path>
+    [Tags("AI / Settings")]
+    [SwaggerResponse(200, "User AI settings", typeof(AiUserSettingsDto))]
     [HttpGet("config/user")]
     public async Task<AiUserSettingsDto> GetAiUserSettingsAsync()
     {
@@ -71,6 +98,13 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
 
+    /// <remarks>
+    /// Updates the per-user AI settings.
+    /// </remarks>
+    /// <summary>Set the user AI settings</summary>
+    /// <path>api/2.0/ai/config/user</path>
+    [Tags("AI / Settings")]
+    [SwaggerResponse(200, "User AI settings", typeof(AiUserSettingsDto))]
     [HttpPut("config/user")]
     public async Task<AiUserSettingsDto> SetAiUserSettingsAsync([FromBody] SetAiUserSettingsRequestDto inDto)
     {

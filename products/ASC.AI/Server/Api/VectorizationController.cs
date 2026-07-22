@@ -38,10 +38,16 @@ namespace ASC.AI.Api;
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]
-[ApiExplorerSettings(IgnoreApi = true)]
 public class VectorizationController(
     VectorizationTaskPublisher vectorizationTaskPublisher) : ControllerBase
 {
+    /// <remarks>
+    /// Submits the specified files for vectorization processing.
+    /// </remarks>
+    /// <summary>Start a vectorization task</summary>
+    /// <path>api/2.0/ai/vectorization/tasks</path>
+    [Tags("AI / Vectorization")]
+    [SwaggerResponse(200, "Ok")]
     [HttpPost("vectorization/tasks")]
     public async Task StartTaskAsync(VectorizationStartRequestDto inDto)
     {
