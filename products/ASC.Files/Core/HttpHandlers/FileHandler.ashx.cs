@@ -595,7 +595,9 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
             var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
 
-            if (linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated)
+            var anonymous = linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated;
+
+            if (anonymous)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey];
                 var validateResult = emailValidationKeyProvider.ValidateEmailKey(id.ToString() + version, auth.FirstOrDefault() ?? "", global.StreamUrlExpire);
@@ -609,7 +611,20 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_SecurityException);
                     return;
                 }
+            }
 
+            if (file == null
+                || version > 0 && file.Version != version)
+            {
+                file = version > 0
+                           ? await fileDao.GetFileAsync(id, version)
+                           : await fileDao.GetFileAsync(id);
+            }
+
+            //NOTE: the content of an encrypted file is opaque to the server, so the DocService signature
+            //is not required for it: such a stream may be requested by the browser, which has no access to the secret
+            if (anonymous && file is not { Encrypted: true })
+            {
                 var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
                 if (!string.IsNullOrEmpty(signatureSecret))
                 {
@@ -665,14 +680,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         return;
                     }
                 }
-            }
-
-            if (file == null
-                || version > 0 && file.Version != version)
-            {
-                file = version > 0
-                           ? await fileDao.GetFileAsync(id, version)
-                           : await fileDao.GetFileAsync(id);
             }
 
             if (file == null)

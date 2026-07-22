@@ -447,13 +447,17 @@ public interface IFileDao<T>
     Task InitCustomOrder(Dictionary<T, int> fileIds, T parentFolderId);
 
     IAsyncEnumerable<File<T>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, T parentId, List<FolderType> folderType, OrderBy orderBy, int offset, int count);
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count);
 
     Task<int> GetSharedFilesCountAsync(T parentId);
 
     IAsyncEnumerable<File<T>> GetSharedFilesAsync(T parentId, int offset = 0, int count = -1);
 
     Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status, Func<Task> action = null);
+
+    Task<bool> IsVectorizationDeletedAsync(T fileId);
+
+    Task DeleteVectorizationIfDeletedAsync(T fileId);
 
     Task SetFileKey(T fileId, IEnumerable<FileKeyData> keys);
     Task<List<FileKeys>> GetFileKeys(T fileId, Guid userId);

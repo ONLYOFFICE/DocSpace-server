@@ -49,6 +49,7 @@ import { isObject } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
+  extractAttachmentRefIds,
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
@@ -117,7 +118,8 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
   }
   const entityId =
     typeof body["entityId"] === "string" ? body["entityId"] : undefined;
-  const fragment = await safeGetToolsPrompt(toolsAdapter, entityId);
+  const attachmentId = extractAttachmentRefIds(body["userMessage"]);
+  const fragment = await safeGetToolsPrompt(toolsAdapter, entityId, attachmentId);
   return fragment ? appendActionPrompt(body, fragment) : body;
 }
 

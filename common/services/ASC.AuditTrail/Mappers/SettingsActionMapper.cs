@@ -160,7 +160,8 @@ internal class ProductsActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Download, [
-                    MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded, MessageAction.CustomerOperationsReportDownloaded
+                    MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded, MessageAction.CustomerOperationsReportDownloaded,
+                    MessageAction.DocsCloudQuotaReportDownloaded
                 ]
             },
             {

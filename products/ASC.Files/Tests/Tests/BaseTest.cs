@@ -378,25 +378,39 @@ public class BaseTest(
         await _filesClient.Authenticate(user);
 
         var rootSw = Stopwatch.StartNew();
-        if (folderType == FolderType.USER)
-        {
-            var myFolder = await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
-            Timing.Write($"getMy({user.Email})", rootSw.ElapsedMilliseconds);
-            return myFolder.Response.Current.Id;
-        }
 
-        if (folderType == FolderType.Favorites)
+        switch (folderType)
         {
-            var favoritesFolder = await _foldersApi.GetFavoritesFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
-            Timing.Write($"getFavorites({user.Email})", rootSw.ElapsedMilliseconds);
-            return favoritesFolder.Response.Current.Id;
-        }
-
-        if (folderType == FolderType.Recent)
-        {
-            var recentFolder = await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
-            Timing.Write($"getRecent({user.Email})", rootSw.ElapsedMilliseconds);
-            return recentFolder.Response.Current.Id;
+            case FolderType.USER:
+                {
+                    var myFolder = await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getMy({user.Email})", rootSw.ElapsedMilliseconds);
+                    return myFolder.Response.Current.Id;
+                }
+            case FolderType.Favorites:
+                {
+                    var favoritesFolder = await _foldersApi.GetFavoritesFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getFavorites({user.Email})", rootSw.ElapsedMilliseconds);
+                    return favoritesFolder.Response.Current.Id;
+                }
+            case FolderType.Recent:
+                {
+                    var recentFolder = await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getRecent({user.Email})", rootSw.ElapsedMilliseconds);
+                    return recentFolder.Response.Current.Id;
+                }
+            case FolderType.TRASH:
+                {
+                    var recentFolder = await _foldersApi.GetTrashFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getTrash({user.Email})", rootSw.ElapsedMilliseconds);
+                    return recentFolder.Response.Current.Id;
+                }
+            case FolderType.Forms:
+                {
+                    var recentFolder = await _foldersApi.GetFormsFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getForms({user.Email})", rootSw.ElapsedMilliseconds);
+                    return recentFolder.Response.Current.Id;
+                }
         }
 
         var rootFolder = (await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;

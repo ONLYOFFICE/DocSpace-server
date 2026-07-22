@@ -34,7 +34,7 @@
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
 [Transient(typeof(IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>))]
-public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo)
+public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo, ThirdpartyConfigurationData thirdpartyConfiguration)
     : IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, IDisposable
 {
     public bool IsOpened => _client != null;
@@ -43,6 +43,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     private const string DepthHeader = "Depth";
     private WebDavClient _client;
     private Uri _baseUri;
+    private string _baseUrl;
     private string _absolutePath;
     private AuthData _authData;
 
@@ -57,14 +58,16 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
 
         var uri = new Uri(authData.Url);
         _baseUri = new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri;
+        _baseUrl = _baseUri.ToString().Trim('/');
         _absolutePath = HttpUtility.UrlDecode(uri.AbsolutePath).Trim('/');
 
 #pragma warning disable CA2000 // HttpClient is owned by WebDavClient
         var httpClient = httpClientFactory.CreateClient();
 #pragma warning restore CA2000
+        httpClient.Timeout = thirdpartyConfiguration.ThirdPartyRequestTimeout;
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-            Convert.ToBase64String(Encoding.ASCII.GetBytes($"{authData.Login}:{authData.Password}")));
+            Convert.ToBase64String(Encoding.UTF8.GetBytes($"{authData.Login}:{authData.Password}")));
 
         _client = new WebDavClient(httpClient);
         _authData = authData;
@@ -118,6 +121,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var response = await SendAsync(() => _client.GetProcessedFile(resourceUrl));
         if (!response.IsSuccessful)
         {
+            response.Dispose();
             return null;
         }
 
@@ -285,14 +289,6 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
 
     private async Task<WebDavResponse> PutStreamAsync(string url, Stream fileStream)
     {
-        var parentPath = GetParentPath(url);
-        var parentResource = await GetEntryAsync(parentPath);
-
-        if (parentResource is not { IsCollection: true })
-        {
-            return null;
-        }
-
         if (fileStream.CanSeek)
         {
             return await SendAsync(() => _client.PutFile(url, fileStream));
@@ -346,11 +342,10 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var entry = new WebDavEntry();
 
         var uri = HttpUtility.UrlDecode(resource.Uri.Trim('/'));
-        var baseUrl = _baseUri.ToString().Trim('/');
 
-        if (uri.StartsWith(baseUrl))
+        if (uri.StartsWith(_baseUrl, StringComparison.Ordinal))
         {
-            uri = uri.Replace(baseUrl, string.Empty);
+            uri = uri[_baseUrl.Length..];
         }
 
         if (!string.IsNullOrEmpty(_absolutePath))
@@ -396,15 +391,24 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
             return response;
         }
 
+        if (response is IDisposable disposableResponse)
+        {
+            disposableResponse.Dispose();
+        }
+
         _client?.Dispose();
 
 #pragma warning disable CA2000 // HttpClient and handler are owned by WebDavClient
+        // IHttpClientFactory is not used here
+        // challenge auth requires per-user credentials on the handler,
+        // which must not be shared via the factory's pooled handlers
+        // fixed in 8533e2f079 (bug 69802)
         var handler = new SocketsHttpHandler
         {
             Credentials = new NetworkCredential(_authData.Login, _authData.Password)
         };
         var client = new HttpClient(handler);
-
+        client.Timeout = thirdpartyConfiguration.ThirdPartyRequestTimeout;
         _client = new WebDavClient(client);
 #pragma warning restore CA2000
 

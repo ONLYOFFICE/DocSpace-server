@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
+import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { ThreadsStorage } from "@onlyoffice/ai-chat/core";
 import type { Thread } from "@onlyoffice/ai-chat/core";
@@ -66,10 +67,11 @@ function dtoToThread(raw: unknown): Thread | null {
 
 export class HttpThreadsStorage implements ThreadsStorage {
   async create(title: string, profileId?: string, entityId?: string): Promise<Thread> {
+    const scopedEntityId = await resolveAgentEntityId(entityId);
     const raw = await aiService.post(PATH, {
       title,
       profileId: profileId ?? null,
-      entityId: entityId ?? null,
+      entityId: scopedEntityId ?? null,
     });
     const thread = dtoToThread(raw);
     if (!thread) {
@@ -91,7 +93,7 @@ export class HttpThreadsStorage implements ThreadsStorage {
   }
 
   async readAll(entityId?: string): Promise<Thread[]> {
-    const query = entityIdQuery(entityId);
+    const query = entityIdQuery(await resolveAgentEntityId(entityId));
     const raw = await aiService.get(PATH, query ? { query } : undefined);
     if (!Array.isArray(raw)) {
       return [];

@@ -60,7 +60,7 @@ switch (launchProfile)
 {
     case "integration-test":
         connectionManager
-            .AddMySql(withDataVolume: false)
+            .AddMySql(withDataVolume: false, withTmpfs: true)
             .AddRabbitMq()
             .AddRedis()
             .AddOpensearch(withDashboard: false, isProxied: false)

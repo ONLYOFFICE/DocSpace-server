@@ -33,20 +33,21 @@
 
 import express from "express";
 import type { Application, RequestHandler, Router } from "express";
-import {
-  DEFAULT_AI_ROUTES,
-  DEFAULT_ASSIGNMENTS_ROUTES,
-  DEFAULT_ATTACHMENTS_ROUTES,
-  DEFAULT_PREFERENCES_ROUTES,
-  DEFAULT_PROFILES_ROUTES,
-  DEFAULT_PROMPTS_ROUTES,
-  DEFAULT_THREADS_ROUTES,
-  DEFAULT_TOOLS_ROUTES,
-  DEFAULT_WEB_SEARCH_ROUTES,
-} from "@onlyoffice/ai-chat/core";
-import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import logger from "./log.js";
+import { buildOpenApiDocument, docsHtml } from "./openapi.js";
+import type { EngineDoc, OpenApiSchemaBundle } from "./openapi.js";
+import { createRequire } from "module";
+import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS } from "./apiCatalog.js";
+
+// Concrete request/response schemas, produced by the build-time generator
+// (`yarn openapi`) and committed. Backs the served document with real types;
+// if regenerated stale it simply loses precision, never breaks. Loaded via
+// `require` to sidestep JSON import-attribute/module constraints under tsx.
+const openApiSchemas = createRequire(import.meta.url)(
+  "./generated/openapi-schemas.json",
+) as OpenApiSchemaBundle;
 import { agentsController } from "./controllers/agentsController.js";
+import { textToDocxController } from "./controllers/textToDocxController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
@@ -57,31 +58,31 @@ import { threadsController } from "./controllers/threadsController.js";
 import { toolsController } from "./controllers/toolsController.js";
 import { webSearchController } from "./controllers/webSearchController.js";
 
-export const API_PREFIX = "/api/2.0/new-ai";
+export { API_PREFIX };
 
-type RouteMap = Readonly<Record<string, RouteSpec>>;
 type ControllerMap = Readonly<Record<string, RequestHandler>>;
 
-interface EngineBinding {
-  name: string;
-  routes: RouteMap;
-  controller: ControllerMap;
-}
+// Controller per engine, keyed by `EngineDoc.name`. The route/method data
+// lives in `apiCatalog.ts` (shared with the OpenAPI emitter); this map is
+// the app-only half that binds each engine method to its handler.
+const CONTROLLERS: Readonly<Record<string, ControllerMap>> = {
+  ai: aiController,
+  assignments: assignmentsController,
+  attachments: attachmentsController,
+  preferences: preferencesController,
+  profiles: profilesController,
+  prompts: promptsController,
+  threads: threadsController,
+  tools: toolsController,
+  webSearch: webSearchController,
+};
 
-const ENGINE_BINDINGS: ReadonlyArray<EngineBinding> = [
-  { name: "ai", routes: DEFAULT_AI_ROUTES, controller: aiController },
-  { name: "assignments", routes: DEFAULT_ASSIGNMENTS_ROUTES, controller: assignmentsController },
-  { name: "attachments", routes: DEFAULT_ATTACHMENTS_ROUTES, controller: attachmentsController },
-  { name: "preferences", routes: DEFAULT_PREFERENCES_ROUTES, controller: preferencesController },
-  { name: "profiles", routes: DEFAULT_PROFILES_ROUTES, controller: profilesController },
-  { name: "prompts", routes: DEFAULT_PROMPTS_ROUTES, controller: promptsController },
-  { name: "threads", routes: DEFAULT_THREADS_ROUTES, controller: threadsController },
-  { name: "tools", routes: DEFAULT_TOOLS_ROUTES, controller: toolsController },
-  { name: "webSearch", routes: DEFAULT_WEB_SEARCH_ROUTES, controller: webSearchController },
-];
-
-function bindEngine(router: Router, binding: EngineBinding): void {
-  const { name, routes, controller } = binding;
+function bindEngine(router: Router, binding: EngineDoc): void {
+  const { name, routes } = binding;
+  const controller = CONTROLLERS[name];
+  if (!controller) {
+    throw new Error(`No controller registered for engine ${name}`);
+  }
   for (const [methodName, route] of Object.entries(routes)) {
     const handler = controller[methodName];
     if (typeof handler !== "function") {
@@ -127,6 +128,23 @@ export default function registerRoutes(app: Application): void {
     res.status(200).json({ status: "Healthy" });
   });
 
+  // OpenAPI document and Scalar docs UI. Built once from the same route maps
+  // the router registers below, so the spec cannot drift from the routes.
+  // Registered before the auth gate: the document describes only the API
+  // shape (no secrets) and the docs UI must be reachable without a session.
+  const openApiDocument = buildOpenApiDocument({
+    apiPrefix: API_PREFIX,
+    engines: ENGINE_DOCS,
+    customRoutes: CUSTOM_ROUTE_DOCS,
+    schemas: openApiSchemas,
+  });
+  router.get("/openapi.json", (_req, res) => {
+    res.json(openApiDocument);
+  });
+  router.get("/docs", (_req, res) => {
+    res.type("html").send(docsHtml(`${API_PREFIX}/openapi.json`));
+  });
+
   // Auth gate: this service does no auth of its own and blindly forwards the
   // caller's credentials downstream, so an unauthenticated request would
   // reach the engine / .NET integration with no DocSpace session. Reject
@@ -164,6 +182,11 @@ export default function registerRoutes(app: Application): void {
   // Literal sub-paths (`news`, `agentquota`, `resetquota`) are registered
   // before the parameterized `/agents/:id` so Express does not capture them
   // as an id.
+  // Async markdown → docx export via the .NET AI Worker (see
+  // textToDocxController); completion is signalled by the files socket
+  // create event, not by this response.
+  router.post("/text-to-docx", textToDocxController.start);
+
   router.get("/agents", agentsController.getAgents);
   router.get("/agents/news", agentsController.getAgentsNews);
   router.get("/agents/:id", agentsController.getAgentInfo);
@@ -174,12 +197,12 @@ export default function registerRoutes(app: Application): void {
   router.delete("/agents/:id", agentsController.deleteAgent);
 
   let total = 0;
-  for (const binding of ENGINE_BINDINGS) {
+  for (const binding of ENGINE_DOCS) {
     bindEngine(router, binding);
     total += Object.keys(binding.routes).length;
   }
   logger.info(
-    `Registered ${total} engine routes across ${ENGINE_BINDINGS.length} engines under ${API_PREFIX}`,
+    `Registered ${total} engine routes across ${ENGINE_DOCS.length} engines under ${API_PREFIX}`,
   );
 
   app.use(API_PREFIX, router);

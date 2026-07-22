@@ -490,7 +490,7 @@ public interface IFolderDao<T>
     Task<Dictionary<T, ChatSettings>> GetChatSettingsAsync(IEnumerable<T> agentIds);
 
     IAsyncEnumerable<Folder<T>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool excludeSubject, Location? location, int trashId, T parentId, List<FolderType> folderType, OrderBy orderBy, int offset, int count);
+        string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count);
 
     Task<int> GetSharedFoldersCountAsync(T parentId);
 

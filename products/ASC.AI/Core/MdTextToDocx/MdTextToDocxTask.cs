@@ -106,6 +106,8 @@ public class MdTextToDocxTask(IServiceScopeFactory serviceScopeFactory) : Distri
 
             var docService = scope.ServiceProvider.GetRequiredService<DocumentServiceConnector>();
 
+            fileUri = docService.ReplaceCommunityAddress(fileUri);
+
             var (_, outFileUri, outFileType) = await docService.GetConvertedUriAsync(
                 fileUri,
                 "md",

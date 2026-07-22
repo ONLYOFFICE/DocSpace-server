@@ -95,8 +95,8 @@ public static class DbPromptFolderExtension
             entity.Property(e => e.Name)
                 .HasColumnName("name")
                 .HasColumnType("varchar(255)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasCharSet("utf8mb4")
+                .UseCollation("utf8mb4_general_ci");
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")

@@ -22,6 +22,6 @@
 
     "noEmit": true
   },
-  "include": ["app.ts", "app/**/*.ts", "app/**/*.d.ts", "config/**/*.ts"],
+  "include": ["app.ts", "app/**/*.ts", "app/**/*.d.ts", "config/**/*.ts", "scripts/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1452,4 +1452,7 @@
   <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
     <value>Image</value>
   </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>DocsCloud Quota Report ({0})</value>
+  </data>
 </root>

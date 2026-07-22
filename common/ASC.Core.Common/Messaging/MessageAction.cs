@@ -1003,6 +1003,9 @@ public enum MessageAction
     [Description("Docs Cloud config updated")]
     DocsCloudConfigUpdated = 6101,
 
+    [Description("Docs Cloud quota report downloaded")]
+    DocsCloudQuotaReportDownloaded = 6102,
+
     #endregion
 
     #region others

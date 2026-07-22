@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Core.Data;
@@ -236,6 +236,99 @@ public class DbTenantService(
         {
             await tenantDbContext.SaveChangesAsync();
         }
+
+        return tenant;
+    }
+
+    public async Task<Tenant> RegisterTenantAsync(CoreSettings coreSettings, Tenant tenant, UserInfo owner, string ownerPasswordHash)
+    {
+        ArgumentNullException.ThrowIfNull(tenant);
+        ArgumentNullException.ThrowIfNull(owner);
+        ArgumentException.ThrowIfNullOrEmpty(ownerPasswordHash);
+        ArgumentException.ThrowIfNullOrEmpty(owner.UserName);
+
+        if (!string.IsNullOrEmpty(tenant.MappedDomain))
+        {
+            var baseUrl = coreSettings.GetBaseDomain(tenant.HostedRegion);
+
+            if (baseUrl != null && tenant.MappedDomain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
+            {
+                await ValidateDomainAsync(tenant.MappedDomain[..(tenant.MappedDomain.Length - baseUrl.Length - 1)], tenant.Id, false);
+            }
+            else
+            {
+                await ValidateDomainAsync(tenant.MappedDomain, tenant.Id, false);
+            }
+        }
+
+        // the default tenant version is static reference data mapped only in TenantDbContext,
+        // so it is read outside the registration transaction
+        await using (var tenantDbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            tenant.Version = await tenantDbContext.VersionIdAsync();
+        }
+
+        if (owner.Id == Guid.Empty)
+        {
+            owner.Id = Guid.NewGuid();
+        }
+
+        if (owner.CreateDate == default)
+        {
+            owner.CreateDate = DateTime.UtcNow;
+        }
+
+        owner.UserName = owner.UserName.Trim();
+        owner.Email = owner.Email.Trim();
+
+        tenant.OwnerId = owner.Id;
+
+        await using var userDbContext = await userDbContextFactory.CreateDbContextAsync();
+
+        var strategy = userDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await userDbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            tenant.LastModified = DateTime.UtcNow;
+
+            var dbTenant = tenant.Map();
+            dbTenant.Id = 0;
+
+            await context.Tenants.AddAsync(dbTenant);
+
+            // the first SaveChanges is needed to obtain the identity-generated tenant id
+            // for the owner rows; the transaction keeps the whole registration atomic
+            await context.SaveChangesAsync();
+
+            tenant.Id = dbTenant.Id;
+
+            owner.TenantId = tenant.Id;
+            owner.LastModified = DateTime.UtcNow;
+
+            await context.Users.AddAsync(owner.Map());
+
+            await context.UserSecurity.AddAsync(new UserSecurity
+            {
+                TenantId = tenant.Id,
+                UserId = owner.Id,
+                PwdHash = GetPasswordHash(owner.Id, ownerPasswordHash),
+                LastModified = DateTime.UtcNow
+            });
+
+            var adminGroupRef = new UserGroupRef(owner.Id, Users.Constants.GroupAdmin.ID, UserGroupRefType.Contains)
+            {
+                TenantId = tenant.Id,
+                LastModified = DateTime.UtcNow
+            };
+
+            await context.UserGroups.AddAsync(adminGroupRef.Map());
+
+            await context.SaveChangesAsync();
+            await tx.CommitAsync();
+        });
 
         return tenant;
     }

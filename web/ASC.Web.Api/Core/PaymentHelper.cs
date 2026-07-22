@@ -45,7 +45,8 @@ public class PaymentHelper(
     QuotaSocketManager quotaSocketManager,
     AiGateway aiGateway,
     DocsCloudClient docsCloudClient,
-    WalletStaticProvider walletStaticProvider)
+    WalletStaticProvider walletStaticProvider,
+    CsvFileUploader csvFileUploader)
 {
     public void DemandConfigured()
     {
@@ -450,6 +451,28 @@ public class PaymentHelper(
         var result = await docsCloudClient.UpdateTenantConfigAsync(portalId, docsCloudConfig);
 
         messageService.Send(MessageAction.DocsCloudConfigUpdated);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Downloads the DocsCloud user quota as a CSV, saves it in "My Documents" and returns the file URL.
+    /// </summary>
+    public async Task<string> CreateTenantQuotaReportAsync(string portalId)
+    {
+        await using var source = await docsCloudClient.DownloadTenantQuotaAsync(portalId);
+
+        // Buffer into a seekable stream: the uploader needs a known length, but the CSV comes from
+        // the DocsCloud HTTP response, which is not guaranteed to be seekable.
+        await using var stream = new MemoryStream();
+        await source.CopyToAsync(stream);
+        stream.Position = 0;
+
+        var reportName = string.Format(Resource.DocsCloudQuotaReportName + ".csv", DateTime.UtcNow.ToShortDateString());
+
+        var result = await csvFileUploader.UploadFile(stream, reportName);
+
+        messageService.Send(MessageAction.DocsCloudQuotaReportDownloaded);
 
         return result;
     }

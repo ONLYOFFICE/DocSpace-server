@@ -1272,13 +1272,6 @@ public class FileSecurity(
             {
                 return false;
             }
-
-            if (action is FilesSecurityActions.Delete &&
-                file is { VectorizationStatus: VectorizationStatus.InProgress } &&
-                await vectorizationHelper.InProcessAsync(file.Id))
-            {
-                return false;
-            }
         }
 
         if (action == FilesSecurityActions.IndexExport && (!isRoom || !folder.SettingsIndexing))

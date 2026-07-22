@@ -1,40 +1,40 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.AI.Api;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]
@@ -49,7 +49,6 @@ public class AgentsController(
     SettingsManager settingsManager,
     SystemMcpConfig systemMcpConfig,
     McpService mcpService,
-    AiProviderService aiProviderService,
     ILogger<AgentsController> logger,
     ApiDateTimeHelper apiDateTimeHelper,
     RootNewItemsDtoHelper rootNewItemsDtoHelper,
@@ -63,7 +62,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderContentDto<int>))]
-    [HttpGet("agents")]
+    [HttpGet("integration/agents")]
     public async Task<FolderContentDto<int>> GetAgents(GetAgentListRequestDto inDto)
     {
         var parentId = await globalFolderHelper.GetFolderAiAgentsAsync();
@@ -119,11 +118,9 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
-    [HttpPost("agents")]
+    [HttpPost("integration/agents")]
     public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
     {
-        await ValidateModelIdAsync(inDto.ChatSettings);
-
         var lifetime = inDto.Lifetime.Map();
         lifetime?.StartDate = DateTime.UtcNow;
 
@@ -172,7 +169,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
-    [HttpGet("agents/{id}")]
+    [HttpGet("integration/agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
     {
         var folder = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
@@ -187,11 +184,9 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Updated agent information", typeof(FolderDto<int>))]
-    [HttpPut("agents/{id}")]
+    [HttpPut("integration/agents/{id}")]
     public async Task<FolderDto<int>> UpdateAgent(UpdateRoomRequestDto<int> inDto)
     {
-        await ValidateModelIdAsync(inDto.UpdateRoom.ChatSettings);
-
         var room = await fileStorageService.UpdateRoomAsync(inDto.Id, inDto.UpdateRoom);
 
         return await folderDtoHelper.GetAsync(room);
@@ -204,7 +199,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
-    [HttpDelete("agents/{id}")]
+    [HttpDelete("integration/agents/{id}")]
     public async Task<FileOperationDto> DeleteAgent(DeleteRoomRequestDto<int> inDto)
     {
         var agent = await fileStorageService.GetFolderAsync(inDto.Id);
@@ -234,7 +229,7 @@ public class AgentsController(
     /// <collection>list</collection>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
-    [HttpPut("agents/agentquota")]
+    [HttpPut("integration/agents/agentquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
     {
         var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
@@ -268,7 +263,7 @@ public class AgentsController(
     /// <collection>list</collection>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
-    [HttpPut("agents/resetquota")]
+    [HttpPut("integration/agents/resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
     {
         var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
@@ -293,7 +288,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/news</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of new items", typeof(List<NewItemsDto<AgentNewItemsDto>>))]
-    [HttpGet("agents/news")]
+    [HttpGet("integration/agents/news")]
     public async Task<List<NewItemsDto<AgentNewItemsDto>>> GetAgentsNewItems()
     {
         var rootId = await globalFolderHelper.FolderAiAgentsAsync;
@@ -320,20 +315,5 @@ public class AgentsController(
         }
 
         return result;
-    }
-
-    private async Task ValidateModelIdAsync(ChatSettings? chatSettings)
-    {
-        if (chatSettings is null || string.IsNullOrEmpty(chatSettings.ModelId))
-        {
-            return;
-        }
-
-        var models = await aiProviderService.GetActiveModelsAsync(chatSettings.ProviderId);
-
-        if (!models.Any(m => string.Equals(m.ModelId, chatSettings.ModelId, StringComparison.Ordinal)))
-        {
-            throw new ArgumentException(nameof(chatSettings.ModelId));
-        }
     }
 }

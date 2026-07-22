@@ -1344,6 +1344,138 @@
         ]
       }
     },
+    "/api/2.0/backup/getbackupscountbypaid": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Get the number of free and paid backups",
+        "description": "Returns the number of free and paid backups for a period of time. The default is the current calendar month.",
+        "operationId": "getBackupsCounts",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "The from date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-01-01T00:00:00Z"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "The to date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-12-31T23:59:59Z"
+            }
+          },
+          {
+            "name": "paid",
+            "in": "query",
+            "description": "Specifies if the backups are paid or not.",
+            "schema": {
+              "type": "boolean",
+              "example": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Number of free and paid backups",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupsCountResultWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "From date must be less than to date"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/backup/getservicestate": {
       "get": {
         "tags": [
@@ -1887,6 +2019,65 @@
         ],
         "description": "The backup storage type.",
         "x-enum-type": "integer"
+      },
+      "BackupsCountResultDto": {
+        "type": "object",
+        "properties": {
+          "free": {
+            "type": "integer",
+            "description": "The number of free backups.",
+            "format": "int32",
+            "example": 3
+          },
+          "paid": {
+            "type": "integer",
+            "description": "The number of paid backups.",
+            "format": "int32",
+            "example": 5
+          }
+        },
+        "additionalProperties": false,
+        "description": "The number of backups."
+      },
+      "BackupsCountResultWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/BackupsCountResultDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
       },
       "BooleanWrapper": {
         "type": "object",
