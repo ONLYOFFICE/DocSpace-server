@@ -196,6 +196,8 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
 
     public async Task<bool> SwitchSubscriptionAsync(string portalId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
+        EnsureConfigured();
+
         var parameters = new List<(string, string)>
         {
             ("FromProductId", fromProductId),
@@ -218,6 +220,8 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
 
     public async Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(string portalId, string fromProductId, string toProductId, int quantity)
     {
+        EnsureConfigured();
+
         var parameters = new List<(string, string)>
         {
             ("FromProductId", fromProductId),
