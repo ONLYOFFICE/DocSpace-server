@@ -35,57 +35,60 @@ namespace ASC.Core.Billing;
 
 /// <summary>
 /// Type-safe REST contract for the external billing service, implemented by Refit.
-/// Every endpoint is a POST whose body is a multimap of string values, e.g.
-/// <c>{"PortalId":["x"],"ProductId":["a","b"]}</c>. Errors arrive as 200 OK with a
-/// <c>{"Message":"error...</c> body and are mapped to exceptions by the ExceptionFactory.
-/// All paths are relative — the base address, authentication and resilience are configured in
-/// <see cref="BillingHttpClientExtension.AddBillingHttpClient"/>. The public wrapper is <see cref="BillingClient"/>.
+/// Every endpoint is a POST whose body preserves the billing multimap wire format: each field is an
+/// array of string values, e.g. <c>{"PortalId":["x"],"ProductId":["a","b"]}</c>. The request bodies are
+/// modelled by the strongly-typed <c>*RequestDto</c> classes (every property is a <see cref="List{T}"/>
+/// of <see cref="string"/>); unset optional fields are <c>null</c> and omitted by the serializer's
+/// <see cref="JsonIgnoreCondition.WhenWritingNull"/> setting.
+/// Errors arrive as 200 OK with a <c>{"Message":"error...</c> body and are mapped to exceptions by the
+/// ExceptionFactory. All paths are relative — the base address, authentication and resilience are configured
+/// in <see cref="BillingHttpClientExtension.AddBillingHttpClient"/>. The public wrapper is <see cref="BillingClient"/>.
 /// </summary>
 public interface IBillingApi
 {
     [Post("/billing/GetAccountLink")]
-    Task<string> GetAccountLinkAsync([Body] Dictionary<string, List<string>> data);
+    Task<string> GetAccountLinkAsync([Body] GetAccountLinkRequestDto requestDto);
 
     [Post("/billing/GetActiveResources")]
     Task<PaymentLast[]> GetActiveResourcesAsync(
-        [Body] Dictionary<string, List<string>> data,
+        [Body] BillingPortalRequestDto requestDto,
         [Property(BillingHttpClientExtension.RetryOptionKey)] bool refresh);
 
     [Post("/billing/GetPayments")]
-    Task<List<PaymentInfo>> GetPaymentsAsync([Body] Dictionary<string, List<string>> data);
+    Task<List<PaymentInfo>> GetPaymentsAsync([Body] BillingPortalRequestDto requestDto);
 
     [Post("/billing/GetSinglePaymentUrl")]
-    Task<string> GetSinglePaymentUrlAsync([Body] Dictionary<string, List<string>> data);
+    Task<string> GetSinglePaymentUrlAsync([Body] GetPaymentUrlRequestDto requestDto);
 
     [Post("/billing/GetCustomerInfo")]
-    Task<CustomerInfo> GetCustomerInfoAsync([Body] Dictionary<string, List<string>> data);
+    Task<CustomerInfo> GetCustomerInfoAsync([Body] BillingPortalRequestDto requestDto);
 
     /// <remarks>Returns the raw response body; the billing service answers with the JSON string <c>"ok"</c> on success.</remarks>
     [Post("/billing/Deposit")]
-    Task<string> DepositAsync([Body] Dictionary<string, List<string>> data);
+    Task<string> DepositAsync([Body] DepositRequestDto requestDto);
 
     [Post("/billing/ChangeSubscription")]
-    Task<bool> ChangeSubscriptionAsync([Body] Dictionary<string, List<string>> data);
+    Task<bool> ChangeSubscriptionAsync([Body] ChangeSubscriptionRequestDto requestDto);
 
     [Post("/billing/SwitchSubscription")]
-    Task<bool> SwitchSubscriptionAsync([Body] Dictionary<string, List<string>> data);
+    Task<bool> SwitchSubscriptionAsync([Body] SwitchSubscriptionRequestDto requestDto);
 
     [Post("/billing/CalculateSwitchSubscription")]
-    Task<PaymentCalculation> CalculateSwitchSubscriptionAsync([Body] Dictionary<string, List<string>> data);
+    Task<PaymentCalculation> CalculateSwitchSubscriptionAsync([Body] CalculateSwitchSubscriptionRequestDto requestDto);
 
     [Post("/billing/CalculateSubscription")]
-    Task<PaymentCalculation> CalculateSubscriptionAsync([Body] Dictionary<string, List<string>> data);
+    Task<PaymentCalculation> CalculateSubscriptionAsync([Body] CalculateSubscriptionRequestDto requestDto);
 
     [Post("/billing/GetProductsPrices")]
-    Task<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>> GetProductsPricesAsync([Body] Dictionary<string, List<string>> data);
+    Task<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>> GetProductsPricesAsync([Body] GetProductsPricesRequestDto requestDto);
 
     [Post("/billing/GetSubscriptionBalanceInfo")]
-    Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync([Body] Dictionary<string, List<string>> data);
+    Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync([Body] BillingProductRequestDto requestDto);
 
     [Post("/billing/SubscriptionBalanceToWallet")]
-    Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync([Body] Dictionary<string, List<string>> data);
+    Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync([Body] BillingProductRequestDto requestDto);
 
     /// <remarks>Returns the raw response body; the billing service answers with the JSON string <c>"ok"</c> on success.</remarks>
     [Post("/billing/getwdocstrial")]
-    Task<string> GetDocsCloudTrialAsync([Body] Dictionary<string, List<string>> data);
+    Task<string> GetDocsCloudTrialAsync([Body] BillingPortalRequestDto requestDto);
 }
