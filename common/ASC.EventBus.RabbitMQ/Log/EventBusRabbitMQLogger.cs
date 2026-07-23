@@ -37,12 +37,6 @@ internal static partial class EventBusRabbitMQLogger
     [LoggerMessage(LogLevel.Warning, "Could not publish event: {eventId} after {timeout}s")]
     public static partial void WarningCouldNotPublishEvent(this ILogger<EventBusRabbitMQ> logger, Guid eventId, double timeout, Exception exception);
 
-    [LoggerMessage(LogLevel.Trace, "Creating RabbitMQ channel to publish event: {eventId} ({eventName})")]
-    public static partial void TraceCreatingRabbitMQChannel(this ILogger<EventBusRabbitMQ> logger, Guid eventId, string eventName);
-
-    [LoggerMessage(LogLevel.Trace, "Declaring RabbitMQ exchange to publish event: {eventId}")]
-    public static partial void TraceDeclaringRabbitMQChannel(this ILogger<EventBusRabbitMQ> logger, Guid eventId);
-
     [LoggerMessage(LogLevel.Trace, "Publishing event to RabbitMQ: {eventId}")]
     public static partial void TracePublishingEvent(this ILogger<EventBusRabbitMQ> logger, Guid eventId);
 
