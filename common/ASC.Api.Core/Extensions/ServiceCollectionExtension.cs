@@ -296,7 +296,9 @@ public static class ServiceCollectionExtension
                         retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                     }
 
-                    return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount);
+                    var lifetime = sp.GetRequiredService<IHostApplicationLifetime>();
+
+                    return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount, lifetime.ApplicationStopping);
                 });
 
                 services.AddSingleton<IEventBus, EventBusRabbitMQ>(sp =>
