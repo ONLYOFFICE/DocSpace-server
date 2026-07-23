@@ -143,6 +143,15 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
         Data = data;
         ThirdPartyData = thirdPartyData;
         Id = taskId;
+
+        // the owner must come from the event payload, not from the ambient principal:
+        // the operation is constructed on a worker thread where the principal can already
+        // belong to another concurrently handled event, and a wrong owner hides the
+        // operation from its client in GetOperationResults
+        Owner = data.UserId != ASC.Core.Configuration.Constants.Guest.ID
+            ? data.UserId
+            : data.SessionSnapshot?.SessionId ?? Guid.Empty;
+
         Init(data.HoldResult);
     }
 
@@ -329,11 +338,17 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         {
             CancellationToken = cancellationToken;
 
+            // the queue worker inherits a context shared by every job of the process, so the job
+            // needs its own one before it publishes a principal: otherwise concurrent operations
+            // overwrite each other's principal
+            CustomSynchronizationContext.CreateContext();
+            CustomSynchronizationContext.CurrentContext.CurrentPrincipal = _principal;
+
+            // authenticates the operation's own user over the freshly created context
             await using var scope = await CreateScopeAsync();
             var scopeClass = scope.ServiceProvider.GetService<FileOperationScope>();
             var (daoFactory, fileSecurity, logger) = scopeClass;
 
-            CustomSynchronizationContext.CurrentContext.CurrentPrincipal = _principal;
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(_culture);
 
