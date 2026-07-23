@@ -541,7 +541,20 @@ public class PermissionCheckStarter<T, TTo>(
         FileConflictResolveType resolveType,
         bool check = false)
     {
-        var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
+        return await CheckFilesPermissionsAsync(file, toFolder, null, copy, resolveType, check);
+    }
+
+    public async Task<string> CheckFilesPermissionsAsync(
+        File<T> file,
+        Folder<TTo> toFolder,
+        List<Folder<TTo>> toFolderParents,
+        bool copy,
+        FileConflictResolveType resolveType,
+        bool check = false)
+    {
+        // the destination does not change between the files of one operation,
+        // so the caller may pass its parent chain once
+        var parentFolders = toFolderParents ?? await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
 
         string errorMsg = null;
 
@@ -716,20 +729,47 @@ public class PermissionCheckStarter<T, TTo>(
     {
         foreach (var file in files)
         {
-            if (checkPermissions && !await security.CanMoveAsync(file))
+            var errorMsg = await CheckFileSecurityPermissionsAsync(file, checkPermissions);
+            if (errorMsg != null)
             {
-                return FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
+                return errorMsg;
             }
+        }
 
-            if (checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
-            {
-                return FilesCommonResource.ErrorMessage_LockedFile;
-            }
+        return null;
+    }
 
-            if (await fileTracker.IsEditingAsync(file.Id, false))
+    // streaming variant: does not require materializing the whole set (used for folder
+    // subtrees) and stops the query on the first error
+    public async Task<string> CheckFilesSecurityPermissionsAsync(IAsyncEnumerable<File<T>> files, bool checkPermissions = true)
+    {
+        await foreach (var file in files)
+        {
+            var errorMsg = await CheckFileSecurityPermissionsAsync(file, checkPermissions);
+            if (errorMsg != null)
             {
-                return FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile;
+                return errorMsg;
             }
+        }
+
+        return null;
+    }
+
+    private async Task<string> CheckFileSecurityPermissionsAsync(File<T> file, bool checkPermissions)
+    {
+        if (checkPermissions && !await security.CanMoveAsync(file))
+        {
+            return FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
+        }
+
+        if (checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
+        {
+            return FilesCommonResource.ErrorMessage_LockedFile;
+        }
+
+        if (await fileTracker.IsEditingAsync(file.Id, false))
+        {
+            return FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile;
         }
 
         return null;
