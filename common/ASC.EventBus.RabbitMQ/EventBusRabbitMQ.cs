@@ -332,14 +332,11 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
         await CloseChannelAsync(_consumerChannel);
 
-        // two passes: the second one picks up channels returned by in-flight publications
-        // that observed _disposing as not yet set
-        for (var i = 0; i < 2; i++)
+        // an in-flight publication may still return a channel to the pool after this drain,
+        // but a leaked channel at process shutdown is harmless, so a single pass is enough
+        while (_publisherChannelPool.TryTake(out var channel))
         {
-            while (_publisherChannelPool.TryTake(out var channel))
-            {
-                await CloseChannelAsync(channel);
-            }
+            await CloseChannelAsync(channel);
         }
 
         Interlocked.Exchange(ref _pooledPublisherChannelCount, 0);
