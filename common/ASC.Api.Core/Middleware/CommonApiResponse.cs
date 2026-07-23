@@ -157,19 +157,35 @@ public class CommonApiError
 
     public static CommonApiError FromException(Exception exception, string message, bool withStackTrace)
     {
+        var actual = Unwrap(exception);
+
         var result = new CommonApiError
         {
-            Message = message ?? exception.Message
+            Message = message ?? actual.Message
         };
 
         if (withStackTrace)
         {
-            result.Type = exception.GetType().ToString();
-            result.Stack = exception.StackTrace;
-            result.Hresult = exception.HResult;
+            result.Type = actual.GetType().ToString();
+            result.Stack = ReferenceEquals(actual, exception) ? exception.StackTrace : exception.ToString();
+            result.Hresult = actual.HResult;
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Reflection and parallel execution wrap the original error, and the wrapper alone
+    /// ("Exception has been thrown by the target of an invocation") tells nothing about the cause.
+    /// </summary>
+    private static Exception Unwrap(Exception exception)
+    {
+        while (exception is TargetInvocationException or AggregateException { InnerExceptions.Count: 1 } && exception.InnerException != null)
+        {
+            exception = exception.InnerException;
+        }
+
+        return exception;
     }
 }
 

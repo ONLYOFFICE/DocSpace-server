@@ -35,36 +35,67 @@ namespace ASC.Collections;
 
 public sealed class HttpRequestDictionary<T> : CachedDictionaryBase<T>
 {
-    private readonly HttpContext _httpContext;
+    private const string StoreKey = "__HttpRequestDictionaryStore";
+
+    private readonly ConcurrentDictionary<string, object> _store;
 
     public HttpRequestDictionary(HttpContext httpContext, string baseKey)
     {
         Condition = _ => true;
         BaseKey = baseKey;
-        _httpContext = httpContext;
+        _store = GetStore(httpContext);
+    }
+
+    /// <summary>
+    /// <see cref="HttpContext.Items"/> is a plain dictionary and is not thread-safe, while a single request
+    /// may build its response from several threads at once. So the entries are kept in a concurrent dictionary
+    /// stored under a single key. Only the creation of that key is locked, once per request; every later
+    /// lookup is a lock-free read.
+    /// </summary>
+    private static ConcurrentDictionary<string, object> GetStore(HttpContext httpContext)
+    {
+        if (httpContext == null)
+        {
+            return null;
+        }
+
+        var items = httpContext.Items;
+
+        if (items.TryGetValue(StoreKey, out var store))
+        {
+            return (ConcurrentDictionary<string, object>)store;
+        }
+
+        lock (items)
+        {
+            if (items.TryGetValue(StoreKey, out store))
+            {
+                return (ConcurrentDictionary<string, object>)store;
+            }
+
+            var newStore = new ConcurrentDictionary<string, object>();
+            items[StoreKey] = newStore;
+
+            return newStore;
+        }
     }
 
     protected override void Reset(string rootKey, string key)
     {
-        if (_httpContext != null)
-        {
-            var builtkey = BuildKey(key, rootKey);
-            _httpContext.Items[builtkey] = null;
-        }
+        _store?.TryRemove(BuildKey(key, rootKey), out _);
     }
 
     protected override void Add(string rootKey, string key, T newValue)
     {
-        if (_httpContext != null)
+        if (_store != null)
         {
-            var builtkey = BuildKey(key, rootKey);
-            _httpContext.Items[builtkey] = new CachedItem(newValue);
+            _store[BuildKey(key, rootKey)] = new CachedItem(newValue);
         }
     }
 
     protected override object GetObjectFromCache(string fullKey)
     {
-        return _httpContext?.Items[fullKey];
+        return _store != null && _store.TryGetValue(fullKey, out var cached) ? cached : null;
     }
 
     protected override bool FitsCondition(object cached)

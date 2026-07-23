@@ -10,6 +10,7 @@ from {{packageName}}.models.delete_folder import DeleteFolder
 from {{packageName}}.models.backup_dto import BackupDto
 from {{packageName}}.models.backup_storage_type import BackupStorageType
 from {{packageName}}.models.sorted_by_type import SortedByType
+from {{packageName}}.models.sort_order import SortOrder
 import time
 
 def main():
@@ -51,7 +52,7 @@ def main():
             print(deleteFolder.status_code)
 
             room_instance = RoomsApi(api_client)
-            getRoom = room_instance.with_fields("current.security,folders.id").get_rooms_folder(None, None, 0, None, None, None, None, None, None, None, 100, None, "DateAndTime", 1, None, _headers=custom_headers)
+            getRoom = room_instance.with_fields("current.security,folders.id").get_rooms_folder(count=100, sort_by="DateAndTime", sort_order=SortOrder.Descending, _headers=custom_headers)
             print(getRoom.status_code)
 
             backup_instanse = BackupApi(api_client)
