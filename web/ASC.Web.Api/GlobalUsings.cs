@@ -181,8 +181,6 @@ global using Riok.Mapperly.Abstractions;
 
 global using SkiaSharp;
 
-global using Svg.Skia;
-
 global using Swashbuckle.AspNetCore.Annotations;
 
 global using ZiggyCreatures.Caching.Fusion;
