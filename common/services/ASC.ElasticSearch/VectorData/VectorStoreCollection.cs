@@ -33,8 +33,6 @@
 
 #nullable enable
 
-using HttpMethod = OpenSearch.Net.HttpMethod;
-
 namespace ASC.ElasticSearch.VectorData;
 
 internal static class ExistingCollectionsCache
@@ -143,40 +141,39 @@ public class VectorStoreCollection<TRecord>(
 
         var k = searchQuery.K ?? searchQuery.Top;
 
-        var builder = new HybridSearchRequestBuilder(searchQuery.Top)
-            .AddMultiMatch(searchQuery.LexicalQuery, lexicalFields)
-            .AddKnn(vectorField, searchQuery.Vector, k);
+        QueryContainer lexicalQuery = new MultiMatchQuery
+        {
+            Query = searchQuery.LexicalQuery,
+            Fields = lexicalFields
+        };
+
+        QueryContainer knnQuery = new KnnQuery
+        {
+            Field = vectorField,
+            Vector = searchQuery.Vector,
+            K = k
+        };
 
         if (searchQuery.Filter != null)
         {
             var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient!.Infer);
-            builder.WithFilter(translator.TranslateToJsonElement(searchQuery.Filter));
+            var filter = translator.Translate(searchQuery.Filter);
+
+            lexicalQuery = new BoolQuery { Must = [lexicalQuery], Filter = [filter] };
+            knnQuery = new BoolQuery { Must = [knnQuery], Filter = [filter] };
         }
 
-        var request = builder.Build();
-
-        var requestParameters = new SearchRequestParameters
+        var request = new SearchRequest(name)
         {
-            QueryString = new Dictionary<string, object>
-            {
-                ["search_pipeline"] = HybridSearchPipeline.Name
-            }
+            Size = searchQuery.Top,
+            SearchPipeline = HybridSearchPipeline.Name,
+            Query = new HybridQuery { Queries = [lexicalQuery, knnQuery] }
         };
 
-        var response = await OperationHandler.RunAsync<SearchResponse<TRecord>, OpenSearchClientException>(
+        var response = await OperationHandler.RunAsync<ISearchResponse<TRecord>, OpenSearchClientException>(
             name,
             "hybrid_search",
-            async () => await ((IOpenSearchClient)openSearchClient!).LowLevel.DoRequestAsync<SearchResponse<TRecord>>(
-                HttpMethod.POST,
-                $"/{Uri.EscapeDataString(name)}/_search",
-                cancellationToken,
-                PostData.String(JsonSerializer.Serialize(request)),
-                requestParameters));
-
-        if (response.Hits == null)
-        {
-            yield break;
-        }
+            async () => await openSearchClient!.SearchAsync<TRecord>(request, cancellationToken));
 
         foreach (var hit in response.Hits)
         {
@@ -308,132 +305,5 @@ public class VectorStoreCollection<TRecord>(
         };
 
         return openSearchClient!.Infer.Field(property);
-    }
-
-    private sealed class HybridSearchRequestBuilder(int size)
-    {
-        private readonly List<HybridSearchQueryNode> _queries = [];
-        private JsonElement? _filter;
-
-        public HybridSearchRequestBuilder AddMultiMatch(string query, string[] fields)
-        {
-            _queries.Add(new HybridSearchQueryNode
-            {
-                MultiMatch = new HybridMultiMatchNode { Query = query, Fields = fields }
-            });
-
-            return this;
-        }
-
-        public HybridSearchRequestBuilder AddKnn(string field, float[] vector, int k)
-        {
-            _queries.Add(new HybridSearchQueryNode
-            {
-                Knn = new HybridKnnNode
-                {
-                    Fields = new Dictionary<string, JsonElement>
-                    {
-                        [field] = JsonSerializer.SerializeToElement(new HybridKnnFieldNode { Vector = vector, K = k })
-                    }
-                }
-            });
-
-            return this;
-        }
-
-        public HybridSearchRequestBuilder WithFilter(JsonElement filter)
-        {
-            _filter = filter;
-
-            return this;
-        }
-
-        public HybridSearchRequest Build()
-        {
-            var queries = _filter.HasValue
-                ? _queries.Select(q => new HybridSearchQueryNode
-                {
-                    Bool = new HybridBoolNode { Must = [q], Filter = [_filter.Value] }
-                }).ToArray()
-                : _queries.ToArray();
-
-            return new HybridSearchRequest
-            {
-                Size = size,
-                Query = new HybridSearchQueryNode
-                {
-                    Hybrid = new HybridNode { Queries = queries }
-                }
-            };
-        }
-    }
-
-    private sealed class HybridSearchRequest
-    {
-        [JsonPropertyName("size")]
-        public required int Size { get; init; }
-
-        [JsonPropertyName("query")]
-        public required HybridSearchQueryNode Query { get; init; }
-    }
-
-    private sealed class HybridSearchQueryNode
-    {
-        [JsonPropertyName("hybrid")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridNode? Hybrid { get; init; }
-
-        [JsonPropertyName("bool")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridBoolNode? Bool { get; init; }
-
-        [JsonPropertyName("multi_match")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridMultiMatchNode? MultiMatch { get; init; }
-
-        [JsonPropertyName("knn")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridKnnNode? Knn { get; init; }
-    }
-
-    private sealed class HybridNode
-    {
-        [JsonPropertyName("queries")]
-        public required HybridSearchQueryNode[] Queries { get; init; }
-    }
-
-    private sealed class HybridBoolNode
-    {
-        [JsonPropertyName("must")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public HybridSearchQueryNode[]? Must { get; init; }
-
-        [JsonPropertyName("filter")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public JsonElement[]? Filter { get; init; }
-    }
-
-    private sealed class HybridMultiMatchNode
-    {
-        [JsonPropertyName("query")]
-        public required string Query { get; init; }
-
-        [JsonPropertyName("fields")]
-        public required string[] Fields { get; init; }
-    }
-
-    private sealed class HybridKnnNode
-    {
-        [JsonExtensionData]
-        public Dictionary<string, JsonElement> Fields { get; init; } = [];
-    }
-
-    private sealed class HybridKnnFieldNode
-    {
-        [JsonPropertyName("vector")]
-        public required float[] Vector { get; init; }
-
-        [JsonPropertyName("k")]
-        public required int K { get; init; }
     }
 }
