@@ -148,7 +148,7 @@ public class Startup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddScoped(_ => UrlEncoder.Default);
 
-        services.AddBillingHttpClient();
+        services.AddBillingHttpClient(_configuration);
         services.AddAccountingHttpClient(_configuration);
         services.AddDocsCloudHttpClient(_configuration);
 

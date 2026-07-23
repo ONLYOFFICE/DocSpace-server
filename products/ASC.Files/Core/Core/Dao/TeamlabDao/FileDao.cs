@@ -93,6 +93,7 @@ internal class FileDao(
     private const string FilePathPart = "file_";
     private const string FolderPathPart = "folder_";
     private const string FileIdGroupName = "id";
+    private const int StorageDeleteParallelism = 8;
 
     private static readonly Regex _pattern = new($"{FilePathPart}(?'id'\\d+)", RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -697,8 +698,7 @@ internal class FileDao(
                             }
                             else
                             {
-                                var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                                await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+                                await DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
 
                                 throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
@@ -719,8 +719,7 @@ internal class FileDao(
                     {
                         if (isNew)
                         {
-                            var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                            await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+                            await DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
                         }
                         else if (!await IsExistOnStorageAsync(file))
                         {
@@ -998,79 +997,154 @@ internal class FileDao(
 
     public async Task DeleteFileAsync(int fileId, Guid ownerId)
     {
-        await DeleteFileAsync(fileId, true, ownerId);
+        // single deletion goes through the batched path so that the set of cleaned-up
+        // tables lives in one place
+        await DeleteFilesAsync([KeyValuePair.Create(fileId, ownerId)]);
     }
 
-    private async ValueTask DeleteFileAsync(int fileId, bool deleteFolder, Guid ownerId)
+    public async Task<IEnumerable<int>> DeleteFilesAsync(IEnumerable<KeyValuePair<int, Guid>> owners)
     {
-        if (fileId == 0)
+        var files = owners.Where(f => f.Key != 0).ToList();
+        if (files.Count == 0)
         {
-            return;
+            return [];
         }
 
+        var fileIds = files.Select(f => f.Key).ToList();
+        var fileIdsStrings = fileIds.Select(id => id.ToString()).ToList();
         var tenantId = _tenantManager.GetCurrentTenantId();
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
-        var vectorsMarkedDeleted = 0;
+
+        List<DbFile> toDeleteFiles = null;
+        List<int> vectorizedFileIds = null;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
 
-            var fromFolders = await context.ParentIdsAsync(tenantId, fileId).ToListAsync();
+            toDeleteFiles = await context.DbFilesByIdsAsync(tenantId, fileIds).ToListAsync();
 
-            await context.DeleteTagLinksAsync(tenantId, fileId.ToString());
+            await context.DeleteTagLinksByFileIdsAsync(tenantId, fileIdsStrings);
 
-            var toDeleteFiles = await context.DbFilesAsync(tenantId, fileId).ToListAsync();
+            // vectorization rows are marked deleted (not removed): the vector store cleanup is
+            // asynchronous, the background service purges the vectors and then the rows themselves
+            vectorizedFileIds = await context.VectorizedFileIdsAsync(tenantId, fileIds).ToListAsync();
+            if (vectorizedFileIds.Count > 0)
+            {
+                await context.MarkVectorizationDeletedByFileIdsAsync(tenantId, vectorizedFileIds);
+            }
 
-            vectorsMarkedDeleted = await context.MarkVectorizationDeletedAsync(tenantId, fileId);
-
-            context.RemoveRange(toDeleteFiles);
-
+            await context.DeleteDbFilesByIdsAsync(tenantId, fileIds);
             await context.DeleteTagsAsync(tenantId);
+            await context.DeleteSecurityByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteOrderByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteMessageAttachmentsByFileIdsAsync(tenantId, fileIds);
 
-            await context.DeleteSecurityAsync(tenantId, fileId);
-
-            await DeleteCustomOrder(filesDbContext, fileId);
-
-            await context.DeleteMessageAttachmentsByFileIdAsync(tenantId, fileId);
-
-            var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
+            var entryEventsIds = await context.AuditEventsIdsByFileIdsAsync(fileIds).ToListAsync();
             await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
-            await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
-            await context.DeleteFileKeysAsync(tenantId, fileId);
+            await context.DeleteAuditReferencesByFileIdsAsync(fileIds);
+            await context.DeleteFileKeysByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteFileLinksByIdsAsync(tenantId, fileIdsStrings);
+            await context.DeleteFilesPropertiesByIdsAsync(tenantId, fileIdsStrings);
+            await context.DeleteFormRoleMappingsByFileIdsAsync(tenantId, fileIds);
 
-            await context.SaveChangesAsync();
             await tx.CommitAsync();
-
-            foreach (var folderId in fromFolders)
-            {
-                await DecrementCountAsync(context, folderId, tenantId, FileEntryType.File);
-            }
-
-            if (deleteFolder)
-            {
-                tenantQuotaController.Init(tenantId, ThumbnailTitle);
-                var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
-                await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
-            }
-
         });
 
-        await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
-        {
-            FileId = fileId,
-            Action = FileIndexAction.Delete
-        });
+        // ids missing from the read (already deleted by a concurrent flow) get no follow-ups
+        // and are excluded from the returned set, so the caller does not report them again
+        var deletedIds = toDeleteFiles.Select(f => f.Id).Distinct().ToHashSet();
 
-        if (vectorsMarkedDeleted > 0)
+        if (deletedIds.Count == 0)
         {
-            await eventBus.PublishAsync(new VectorsDeletionIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
-            {
-                FileId = fileId
-            });
+            return deletedIds;
         }
+
+        // the rows are already deleted at this point: every follow-up step below is
+        // best-effort on its own, so one failure must not skip the others or make the
+        // caller believe the deletion itself failed and retry it
+        foreach (var folderGroup in toDeleteFiles.GroupBy(f => f.ParentId))
+        {
+            try
+            {
+                var filesCount = folderGroup.Select(f => f.Id).Distinct().Count();
+                await filesDbContext.ChangeFilesCountAsync(tenantId, folderGroup.Key, -filesCount);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        foreach (var fileId in vectorizedFileIds)
+        {
+            try
+            {
+                await eventBus.PublishAsync(new VectorsDeletionIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = fileId
+                });
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        try
+        {
+            tenantQuotaController.Init(tenantId, ThumbnailTitle);
+            var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
+
+            var deletedIdsSet = deletedIds.ToHashSet();
+
+            // warm up the quota running total on this thread so the concurrent quota decrements
+            // below only contend on the controller's in-memory arithmetic, not the blocking DB seed
+            tenantQuotaController.PreloadCurrentSize();
+
+            // file directories are independent of each other, so they are removed concurrently;
+            // each removal stays best-effort on its own (the quota accounting inside only
+            // decrements counters, no limit checks happen on the delete path)
+            await Parallel.ForEachAsync(
+                files.Where(f => deletedIdsSet.Contains(f.Key)),
+                new ParallelOptions { MaxDegreeOfParallelism = StorageDeleteParallelism },
+                async (file, _) =>
+                {
+                    try
+                    {
+                        await store.DeleteDirectoryAsync(file.Value, GetUniqFileDirectory(file.Key));
+                    }
+                    catch (Exception e)
+                    {
+                        logger.ErrorWithException(e);
+                    }
+                });
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+
+        foreach (var deletedId in deletedIds)
+        {
+            try
+            {
+                await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = deletedId,
+                    Action = FileIndexAction.Delete
+                });
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        return deletedIds;
     }
 
     public async Task<bool> IsExistAsync(string title, int folderId)
@@ -1213,8 +1287,6 @@ internal class FileDao(
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
-                await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
-
                 if (trashId.Equals(toFolderId))
                 {
                     await q.ExecuteUpdateAsync(f => f
@@ -1244,9 +1316,18 @@ internal class FileDao(
                     await context.SaveChangesAsync();
                 }
 
-                var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
-                var (toFolderRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
-                var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                // reuse the values already resolved before the transaction: toFolder has not
+                // changed, and oldFolder differs from fromFolder only on a concurrent move
+                var toFolderRoomId = toRoomId;
+                var oldFolder = fromFolder;
+                var roomId = fromRoomId;
+
+                if (oldParentId.HasValue && oldParentId.Value != fromFolder.Id)
+                {
+                    oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
+                    (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                }
+
                 var archiveId = await folderDao.GetFolderIDArchive(false);
 
                 if (toFolderId == trashId && oldParentId.HasValue)
@@ -1365,6 +1446,121 @@ internal class FileDao(
         });
 
         return fileId;
+    }
+
+    // Plain batched move: parents, owner and room stay compatible (checked by the caller),
+    // so counters and sizes are aggregated and no quota/tag/link work is needed.
+    // Only files whose parent still matches the caller's snapshot are moved; the rest
+    // (moved concurrently) are excluded from the returned set.
+    public async Task<IEnumerable<int>> MoveFilesAsync(IEnumerable<int> fileIds, int toFolderId, IEnumerable<int> fromParentIds = null)
+    {
+        var ids = fileIds.Where(id => id != 0).Distinct().ToList();
+        if (ids.Count == 0 || toFolderId == 0)
+        {
+            return [];
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        List<DbFile> movedFiles = null;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var rows = await context.DbFilesByIdsAsync(tenantId, ids).ToListAsync();
+            var parents = (fromParentIds ?? rows.Select(r => r.ParentId)).Distinct().ToList();
+
+            movedFiles = rows.Where(r => parents.Contains(r.ParentId)).ToList();
+
+            await context.UpdateFilesFolderIdAsync(tenantId, ids, parents, toFolderId);
+
+            await tx.CommitAsync();
+        });
+
+        var movedIds = movedFiles.Select(f => f.Id).Distinct().ToList();
+
+        if (movedIds.Count == 0)
+        {
+            return movedIds;
+        }
+
+        // the rows are already moved: the follow-ups below are best-effort each,
+        // and a failed source update must not distort the destination totals
+        var currentVersions = movedFiles.Where(f => f.CurrentVersion).ToList();
+
+        foreach (var parentGroup in movedFiles.GroupBy(f => f.ParentId).Where(g => g.Key != toFolderId))
+        {
+            var count = parentGroup.Select(f => f.Id).Distinct().Count();
+            var size = parentGroup.Where(f => f.CurrentVersion).Sum(f => f.ContentLength);
+
+            try
+            {
+                await filesDbContext.ChangeFilesCountAsync(tenantId, parentGroup.Key, -count);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+
+            try
+            {
+                await folderDao.ChangeTreeFolderSizeAsync(parentGroup.Key, -size);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        try
+        {
+            await filesDbContext.ChangeFilesCountAsync(tenantId, toFolderId, movedIds.Count);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+
+        try
+        {
+            await folderDao.ChangeTreeFolderSizeAsync(toFolderId, currentVersions.Sum(f => f.ContentLength));
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+
+        foreach (var movedId in movedIds)
+        {
+            try
+            {
+                await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = movedId,
+                    Action = FileIndexAction.UpdateFolders
+                });
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        return movedIds;
+    }
+
+    public async Task<IEnumerable<string>> GetExistingTitlesAsync(int parentId, IEnumerable<string> titles)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.ConflictTitlesAsync(tenantId, parentId, titles.Distinct().ToList()).ToListAsync();
     }
 
     public async Task<string> MoveFileAsync(int fileId, string toFolderId, bool deleteLinks = false)

@@ -51,7 +51,7 @@ public class AccountingClientTests
 
         var filter = new OperationFilter
         {
-            ServiceName = "backup",
+            ServiceName = ["backup"],
             UtcStartDate = new DateTime(2024, 1, 15, 10, 30, 0, DateTimeKind.Utc),
             UtcEndDate = new DateTime(2024, 2, 20, 8, 0, 0, DateTimeKind.Utc),
             ParticipantName = "  participant  ",

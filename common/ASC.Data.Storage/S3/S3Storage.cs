@@ -1087,6 +1087,10 @@ public class S3Storage(TempStream tempStream,
 
         var client = GetClient();
 
+        // warm up the quota running total on this thread so the concurrent QuotaUsedAddAsync calls
+        // below only contend on the controller's in-memory arithmetic, not the blocking DB seed
+        QuotaController?.PreloadCurrentSize();
+
         await Parallel.ForEachAsync(s3Objects,
             new ParallelOptions { MaxDegreeOfParallelism = 3 },
             async (s3Object, _) =>
