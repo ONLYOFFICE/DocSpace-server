@@ -242,6 +242,17 @@ public class PermissionCheckStarter<T, TTo>(
         {
             var firstFile = await fileDao.GetFileAsync(files[0]);
 
+            if (firstFile == null)
+            {
+                errorMsg = FilesCommonResource.ErrorMessage_FileNotFound;
+                if (check)
+                {
+                    throw new FileNotFoundException(errorMsg);
+                }
+
+                return errorMsg;
+            }
+
             if (copy && !await security.CanCopyAsync(firstFile))
             {
                 errorMsg = FilesCommonResource.ErrorMessage_SecurityException_CopyFile;
