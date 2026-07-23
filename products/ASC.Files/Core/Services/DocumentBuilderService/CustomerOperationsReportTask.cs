@@ -53,6 +53,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             ReportType.Operations => await BuildOperationsReportAsync(serviceProvider, _userId, _data),
             ReportType.ServiceUsage => await BuildServiceUsageReportAsync(serviceProvider, _userId, _data),
             ReportType.MonthlyUsage => await BuildMonthlyUsageReportAsync(serviceProvider, _userId, _data),
+            ReportType.DocsCloudUserQuota => await BuildDocsCloudUserQuotaReportAsync(serviceProvider, _userId, _data),
             _ => throw new ArgumentOutOfRangeException(nameof(serviceProvider), _data.ReportType, "Unknown report type")
         };
     }
@@ -93,7 +94,11 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))
             : [];
 
-        messageService.SendHeadersMessage(MessageAction.CustomerOperationsReportDownloaded, target: null, httpHeaders: headers, null);
+        var messageAction = _data.ReportType == ReportType.DocsCloudUserQuota
+            ? MessageAction.DocsCloudQuotaReportDownloaded
+            : MessageAction.CustomerOperationsReportDownloaded;
+
+        messageService.SendHeadersMessage(messageAction, target: null, httpHeaders: headers, null);
 
         if (System.IO.File.Exists(inputData.Script))
         {
@@ -358,6 +363,47 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         });
     }
 
+    private static Task<DocumentBuilderInputData> BuildDocsCloudUserQuotaReportAsync(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
+    {
+        return RenderAsync(serviceProvider, userId, taskData, ctx =>
+        {
+            var keys = new List<string> {
+                Resource.DocsCloudQuotaReportColumnUserId,
+                Resource.DocsCloudQuotaReportColumnUserName,
+                Resource.DocsCloudQuotaReportColumnExpire,
+                Resource.DocsCloudQuotaReportColumnType
+            };
+
+            var definition = new ReportDefinition(
+                Resource.DocsCloudQuotaReportSheetName,
+                Resource.DocsCloudQuotaReportName,
+                keys,
+                async writer =>
+                {
+                    var coreSettings = ctx.ServiceProvider.GetService<CoreSettings>();
+                    var docsCloudClient = ctx.ServiceProvider.GetService<DocsCloudClient>();
+                    var userManager = ctx.ServiceProvider.GetService<UserManager>();
+                    var displayUserSettingsHelper = ctx.ServiceProvider.GetService<DisplayUserSettingsHelper>();
+
+                    var portalId = await coreSettings.GetKeyAsync(ctx.Tenant.Id);
+
+                    var quota = await docsCloudClient.GetTenantQuotaAsync(portalId);
+                    if (quota == null)
+                    {
+                        return;
+                    }
+
+                    var dateFormat = $"{ctx.Culture.DateTimeFormat.ShortDatePattern} {ctx.Culture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
+
+                    // Editors first, then viewers.
+                    await writer.WriteAsync(await SerializeDocsCloudUsers(quota.Users, Resource.DocsCloudQuotaUserTypeEditor, userManager, displayUserSettingsHelper, dateFormat, ctx.Options));
+                    await writer.WriteAsync(await SerializeDocsCloudUsers(quota.UsersView, Resource.DocsCloudQuotaUserTypeViewer, userManager, displayUserSettingsHelper, dateFormat, ctx.Options));
+                });
+
+            return Task.FromResult(definition);
+        });
+    }
+
     private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(
         TariffService tariffService,
         TenantUtil tenantUtil,
@@ -509,6 +555,53 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(month, "@"),
                 new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
                 new(record.Currency, "@")
+            };
+
+            _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
+        }
+
+        return sb.ToString();
+    }
+
+    private static async Task<string> SerializeDocsCloudUsers(
+        List<DocsCloudQuotaUser> users,
+        string type,
+        UserManager userManager,
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        string dateFormat,
+        JsonSerializerOptions jsonSerializerOptions)
+    {
+        if (users is not { Count: > 0 })
+        {
+            return string.Empty;
+        }
+
+        var sb = new StringBuilder();
+
+        foreach (var user in users)
+        {
+            var userName = string.Empty;
+
+            // The user id may be a DocSpace user Guid or an external identifier; only resolve display names for Guids.
+            if (Guid.TryParse(user.UserId, out var guid))
+            {
+                var userInfo = await userManager.GetUsersAsync(guid);
+                if (userInfo.Id != ASC.Core.Users.Constants.LostUser.Id)
+                {
+                    userName = displayUserSettingsHelper.GetFullUserName(userInfo, false);
+                }
+            }
+
+            var expire = DateTime.TryParse(user.Expire, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var expireDate)
+                ? new PropertyValue(expireDate.ToString("G", CultureInfo.InvariantCulture), dateFormat)
+                : new PropertyValue(user.Expire, "@");
+
+            var properties = new List<PropertyValue>
+            {
+                new(user.UserId, "@"),
+                new(userName, "@"),
+                expire,
+                new(type, "@")
             };
 
             _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");

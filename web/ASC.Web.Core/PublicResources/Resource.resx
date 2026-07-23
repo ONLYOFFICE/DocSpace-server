@@ -1455,4 +1455,25 @@
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
     <value>DocsCloud Quota Report ({0})</value>
   </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>User quota</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>User ID</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserName" xml:space="preserve">
+    <value>User name</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Expiration date</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeEditor" xml:space="preserve">
+    <value>Editor</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeViewer" xml:space="preserve">
+    <value>Viewer</value>
+  </data>
 </root>

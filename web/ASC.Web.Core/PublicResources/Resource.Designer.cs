@@ -4072,5 +4072,68 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("DocsCloudQuotaReportName", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to User quota.
+        /// </summary>
+        public static string DocsCloudQuotaReportSheetName {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportSheetName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to User ID.
+        /// </summary>
+        public static string DocsCloudQuotaReportColumnUserId {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportColumnUserId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to User name.
+        /// </summary>
+        public static string DocsCloudQuotaReportColumnUserName {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportColumnUserName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Expiration date.
+        /// </summary>
+        public static string DocsCloudQuotaReportColumnExpire {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportColumnExpire", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Type.
+        /// </summary>
+        public static string DocsCloudQuotaReportColumnType {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportColumnType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Editor.
+        /// </summary>
+        public static string DocsCloudQuotaUserTypeEditor {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaUserTypeEditor", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Viewer.
+        /// </summary>
+        public static string DocsCloudQuotaUserTypeViewer {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaUserTypeViewer", resourceCulture);
+            }
+        }
     }
 }

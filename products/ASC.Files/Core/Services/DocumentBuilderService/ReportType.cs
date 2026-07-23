@@ -45,5 +45,8 @@ public enum ReportType
     ServiceUsage = 1,
 
     /// <summary>Aggregated usage grouped by month.</summary>
-    MonthlyUsage = 2
+    MonthlyUsage = 2,
+
+    /// <summary>DocsCloud user quota (editors and viewers with their expiration dates).</summary>
+    DocsCloudUserQuota = 3
 }
