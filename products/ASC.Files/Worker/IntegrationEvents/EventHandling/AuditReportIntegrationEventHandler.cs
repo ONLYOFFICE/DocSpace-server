@@ -53,9 +53,11 @@ public class AuditReportIntegrationEventHandler(
 
             try
             {
+                var discriminator = @event.FolderId ?? (int)@event.Kind;
+
                 if (@event.Terminate)
                 {
-                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy, (int)@event.Kind);
+                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy, discriminator);
                     return;
                 }
 
@@ -73,9 +75,10 @@ public class AuditReportIntegrationEventHandler(
                     @event.Format,
                     @event.From,
                     @event.To,
-                    @event.Headers);
+                    @event.Headers,
+                    @event.FolderId);
 
-                var taskId = DocumentBuilderTaskManager.GetTaskId(@event.TenantId, @event.CreateBy, (int)@event.Kind);
+                var taskId = DocumentBuilderTaskManager.GetTaskId(@event.TenantId, @event.CreateBy, discriminator);
 
                 task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, data, taskId);
 

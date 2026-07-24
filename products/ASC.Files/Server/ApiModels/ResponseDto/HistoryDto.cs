@@ -252,4 +252,15 @@ public class HistoryApiHelper(
             yield return mapper.ToAuditEvent(query);
         }
     }
+
+    public async Task DemandFolderHistoryReportPermissionAsync(int folderId)
+    {
+        var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId)
+            ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+
+        if (!await fileSecurity.CanReadHistoryAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+    }
 }

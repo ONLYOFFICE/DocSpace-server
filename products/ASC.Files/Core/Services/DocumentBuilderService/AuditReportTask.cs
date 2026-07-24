@@ -88,19 +88,35 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 
             CancellationToken.ThrowIfCancellationRequested();
 
-            if (_data.Kind == AuditReportKind.LoginHistory)
+            switch (_data.Kind)
             {
-                var events = await serviceProvider.GetService<LoginEventsRepository>()
-                    .GetByFilterAsync(fromDate: _data.From, to: _data.To);
+                case AuditReportKind.LoginHistory:
+                    {
+                        var events = await serviceProvider.GetService<LoginEventsRepository>()
+                            .GetByFilterAsync(fromDate: _data.From, to: _data.To);
 
-                await ProduceAsync(serviceProvider, events, AuditReportResource.LoginHistoryReportName, userCulture);
-            }
-            else
-            {
-                var events = await serviceProvider.GetService<AuditEventsRepository>()
-                    .GetByFilterAsync(from: _data.From, to: _data.To);
+                        await ProduceAsync(serviceProvider, events, AuditReportResource.LoginHistoryReportName,
+                            _data.From?.ToShortDateString(), _data.To?.ToShortDateString(), userCulture);
+                        break;
+                    }
+                case AuditReportKind.FolderHistory:
+                    {
+                        var events = await serviceProvider.GetService<HistoryService>()
+                            .GetFolderAuditEventsAsync(_data.FolderId.Value, _data.From, _data.To);
 
-                await ProduceAsync(serviceProvider, events, AuditReportResource.AuditTrailReportName, userCulture);
+                        await ProduceAsync(serviceProvider, events, AuditReportResource.AuditTrailReportName,
+                            "room", _data.FolderId.Value.ToString(CultureInfo.InvariantCulture), userCulture);
+                        break;
+                    }
+                default:
+                    {
+                        var events = await serviceProvider.GetService<AuditEventsRepository>()
+                            .GetByFilterAsync(from: _data.From, to: _data.To);
+
+                        await ProduceAsync(serviceProvider, events, AuditReportResource.AuditTrailReportName,
+                            _data.From?.ToShortDateString(), _data.To?.ToShortDateString(), userCulture);
+                        break;
+                    }
             }
 
             Percentage = 100;
@@ -124,14 +140,14 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
         }
     }
 
-    private Task ProduceAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, CultureInfo culture) where T : BaseEvent
+    private Task ProduceAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, string nameArg0, string nameArg1, CultureInfo culture) where T : BaseEvent
     {
         return _data.Format == AuditReportFormat.Csv
-            ? BuildCsvAsync(serviceProvider, events, reportNameFormat)
-            : BuildXlsxAsync(serviceProvider, events, reportNameFormat, culture);
+            ? BuildCsvAsync(serviceProvider, events, reportNameFormat, nameArg0, nameArg1)
+            : BuildXlsxAsync(serviceProvider, events, reportNameFormat, nameArg0, nameArg1, culture);
     }
 
-    private async Task BuildXlsxAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, CultureInfo culture) where T : BaseEvent
+    private async Task BuildXlsxAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, string nameArg0, string nameArg1, CultureInfo culture) where T : BaseEvent
     {
         var tempPath = serviceProvider.GetService<TempPath>();
         var documentBuilderTask = serviceProvider.GetService<DocumentBuilderTask>();
@@ -150,7 +166,7 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 
         var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
-        var outputFileName = string.Format(reportNameFormat + ".xlsx", _data.From.ToShortDateString(), _data.To.ToShortDateString());
+        var outputFileName = string.Format(reportNameFormat + ".xlsx", nameArg0, nameArg1);
 
         script = script
             .Replace("${sheetName}", GetSheetName(reportNameFormat))
@@ -218,12 +234,12 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
         }
     }
 
-    private async Task BuildCsvAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat) where T : BaseEvent
+    private async Task BuildCsvAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, string nameArg0, string nameArg1) where T : BaseEvent
     {
         var csvFileHelper = serviceProvider.GetService<CsvFileHelper>();
         var csvFileUploader = serviceProvider.GetService<CsvFileUploader>();
 
-        var reportName = string.Format(reportNameFormat + ".csv", _data.From.ToShortDateString(), _data.To.ToShortDateString());
+        var reportName = string.Format(reportNameFormat + ".csv", nameArg0, nameArg1);
 
         Percentage = 50;
         await PublishChanges();
@@ -271,6 +287,11 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 
     private void SendDownloadedMessage(IServiceProvider serviceProvider)
     {
+        if (_data.Kind == AuditReportKind.FolderHistory)
+        {
+            return;
+        }
+
         var messageService = serviceProvider.GetService<MessageService>();
 
         var headers = _data.Headers != null
@@ -317,6 +338,7 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 public record AuditReportTaskData(
     AuditReportKind Kind,
     AuditReportFormat Format,
-    DateTime From,
-    DateTime To,
-    IDictionary<string, string> Headers);
+    DateTime? From,
+    DateTime? To,
+    IDictionary<string, string> Headers,
+    int? FolderId = null);

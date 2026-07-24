@@ -46,10 +46,11 @@ public record AuditReportIntegrationEvent : IntegrationEvent
         string baseUri,
         AuditReportKind kind,
         AuditReportFormat format,
-        DateTime from,
-        DateTime to,
+        DateTime? from,
+        DateTime? to,
         IDictionary<string, string> headers = null,
-        bool terminate = false)
+        bool terminate = false,
+        int? folderId = null)
     : base(createBy, tenantId)
     {
         BaseUri = baseUri;
@@ -59,6 +60,7 @@ public record AuditReportIntegrationEvent : IntegrationEvent
         To = to;
         Headers = headers;
         Terminate = terminate;
+        FolderId = folderId;
     }
 
     [ProtoMember(1)]
@@ -71,14 +73,17 @@ public record AuditReportIntegrationEvent : IntegrationEvent
     public AuditReportFormat Format { get; set; }
 
     [ProtoMember(4)]
-    public DateTime From { get; set; }
+    public DateTime? From { get; set; }
 
     [ProtoMember(5)]
-    public DateTime To { get; set; }
+    public DateTime? To { get; set; }
 
     [ProtoMember(6)]
     public IDictionary<string, string> Headers { get; set; }
 
     [ProtoMember(7)]
     public bool Terminate { get; set; }
+
+    [ProtoMember(8)]
+    public int? FolderId { get; set; }
 }
