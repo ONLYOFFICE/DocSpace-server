@@ -161,29 +161,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         CustomerOperationsReportTaskData taskData,
         Func<RenderContext, Task<ReportDefinition>> buildDefinitionAsync)
     {
-        var tenantManager = serviceProvider.GetService<TenantManager>();
-        var userManager = serviceProvider.GetService<UserManager>();
-        var tenantUtil = serviceProvider.GetService<TenantUtil>();
-        var tempPath = serviceProvider.GetService<TempPath>();
-
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var user = await userManager.GetUsersAsync(userId);
-
-        var userCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = userCulture;
-        CultureInfo.CurrentUICulture = userCulture;
-
-        var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
-        var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-
-        var context = new RenderContext(serviceProvider, tenant, userCulture, utcStartDate, utcEndDate, options);
+        var context = await CreateRenderContextAsync(serviceProvider, userId, taskData);
 
         // Resolve localized resources only after the culture above has been applied.
         var definition = await buildDefinitionAsync(context);
@@ -231,25 +209,72 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             totalCurrencyColumn
         };
 
-        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
+        var outputFileName = string.Format(definition.OutputFileNameFormat + ".xlsx", context.UtcStartDate.ToShortDateString(), context.UtcEndDate.ToShortDateString());
+
+        return await WriteReportScriptAsync(context, ScriptName, inputData, outputFileName, definition.WriteValues);
+    }
+
+    // Resolves the tenant/user, applies the user's culture and builds the shared JSON options + date range.
+    private static async Task<RenderContext> CreateRenderContextAsync(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
+    {
+        var tenantManager = serviceProvider.GetService<TenantManager>();
+        var userManager = serviceProvider.GetService<UserManager>();
+        var tenantUtil = serviceProvider.GetService<TenantUtil>();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var user = await userManager.GetUsersAsync(userId);
+
+        var userCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = userCulture;
+        CultureInfo.CurrentUICulture = userCulture;
+
+        var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
+
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+
+        return new RenderContext(serviceProvider, tenant, userCulture, utcStartDate, utcEndDate, options);
+    }
+
+    // Reads the embedded script template, injects the serialized input data and output name, optionally
+    // streams the (potentially large) data rows in place of the ${dataValues} placeholder, and writes the
+    // ready-to-run script to a temp file.
+    private static async Task<DocumentBuilderInputData> WriteReportScriptAsync(
+        RenderContext context,
+        string scriptName,
+        object inputData,
+        string outputFileName,
+        Func<StreamWriter, Task> writeValues = null)
+    {
+        var tempPath = context.ServiceProvider.GetService<TempPath>();
+
+        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(scriptName) ?? throw new Exception("Template not found");
 
         var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
-        var outputFileName = string.Format(definition.OutputFileNameFormat + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
 
         script = script
-            .Replace("${inputData}", JsonSerializer.Serialize(inputData, options))
+            .Replace("${inputData}", JsonSerializer.Serialize(inputData, context.Options))
             .Replace("${tempFileName}", tempFileName);
-
-        var scriptParts = script.Split("${dataValues}");
 
         await using (var writer = new StreamWriter(scriptFilePath))
         {
-            await writer.WriteAsync(scriptParts[0]);
-
-            await definition.WriteValues(writer);
-
-            await writer.WriteAsync(scriptParts[1]);
+            if (writeValues != null)
+            {
+                var scriptParts = script.Split("${dataValues}");
+                await writer.WriteAsync(scriptParts[0]);
+                await writeValues(writer);
+                await writer.WriteAsync(scriptParts[1]);
+            }
+            else
+            {
+                await writer.WriteAsync(script);
+            }
         }
 
         return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
@@ -467,38 +492,21 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     // so it uses its own script and does not go through the single-table RenderAsync scaffolding.
     private static async Task<DocumentBuilderInputData> BuildDocsCloudUserQuotaReportAsync(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
     {
-        var tenantManager = serviceProvider.GetService<TenantManager>();
-        var userManager = serviceProvider.GetService<UserManager>();
-        var tenantUtil = serviceProvider.GetService<TenantUtil>();
-        var tempPath = serviceProvider.GetService<TempPath>();
+        var context = await CreateRenderContextAsync(serviceProvider, userId, taskData);
+
         var coreSettings = serviceProvider.GetService<CoreSettings>();
         var docsCloudClient = serviceProvider.GetService<DocsCloudClient>();
+        var userManager = serviceProvider.GetService<UserManager>();
         var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
-
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var user = await userManager.GetUsersAsync(userId);
-
-        var userCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = userCulture;
-        CultureInfo.CurrentUICulture = userCulture;
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-
-        // The quota report is a point-in-time snapshot: it has no period, and the file name carries the
-        // tenant-local generation date. The task data StartDate/EndDate are intentionally not used here
-        // (they are meaningless for a snapshot, and running "now" through DateTimeToUtc would shift it).
-        var reportDate = tenantUtil.DateTimeNow();
-
-        var context = new RenderContext(serviceProvider, tenant, userCulture, DateTime.UtcNow, DateTime.UtcNow, options);
+        var tenantUtil = serviceProvider.GetService<TenantUtil>();
 
         var header = await BuildReportHeaderAsync(context);
 
-        var portalId = await coreSettings.GetKeyAsync(tenant.Id);
+        // The quota report is a point-in-time snapshot: it has no period, and the file name carries the
+        // tenant-local generation date. The task data StartDate/EndDate are intentionally not used here.
+        var reportDate = tenantUtil.DateTimeNow();
+
+        var portalId = await coreSettings.GetKeyAsync(context.Tenant.Id);
 
         var quota = await docsCloudClient.GetTenantQuotaAsync(portalId);
         var tenantInfo = await docsCloudClient.GetTenantInfoAsync(portalId);
@@ -509,7 +517,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         var (editors, editorsInternal, editorsExternal) = await BuildDocsCloudUsersAsync(quota?.Users, userManager, displayUserSettingsHelper, tenantUtil);
         var (viewers, viewersInternal, viewersExternal) = await BuildDocsCloudUsersAsync(quota?.UsersView, userManager, displayUserSettingsHelper, tenantUtil);
 
-        var dateFormat = $"{userCulture.DateTimeFormat.ShortDatePattern} {userCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
+        var dateFormat = $"{context.Culture.DateTimeFormat.ShortDatePattern} {context.Culture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
 
         var userTypeHeader = Resource.DocsCloudQuotaReportColumnType;
         var expireHeader = Resource.DocsCloudQuotaReportColumnExpire;
@@ -558,22 +566,9 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             }
         };
 
-        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(DocsCloudScriptName) ?? throw new Exception("Template not found");
-
-        var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
-        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
         var outputFileName = string.Format(Resource.DocsCloudQuotaReportName + ".xlsx", reportDate.ToShortDateString());
 
-        script = script
-            .Replace("${inputData}", JsonSerializer.Serialize(inputData, options))
-            .Replace("${tempFileName}", tempFileName);
-
-        await using (var writer = new StreamWriter(scriptFilePath))
-        {
-            await writer.WriteAsync(script);
-        }
-
-        return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
+        return await WriteReportScriptAsync(context, DocsCloudScriptName, inputData, outputFileName);
     }
 
     private sealed record DocsCloudUserRow(string UserId, string UserType, string Expire);
