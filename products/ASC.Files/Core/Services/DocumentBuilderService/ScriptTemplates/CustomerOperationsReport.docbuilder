@@ -139,6 +139,19 @@ function prepareTotal(headerRowIndex) {
         return null;
     }
 
+    // Summing across different currencies would be meaningless, so skip the total row entirely
+    // when the currency column holds more than one distinct value.
+    var currencyCol = inputData.totalCurrencyColumn;
+    var firstCurrency = currencyCol >= 0 && values[0][currencyCol] != null ? values[0][currencyCol].value : null;
+    if (currencyCol >= 0) {
+        for (var r = 1; r < values.length; r++) {
+            var currency = values[r][currencyCol] != null ? values[r][currencyCol].value : null;
+            if (currency !== firstCurrency) {
+                return null;
+            }
+        }
+    }
+
     var firstDataRow = headerRowIndex + 1;
     var lastDataRow = headerRowIndex + values.length;
 
@@ -158,8 +171,8 @@ function prepareTotal(headerRowIndex) {
             cell.format = inputData.resources.totalFormat;
             cell.halign = inputData.aligns[i];
         } else if (i == inputData.totalCurrencyColumn) {
-            // Echo the currency code from the first data row of the currency column.
-            cell.value = values[0][i] != null ? values[0][i].value : null;
+            // Echo the currency code shared by all data rows.
+            cell.value = firstCurrency;
             cell.format = "@";
             cell.halign = inputData.aligns[i];
         }
