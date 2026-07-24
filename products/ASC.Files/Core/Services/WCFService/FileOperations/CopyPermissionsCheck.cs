@@ -35,15 +35,31 @@ namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class CopyPermissionsCheck<T>(IFileDao<T> fileDao, PermissionCheckStarter<T, int> intPermissionManager, PermissionCheckStarter<T, string> stringPermissionManager)
+public class CopyPermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folderDao, PermissionCheckStarter<T, int> intPermissionManager, PermissionCheckStarter<T, string> stringPermissionManager)
     : IPermissionsChecker<FileMoveCopyOperationData<T>, T>,  IPermissionsChecker<FileOperationData<T>, T>
 {
     public async Task RunPermissionCheckAsync(FileOperationData<T> data)
     {
+        var folders = data.Folders?.ToList() ?? [];
+        foreach (var id in folders)
+        {
+            var folder = await folderDao.GetFolderAsync(id);
+            if (folder == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+        }
+
         var files = data.Files?.ToList() ?? [];
         foreach (var id in files)
         {
             var file = await fileDao.GetFilesAsync([id]).FirstOrDefaultAsync();
+
+            if (file == null)
+            {
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
             var copyOperationData = new FileMoveCopyOperationData<T>([], [id], data.TenantId, data.UserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, false, true, data.Headers, data.SessionSnapshot);
 
             await RunPermissionCheckAsync(copyOperationData);
