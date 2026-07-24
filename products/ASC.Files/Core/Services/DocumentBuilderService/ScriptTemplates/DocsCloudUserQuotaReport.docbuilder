@@ -9,11 +9,12 @@ var INFO_ROW_HEIGHT = 15.5;
 var ROW_HEIGHT = 19.5;
 var HEADER_ROW = 6;
 
-// Summary blocks live in columns I:J. The editors block starts at the header row;
-// the viewers block is placed a fixed distance below it.
+// Summary blocks live in columns I:J. The editors block starts at the header row; the viewers
+// block is placed below it (its start row is derived from the editors block height, see below).
 var SUMMARY_LABEL_COL = 9;
 var SUMMARY_VALUE_COL = 10;
-var VIEWERS_SUMMARY_ROW = HEADER_ROW + 10;
+// Blank rows between the editors and viewers summary blocks.
+var SUMMARY_BLOCK_GAP = 3;
 
 var COLUMN_WIDTHS = [40.42, 21, 22, 3, 38, 11, 21.42, 3, 26, 12];
 
@@ -160,6 +161,9 @@ function writeSummary(startRow, block) {
         writeCell(row, SUMMARY_LABEL_COL, { value: block.summary[i].label, bgColor: bgColor, valign: "center", border: true });
         writeCell(row, SUMMARY_VALUE_COL, { value: block.summary[i].value, bgColor: bgColor, valign: "center", halign: "right", format: inputData.resources.countFormat, border: true });
     }
+
+    // Next free row after the block (title + subtitle + summary rows).
+    return startRow + 2 + block.summary.length;
 }
 
 customizeWorksheet();
@@ -171,8 +175,8 @@ writeInfo();
 var editorsRange = writeDataTable(1, inputData.editors);
 var viewersRange = writeDataTable(5, inputData.viewers);
 
-writeSummary(HEADER_ROW, inputData.editors);
-writeSummary(VIEWERS_SUMMARY_ROW, inputData.viewers);
+var editorsSummaryEnd = writeSummary(HEADER_ROW, inputData.editors);
+writeSummary(editorsSummaryEnd + SUMMARY_BLOCK_GAP, inputData.viewers);
 
 var freezePanes = oWorksheet.GetFreezePanes();
 freezePanes.FreezeRows(HEADER_ROW);
