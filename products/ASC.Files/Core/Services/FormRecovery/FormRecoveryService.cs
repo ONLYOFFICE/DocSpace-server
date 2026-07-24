@@ -33,35 +33,537 @@
 
 namespace ASC.Files.Core.Services.FormRecovery;
 
-[Transient]
-public class FormRecoveryService(
-    TenantManager tenantManager,
-    IEventBus eventBus,
-    FormRecoveryTaskManager taskManager,
-    AuthContext authContext,
-    CommonLinkUtility commonLinkUtility)
-{
-    public async Task<FormRecoveryTask> StartRecoveryAsync(int roomId)
-    {
-        var tenantId = tenantManager.GetCurrentTenantId();
+#nullable enable
 
-        var existingTask = await taskManager.GetTask(tenantId, roomId);
-        if (existingTask is { IsCompleted: false })
+/// <summary>
+/// Recovers form field data for completed form PDFs that ended up in a form's "Complete" folder without ever
+/// going through the normal submit flow (e.g. restored from a backup or copied in manually), and therefore
+/// have neither their own <see cref="FormFillingProperties{T}"/> nor an indexed submission record. Field
+/// values are read from the PDF via a DocBuilder script, then fed into the same ingestion path a normal
+/// submission uses (<see cref="FormFillingReportCreator.UpdateFormFillingReport{T}"/>).
+/// </summary>
+[Scope]
+public class FormRecoveryService(
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory,
+    FactoryIndexerForm factoryIndexerForm,
+    FormFillingReportCreator formFillingReportCreator,
+    DocumentBuilderTask documentBuilderTask,
+    DocumentServiceConnector documentServiceConnector,
+    DocumentServiceHelper documentServiceHelper,
+    PathProvider pathProvider,
+    GlobalStore globalStore,
+    IHttpClientFactory httpClientFactory,
+    IDistributedLockProvider distributedLockProvider,
+    TenantUtil tenantUtil,
+    SocketManager socketManager,
+    ILogger<FormRecoveryService> logger)
+{
+    // Default encoder unicode-escapes "&", which the docbuilder script engine doesn't decode back inside
+    // string literals, breaking every query parameter after the first in an embedded URL.
+    private static readonly JsonSerializerOptions _scriptStringOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+    private static readonly TimeSpan _sourceUrlSignatureLifetime = TimeSpan.FromMinutes(10);
+
+    /// <summary>
+    /// If the form's completed PDFs are desynced from the search index (some completed forms have no indexed
+    /// submission record), repairs the orphaned forms and rebuilds the form's xlsx report history, then
+    /// returns <c>true</c>. When everything is already in sync returns <c>false</c> so the caller performs the
+    /// ordinary report build instead.
+    /// </summary>
+    public async Task<bool> TryRecoverFormAsync(int roomId, int originalFormId, Guid userId, CancellationToken cancellationToken)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var origProperties = await fileDao.GetProperties(originalFormId);
+        if (origProperties?.FormFilling is not { ResultsFolderId: not 0 } formFilling)
         {
-            return existingTask;
+            return false;
         }
 
-        var userId = authContext.CurrentAccount.ID;
-        var baseUri = commonLinkUtility.ServerRootPath;
+        var doneFolder = await folderDao.GetFolderAsync(formFilling.ResultsFolderId);
+        if (doneFolder is not { FolderType: FolderType.FormFillingFolderDone })
+        {
+            return false;
+        }
 
-        await eventBus.PublishAsync(new FormRecoveryIntegrationEvent(userId, tenantId, roomId, baseUri));
+        var room = await folderDao.GetFolderAsync(roomId);
+        if (room is not { FolderType: FolderType.FillingFormsRoom })
+        {
+            return false;
+        }
 
-        return new FormRecoveryTask { Id = FormRecoveryTaskManager.GetTaskId(tenantId, roomId), Status = DistributedTaskStatus.Created };
+        var orphans = await FindOrphanedFormsAsync(fileDao, doneFolder);
+        if (orphans.Count == 0)
+        {
+            return false;
+        }
+
+        logger.InfoRecoveryOrphansFound(roomId, orphans.Count);
+
+        var currentForm = await fileDao.GetFileAsync(originalFormId);
+        if (currentForm == null)
+        {
+            return false;
+        }
+
+        var versionKeySets = await GetVersionKeySetsAsync(originalFormId, currentForm, fileDao, cancellationToken);
+
+        var repaired = 0;
+        foreach (var orphan in orphans)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                await RepairFormAsync(orphan, doneFolder, room, originalFormId, currentForm, versionKeySets, fileDao, cancellationToken);
+                repaired++;
+            }
+            catch (Exception e)
+            {
+                logger.ErrorRecoveryFormFailed(e, originalFormId, roomId);
+            }
+        }
+
+        // Nothing repaired (or no xlsx kept): let the ordinary index build produce the report instead.
+        if (repaired == 0 || !room.SettingsSaveFormAsXLSX)
+        {
+            return false;
+        }
+
+        try
+        {
+            await RebuildReportHistoryAsync(roomId, originalFormId, userId, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorRecoveryXlsxRebuildFailed(e, originalFormId, roomId);
+        }
+
+        return true;
     }
 
-    public async Task<FormRecoveryTask> GetTaskAsync(int roomId)
+    /// <summary>
+    /// Finds completed form PDFs in the form's "Complete" folder that have no matching submission record in the
+    /// search index yet.
+    /// </summary>
+    private async Task<List<File<int>>> FindOrphanedFormsAsync(IFileDao<int> fileDao, Folder<int> doneFolder)
     {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        return await taskManager.GetTask(tenantId, roomId);
+        // Orphans skipped the signature sniffing, so may lack the PdfForm category stamp — match by extension.
+        var completedFiles = (await fileDao.GetFilesAsync(doneFolder.Id, null, FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false).ToListAsync())
+            .Where(f => string.Equals(FileUtility.GetFileExtension(f.Title), ".pdf", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (completedFiles.Count == 0)
+        {
+            return [];
+        }
+
+        factoryIndexerForm.Refresh();
+
+        var (indexSuccess, indexedItems) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.ParentId, doneFolder.Id));
+
+        if (!indexSuccess)
+        {
+            // A failed query looks the same as "nothing indexed yet" — don't treat it as "all orphaned".
+            logger.WarnRecoveryIndexQueryFailed(doneFolder.Id);
+            return [];
+        }
+
+        var indexedIds = indexedItems.Select(i => i.Id).ToHashSet();
+
+        return completedFiles.Where(f => !indexedIds.Contains(f.Id)).ToList();
+    }
+
+    private async Task RepairFormAsync(
+        File<int> orphan,
+        Folder<int> doneFolder,
+        Folder<int> room,
+        int originalFormId,
+        File<int> originalForm,
+        List<(int Version, HashSet<string> Keys)> versionKeySets,
+        IFileDao<int> fileDao,
+        CancellationToken cancellationToken)
+    {
+        var existing = (await fileDao.GetProperties(orphan.Id))?.FormFilling;
+        var roomId = room.Id;
+
+        // Completed forms don't reliably record their template version — route by matching the PDF's field key
+        // set to the version whose layout it matches, keeping each version's report to one consistent column set.
+        var orphanFormsDataJson = await ExtractFormFieldsJsonAsync(orphan, lastVersion: true, cancellationToken);
+        var orphanKeys = ParseFieldKeys(orphanFormsDataJson);
+
+        // Tie (a revision that didn't change fields) → newest match; no match → current version (keep the data).
+        var matchedVersion = versionKeySets
+            .Where(x => x.Keys.SetEquals(orphanKeys))
+            .Select(x => (int?)x.Version)
+            .Max();
+
+        int effectiveVersion;
+        if (matchedVersion is { } matched)
+        {
+            effectiveVersion = matched;
+        }
+        else
+        {
+            effectiveVersion = originalForm.Version;
+            logger.WarnRecoveryVersionUnmatched(orphan.Id, originalFormId, roomId);
+        }
+
+        string formsDataUrl;
+        using (var jsonStream = new MemoryStream(Encoding.UTF8.GetBytes(orphanFormsDataJson)))
+        {
+            formsDataUrl = await pathProvider.GetTempUrlAsync(jsonStream, ".json");
+        }
+
+        int resultFormNumber;
+        var assignedNewNumber = false;
+        var lockKey = $"fillform_{roomId}_{originalFormId}";
+
+        try
+        {
+            // Reuse the number the form was given when it was originally filled (kept in its own properties and
+            // reflected in its title), so the report's "form number" matches the completed file. Only mint a
+            // fresh sequential number when it's unknown (e.g. a backup restore that lost the properties).
+            if (existing is { ResultFormNumber: > 0 })
+            {
+                resultFormNumber = existing.ResultFormNumber;
+            }
+            else
+            {
+                await using (await distributedLockProvider.TryAcquireFairLockAsync(lockKey))
+                {
+                    var origProperties = await fileDao.GetProperties(originalFormId) ?? new EntryProperties<int>();
+                    origProperties.FormFilling ??= new FormFillingProperties<int>();
+                    origProperties.FormFilling.ResultFormNumber++;
+                    resultFormNumber = origProperties.FormFilling.ResultFormNumber;
+                    await fileDao.SaveProperties(originalFormId, origProperties);
+                }
+
+                assignedNewNumber = true;
+            }
+
+            try
+            {
+                await formFillingReportCreator.UpdateFormFillingReport(
+                    originalFormId,
+                    effectiveVersion,
+                    roomId,
+                    resultFormNumber,
+                    formsDataUrl,
+                    orphan,
+                    room.SettingsSendFormToExternalDB,
+                    room.SettingsSaveFormAsXLSX,
+                    triggerXlsxUpdate: false,
+                    // Report timestamp = when the form was filled, not this run. File times are tenant-local,
+                    // so convert to UTC to match what a normal submission stores.
+                    filledOn: tenantUtil.DateTimeToUtc(orphan.ModifiedOn));
+            }
+            catch
+            {
+                // Undo the counter bump above (only when we minted a new number) unless something else already
+                // claimed a later number, otherwise a retry would skip a number permanently.
+                if (assignedNewNumber)
+                {
+                    await using (await distributedLockProvider.TryAcquireFairLockAsync(lockKey))
+                    {
+                        var origProperties = await fileDao.GetProperties(originalFormId);
+                        if (origProperties?.FormFilling?.ResultFormNumber == resultFormNumber)
+                        {
+                            origProperties.FormFilling.ResultFormNumber--;
+                            await fileDao.SaveProperties(originalFormId, origProperties);
+                        }
+                    }
+                }
+
+                throw;
+            }
+        }
+        finally
+        {
+            // No-op if UpdateFormFillingReport already read (and thereby self-deleted) the temp file; cleans it
+            // up if a failure above prevented that from ever happening.
+            await CleanupTempFormsDataFileAsync(formsDataUrl);
+        }
+
+        await fileDao.SaveProperties(orphan.Id, new EntryProperties<int>
+        {
+            FormFilling = new FormFillingProperties<int>
+            {
+                StartFilling = false,
+                OriginalFormId = originalFormId,
+                OriginalFormVersion = effectiveVersion,
+                RoomId = roomId,
+                ResultsFolderId = doneFolder.Id,
+                ResultFormNumber = resultFormNumber
+            }
+        });
+    }
+
+    /// <summary>
+    /// Rebuilds the form's results xlsx version history from the index — one file version per form version that
+    /// has submissions, oldest first — which recovering many versions at once can't get from the normal build.
+    /// </summary>
+    private async Task RebuildReportHistoryAsync(int roomId, int formId, Guid userId, CancellationToken cancellationToken)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+
+        var origProperties = await fileDao.GetProperties(formId);
+        if (origProperties?.FormFilling is not { ResultsFileID: not 0 } formFilling)
+        {
+            return;
+        }
+
+        var currentForm = await fileDao.GetFileAsync(formId);
+        var resultFile = await fileDao.GetFileAsync(formFilling.ResultsFileID);
+        if (currentForm == null || resultFile == null)
+        {
+            return;
+        }
+
+        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource("FormFillingReport.docbuilder")
+            ?? throw new InvalidOperationException("FormFillingReport.docbuilder template not found.");
+
+        // The results file may already carry partial versions built online before the outage. The index (now
+        // including the recovered rows) is the source of truth for the full history, so collapse the file back
+        // to a single version and rebuild every version from scratch below.
+        while (resultFile.Version > 1)
+        {
+            await fileDao.DeleteFileVersionAsync(resultFile, resultFile.Version);
+            resultFile.Version--;
+        }
+
+        var isFirst = true;
+
+        for (var version = 1; version <= currentForm.Version; version++)
+        {
+            var submissions = await formFillingReportCreator.GetFormFillingResults(roomId, formId, version);
+            if (!submissions.Any())
+            {
+                continue;
+            }
+
+            var reportData = await FormFillingReportTask.GetFormFillingReportData(serviceProvider, userId, roomId, formId, version);
+            var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
+            var versionScript = script
+                .Replace("${tempFileName}", tempFileName)
+                .Replace("${inputData}", JsonSerializer.Serialize(reportData));
+
+            var xlsxUrl = await documentBuilderTask.BuildFileAsync(new DocumentBuilderInputData(versionScript, tempFileName, ""), cancellationToken);
+
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
+            var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
+            using var response = await httpClient.GetAsync(xlsxUrl, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            using var buffer = new MemoryStream();
+            await response.Content.CopyToAsync(buffer, cancellationToken);
+            buffer.Position = 0;
+            resultFile.ContentLength = buffer.Length;
+
+            // First version replaces the single remaining file version; each later version is appended as a new
+            // file version, so the file's version history mirrors the form's versions.
+            if (isFirst)
+            {
+                resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, buffer);
+                isFirst = false;
+            }
+            else
+            {
+                resultFile.Version++;
+                resultFile.VersionGroup++;
+                resultFile = await fileDao.SaveFileAsync(resultFile, buffer, false);
+            }
+
+            logger.InfoRecoveryReportVersionRebuilt(formId, version, submissions.Count(), resultFile.Version);
+        }
+
+        if (isFirst)
+        {
+            return;
+        }
+
+        // Point the form at the rebuilt file and clear the pending version-change flag so the next live
+        // submission replaces the current report version instead of bumping it again.
+        formFilling.ResultsFileID = resultFile.Id;
+        formFilling.IsVersionChanged = false;
+        await fileDao.SaveProperties(formId, origProperties);
+
+        await fileDao.SaveProperties(resultFile.Id, new EntryProperties<int>
+        {
+            FormFilling = new FormFillingProperties<int>
+            {
+                StartFilling = false,
+                OriginalFormId = formId,
+                OriginalFormVersion = currentForm.Version,
+                RoomId = roomId,
+                ResultsFolderId = formFilling.ResultsFolderId,
+                ResultsFileID = resultFile.Id
+            }
+        });
+
+        await socketManager.UpdateFileAsync(resultFile);
+    }
+
+    /// <summary>
+    /// Best-effort delete of the temp JSON uploaded for a repaired orphan, for when it never got read (and
+    /// thereby self-deleted). Safe to call even if it was already consumed.
+    /// </summary>
+    private async Task CleanupTempFormsDataFileAsync(string formsDataUrl)
+    {
+        try
+        {
+            var fileName = HttpUtility.ParseQueryString(new Uri(formsDataUrl).Query)[FilesLinkUtility.FileTitle];
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            var store = await globalStore.GetStoreAsync();
+            var path = CrossPlatform.PathCombine("temp_stream", fileName);
+
+            if (await store.IsFileAsync(FileConstant.StorageDomainTmp, path))
+            {
+                await store.DeleteAsync(FileConstant.StorageDomainTmp, path);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.WarnRecoveryTempCleanupFailed(e, formsDataUrl);
+        }
+    }
+
+    /// <summary>
+    /// Resolves the field key set of each version (1..current) of the original form, used to route each orphan
+    /// into the report of the version whose field layout it matches. Prefers the layout already indexed in the
+    /// search metadata; for versions never indexed (only ever filled while the index was down) it reads the
+    /// fields straight from that version of the template PDF.
+    /// </summary>
+    private async Task<List<(int Version, HashSet<string> Keys)>> GetVersionKeySetsAsync(
+        int originalFormId, File<int> currentForm, IFileDao<int> fileDao, CancellationToken cancellationToken)
+    {
+        var result = new List<(int Version, HashSet<string> Keys)>();
+
+        for (var version = 1; version <= currentForm.Version; version++)
+        {
+            var keys = await formFillingReportCreator.TryGetIndexedFieldKeysAsync(originalFormId, version);
+
+            if (keys == null)
+            {
+                var templateAtVersion = version == currentForm.Version
+                    ? currentForm
+                    : await fileDao.GetFileAsync(originalFormId, version);
+
+                if (templateAtVersion != null)
+                {
+                    try
+                    {
+                        var templateJson = await ExtractFormFieldsJsonAsync(templateAtVersion, lastVersion: false, cancellationToken);
+                        keys = ParseFieldKeys(templateJson);
+                    }
+                    catch (Exception e)
+                    {
+                        // A version whose layout can't be resolved simply won't participate in matching.
+                        logger.WarnRecoveryTemplateVersionExtractFailed(e, originalFormId, version);
+                    }
+                }
+            }
+
+            if (keys is { Count: > 0 })
+            {
+                result.Add((version, keys));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The set of field keys present in the given "{ formsdata: [...] }" payload, matching how the report lays
+    /// out its columns (picture/signature fields excluded, compared case-insensitively).
+    /// </summary>
+    private static HashSet<string> ParseFieldKeys(string formsDataJson)
+    {
+        var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        using var document = JsonDocument.Parse(formsDataJson);
+        if (document.RootElement.TryGetProperty("formsdata", out var formsArray) && formsArray.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var form in formsArray.EnumerateArray())
+            {
+                var key = form.TryGetProperty("key", out var keyProp) ? keyProp.GetString() : null;
+                var type = form.TryGetProperty("type", out var typeProp) ? typeProp.GetString() : null;
+
+                if (!string.IsNullOrEmpty(key) && type != "picture" && type != "signature")
+                {
+                    keys.Add(key);
+                }
+            }
+        }
+
+        return keys;
+    }
+
+    /// <summary>
+    /// Runs ExtractFormFieldsData.docbuilder against a form file and pulls out the "{ formsdata: [...] }" JSON
+    /// it embeds in its text output — the same shape Document Server's normal submit callback produces.
+    /// </summary>
+    private async Task<string> ExtractFormFieldsJsonAsync(File<int> file, bool lastVersion, CancellationToken cancellationToken)
+    {
+        var sourceUrl = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file, lastVersion));
+
+        // OpenFile(url) can't set headers, so the signature travels as a query param — bound to this file and
+        // short-lived (exp-enforced), since query strings, unlike headers, tend to end up in access logs.
+        var signatureToken = documentServiceHelper.GetSignature(new
+        {
+            fileId = file.Id,
+            exp = DateTimeOffset.UtcNow.Add(_sourceUrlSignatureLifetime).ToUnixTimeSeconds()
+        });
+
+        if (!string.IsNullOrEmpty(signatureToken))
+        {
+            sourceUrl = FilesLinkUtility.AddQueryString(sourceUrl, new Dictionary<string, string>
+            {
+                { FilesLinkUtility.SignatureQueryKey, signatureToken }
+            });
+        }
+
+        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource("ExtractFormFieldsData.docbuilder")
+            ?? throw new InvalidOperationException("ExtractFormFieldsData.docbuilder template not found.");
+        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".txt");
+
+        // The docbuilder engine keeps only one document active at a time, so the script embeds the result in
+        // the opened PDF's own text output between unique markers; this pulls the JSON back out from between them.
+        var markerStart = $"@@FORMDATA_START_{Guid.NewGuid():N}@@";
+        var markerEnd = $"@@FORMDATA_END_{Guid.NewGuid():N}@@";
+
+        script = script
+            .Replace("${sourceFileUrl}", JsonSerializer.Serialize(sourceUrl, _scriptStringOptions))
+            .Replace("${tempFileName}", tempFileName)
+            .Replace("${resultMarkerStart}", markerStart)
+            .Replace("${resultMarkerEnd}", markerEnd);
+
+        var inputData = new DocumentBuilderInputData(script, tempFileName, "");
+        var resultTextUrl = await documentBuilderTask.BuildFileAsync(inputData, cancellationToken);
+
+#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
+        var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
+        using var response = await httpClient.GetAsync(resultTextUrl, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var resultText = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        var startIndex = resultText.IndexOf(markerStart, StringComparison.Ordinal);
+        var endIndex = resultText.IndexOf(markerEnd, StringComparison.Ordinal);
+        if (startIndex < 0 || endIndex < 0 || endIndex <= startIndex)
+        {
+            throw new InvalidOperationException("The form data markers were not found in the DocBuilder script output.");
+        }
+
+        startIndex += markerStart.Length;
+
+        return resultText[startIndex..endIndex];
     }
 }

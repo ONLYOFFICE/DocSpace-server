@@ -61,7 +61,16 @@ public class FormsDbProvisioningService(
         var settings = await settingsManager.LoadAsync<BuiltinFormsDbSettings>(tenantId);
         if (settings.IsProvisioned)
         {
-            return BuildCredentials(settings);
+            // Don't trust the stored flag blindly: the schema can be gone from the database while the
+            // setting persists (the DB was reset/recreated or repointed at a different server). Verify it
+            // still exists, otherwise re-provision so submissions keep working instead of failing with
+            // "schema does not exist".
+            if (await SchemaExistsAsync(settings.SchemaName!))
+            {
+                return BuildCredentials(settings);
+            }
+
+            logger.WarnFormsDbSchemaMissing(tenantId, settings.SchemaName!);
         }
 
         return await ProvisionAsync(tenantId);
@@ -180,6 +189,22 @@ public class FormsDbProvisioningService(
             RoPassword: settings.RoPassword!);
     }
 
+    private async Task<bool> SchemaExistsAsync(string schemaName)
+    {
+        await using var connection = new NpgsqlConnection(AdminConnectionString);
+        await connection.OpenAsync();
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT 1 FROM information_schema.schemata WHERE schema_name = @schemaName";
+
+        var parameter = cmd.CreateParameter();
+        parameter.ParameterName = "@schemaName";
+        parameter.Value = schemaName;
+        cmd.Parameters.Add(parameter);
+
+        return await cmd.ExecuteScalarAsync() != null;
+    }
+
     private static Task ExecuteAsync(NpgsqlConnection connection, string sql)
     {
         using var cmd = connection.CreateCommand();
@@ -201,6 +226,9 @@ internal static partial class FormsDbProvisioningServiceLogger
 
     [LoggerMessage(LogLevel.Information, "Forms DB schema '{SchemaName}' deprovisioned for tenant {TenantId}")]
     public static partial void InfoFormsDbDeprovisioned(this ILogger<FormsDbProvisioningService> logger, int tenantId, string schemaName);
+
+    [LoggerMessage(LogLevel.Warning, "Forms DB schema '{SchemaName}' for tenant {TenantId} is marked provisioned but missing in the database; re-provisioning")]
+    public static partial void WarnFormsDbSchemaMissing(this ILogger<FormsDbProvisioningService> logger, int tenantId, string schemaName);
 
     [LoggerMessage(LogLevel.Error, "Failed to deprovision forms DB for tenant {TenantId}")]
     public static partial void ErrorFormsDbDeprovisionFailed(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId);

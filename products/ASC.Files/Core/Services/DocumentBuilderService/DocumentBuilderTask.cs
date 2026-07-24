@@ -109,6 +109,13 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
 
             CancellationToken.ThrowIfCancellationRequested();
 
+            if (await TryHandleSpeciallyAsync(scope.ServiceProvider))
+            {
+                Percentage = 100;
+                Status = DistributedTaskStatus.Completed;
+                return;
+            }
+
             var inputData = await GetDocumentBuilderInputDataAsync(scope.ServiceProvider);
 
             Percentage = 30;
@@ -155,6 +162,12 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
 
     protected abstract Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider);
     protected abstract Task<File<TId>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData);
+
+    /// <summary>
+    /// Optional pre-step (scope/tenant/auth already set) before the normal build; return true to skip it.
+    /// Default: no-op.
+    /// </summary>
+    protected virtual Task<bool> TryHandleSpeciallyAsync(IServiceProvider serviceProvider) => Task.FromResult(false);
 }
 
 public record DocumentBuilderInputData(string Script, string TempFileName, string OutputFileName);

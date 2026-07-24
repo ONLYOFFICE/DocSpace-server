@@ -47,6 +47,21 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
 
     private const string ScriptName = "FormFillingReport.docbuilder";
 
+    /// <summary>
+    /// Only for an explicit xlsx request (never the per-submission update, which must stay fast): recover the
+    /// form when its completed PDFs are desynced from the index, otherwise let the normal build run.
+    /// </summary>
+    protected override async Task<bool> TryHandleSpeciallyAsync(IServiceProvider serviceProvider)
+    {
+        if (!_data.Recover)
+        {
+            return false;
+        }
+
+        var recoveryService = serviceProvider.GetRequiredService<FormRecoveryService>();
+        return await recoveryService.TryRecoverFormAsync(_data.RoomId, _data.OriginalFormId, _userId, CancellationToken);
+    }
+
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
@@ -246,4 +261,4 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
     }
 }
 
-public record FormFillingReportTaskData(int RoomId, int OriginalFormId, int OriginalFormVersion, bool IsNewFile, IDictionary<string, string> Headers);
+public record FormFillingReportTaskData(int RoomId, int OriginalFormId, int OriginalFormVersion, bool IsNewFile, IDictionary<string, string> Headers, bool Recover = false);

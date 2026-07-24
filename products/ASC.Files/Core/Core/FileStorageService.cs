@@ -111,7 +111,6 @@ public class FileStorageService //: IFileStorageService
     FormFillingReportCreator formFillingReportCreator,
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService,
-    FormRecoveryService formRecoveryService,
     EncryptionLoginProvider encryptionLoginProvider)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
@@ -5599,7 +5598,7 @@ public class FileStorageService //: IFileStorageService
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile, recover: true);
 
         return (task, form, isNewFile);
     }
@@ -5686,7 +5685,7 @@ public class FileStorageService //: IFileStorageService
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile, recover: true);
 
         return (task, form, isNewFile);
     }
@@ -5731,42 +5730,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         return await externalDbSyncService.GetTaskAsync(roomId);
-    }
-
-    public async Task<FormRecoveryTask> StartFormRecoveryAsync(int roomId)
-    {
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
-
-        if (room.FolderType != FolderType.FillingFormsRoom)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        if (!await fileSecurity.CanEditAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        return await formRecoveryService.StartRecoveryAsync(roomId);
-    }
-
-    public async Task<FormRecoveryTask> GetFormRecoveryTaskAsync(int roomId)
-    {
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
-
-        if (room.FolderType != FolderType.FillingFormsRoom)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        if (!await fileSecurity.CanEditAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        return await formRecoveryService.GetTaskAsync(roomId);
     }
 
     private async Task CheckRoomAvailability<T>(T roomId)
