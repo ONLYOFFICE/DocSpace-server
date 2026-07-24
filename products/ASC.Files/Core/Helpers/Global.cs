@@ -431,6 +431,7 @@ public class GlobalFolder(
     TenantManager tenantManager,
     UserManager userManager,
     SettingsManager settingsManager,
+    CommonLinkUtility commonLinkUtility,
     ILogger<GlobalFolder> logger,
     IServiceProvider serviceProvider)
 {
@@ -820,7 +821,9 @@ public class GlobalFolder(
 
         if (my && userId == tenantManager.GetCurrentTenant().OwnerId)
         {
-            await TryScheduleDemoFormRoomAsync(tenantId, userId);
+            // Capture the request's base URL now: the demo runs fire-and-forget (no HttpContext), and without
+            // it Document Server can't resolve the form's download URL when reading the field layout.
+            await TryScheduleDemoFormRoomAsync(tenantId, userId, commonLinkUtility.ServerRootPath);
         }
 
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).StartDocsEnabled)
@@ -842,7 +845,7 @@ public class GlobalFolder(
         task.Start();
     }
 
-    private async Task TryScheduleDemoFormRoomAsync(int tenantId, Guid userId)
+    private async Task TryScheduleDemoFormRoomAsync(int tenantId, Guid userId, string baseUri)
     {
         var settings = await settingsManager.LoadAsync<DemoFormRoomSettings>(tenantId);
         if (settings.IsCreated)
@@ -853,14 +856,14 @@ public class GlobalFolder(
         settings.IsCreated = true;
         await settingsManager.SaveAsync(settings, tenantId);
 
-        RunFireAndForget(async () => await CreateDemoFormRoomAsync(serviceProvider, tenantId, userId));
+        RunFireAndForget(async () => await CreateDemoFormRoomAsync(serviceProvider, tenantId, userId, baseUri));
     }
 
     /// <summary>
     /// Provisions the owner-only onboarding demo: a form-filling room with a sample form and a batch of
     /// synthetic filled-in submissions synced to the built-in forms database.
     /// </summary>
-    private async Task CreateDemoFormRoomAsync(IServiceProvider serviceProvider, int tenantId, Guid userId)
+    private async Task CreateDemoFormRoomAsync(IServiceProvider serviceProvider, int tenantId, Guid userId, string baseUri)
     {
         try
         {
@@ -874,14 +877,16 @@ public class GlobalFolder(
 
             var globalStore = scope.ServiceProvider.GetRequiredService<GlobalStore>();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            var formPath = $"{FileConstant.StartDocPath}{FileConstant.StartDocDefaultPath}{FileConstant.DemoFormRoomPath}{FileConstant.DemoFormRoomFileName}";
 
-            if (!await storeTemplate.IsFileAsync("", formPath))
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+            var culture = (await userManager.GetUsersAsync(userId)).GetCulture();
+
+            var formPath = await ResolveDemoFormPathAsync(globalStore, storeTemplate, culture);
+            if (formPath == null)
             {
-                logger.WarnDemoFormAssetMissing(formPath);
+                logger.WarnDemoFormAssetMissing($"{await globalStore.GetStartDocsPath(storeTemplate, true, culture)}*.pdf");
 
-                // The asset may simply not have been deployed yet — un-flag as "created" so the next
-                // owner visit retries, instead of permanently skipping the demo for this tenant.
+                // Asset not deployed yet — un-flag so the next owner visit retries.
                 await ResetDemoFormRoomFlagAsync(tenantId);
 
                 return;
@@ -889,16 +894,37 @@ public class GlobalFolder(
 
             var (roomId, savedFile) = await CreateDemoFormRoomFileAsync(scope.ServiceProvider, storeTemplate, formPath);
 
+            // No HttpContext here: force the request URL so Document Server can reach the form during
+            // extraction. Doing it before room creation would break share-link validation.
+            if (!string.IsNullOrEmpty(baseUri))
+            {
+                scope.ServiceProvider.GetRequiredService<CommonLinkUtility>().ServerUri = baseUri;
+            }
+
             await SeedDemoFormSubmissionsAsync(scope.ServiceProvider, tenantId, roomId, savedFile);
         }
         catch (Exception e)
         {
             logger.ErrorCreateDemoFormRoom(e);
 
-            // Un-flag as "created" so a transient failure (unreachable service, quota, etc.) doesn't
-            // permanently skip the demo for this tenant — the next owner visit will retry.
+            // Transient failure — un-flag so the next owner visit retries.
             await ResetDemoFormRoomFlagAsync(tenantId);
         }
+    }
+
+    /// <summary>The demo resume form: the single PDF in the owner-culture "my" samples, falling back to the default culture; null if none.</summary>
+    private static async Task<string> ResolveDemoFormPathAsync(GlobalStore globalStore, IDataStore storeTemplate, CultureInfo culture)
+    {
+        var path = await globalStore.GetStartDocsPath(storeTemplate, true, culture);
+        var pdf = await storeTemplate.ListFilesRelativeAsync("", path, "*.pdf", false).FirstOrDefaultAsync();
+
+        if (pdf == null && culture != null)
+        {
+            path = await globalStore.GetStartDocsPath(storeTemplate, true, null);
+            pdf = await storeTemplate.ListFilesRelativeAsync("", path, "*.pdf", false).FirstOrDefaultAsync();
+        }
+
+        return pdf == null ? null : path + pdf;
     }
 
     private async Task ResetDemoFormRoomFlagAsync(int tenantId)
@@ -921,7 +947,7 @@ public class GlobalFolder(
         var fileStorageService = scopedProvider.GetRequiredService<FileStorageService>();
 
         var room = await fileStorageService.CreateRoomAsync(
-            "Demo: Customer Feedback", RoomType.FillingFormsRoom, privacy: false, indexing: true,
+            "Demo: Resume Submissions", RoomType.FillingFormsRoom, privacy: false, indexing: true,
             share: null, quota: null, lifetime: null, denyDownload: false, watermark: null,
             color: null, cover: null, tags: ["demo"], logo: null, chatSettings: null,
             sendFormToExternalDB: true, saveFormAsXLSX: false);
@@ -931,7 +957,7 @@ public class GlobalFolder(
         var socketManager = scopedProvider.GetRequiredService<SocketManager>();
 
         var newFile = scopedProvider.GetRequiredService<File<int>>();
-        newFile.Title = FileConstant.DemoFormRoomFileName;
+        newFile.Title = Path.GetFileName(formPath);
         newFile.ParentId = room.Id;
         newFile.Category = (int)FilterType.PdfForm;
         newFile.Comment = FilesCommonResource.CommentCreate;
@@ -956,11 +982,27 @@ public class GlobalFolder(
         var originalFormId = savedFile.Id;
         var originalFormVersion = savedFile.Version;
 
-        var (metadata, submissions) = GenerateSyntheticSubmissions(tenantId, roomId, originalFormId, originalFormVersion);
+        // Field keys are localized per portal language: prefer the layout read from the PDF, fall back to the
+        // default resume schema if Document Server can't be reached. Values are always English.
+        IReadOnlyList<FormFieldDefinition> fields;
+        try
+        {
+            var formsDataJson = await scopedProvider.GetRequiredService<FormFieldsExtractor>().ExtractFieldsJsonAsync(savedFile, lastVersion: true);
+            fields = FormFieldsExtractor.ParseFields(formsDataJson);
+            if (fields.Count == 0)
+            {
+                fields = _fallbackResumeFields;
+            }
+        }
+        catch (Exception e)
+        {
+            logger.WarnDemoFormFieldsExtractFailed(e);
+            fields = _fallbackResumeFields;
+        }
 
-        // Best-effort: also index into OpenSearch so the demo data is consistent with what a real
-        // submission would produce (search, reconciliation) — but never block seeding on it, since
-        // it is not guaranteed to be reachable in every environment.
+        var (metadata, submissions) = GenerateSyntheticSubmissions(tenantId, roomId, originalFormId, originalFormVersion, fields);
+
+        // Best-effort mirror into OpenSearch to match a real submission; never block seeding on it.
         try
         {
             var factoryIndexerFormMetadata = scopedProvider.GetRequiredService<FactoryIndexerFormMetadata>();
@@ -985,8 +1027,7 @@ public class GlobalFolder(
             logger.WarnDemoFormOpenSearchIndexingFailed(e);
         }
 
-        // Write straight into the built-in Postgres DB — this is the path the AI tools actually read
-        // from, and it must not depend on OpenSearch being reachable.
+        // The built-in Postgres DB is what the AI tools read from, independent of OpenSearch.
         var formFillingReportCreator = scopedProvider.GetRequiredService<FormFillingReportCreator>();
         await formFillingReportCreator.SeedBuiltinDbDirectlyAsync(
             originalFormId, originalFormVersion, metadata,
@@ -994,47 +1035,76 @@ public class GlobalFolder(
     }
 
     private const int SyntheticSubmissionIdBase = 900_000_000;
+    private const int SyntheticSubmissionCount = 12;
+
+    // Used only when the form's real layout can't be read; keys match the default-culture resume so the
+    // seeded values stay meaningful.
+    private static readonly IReadOnlyList<FormFieldDefinition> _fallbackResumeFields =
+    [
+        new("FirstName", "text"),
+        new("LastName", "text"),
+        new("Position", "text"),
+        new("EmailAddress", "text"),
+        new("PhoneNumber", "text"),
+        new("BirthdayDate", "text"),
+        new("Website", "text"),
+        new("CompanyName", "text"),
+        new("Institution", "text"),
+        new("Degree", "text"),
+        new("Language", "text"),
+        new("Skills", "text"),
+        new("TextAboutYou", "text")
+    ];
+
+    private static readonly string[] _firstNames = ["Alex", "Maria", "Chen", "Sam", "Emma", "David", "Sofia", "Liam", "Olivia", "Noah", "Ava", "Lucas"];
+    private static readonly string[] _lastNames = ["Johnson", "Garcia", "Wei", "Patel", "Brown", "Miller", "Rossi", "Novak", "Kim", "Silva", "Adams", "Cohen"];
+    private static readonly string[] _positions = ["Software Engineer", "Project Manager", "UX Designer", "Data Analyst", "QA Engineer", "Product Owner", "DevOps Engineer", "Business Analyst"];
+    private static readonly string[] _companies = ["Acme Corp", "Globex", "Initech", "Umbrella Ltd", "Soylent Inc", "Hooli", "Vandelay", "Stark Labs"];
+    private static readonly string[] _institutions = ["State University", "Institute of Technology", "City College", "National University"];
+    private static readonly string[] _degrees = ["Bachelor of Science", "Master of Arts", "B.Eng.", "MBA"];
+    private static readonly string[] _languages = ["English", "Spanish", "German", "French", "Chinese"];
+    private static readonly string[] _paragraphs =
+    [
+        "Motivated professional with a track record of delivering results.",
+        "Experienced in cross-functional teams and agile delivery.",
+        "Focused on quality, collaboration and continuous improvement.",
+        "Passionate about building products people love to use."
+    ];
+    private static readonly string[] _skills = ["Teamwork, communication, problem solving", "Leadership, planning, analytics", "Design, prototyping, research", "Automation, testing, CI/CD"];
+    private static readonly string[] _choiceValues = ["Yes", "No"];
 
     private static (List<FormMetadata> Metadata, List<DbFormsItemDataSearch> Submissions) GenerateSyntheticSubmissions(
-        int tenantId, int roomId, int originalFormId, int originalFormVersion)
+        int tenantId, int roomId, int originalFormId, int originalFormVersion, IReadOnlyList<FormFieldDefinition> fields)
     {
-        string[] satisfactionLevels = ["Excellent", "Good", "Average", "Poor"];
-        string[] comments =
-        [
-            "Great service, will definitely come back.",
-            "The support team resolved my issue quickly.",
-            "Delivery took longer than expected.",
-            "Exactly what I was looking for.",
-            "Could be better, but overall satisfied.",
-            "Outstanding experience from start to finish.",
-            "A few rough edges, but the team was helpful.",
-            "Not what I expected, needs improvement.",
-            "Very happy with the quality.",
-            "Average experience, nothing special.",
-            "Exceeded my expectations!",
-            "Support response time was slow.",
-            "Smooth process, no complaints.",
-            "Would recommend to a friend.",
-            "It was okay, could use more options."
-        ];
-
-        var metadata = new List<FormMetadata>
+        // Leading form-number column, then the form's own fields.
+        var metadata = new List<FormMetadata> { new() { Key = "FormNumber", Type = "text" } };
+        metadata.AddRange(fields.Select(f => new FormMetadata
         {
-            new() { Key = "FormNumber", Type = "text" },
-            new() { Key = "Satisfaction", Type = "radio", PossibleValues = [.. satisfactionLevels] },
-            new() { Key = "Comment", Type = "text" },
-            new() { Key = "SubmittedDate", Type = "dateTime", Format = "DD.MM.YYYY HH:mm" },
-            new() { Key = "WouldRecommend", Type = "checkBox" }
-        };
+            Key = f.Key,
+            Type = f.Type,
+            Format = f.Type is "date" or "dateTime" ? "DD.MM.YYYY HH:mm" : null,
+            PossibleValues = f.Type is "radio" or "comboBox" or "dropDownList" ? [.. _choiceValues] : null
+        }));
 
         var random = new Random();
         var submissions = new List<DbFormsItemDataSearch>();
 
-        for (var i = 1; i <= 15; i++)
+        for (var i = 1; i <= SyntheticSubmissionCount; i++)
         {
-            var satisfaction = satisfactionLevels[random.Next(satisfactionLevels.Length)];
-            var recommend = satisfaction is "Excellent" or "Good" ? random.Next(100) < 85 : random.Next(100) < 30;
             var submittedOn = DateTime.UtcNow.AddDays(-random.Next(1, 42)).AddHours(-random.Next(0, 24));
+            var firstName = _firstNames[i % _firstNames.Length];
+            var lastName = _lastNames[i % _lastNames.Length];
+
+            var formsData = new List<FormsItemData> { new() { Key = "FormNumber", Value = i.ToString(), Type = "text" } };
+            for (var f = 0; f < fields.Count; f++)
+            {
+                formsData.Add(new FormsItemData
+                {
+                    Key = fields[f].Key,
+                    Type = fields[f].Type,
+                    Value = SampleFieldValue(fields[f].Key, fields[f].Type, firstName, lastName, i, f, random, submittedOn)
+                });
+            }
 
             submissions.Add(new DbFormsItemDataSearch
             {
@@ -1045,19 +1115,78 @@ public class GlobalFolder(
                 OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
                 CreateOn = submittedOn,
-                FormsData =
-                [
-                    new FormsItemData { Key = "FormNumber", Value = i.ToString(), Type = "text" },
-                    new FormsItemData { Key = "Satisfaction", Value = satisfaction, Type = "radio" },
-                    new FormsItemData { Key = "Comment", Value = comments[random.Next(comments.Length)], Type = "text" },
-                    new FormsItemData { Key = "SubmittedDate", Value = submittedOn.ToString("dd.MM.yyyy HH:mm"), Type = "dateTime" },
-                    new FormsItemData { Key = "WouldRecommend", Value = recommend.ToString(), Type = "checkBox" }
-                ]
+                FormsData = formsData
             });
         }
 
         return (metadata, submissions);
     }
+
+    /// <summary>
+    /// Known resume keys get a meaningful value, sensitive fields stay blank, anything else (incl. unrecognised
+    /// localized keys) falls back to a value by field type. Always English.
+    /// </summary>
+    private static string SampleFieldValue(string key, string type, string firstName, string lastName, int row, int fieldIndex, Random random, DateTime submittedOn)
+    {
+        // Strip the trailing index/part suffixes the resume uses (e.g. CompanyName1, SalaryExpectations_0).
+        var name = key.Trim().TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_').ToLowerInvariant();
+
+        switch (name)
+        {
+            // Sensitive fields — never seed synthetic values.
+            case "creditcard":
+            case "currentsalary":
+            case "salaryexpectations":
+                return string.Empty;
+
+            case "firstname":
+                return firstName;
+            case "lastname":
+                return lastName;
+            case "emailaddress":
+            case "email":
+                return $"{firstName}.{lastName}@example.com".ToLowerInvariant();
+            case "phonenumber":
+            case "phone":
+                return $"+1 555 01{row:00}";
+            case "website":
+                return $"https://example.com/{firstName.ToLowerInvariant()}";
+            case "position":
+            case "jobtitle":
+                return _positions[(row + fieldIndex) % _positions.Length];
+            case "companyname":
+                return _companies[(row + fieldIndex) % _companies.Length];
+            case "institution":
+                return _institutions[(row + fieldIndex) % _institutions.Length];
+            case "degree":
+                return _degrees[(row + fieldIndex) % _degrees.Length];
+            case "language":
+                return _languages[(row + fieldIndex) % _languages.Length];
+            case "skills":
+                return _skills[(row + fieldIndex) % _skills.Length];
+            case "birthdaydate":
+                return submittedOn.AddYears(-25 - (row % 15)).ToString("dd.MM.yyyy");
+            case "educationperiod":
+            case "experienceperiod":
+                return (2005 + ((row + fieldIndex) % 18)).ToString();
+            case "textaboutyou":
+            case "description":
+            case "achievements":
+            case "volunteerexperience":
+                return _paragraphs[(row + fieldIndex) % _paragraphs.Length];
+        }
+
+        return SampleValueForType(type, random, row, fieldIndex, submittedOn);
+    }
+
+    private static string SampleValueForType(string type, Random random, int row, int fieldIndex, DateTime submittedOn) => type switch
+    {
+        "checkBox" => (random.Next(2) == 0).ToString(),
+        "date" or "dateTime" => submittedOn.ToString("dd.MM.yyyy HH:mm"),
+        "radio" or "comboBox" or "dropDownList" => _choiceValues[(row + fieldIndex) % _choiceValues.Length],
+        "digit" or "number" => random.Next(1, 100).ToString(),
+        _ => _paragraphs[(row + fieldIndex) % _paragraphs.Length]
+    };
 
     private async Task CreateSampleDocumentsAsync(IServiceProvider serviceProvider, int tenantId, Guid userId, int folderId, bool my)
     {

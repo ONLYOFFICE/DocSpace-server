@@ -45,8 +45,6 @@ public static class FileConstant
     public const string StartDocDefaultPath = "en-US/";
     public const string StartDocMyPath = "my/";
     public const string StartDocCorporatePath = "corporate/";
-    public const string DemoFormRoomPath = "forms/";
-    public const string DemoFormRoomFileName = "Customer Satisfaction Survey.pdf";
     public const string NewDocPath = "new/";
     public const string NewDocDefaultPath = "default/";
     public const string NewDocDefaultCustomModePath = "ru-RU/";

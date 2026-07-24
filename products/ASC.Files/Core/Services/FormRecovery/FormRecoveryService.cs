@@ -48,9 +48,8 @@ public class FormRecoveryService(
     IDaoFactory daoFactory,
     FactoryIndexerForm factoryIndexerForm,
     FormFillingReportCreator formFillingReportCreator,
+    FormFieldsExtractor formFieldsExtractor,
     DocumentBuilderTask documentBuilderTask,
-    DocumentServiceConnector documentServiceConnector,
-    DocumentServiceHelper documentServiceHelper,
     PathProvider pathProvider,
     GlobalStore globalStore,
     IHttpClientFactory httpClientFactory,
@@ -59,12 +58,6 @@ public class FormRecoveryService(
     SocketManager socketManager,
     ILogger<FormRecoveryService> logger)
 {
-    // Default encoder unicode-escapes "&", which the docbuilder script engine doesn't decode back inside
-    // string literals, breaking every query parameter after the first in an embedded URL.
-    private static readonly JsonSerializerOptions _scriptStringOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-
-    private static readonly TimeSpan _sourceUrlSignatureLifetime = TimeSpan.FromMinutes(10);
-
     /// <summary>
     /// If the form's completed PDFs are desynced from the search index (some completed forms have no indexed
     /// submission record), repairs the orphaned forms and rebuilds the form's xlsx report history, then
@@ -191,8 +184,8 @@ public class FormRecoveryService(
 
         // Completed forms don't reliably record their template version — route by matching the PDF's field key
         // set to the version whose layout it matches, keeping each version's report to one consistent column set.
-        var orphanFormsDataJson = await ExtractFormFieldsJsonAsync(orphan, lastVersion: true, cancellationToken);
-        var orphanKeys = ParseFieldKeys(orphanFormsDataJson);
+        var orphanFormsDataJson = await formFieldsExtractor.ExtractFieldsJsonAsync(orphan, lastVersion: true, cancellationToken);
+        var orphanKeys = FormFieldsExtractor.ParseFields(orphanFormsDataJson).Select(f => f.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         // Tie (a revision that didn't change fields) → newest match; no match → current version (keep the data).
         var matchedVersion = versionKeySets
@@ -460,8 +453,8 @@ public class FormRecoveryService(
                 {
                     try
                     {
-                        var templateJson = await ExtractFormFieldsJsonAsync(templateAtVersion, lastVersion: false, cancellationToken);
-                        keys = ParseFieldKeys(templateJson);
+                        var templateJson = await formFieldsExtractor.ExtractFieldsJsonAsync(templateAtVersion, lastVersion: false, cancellationToken);
+                        keys = FormFieldsExtractor.ParseFields(templateJson).Select(f => f.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
                     }
                     catch (Exception e)
                     {
@@ -478,92 +471,5 @@ public class FormRecoveryService(
         }
 
         return result;
-    }
-
-    /// <summary>
-    /// The set of field keys present in the given "{ formsdata: [...] }" payload, matching how the report lays
-    /// out its columns (picture/signature fields excluded, compared case-insensitively).
-    /// </summary>
-    private static HashSet<string> ParseFieldKeys(string formsDataJson)
-    {
-        var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        using var document = JsonDocument.Parse(formsDataJson);
-        if (document.RootElement.TryGetProperty("formsdata", out var formsArray) && formsArray.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var form in formsArray.EnumerateArray())
-            {
-                var key = form.TryGetProperty("key", out var keyProp) ? keyProp.GetString() : null;
-                var type = form.TryGetProperty("type", out var typeProp) ? typeProp.GetString() : null;
-
-                if (!string.IsNullOrEmpty(key) && type != "picture" && type != "signature")
-                {
-                    keys.Add(key);
-                }
-            }
-        }
-
-        return keys;
-    }
-
-    /// <summary>
-    /// Runs ExtractFormFieldsData.docbuilder against a form file and pulls out the "{ formsdata: [...] }" JSON
-    /// it embeds in its text output — the same shape Document Server's normal submit callback produces.
-    /// </summary>
-    private async Task<string> ExtractFormFieldsJsonAsync(File<int> file, bool lastVersion, CancellationToken cancellationToken)
-    {
-        var sourceUrl = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file, lastVersion));
-
-        // OpenFile(url) can't set headers, so the signature travels as a query param — bound to this file and
-        // short-lived (exp-enforced), since query strings, unlike headers, tend to end up in access logs.
-        var signatureToken = documentServiceHelper.GetSignature(new
-        {
-            fileId = file.Id,
-            exp = DateTimeOffset.UtcNow.Add(_sourceUrlSignatureLifetime).ToUnixTimeSeconds()
-        });
-
-        if (!string.IsNullOrEmpty(signatureToken))
-        {
-            sourceUrl = FilesLinkUtility.AddQueryString(sourceUrl, new Dictionary<string, string>
-            {
-                { FilesLinkUtility.SignatureQueryKey, signatureToken }
-            });
-        }
-
-        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource("ExtractFormFieldsData.docbuilder")
-            ?? throw new InvalidOperationException("ExtractFormFieldsData.docbuilder template not found.");
-        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".txt");
-
-        // The docbuilder engine keeps only one document active at a time, so the script embeds the result in
-        // the opened PDF's own text output between unique markers; this pulls the JSON back out from between them.
-        var markerStart = $"@@FORMDATA_START_{Guid.NewGuid():N}@@";
-        var markerEnd = $"@@FORMDATA_END_{Guid.NewGuid():N}@@";
-
-        script = script
-            .Replace("${sourceFileUrl}", JsonSerializer.Serialize(sourceUrl, _scriptStringOptions))
-            .Replace("${tempFileName}", tempFileName)
-            .Replace("${resultMarkerStart}", markerStart)
-            .Replace("${resultMarkerEnd}", markerEnd);
-
-        var inputData = new DocumentBuilderInputData(script, tempFileName, "");
-        var resultTextUrl = await documentBuilderTask.BuildFileAsync(inputData, cancellationToken);
-
-#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
-        var httpClient = httpClientFactory.CreateClient();
-#pragma warning restore CA2000
-        using var response = await httpClient.GetAsync(resultTextUrl, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        var resultText = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        var startIndex = resultText.IndexOf(markerStart, StringComparison.Ordinal);
-        var endIndex = resultText.IndexOf(markerEnd, StringComparison.Ordinal);
-        if (startIndex < 0 || endIndex < 0 || endIndex <= startIndex)
-        {
-            throw new InvalidOperationException("The form data markers were not found in the DocBuilder script output.");
-        }
-
-        startIndex += markerStart.Length;
-
-        return resultText[startIndex..endIndex];
     }
 }

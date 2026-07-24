@@ -57,4 +57,7 @@ internal static partial class GlobalLogger
 
     [LoggerMessage(LogLevel.Warning, "Demo form room: best-effort OpenSearch indexing of synthetic submissions failed")]
     public static partial void WarnDemoFormOpenSearchIndexingFailed(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Demo form room: could not read the form's field layout; falling back to the default resume schema")]
+    public static partial void WarnDemoFormFieldsExtractFailed(this ILogger logger, Exception exception);
 }
