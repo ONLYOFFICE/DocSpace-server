@@ -149,7 +149,6 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         string ReportTitle,
         string OutputFileNameFormat,
         List<ReportColumn> Columns,
-        string TotalCurrency,
         Func<StreamWriter, Task> WriteValues);
 
     // Common scaffolding for all report types: resolve tenant/user, apply the user's culture,
@@ -229,8 +228,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             keys = definition.Columns.Select(x => x.Header).ToList(),
             aligns = definition.Columns.Select(x => x.Align).ToList(),
             totalColumns,
-            totalCurrencyColumn,
-            totalCurrency = definition.TotalCurrency
+            totalCurrencyColumn
         };
 
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
@@ -308,7 +306,6 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return RenderAsync(serviceProvider, userId, taskData, async ctx =>
         {
             var tenantManager = ctx.ServiceProvider.GetService<TenantManager>();
-            var tariffService = ctx.ServiceProvider.GetService<TariffService>();
 
             var columns = new List<ReportColumn> {
                 new(Resource.AccountingCustomerOperationDate),
@@ -336,7 +333,6 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 Resource.AccountingCustomerOperationsReportSheetName,
                 Resource.AccountingCustomerOperationsReportName,
                 columns,
-                tariffService.GetSupportedAccountingCurrencies().FirstOrDefault(),
                 async writer =>
                 {
                     var tariffService = ctx.ServiceProvider.GetService<TariffService>();
@@ -391,7 +387,6 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 Resource.AccountingServiceUsageReportSheetName,
                 Resource.AccountingServiceUsageReportName,
                 columns,
-                tariffService.GetSupportedAccountingCurrencies().FirstOrDefault(),
                 async writer =>
                 {
                     var quotaService = ctx.ServiceProvider.GetService<IQuotaService>();
@@ -448,7 +443,6 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 Resource.AccountingMonthlyUsageReportSheetName,
                 Resource.AccountingMonthlyUsageReportName,
                 columns,
-                tariffService.GetSupportedAccountingCurrencies().FirstOrDefault(),
                 async writer =>
                 {
                     var filter = new MonthlyUsageFilter

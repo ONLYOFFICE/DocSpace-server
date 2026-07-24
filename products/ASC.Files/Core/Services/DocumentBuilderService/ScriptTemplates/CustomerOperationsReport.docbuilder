@@ -158,7 +158,8 @@ function prepareTotal(headerRowIndex) {
             cell.format = inputData.resources.totalFormat;
             cell.halign = inputData.aligns[i];
         } else if (i == inputData.totalCurrencyColumn) {
-            cell.value = inputData.totalCurrency;
+            // Echo the currency code from the first data row of the currency column.
+            cell.value = values[0][i] != null ? values[0][i].value : null;
             cell.format = "@";
             cell.halign = inputData.aligns[i];
         }
