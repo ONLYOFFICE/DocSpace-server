@@ -559,8 +559,9 @@ public abstract class BaseStartup
         services.AddApiKeyBearerAuthentication()
                 .AddJwtBearerAuthentication();
 
-        services.AddBillingHttpClient();
+        services.AddBillingHttpClient(_configuration);
         services.AddAccountingHttpClient(_configuration);
+        services.AddDocsCloudHttpClient(_configuration);
 
         services.ConfigureNotificationServices();
 

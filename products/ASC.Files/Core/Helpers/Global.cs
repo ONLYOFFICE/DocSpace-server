@@ -1014,12 +1014,12 @@ public class GlobalFolder(
                 OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
                 Metadata = metadata
-            }, waitForCompletion: true);
+            });
 
             var factoryIndexerForm = scopedProvider.GetRequiredService<FactoryIndexerForm>();
             foreach (var submission in submissions)
             {
-                await factoryIndexerForm.IndexAsync(submission, waitForCompletion: true);
+                await factoryIndexerForm.IndexAsync(submission);
             }
         }
         catch (Exception e)

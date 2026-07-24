@@ -33,17 +33,12 @@
 
 namespace ASC.Core.Billing;
 
-[Singleton]
-public class BillingClient
+[Scope]
+public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillingApi billingApi)
 {
-    public readonly bool Configured;
-    private readonly PaymentConfiguration _configuration;
-    private readonly IHttpClientFactory _httpClientFactory;
     private const int StripePaymentSystemId = 9;
     private const int AccountingPaymentSystemId = 11;
 
-    internal const string HttpClientName = "billingHttpClient";
-    internal const string ResiliencePipelineName = "billingResiliencePipeline";
     public const string GetCurrentPaymentsUri = "GetActiveResources";
     public const string MetadataDetails = "details";
     public const string MetadataType = "type";
@@ -51,33 +46,30 @@ public class BillingClient
     public const string MetadataAgentTitle = "agent_title";
     public const string MetadataAgentId = "agent_id";
 
-    public BillingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
-    {
-        _configuration = configuration.GetSection("core:payment").Get<PaymentConfiguration>() ?? new PaymentConfiguration();
-        _httpClientFactory = httpClientFactory;
-
-        _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
-        if (!string.IsNullOrEmpty(_configuration.Url))
-        {
-            _configuration.Url += "/billing/";
-
-            Configured = true;
-        }
-    }
+    public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
     public async Task<string> GetAccountLinkAsync(string portalId, string backUrl)
     {
-        var result = await RequestAsync("GetAccountLink", portalId, [Tuple.Create("BackRef", backUrl)]);
+        EnsureConfigured();
+
+        var result = await billingApi.GetAccountLinkAsync(new GetAccountLinkRequestDto
+        {
+            PortalId = [portalId],
+            BackRef = [backUrl]
+        });
+
         var link = JsonSerializer.Deserialize<string>(result);
         return link;
     }
 
     public async Task<PaymentLast[]> GetCurrentPaymentsAsync(string portalId, bool refresh)
     {
-        var result = await RequestAsync(GetCurrentPaymentsUri, portalId, addPolicy: refresh);
-        var payments = JsonSerializer.Deserialize<PaymentLast[]>(result);
+        EnsureConfigured();
 
-        if (!_configuration.Test)
+        var payments = await billingApi.GetActiveResourcesAsync(
+            new BillingPortalRequestDto { PortalId = [portalId] }, refresh);
+
+        if (!configuration.Value.Test)
         {
             payments = payments.Where(payment => payment.PaymentStatus != 4).ToArray();
         }
@@ -87,61 +79,37 @@ public class BillingClient
 
     public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(string portalId)
     {
-        var result = await RequestAsync("GetPayments", portalId);
-        var payments = JsonSerializer.Deserialize<List<PaymentInfo>>(result);
+        EnsureConfigured();
 
-        return payments;
+        return await billingApi.GetPaymentsAsync(new BillingPortalRequestDto { PortalId = [portalId] });
     }
 
-    public async Task<string> GetPaymentUrlAsync(string portalId, IEnumerable<string> products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null, string successUrl = null)
+    public async Task<string> GetPaymentUrlAsync(string portalId, IEnumerable<string> products,
+        string affiliateId = null, string partnerId = null, string campaign = null, string currency = null,
+        string language = null, string customerEmail = null, string quantity = null, string backUrl = null,
+        string successUrl = null)
     {
-        var parameters = products
-            .Distinct()
-            .Select(p => Tuple.Create("ProductId", p))
-            .ToList();
+        EnsureConfigured();
 
-        parameters.Add(Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()));
-
-        if (!string.IsNullOrEmpty(affiliateId))
+        var requestDto = new GetPaymentUrlRequestDto
         {
-            parameters.Add(Tuple.Create("AffiliateId", affiliateId));
-        }
-        if (!string.IsNullOrEmpty(partnerId))
-        {
-            parameters.Add(Tuple.Create("PartnerId", partnerId));
-        }
-        if (!string.IsNullOrEmpty(campaign))
-        {
-            parameters.Add(Tuple.Create("campaign", campaign));
-        }
-        if (!string.IsNullOrEmpty(currency))
-        {
-            parameters.Add(Tuple.Create("Currency", currency));
-        }
-        if (!string.IsNullOrEmpty(language))
-        {
-            parameters.Add(Tuple.Create("Language", language));
-        }
-        if (!string.IsNullOrEmpty(customerEmail))
-        {
-            parameters.Add(Tuple.Create("CustomerEmail", customerEmail));
-        }
-        if (!string.IsNullOrEmpty(quantity))
-        {
-            parameters.Add(Tuple.Create("Quantity", quantity));
-        }
-        if (!string.IsNullOrEmpty(successUrl))
-        {
+            PortalId = [portalId],
+            ProductId = Multi(products?.Distinct()),
+            PaymentSystemId = [StripePaymentSystemId.ToString()],
+            AffiliateId = Optional(affiliateId),
+            PartnerId = Optional(partnerId),
+            Campaign = Optional(campaign),
+            Currency = Optional(currency),
+            Language = Optional(language),
+            CustomerEmail = Optional(customerEmail),
+            Quantity = Optional(quantity),
             // BackRef - redirect url after payment
-            parameters.Add(Tuple.Create("BackRef", successUrl));
-        }
-        if (!string.IsNullOrEmpty(backUrl))
-        {
+            BackRef = Optional(successUrl),
             // ShopUrl - redirect url when canceling a purchase (back to the shop)
-            parameters.Add(Tuple.Create("ShopUrl", backUrl));
-        }
+            ShopUrl = Optional(backUrl)
+        };
 
-        var result = await RequestAsync("GetSinglePaymentUrl", portalId, parameters);
+        var result = await billingApi.GetSinglePaymentUrlAsync(requestDto);
         var paymentUrl = JsonSerializer.Deserialize<string>(result);
 
         return paymentUrl;
@@ -149,106 +117,130 @@ public class BillingClient
 
     public async Task<CustomerInfo> GetCustomerInfoAsync(string portalId)
     {
-        var result = await RequestAsync("GetCustomerInfo", portalId);
-        var customerInfo = JsonSerializer.Deserialize<CustomerInfo>(result);
+        EnsureConfigured();
 
-        return customerInfo;
+        return await billingApi.GetCustomerInfoAsync(new BillingPortalRequestDto { PortalId = [portalId] });
     }
 
-    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null)
+    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency,
+        string customerParticipantName, string siteName, Dictionary<string, string> metadata = null)
     {
-        var parameters = new List<Tuple<string, string>>
+        EnsureConfigured();
+
+        var requestDto = new DepositRequestDto
         {
-            Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)),
-            Tuple.Create("Currency", currency)
+            PortalId = [portalId],
+            Amount = [amount.ToString(CultureInfo.InvariantCulture)],
+            Currency = [currency],
+            CustomerParticipantName = Optional(customerParticipantName),
+            SiteName = Optional(siteName),
+            Metadata = Metadata(metadata)
         };
 
-        if (!string.IsNullOrEmpty(customerParticipantName))
-        {
-            parameters.Add(Tuple.Create("CustomerParticipantName", customerParticipantName));
-        }
-
-        if (!string.IsNullOrEmpty(siteName))
-        {
-            parameters.Add(Tuple.Create("SiteName", siteName));
-        }
-
-        if (metadata != null)
-        {
-            parameters.Add(Tuple.Create("Metadata", JsonSerializer.Serialize(metadata)));
-        }
-
-        var result = await RequestAsync("Deposit", portalId, parameters);
+        var result = await billingApi.DepositAsync(requestDto);
         return result == "\"ok\"";
     }
 
-    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity,
+        ProductQuantityType productQuantityType, string currency, string customerParticipantName,
+        Dictionary<string, string> metadata = null)
     {
-        var parameters = products.Select(p => Tuple.Create("ProductId", p))
-            .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
-            .ToList();
+        EnsureConfigured();
 
-        parameters.Add(Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString()));
-        parameters.Add(Tuple.Create("Currency", currency));
-
-        if (!string.IsNullOrEmpty(customerParticipantName))
+        var requestDto = new ChangeSubscriptionRequestDto
         {
-            parameters.Add(Tuple.Create("CustomerParticipantName", customerParticipantName));
-        }
+            PortalId = [portalId],
+            ProductId = Multi(products),
+            ProductQty = Multi(quantity?.Select(q => q.ToString())),
+            ProductQuantityType = [((int)productQuantityType).ToString()],
+            Currency = [currency],
+            CustomerParticipantName = Optional(customerParticipantName),
+            Metadata = Metadata(metadata)
+        };
 
-        if (metadata != null)
-        {
-            parameters.Add(Tuple.Create("Metadata", JsonSerializer.Serialize(metadata)));
-        }
-
-        var result = await RequestAsync("ChangeSubscription", portalId, parameters);
-        var changed = JsonSerializer.Deserialize<bool>(result);
-
-        return changed;
+        return await billingApi.ChangeSubscriptionAsync(requestDto);
     }
 
-    public async Task<PaymentCalculation> CalculatePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency)
+    public async Task<bool> SwitchSubscriptionAsync(string portalId, string fromProductId, string toProductId,
+        int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var parameters = products.Select(p => Tuple.Create("ProductId", p))
-            .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
-            .ToList();
+        EnsureConfigured();
 
-        parameters.Add(Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString()));
-        parameters.Add(Tuple.Create("Currency", currency));
+        var requestDto = new SwitchSubscriptionRequestDto
+        {
+            PortalId = [portalId],
+            FromProductId = [fromProductId],
+            ToProductId = [toProductId],
+            ProductQty = [quantity.ToString()],
+            CustomerParticipantName = Optional(customerParticipantName),
+            Metadata = Metadata(metadata)
+        };
 
-        var result = await RequestAsync("CalculateSubscription", portalId, parameters);
-
-        var response = JsonSerializer.Deserialize<PaymentCalculation>(result);
-
-        return response;
+        return await billingApi.SwitchSubscriptionAsync(requestDto);
     }
 
-    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, List<string> productIds)
+    public async Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(string portalId, string fromProductId,
+        string toProductId, int quantity)
+    {
+        EnsureConfigured();
+
+        var requestDto = new CalculateSwitchSubscriptionRequestDto
+        {
+            PortalId = [portalId],
+            FromProductId = [fromProductId],
+            ToProductId = [toProductId],
+            ProductQty = [quantity.ToString()]
+        };
+
+        return await billingApi.CalculateSwitchSubscriptionAsync(requestDto);
+    }
+
+    public async Task<PaymentCalculation> CalculatePaymentAsync(string portalId, IEnumerable<string> products,
+        IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency)
+    {
+        EnsureConfigured();
+
+        var requestDto = new CalculateSubscriptionRequestDto
+        {
+            PortalId = [portalId],
+            ProductId = Multi(products),
+            ProductQty = Multi(quantity?.Select(q => q.ToString())),
+            ProductQuantityType = [((int)productQuantityType).ToString()],
+            Currency = [currency]
+        };
+
+        return await billingApi.CalculateSubscriptionAsync(requestDto);
+    }
+
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId,
+        bool wallet, List<string> productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
-        var parameters = productIds.Select(pid => Tuple.Create("ProductId", pid)).ToList();
+        EnsureConfigured();
+
         var paymentSystemId = wallet ? AccountingPaymentSystemId : StripePaymentSystemId;
-        parameters.Add(Tuple.Create("PaymentSystemId", paymentSystemId.ToString()));
 
-        if (!string.IsNullOrEmpty(partnerId))
+        var requestDto = new GetProductsPricesRequestDto
         {
-            parameters.Add(Tuple.Create("PartnerId", partnerId));
-        }
+            ProductId = Multi(productIds),
+            PaymentSystemId = [paymentSystemId.ToString()],
+            PartnerId = Optional(partnerId)
+        };
 
-        var result = await RequestAsync("GetProductsPrices", null, parameters);
-        var prices = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>>(result);
+        var prices = await billingApi.GetProductsPricesAsync(requestDto);
 
         if (prices.TryGetValue(paymentSystemId, out var pricesPaymentSystem))
         {
             return productIds.Select(productId =>
-            {
-                if (pricesPaymentSystem.TryGetValue(productId, out var pricesByProduct))
                 {
-                    return new { ProductId = productId, Prices = pricesByProduct };
-                }
-                return new { ProductId = productId, Prices = new Dictionary<string, decimal>() };
-            })
+                    if (pricesPaymentSystem.TryGetValue(productId, out var pricesByProduct))
+                    {
+                        return new { ProductId = productId, Prices = pricesByProduct };
+                    }
+
+                    return new { ProductId = productId, Prices = new Dictionary<string, decimal>() };
+                })
                 .ToDictionary(e => e.ProductId, e => e.Prices);
         }
 
@@ -257,124 +249,265 @@ public class BillingClient
 
     public async Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(string portalId, string productId)
     {
-        var parameters = new List<Tuple<string, string>> { Tuple.Create("ProductId", productId) };
+        EnsureConfigured();
 
-        var result = await RequestAsync("GetSubscriptionBalanceInfo", portalId, parameters);
-
-        return JsonSerializer.Deserialize<SubscriptionBalanceInfo>(result);
+        return await billingApi.GetSubscriptionBalanceInfoAsync(
+            new BillingProductRequestDto { PortalId = [portalId], ProductId = [productId] });
     }
 
     public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(string portalId, string productId)
     {
-        var parameters = new List<Tuple<string, string>> { Tuple.Create("ProductId", productId) };
+        EnsureConfigured();
 
-        var result = await RequestAsync("SubscriptionBalanceToWallet", portalId, parameters);
-
-        return JsonSerializer.Deserialize<SubscriptionToWalletResult>(result);
+        return await billingApi.SubscriptionBalanceToWalletAsync(
+            new BillingProductRequestDto { PortalId = [portalId], ProductId = [productId] });
     }
 
-    private string CreateAuthToken(string pkey, string machinekey)
+    public async Task<bool> GetDocsCloudTrialAsync(string portalId)
     {
-        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
-        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
+        EnsureConfigured();
 
-        return $"ASC {pkey}:{now}:{hash}";
+        var result =
+            await billingApi.GetDocsCloudTrialAsync(new BillingPortalRequestDto { PortalId = [portalId] });
+
+        return result == "\"ok\"";
     }
 
-    private async Task<string> RequestAsync(string method, string portalId, List<Tuple<string, string>> parameters = null, bool addPolicy = false)
+    private void EnsureConfigured()
     {
-        var url = _configuration.Url + method;
-
-        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(url));
-
-        if (!string.IsNullOrEmpty(_configuration.Key))
+        if (!Configured)
         {
-            request.Headers.Add("Authorization", CreateAuthToken(_configuration.Key, _configuration.Secret));
+            throw new BillingNotConfiguredException("Billing service is not configured");
         }
-
-        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
-
-        var data = new Dictionary<string, List<string>>();
-
-        if (!string.IsNullOrEmpty(portalId))
-        {
-            data.Add("PortalId", [portalId]);
-        }
-
-        if (parameters != null)
-        {
-            foreach (var parameter in parameters)
-            {
-                if (!data.ContainsKey(parameter.Item1))
-                {
-                    data.Add(parameter.Item1, [parameter.Item2]);
-                }
-                else
-                {
-                    data[parameter.Item1].Add(parameter.Item2);
-                }
-            }
-        }
-
-        var body = JsonSerializer.Serialize(data);
-        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
-
-        string result;
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-
-        using (var response = await httpClient.SendAsync(request, cts.Token))
-        await using (var stream = await response.Content.ReadAsStreamAsync())
-        {
-            if (stream == null)
-            {
-                throw new BillingNotConfiguredException("Billing response is null");
-            }
-            using (var readStream = new StreamReader(stream))
-            {
-                result = await readStream.ReadToEndAsync();
-            }
-        }
-
-        if (string.IsNullOrEmpty(result))
-        {
-            throw new BillingNotConfiguredException("Billing response is null");
-        }
-        if (!result.StartsWith("{\"Message\":\"error", true, null))
-        {
-            return result;
-        }
-
-        if (result.Contains("{\"Message\":\"error: cannot find "))
-        {
-            throw new BillingNotFoundException(result);
-        }
-
-        throw new BillingException(result);
     }
+
+    // Wraps a single optional value into the multimap array shape, returning null (so the field is omitted)
+    // when the value is absent - reproducing the original "add the key only when it has a value" behavior.
+    private static List<string> Optional(string value)
+    {
+        return string.IsNullOrEmpty(value) ? null : [value];
+    }
+
+    // Materializes a multi-value field, returning null (omitted) for an empty or absent collection.
+    private static List<string> Multi(IEnumerable<string> values)
+    {
+        var list = values?.ToList();
+        return list is { Count: > 0 } ? list : null;
+    }
+
+    // Serializes operation metadata into the single JSON-object-string element the billing service expects,
+    // or null when there is no metadata.
+    private static List<string> Metadata(Dictionary<string, string> metadata)
+    {
+        return metadata == null ? null : [JsonSerializer.Serialize(metadata)];
+    }
+}
+
+// Strongly-typed request bodies for IBillingApi. Every value is a List<string> to preserve the billing
+// multimap wire format (each field is an array of string values); null fields are omitted from the
+// serialized body by the JsonIgnoreCondition.WhenWritingNull setting in AddBillingHttpClient.
+
+/// <summary>
+/// Base billing request scoped to a single portal.
+/// </summary>
+public class BillingPortalRequestDto
+{
+    public List<string> PortalId { get; set; }
+}
+
+/// <summary>A portal-scoped request that targets a single product.</summary>
+public class BillingProductRequestDto : BillingPortalRequestDto
+{
+    public List<string> ProductId { get; set; }
+}
+
+/// <summary>Request for the customer account management link.</summary>
+public class GetAccountLinkRequestDto : BillingPortalRequestDto
+{
+    public List<string> BackRef { get; set; }
+}
+
+/// <summary>Request for a single Stripe payment (checkout) URL.</summary>
+public class GetPaymentUrlRequestDto : BillingPortalRequestDto
+{
+    public List<string> ProductId { get; set; }
+    public List<string> PaymentSystemId { get; set; }
+    public List<string> AffiliateId { get; set; }
+    public List<string> PartnerId { get; set; }
+
+    /// <summary>The marketing campaign identifier. The billing service expects the lowercase <c>campaign</c> key.</summary>
+    [JsonPropertyName("campaign")]
+    public List<string> Campaign { get; set; }
+
+    public List<string> Currency { get; set; }
+    public List<string> Language { get; set; }
+    public List<string> CustomerEmail { get; set; }
+    public List<string> Quantity { get; set; }
+
+    /// <summary>The redirect URL after a successful payment.</summary>
+    public List<string> BackRef { get; set; }
+
+    /// <summary>The redirect URL when the purchase is cancelled (back to the shop).</summary>
+    public List<string> ShopUrl { get; set; }
+}
+
+/// <summary>Request to top up the customer wallet (deposit).</summary>
+public class DepositRequestDto : BillingPortalRequestDto
+{
+    public List<string> Amount { get; set; }
+    public List<string> Currency { get; set; }
+    public List<string> CustomerParticipantName { get; set; }
+    public List<string> SiteName { get; set; }
+
+    /// <summary>Operation metadata serialized as a single JSON object string.</summary>
+    public List<string> Metadata { get; set; }
+}
+
+/// <summary>Request to change (up/downgrade) the current subscription quantities.</summary>
+public class ChangeSubscriptionRequestDto : BillingPortalRequestDto
+{
+    public List<string> ProductId { get; set; }
+    public List<string> ProductQty { get; set; }
+    public List<string> ProductQuantityType { get; set; }
+    public List<string> Currency { get; set; }
+    public List<string> CustomerParticipantName { get; set; }
+
+    /// <summary>Operation metadata serialized as a single JSON object string.</summary>
+    public List<string> Metadata { get; set; }
+}
+
+/// <summary>Request to estimate the cost of a subscription change.</summary>
+public class CalculateSubscriptionRequestDto : BillingPortalRequestDto
+{
+    public List<string> ProductId { get; set; }
+    public List<string> ProductQty { get; set; }
+    public List<string> ProductQuantityType { get; set; }
+    public List<string> Currency { get; set; }
+}
+
+/// <summary>Request to switch the subscription from one product to another.</summary>
+public class SwitchSubscriptionRequestDto : BillingPortalRequestDto
+{
+    public List<string> FromProductId { get; set; }
+    public List<string> ToProductId { get; set; }
+    public List<string> ProductQty { get; set; }
+    public List<string> CustomerParticipantName { get; set; }
+
+    /// <summary>Operation metadata serialized as a single JSON object string.</summary>
+    public List<string> Metadata { get; set; }
+}
+
+/// <summary>Request to estimate the cost of a subscription switch.</summary>
+public class CalculateSwitchSubscriptionRequestDto : BillingPortalRequestDto
+{
+    public List<string> FromProductId { get; set; }
+    public List<string> ToProductId { get; set; }
+    public List<string> ProductQty { get; set; }
+}
+
+/// <summary>
+/// Request for product prices. This endpoint is not portal-scoped, so it intentionally does not
+/// derive from <see cref="BillingPortalRequestDto"/> and carries no <c>PortalId</c>.
+/// </summary>
+public class GetProductsPricesRequestDto
+{
+    public List<string> ProductId { get; set; }
+    public List<string> PaymentSystemId { get; set; }
+    public List<string> PartnerId { get; set; }
 }
 
 public static class BillingHttpClientExtension
 {
-    public static void AddBillingHttpClient(this IServiceCollection services)
+    private const string ResiliencePipelineName = "billingResiliencePipeline";
+    internal const string RetryOptionKey = "billingRetryEnabled";
+
+    private const string ErrorMarker = "{\"Message\":\"error";
+    private const string NotFoundMarker = "{\"Message\":\"error: cannot find ";
+
+    public static void AddBillingHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHttpClient(BillingClient.HttpClientName)
+        var paymentSettingsSection = configuration.GetSection("core:payment");
+        var paymentSettings = paymentSettingsSection.Get<PaymentConfiguration>();
+        services.Configure<PaymentConfiguration>(paymentSettingsSection);
+
+        services.AddTransient<BillingAuthHandler>();
+
+        services
+            .AddRefitClient<IBillingApi>(new RefitSettings
+            {
+                ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    // Optional request fields are modelled as nullable List<string> properties; omit them from the
+                    // body when null so the wire format matches the original "add the key only when it has a value".
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                }),
+                ExceptionFactory = CreateExceptionAsync
+            })
+            .ConfigureHttpClient((_, client) =>
+            {
+                var url = paymentSettings?.Url;
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    client.BaseAddress = new Uri(url);
+                }
+
+                client.Timeout = TimeSpan.FromMilliseconds(60000);
+            })
+            .AddHttpMessageHandler<BillingAuthHandler>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddResilienceHandler(BillingClient.ResiliencePipelineName, builder =>
+            .AddResilienceHandler(ResiliencePipelineName, builder =>
             {
                 builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                 {
                     MaxRetryAttempts = 2,
                     Delay = TimeSpan.FromSeconds(1),
                     BackoffType = DelayBackoffType.Exponential,
-                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                        .HandleResult(response =>
+                    ShouldHandle = async args =>
+                    {
+                        // Only requests that explicitly opt in via [Property(RetryOptionKey)] are retried
+                        // (GetActiveResources with refresh) - and only on the "cannot find" response a freshly
+                        // created portal produces until the billing service learns about it.
+                        var response = args.Outcome.Result;
+                        if (response?.RequestMessage is null ||
+                            !response.RequestMessage.Options.TryGetValue(new HttpRequestOptionsKey<bool>(RetryOptionKey), out var retryEnabled) ||
+                            !retryEnabled)
                         {
-                            var result = response.Content.ReadAsStringAsync().Result;
-                            return result.Contains("{\"Message\":\"error: cannot find ");
-                        })
+                            return false;
+                        }
+
+                        var content = await response.Content.ReadAsStringAsync();
+                        return content.Contains(NotFoundMarker);
+                    }
                 });
             });
+    }
+
+    // The billing service reports errors as 200 OK with a '{"Message":"error...' body, so the content is inspected
+    // for every response, not only for non-success status codes.
+    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
+    {
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrEmpty(content))
+        {
+            return new BillingNotConfiguredException("Billing response is null");
+        }
+
+        if (content.StartsWith(ErrorMarker, StringComparison.OrdinalIgnoreCase))
+        {
+            return content.Contains(NotFoundMarker)
+                ? new BillingNotFoundException(content)
+                : new BillingException(content);
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new BillingException($"Billing request failed with status code {response.StatusCode} {content}");
+        }
+
+        return null;
     }
 }
 

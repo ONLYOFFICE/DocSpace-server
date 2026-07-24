@@ -102,21 +102,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> DeleteAuditReferencesAsync(int entryId, FileEntryType entryType)
-    {
-        return AbstractQueries.DeleteAuditReferencesAsync(this, entryId, entryType);
-    }
-
-    [PreCompileQuery]
     public Task<int> DeleteLinksAsync(int tenantId, int entryId, FileEntryType entryType)
     {
         return AbstractQueries.DeleteLinksAsync(this, tenantId, entryId, entryType);
-    }
-
-    [PreCompileQuery]
-    public IAsyncEnumerable<int> GetAuditEventsIdsAsync(int entryId, FileEntryType entryType)
-    {
-        return AbstractQueries.GetAuditEventsIdsAsync(this, entryId, entryType);
     }
 
     [PreCompileQuery]
@@ -126,15 +114,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task DeleteChatsAsync(int folderId)
+    public Task DeleteChatsByRoomIdsAsync(int tenantId, IEnumerable<int> folderIds)
     {
-        return AbstractQueries.DeleteChatsAsync(this, folderId);
-    }
-
-    [PreCompileQuery]
-    public Task DeleteFileKeysAsync(int entryId, int tenantId)
-    {
-        return AbstractQueries.DeleteFileKeysAsync(this, entryId, tenantId);
+        return AbstractQueries.DeleteChatsByRoomIdsAsync(this, tenantId, folderIds);
     }
 
     [PreCompileQuery]
@@ -244,14 +226,6 @@ static file class AbstractQueries
                     .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
                     .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
 
-    public static readonly Func<FilesDbContext, int, FileEntryType, Task<int>> DeleteAuditReferencesAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int entryId, FileEntryType entryType) =>
-                ctx.FilesAuditReference
-                    .Where(r => r.EntryId == entryId)
-                    .Where(r => r.EntryType == (byte)entryType)
-                    .ExecuteDelete());
-
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<int>> DeleteLinksAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int entryId, FileEntryType entryType) =>
@@ -262,14 +236,6 @@ static file class AbstractQueries
                     .Where(x => x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.ExternalLink)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, FileEntryType, IAsyncEnumerable<int>> GetAuditEventsIdsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int entryId, FileEntryType entryType) =>
-                ctx.FilesAuditReference
-                    .Where(r => r.EntryId == entryId)
-                    .Where(r => r.EntryType == (byte)entryType)
-                    .Select(r => r.AuditEventId));
-
     public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> MarkAuditReferencesAsCorruptedAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, IEnumerable<int> eventsIds) =>
@@ -278,17 +244,10 @@ static file class AbstractQueries
                         x.SetProperty(y => y.Corrupted, a => true))
         );
 
-    public static readonly Func<FilesDbContext, int, Task> DeleteChatsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int folderId) =>
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteChatsByRoomIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
             ctx.Chats
-                .Where(x => x.RoomId == folderId)
-                .ExecuteDelete());
-
-    public static readonly Func<FilesDbContext, int, int, Task> DeleteFileKeysAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int fileId) =>
-            ctx.DbFileKeys
-                .Where(x=> x.TenantId == tenantId)
-                .Where(x => x.FileId == fileId)
+                .Where(x => x.TenantId == tenantId && folderIds.Contains(x.RoomId))
                 .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, int, IEnumerable<Guid>, Task> DeleteFileKeysByUsersAsync =

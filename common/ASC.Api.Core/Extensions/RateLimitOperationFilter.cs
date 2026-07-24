@@ -33,6 +33,31 @@
 
 namespace ASC.Api.Core.Extensions;
 
+public class RateLimitDocumentFilter(
+    IOptions<RateLimiterSettings> rateLimiterOptions,
+    IOptions<RateLimiterOptions> limiterOptions) : IDocumentFilter
+{
+    private readonly RateLimiterSettings _settings = rateLimiterOptions.Value;
+    private readonly bool _hasGlobalLimiter = limiterOptions.Value.GlobalLimiter is not null;
+
+    public void Apply(OpenApiDocument document, DocumentFilterContext context)
+    {
+        if (!_hasGlobalLimiter)
+        {
+            return;
+        }
+
+        var headers = RateLimitOperationFilter.BuildGlobalHeaders(_settings);
+
+        document.Components ??= new OpenApiComponents();
+        document.Components.Headers ??= new Dictionary<string, IOpenApiHeader>();
+        document.Components.Headers["X-RateLimit-Limit"]     = headers.Limit;
+        document.Components.Headers["X-RateLimit-Remaining"] = headers.Remaining;
+        document.Components.Headers["X-RateLimit-Reset"]     = headers.Reset;
+        document.Components.Headers["Retry-After"]           = headers.RetryAfter;
+    }
+}
+
 public class RateLimitOperationFilter(
     IOptions<RateLimiterSettings> rateLimiterOptions,
     IOptions<RateLimiterOptions> limiterOptions) : IOperationFilter
@@ -91,7 +116,7 @@ public class RateLimitOperationFilter(
         };
     }
 
-    private static (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) BuildGlobalHeaders(RateLimiterSettings settings) =>
+    internal static (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) BuildGlobalHeaders(RateLimiterSettings settings) =>
     (
         new OpenApiHeader
         {

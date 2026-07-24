@@ -153,7 +153,7 @@ public class FormRecoveryService(
             return [];
         }
 
-        factoryIndexerForm.Refresh();
+        await factoryIndexerForm.RefreshAsync();
 
         var (indexSuccess, indexedItems) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.ParentId, doneFolder.Id));
 

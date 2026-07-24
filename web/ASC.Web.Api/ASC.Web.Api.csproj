@@ -57,8 +57,12 @@
       <EmbeddedResource Include="img\google.svg" />
       <EmbeddedResource Include="img\openai.svg" />
       <EmbeddedResource Include="img\search.svg" />
+      <EmbeddedResource Include="img\docscloud_wallet.svg" />
       <EmbeddedResource Include="img\aisearch_wallet.svg" />
       <EmbeddedResource Include="img\alibaba.svg" />
+      <EmbeddedResource Include="img\z.ai.svg" />
+      <EmbeddedResource Include="img\xai.svg" />
+      <EmbeddedResource Include="img\moonshotai.svg" />
     </ItemGroup>
     <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Analyzers\ASC.Analyzers.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

@@ -34,6 +34,7 @@
 import { randomUUID } from "crypto";
 import { aiService } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
+import { getResolvedFormId, setResolvedFormId } from "../requestContext.js";
 import { getArray, getString, isObject, parseInt10 } from "../narrow.js";
 import logger from "../log.js";
 import type { ToolsAdapter, TMCPItem } from "@onlyoffice/ai-chat/core";
@@ -73,16 +74,6 @@ type ToolContextDto = {
     folderId: number;
     formId: number;
 };
-
-// `callTool` (per the `ToolsAdapter` interface) doesn't receive the
-// message's attachment refs — only `getTools` does. Cache the last
-// resolved formId per entity so a same-turn tool call still targets the
-// right form.
-const lastFormIdByEntity = new Map<string, number>();
-
-function entityKey(entityId: string | undefined): string {
-    return entityId ?? "";
-}
 
 // A ref-carrying content part encodes `{ref, title, kind}` as JSON in
 // `mimeType` (file parts) or `image` (image parts) — mirrors
@@ -135,6 +126,9 @@ export function extractAttachmentRefIds(message: unknown): string[] {
 // expects as `formId`. `HttpAttachmentsStorage` composes `path` as
 // `${entryId}/${title}` (see `dtoToAttachment`) — the leading segment is the
 // DocSpace entry id, echoed back verbatim from `/integration/attachments`.
+// Whether the file actually is a started form is validated on the C# side
+// (`FormDataToolsFactory.TryInitAsync`); a non-form id resolves to an empty
+// tool bundle.
 async function resolveFormId(attachmentId: string[] | undefined): Promise<number> {
     if (!attachmentId || attachmentId.length === 0) {
         return 0;
@@ -158,6 +152,14 @@ async function resolveFormId(attachmentId: string[] | undefined): Promise<number
     return 0;
 }
 
+// Form features are scoped to the CURRENT user message only: the controller
+// (`withToolsPrompt`) extracts the message's attachment refs and resolves
+// them here before the stream starts; the resolved formId is kept in the
+// per-request context so the engine's later `getTools` and same-turn
+// `callTool` (whose signatures carry no current-message refs) see the same
+// value. A form that only lives in the thread history must NOT re-activate
+// the form tools, which is why the engine-supplied `config.attachmentId`
+// (collected across the whole history) is deliberately ignored.
 async function toContext(
     entityId: string | undefined,
     attachmentId?: string[],
@@ -166,11 +168,11 @@ async function toContext(
     if (attachmentId && attachmentId.length > 0) {
         const formId = await resolveFormId(attachmentId);
         if (formId > 0) {
-            lastFormIdByEntity.set(entityKey(entityId), formId);
+            setResolvedFormId(formId);
         }
         return { folderId, formId };
     }
-    return { folderId, formId: lastFormIdByEntity.get(entityKey(entityId)) ?? 0 };
+    return { folderId, formId: getResolvedFormId() ?? 0 };
 }
 
 // `ToolDescriptor` on the C# side — `{ name, description, parameters }`,
@@ -219,6 +221,8 @@ function parseList(raw: unknown): ToolsList {
  * dialog before running them.
  */
 export class HttpToolsAdapter implements ToolsAdapter {
+    // `_config.attachmentId` (the engine's ref collection over the whole
+    // thread) is intentionally unused — see `toContext`.
     async getTools(
         entityId?: string,
         config?: { attachmentId: string[] },
@@ -297,14 +301,17 @@ export class HttpToolsAdapter implements ToolsAdapter {
             return `Tool "${toolName}" failed: ${error}`;
         }
         const value = "result" in result ? result["result"] : result["Result"];
+        // Contract: a tool result must reach the engine as a string — the
+        // same shape MCP tools produce. An object here would be spliced
+        // verbatim into the tool message's `content` and break providers
+        // that expect text (or text-part arrays).
+        const text = typeof value === "string" ? value : JSON.stringify(value ?? null);
         logger.info(
             `docspaceTools.callTool name=${toolName} ok in ${
                 Date.now() - started
-            }ms (resultLength=${
-                typeof value === "string" ? value.length : "n/a"
-            })`,
+            }ms (resultLength=${text.length})`,
         );
-        return value;
+        return text;
     }
 
     /**

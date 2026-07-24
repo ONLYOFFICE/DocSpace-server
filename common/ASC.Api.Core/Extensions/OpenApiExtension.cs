@@ -113,6 +113,7 @@ public static class OpenApiExtension
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
+            c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
@@ -441,14 +442,6 @@ public static class OpenApiExtension
                 return;
             }
 
-            var baseTypeSchema = context.SchemaGenerator.GenerateSchema(baseType, context.SchemaRepository);
-
-            var schemaId = CustomSchemaId(baseType);
-
-            context.SchemaRepository.Schemas.TryAdd(schemaId, baseTypeSchema);
-
-            var baseSchemaRef = new OpenApiSchemaReference(schemaId);
-
             var originalProperties = schema.Properties;
             var originalRequired = schema.Required;
 
@@ -471,9 +464,23 @@ public static class OpenApiExtension
                 }
             }
 
+            if (derivedPropertiesSchema.Properties.Count == 0)
+            {
+                // The derived type adds nothing of its own. Emitting `allOf: [$ref base, {}]` here produces
+                // an empty child schema, and code generators then build a model with no properties and no
+                // parameterized constructor. Keep the flattened schema instead.
+                return;
+            }
+
+            var baseTypeSchema = context.SchemaGenerator.GenerateSchema(baseType, context.SchemaRepository);
+
+            var schemaId = CustomSchemaId(baseType);
+
+            context.SchemaRepository.Schemas.TryAdd(schemaId, baseTypeSchema);
+
             openApiSchema.AllOf = new List<IOpenApiSchema>
             {
-                baseSchemaRef,
+                new OpenApiSchemaReference(schemaId),
                 derivedPropertiesSchema
             };
 

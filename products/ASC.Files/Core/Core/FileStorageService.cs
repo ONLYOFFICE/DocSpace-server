@@ -3020,7 +3020,7 @@ public class FileStorageService //: IFileStorageService
         var toFolder = await destFolderDao.GetFolderAsync(destFolderId);
         if (toFolder == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (!await fileSecurity.CanCreateAsync(toFolder))

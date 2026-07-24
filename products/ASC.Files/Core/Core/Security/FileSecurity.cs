@@ -357,6 +357,11 @@ public class FileSecurity(
         return CanReadAsync(entries, authContext.CurrentAccount.ID);
     }
 
+    public IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanDeleteAsync<T>(IAsyncEnumerable<FileEntry<T>> entries)
+    {
+        return CanAsync(entries, authContext.CurrentAccount.ID, FilesSecurityActions.Delete);
+    }
+
     public async Task<bool> CanReadAsync<T>(FileEntry<T> entry)
     {
         return await CanReadAsync(entry, authContext.CurrentAccount.ID);
@@ -1269,13 +1274,6 @@ public class FileSecurity(
             }
 
             if (action is FilesSecurityActions.Vectorization && !await aiAccessibility.IsVectorizationEnabledAsync())
-            {
-                return false;
-            }
-
-            if (action is FilesSecurityActions.Delete &&
-                file is { VectorizationStatus: VectorizationStatus.InProgress } &&
-                await vectorizationHelper.InProcessAsync(file.Id))
             {
                 return false;
             }

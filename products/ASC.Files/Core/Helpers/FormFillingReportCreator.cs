@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Helpers;
@@ -174,7 +174,7 @@ public class FormFillingReportCreator(
 
         var dbCount = await client.GetTableCountAsync(tableName);
 
-        factoryIndexerForm.Refresh();
+        await factoryIndexerForm.RefreshAsync();
         var (osCountSuccess, osCount) = await factoryIndexerForm.TryCountAsync(r =>
             r.Where(s => s.RoomId, roomId)
              .Where(s => s.OriginalFormId, originalFormId)
@@ -217,7 +217,7 @@ public class FormFillingReportCreator(
             return true;
         }
 
-        factoryIndexerFormMetadata.Refresh();
+        await factoryIndexerFormMetadata.RefreshAsync();
         var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
             r.Where(s => s.OriginalFormId, originalFormId)
              .Where(s => s.OriginalFormVersion, originalFormVersion));
@@ -306,7 +306,7 @@ public class FormFillingReportCreator(
 
     public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId, int originalFormVersion)
     {
-        factoryIndexerForm.Refresh();
+        await factoryIndexerForm.RefreshAsync();
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r
             .Where(s => s.RoomId, roomId)
             .Where(s => s.OriginalFormId, originalFormId)
@@ -331,7 +331,7 @@ public class FormFillingReportCreator(
 
     public async Task MigrateFormVersionAsync(int roomId, int originalFormId, int targetVersion)
     {
-        factoryIndexerForm.Refresh();
+        await factoryIndexerForm.RefreshAsync();
 
         var (oldSuccess, oldRecords) = await factoryIndexerForm.TrySelectAsync(r =>
             r.Where(s => s.RoomId, roomId)
@@ -444,7 +444,7 @@ public class FormFillingReportCreator(
     }
 
     /// <summary>
-    /// <paramref name="refreshIndex"/>=false skips the comparatively expensive index-wide Refresh() for
+    /// <paramref name="refreshIndex"/>=false skips the comparatively expensive index-wide refresh for
     /// callers that can tolerate a stale-by-seconds read (the metadata backfill in
     /// <see cref="GetSubmitFormsData{T}"/>, run on every submission).
     /// </summary>
@@ -452,7 +452,7 @@ public class FormFillingReportCreator(
     {
         if (refreshIndex)
         {
-            factoryIndexerFormMetadata.Refresh();
+            await factoryIndexerFormMetadata.RefreshAsync();
         }
 
         var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
@@ -515,7 +515,7 @@ public class FormFillingReportCreator(
                 FormsData = formNumber.Concat(fromData.FormsData)
             };
 
-            await factoryIndexerForm.IndexAsync(searchItems, waitForCompletion: true);
+            await factoryIndexerForm.IndexAsync(searchItems);
 
             // The metadata document is shared by every submission of this form+version and fully replaced
             // below — backfill from what's already stored so a caller with partial per-field data (e.g. no
@@ -549,7 +549,7 @@ public class FormFillingReportCreator(
                 OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
                 Metadata = fromMetaData
-            }, waitForCompletion: true);
+            });
         }
 
         return (fromData, fromMetaData: fromMetaData);

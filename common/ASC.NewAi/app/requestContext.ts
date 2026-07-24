@@ -96,3 +96,18 @@ export function markForwardHeadersToProvider(): void {
 export function shouldForwardHeadersToProvider(): boolean {
   return als.getStore()?.forwardHeadersToProvider === true;
 }
+
+// Remember the form id resolved from the current message's attachments so a
+// same-request tool call (whose `ToolsAdapter.callTool` signature carries no
+// attachment refs) still targets the right form. Request-scoped: dies with
+// the request, never visible to other users or threads.
+export function setResolvedFormId(formId: number): void {
+  const store = als.getStore();
+  if (store) {
+    store.resolvedFormId = formId;
+  }
+}
+
+export function getResolvedFormId(): number | undefined {
+  return als.getStore()?.resolvedFormId;
+}

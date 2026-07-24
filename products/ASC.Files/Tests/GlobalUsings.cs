@@ -47,6 +47,7 @@ global using System.Web;
 global using ASC.Files.Tests.Data;
 
 global using Aspire.Hosting;
+global using Aspire.Hosting.ApplicationModel;
 global using Aspire.Hosting.Testing;
 
 global using Bogus;

@@ -46,8 +46,8 @@ public class AccountingConfiguration
     }
 
     public string Key { get; init; }
-    public string Secret { get;  init; }
-    public bool SubAccounts { get; set; }
+    public string Secret { get; init; }
+    public bool SubAccounts { get; init; }
 
     public List<string> Currencies
     {

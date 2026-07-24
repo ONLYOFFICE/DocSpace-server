@@ -496,6 +496,42 @@ public class TenantQuota
         set => _aiSearch.Value = value;
     }
 
+    private readonly CountDocsCloudFeature _countDocsCloud;
+
+    /// <summary>
+    /// The number of DocsCloud users.
+    /// </summary>
+    /// <example>true</example>
+    public int DocsCloud
+    {
+        get => _countDocsCloud.Value;
+        set => _countDocsCloud.Value = value;
+    }
+
+    private readonly TenantQuotaFeatureFlag _docsCloudDevPack;
+
+    /// <summary>
+    /// Specifies if the DocsCloudDevPack enabled or not.
+    /// </summary>
+    /// <example>true</example>
+    public bool DocsCloudDevPack
+    {
+        get => _docsCloudDevPack.Value;
+        set => _docsCloudDevPack.Value = value;
+    }
+
+    private readonly TenantQuotaFeatureFlag _docsCloudTrial;
+
+    /// <summary>
+    /// Specifies if the DocsCloudTrial enabled or not.
+    /// </summary>
+    /// <example>true</example>
+    public bool DocsCloudTrial
+    {
+        get => _docsCloudTrial.Value;
+        set => _docsCloudTrial.Value = value;
+    }
+
     public TenantQuota()
     {
         _featuresList = [];
@@ -530,6 +566,9 @@ public class TenantQuota
         _countAIAgentFeature = new CountAIAgentFeature(this) { Order = 11 };
         _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiSearch = new WalletFeatureFlag(this, "aisearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _countDocsCloud = new CountDocsCloudFeature(this) { Order = 13 };
+        _docsCloudDevPack = new TenantQuotaFeatureFlag(this, "docsclouddevpack") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _docsCloudTrial = new TenantQuotaFeatureFlag(this, "docscloudtrial") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -562,7 +601,10 @@ public class TenantQuota
             _backup,
             _countAIAgentFeature,
             _aiTools,
-            _aiSearch
+            _aiSearch,
+            _countDocsCloud,
+            _docsCloudDevPack,
+            _docsCloudTrial
         };
     }
 
