@@ -600,8 +600,8 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             string type;
 
             if (Guid.TryParse(user.UserId, out var guid) &&
-                (await userManager.GetUsersAsync(guid)) is { } userInfo &&
-                userInfo.Id != ASC.Core.Users.Constants.LostUser.Id)
+                (await userManager.GetUsersAsync(guid, returnLostUserIfRemoved: false)) is { } userInfo &&
+                userInfo.Id != Constants.LostUser.Id)
             {
                 display = displayUserSettingsHelper.GetFullUserName(userInfo, false);
                 type = Resource.DocsCloudQuotaUserTypeInternal;
