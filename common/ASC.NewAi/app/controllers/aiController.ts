@@ -112,12 +112,25 @@ function appendActionPrompt<T>(body: T, fragment: string): T {
   } as T;
 }
 
+// The round's context scope: `contextEntityId` (agent workspace picked from
+// outside its room — the thread stays under `entityId`) wins over `entityId`.
+// Mirrors the engine's own `contextEntityId ?? entityId` resolution.
+function contextScopeOf(body: unknown): string | undefined {
+  if (!isObject(body)) {
+    return undefined;
+  }
+  const context = body["contextEntityId"];
+  if (typeof context === "string") {
+    return context;
+  }
+  return typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+}
+
 async function withToolsPrompt<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
   }
-  const entityId =
-    typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+  const entityId = contextScopeOf(body);
   const attachmentId = extractAttachmentRefIds(body["userMessage"]);
   const fragment = await safeGetToolsPrompt(toolsAdapter, entityId, attachmentId);
   return fragment ? appendActionPrompt(body, fragment) : body;
@@ -149,9 +162,7 @@ function withContextPrompt<T>(body: T): T {
   if (!isObject(body)) {
     return body;
   }
-  const entityId =
-    typeof body["entityId"] === "string" ? body["entityId"] : undefined;
-  return appendActionPrompt(body, buildContextFragment(entityId));
+  return appendActionPrompt(body, buildContextFragment(contextScopeOf(body)));
 }
 
 const toolsAdapter = new HttpToolsAdapter();
@@ -344,7 +355,9 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = await withToolsPrompt(withRequestSignal(res, req.body));
+    // Same prompt envelope as sendWithStream: the regenerated round must
+    // see the identical workspace-context fragment the original reply had.
+    const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
     await streamNdjson(
       res,
       logStreamErrors("ai/regenerate-stream", engine.regenerateStream(body)),
