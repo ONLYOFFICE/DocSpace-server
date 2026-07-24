@@ -1,0 +1,184 @@
+builder.CreateFile("xlsx");
+
+var defaultFontSize = 11;
+var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
+var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
+var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
+
+var INFO_ROW_HEIGHT = 15.5;
+var ROW_HEIGHT = 19.5;
+var HEADER_ROW = 6;
+
+// Summary blocks live in columns I:J. The editors block starts at the header row;
+// the viewers block is placed a fixed distance below it.
+var SUMMARY_LABEL_COL = 9;
+var SUMMARY_VALUE_COL = 10;
+var VIEWERS_SUMMARY_ROW = HEADER_ROW + 10;
+
+var COLUMN_WIDTHS = [40.42, 21, 22, 3, 38, 11, 21.42, 3, 26, 12];
+
+var inputData = ${inputData};
+
+var oWorksheet = Api.GetActiveSheet();
+
+var colors = {
+    mainBgColor: Api.CreateColorFromRGB(inputData.themeColors.mainBgColor[0], inputData.themeColors.mainBgColor[1], inputData.themeColors.mainBgColor[2]),
+    lightBgColor: Api.CreateColorFromRGB(inputData.themeColors.lightBgColor[0], inputData.themeColors.lightBgColor[1], inputData.themeColors.lightBgColor[2]),
+    mainFontColor: Api.CreateColorFromRGB(inputData.themeColors.mainFontColor[0], inputData.themeColors.mainFontColor[1], inputData.themeColors.mainFontColor[2])
+};
+
+function toColumnName(num) {
+    for (var res = '', a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) {
+        res = String.fromCharCode(parseInt((num % b) / a) + 65) + res;
+    }
+    return res;
+}
+
+function writeCell(row, col, data) {
+    if (data == null) {
+        return;
+    }
+
+    var position = toColumnName(col) + row;
+    var sRange = oWorksheet.GetRange(position);
+
+    if (data.format) {
+        sRange.SetNumberFormat(data.format);
+    }
+
+    if (data.value != null) {
+        sRange.SetValue(data.value);
+    }
+
+    sRange.SetFontSize(defaultFontSize);
+    sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
+    sRange.SetBold(data.bold || false);
+    sRange.SetItalic(data.italic || false);
+    sRange.SetAlignHorizontal(data.halign || "left");
+    sRange.SetAlignVertical(data.valign || "center");
+
+    if (data.bgColor) {
+        sRange.SetFillColor(data.bgColor);
+    }
+
+    if (data.border) {
+        sRange.SetBorders("Bottom", "Medium", defaultBorderColorWhite);
+        sRange.SetBorders("Top", "Medium", defaultBorderColorWhite);
+        sRange.SetBorders("Left", "Medium", defaultBorderColorWhite);
+        sRange.SetBorders("Right", "Medium", defaultBorderColorWhite);
+    }
+}
+
+function headerCell(value) {
+    return { value: value, bold: true, fontColor: colors.mainFontColor, bgColor: colors.mainBgColor, valign: "center", border: true };
+}
+
+function customizeWorksheet() {
+    oWorksheet.SetName(inputData.resources.sheetName);
+    oWorksheet.SetDisplayGridlines(false);
+
+    for (var i = 0; i < COLUMN_WIDTHS.length; i++) {
+        oWorksheet.SetColumnWidth(i, COLUMN_WIDTHS[i]);
+    }
+}
+
+function writeImg() {
+    if (!inputData.logoSrc) {
+        return;
+    }
+    oWorksheet.AddImage(inputData.logoSrc, 87 * 36000, 10 * 36000, 7, -87 * 36000, 0, 10 * 36000);
+}
+
+function writeInfo() {
+    var rows = [
+        { label: inputData.resources.company, value: inputData.info.company, format: "@" },
+        { label: inputData.resources.report, value: inputData.info.report, format: "@" },
+        { label: inputData.resources.period, value: inputData.info.period, format: "@" },
+        { label: inputData.resources.dateGenerated, value: inputData.info.dateGenerated, format: inputData.resources.dateGeneratedFormat }
+    ];
+
+    for (var i = 0; i < rows.length; i++) {
+        var row = i + 1;
+        oWorksheet.GetRange("A" + row).SetRowHeight(INFO_ROW_HEIGHT);
+        writeCell(row, 1, { value: rows[i].label, bold: true, valign: "center" });
+        writeCell(row, 2, { value: rows[i].value, fontColor: defaultFontColorGray, format: rows[i].format, valign: "center" });
+    }
+
+    oWorksheet.GetRange("A5").SetRowHeight(INFO_ROW_HEIGHT);
+}
+
+// Writes one of the two user tables (editors or viewers) at the given start column and returns
+// the A1 range that should be turned into a filterable table.
+function writeDataTable(startCol, table) {
+    oWorksheet.GetRange("A" + HEADER_ROW).SetRowHeight(ROW_HEIGHT);
+
+    for (var c = 0; c < table.headers.length; c++) {
+        writeCell(HEADER_ROW, startCol + c, headerCell(table.headers[c]));
+    }
+
+    for (var i = 0; i < table.users.length; i++) {
+        var row = HEADER_ROW + 1 + i;
+        oWorksheet.GetRange("A" + row).SetRowHeight(ROW_HEIGHT);
+
+        var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
+        var user = table.users[i];
+
+        writeCell(row, startCol, { value: user.userId, bgColor: bgColor, valign: "center", format: "@", border: true });
+        writeCell(row, startCol + 1, { value: user.userType, bgColor: bgColor, valign: "center", format: "@", border: true });
+        writeCell(row, startCol + 2, { value: user.expire, bgColor: bgColor, valign: "center", format: inputData.resources.dateFormat, border: true });
+    }
+
+    var lastRow = HEADER_ROW + table.users.length;
+    return toColumnName(startCol) + HEADER_ROW + ":" + toColumnName(startCol + 2) + lastRow;
+}
+
+function writeSummary(startRow, block) {
+    // Blue title spanning the two summary columns.
+    oWorksheet.GetRange("A" + startRow).SetRowHeight(ROW_HEIGHT);
+    writeCell(startRow, SUMMARY_LABEL_COL, headerCell(block.title));
+    writeCell(startRow, SUMMARY_VALUE_COL, { bgColor: colors.mainBgColor, border: true });
+
+    // Gray italic subtitle.
+    var descRow = startRow + 1;
+    oWorksheet.GetRange("A" + descRow).SetRowHeight(ROW_HEIGHT);
+    writeCell(descRow, SUMMARY_LABEL_COL, { value: block.desc, italic: true, fontColor: defaultFontColorGray, valign: "center" });
+
+    for (var i = 0; i < block.summary.length; i++) {
+        var row = startRow + 2 + i;
+        oWorksheet.GetRange("A" + row).SetRowHeight(ROW_HEIGHT);
+
+        var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
+
+        writeCell(row, SUMMARY_LABEL_COL, { value: block.summary[i].label, bgColor: bgColor, valign: "center", border: true });
+        writeCell(row, SUMMARY_VALUE_COL, { value: block.summary[i].value, bgColor: bgColor, valign: "center", halign: "right", format: inputData.resources.countFormat, border: true });
+    }
+}
+
+customizeWorksheet();
+
+writeImg();
+
+writeInfo();
+
+var editorsRange = writeDataTable(1, inputData.editors);
+var viewersRange = writeDataTable(5, inputData.viewers);
+
+writeSummary(HEADER_ROW, inputData.editors);
+writeSummary(VIEWERS_SUMMARY_ROW, inputData.viewers);
+
+var freezePanes = oWorksheet.GetFreezePanes();
+freezePanes.FreezeRows(HEADER_ROW);
+
+if (inputData.editors.users.length > 0) {
+    oWorksheet.FormatAsTable(editorsRange);
+}
+
+if (inputData.viewers.users.length > 0) {
+    oWorksheet.FormatAsTable(viewersRange);
+}
+
+oWorksheet.GetRange("A1").Select();
+
+Api.Save();
+builder.SaveFile("xlsx", "${tempFileName}");
+builder.CloseFile();

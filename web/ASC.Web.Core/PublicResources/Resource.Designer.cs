@@ -420,6 +420,51 @@ namespace ASC.Web.Core.PublicResources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Company.
+        /// </summary>
+        public static string AccountingReportCompany {
+            get {
+                return ResourceManager.GetString("AccountingReportCompany", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Report.
+        /// </summary>
+        public static string AccountingReportTitle {
+            get {
+                return ResourceManager.GetString("AccountingReportTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Period.
+        /// </summary>
+        public static string AccountingReportPeriod {
+            get {
+                return ResourceManager.GetString("AccountingReportPeriod", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Date generated.
+        /// </summary>
+        public static string AccountingReportDateGenerated {
+            get {
+                return ResourceManager.GetString("AccountingReportDateGenerated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Total.
+        /// </summary>
+        public static string AccountingReportTotal {
+            get {
+                return ResourceManager.GetString("AccountingReportTotal", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Type.
         /// </summary>
         public static string AccountingCustomerOperationType {
@@ -4092,16 +4137,7 @@ namespace ASC.Web.Core.PublicResources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to User name.
-        /// </summary>
-        public static string DocsCloudQuotaReportColumnUserName {
-            get {
-                return ResourceManager.GetString("DocsCloudQuotaReportColumnUserName", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Expiration date.
+        ///   Looks up a localized string similar to Access expires.
         /// </summary>
         public static string DocsCloudQuotaReportColumnExpire {
             get {
@@ -4110,7 +4146,7 @@ namespace ASC.Web.Core.PublicResources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Type.
+        ///   Looks up a localized string similar to User type.
         /// </summary>
         public static string DocsCloudQuotaReportColumnType {
             get {
@@ -4119,20 +4155,83 @@ namespace ASC.Web.Core.PublicResources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Editor.
+        ///   Looks up a localized string similar to Internal.
         /// </summary>
-        public static string DocsCloudQuotaUserTypeEditor {
+        public static string DocsCloudQuotaUserTypeInternal {
             get {
-                return ResourceManager.GetString("DocsCloudQuotaUserTypeEditor", resourceCulture);
+                return ResourceManager.GetString("DocsCloudQuotaUserTypeInternal", resourceCulture);
             }
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Viewer.
+        ///   Looks up a localized string similar to External.
         /// </summary>
-        public static string DocsCloudQuotaUserTypeViewer {
+        public static string DocsCloudQuotaUserTypeExternal {
             get {
-                return ResourceManager.GetString("DocsCloudQuotaUserTypeViewer", resourceCulture);
+                return ResourceManager.GetString("DocsCloudQuotaUserTypeExternal", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Editors.
+        /// </summary>
+        public static string DocsCloudQuotaReportEditors {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportEditors", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Live Viewer.
+        /// </summary>
+        public static string DocsCloudQuotaReportViewers {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportViewers", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Document editors with full permissions.
+        /// </summary>
+        public static string DocsCloudQuotaReportEditorsDesc {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportEditorsDesc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Read-only document viewers.
+        /// </summary>
+        public static string DocsCloudQuotaReportViewersDesc {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportViewersDesc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Active.
+        /// </summary>
+        public static string DocsCloudQuotaReportActive {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportActive", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Subscription limit.
+        /// </summary>
+        public static string DocsCloudQuotaReportSubscriptionLimit {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportSubscriptionLimit", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Remaining.
+        /// </summary>
+        public static string DocsCloudQuotaReportRemaining {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportRemaining", resourceCulture);
             }
         }
     }

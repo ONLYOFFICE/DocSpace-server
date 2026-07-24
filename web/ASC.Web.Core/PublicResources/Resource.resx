@@ -198,6 +198,21 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Transaction history</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Report</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Period</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Date generated</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Total</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Type</value>
   </data>
@@ -1461,19 +1476,37 @@
   <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
     <value>User ID</value>
   </data>
-  <data name="DocsCloudQuotaReportColumnUserName" xml:space="preserve">
-    <value>User name</value>
-  </data>
   <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
-    <value>Expiration date</value>
+    <value>Access expires</value>
   </data>
   <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
-    <value>Type</value>
+    <value>User type</value>
   </data>
-  <data name="DocsCloudQuotaUserTypeEditor" xml:space="preserve">
-    <value>Editor</value>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Internal</value>
   </data>
-  <data name="DocsCloudQuotaUserTypeViewer" xml:space="preserve">
-    <value>Viewer</value>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>External</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editors</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Live Viewer</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Document editors with full permissions</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Read-only document viewers</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Subscription limit</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Remaining</value>
   </data>
 </root>

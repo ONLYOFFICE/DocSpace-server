@@ -45,6 +45,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     }
 
     private const string ScriptName = "CustomerOperationsReport.docbuilder";
+    private const string DocsCloudScriptName = "DocsCloudUserQuotaReport.docbuilder";
 
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
@@ -137,16 +138,24 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         DateTime UtcEndDate,
         JsonSerializerOptions Options);
 
+    // A single report column: its localized header, horizontal alignment, and whether it participates
+    // in the total row (summed, or the currency echoed next to the sums).
+    private sealed record ReportColumn(string Header, string Align = "left", bool Sum = false, bool Currency = false);
+
     // The report-specific pieces, resolved after the user's culture is applied so that
-    // the sheet name, file name and column headers are localized correctly.
+    // the sheet name, report title, file name and column headers are localized correctly.
     private sealed record ReportDefinition(
         string SheetName,
+        string ReportTitle,
         string OutputFileNameFormat,
-        List<string> Keys,
+        List<ReportColumn> Columns,
+        string TotalCurrency,
         Func<StreamWriter, Task> WriteValues);
 
     // Common scaffolding for all report types: resolve tenant/user, apply the user's culture,
     // then let the report-specific delegate build the localized definition and stream the rows.
+    // Also assembles the shared header block (logo, company, report title, period, generation date)
+    // and the theme colors used to style the sheet.
     private static async Task<DocumentBuilderInputData> RenderAsync(
         IServiceProvider serviceProvider,
         Guid userId,
@@ -180,6 +189,50 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         // Resolve localized resources only after the culture above has been applied.
         var definition = await buildDefinitionAsync(context);
 
+        var header = await BuildReportHeaderAsync(context);
+
+        var totalColumns = definition.Columns
+            .Select((column, index) => (column, index))
+            .Where(x => x.column.Sum)
+            .Select(x => x.index)
+            .ToList();
+
+        var totalCurrencyColumn = definition.Columns.FindIndex(x => x.Currency);
+
+        var inputData = new
+        {
+            resources = new
+            {
+                company = Resource.AccountingReportCompany + ":",
+                report = Resource.AccountingReportTitle + ":",
+                period = Resource.AccountingReportPeriod + ":",
+                dateGenerated = Resource.AccountingReportDateGenerated + ":",
+                total = Resource.AccountingReportTotal,
+                sheetName = definition.SheetName,
+                dateGeneratedFormat = header.DateGeneratedFormat,
+                totalFormat = "#,##0.00"
+            },
+            info = new
+            {
+                company = header.Company,
+                report = definition.ReportTitle,
+                period = header.Period,
+                dateGenerated = header.DateGenerated
+            },
+            logoSrc = header.LogoSrc,
+            themeColors = new
+            {
+                mainBgColor = header.MainBgColor,
+                lightBgColor = header.LightBgColor,
+                mainFontColor = header.MainFontColor
+            },
+            keys = definition.Columns.Select(x => x.Header).ToList(),
+            aligns = definition.Columns.Select(x => x.Align).ToList(),
+            totalColumns,
+            totalCurrencyColumn,
+            totalCurrency = definition.TotalCurrency
+        };
+
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
 
         var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
@@ -187,9 +240,8 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         var outputFileName = string.Format(definition.OutputFileNameFormat + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
 
         script = script
-            .Replace("${sheetName}", definition.SheetName)
-            .Replace("${tempFileName}", tempFileName)
-            .Replace("${dataKeys}", JsonSerializer.Serialize(definition.Keys));
+            .Replace("${inputData}", JsonSerializer.Serialize(inputData, options))
+            .Replace("${tempFileName}", tempFileName);
 
         var scriptParts = script.Split("${dataValues}");
 
@@ -205,22 +257,69 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
     }
 
+    // The shared report header: the portal logo, theme colors and the company/period/generation-date
+    // values printed above every report. Reused by both the generic report script and the DocsCloud one.
+    private sealed record ReportHeader(
+        string LogoSrc,
+        int[] MainBgColor,
+        int[] LightBgColor,
+        int[] MainFontColor,
+        string Company,
+        string Period,
+        string DateGenerated,
+        string DateGeneratedFormat);
+
+    private static async Task<ReportHeader> BuildReportHeaderAsync(RenderContext ctx)
+    {
+        var settingsManager = ctx.ServiceProvider.GetService<SettingsManager>();
+        var commonLinkUtility = ctx.ServiceProvider.GetService<CommonLinkUtility>();
+        var tenantLogoManager = ctx.ServiceProvider.GetService<TenantLogoManager>();
+        var tenantWhiteLabelSettingsHelper = ctx.ServiceProvider.GetService<TenantWhiteLabelSettingsHelper>();
+        var documentServiceConnector = ctx.ServiceProvider.GetService<DocumentServiceConnector>();
+        var tenantUtil = ctx.ServiceProvider.GetService<TenantUtil>();
+
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+        var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall);
+        logoPath = documentServiceConnector.ReplaceCommunityAddress(logoPath);
+        var logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath.Split('?')[0]);
+
+        var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
+        var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
+
+        var localStartDate = tenantUtil.DateTimeFromUtc(ctx.UtcStartDate);
+        var localEndDate = tenantUtil.DateTimeFromUtc(ctx.UtcEndDate);
+        var dateGeneratedFormat = $"{ctx.Culture.DateTimeFormat.ShortDatePattern} {ctx.Culture.DateTimeFormat.LongTimePattern.Replace("tt", "AM/PM")}";
+
+        return new ReportHeader(
+            logoSrc,
+            DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1),
+            DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08),
+            DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1),
+            logoText,
+            $"{localStartDate.ToShortDateString()} – {localEndDate.ToShortDateString()}",
+            tenantUtil.DateTimeNow().ToString("G", CultureInfo.InvariantCulture),
+            dateGeneratedFormat);
+    }
+
     private static Task<DocumentBuilderInputData> BuildOperationsReportAsync(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
     {
         return RenderAsync(serviceProvider, userId, taskData, async ctx =>
         {
             var tenantManager = ctx.ServiceProvider.GetService<TenantManager>();
+            var tariffService = ctx.ServiceProvider.GetService<TariffService>();
 
-            var keys = new List<string> {
-                Resource.AccountingCustomerOperationDate,
-                Resource.AccountingCustomerOperationType,
-                Resource.AccountingCustomerOperationDetails,
-                Resource.AccountingCustomerOperationContact,
-                Resource.AccountingCustomerOperationQuantity,
-                Resource.AccountingCustomerOperationServiceUnit,
-                Resource.AccountingCustomerOperationCredit,
-                Resource.AccountingCustomerOperationDebit,
-                Resource.AccountingCustomerOperationCurrency
+            var columns = new List<ReportColumn> {
+                new(Resource.AccountingCustomerOperationDate),
+                new(Resource.AccountingCustomerOperationType),
+                new(Resource.AccountingCustomerOperationDetails),
+                new(Resource.AccountingCustomerOperationContact),
+                new(Resource.AccountingCustomerOperationQuantity, "right"),
+                new(Resource.AccountingCustomerOperationServiceUnit),
+                new(Resource.AccountingCustomerOperationCredit, "right", Sum: true),
+                new(Resource.AccountingCustomerOperationDebit, "right", Sum: true),
+                new(Resource.AccountingCustomerOperationCurrency, Currency: true)
             };
 
             var tenantWalletService = taskData.ServiceName is { Count: 1 }
@@ -229,13 +328,15 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             var addAgentColumn = tenantWalletService is TenantWalletService.AITools;
             if (addAgentColumn)
             {
-                keys.Add(Resource.AccountingCustomerOperationAgent);
+                columns.Add(new ReportColumn(Resource.AccountingCustomerOperationAgent));
             }
 
             return new ReportDefinition(
                 Resource.AccountingCustomerOperationsReportSheetName,
+                Resource.AccountingCustomerOperationsReportSheetName,
                 Resource.AccountingCustomerOperationsReportName,
-                keys,
+                columns,
+                tariffService.GetSupportedAccountingCurrencies().FirstOrDefault(),
                 async writer =>
                 {
                     var tariffService = ctx.ServiceProvider.GetService<TariffService>();
@@ -275,21 +376,24 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     {
         return RenderAsync(serviceProvider, userId, taskData, ctx =>
         {
-            var keys = new List<string> {
-                Resource.AccountingCustomerOperationService,
-                Resource.AccountingCustomerOperationQuantity,
-                Resource.AccountingCustomerOperationServiceUnit,
-                Resource.AccountingCustomerOperationDebit,
-                Resource.AccountingCustomerOperationCurrency
+            var tariffService = ctx.ServiceProvider.GetService<TariffService>();
+
+            var columns = new List<ReportColumn> {
+                new(Resource.AccountingCustomerOperationService),
+                new(Resource.AccountingCustomerOperationQuantity, "right"),
+                new(Resource.AccountingCustomerOperationServiceUnit),
+                new(Resource.AccountingCustomerOperationDebit, "right", Sum: true),
+                new(Resource.AccountingCustomerOperationCurrency, Currency: true)
             };
 
             var definition = new ReportDefinition(
                 Resource.AccountingServiceUsageReportSheetName,
+                Resource.AccountingServiceUsageReportSheetName,
                 Resource.AccountingServiceUsageReportName,
-                keys,
+                columns,
+                tariffService.GetSupportedAccountingCurrencies().FirstOrDefault(),
                 async writer =>
                 {
-                    var tariffService = ctx.ServiceProvider.GetService<TariffService>();
                     var quotaService = ctx.ServiceProvider.GetService<IQuotaService>();
 
                     // For ai-tools, usage is displayed in Tokens instead of AI Credits.
@@ -331,20 +435,22 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     {
         return RenderAsync(serviceProvider, userId, taskData, ctx =>
         {
-            var keys = new List<string> {
-                Resource.AccountingCustomerOperationMonth,
-                Resource.AccountingCustomerOperationDebit,
-                Resource.AccountingCustomerOperationCurrency
+            var tariffService = ctx.ServiceProvider.GetService<TariffService>();
+
+            var columns = new List<ReportColumn> {
+                new(Resource.AccountingCustomerOperationMonth),
+                new(Resource.AccountingCustomerOperationDebit, "right", Sum: true),
+                new(Resource.AccountingCustomerOperationCurrency, Currency: true)
             };
 
             var definition = new ReportDefinition(
                 Resource.AccountingMonthlyUsageReportSheetName,
+                Resource.AccountingMonthlyUsageReportSheetName,
                 Resource.AccountingMonthlyUsageReportName,
-                keys,
+                columns,
+                tariffService.GetSupportedAccountingCurrencies().FirstOrDefault(),
                 async writer =>
                 {
-                    var tariffService = ctx.ServiceProvider.GetService<TariffService>();
-
                     var filter = new MonthlyUsageFilter
                     {
                         UtcStartDate = ctx.UtcStartDate,
@@ -363,45 +469,177 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         });
     }
 
-    private static Task<DocumentBuilderInputData> BuildDocsCloudUserQuotaReportAsync(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
+    // The DocsCloud user quota report has a bespoke layout (two user tables + two summary blocks),
+    // so it uses its own script and does not go through the single-table RenderAsync scaffolding.
+    private static async Task<DocumentBuilderInputData> BuildDocsCloudUserQuotaReportAsync(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
     {
-        return RenderAsync(serviceProvider, userId, taskData, ctx =>
+        var tenantManager = serviceProvider.GetService<TenantManager>();
+        var userManager = serviceProvider.GetService<UserManager>();
+        var tenantUtil = serviceProvider.GetService<TenantUtil>();
+        var tempPath = serviceProvider.GetService<TempPath>();
+        var coreSettings = serviceProvider.GetService<CoreSettings>();
+        var docsCloudClient = serviceProvider.GetService<DocsCloudClient>();
+        var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var user = await userManager.GetUsersAsync(userId);
+
+        var userCulture = user.GetCulture();
+        CultureInfo.CurrentCulture = userCulture;
+        CultureInfo.CurrentUICulture = userCulture;
+
+        var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
+
+        var options = new JsonSerializerOptions
         {
-            var keys = new List<string> {
-                Resource.DocsCloudQuotaReportColumnUserId,
-                Resource.DocsCloudQuotaReportColumnUserName,
-                Resource.DocsCloudQuotaReportColumnExpire,
-                Resource.DocsCloudQuotaReportColumnType
-            };
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
 
-            var definition = new ReportDefinition(
-                Resource.DocsCloudQuotaReportSheetName,
-                Resource.DocsCloudQuotaReportName,
-                keys,
-                async writer =>
-                {
-                    var coreSettings = ctx.ServiceProvider.GetService<CoreSettings>();
-                    var docsCloudClient = ctx.ServiceProvider.GetService<DocsCloudClient>();
-                    var userManager = ctx.ServiceProvider.GetService<UserManager>();
-                    var displayUserSettingsHelper = ctx.ServiceProvider.GetService<DisplayUserSettingsHelper>();
+        var context = new RenderContext(serviceProvider, tenant, userCulture, utcStartDate, utcEndDate, options);
 
-                    var portalId = await coreSettings.GetKeyAsync(ctx.Tenant.Id);
+        var header = await BuildReportHeaderAsync(context);
 
-                    var quota = await docsCloudClient.GetTenantQuotaAsync(portalId);
-                    if (quota == null)
-                    {
-                        return;
-                    }
+        var portalId = await coreSettings.GetKeyAsync(tenant.Id);
 
-                    var dateFormat = $"{ctx.Culture.DateTimeFormat.ShortDatePattern} {ctx.Culture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
+        var quota = await docsCloudClient.GetTenantQuotaAsync(portalId);
+        var tenantInfo = await docsCloudClient.GetTenantInfoAsync(portalId);
 
-                    // Editors first, then viewers.
-                    await writer.WriteAsync(await SerializeDocsCloudUsers(quota.Users, Resource.DocsCloudQuotaUserTypeEditor, userManager, displayUserSettingsHelper, dateFormat, ctx.Options));
-                    await writer.WriteAsync(await SerializeDocsCloudUsers(quota.UsersView, Resource.DocsCloudQuotaUserTypeViewer, userManager, displayUserSettingsHelper, dateFormat, ctx.Options));
-                });
+        var editLimit = tenantInfo?.UsersLimit?.Edit ?? 0;
+        var viewLimit = tenantInfo?.UsersLimit?.View ?? 0;
 
-            return Task.FromResult(definition);
-        });
+        var (editors, editorsInternal, editorsExternal) = await BuildDocsCloudUsersAsync(quota?.Users, userManager, displayUserSettingsHelper, tenantUtil);
+        var (viewers, viewersInternal, viewersExternal) = await BuildDocsCloudUsersAsync(quota?.UsersView, userManager, displayUserSettingsHelper, tenantUtil);
+
+        var dateFormat = $"{userCulture.DateTimeFormat.ShortDatePattern} {userCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
+
+        var userTypeHeader = Resource.DocsCloudQuotaReportColumnType;
+        var expireHeader = Resource.DocsCloudQuotaReportColumnExpire;
+
+        var inputData = new
+        {
+            resources = new
+            {
+                company = Resource.AccountingReportCompany + ":",
+                report = Resource.AccountingReportTitle + ":",
+                period = Resource.AccountingReportPeriod + ":",
+                dateGenerated = Resource.AccountingReportDateGenerated + ":",
+                sheetName = Resource.DocsCloudQuotaReportSheetName,
+                dateGeneratedFormat = header.DateGeneratedFormat,
+                dateFormat,
+                countFormat = "#,##0"
+            },
+            info = new
+            {
+                company = header.Company,
+                report = Resource.DocsCloudQuotaReportSheetName,
+                period = header.Period,
+                dateGenerated = header.DateGenerated
+            },
+            logoSrc = header.LogoSrc,
+            themeColors = new
+            {
+                mainBgColor = header.MainBgColor,
+                lightBgColor = header.LightBgColor,
+                mainFontColor = header.MainFontColor
+            },
+            editors = new
+            {
+                title = Resource.DocsCloudQuotaReportEditors,
+                desc = Resource.DocsCloudQuotaReportEditorsDesc,
+                headers = new[] { $"{Resource.DocsCloudQuotaReportEditors} — {Resource.DocsCloudQuotaReportColumnUserId}", userTypeHeader, expireHeader },
+                users = editors,
+                summary = BuildDocsCloudSummary(editors.Count, editorsInternal, editorsExternal, editLimit)
+            },
+            viewers = new
+            {
+                title = Resource.DocsCloudQuotaReportViewers,
+                desc = Resource.DocsCloudQuotaReportViewersDesc,
+                headers = new[] { $"{Resource.DocsCloudQuotaReportViewers} — {Resource.DocsCloudQuotaReportColumnUserId}", userTypeHeader, expireHeader },
+                users = viewers,
+                summary = BuildDocsCloudSummary(viewers.Count, viewersInternal, viewersExternal, viewLimit)
+            }
+        };
+
+        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(DocsCloudScriptName) ?? throw new Exception("Template not found");
+
+        var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
+        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
+        var outputFileName = string.Format(Resource.DocsCloudQuotaReportName + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
+
+        script = script
+            .Replace("${inputData}", JsonSerializer.Serialize(inputData, options))
+            .Replace("${tempFileName}", tempFileName);
+
+        await using (var writer = new StreamWriter(scriptFilePath))
+        {
+            await writer.WriteAsync(script);
+        }
+
+        return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
+    }
+
+    private sealed record DocsCloudUserRow(string UserId, string UserType, string Expire);
+
+    // Classifies each DocsCloud quota user: a Guid that resolves to a real DocSpace user is "Internal"
+    // (shown by display name); anything else is "External" (shown by its raw identifier).
+    private static async Task<(List<DocsCloudUserRow> Users, int Internal, int External)> BuildDocsCloudUsersAsync(
+        List<DocsCloudQuotaUser> source,
+        UserManager userManager,
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        TenantUtil tenantUtil)
+    {
+        var users = new List<DocsCloudUserRow>();
+        var internalCount = 0;
+        var externalCount = 0;
+
+        if (source == null)
+        {
+            return (users, internalCount, externalCount);
+        }
+
+        foreach (var user in source)
+        {
+            string display;
+            string type;
+
+            if (Guid.TryParse(user.UserId, out var guid) &&
+                (await userManager.GetUsersAsync(guid)) is { } userInfo &&
+                userInfo.Id != ASC.Core.Users.Constants.LostUser.Id)
+            {
+                display = displayUserSettingsHelper.GetFullUserName(userInfo, false);
+                type = Resource.DocsCloudQuotaUserTypeInternal;
+                internalCount++;
+            }
+            else
+            {
+                display = user.UserId;
+                type = Resource.DocsCloudQuotaUserTypeExternal;
+                externalCount++;
+            }
+
+            var expire = DateTime.TryParse(user.Expire, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var expireDate)
+                ? tenantUtil.DateTimeFromUtc(expireDate).ToString("G", CultureInfo.InvariantCulture)
+                : user.Expire;
+
+            users.Add(new DocsCloudUserRow(display, type, expire));
+        }
+
+        return (users, internalCount, externalCount);
+    }
+
+    private static object[] BuildDocsCloudSummary(int active, int internalCount, int externalCount, int limit)
+    {
+        return
+        [
+            new { label = Resource.DocsCloudQuotaReportActive, value = active },
+            new { label = Resource.DocsCloudQuotaUserTypeInternal, value = internalCount },
+            new { label = Resource.DocsCloudQuotaUserTypeExternal, value = externalCount },
+            new { label = Resource.DocsCloudQuotaReportSubscriptionLimit, value = limit },
+            new { label = Resource.DocsCloudQuotaReportRemaining, value = Math.Max(limit - active, 0) }
+        ];
     }
 
     private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(
@@ -501,10 +739,10 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Description, "@"),
                 new(record.Details, "@"),
                 new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(CultureInfo.InvariantCulture), "General", "right"),
+                new(record.Quantity.ToString(CultureInfo.InvariantCulture), "#,##0", "right"),
                 new(record.ServiceUnit, "@"),
-                new(record.Credit.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
-                new(record.Debit.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
+                new(record.Credit.ToString(CultureInfo.InvariantCulture), "#,##0.00", "right"),
+                new(record.Debit.ToString(CultureInfo.InvariantCulture), "#,##0.0000000", "right"),
                 new(record.Currency, "@")
             };
 
@@ -530,9 +768,9 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             var properties = new List<PropertyValue>
             {
                 new(title, "@"),
-                new(record.TotalQuantity.ToString(CultureInfo.InvariantCulture), "General", "right"),
+                new(record.TotalQuantity.ToString(CultureInfo.InvariantCulture), "#,##0", "right"),
                 new(serviceUnit, "@"),
-                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
+                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), "#,##0.00", "right"),
                 new(record.Currency, "@")
             };
 
@@ -553,55 +791,8 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             var properties = new List<PropertyValue>
             {
                 new(month, "@"),
-                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), "0.0000000000", "right"),
+                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), "#,##0.00", "right"),
                 new(record.Currency, "@")
-            };
-
-            _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
-        }
-
-        return sb.ToString();
-    }
-
-    private static async Task<string> SerializeDocsCloudUsers(
-        List<DocsCloudQuotaUser> users,
-        string type,
-        UserManager userManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        string dateFormat,
-        JsonSerializerOptions jsonSerializerOptions)
-    {
-        if (users is not { Count: > 0 })
-        {
-            return string.Empty;
-        }
-
-        var sb = new StringBuilder();
-
-        foreach (var user in users)
-        {
-            var userName = string.Empty;
-
-            // The user id may be a DocSpace user Guid or an external identifier; only resolve display names for Guids.
-            if (Guid.TryParse(user.UserId, out var guid))
-            {
-                var userInfo = await userManager.GetUsersAsync(guid);
-                if (userInfo.Id != ASC.Core.Users.Constants.LostUser.Id)
-                {
-                    userName = displayUserSettingsHelper.GetFullUserName(userInfo, false);
-                }
-            }
-
-            var expire = DateTime.TryParse(user.Expire, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var expireDate)
-                ? new PropertyValue(expireDate.ToString("G", CultureInfo.InvariantCulture), dateFormat)
-                : new PropertyValue(user.Expire, "@");
-
-            var properties = new List<PropertyValue>
-            {
-                new(user.UserId, "@"),
-                new(userName, "@"),
-                expire,
-                new(type, "@")
             };
 
             _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
