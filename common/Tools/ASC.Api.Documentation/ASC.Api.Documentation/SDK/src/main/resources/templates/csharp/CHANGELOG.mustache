@@ -6,18 +6,27 @@
 
 - Added new API methods and enhanced models with additional properties
 - Added tag Rooms / Groups
+- Added per-user AI settings endpoints: `GetAiUserSettings` (GET `/api/2.0/ai/config/user`) and `SetAiUserSettings` (PUT `/api/2.0/ai/config/user`)
+- Added new models `AiUserSettingsDto`, `AiUserSettingsWrapper`, and `SetAiUserSettingsRequestDto` (recommended model banner visibility)
+- Added `UserUpdatedAiSettings` value to the `MessageAction` enum
+- Added a Rate Limiting section to the README describing the `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and `Retry-After` response headers
+- Added a dedicated NuGet package readme (`README_nuget.md`) via `PackageReadmeFile`
+- Added XML documentation to `ApiDateTimeConverter` (`ReadJson`/`WriteJson`)
 
 ### Changed
 
 - Updated from System.Text to Newtonsoft
 - Updated SDK OpenAPI specification v3.7.0
 - Updated example values, added email length validation, and adjusted method return types in API models and methods
+- Date range parameters (`from`/`to` UTC time) are now always sent for audit trail, login history, and file/folder index requests
 
 ### Fixed
 
 - Fixed & / ' issues
 - Fixed ApiDateTimeConverter
 - Fixed descriptions
+- Fixed the `system` parameter reference in the Web plugins API documentation
+- Fixed HTML encoding of special characters (`'`, `&`, `<>`) in generated documentation comments
 
 ### Improved / Enhanced
 
