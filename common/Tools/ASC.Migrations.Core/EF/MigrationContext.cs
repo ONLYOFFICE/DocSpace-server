@@ -114,6 +114,10 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesGroup> FilesGroup { get; set; }
     public DbSet<DbFilesRoomGroup> FilesRoomGroup { get; set; }
     public DbSet<DbFileKeys> FileKeys { get; set; }
+    public DbSet<DbFilesMetadataTemplate> MetadataTemplates { get; set; }
+    public DbSet<DbFilesMetadataField> MetadataFields { get; set; }
+    public DbSet<DbFilesMetadataLink> MetadataLinks { get; set; }
+    public DbSet<DbFilesMetadataValue> MetadataValues { get; set; }
 
 
     public DbSet<IdentityAuthorization> IdentityAuthorizations { get; set; }
@@ -207,6 +211,10 @@ public class MigrationContext : DbContext
                 .AddDbDbFilesThirdpartyApp()
                 .AddDbFilesLink()
                 .AddDbFilesProperties()
+                .AddDbFilesMetadataTemplate()
+                .AddDbFilesMetadataField()
+                .AddDbFilesMetadataLink()
+                .AddDbFilesMetadataValue()
                 .AddInstanceRegistration()
                 .AddAuditEvent()
                 .AddLoginEvents()

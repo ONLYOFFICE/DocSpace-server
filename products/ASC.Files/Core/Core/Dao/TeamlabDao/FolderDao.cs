@@ -715,6 +715,8 @@ internal class FolderDao(
             treeToAdd.AddRange(await filesDbContext.FolderTreeAsync(folder.Id, folder.ParentId).ToListAsync());
             await filesDbContext.AddRangeAsync(treeToAdd);
             await filesDbContext.SaveChangesAsync();
+
+            await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, folder.Id, FileEntryType.Folder, folder.ParentId, folder.CreateBy);
         }
 
         if (isNew)
@@ -1000,6 +1002,8 @@ internal class FolderDao(
             await filesDbContext.DeleteMcpServerToolPrefsAsync(tenantId, folderId);
             await filesDbContext.DeleteMcpServersAsync(tenantId, folderId);
             await filesDbContext.DeleteRoomGroupRefByFolderIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteMetadataLinksByEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
+            await filesDbContext.DeleteMetadataValuesByEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -1141,6 +1145,7 @@ internal class FolderDao(
             if (!trashId.Equals(toFolderId))
             {
                 await SetCustomOrder(context, folderId, toFolderId);
+                await context.ApplyMetadataCascadeLinksAsync(tenantId, folderId, FileEntryType.Folder, toFolderId, currentAccount);
             }
             else
             {
@@ -1231,6 +1236,11 @@ internal class FolderDao(
             t.EntryId = copy.Id;
         }
         await tagDao.SaveTagsAsync(tags);
+
+        await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
+        {
+            await filesDbContext.CopyMetadataAsync(_tenantManager.GetCurrentTenantId(), folder.Id, copy.Id, FileEntryType.Folder, _authContext.CurrentAccount.ID);
+        }
 
         //FactoryIndexer.IndexAsync(FoldersWrapper.GetFolderWrapper(ServiceProvider, copy));
         return copy;

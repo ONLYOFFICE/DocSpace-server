@@ -39,6 +39,7 @@ internal class FileDao(
         ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,
         FactoryIndexerForm factoryIndexerFormData,
+        FactoryIndexerFileMetadata factoryIndexerFileMetadata,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -272,7 +273,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -281,7 +282,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType);
+        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType, metadataFilter);
 
         if (containingMyFiles)
         {
@@ -634,7 +635,14 @@ internal class FileDao(
 
                             await filesDbContext.MessageAttachments.AddAsync(attachment);
                         }
+
                         await filesDbContext.SaveChangesAsync();
+
+                        if (isNew)
+                        {
+                            await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, file.Id, FileEntryType.File, file.ParentId, file.CreateBy);
+                        }
+
                         await tx.CommitAsync();
                     });
 
@@ -768,7 +776,7 @@ internal class FileDao(
     }
 
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -777,7 +785,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType);
+        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType, metadataFilter);
         if (additionalFilterOption != AdditionalFilterOption.All)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, additionalFilterOption);
@@ -1040,6 +1048,8 @@ internal class FileDao(
             await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
             await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
             await context.DeleteFileKeysAsync(tenantId, fileId);
+            await context.DeleteMetadataLinksByEntriesAsync(tenantId, [fileId], FileEntryType.File);
+            await context.DeleteMetadataValuesByEntriesAsync(tenantId, [fileId], FileEntryType.File);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -1341,6 +1351,11 @@ internal class FileDao(
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
             }
 
+            if (toFolderId != trashId)
+            {
+                await context.ApplyMetadataCascadeLinksAsync(tenantId, fileId, FileEntryType.File, toFolderId, _authContext.CurrentAccount.ID);
+            }
+
             await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
             {
                 FileId = fileId,
@@ -1417,6 +1432,11 @@ internal class FileDao(
         {
             copy.ContentLength = stream.CanSeek ? stream.Length : file.ContentLength;
             copy = await SaveFileAsync(copy, stream, true, true, null, chatId);
+        }
+
+        await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
+        {
+            await filesDbContext.CopyMetadataAsync(_tenantManager.GetCurrentTenantId(), file.Id, copy.Id, FileEntryType.File, _authContext.CurrentAccount.ID);
         }
 
         if (file.ThumbnailStatus != Thumbnail.Created)
@@ -2386,6 +2406,151 @@ internal class FileDao(
         };
     }
 
+    internal static Func<Selector<T>, Selector<T>> GetFuncForSearchInMetadata<T>(int parentId, bool withSubfolders, MetadataFilter metadataFilter) where T : MetadataSearchItemBase
+    {
+        return s =>
+        {
+            if (withSubfolders)
+            {
+                s.In(r => r.Folders.Select(a => a.ParentId), new[] { parentId });
+            }
+            else
+            {
+                s.Where(r => r.ParentId, parentId);
+            }
+
+            foreach (var condition in metadataFilter.Conditions)
+            {
+                switch (condition.FieldType)
+                {
+                    case MetadataFieldType.String:
+                        s.Nested(a => a.Values, b =>
+                            b.Term(c => c.Values.Select(v => v.FieldId), condition.FieldId) &&
+                            b.Term(c => c.Values.Select(v => v.StringValue), condition.StringValue));
+                        break;
+                    case MetadataFieldType.Date:
+                        s.Nested(a => a.Values, b =>
+                            b.Term(c => c.Values.Select(v => v.FieldId), condition.FieldId) &&
+                            b.DateRange(r =>
+                            {
+                                r.Field(c => c.Values.Select(v => v.DateValue));
+
+                                if (condition.DateFrom.HasValue)
+                                {
+                                    r.GreaterThanOrEquals(condition.DateFrom.Value);
+                                }
+
+                                if (condition.DateTo.HasValue)
+                                {
+                                    r.LessThanOrEquals(condition.DateTo.Value);
+                                }
+
+                                return r;
+                            }));
+                        break;
+                    case MetadataFieldType.Number:
+                        s.Nested(a => a.Values, b =>
+                            b.Term(c => c.Values.Select(v => v.FieldId), condition.FieldId) &&
+                            b.Range(r =>
+                            {
+                                r.Field(c => c.Values.Select(v => v.NumberValue));
+
+                                if (condition.NumberFrom.HasValue)
+                                {
+                                    r.GreaterThanOrEquals(condition.NumberFrom.Value);
+                                }
+
+                                if (condition.NumberTo.HasValue)
+                                {
+                                    r.LessThanOrEquals(condition.NumberTo.Value);
+                                }
+
+                                return r;
+                            }));
+                        break;
+                    case MetadataFieldType.SingleChoice:
+                    case MetadataFieldType.MultiChoice:
+                        var optionIds = condition.OptionIds.Select(id => id.ToString()).ToArray();
+
+                        s.Nested(a => a.Values, b =>
+                            b.Term(c => c.Values.Select(v => v.FieldId), condition.FieldId) &&
+                            b.Terms(t => t.Field(c => c.Values.Select(v => v.OptionIds)).Terms(optionIds)));
+                        break;
+                }
+            }
+
+            s.Limit(0, BaseIndexer<T>.QueryLimit);
+
+            return s;
+        };
+    }
+
+    internal static Func<Selector<T>, Selector<T>> GetFuncForSearchInMetadataGlobalText<T>(int parentId, bool withSubfolders, string searchText) where T : MetadataSearchItemBase
+    {
+        return s =>
+        {
+            if (withSubfolders)
+            {
+                s.In(r => r.Folders.Select(a => a.ParentId), new[] { parentId });
+            }
+            else
+            {
+                s.Where(r => r.ParentId, parentId);
+            }
+
+            s.Match(r => r.GlobalText, searchText);
+
+            s.Limit(0, BaseIndexer<T>.QueryLimit);
+
+            return s;
+        };
+    }
+
+    internal static IQueryable<DbFile> ApplyMetadataFiltersSql(IQueryable<DbFile> q, FilesDbContext filesDbContext, int tenantId, FileEntryType entryType, MetadataFilter metadataFilter)
+    {
+        foreach (var condition in metadataFilter.Conditions)
+        {
+            var fieldId = condition.FieldId;
+
+            switch (condition.FieldType)
+            {
+                case MetadataFieldType.String:
+                    var stringValue = condition.StringValue;
+                    q = q.Where(f => filesDbContext.MetadataValues.Any(v =>
+                        v.TenantId == tenantId && v.EntryType == entryType && v.EntryId == f.Id &&
+                        v.FieldId == fieldId && v.ValueString.ToLower() == stringValue));
+                    break;
+                case MetadataFieldType.Date:
+                    var dateFrom = condition.DateFrom;
+                    var dateTo = condition.DateTo;
+                    q = q.Where(f => filesDbContext.MetadataValues.Any(v =>
+                        v.TenantId == tenantId && v.EntryType == entryType && v.EntryId == f.Id &&
+                        v.FieldId == fieldId &&
+                        (dateFrom == null || v.ValueDate >= dateFrom) &&
+                        (dateTo == null || v.ValueDate <= dateTo)));
+                    break;
+                case MetadataFieldType.Number:
+                    var numberFrom = condition.NumberFrom;
+                    var numberTo = condition.NumberTo;
+                    q = q.Where(f => filesDbContext.MetadataValues.Any(v =>
+                        v.TenantId == tenantId && v.EntryType == entryType && v.EntryId == f.Id &&
+                        v.FieldId == fieldId &&
+                        (numberFrom == null || v.ValueNumber >= numberFrom) &&
+                        (numberTo == null || v.ValueNumber <= numberTo)));
+                    break;
+                case MetadataFieldType.SingleChoice:
+                case MetadataFieldType.MultiChoice:
+                    var optionIds = condition.OptionIds.Select(id => id.ToString()).ToList();
+                    q = q.Where(f => filesDbContext.MetadataValues.Any(v =>
+                        v.TenantId == tenantId && v.EntryType == entryType && v.EntryId == f.Id &&
+                        v.FieldId == fieldId && optionIds.Contains(v.OptionId)));
+                    break;
+            }
+        }
+
+        return q;
+    }
+
     private IQueryable<DbFile> ApplyAdditionalFileFilters(
         IQueryable<DbFile> q,
         FilesDbContext filesDbContext,
@@ -2654,7 +2819,8 @@ internal class FileDao(
         string[] extension,
         FilesDbContext filesDbContext,
         FormsItemDto formsItemDto,
-        List<FolderType> folderType = null)
+        List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var currentUserId = _authContext.CurrentAccount.ID;
@@ -2693,6 +2859,20 @@ internal class FileDao(
                 }
             }
 
+            if (success && searchByText)
+            {
+                // the string values of the globally visible system template participate in the general text search:
+                // the entry matches when either its own fields or its global metadata match, so the id sets are united
+                var funcForGlobalText = GetFuncForSearchInMetadataGlobalText<DbFileMetadataSearch>(parentId, withSubfolders, searchText);
+                Expression<Func<Selector<DbFileMetadataSearch>, Selector<DbFileMetadataSearch>>> expressionGlobalText = s => funcForGlobalText(s);
+
+                var (globalTextSuccess, globalTextIds) = await factoryIndexerFileMetadata.TrySelectIdsAsync(expressionGlobalText);
+                if (globalTextSuccess && globalTextIds.Count > 0)
+                {
+                    searchIds = searchIds.Union(globalTextIds).ToList();
+                }
+            }
+
             if (success)
             {
                 q = q.Where(r => searchIds.Contains(r.Id));
@@ -2701,7 +2881,14 @@ internal class FileDao(
             {
                 if (searchByText)
                 {
-                    q = BuildSearch(q, searchText, SearchType.Any);
+                    var lowerText = GetSearchText(searchText);
+
+                    q = q.Where(f => f.Title.ToLower().Contains(lowerText) ||
+                        filesDbContext.MetadataValues.Any(v =>
+                            v.TenantId == tenantId && v.EntryType == FileEntryType.File && v.EntryId == f.Id &&
+                            v.ValueString.ToLower().Contains(lowerText) &&
+                            filesDbContext.MetadataFields.Any(fl => fl.TenantId == tenantId && fl.Id == v.FieldId &&
+                                filesDbContext.MetadataTemplates.Any(t => t.TenantId == tenantId && t.Id == fl.TemplateId && t.IsSystem))));
                 }
 
                 if (searchByExtension)
@@ -2709,6 +2896,18 @@ internal class FileDao(
                     q = BuildSearch(q, extension, SearchType.End);
                 }
             }
+        }
+
+        if (metadataFilter is { Conditions.Count: > 0 })
+        {
+            var funcForMetadata = GetFuncForSearchInMetadata<DbFileMetadataSearch>(parentId, withSubfolders, metadataFilter);
+            Expression<Func<Selector<DbFileMetadataSearch>, Selector<DbFileMetadataSearch>>> expressionMetadata = s => funcForMetadata(s);
+
+            var (metadataSuccess, metadataIds) = await factoryIndexerFileMetadata.TrySelectIdsAsync(expressionMetadata);
+
+            q = metadataSuccess
+                ? q.Where(r => metadataIds.Contains(r.Id))
+                : ApplyMetadataFiltersSql(q, filesDbContext, tenantId, FileEntryType.File, metadataFilter);
         }
 
         q = orderBy == null
@@ -3028,6 +3227,7 @@ public record FileReassignInfo
 internal class CacheFileDao(ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,
         FactoryIndexerForm factoryIndexerFormData,
+        FactoryIndexerFileMetadata factoryIndexerFileMetadata,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -3070,6 +3270,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         logger,
         factoryIndexer,
         factoryIndexerFormData,
+        factoryIndexerFileMetadata,
         userManager,
         fileUtility,
         dbContextManager,

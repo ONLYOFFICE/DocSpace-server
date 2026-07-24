@@ -57,7 +57,8 @@ public class FoldersControllerInternal(
     CsvFileHelper csvFileHelper,
     CsvFileUploader csvFileUploader,
     TenantManager tenantManager,
-    CoreBaseSettings coreBaseSettings
+    CoreBaseSettings coreBaseSettings,
+    MetadataFilterHelper metadataFilterHelper
     )
     : FoldersController<int>(
         daoFactory,
@@ -71,7 +72,8 @@ public class FoldersControllerInternal(
         fileDtoHelper,
         permissionContext,
         fileShareDtoHelper,
-        apiContext)
+        apiContext,
+        metadataFilterHelper)
 {
     private readonly FileStorageService _fileStorageServiceInternal = fileStorageService;
     /// <remarks>
@@ -173,7 +175,8 @@ public class FoldersControllerThirdparty(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    ApiContext apiContext)
+    ApiContext apiContext,
+    MetadataFilterHelper metadataFilterHelper)
     : FoldersController<string>(
         daoFactory,
         fileSecurity,
@@ -186,7 +189,8 @@ public class FoldersControllerThirdparty(
         fileDtoHelper,
         permissionContext,
         fileShareDtoHelper,
-        apiContext);
+        apiContext,
+        metadataFilterHelper);
 
 public abstract class FoldersController<T>(
     IDaoFactory daoFactory,
@@ -200,7 +204,8 @@ public abstract class FoldersController<T>(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    ApiContext apiContext)
+    ApiContext apiContext,
+    MetadataFilterHelper metadataFilterHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -277,7 +282,9 @@ public abstract class FoldersController<T>(
             formsItemDto = new FormsItemDto(inDto.FormsItemKey, inDto.FormsItemType);
         }
 
-        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, inDto.WithSubFolders ?? true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location, inDto.FolderType);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, inDto.WithSubFolders ?? true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location, inDto.FolderType, metadataFilter);
         return folder.NotFoundIfNull();
     }
 

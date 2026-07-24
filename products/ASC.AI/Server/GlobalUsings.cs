@@ -49,6 +49,7 @@ global using ASC.AI.Integration.Profiles;
 global using ASC.AI.Integration.Prompts;
 global using ASC.AI.Integration.ToolPrefs;
 global using ASC.AI.Models.ResponseDto;
+global using ASC.AI.Core.MetadataAutofill;
 global using ASC.AI.Models.RequestDto;
 global using ASC.AI.Models.RequestDto.Integration;
 global using ASC.AI.Core.MCP;

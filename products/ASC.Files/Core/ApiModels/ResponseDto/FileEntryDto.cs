@@ -298,6 +298,12 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <example>false</example>
     public bool? IsLinkExpired { get; set; }
 
+    /// <summary>
+    /// The IDs of the metadata templates assigned to the file entry.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<int> AssignedMetadataTemplates { get; set; }
+
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)
     {

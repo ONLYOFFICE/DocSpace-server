@@ -87,6 +87,8 @@ public static class AiWorkerServiceExtensions
             eventBus.SubscribeAsync<MdTextToDocxIntegrationEvent,
                 TextToDocxIntegrationHandler>(),
             eventBus.SubscribeAsync<ChatDeletionIntegrationEvent,
-                ChatDeletionIntegrationEventHandler>());
+                ChatDeletionIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<MetadataAutofillIntegrationEvent,
+                MetadataAutofillIntegrationEventHandler>());
     }
 }

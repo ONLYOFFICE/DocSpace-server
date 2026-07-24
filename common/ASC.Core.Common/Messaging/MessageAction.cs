@@ -1057,6 +1057,40 @@ public enum MessageAction
 
     #endregion
 
+    #region Metadata
+
+    [Description("Metadata template created")]
+    MetadataTemplateCreated = 9910,
+
+    [Description("Metadata template updated")]
+    MetadataTemplateUpdated = 9911,
+
+    [Description("Metadata template deleted")]
+    MetadataTemplateDeleted = 9912,
+
+    [Description("Metadata field created")]
+    MetadataFieldCreated = 9913,
+
+    [Description("Metadata field updated")]
+    MetadataFieldUpdated = 9914,
+
+    [Description("Metadata field deleted")]
+    MetadataFieldDeleted = 9915,
+
+    [Description("Metadata template assigned")]
+    MetadataTemplateAssigned = 9916,
+
+    [Description("Metadata template unassigned")]
+    MetadataTemplateUnassigned = 9917,
+
+    [Description("Metadata values updated")]
+    MetadataValuesUpdated = 9918,
+
+    [Description("Metadata cascade assignment started")]
+    MetadataCascadeStarted = 9919,
+
+    #endregion
+
     #region Ldap
 
     [Description("Ldap enabled")]

@@ -33,6 +33,7 @@
 
 global using ASC.AI.Core.Database;
 global using ASC.AI.Core.Database.Models;
+global using ASC.AI.Core.Chat;
 global using ASC.AI.Core.Chat.Data;
 global using ASC.AI.Core.Chat.Deletion;
 global using ASC.AI.Core.Chat.History;
