@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>ユーザーのアクティブな接続がログアウトされました: {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect の設定が更新されました</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect のクォータレポートがダウンロードされました</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>ユーザーのAI設定が更新されました</value>
+  </data>
 </root>

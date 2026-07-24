@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>사용자의 활성 연결들이 로그아웃되었습니다: {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect 구성이 업데이트되었습니다</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect 할당량 보고서가 다운로드되었습</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>사용자 AI 설정이 업데이트되었습니다</value>
+  </data>
 </root>

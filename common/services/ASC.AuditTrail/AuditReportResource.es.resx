@@ -952,7 +952,7 @@
     <value>Iniciar migración de región de portal</value>
   </data>
   <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
-    <value>Saldo de suscripción movido a la billetera: {0}</value>
+    <value>Saldo de suscripción movido al monedero: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Cuenta de sistema</value>
@@ -1202,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Sesiones de conexiones activas cerradas para el usuario: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Configuración de Docs Connect actualizada</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Informe de cuota de Docs Connect descargado</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Configuración de IA del usuario actualizada</value>
   </data>
 </root>

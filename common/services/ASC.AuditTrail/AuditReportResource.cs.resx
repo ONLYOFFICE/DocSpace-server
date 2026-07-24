@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Aktivní připojení pro uživatele byla odhlášena: {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Konfigurace Docs Connect byla aktualizována</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Zpráva o kvótě Docs Connect byla stažena</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Nastavení AI uživatele bylo aktualizováno</value>
+  </data>
 </root>

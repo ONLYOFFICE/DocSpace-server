@@ -595,4 +595,10 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Sincronizzazione dei dati del modulo con il database esterno non riuscita.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Il modulo è stato modificato. Questa bozza è obsoleta e non può essere inviata.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>L'istruzione di un agente IA non può essere più lunga di {0} caratteri</value>
+  </data>
 </root>

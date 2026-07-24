@@ -168,4 +168,10 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>Telpas</value>
   </data>
+  <data name="Files" xml:space="preserve">
+    <value>Faili</value>
+  </data>
+  <data name="Forms" xml:space="preserve">
+    <value>Veidlapas</value>
+  </data>
 </root>
