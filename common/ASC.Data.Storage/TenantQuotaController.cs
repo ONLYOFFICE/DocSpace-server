@@ -45,18 +45,49 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
     private long AvailableFileSize =>
         long.TryParse(configuration["web:available-file-size"], out var value) ? value : 100L * 1024L * 1024L;
 
+    // CurrentSize is a mutable running total shared by every QuotaUsed*/QuotaUser* call. Some storage
+    // operations fan those calls out concurrently (e.g. FileDao batched delete, S3 CopyDirectoryAsync),
+    // so both the lazy seeding and the +=/read must be serialized. The lock only ever guards the
+    // in-memory arithmetic below — never the DB write or storage I/O (an await under lock is a compile
+    // error), so it does not serialize the parts that make the fan-out worthwhile.
+    private readonly Lock _sizeLock = new();
+    private long _currentSize;
+
     private long CurrentSize
     {
         get
         {
-            if (!_lazyCurrentSize.IsValueCreated)
+            lock (_sizeLock)
             {
-                return field = _lazyCurrentSize.Value;
+                EnsureCurrentSizeSeeded();
+                return _currentSize;
             }
-
-            return field;
         }
-        set;
+    }
+
+    // must be called under _sizeLock
+    private void EnsureCurrentSizeSeeded()
+    {
+        if (!_lazyCurrentSize.IsValueCreated)
+        {
+            _currentSize = _lazyCurrentSize.Value;
+        }
+    }
+
+    private void AddCurrentSize(long delta)
+    {
+        lock (_sizeLock)
+        {
+            EnsureCurrentSizeSeeded();
+            _currentSize += delta;
+        }
+    }
+
+    // Single-threaded warm-up: materializes the DB running total before a concurrent fan-out so the
+    // lock above only ever wraps arithmetic, never the blocking Lazy DB query.
+    public void PreloadCurrentSize()
+    {
+        _ = CurrentSize;
     }
 
     private int _tenant;
@@ -77,7 +108,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         if (UsedInQuota(dataTag))
         {
             var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
-            CurrentSize += size;
+            AddCurrentSize(size);
             if (result == QuotaCheckResult.QuotaExceeded)
             {
                 await quotaSocketManager.TenantQuotaExceededAsync();
@@ -96,7 +127,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         if (UsedInQuota(dataTag))
         {
             var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
-            CurrentSize += size;
+            AddCurrentSize(size);
             if (result == QuotaCheckResult.QuotaExceeded)
             {
                 await quotaSocketManager.TenantQuotaExceededAsync();
@@ -119,7 +150,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         size = -Math.Abs(size);
         if (UsedInQuota(dataTag))
         {
-            CurrentSize += size;
+            AddCurrentSize(size);
         }
 
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, Guid.Empty);
@@ -134,7 +165,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         size = -Math.Abs(size);
         if (UsedInQuota(dataTag))
         {
-            CurrentSize += size;
+            AddCurrentSize(size);
         }
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : authContext.CurrentAccount.ID);
 
@@ -145,7 +176,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         size = Math.Max(0, size);
         if (UsedInQuota(dataTag))
         {
-            CurrentSize += size;
+            AddCurrentSize(size);
         }
 
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, false, Guid.Empty);

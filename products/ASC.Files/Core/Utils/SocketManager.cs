@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using System.Threading.Channels;
@@ -79,10 +79,7 @@ public class SocketManager(
 
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {
-        if (users == null)
-        {
-            users = await GetRecipientListForFolder(folder);
-        }
+        users ??= await GetRecipientListForFolder(folder);
         await MakeRequest("create-folder", folder, true, users);
     }
 
@@ -96,14 +93,21 @@ public class SocketManager(
         await MakeRequest("update-folder", folder, true, users: users);
     }
 
-    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null, IEnumerable<Guid> users = null)
+    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null, IEnumerable<Guid> users = null, IEnumerable<Guid> sharedUsers = null)
     {
-        await MakeRequest("delete-file", file, users: users, action: action);
+        await MakeRequest("delete-file", file, users: users, action: action, sharedUsers: sharedUsers);
     }
 
-    public async Task DeleteFolder<T>(Folder<T> folder, IEnumerable<Guid> users = null, Func<Task> action = null)
+    // recipients are resolved from files_security, so when an entry is deleted in bulk
+    // they must be captured before the deletion removes the security records
+    public async Task<(IEnumerable<Guid> users, IEnumerable<Guid> sharedUsers)> GetDeleteRecipientsAsync<T>(FileEntry<T> entry)
     {
-        await MakeRequest("delete-folder", folder, users: users, action: action);
+        return await WhoCanRead(entry, entry.FolderIdDisplay);
+    }
+
+    public async Task DeleteFolder<T>(Folder<T> folder, IEnumerable<Guid> users = null, Func<Task> action = null, IEnumerable<Guid> sharedUsers = null)
+    {
+        await MakeRequest("delete-folder", folder, users: users, action: action, sharedUsers: sharedUsers);
     }
 
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
@@ -206,10 +210,10 @@ public class SocketManager(
     public async Task UpdateChatAsync<T>(Folder<T> folder, Guid chatId, string chatTitle, Guid userId)
     {
         var room = FolderRoom(folder.Id);
-        
+
         await base.MakeRequest("update-chat", new { room, chatId, chatTitle, userId });
     }
-    
+
     public async Task CommitMessageAsync(Guid chatId, long messageId)
     {
         var room = ChatRoom(chatId);
@@ -276,7 +280,7 @@ public class SocketManager(
         });
 
     }
-    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null, T folderIdDisplay = default)
+    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null, T folderIdDisplay = default, IEnumerable<Guid> sharedUsers = null)
     {
         if (Equals(folderIdDisplay, default(T)))
         {
@@ -284,8 +288,6 @@ public class SocketManager(
         }
 
         var room = FolderRoom(folderIdDisplay);
-
-        IEnumerable<Guid> sharedUsers = null;
 
         if (users == null)
         {
