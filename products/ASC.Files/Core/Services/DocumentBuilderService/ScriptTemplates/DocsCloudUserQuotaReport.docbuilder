@@ -92,10 +92,15 @@ function writeImg() {
 function writeInfo() {
     var rows = [
         { label: inputData.resources.company, value: inputData.info.company, format: "@" },
-        { label: inputData.resources.report, value: inputData.info.report, format: "@" },
-        { label: inputData.resources.period, value: inputData.info.period, format: "@" },
-        { label: inputData.resources.dateGenerated, value: inputData.info.dateGenerated, format: inputData.resources.dateGeneratedFormat }
+        { label: inputData.resources.report, value: inputData.info.report, format: "@" }
     ];
+
+    // The quota snapshot has no period; only render it when provided.
+    if (inputData.info.period) {
+        rows.push({ label: inputData.resources.period, value: inputData.info.period, format: "@" });
+    }
+
+    rows.push({ label: inputData.resources.dateGenerated, value: inputData.info.dateGenerated, format: inputData.resources.dateGeneratedFormat });
 
     for (var i = 0; i < rows.length; i++) {
         var row = i + 1;
@@ -104,7 +109,10 @@ function writeInfo() {
         writeCell(row, 2, { value: rows[i].value, fontColor: defaultFontColorGray, format: rows[i].format, valign: "center" });
     }
 
-    oWorksheet.GetRange("A5").SetRowHeight(INFO_ROW_HEIGHT);
+    // Blank spacer rows up to the table header.
+    for (var r = rows.length + 1; r < HEADER_ROW; r++) {
+        oWorksheet.GetRange("A" + r).SetRowHeight(INFO_ROW_HEIGHT);
+    }
 }
 
 // Writes one of the two user tables (editors or viewers) at the given start column and returns

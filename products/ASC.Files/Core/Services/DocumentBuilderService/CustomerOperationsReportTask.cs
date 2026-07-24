@@ -483,16 +483,18 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         CultureInfo.CurrentCulture = userCulture;
         CultureInfo.CurrentUICulture = userCulture;
 
-        var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
-        var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
-
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        var context = new RenderContext(serviceProvider, tenant, userCulture, utcStartDate, utcEndDate, options);
+        // The quota report is a point-in-time snapshot: it has no period, and the file name carries the
+        // tenant-local generation date. The task data StartDate/EndDate are intentionally not used here
+        // (they are meaningless for a snapshot, and running "now" through DateTimeToUtc would shift it).
+        var reportDate = tenantUtil.DateTimeNow();
+
+        var context = new RenderContext(serviceProvider, tenant, userCulture, DateTime.UtcNow, DateTime.UtcNow, options);
 
         var header = await BuildReportHeaderAsync(context);
 
@@ -529,7 +531,6 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             {
                 company = header.Company,
                 report = Resource.DocsCloudQuotaReportSheetName,
-                period = header.Period,
                 dateGenerated = header.DateGenerated
             },
             logoSrc = header.LogoSrc,
@@ -561,7 +562,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
-        var outputFileName = string.Format(Resource.DocsCloudQuotaReportName + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
+        var outputFileName = string.Format(Resource.DocsCloudQuotaReportName + ".xlsx", reportDate.ToShortDateString());
 
         script = script
             .Replace("${inputData}", JsonSerializer.Serialize(inputData, options))
