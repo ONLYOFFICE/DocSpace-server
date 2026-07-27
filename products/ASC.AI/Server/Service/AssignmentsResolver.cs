@@ -42,7 +42,7 @@ public record AssignmentPolicy
 }
 
 [Scope]
-public class AssignmentsResolver(AiGateway gateway)
+public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver> logger)
 {
     private static readonly AssignmentPolicy[] _policies =
     [
@@ -68,6 +68,10 @@ public class AssignmentsResolver(AiGateway gateway)
         }
 
         var models = await GetModelsAsync();
+        if (models == null)
+        {
+            return stored;
+        }
 
         if (stored.HasValue && models.Any(m => m.RevisionId == stored.Value))
         {
@@ -92,6 +96,11 @@ public class AssignmentsResolver(AiGateway gateway)
         }
 
         var models = await GetModelsAsync();
+        if (models == null)
+        {
+            return stored;
+        }
+
         var alive = models.Select(m => m.RevisionId).ToHashSet();
 
         var resolved = stored
@@ -120,10 +129,18 @@ public class AssignmentsResolver(AiGateway gateway)
         return resolved;
     }
 
-    private async Task<List<Model>> GetModelsAsync()
+    private async Task<List<Model>?> GetModelsAsync()
     {
-        var response = await gateway.GetModelsAsync();
-        return response?.Data?.ToList() ?? [];
+        try
+        {
+            var response = await gateway.GetModelsAsync();
+            return response?.Data?.ToList() ?? [];
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or TimeoutException or JsonException)
+        {
+            logger.WarningModelsUnavailable(e);
+            return null;
+        }
     }
 
     private static Guid? PickDefault(AssignmentPolicy policy, List<Model> models)
@@ -153,4 +170,10 @@ public class AssignmentsResolver(AiGateway gateway)
             .ThenBy(m => m.Id, StringComparer.Ordinal)
             .FirstOrDefault();
     }
+}
+
+internal static partial class AssignmentsResolverLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Failed to load models from AI Gateway, falling back to stored assignments")]
+    public static partial void WarningModelsUnavailable(this ILogger<AssignmentsResolver> logger, Exception exception);
 }
