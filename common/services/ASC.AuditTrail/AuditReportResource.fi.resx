@@ -1204,10 +1204,10 @@
     <value>Käyttäjän aktiiviset yhteydet kirjattu ulos: {0}</value>
   </data>
   <data name="DocsCloudConfigUpdated" xml:space="preserve">
-    <value>Docs Connect -kokoonpano päivitetty</value>
+    <value>Docs Connect-kokoonpano päivitetty</value>
   </data>
   <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
-    <value>Docs Connect -kiintiöraportti ladattu</value>
+    <value>Docs Connect-kiintiöraportti ladattu</value>
   </data>
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Käyttäjän AI-asetukset päivitetty</value>
