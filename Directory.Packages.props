@@ -101,7 +101,6 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="10.8.1" />
     <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.8.1" />
     <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.8.1" />
@@ -192,7 +191,6 @@
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.19.2" />
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
     <PackageVersion Include="Telegram.Bot" Version="22.7.6" />
     <PackageVersion Include="TweetinviAPI" Version="5.0.4" />
