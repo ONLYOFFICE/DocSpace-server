@@ -47,6 +47,13 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     private const string ScriptName = "CustomerOperationsReport.docbuilder";
     private const string DocsCloudScriptName = "DocsCloudUserQuotaReport.docbuilder";
 
+    // Money cells (credit, debit, amounts) and the total row share one high-precision format:
+    // debits can be fractions of a cent, so all monetary values are shown with full precision.
+    private const string MoneyFormat = "#,##0.0000000000";
+
+    // Whole-number cells (quantities, user counts).
+    private const string CountFormat = "#,##0";
+
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         return _data.ReportType switch
@@ -187,7 +194,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 total = Resource.AccountingReportTotal,
                 sheetName = definition.SheetName,
                 dateGeneratedFormat = header.DateGeneratedFormat,
-                totalFormat = "#,##0.00"
+                totalFormat = MoneyFormat
             },
             info = new
             {
@@ -533,7 +540,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 sheetName = Resource.DocsCloudQuotaReportSheetName,
                 dateGeneratedFormat = header.DateGeneratedFormat,
                 dateFormat,
-                countFormat = "#,##0"
+                countFormat = CountFormat
             },
             info = new
             {
@@ -729,10 +736,10 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Description, "@"),
                 new(record.Details, "@"),
                 new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(CultureInfo.InvariantCulture), "#,##0", "right"),
+                new(record.Quantity.ToString(CultureInfo.InvariantCulture), CountFormat, "right"),
                 new(record.ServiceUnit, "@"),
-                new(record.Credit.ToString(CultureInfo.InvariantCulture), "#,##0.00", "right"),
-                new(record.Debit.ToString(CultureInfo.InvariantCulture), "#,##0.0000000", "right"),
+                new(record.Credit.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
+                new(record.Debit.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
                 new(record.Currency, "@")
             };
 
@@ -758,9 +765,9 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             var properties = new List<PropertyValue>
             {
                 new(title, "@"),
-                new(record.TotalQuantity.ToString(CultureInfo.InvariantCulture), "#,##0", "right"),
+                new(record.TotalQuantity.ToString(CultureInfo.InvariantCulture), CountFormat, "right"),
                 new(serviceUnit, "@"),
-                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), "#,##0.00", "right"),
+                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
                 new(record.Currency, "@")
             };
 
@@ -781,7 +788,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             var properties = new List<PropertyValue>
             {
                 new(month, "@"),
-                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), "#,##0.00", "right"),
+                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
                 new(record.Currency, "@")
             };
 
