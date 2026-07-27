@@ -505,17 +505,16 @@ static file class TagQueries
                     .FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, string, Guid, DateTime, int, Task<int>> UpdateTagLinkAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int tagId, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn, int count) =>
-                ctx.TagLink
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.TagId == tagId)
-                    .Where(r => r.EntryType == tagEntryType)
-                    .Where(r => r.EntryId == mappedId)
-                    .ExecuteUpdate(f => f
-                        .SetProperty(p => p.CreateBy, createdBy)
-                        .SetProperty(p => p.CreateOn, createOn)
-                        .SetProperty(p => p.Count, count)));
+        (FilesDbContext ctx, int tenantId, int tagId, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn, int count) =>
+            ctx.TagLink
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.TagId == tagId)
+                .Where(r => r.EntryType == tagEntryType)
+                .Where(r => r.EntryId == mappedId)
+                .ExecuteUpdateAsync(f => f
+                    .SetProperty(p => p.CreateBy, createdBy)
+                    .SetProperty(p => p.CreateOn, createOn)
+                    .SetProperty(p => p.Count, count));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, string, FileEntryType, Task<int>>
         DeleteTagLinksAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -575,15 +574,14 @@ static file class TagQueries
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, FileEntryType, string, Guid, DateTime, Task<int>>
-        IncrementNewTagsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> tagsIds, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn) =>
-                ctx.TagLink
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => tagsIds.Contains(r.TagId))
-                    .Where(r => r.EntryType == tagEntryType)
-                    .Where(r => r.EntryId == mappedId)
-                    .ExecuteUpdate(f => f
-                        .SetProperty(p => p.CreateBy, createdBy)
-                        .SetProperty(p => p.CreateOn, createOn)
-                        .SetProperty(p => p.Count, p => p.Count + 1)));
+        IncrementNewTagsAsync = (FilesDbContext ctx, int tenantId, IEnumerable<int> tagsIds, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn) =>
+            ctx.TagLink
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => tagsIds.Contains(r.TagId))
+                .Where(r => r.EntryType == tagEntryType)
+                .Where(r => r.EntryId == mappedId)
+                .ExecuteUpdateAsync(f => f
+                    .SetProperty(p => p.CreateBy, createdBy)
+                    .SetProperty(p => p.CreateOn, createOn)
+                    .SetProperty(p => p.Count, p => p.Count + 1));
 }
