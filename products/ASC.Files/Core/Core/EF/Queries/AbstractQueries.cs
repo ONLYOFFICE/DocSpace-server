@@ -195,36 +195,32 @@ static file class AbstractQueries
                     .LastOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, int, int, Task> IncreaseFileOrderAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
-                ctx.FileOrder
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.ParentFolderId == parentFolderId)
-                    .Where(r => r.Order >= newOrder && r.Order < currentOrder)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order + 1)));
+        (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+            ctx.FileOrder
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.ParentFolderId == parentFolderId)
+                .Where(r => r.Order >= newOrder && r.Order < currentOrder)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.Order, p => p.Order + 1));
 
     public static readonly Func<FilesDbContext, int, int, int, int, Task> DecreaseFileOrderAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
-                ctx.FileOrder
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.ParentFolderId == parentFolderId)
-                    .Where(r => r.Order <= newOrder && r.Order > currentOrder)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order - 1)));
+        (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+            ctx.FileOrder
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.ParentFolderId == parentFolderId)
+                .Where(r => r.Order <= newOrder && r.Order > currentOrder)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.Order, p => p.Order - 1));
 
     public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFilesCountAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
-                    .ExecuteUpdate(r => r.SetProperty(a => a.FilesCount, a => a.FilesCount + counter)));
+        (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
+                .ExecuteUpdateAsync(r => r.SetProperty(a => a.FilesCount, a => a.FilesCount + counter));
 
     public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFoldersCountAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
-                    .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
+        (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
+                .ExecuteUpdateAsync(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter));
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<int>> DeleteLinksAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -237,12 +233,11 @@ static file class AbstractQueries
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> MarkAuditReferencesAsCorruptedAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, IEnumerable<int> eventsIds) =>
-                ctx.FilesAuditReference.Where(x => eventsIds.Contains(x.AuditEventId))
-                    .ExecuteUpdate(x =>
-                        x.SetProperty(y => y.Corrupted, a => true))
-        );
+        (FilesDbContext ctx, IEnumerable<int> eventsIds) =>
+            ctx.FilesAuditReference.Where(x => eventsIds.Contains(x.AuditEventId))
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(y => y.Corrupted, a => true))
+    ;
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteChatsByRoomIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>

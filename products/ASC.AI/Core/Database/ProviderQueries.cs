@@ -149,14 +149,13 @@ static file class Queries
                 .FirstOrDefault());
 
     public static readonly Func<AiDbContext, int, int, string, string?, string, DateTime, Task> UpdateProviderAsync =
-        EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, int id, string title, string? url, string key, DateTime modifiedOn) =>
-                ctx.Providers.Where(x => x.TenantId == tenantId && x.Id == id)
-                    .ExecuteUpdate(x =>
-                        x.SetProperty(y => y.Title, title)
-                            .SetProperty(y => y.Url, url)
-                            .SetProperty(y => y.Key, key)
-                            .SetProperty(y => y.ModifiedOn, modifiedOn)));
+        (AiDbContext ctx, int tenantId, int id, string title, string? url, string key, DateTime modifiedOn) =>
+            ctx.Providers.Where(x => x.TenantId == tenantId && x.Id == id)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(y => y.Title, title)
+                        .SetProperty(y => y.Url, url)
+                        .SetProperty(y => y.Key, key)
+                        .SetProperty(y => y.ModifiedOn, modifiedOn));
 
     public static readonly Func<AiDbContext, int, IEnumerable<int>, Task> DeleteProvidersAsync =
         EF.CompileAsyncQuery(

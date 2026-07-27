@@ -341,12 +341,11 @@ static file class Queries
                     .ExecuteDelete());
 
     public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>> UpdateUserGroupsByIdsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
-                ctx.UserGroups
-                    .Where(r => r.TenantId == tenantId && ids.Any(i => i == r.UserGroupId))
-                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
-                                         .SetProperty(p => p.LastModified, DateTime.UtcNow)));
+        (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+            ctx.UserGroups
+                .Where(r => r.TenantId == tenantId && ids.Any(i => i == r.UserGroupId))
+                .ExecuteUpdateAsync(q => q.SetProperty(p => p.Removed, true)
+                                          .SetProperty(p => p.LastModified, DateTime.UtcNow));
 
     public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>> DeleteDbGroupsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -356,12 +355,11 @@ static file class Queries
                     .ExecuteDelete());
 
     public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>> UpdateDbGroupsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
-                ctx.Groups
-                    .Where(r => r.TenantId == tenantId && ids.Any(i => i == r.Id))
-                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
-                                         .SetProperty(p => p.LastModified, DateTime.UtcNow)));
+        (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+            ctx.Groups
+                .Where(r => r.TenantId == tenantId && ids.Any(i => i == r.Id))
+                .ExecuteUpdateAsync(q => q.SetProperty(p => p.Removed, true)
+                                          .SetProperty(p => p.LastModified, DateTime.UtcNow));
 
     public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteAclAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -406,12 +404,11 @@ static file class Queries
                     .ExecuteDelete());
 
     public static readonly Func<UserDbContext, int, Guid, Task<int>> UpdateUserGroupsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, Guid userId) =>
-                ctx.UserGroups
-                    .Where(r => r.TenantId == tenantId && r.Userid == userId)
-                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
-                                        .SetProperty(p => p.LastModified, DateTime.UtcNow)));
+        (UserDbContext ctx, int tenantId, Guid userId) =>
+            ctx.UserGroups
+                .Where(r => r.TenantId == tenantId && r.Userid == userId)
+                .ExecuteUpdateAsync(q => q.SetProperty(p => p.Removed, true)
+                                          .SetProperty(p => p.LastModified, DateTime.UtcNow));
 
     public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteUsersAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -420,13 +417,12 @@ static file class Queries
                     .ExecuteDelete());
 
     public static readonly Func<UserDbContext, int, Guid, Task<int>> UpdateUsersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, Guid id) =>
-                ctx.Users.Where(r => r.TenantId == tenantId && r.Id == id)
-                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
-                                         .SetProperty(p => p.LastModified, DateTime.UtcNow)
-                                         .SetProperty(p => p.TerminatedDate, DateTime.UtcNow)
-                                         .SetProperty(p => p.Status, EmployeeStatus.Terminated)));
+        (UserDbContext ctx, int tenantId, Guid id) =>
+            ctx.Users.Where(r => r.TenantId == tenantId && r.Id == id)
+                .ExecuteUpdateAsync(q => q.SetProperty(p => p.Removed, true)
+                                          .SetProperty(p => p.LastModified, DateTime.UtcNow)
+                                          .SetProperty(p => p.TerminatedDate, DateTime.UtcNow)
+                                          .SetProperty(p => p.Status, EmployeeStatus.Terminated));
 
     public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteUserSecuritiesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -446,15 +442,14 @@ static file class Queries
                     .ExecuteDelete());
 
     public static readonly Func<UserDbContext, int, Guid, Guid, UserGroupRefType, Task<int>> UpdateUserGroupsByGroupIdAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, Guid userId, Guid groupId, UserGroupRefType refType) =>
-                ctx.UserGroups
-                    .Where(r => r.TenantId == tenantId
-                                && r.Userid == userId
-                                && r.UserGroupId == groupId
-                                && r.RefType == refType)
-                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
-                                         .SetProperty(p => p.LastModified, DateTime.UtcNow)));
+        (UserDbContext ctx, int tenantId, Guid userId, Guid groupId, UserGroupRefType refType) =>
+            ctx.UserGroups
+                .Where(r => r.TenantId == tenantId
+                            && r.Userid == userId
+                            && r.UserGroupId == groupId
+                            && r.RefType == refType)
+                .ExecuteUpdateAsync(q => q.SetProperty(p => p.Removed, true)
+                                          .SetProperty(p => p.LastModified, DateTime.UtcNow));
 
     public static readonly Func<UserDbContext, int, Guid, Task<User>> UserAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -562,19 +557,17 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId));
 
     public static readonly Func<UserDbContext, int, Guid, DateTime, int?, Task<int>> UpdateInvitationLinkAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, Guid id, DateTime expiration, int? maxUseCount) =>
-                ctx.InvitationLinks
-                    .Where(r => r.TenantId == tenantId && r.Id == id)
-                    .ExecuteUpdate(q => q.SetProperty(p => p.Expiration, expiration)
-                                         .SetProperty(p => p.MaxUseCount, maxUseCount)));
+        (UserDbContext ctx, int tenantId, Guid id, DateTime expiration, int? maxUseCount) =>
+            ctx.InvitationLinks
+                .Where(r => r.TenantId == tenantId && r.Id == id)
+                .ExecuteUpdateAsync(q => q.SetProperty(p => p.Expiration, expiration)
+                                          .SetProperty(p => p.MaxUseCount, maxUseCount));
 
     public static readonly Func<UserDbContext, int, Guid, Task<int>> IncreaseInvitationLinkUsageAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, Guid id) =>
-                ctx.InvitationLinks
-                    .Where(r => r.TenantId == tenantId && r.Id == id)
-                    .ExecuteUpdate(q => q.SetProperty(p => p.CurrentUseCount, p => p.CurrentUseCount + 1)));
+        (UserDbContext ctx, int tenantId, Guid id) =>
+            ctx.InvitationLinks
+                .Where(r => r.TenantId == tenantId && r.Id == id)
+                .ExecuteUpdateAsync(q => q.SetProperty(p => p.CurrentUseCount, p => p.CurrentUseCount + 1));
 
     public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteInvitationLinkAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

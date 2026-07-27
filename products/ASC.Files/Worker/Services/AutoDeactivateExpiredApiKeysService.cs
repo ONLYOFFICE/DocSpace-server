@@ -106,11 +106,10 @@ static file class Queries
         );
 
     public static readonly Func<ApiKeysDbContext, IEnumerable<Guid>, Task<int>> DeactiveExpiredApiKeys =
-        EF.CompileAsyncQuery(
-            (ApiKeysDbContext ctx, IEnumerable<Guid> ids) =>
-                ctx.DbApiKey.Where(r => ids.Contains(r.Id))
-                    .ExecuteUpdate(x => x.SetProperty(r => r.IsActive, false))
-                );
+        (ApiKeysDbContext ctx, IEnumerable<Guid> ids) =>
+            ctx.DbApiKey.Where(r => ids.Contains(r.Id))
+                .ExecuteUpdateAsync(x => x.SetProperty(r => r.IsActive, false))
+            ;
 
 
 }
