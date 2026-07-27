@@ -132,12 +132,6 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbFile> DbFilesAsync(int tenantId, int folderId, int conflict)
-    {
-        return FolderQueries.DbFilesAsync(this, tenantId, folderId, conflict);
-    }
-
-    [PreCompileQuery]
     public IAsyncEnumerable<OriginData> OriginsDataAsync(int tenantId, IEnumerable<int> entriesIds)
     {
         return FolderQueries.OriginsDataAsync(this, tenantId, entriesIds);
@@ -264,9 +258,21 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> DeleteBunchObjectsAsync(int tenantId, string id)
+    public Task<int> DeleteBunchObjectsByIdsAsync(int tenantId, IEnumerable<string> ids)
     {
-        return FolderQueries.DeleteBunchObjectsAsync(this, tenantId, id);
+        return FolderQueries.DeleteBunchObjectsByIdsAsync(this, tenantId, ids);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteOrderByFolderIdsAsync(int tenantId, IEnumerable<int> folderIds)
+    {
+        return FolderQueries.DeleteOrderByFolderIdsAsync(this, tenantId, folderIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteAuditReferencesByFolderIdsAsync(IEnumerable<int> folderIds)
+    {
+        return FolderQueries.DeleteAuditReferencesByFolderIdsAsync(this, folderIds);
     }
 
     [PreCompileQuery]
@@ -647,12 +653,28 @@ static file class FolderQueries
                     .Where(r => r.EntryType == FileEntryType.Folder)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteBunchObjectsAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteBunchObjectsByIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string id) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> ids) =>
                 ctx.BunchObjects
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.LeftNode == id)
+                    .Where(r => ids.Contains(r.LeftNode))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteOrderByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
+                ctx.FileOrder
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => folderIds.Contains(r.EntryId) && r.EntryType == FileEntryType.Folder)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> DeleteAuditReferencesByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, IEnumerable<int> folderIds) =>
+                ctx.FilesAuditReference
+                    .Where(r => folderIds.Contains(r.EntryId))
+                    .Where(r => r.EntryType == (byte)FileEntryType.Folder)
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, int, int, Guid, Task<int>> UpdateFoldersAsync =
@@ -715,15 +737,6 @@ static file class FolderQueries
                     .Where(r => r.ParentId == parentId)
                     .Select(r => r.Id)
                     .FirstOrDefault());
-
-    public static readonly Func<FilesDbContext, int, int, int, IAsyncEnumerable<DbFile>> DbFilesAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, int conflict) =>
-                ctx.Files
-                    .Join(ctx.Files, f1 => f1.Title.ToLower(), f2 => f2.Title.ToLower(), (f1, f2) => new { f1, f2 })
-                    .Where(r => r.f1.TenantId == tenantId && r.f1.CurrentVersion && r.f1.ParentId == folderId)
-                    .Where(r => r.f2.TenantId == tenantId && r.f2.CurrentVersion && r.f2.ParentId == conflict)
-                    .Select(r => r.f1));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> ArrayAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

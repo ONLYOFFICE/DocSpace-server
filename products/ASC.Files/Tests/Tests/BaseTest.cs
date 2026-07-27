@@ -60,6 +60,7 @@ public class BaseTest(
     protected RoomsApi _roomsApi = null!;
     protected SettingsApi _filesSettingsApi = null!;
     protected QuotaApi _quotaApi = null!;
+    protected PaymentApi _paymentApi = null!;
     protected SharingApi _sharingApi = null!;
     protected PrivacyroomApi _privacyRoomApi = null!;
 
@@ -115,6 +116,7 @@ public class BaseTest(
         _roomsApi = _clients.RoomsApi;
         _filesSettingsApi = _clients.SettingsApi;
         _quotaApi = _clients.QuotaApi;
+        _paymentApi = _clients.PaymentApi;
         _sharingApi = _clients.SharingApi;
         _privacyRoomApi = _clients.PrivacyroomApi;
 

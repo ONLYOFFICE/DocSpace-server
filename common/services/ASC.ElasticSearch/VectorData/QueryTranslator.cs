@@ -49,29 +49,6 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
             createOr: (left, right) => new BoolQuery { Should = [left, right] });
     }
 
-    public JsonElement TranslateToJsonElement(Expression<Func<T, bool>> filter)
-    {
-        _recordParameter = filter.Parameters[0];
-
-        return JsonSerializer.SerializeToElement(TranslateCore<object>(
-            filter.Body,
-            createMatch: (field, value) => new Dictionary<string, object?>
-            {
-                ["match"] = new Dictionary<string, object?>
-                {
-                    [field] = new Dictionary<string, object?> { ["query"] = value?.ToString() }
-                }
-            },
-            createAnd: (left, right) => new Dictionary<string, object?>
-            {
-                ["bool"] = new Dictionary<string, object?> { ["must"] = new[] { left, right } }
-            },
-            createOr: (left, right) => new Dictionary<string, object?>
-            {
-                ["bool"] = new Dictionary<string, object?> { ["should"] = new[] { left, right } }
-            }));
-    }
-
     private TResult TranslateCore<TResult>(
         Expression node,
         Func<string, object?, TResult> createMatch,
