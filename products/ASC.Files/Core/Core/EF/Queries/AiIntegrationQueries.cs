@@ -29,65 +29,65 @@ namespace ASC.Files.Core.EF;
 public partial class FilesDbContext
 {
     [PreCompileQuery]
-    public Task DeleteThreadsAsync(int tenantId, int folderId)
+    public Task DeleteThreadsByFolderIdsAsync(int tenantId, IEnumerable<int> folderIds)
     {
-        return AiIntegrationQueries.DeleteThreadsAsync(this, tenantId, folderId);
+        return AiIntegrationQueries.DeleteThreadsByFolderIdsAsync(this, tenantId, folderIds);
     }
 
     [PreCompileQuery]
-    public Task DeleteAssignmentsAsync(int tenantId, int folderId)
+    public Task DeleteAssignmentsByFolderIdsAsync(int tenantId, IEnumerable<int> folderIds)
     {
-        return AiIntegrationQueries.DeleteAssignmentsAsync(this, tenantId, folderId);
+        return AiIntegrationQueries.DeleteAssignmentsByFolderIdsAsync(this, tenantId, folderIds);
     }
 
     [PreCompileQuery]
-    public Task DeleteMcpServersAsync(int tenantId, int folderId)
+    public Task DeleteMcpServersByFolderIdsAsync(int tenantId, IEnumerable<int> folderIds)
     {
-        return AiIntegrationQueries.DeleteMcpServersAsync(this, tenantId, folderId);
+        return AiIntegrationQueries.DeleteMcpServersByFolderIdsAsync(this, tenantId, folderIds);
     }
 
     [PreCompileQuery]
-    public Task DeleteMcpServerToolPrefsAsync(int tenantId, int folderId)
+    public Task DeleteMcpServerToolPrefsByFolderIdsAsync(int tenantId, IEnumerable<int> folderIds)
     {
-        return AiIntegrationQueries.DeleteMcpServerToolPrefsAsync(this, tenantId, folderId);
+        return AiIntegrationQueries.DeleteMcpServerToolPrefsByFolderIdsAsync(this, tenantId, folderIds);
     }
 
     [PreCompileQuery]
-    public Task DeleteAttachmentsAsync(int tenantId, int folderId)
+    public Task DeleteAttachmentsByFolderIdsAsync(int tenantId, IEnumerable<int> folderIds)
     {
-        return AiIntegrationQueries.DeleteAttachmentsAsync(this, tenantId, folderId);
+        return AiIntegrationQueries.DeleteAttachmentsByFolderIdsAsync(this, tenantId, folderIds);
     }
 }
 
 static file class AiIntegrationQueries
 {
-    public static readonly Func<FilesDbContext, int, int, Task> DeleteThreadsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int folderId) =>
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteThreadsByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
             ctx.Threads
-                .Where(x => x.TenantId == tenantId && x.EntryId == folderId)
+                .Where(x => x.TenantId == tenantId && x.EntryId != null && folderIds.Contains(x.EntryId.Value))
                 .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, Task> DeleteAssignmentsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int folderId) =>
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteAssignmentsByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
             ctx.Assignments
-                .Where(x => x.TenantId == tenantId && x.EntryId == folderId)
+                .Where(x => x.TenantId == tenantId && x.EntryId != null && folderIds.Contains(x.EntryId.Value))
                 .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, Task> DeleteMcpServersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int folderId) =>
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteMcpServersByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
             ctx.McpServers
-                .Where(x => x.TenantId == tenantId && x.EntryId == folderId)
+                .Where(x => x.TenantId == tenantId && x.EntryId != null && folderIds.Contains(x.EntryId.Value))
                 .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, Task> DeleteMcpServerToolPrefsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int folderId) =>
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteMcpServerToolPrefsByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
             ctx.ToolPrefs
-                .Where(x => x.TenantId == tenantId && x.EntryId == folderId)
+                .Where(x => x.TenantId == tenantId && x.EntryId != null && folderIds.Contains(x.EntryId.Value))
                 .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, Task> DeleteAttachmentsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int folderId) =>
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteAttachmentsByFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
             ctx.Attachments
-                .Where(x => x.TenantId == tenantId && x.EntryId == folderId)
+                .Where(x => x.TenantId == tenantId && x.EntryId != null && folderIds.Contains(x.EntryId.Value))
                 .ExecuteDelete());
 }

@@ -31,26 +31,39 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.Collections.Concurrent;
-global using System.Globalization;
-global using System.Net;
-global using System.Security.Cryptography;
-global using System.Text;
-global using System.Text.Json;
+namespace ASC.AppHost.Configuration;
 
-global using ASC.Common.Caching;
-global using ASC.Core.Billing;
-global using ASC.Core.Common.Security;
-global using ASC.Core.Tenants;
-global using ASC.Notify.Cron;
+/// <summary>
+/// Where the orchestrated services keep their data and logs. The integration-test paths are public
+/// because the test fixtures reuse them: they have to delete the very folders the AppHost hands to
+/// the services, so both sides must agree on the location.
+/// </summary>
+public static class AppPaths
+{
+    private const string TestSubFolder = "test";
 
-global using FluentAssertions;
+    /// <summary>
+    /// The repository root that owns <c>Data/</c>, <c>Logs/</c> and <c>buildtools/</c>.
+    /// </summary>
+    public static string GetBasePath(string appHostDirectory)
+    {
+        return Path.GetFullPath(Path.Combine(appHostDirectory, "..", "..", ".."));
+    }
 
-global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Memory;
-global using Microsoft.Extensions.Configuration;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Logging.Abstractions;
+    /// <summary>
+    /// <c>$STORAGE_ROOT</c> for the integration-test profile — a subfolder, so a test run never
+    /// touches the developer's own <c>Data</c> tree and can be wiped as a whole afterwards.
+    /// </summary>
+    public static string GetTestStorageRoot(string basePath)
+    {
+        return Path.Combine(basePath, "Data", TestSubFolder);
+    }
 
-global using Polly;
-global using Polly.Retry;
+    /// <summary>
+    /// Log directory for the integration-test profile.
+    /// </summary>
+    public static string GetTestLogsDirectory(string basePath)
+    {
+        return Path.Combine(basePath, "Logs", TestSubFolder);
+    }
+}

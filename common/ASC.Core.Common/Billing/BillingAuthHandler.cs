@@ -31,26 +31,30 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.Collections.Concurrent;
-global using System.Globalization;
-global using System.Net;
-global using System.Security.Cryptography;
-global using System.Text;
-global using System.Text.Json;
+namespace ASC.Core.Billing;
 
-global using ASC.Common.Caching;
-global using ASC.Core.Billing;
-global using ASC.Core.Common.Security;
-global using ASC.Core.Tenants;
-global using ASC.Notify.Cron;
+/// <summary>
+/// Adds the per-request ASC HMAC-SHA1 authorization header to every billing request.
+/// The token embeds the current UTC timestamp, so it must be generated per call rather than as a static header.
+/// </summary>
+internal class BillingAuthHandler(IOptions<PaymentConfiguration> configuration) : DelegatingHandler
+{
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrEmpty(configuration.Value.Key))
+        {
+            request.Headers.Add("Authorization", CreateAuthToken(configuration.Value.Key, configuration.Value.Secret));
+        }
 
-global using FluentAssertions;
+        return await base.SendAsync(request, cancellationToken);
+    }
 
-global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Memory;
-global using Microsoft.Extensions.Configuration;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Logging.Abstractions;
+    private static string CreateAuthToken(string pkey, string machinekey)
+    {
+        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
 
-global using Polly;
-global using Polly.Retry;
+        return $"ASC {pkey}:{now}:{hash}";
+    }
+}
