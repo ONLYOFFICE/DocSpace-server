@@ -208,21 +208,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
 
             if (quota.MaxTotalSize != 0)
             {
-                var newTotal = CurrentSize + size;
-
-                // Strict limit for non-file-save writes (avatars, thumbnails, backups, ...); for editor saves
-                // (AllowTenantQuotaGrace) hard-fail only once already over the limit or beyond the grace.
-                if (!AllowTenantQuotaGrace || CurrentSize > quota.MaxTotalSize || newTotal > quota.MaxTotalSize + tenantQuotaConfig.AvailableFileSize)
-                {
-                    await maxTotalSizeChecker.CheckAddAsync(_tenant, newTotal); // throws when newTotal exceeds MaxTotalSize
-                }
-                else if (newTotal > quota.MaxTotalSize)
-                {
-                    // soft overshoot within grace: caller fires the socket notification.
-                    // The file-save path opts in (AllowTenantQuotaGrace) and serializes this via a
-                    // tenant-scoped lock (see FileDao.TryAllowTenantQuotaGraceAsync) so it is consumed once.
-                    result = QuotaCheckResult.QuotaExceeded;
-                }
+                result = await CheckMaxTotalSizeAsync(quota, CurrentSize + size);
             }
         }
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
@@ -244,6 +230,25 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         }
 
         return result;
+    }
+
+    // Enforces the portal (tariff) MaxTotalSize quota. Throws on a hard failure; otherwise returns whether
+    // the write is a soft overshoot within the grace (QuotaExceeded) or fits (Ok).
+    // Strict for non-file-save writes (avatars, thumbnails, backups, ...); editor saves (AllowTenantQuotaGrace)
+    // may overshoot within tenantQuotaConfig.AvailableFileSize, but only once - hard-fail once already over
+    // the limit or beyond the grace.
+    private async Task<QuotaCheckResult> CheckMaxTotalSizeAsync(TenantQuota quota, long newTotal)
+    {
+        if (!AllowTenantQuotaGrace || CurrentSize > quota.MaxTotalSize || newTotal > quota.MaxTotalSize + tenantQuotaConfig.AvailableFileSize)
+        {
+            await maxTotalSizeChecker.CheckAddAsync(_tenant, newTotal); // throws when newTotal exceeds MaxTotalSize
+            return QuotaCheckResult.Ok;
+        }
+
+        // soft overshoot within grace: caller fires the socket notification. The file-save path opts in
+        // (AllowTenantQuotaGrace) and serializes this via a tenant-scoped lock (see
+        // FileDao.TryAllowTenantQuotaGraceAsync) so it is consumed once.
+        return newTotal > quota.MaxTotalSize ? QuotaCheckResult.QuotaExceeded : QuotaCheckResult.Ok;
     }
 
     public enum QuotaCheckResult
