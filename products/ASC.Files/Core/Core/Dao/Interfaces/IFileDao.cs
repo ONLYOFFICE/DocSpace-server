@@ -177,6 +177,7 @@ public interface IFileDao<T>
     /// <param name="file"></param>
     /// <param name="fileStream"> </param>
     /// <param name="chatId"></param>
+    /// <param name="allowQuotaGrace">Allow a single overshoot of the portal (tariff) storage quota within a grace (editor saves only)</param>
     /// <returns></returns>
     /// <remarks>
     /// Updates the file if:
@@ -185,7 +186,7 @@ public interface IFileDao<T>
     ///
     /// Save in all other cases
     /// </remarks>
-    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, Guid chatId = default);
+    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, Guid chatId = default, bool allowQuotaGrace = false);
 
     /// <summary>
     ///  Saves / updates the version of the file
@@ -209,8 +210,9 @@ public interface IFileDao<T>
     /// </summary>
     /// <param name="file"></param>
     /// <param name="fileStream"></param>
+    /// <param name="allowQuotaGrace">Allow a single overshoot of the portal (tariff) storage quota within a grace (editor saves only)</param>
     /// <returns></returns>
-    Task<File<T>> ReplaceFileVersionAsync(File<T> file, Stream fileStream);
+    Task<File<T>> ReplaceFileVersionAsync(File<T> file, Stream fileStream, bool allowQuotaGrace = false);
     /// <summary>
     ///   Deletes a file including all previous versions
     /// </summary>

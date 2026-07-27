@@ -319,7 +319,7 @@ internal class SharePointFileDao(
         return await SaveFileAsync(file, fileStream);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(fileStream);
 
@@ -353,7 +353,7 @@ internal class SharePointFileDao(
         return null;
     }
 
-    public async Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
+    public async Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         return await SaveFileAsync(file, fileStream);
     }

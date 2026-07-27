@@ -94,6 +94,9 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
     private Lazy<long> _lazyCurrentSize;
     public string ExcludePattern { get; set; }
 
+    // See IQuotaController: set by FileDao only around a serialized editor file-save write; off otherwise.
+    public bool AllowTenantQuotaGrace { get; set; }
+
     public void Init(int tenant, string excludePattern = null)
     {
         _tenant = tenant;
@@ -203,16 +206,17 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
             {
                 var newTotal = CurrentSize + size;
 
-                // already over the limit OR beyond the grace -> hard fail (mirrors custom quota)
-                if (newTotal > quota.MaxTotalSize + AvailableFileSize || CurrentSize > quota.MaxTotalSize)
+                // Strict limit for non-file-save writes (avatars, thumbnails, backups, ...); for editor saves
+                // (AllowTenantQuotaGrace) hard-fail only once already over the limit or beyond the grace.
+                if (!AllowTenantQuotaGrace || CurrentSize > quota.MaxTotalSize || newTotal > quota.MaxTotalSize + AvailableFileSize)
                 {
-                    await maxTotalSizeChecker.CheckAddAsync(_tenant, newTotal);
+                    await maxTotalSizeChecker.CheckAddAsync(_tenant, newTotal); // throws when newTotal exceeds MaxTotalSize
                 }
                 else if (newTotal > quota.MaxTotalSize)
                 {
                     // soft overshoot within grace: caller fires the socket notification.
-                    // The file-save path serializes the grace via a tenant-scoped lock
-                    // (see FileDao.TryAllowTenantQuotaGraceAsync) so it is consumed only once.
+                    // The file-save path opts in (AllowTenantQuotaGrace) and serializes this via a
+                    // tenant-scoped lock (see FileDao.TryAllowTenantQuotaGraceAsync) so it is consumed once.
                     result = QuotaCheckResult.QuotaExceeded;
                 }
             }

@@ -52,5 +52,10 @@ public interface IQuotaController
     // QuotaUsed*/QuotaUser* calls, so the controller's lock never wraps the blocking DB seed query.
     void PreloadCurrentSize();
 
+    // Opt-in soft-overshoot of the portal (tariff) MaxTotalSize quota within a grace, set by the file-save
+    // path (which serializes it under a tenant lock) only for the duration of that write. Off by default so
+    // every other quota-checked write (avatars, thumbnails, backups, ...) keeps the strict limit.
+    bool AllowTenantQuotaGrace { get; set; }
+
     string ExcludePattern { get; set; }
 }

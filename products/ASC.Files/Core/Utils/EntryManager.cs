@@ -1518,13 +1518,16 @@ public class EntryManager(IDaoFactory daoFactory,
 
             file.ContentLength = tmpStream.Length;
             file.Comment = string.IsNullOrEmpty(comment) ? null : comment;
+
+            // editor saves may overshoot the portal (tariff) quota within a grace so assembled edits are not
+            // lost; opt in only for this write - uploads/conversions/copies keep the strict limit
             if (replaceVersion)
             {
-                file = await fileDao.ReplaceFileVersionAsync(file, tmpStream);
+                file = await fileDao.ReplaceFileVersionAsync(file, tmpStream, allowQuotaGrace: true);
             }
             else
             {
-                file = await fileDao.SaveFileAsync(file, tmpStream);
+                file = await fileDao.SaveFileAsync(file, tmpStream, allowQuotaGrace: true);
             }
             if (!keepLink
                || (!file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID)
