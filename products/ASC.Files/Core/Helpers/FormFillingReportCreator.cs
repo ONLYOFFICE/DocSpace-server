@@ -315,6 +315,17 @@ public class FormFillingReportCreator(
         return success ? SortByFormNumber(result) : [];
     }
 
+    /// <summary>All submissions of a form across every version, in a single query (grouped by key set by the caller).</summary>
+    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId)
+    {
+        await factoryIndexerForm.RefreshAsync();
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r
+            .Where(s => s.RoomId, roomId)
+            .Where(s => s.OriginalFormId, originalFormId));
+
+        return success ? SortByFormNumber(result) : [];
+    }
+
     private static List<DbFormsItemDataSearch> SortByFormNumber(IReadOnlyCollection<DbFormsItemDataSearch> result)
     {
         return result
@@ -328,6 +339,16 @@ public class FormFillingReportCreator(
             .Select(x => x.item)
             .ToList();
     }
+
+    /// <summary>
+    /// The ordered field-key set of a submission (leading form-number and picture/signature fields excluded),
+    /// matching the report's columns. Submissions sharing it belong to the same report version.
+    /// </summary>
+    public static string KeySetSignature(DbFormsItemDataSearch submission) =>
+        string.Join((char)31, submission.FormsData
+            .Skip(1)
+            .Where(d => d.Type != "picture" && d.Type != "signature")
+            .Select(d => d.Key));
 
     public async Task MigrateFormVersionAsync(int roomId, int originalFormId, int targetVersion)
     {

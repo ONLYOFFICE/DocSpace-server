@@ -38,7 +38,7 @@ internal static partial class FormRecoveryServiceLogger
     [LoggerMessage(LogLevel.Information, "FormRecovery: room {roomId} — found {count} orphaned form(s) to repair.")]
     public static partial void InfoRecoveryOrphansFound(this ILogger<FormRecoveryService> logger, int roomId, int count);
 
-    [LoggerMessage(LogLevel.Information, "FormRecovery: rebuilt report for form {formId} version {version} with {submissionCount} submission(s); results file at version {fileVersion}.")]
+    [LoggerMessage(LogLevel.Information, "FormRecovery: rebuilt report for form {formId} key set #{version} with {submissionCount} submission(s); results file at version {fileVersion}.")]
     public static partial void InfoRecoveryReportVersionRebuilt(this ILogger<FormRecoveryService> logger, int formId, int version, int submissionCount, int fileVersion);
 
     [LoggerMessage(LogLevel.Error, "FormRecovery: failed to recover form {formId} in room {roomId}.")]

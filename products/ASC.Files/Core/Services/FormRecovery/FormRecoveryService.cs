@@ -88,39 +88,39 @@ public class FormRecoveryService(
         }
 
         var orphans = await FindOrphanedFormsAsync(fileDao, doneFolder);
-        if (orphans.Count == 0)
+
+        if (orphans.Count > 0)
         {
-            return false;
-        }
+            logger.InfoRecoveryOrphansFound(roomId, orphans.Count);
 
-        logger.InfoRecoveryOrphansFound(roomId, orphans.Count);
-
-        var currentForm = await fileDao.GetFileAsync(originalFormId);
-        if (currentForm == null)
-        {
-            return false;
-        }
-
-        var versionKeySets = await GetVersionKeySetsAsync(originalFormId, currentForm, fileDao, cancellationToken);
-
-        var repaired = 0;
-        foreach (var orphan in orphans)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            try
+            var currentForm = await fileDao.GetFileAsync(originalFormId);
+            if (currentForm == null)
             {
-                await RepairFormAsync(orphan, doneFolder, room, originalFormId, currentForm, versionKeySets, fileDao, cancellationToken);
-                repaired++;
+                return false;
             }
-            catch (Exception e)
+
+            var versionKeySets = await GetVersionKeySetsAsync(originalFormId, currentForm, fileDao, cancellationToken);
+
+            foreach (var orphan in orphans)
             {
-                logger.ErrorRecoveryFormFailed(e, originalFormId, roomId);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    await RepairFormAsync(orphan, doneFolder, room, originalFormId, currentForm, versionKeySets, fileDao, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorRecoveryFormFailed(e, originalFormId, roomId);
+                }
             }
         }
 
-        // Nothing repaired (or no xlsx kept): let the ordinary index build produce the report instead.
-        if (repaired == 0 || !room.SettingsSaveFormAsXLSX)
+        // An explicit xlsx request rebuilds the whole report grouped by unique key set — even when nothing was
+        // orphaned — so report versions stay one-per-key-set. This consolidates cases the incremental
+        // per-submission build can't merge retroactively, e.g. an edit that reverted to an earlier field set.
+        // With no report file yet, let the ordinary build create the first one instead.
+        if (!room.SettingsSaveFormAsXLSX || origProperties.FormFilling.ResultsFileID == 0)
         {
             return false;
         }
@@ -327,17 +327,49 @@ public class FormRecoveryService(
             resultFile.Version--;
         }
 
-        var isFirst = true;
+        // Group every submission of the form by its actual field-key set (not by its version tag, which
+        // repeated layouts can't reliably distinguish): one report version per unique key set.
+        var allSubmissions = await formFillingReportCreator.GetFormFillingResults(roomId, formId);
 
-        for (var version = 1; version <= currentForm.Version; version++)
+        var keySetOrder = new List<string>();
+        var submissionsByKeySet = new Dictionary<string, List<DbFormsItemDataSearch>>();
+        foreach (var submission in allSubmissions)
         {
-            var submissions = await formFillingReportCreator.GetFormFillingResults(roomId, formId, version);
-            if (!submissions.Any())
+            var keySet = FormFillingReportCreator.KeySetSignature(submission);
+            if (!submissionsByKeySet.TryGetValue(keySet, out var bucket))
             {
-                continue;
+                bucket = [];
+                submissionsByKeySet[keySet] = bucket;
+                keySetOrder.Add(keySet);
             }
 
-            var reportData = await FormFillingReportTask.GetFormFillingReportData(serviceProvider, userId, roomId, formId, version);
+            bucket.Add(submission);
+        }
+
+        // The current form version's key set must be the LAST report version, so later online submissions
+        // extend it instead of a stale earlier one (e.g. after an edit that reverted to an earlier field set).
+        // Every other key set keeps its first-appearance order.
+        var currentVersionSubmission = allSubmissions.FirstOrDefault(s => s.OriginalFormVersion == currentForm.Version);
+        var currentKeySet = currentVersionSubmission != null ? FormFillingReportCreator.KeySetSignature(currentVersionSubmission) : null;
+
+        var groups = keySetOrder
+            .OrderBy(keySet => keySet == currentKeySet ? 1 : 0)
+            .ThenBy(keySet => submissionsByKeySet[keySet].Min(s => s.CreateOn))
+            .Select(keySet => submissionsByKeySet[keySet])
+            .ToList();
+
+        if (groups.Count == 0)
+        {
+            return;
+        }
+
+        var reportVersion = 0;
+        foreach (var bucket in groups)
+        {
+            reportVersion++;
+            var submissions = bucket.OrderBy(FormNumberOf).ToList();
+
+            var reportData = await FormFillingReportTask.GetFormFillingReportData(serviceProvider, userId, formId, submissions);
             var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
             var versionScript = script
                 .Replace("${tempFileName}", tempFileName)
@@ -356,12 +388,11 @@ public class FormRecoveryService(
             buffer.Position = 0;
             resultFile.ContentLength = buffer.Length;
 
-            // First version replaces the single remaining file version; each later version is appended as a new
-            // file version, so the file's version history mirrors the form's versions.
-            if (isFirst)
+            // First key set replaces the single remaining file version; each later one is appended, so the
+            // report's version history has exactly one version per unique key set.
+            if (reportVersion == 1)
             {
                 resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, buffer);
-                isFirst = false;
             }
             else
             {
@@ -370,12 +401,7 @@ public class FormRecoveryService(
                 resultFile = await fileDao.SaveFileAsync(resultFile, buffer, false);
             }
 
-            logger.InfoRecoveryReportVersionRebuilt(formId, version, submissions.Count(), resultFile.Version);
-        }
-
-        if (isFirst)
-        {
-            return;
+            logger.InfoRecoveryReportVersionRebuilt(formId, reportVersion, submissions.Count, resultFile.Version);
         }
 
         // Point the form at the rebuilt file and clear the pending version-change flag so the next live
@@ -399,6 +425,9 @@ public class FormRecoveryService(
 
         await socketManager.UpdateFileAsync(resultFile);
     }
+
+    private static int FormNumberOf(DbFormsItemDataSearch submission) =>
+        int.TryParse(submission.FormsData.FirstOrDefault()?.Value, out var number) ? number : 0;
 
     /// <summary>
     /// Best-effort delete of the temp JSON uploaded for a repaired orphan, for when it never got read (and

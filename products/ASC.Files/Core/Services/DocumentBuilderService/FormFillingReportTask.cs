@@ -47,6 +47,11 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
 
     private const string ScriptName = "FormFillingReport.docbuilder";
 
+    // Field-key set this run's report version targets, and whether a form edit changed it — computed while
+    // assembling the report data and read when deciding whether to start a new report version.
+    private string _currentKeySet = "";
+    private bool _keySetChanged;
+
     /// <summary>
     /// Only for an explicit xlsx request (never the per-submission update, which must stay fast): recover the
     /// form when its completed PDFs are desynced from the index, otherwise let the normal build run.
@@ -67,7 +72,25 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
 
-        var data = await GetFormFillingReportData(serviceProvider, _userId, _data.RoomId, _data.OriginalFormId, _data.OriginalFormVersion);
+        var reportCreator = serviceProvider.GetService<FormFillingReportCreator>();
+
+        // One query for all of the form's submissions, then group by field-key set in memory (cheap): a report
+        // version is defined by its key set, so an edit that keeps the same fields (e.g. adding a word) keeps
+        // filling the current version instead of starting a new one.
+        var allSubmissions = (await reportCreator.GetFormFillingResults(_data.RoomId, _data.OriginalFormId)).ToList();
+
+        var currentSubmission = allSubmissions.LastOrDefault(s => s.OriginalFormVersion == _data.OriginalFormVersion)
+                                ?? allSubmissions.LastOrDefault();
+        _currentKeySet = currentSubmission != null ? FormFillingReportCreator.KeySetSignature(currentSubmission) : "";
+
+        var previousSubmission = allSubmissions
+            .Where(s => s.OriginalFormVersion < _data.OriginalFormVersion)
+            .OrderBy(s => s.OriginalFormVersion)
+            .LastOrDefault();
+        _keySetChanged = previousSubmission != null && FormFillingReportCreator.KeySetSignature(previousSubmission) != _currentKeySet;
+
+        var submissions = allSubmissions.Where(s => FormFillingReportCreator.KeySetSignature(s) == _currentKeySet).ToList();
+        var data = await GetFormFillingReportData(serviceProvider, _userId, _data.OriginalFormId, submissions);
 
         script = script
             .Replace("${tempFileName}", tempFileName)
@@ -96,15 +119,15 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 
-        if (origProperties.FormFilling.IsVersionChanged)
+        // New report version only when a form edit actually changed the field-key set; edits that keep the same
+        // fields (adding a word, moving things) keep filling the current version.
+        if (origProperties.FormFilling.IsVersionChanged && _keySetChanged)
         {
             resultFile.Version++;
             resultFile.VersionGroup++;
             resultFile.ContentLength = stream.Length;
 
             resultFile = await fileDao.SaveFileAsync(resultFile, stream, false);
-            origProperties.FormFilling.IsVersionChanged = false;
-            await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
         }
         else
         {
@@ -112,6 +135,12 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
             resultFile.ContentLength = stream.Length;
 
             resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
+        }
+
+        if (origProperties.FormFilling.IsVersionChanged)
+        {
+            origProperties.FormFilling.IsVersionChanged = false;
+            await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
         }
 
         if (resultFile.Id != origProperties.FormFilling.ResultsFileID)
@@ -153,13 +182,12 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         return resultFile;
     }
 
-    public static async Task<object> GetFormFillingReportData(IServiceProvider serviceProvider, Guid userId, int roomId, int originalFormId, int originalFormVersion)
+    public static async Task<object> GetFormFillingReportData(IServiceProvider serviceProvider, Guid userId, int originalFormId, IEnumerable<DbFormsItemDataSearch> formFillingResults)
     {
         var userManager = serviceProvider.GetService<UserManager>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var settingsManager = serviceProvider.GetService<SettingsManager>();
         var tenantManager = serviceProvider.GetService<TenantManager>();
-        var formFillingReportCreator = serviceProvider.GetService<FormFillingReportCreator>();
         var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
         var filesLinkUtility = serviceProvider.GetService<FilesLinkUtility>();
         var fileUtility = serviceProvider.GetService<FileUtility>();
@@ -172,7 +200,6 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         CultureInfo.CurrentCulture = userCulture;
         CultureInfo.CurrentUICulture = userCulture;
 
-        var formFillingResults = await formFillingReportCreator.GetFormFillingResults(roomId, originalFormId, originalFormVersion);
         var tenantCulture = tenantManager.GetCurrentTenant().GetCulture();
 
         var keys = new List<string>();
