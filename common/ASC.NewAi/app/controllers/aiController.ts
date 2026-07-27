@@ -130,9 +130,12 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
   }
-  const entityId = contextScopeOf(body);
+  // The tools fragment describes the tool set the engine actually wires up
+  // for the round, so it follows the round's context scope (the agent when
+  // one is picked), unlike the location fragment below.
+  const contextScope = contextScopeOf(body);
   const attachmentId = extractAttachmentRefIds(body["userMessage"]);
-  const fragment = await safeGetToolsPrompt(toolsAdapter, entityId, attachmentId);
+  const fragment = await safeGetToolsPrompt(toolsAdapter, contextScope, attachmentId);
   return fragment ? appendActionPrompt(body, fragment) : body;
 }
 
@@ -162,7 +165,14 @@ function withContextPrompt<T>(body: T): T {
   if (!isObject(body)) {
     return body;
   }
-  return appendActionPrompt(body, buildContextFragment(contextScopeOf(body)));
+  // Always the folder/room the chat is invoked from (`entityId`), even when
+  // the round runs against an agent's context (`contextEntityId`): the
+  // location line must tell the model where the USER is — picking agent 10
+  // while browsing folder 2 keeps the location at 2. The agent's own scope
+  // reaches the model through the tools fragment and tool execution.
+  const entityId =
+    typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+  return appendActionPrompt(body, buildContextFragment(entityId));
 }
 
 const toolsAdapter = new HttpToolsAdapter();
