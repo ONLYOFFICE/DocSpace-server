@@ -1,54 +1,58 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Data.Storage;
+
+[Singleton]
+public class TenantQuotaConfig(IConfiguration configuration)
+{
+    // Same config key/default as SetupInfo.AvailableFileSize (ASC.Web.Core is not referenceable from this layer).
+    public long AvailableFileSize { get; } = long.TryParse(configuration["web:available-file-size"], out var value)
+        ? value
+        : Constants.DefaultAvailableFileSize;
+}
 
 [Transient]
 public class TenantQuotaController(TenantManager tenantManager, AuthContext authContext, SettingsManager settingsManager, QuotaSocketManager quotaSocketManager,
         TenantQuotaFeatureChecker<MaxFileSizeFeature, long> maxFileSizeChecker,
         TenantQuotaFeatureChecker<MaxTotalSizeFeature, long> maxTotalSizeChecker,
-        IConfiguration configuration)
+        TenantQuotaConfig tenantQuotaConfig)
     : IQuotaController
 {
-    // Grace applied on top of the portal (tariff) MaxTotalSize so a single write can overshoot the quota.
-    // Same config key/default as SetupInfo.AvailableFileSize (ASC.Web.Core is not referenceable from this layer).
-    private long AvailableFileSize =>
-        long.TryParse(configuration["web:available-file-size"], out var value) ? value : 100L * 1024L * 1024L;
-
     // CurrentSize is a mutable running total shared by every QuotaUsed*/QuotaUser* call. Some storage
     // operations fan those calls out concurrently (e.g. FileDao batched delete, S3 CopyDirectoryAsync),
     // so both the lazy seeding and the +=/read must be serialized. The lock only ever guards the
-    // in-memory arithmetic below — never the DB write or storage I/O (an await under lock is a compile
+    // in-memory arithmetic below - never the DB write or storage I/O (an await under lock is a compile
     // error), so it does not serialize the parts that make the fan-out worthwhile.
     private readonly Lock _sizeLock = new();
     private long _currentSize;
@@ -208,7 +212,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
 
                 // Strict limit for non-file-save writes (avatars, thumbnails, backups, ...); for editor saves
                 // (AllowTenantQuotaGrace) hard-fail only once already over the limit or beyond the grace.
-                if (!AllowTenantQuotaGrace || CurrentSize > quota.MaxTotalSize || newTotal > quota.MaxTotalSize + AvailableFileSize)
+                if (!AllowTenantQuotaGrace || CurrentSize > quota.MaxTotalSize || newTotal > quota.MaxTotalSize + tenantQuotaConfig.AvailableFileSize)
                 {
                     await maxTotalSizeChecker.CheckAddAsync(_tenant, newTotal); // throws when newTotal exceeds MaxTotalSize
                 }
