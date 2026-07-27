@@ -37,7 +37,7 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 IResourceBuilder<JavaScriptAppResource>? playwright = null;
-var basePath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", ".."));
+var basePath = AppPaths.GetBasePath(builder.AppHostDirectory);
 var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var storybook = string.Compare(builder.Configuration["STORYBOOK"], "true", StringComparison.OrdinalIgnoreCase) == 0;
@@ -55,7 +55,9 @@ if (otelFileLogging)
     connectionManager.AddOpenTelemetryCollector();
 }
 
-var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
+var isIntegrationTest = launchProfile == "integration-test";
+var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker, isIntegrationTest);
+
 switch (launchProfile)
 {
     case "integration-test":
