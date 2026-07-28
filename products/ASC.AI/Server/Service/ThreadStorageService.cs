@@ -49,7 +49,7 @@ public class ThreadStorageService(
     FileSecurity fileSecurity,
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
-    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async Task<Thread> CreateAsync(string title, Guid? profileId = null, string? entityId = null)
     {

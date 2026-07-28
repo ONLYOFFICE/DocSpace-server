@@ -58,9 +58,6 @@ public interface IDocsCloudApi
     [Get("/tenant/quota")]
     Task<DocsCloudQuota> GetTenantQuotaAsync([Query] string portalId);
 
-    [Get("/tenant/quota/download")]
-    Task<Stream> DownloadTenantQuotaAsync([Query] string portalId);
-
     [Get("/tenant/usage")]
     Task<DocsCloudUsage> GetTenantUsageAsync([Query] string portalId);
 }
