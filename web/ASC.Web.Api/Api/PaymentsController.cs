@@ -980,6 +980,29 @@ public class PaymentController(
     }
 
     /// <remarks>
+    /// Returns all the active wallet services (quotas) of the current portal: the active additional quotas
+    /// from the tariff, plus the services enabled manually via the wallet service settings.
+    /// </remarks>
+    /// <summary>
+    /// Get the active wallet services
+    /// </summary>
+    /// <path>api/2.0/portal/payment/activeservices</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The list of active wallet services", typeof(IEnumerable<ActiveServiceDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("activeservices")]
+    public async Task<List<ActiveServiceDto>> GetActiveServices()
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        return await paymentHelper.GetActiveServicesAsync(tenant.Id);
+    }
+
+    /// <remarks>
     /// Starts generating a customer operations report as an "xlsx" file and saves it in Documents.
     /// </remarks>
     /// <summary>

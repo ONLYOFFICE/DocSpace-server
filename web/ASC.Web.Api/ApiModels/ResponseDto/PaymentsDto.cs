@@ -418,6 +418,58 @@ public class CustomerServiceUsageReportDto
 }
 
 /// <summary>
+/// Represents an active wallet service (quota) of the current portal.
+/// </summary>
+/// <example>
+/// {
+///   "service": "disk-storage",
+///   "serviceUnit": "GB",
+///   "subscription": true,
+///   "title": "Additional disk storage",
+///   "limit": 500,
+///   "used": 320
+/// }
+/// </example>
+public class ActiveServiceDto
+{
+    /// <summary>
+    /// The name of the service.
+    /// </summary>
+    /// <example>disk-storage</example>
+    public string Service { get; set; }
+
+    /// <summary>
+    /// The unit of measurement for the service.
+    /// </summary>
+    /// <example>GB</example>
+    public string ServiceUnit { get; set; }
+
+    /// <summary>
+    /// Indicates whether the service is subscription-based.
+    /// </summary>
+    /// <example>true</example>
+    public bool Subscription { get; set; }
+
+    /// <summary>
+    /// The title of the service.
+    /// </summary>
+    /// <example>Additional disk storage</example>
+    public string Title { get; set; }
+
+    /// <summary>
+    /// The service limit. Populated only for the subscription-based services.
+    /// </summary>
+    /// <example>500</example>
+    public int? Limit { get; set; }
+
+    /// <summary>
+    /// The current service usage. Populated only for the subscription-based services.
+    /// </summary>
+    /// <example>320</example>
+    public int? Used { get; set; }
+}
+
+/// <summary>
 /// The customer information.
 /// </summary>
 public class CustomerInfoDto(CustomerInfo customerInfo, EmployeeDto employeeDto)

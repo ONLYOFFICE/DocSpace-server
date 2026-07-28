@@ -45,7 +45,9 @@ public class PaymentHelper(
     QuotaSocketManager quotaSocketManager,
     AiGateway aiGateway,
     DocsCloudClient docsCloudClient,
-    WalletStaticProvider walletStaticProvider)
+    WalletStaticProvider walletStaticProvider,
+    CoreSettings coreSettings,
+    ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> maxTotalSizeStatistic)
 {
     public void DemandConfigured()
     {
@@ -222,6 +224,45 @@ public class PaymentHelper(
         }
 
         return correctedList;
+    }
+
+    /// <summary>
+    /// Returns all the active wallet services (quotas) of the current tenant: the active additional quotas
+    /// from the tariff (e.g. disk-storage, docscloud), plus the services enabled manually via the wallet
+    /// service settings (e.g. backup, ai-tools, ai-search).
+    /// </summary>
+    public async Task<List<ActiveServiceDto>> GetActiveServicesAsync(int tenantId)
+    {
+        var tariff = await tariffService.GetTariffAsync(tenantId);
+        var quotaDefinitions = (await quotaService.GetTenantQuotasAsync()).ToDictionary(q => q.TenantId);
+        var enabledServices = (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices ?? [];
+
+        var result = new List<ActiveServiceDto>();
+        var addedIds = new HashSet<int>();
+
+        foreach (var quota in tariff.Quotas.Where(q => q.Additional && q.State == QuotaState.Active))
+        {
+            if (!addedIds.Add(quota.Id) || !quotaDefinitions.TryGetValue(quota.Id, out var definition))
+            {
+                continue;
+            }
+
+            result.Add(await ToActiveServiceDtoAsync(definition, quota.Quantity, tenantId));
+        }
+
+        foreach (var service in enabledServices)
+        {
+            var id = (int)service;
+
+            if (!addedIds.Add(id) || !quotaDefinitions.TryGetValue(id, out var definition))
+            {
+                continue;
+            }
+
+            result.Add(await ToActiveServiceDtoAsync(definition, null, tenantId));
+        }
+
+        return result;
     }
 
     public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName)
@@ -452,6 +493,68 @@ public class PaymentHelper(
         messageService.Send(MessageAction.DocsCloudConfigUpdated);
 
         return result;
+    }
+
+    // -15: DocsCloud, -16: DocsCloudDevPack, -17: DocsCloudTrial (not exposed as a TenantWalletService enum
+    // value); only one of them can be active at a time, and they are all surfaced as a single "docscloud" service.
+    private static bool IsDocsCloudService(int quotaId)
+    {
+        return quotaId is (int)TenantWalletService.DocsCloud or (int)TenantWalletService.DocsCloudDevPack or -17;
+    }
+
+    private async Task<ActiveServiceDto> ToActiveServiceDtoAsync(TenantQuota definition, int? quantity, int tenantId)
+    {
+        var isDocsCloud = IsDocsCloudService(definition.TenantId);
+
+        var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(
+            isDocsCloud ? "docscloud" : definition.ServiceName ?? definition.Name, []);
+
+        var dto = new ActiveServiceDto
+        {
+            Service = serviceName,
+            ServiceUnit = serviceUnit,
+            Title = title,
+            Subscription = !string.IsNullOrEmpty(definition.ProductId)
+        };
+
+        if (!dto.Subscription)
+        {
+            return dto;
+        }
+
+        if (isDocsCloud)
+        {
+            if (!docsCloudClient.Configured)
+            {
+                return dto;
+            }
+
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+            var info = await docsCloudClient.GetTenantInfoAsync(portalId);
+
+            dto.Limit = info?.UsersLimit?.Edit;
+            dto.Used = info?.Stats?.Editor?.Active;
+        }
+        else if (definition.TenantId == (int)TenantWalletService.Storage && quantity.HasValue)
+        {
+            // definition.MaxTotalSize is the storage granted by a single purchased unit (e.g. 1 GB in bytes);
+            // multiplying it by the purchased quantity gives the number of bytes the disk-storage add-on
+            // contributes to the tenant's combined MaxTotalSize (see also MaxTotalSizeChecker).
+            var perUnitBytes = definition.MaxTotalSize;
+
+            if (perUnitBytes > 0)
+            {
+                var limitBytes = perUnitBytes * (long)quantity.Value;
+                var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
+                var usedBytes = await maxTotalSizeStatistic.GetValueAsync();
+                var usedBytesForStorage = Math.Max(usedBytes - (currentQuota.MaxTotalSize - limitBytes), 0);
+
+                dto.Limit = quantity;
+                dto.Used = (int)(usedBytesForStorage / perUnitBytes);
+            }
+        }
+
+        return dto;
     }
 
     private async Task<bool> IsPayerAsync(CustomerInfo customerInfo)
