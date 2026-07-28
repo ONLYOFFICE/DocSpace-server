@@ -49,7 +49,7 @@ public class WebSearchStorageService(
     private readonly AiGateway _gateway = gateway;
 
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
-    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async Task<WebSearchConfig?> ReadAsync()
     {
