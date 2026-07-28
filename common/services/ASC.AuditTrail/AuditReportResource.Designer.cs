@@ -520,15 +520,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Subscription balance moved to wallet: {0}.
-        /// </summary>
-        public static string SubscriptionBalanceMovedToWallet {
-            get {
-                return ResourceManager.GetString("SubscriptionBalanceMovedToWallet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Custom Navigation Settings Updated.
         /// </summary>
         public static string CustomNavigationSettingsUpdated {
@@ -707,7 +698,7 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("DocsCloudConfigUpdated", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Docs Connect quota report downloaded.
         /// </summary>
@@ -2739,6 +2730,15 @@ namespace ASC.AuditTrail {
         public static string StartTransferSetting {
             get {
                 return ResourceManager.GetString("StartTransferSetting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subscription balance moved to wallet: {0}.
+        /// </summary>
+        public static string SubscriptionBalanceMovedToWallet {
+            get {
+                return ResourceManager.GetString("SubscriptionBalanceMovedToWallet", resourceCulture);
             }
         }
         

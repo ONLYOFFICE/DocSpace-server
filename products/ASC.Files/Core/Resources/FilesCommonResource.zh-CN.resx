@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>无法将表单数据同步到外部数据库。</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>AI 代理的指令不能超过 {0} 个字符</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>表单已更改。此草稿已过时，无法提交。</value>
+  </data>
 </root>
