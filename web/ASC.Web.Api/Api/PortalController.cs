@@ -535,6 +535,11 @@ public class PortalController(
 
         foreach (var quota in source.Quotas)
         {
+            if (quota.State == QuotaState.Overdue)
+            {
+                continue;
+            }
+
             var definition = await tenantManager.GetTenantQuotaAsync(quota.Id);
             if (definition == null || definition.TenantId != quota.Id || definition.Price <= 0)
             {
