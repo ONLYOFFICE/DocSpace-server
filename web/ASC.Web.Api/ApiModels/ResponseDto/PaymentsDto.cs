@@ -313,9 +313,26 @@ public class CustomerServiceUsageDto
     /// <example>1</example>
     public int OperationCount { get; set; }
 
-    public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, string> customUom)
+    /// <summary>
+    /// The price of the service.
+    /// </summary>
+    /// <example>0.14</example>
+    public decimal Price { get; set; }
+
+    /// <summary>
+    /// Indicates whether the service is subscription-based.
+    /// </summary>
+    /// <example>true</example>
+    public bool Subscription { get; set; }
+
+    public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, TenantQuota> walletQuotas, Dictionary<string, string> customUom)
     {
         var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(usage.Service, customUom);
+
+        if (!walletQuotas.TryGetValue(usage.Service, out var quota))
+        {
+            walletQuotas.TryGetValue(serviceName, out quota);
+        }
 
         Service = serviceName;
         Title = title;
@@ -324,6 +341,8 @@ public class CustomerServiceUsageDto
         TotalQuantity = usage.TotalQuantity;
         TotalAmount = usage.TotalAmount;
         OperationCount = usage.OperationCount;
+        Price = quota?.Price ?? 0;
+        Subscription = !string.IsNullOrEmpty(quota?.ProductId);
     }
 }
 
@@ -378,7 +397,7 @@ public class CustomerServiceUsageReportDto
     /// <example>1</example>
     public int CurrentPage { get; set; }
 
-    public CustomerServiceUsageReportDto(UsageReport report, Dictionary<string, string> customUom)
+    public CustomerServiceUsageReportDto(UsageReport report, Dictionary<string, TenantQuota> walletQuotas, Dictionary<string, string> customUom)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -392,7 +411,7 @@ public class CustomerServiceUsageReportDto
         {
             foreach (var usage in report.Collection)
             {
-                Collection.Add(new CustomerServiceUsageDto(usage, customUom));
+                Collection.Add(new CustomerServiceUsageDto(usage, walletQuotas, customUom));
             }
         }
     }

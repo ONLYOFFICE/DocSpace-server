@@ -964,15 +964,19 @@ public class PaymentController(
             return null;
         }
 
+        var tenantQuotas = (await quotaService.GetTenantQuotasAsync()).ToList();
+        var walletQuotas = tenantQuotas.Where(x => x.Wallet)
+            .ToDictionary(x => x.ServiceName, x => x);
+
         var customUom = new Dictionary<string, string>();
-        var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+        var aiQuota = tenantQuotas.SingleOrDefault(q => q.TenantId == (int)TenantWalletService.AITools);
         if (aiQuota != null)
         {
             // For ai-tools, usage is displayed in Tokens instead of AI Credits.
             customUom.Add(aiQuota.ServiceName, "chat");
         }
 
-        return new CustomerServiceUsageReportDto(report, customUom);
+        return new CustomerServiceUsageReportDto(report, walletQuotas, customUom);
     }
 
     /// <remarks>
