@@ -157,4 +157,18 @@ public class RoomContentRequestDto
     /// <example>1</example>
     [FromQuery(Name = "groupId")]
     public int? GroupId { get; set; }
+
+    /// <summary>
+    /// The ID of the metadata template whose fields are used in the metadata filters.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "metadataTemplateId")]
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The URL-encoded JSON array of the metadata filter conditions,
+    /// e.g. [{"fieldId":1,"op":"eq","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// </summary>
+    [FromQuery(Name = "metadataFilters")]
+    public string MetadataFilters { get; set; }
 }

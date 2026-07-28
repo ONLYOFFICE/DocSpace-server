@@ -36,12 +36,15 @@ extern alias ASCFiles;
 extern alias ASCPeople;
 extern alias ASCFilesService;
 global using System.Diagnostics;
+global using System.Globalization;
 global using System.Net;
 global using System.Net.Http.Headers;
+global using System.Net.Http.Json;
 global using System.Runtime.CompilerServices;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
+global using System.Text.Json.Serialization;
 global using System.Web;
 
 global using ASC.Files.Tests.Data;

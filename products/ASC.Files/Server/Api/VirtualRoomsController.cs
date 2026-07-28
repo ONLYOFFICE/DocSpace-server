@@ -897,7 +897,8 @@ public class VirtualRoomsCommonController(
     UserManager userManager,
     IServiceProvider serviceProvider,
     ApiDateTimeHelper apiDateTimeHelper,
-    RootNewItemsDtoHelper rootNewItemsDtoHelper)
+    RootNewItemsDtoHelper rootNewItemsDtoHelper,
+    MetadataFilterHelper metadataFilterHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -936,6 +937,8 @@ public class VirtualRoomsCommonController(
         var count = inDto.Count;
         var filterValue = inDto.Text;
 
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+
         var content = await fileStorageService.GetFolderItemsAsync(
             parentId,
             startIndex,
@@ -959,7 +962,8 @@ public class VirtualRoomsCommonController(
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: inDto.StorageFilter ?? StorageFilter.None,
             groupId: inDto.GroupId ?? null,
-            privacyFilter: inDto.PrivacyFilter ?? RoomPrivacyFilter.None);
+            privacyFilter: inDto.PrivacyFilter ?? RoomPrivacyFilter.None,
+            metadataFilter: metadataFilter);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 

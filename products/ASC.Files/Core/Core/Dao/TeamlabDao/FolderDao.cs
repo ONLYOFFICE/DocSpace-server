@@ -36,6 +36,7 @@ namespace ASC.Files.Core.Data;
 [Scope(typeof(IFolderDao<int>))]
 internal class FolderDao(
         FactoryIndexerFolder factoryIndexer,
+        FactoryIndexerFolderMetadata factoryIndexerFolderMetadata,
         UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
@@ -201,7 +202,8 @@ internal class FolderDao(
         IEnumerable<string> subjectEntriesIds,
         QuotaFilter quotaFilter = QuotaFilter.All,
         int? groupId = null,
-        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        MetadataFilter metadataFilter = null)
     {
         if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
         {
@@ -220,11 +222,7 @@ internal class FolderDao(
             BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectOwnerId, subjectEntriesIds, quotaFilter, groupId, privacyFilter) :
             BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectOwnerId, subjectEntriesIds, privacyFilter);
 
-        if (!string.IsNullOrEmpty(searchText))
-        {
-            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
-            q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
-        }
+        q = await ApplyRoomsSearchAsync(q, filesDbContext, searchText, metadataFilter);
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
@@ -246,7 +244,8 @@ internal class FolderDao(
         IEnumerable<string> subjectEntriesIds,
         IEnumerable<int> parentsIds = null,
         int? groupId = null,
-        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        MetadataFilter metadataFilter = null)
     {
         if (CheckInvalidFilters(filterTypes) || provider != ProviderFilter.None)
         {
@@ -265,17 +264,75 @@ internal class FolderDao(
             BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectOwnerId, subjectEntriesIds, groupId: groupId, privacyFilter: privacyFilter) :
             BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectOwnerId, subjectEntriesIds, privacyFilter);
 
-        if (!string.IsNullOrEmpty(searchText))
-        {
-            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
-
-            q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
-        }
+        q = await ApplyRoomsSearchAsync(q, filesDbContext, searchText, metadataFilter);
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
             yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
+    }
+
+    /// <summary>
+    /// Narrows the rooms query by the free text and by the structured metadata filter.
+    /// </summary>
+    /// <remarks>
+    /// The metadata queries are not scoped to the rooms section: the query itself is already limited to the
+    /// requested rooms, and the tenant is applied centrally by the indexer. Scoping by the ancestor tree stored
+    /// inside the metadata document would break for the archived rooms, whose documents are not rebuilt on move.
+    /// </remarks>
+    private async Task<IQueryable<DbFolder>> ApplyRoomsSearchAsync(IQueryable<DbFolder> q, FilesDbContext filesDbContext, string searchText, MetadataFilter metadataFilter)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
+
+            if (success)
+            {
+                // the string values of the globally visible system template participate in the general text search:
+                // the room matches when either its title or its global metadata match, so the id sets are united
+                var funcForGlobalText = MetadataSearchQuery.BuildGlobalTextSelector<DbFolderMetadataSearch>(searchText, MetadataSearchScope.None);
+                Expression<Func<Selector<DbFolderMetadataSearch>, Selector<DbFolderMetadataSearch>>> expressionGlobalText = s => funcForGlobalText(s);
+
+                var (globalTextSuccess, globalTextIds) = await factoryIndexerFolderMetadata.TrySelectIdsAsync(expressionGlobalText);
+                if (globalTextSuccess && globalTextIds.Count > 0)
+                {
+                    searchIds = searchIds.Union(globalTextIds).ToList();
+                }
+
+                q = q.Where(r => searchIds.Contains(r.Id));
+            }
+            else
+            {
+                var lowerText = GetSearchText(searchText);
+                var globalTextIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.Folder, lowerText);
+
+                q = q.Where(r => r.Title.ToLower().Contains(lowerText) || globalTextIds.Contains(r.Id));
+            }
+        }
+
+        if (metadataFilter is { Conditions.Count: > 0 })
+        {
+            var funcForMetadata = MetadataSearchQuery.BuildSelector<DbFolderMetadataSearch>(metadataFilter, MetadataSearchScope.None);
+            Expression<Func<Selector<DbFolderMetadataSearch>, Selector<DbFolderMetadataSearch>>> expressionMetadata = s => funcForMetadata(s);
+
+            var (metadataSuccess, metadataIds) = await factoryIndexerFolderMetadata.TrySelectIdsAsync(expressionMetadata);
+
+            if (metadataSuccess)
+            {
+                q = q.Where(r => metadataIds.Contains(r.Id));
+            }
+            else
+            {
+                foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.Folder, metadataFilter))
+                {
+                    q = q.Where(r => conditionIds.Contains(r.Id));
+                }
+            }
+        }
+
+        return q;
     }
 
     public async Task<int> GetFoldersCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
@@ -2620,6 +2677,7 @@ public record FolderReassignInfo
 [Scope(typeof(ICacheFolderDao<int>))]
 internal class CacheFolderDao(
     FactoryIndexerFolder factoryIndexer,
+    FactoryIndexerFolderMetadata factoryIndexerFolderMetadata,
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,
     TenantManager tenantManager,
@@ -2641,6 +2699,7 @@ internal class CacheFolderDao(
     IEventBus eventBus)
     : FolderDao(
         factoryIndexer,
+        factoryIndexerFolderMetadata,
         userManager,
         dbContextManager,
         tenantManager,

@@ -517,7 +517,7 @@ public class EntryManager(IDaoFactory daoFactory,
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.Forms && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
-                provider, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter);
+                provider, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter, metadataFilter);
 
             CalculateTotal();
         }
