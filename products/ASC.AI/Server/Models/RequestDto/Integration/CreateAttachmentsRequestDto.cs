@@ -43,3 +43,14 @@ public class CreateAttachmentsRequestBody
 {
     public required HashSet<string> EntryIds { get; init; }
 }
+
+public class FormAnalysisRequestDto
+{
+    [FromBody]
+    public required FormAnalysisRequestBody Body { get; init; }
+}
+
+public class FormAnalysisRequestBody
+{
+    public required HashSet<string> EntryIds { get; init; }
+}

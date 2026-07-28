@@ -62,3 +62,16 @@ public static partial class AttachmentMapper
     private static long MapDateTimeToMs(DateTime dateTime) =>
         new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
 }
+
+public class FormAnalysisDto
+{
+    public required string EntryId { get; init; }
+    public required bool CanAnalyze { get; init; }
+    public required List<FormKeyDto> Keys { get; init; }
+}
+
+public class FormKeyDto
+{
+    public required string Key { get; init; }
+    public required string Type { get; init; }
+}

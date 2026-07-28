@@ -465,6 +465,19 @@ public class FormFillingReportCreator(
     }
 
     /// <summary>
+    /// The form's field layout (key + type) from the search index metadata, excluding the leading form-number
+    /// column and picture/signature fields — the fields whose submitted data can be analysed.
+    /// </summary>
+    public async Task<IReadOnlyList<FormMetadata>> GetFormFieldsMetadataAsync(int originalFormId, int originalFormVersion)
+    {
+        // refreshIndex: false — a read of the (stable) field layout doesn't need the expensive index refresh.
+        var metadata = await GetExistingMetadataAsync(originalFormId, originalFormVersion, refreshIndex: false);
+        return metadata
+            .Where(m => !string.IsNullOrEmpty(m.Key) && m.Key != "FormNumber" && m.Type != "picture" && m.Type != "signature")
+            .ToList();
+    }
+
+    /// <summary>
     /// <paramref name="refreshIndex"/>=false skips the comparatively expensive index-wide refresh for
     /// callers that can tolerate a stale-by-seconds read (the metadata backfill in
     /// <see cref="GetSubmitFormsData{T}"/>, run on every submission).

@@ -62,10 +62,32 @@ export const attachmentsController = {
 
   saveFilesMany: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["inputs", "entityId"] as const);
+    const inputs = (args.inputs as FileInput[]) ?? [];
     const result = await engine.saveFilesMany(
-      (args.inputs as FileInput[]) ?? [],
+      inputs,
       args.entityId as string | undefined,
     );
+    // Tell the client which attached forms have analysable submission data and their field keys/types, by
+    // adding the info onto each saved file (matched by DocSpace entry id) — keeps the array response shape.
+    const entryIds = inputs
+      .map((input) => input.path)
+      .filter((path): path is string => typeof path === "string" && path.length > 0);
+    const analysis = await storage.attachments.getFormAnalysis(entryIds);
+
+    if (Array.isArray(result) && analysis.length > 0) {
+      const byEntryId = new Map(analysis.map((item) => [item.entryId, item]));
+      for (const file of result) {
+        const path = (file as { path?: string })?.path;
+        const entryId = typeof path === "string" ? path.split("/", 1)[0] : undefined;
+        const info = entryId ? byEntryId.get(entryId) : undefined;
+        if (info) {
+          const target = file as unknown as Record<string, unknown>;
+          target.canAnalyze = info.canAnalyze;
+          target.formKeys = info.keys;
+        }
+      }
+    }
+
     res.json(result);
   }),
 

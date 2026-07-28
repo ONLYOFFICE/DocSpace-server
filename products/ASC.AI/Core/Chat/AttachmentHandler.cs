@@ -290,6 +290,50 @@ public class AttachmentHandler(
         };
     }
 
+    /// <summary>
+    /// Whether the file is a started form-filling form whose submissions are stored in a forms database (so
+    /// its data can be analysed), and — when so — its field layout (key + type) from the search index.
+    /// </summary>
+    public async Task<(bool CanAnalyze, IReadOnlyList<(string Key, string Type)> Keys)> GetFormAnalysisInfoAsync(int fileId)
+    {
+        var client = GetEnabledFormsDatabaseClient();
+        if (client == null)
+        {
+            return (false, []);
+        }
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var file = await fileDao.GetFileAsync(fileId);
+        if (file is not { IsForm: true })
+        {
+            return (false, []);
+        }
+
+        var properties = await fileDao.GetProperties(fileId);
+        var formFilling = properties?.FormFilling;
+        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != fileId)
+        {
+            return (false, []);
+        }
+
+        try
+        {
+            var tableName = FormFillingReportCreator.GetTableName(fileId, file.Version);
+            if (!await client.TableExistsAsync(tableName))
+            {
+                return (false, []);
+            }
+
+            var fields = await formFillingReportCreator.GetFormFieldsMetadataAsync(fileId, file.Version);
+            return (true, fields.Select(f => (f.Key, f.Type)).ToList());
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormDataToolsFailed(e, fileId);
+            return (false, []);
+        }
+    }
+
     public async Task<(IReadOnlyList<ToolWrapper> Tools, string SchemaContext)?> GetFormDataToolsAsync(int fileId)
     {
         var client = GetEnabledFormsDatabaseClient();

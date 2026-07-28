@@ -33,6 +33,8 @@
 
 using AttachmentDto = ASC.AI.Models.ResponseDto.Integration.AttachmentDto;
 using AttachmentMapper = ASC.AI.Models.ResponseDto.Integration.AttachmentMapper;
+using FormAnalysisDto = ASC.AI.Models.ResponseDto.Integration.FormAnalysisDto;
+using FormKeyDto = ASC.AI.Models.ResponseDto.Integration.FormKeyDto;
 
 namespace ASC.AI.Api.Integration;
 
@@ -42,7 +44,9 @@ namespace ASC.AI.Api.Integration;
 [AiFeature]
 [ControllerName("ai")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class AttachmentsStorageController(AttachmentsStorageService attachmentsStorageService) : ControllerBase
+public class AttachmentsStorageController(
+    AttachmentsStorageService attachmentsStorageService,
+    AttachmentHandler attachmentHandler) : ControllerBase
 {
     [HttpPost("integration/attachments")]
     public async Task<List<AttachmentDto>> CreateManyAsync(CreateAttachmentsRequestDto inDto)
@@ -50,6 +54,32 @@ public class AttachmentsStorageController(AttachmentsStorageService attachmentsS
         return await attachmentsStorageService.CreateManyAsync(inDto.Body.EntryIds)
             .Select(AttachmentMapper.MapToDto)
             .ToListAsync();
+    }
+
+    [HttpPost("integration/attachments/form-analysis")]
+    public async Task<List<FormAnalysisDto>> GetFormAnalysisAsync(FormAnalysisRequestDto inDto)
+    {
+        var result = new List<FormAnalysisDto>(inDto.Body.EntryIds.Count);
+
+        foreach (var entryId in inDto.Body.EntryIds)
+        {
+            // Only internal (numeric) entries can be filling-forms; third-party ids are never analysable forms.
+            if (!int.TryParse(entryId, out var fileId))
+            {
+                result.Add(new FormAnalysisDto { EntryId = entryId, CanAnalyze = false, Keys = [] });
+                continue;
+            }
+
+            var (canAnalyze, keys) = await attachmentHandler.GetFormAnalysisInfoAsync(fileId);
+            result.Add(new FormAnalysisDto
+            {
+                EntryId = entryId,
+                CanAnalyze = canAnalyze,
+                Keys = keys.Select(k => new FormKeyDto { Key = k.Key, Type = k.Type }).ToList()
+            });
+        }
+
+        return result;
     }
 
     [HttpGet("integration/attachments/{id}")]

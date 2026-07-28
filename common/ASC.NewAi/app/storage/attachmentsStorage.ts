@@ -265,6 +265,19 @@ function dtoToAttachment(raw: unknown): Attachment | null {
   return result;
 }
 
+// Per-entry form-analysis info returned by the C# `integration/attachments/form-analysis` endpoint:
+// whether the entry is a started form whose submissions can be analysed, and its field keys/types.
+export interface FormAnalysisKey {
+  key: string;
+  type: string;
+}
+
+export interface FormAnalysis {
+  entryId: string;
+  canAnalyze: boolean;
+  keys: FormAnalysisKey[];
+}
+
 export class HttpAttachmentsStorage implements AttachmentsStorage {
   async create(input: Omit<Attachment, "id" | "createdAt">): Promise<Attachment> {
     const [result] = await this.createMany([input]);
@@ -404,6 +417,17 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     });
     await inlineImagesAsync(finalResult);
     return finalResult;
+  }
+
+  // Ask the C# side which of the given DocSpace entries are started form-filling forms whose submissions can
+  // be analysed, and for those, the form's field keys/types (from the search index). One item per input id.
+  async getFormAnalysis(entryIds: string[]): Promise<FormAnalysis[]> {
+    if (entryIds.length === 0) {
+      return [];
+    }
+
+    const raw = await aiService.post(`${PATH}/form-analysis`, { entryIds });
+    return Array.isArray(raw) ? (raw as FormAnalysis[]) : [];
   }
 
   // Persist a tool-generated image (raw base64, `source === "tool"`). The bytes
