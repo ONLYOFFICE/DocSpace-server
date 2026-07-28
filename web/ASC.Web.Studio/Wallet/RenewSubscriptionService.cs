@@ -204,7 +204,7 @@ public class RenewSubscriptionService(
 
             // when a switch to a different quota is scheduled, buy that quota outright instead of renewing the current one
             var targetQuota = data.NextQuota is { } nextQuotaId ? _walletQuotas[nextQuotaId] : walletQuota;
-            var productQuantityType = data.NextQuota is null ? ProductQuantityType.Renew : ProductQuantityType.Add;
+            var productQuantityType = data.NextQuota is null ? ProductQuantityType.Renew : ProductQuantityType.Set;
 
             var quantity = new Dictionary<string, int>
             {
