@@ -125,18 +125,16 @@ static file class McpServerQueriesContainer
                     .AsQueryable());
 
     public static readonly Func<AiIntegrationContext, int, string, string, Task<int>> UpdateMcpServerConfigAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, string name, string config) =>
-                ctx.McpServers
-                    .Where(x => x.TenantId == tenantId && x.Name == name && x.EntryId == null)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.Config, config)));
+        (AiIntegrationContext ctx, int tenantId, string name, string config) =>
+            ctx.McpServers
+                .Where(x => x.TenantId == tenantId && x.Name == name && x.EntryId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.Config, config));
 
     public static readonly Func<AiIntegrationContext, int, string, int, string, Task<int>> UpdateMcpServerConfigByEntryAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, string name, int entryId, string config) =>
-                ctx.McpServers
-                    .Where(x => x.TenantId == tenantId && x.Name == name && x.EntryId == entryId)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.Config, config)));
+        (AiIntegrationContext ctx, int tenantId, string name, int entryId, string config) =>
+            ctx.McpServers
+                .Where(x => x.TenantId == tenantId && x.Name == name && x.EntryId == entryId)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.Config, config));
 
     public static readonly Func<AiIntegrationContext, int, string, Task<int>> DeleteMcpServerAsync =
         EF.CompileAsyncQuery(

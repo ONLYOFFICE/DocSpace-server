@@ -42,9 +42,9 @@
     <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microting.EntityFrameworkCore.MySql" />
+    <PackageReference Include="Microting.EntityFrameworkCore.MySql.Json.Microsoft" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Json.Microsoft" />
     <PackageReference Include="Refit" />
     <PackageReference Include="Refit.HttpClientFactory" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />

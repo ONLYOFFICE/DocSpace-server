@@ -77,13 +77,12 @@ static file class PromptFolderQueriesContainer
                     .AsQueryable());
 
     public static readonly Func<AiIntegrationContext, int, Guid, Guid, string, DateTime, Task<int>> UpdatePromptFolderNameAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid createdBy, Guid id, string name, DateTime updatedAt) =>
-                ctx.PromptFolders
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Id == id)
-                    .ExecuteUpdate(x => x
-                        .SetProperty(y => y.Name, name)
-                        .SetProperty(y => y.UpdatedAt, updatedAt)));
+        (AiIntegrationContext ctx, int tenantId, Guid createdBy, Guid id, string name, DateTime updatedAt) =>
+            ctx.PromptFolders
+                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Id == id)
+                .ExecuteUpdateAsync(x => x
+                    .SetProperty(y => y.Name, name)
+                    .SetProperty(y => y.UpdatedAt, updatedAt));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Guid, Task<int>> DeletePromptFolderAsync =
         EF.CompileAsyncQuery(
