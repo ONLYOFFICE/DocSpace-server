@@ -2516,7 +2516,7 @@ public class FileSecurity(
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomManager)
+                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
                         {
                             return true;
                         }

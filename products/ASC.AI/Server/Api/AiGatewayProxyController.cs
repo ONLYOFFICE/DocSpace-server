@@ -59,7 +59,7 @@ public class AiGatewayProxyController(
     public async Task<IActionResult> ProxyRequest([FromRoute] string path)
     {
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        if (userType is EmployeeType.User or EmployeeType.Guest)
+        if (userType is EmployeeType.Guest)
         {
             throw new SecurityException();
         }
