@@ -202,9 +202,13 @@ public class RenewSubscriptionService(
                 }
             }
 
+            // when a switch to a different quota is scheduled, buy that quota outright instead of renewing the current one
+            var targetQuota = data.NextQuota is { } nextQuotaId ? _walletQuotas[nextQuotaId] : walletQuota;
+            var productQuantityType = data.NextQuota is null ? ProductQuantityType.Renew : ProductQuantityType.Add;
+
             var quantity = new Dictionary<string, int>
             {
-                { walletQuota.Name, nextQuantity }
+                { targetQuota.Name, nextQuantity }
             };
 
             // TODO: support other currencies
@@ -212,11 +216,11 @@ public class RenewSubscriptionService(
 
             var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoRenewal } };
 
-            if (!walletQuota.Additional)
+            if (!targetQuota.Additional)
             {
                 // The user subscription is paid from the wallet, so make sure the wallet balance
-                // covers the renewal cost, topping it up for the missing amount if necessary.
-                var requiredAmount = walletQuota.Price * nextQuantity;
+                // covers the renewal cost (priced off the target quota), topping it up for the missing amount if necessary.
+                var requiredAmount = targetQuota.Price * nextQuantity;
 
                 var coreSettings = scope.ServiceProvider.GetRequiredService<CoreSettings>();
                 var siteName = tenant.GetTenantDomain(coreSettings);
@@ -227,13 +231,13 @@ public class RenewSubscriptionService(
                 }
             }
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false, null, metadata);
+            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, productQuantityType, defaultCurrency, false, null, metadata);
 
             if (result)
             {
                 var newTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);
 
-                var description = $"{walletQuota.Name} {nextQuantity}";
+                var description = $"{targetQuota.Name} {nextQuantity}";
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
                 messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerSubscriptionUpdated, description);
 

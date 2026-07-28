@@ -869,6 +869,7 @@ public class TariffService(
                         Quantity = q.Quantity,
                         DueDate = q.DueDate,
                         NextQuantity = q.NextQuantity,
+                        NextQuota = q.NextQuota,
                         TenantId = tenant
                     });
                 }
@@ -903,11 +904,17 @@ public class TariffService(
         return inserted;
     }
 
-    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity)
+    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity, int? nextQuota = null)
     {
         try
         {
             if (nextQuantity is < 0)
+            {
+                return false;
+            }
+
+            // the only supported scheduled quota switch today is reverting from DocsCloudDevPack back to DocsCloud
+            if (nextQuota is not null && (quotaId != (int)TenantWalletService.DocsCloudDevPack || nextQuota != (int)TenantWalletService.DocsCloud))
             {
                 return false;
             }
@@ -923,6 +930,7 @@ public class TariffService(
                 if (q.Id == quotaId)
                 {
                     q.NextQuantity = nextQuantity;
+                    q.NextQuota = nextQuota;
 
                     await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
                     {
@@ -931,6 +939,7 @@ public class TariffService(
                         Quantity = q.Quantity,
                         DueDate = q.DueDate,
                         NextQuantity = nextQuantity,
+                        NextQuota = nextQuota,
                         TenantId = tenant
                     });
 
