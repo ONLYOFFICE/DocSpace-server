@@ -73,7 +73,7 @@ public class MetadataController(
     }
 
     /// <summary>
-    /// Returns the system metadata template with the global visibility.
+    /// Returns the system metadata template with the global visibility, or null when it does not exist yet.
     /// </summary>
     /// <path>api/2.0/files/metadata/templates/system</path>
     [Tags("Files / Metadata")]
@@ -81,9 +81,9 @@ public class MetadataController(
     [HttpGet("metadata/templates/system")]
     public async Task<MetadataTemplateDto> GetSystemTemplate()
     {
-        var template = await metadataService.GetOrCreateSystemTemplateAsync();
+        var template = await metadataService.GetSystemTemplateAsync();
 
-        return metadataDtoHelper.Get(template);
+        return template == null ? null : metadataDtoHelper.Get(template);
     }
 
     /// <summary>
@@ -158,7 +158,7 @@ public class MetadataController(
     [HttpPut("metadata/templates/{templateId:int}/fields/{fieldId:int}")]
     public async Task<MetadataFieldDto> UpdateField(UpdateMetadataFieldRequestDto inDto)
     {
-        var field = await metadataService.UpdateFieldAsync(inDto.FieldId, ToField(inDto.Field));
+        var field = await metadataService.UpdateFieldAsync(inDto.FieldId, ToField(inDto.Field), inDto.Field.Order);
 
         return metadataDtoHelper.Get(field);
     }
@@ -267,19 +267,17 @@ public class MetadataController(
     }
 
     /// <summary>
-    /// Unassigns the metadata template from the folder, removing it from the sub-entries when it was cascaded.
+    /// Unassigns the metadata template from the folder; the sub-entries keep it as a direct assignment when it was cascaded.
     /// </summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/{templateId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Cascade operation status or null when no cascade cleanup is required", typeof(MetadataOperationDto))]
+    [SwaggerResponse(200, "OK")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpDelete("metadata/folder/{folderId:int}/templates/{templateId:int}")]
-    public async Task<MetadataOperationDto> UnassignFolderTemplate(UnassignFolderMetadataTemplateRequestDto<int> inDto)
+    public async Task UnassignFolderTemplate(UnassignFolderMetadataTemplateRequestDto<int> inDto)
     {
-        var taskId = await metadataService.UnassignTemplateFromFolderAsync(inDto.FolderId, inDto.TemplateId);
-
-        return taskId == null ? null : metadataDtoHelper.Get(await metadataService.GetCascadeStatusAsync(inDto.FolderId));
+        await metadataService.UnassignTemplateFromFolderAsync(inDto.FolderId, inDto.TemplateId);
     }
 
     /// <summary>
@@ -353,7 +351,7 @@ public class MetadataController(
             Name = request.Name,
             Type = request.Type,
             Options = request.Options?.Select(o => new MetadataFieldOption(o.Id ?? Guid.Empty, o.Value)).ToList(),
-            Order = request.Order
+            Order = request.Order ?? 0
         };
     }
 

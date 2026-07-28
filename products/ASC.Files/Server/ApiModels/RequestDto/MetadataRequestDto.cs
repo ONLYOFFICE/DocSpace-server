@@ -55,9 +55,9 @@ public class MetadataFieldRequest
     public List<MetadataFieldOptionRequest> Options { get; set; }
 
     /// <summary>
-    /// The field display order inside the template.
+    /// The field display order inside the template. Omit it on update to keep the current order.
     /// </summary>
-    public int Order { get; set; }
+    public int? Order { get; set; }
 }
 
 /// <summary>

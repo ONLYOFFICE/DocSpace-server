@@ -393,25 +393,6 @@ public class MetadataIndexHelper(
         }
     }
 
-    public async Task DeleteEntryAsync(FileEntryType entryType, int entryId)
-    {
-        try
-        {
-            if (entryType == FileEntryType.File)
-            {
-                await fileIndexer.DeleteAsync(r => r.Where(a => a.Id, entryId));
-            }
-            else
-            {
-                await folderIndexer.DeleteAsync(r => r.Where(a => a.Id, entryId));
-            }
-        }
-        catch (Exception e)
-        {
-            logger.WarningMetadataIndexFailed(e);
-        }
-    }
-
     private static async Task IndexAsync<TDoc>(FilesDbContext filesDbContext, FactoryIndexer<TDoc> indexer, FileEntryType entryType, IReadOnlyCollection<int> entryIds, int tenantId)
         where TDoc : MetadataSearchItemBase, new()
     {

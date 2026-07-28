@@ -90,9 +90,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> DeleteMetadataLinksBySourceFolderAsync(int tenantId, int sourceFolderId, int? templateId)
+    public Task<int> ConvertMetadataCascadeLinksToDirectAsync(int tenantId, int sourceFolderId, int? templateId)
     {
-        return MetadataQueries.DeleteMetadataLinksBySourceFolderAsync(this, tenantId, sourceFolderId, templateId);
+        return MetadataQueries.ConvertMetadataCascadeLinksToDirectAsync(this, tenantId, sourceFolderId, templateId);
     }
 
     [PreCompileQuery]
@@ -103,15 +103,16 @@ public partial class FilesDbContext
 
     public async Task ApplyMetadataCascadeLinksAsync(int tenantId, int entryId, FileEntryType entryType, int parentFolderId, Guid createBy)
     {
-        var ancestorIds = await Tree
+        var levelByFolderId = await Tree
             .Where(t => t.FolderId == parentFolderId)
-            .Select(t => t.ParentId)
-            .ToListAsync();
+            .ToDictionaryAsync(t => t.ParentId, t => t.Level);
 
-        if (ancestorIds.Count == 0)
+        if (levelByFolderId.Count == 0)
         {
             return;
         }
+
+        var ancestorIds = levelByFolderId.Keys.ToList();
 
         var cascadeLinks = await MetadataLinks
             .Where(r => r.TenantId == tenantId && r.Cascade && r.EntryType == FileEntryType.Folder && ancestorIds.Contains(r.EntryId))
@@ -127,17 +128,21 @@ public partial class FilesDbContext
             .Select(r => r.TemplateId)
             .ToListAsync();
 
+        var nearestSources = MetadataCascadeResolver.ResolveNearestSources(
+            cascadeLinks.Select(l => (l.TemplateId, l.EntryId)),
+            levelByFolderId);
+
         var added = false;
 
-        foreach (var cascadeLink in cascadeLinks.DistinctBy(l => l.TemplateId).Where(l => !existingTemplateIds.Contains(l.TemplateId)))
+        foreach (var (templateId, sourceFolderId) in nearestSources.Where(s => !existingTemplateIds.Contains(s.Key)))
         {
             await MetadataLinks.AddAsync(new DbFilesMetadataLink
             {
                 TenantId = tenantId,
-                TemplateId = cascadeLink.TemplateId,
+                TemplateId = templateId,
                 EntryId = entryId,
                 EntryType = entryType,
-                SourceFolderId = cascadeLink.EntryId,
+                SourceFolderId = sourceFolderId,
                 CreateBy = createBy,
                 CreateOn = DateTime.UtcNow
             });
@@ -162,28 +167,26 @@ public partial class FilesDbContext
                 .Select(f => new { f.Id, f.TemplateId })
                 .ToDictionaryAsync(f => f.Id, f => f.TemplateId);
 
-            var cascadeTemplateIds = cascadeLinks.Select(l => l.TemplateId).ToHashSet();
-
             var filledFieldIds = (await MetadataValues
                     .Where(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType)
                     .Select(r => r.FieldId)
                     .ToListAsync())
                 .ToHashSet();
 
-            foreach (var fieldGroup in sourceValues.GroupBy(v => v.FieldId))
+            var fieldSources = MetadataCascadeResolver.ResolveFieldSources(
+                sourceValues.Select(v => (v.FieldId, v.EntryId)),
+                cascadeLinks.Select(l => (l.TemplateId, l.EntryId)),
+                fieldTemplates,
+                levelByFolderId);
+
+            foreach (var (fieldId, sourceEntryId) in fieldSources)
             {
-                if (filledFieldIds.Contains(fieldGroup.Key) ||
-                    !fieldTemplates.TryGetValue(fieldGroup.Key, out var templateId) ||
-                    !cascadeTemplateIds.Contains(templateId))
+                if (filledFieldIds.Contains(fieldId))
                 {
                     continue;
                 }
 
-                // when several ancestors declare the same field, a single source is copied whole
-                // (multi-choice values span several rows and must not be mixed between sources)
-                var sourceEntryId = fieldGroup.First().EntryId;
-
-                foreach (var value in fieldGroup.Where(v => v.EntryId == sourceEntryId))
+                foreach (var value in sourceValues.Where(v => v.FieldId == fieldId && v.EntryId == sourceEntryId))
                 {
                     await MetadataValues.AddAsync(new DbFilesMetadataValue
                     {
@@ -338,13 +341,13 @@ static file class MetadataQueries
                     .Where(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType && r.TemplateId == templateId)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, int?, Task<int>> DeleteMetadataLinksBySourceFolderAsync =
+    public static readonly Func<FilesDbContext, int, int, int?, Task<int>> ConvertMetadataCascadeLinksToDirectAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int sourceFolderId, int? templateId) =>
                 ctx.MetadataLinks
                     .Where(r => r.TenantId == tenantId && r.SourceFolderId == sourceFolderId)
                     .Where(r => templateId == null || r.TemplateId == templateId)
-                    .ExecuteDelete());
+                    .ExecuteUpdate(s => s.SetProperty(r => r.SourceFolderId, (int?)null)));
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, IEnumerable<int>, Task<int>> DeleteMetadataValuesByFieldsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -53,7 +53,7 @@ public interface IMetadataDao<T>
     IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(IEnumerable<T> entryIds, FileEntryType entryType);
     IAsyncEnumerable<int> GetCascadeTemplateIdsForAncestorsAsync(T folderId);
     Task DeleteLinksAsync(T entryId, FileEntryType entryType, int? templateId = null);
-    Task DeleteLinksBySourceFolderAsync(int sourceFolderId, int? templateId = null);
+    Task ConvertCascadeLinksToDirectAsync(int sourceFolderId, int? templateId = null);
 
     Task SetValuesAsync(T entryId, FileEntryType entryType, IEnumerable<MetadataValue> values);
     IAsyncEnumerable<MetadataValue> GetValuesAsync(T entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null);
@@ -63,8 +63,10 @@ public interface IMetadataDao<T>
     IAsyncEnumerable<int> GetSubtreeFolderIdsAsync(int rootFolderId);
     IAsyncEnumerable<int> GetFileIdsByParentFoldersAsync(IEnumerable<int> folderIds);
     Task ApplyCascadeBatchAsync(IReadOnlyCollection<int> entryIds, FileEntryType entryType, IReadOnlyCollection<int> templateIds, int sourceFolderId, IReadOnlyCollection<MetadataValue> values, MetadataConflictResolveType conflict);
-    Task<List<MetadataTemplateLink>> GetLinksBySourceFolderAsync(int sourceFolderId, int? templateId = null);
+    Task<List<MetadataTemplateLink>> GetCascadeLinksByFoldersAsync(IEnumerable<int> folderIds);
+    Task<List<MetadataTemplateLink>> GetCascadeLinksInSubtreeAsync(int rootFolderId, IEnumerable<int> templateIds);
+    Task<List<int>> GetFolderIdsInSubtreesAsync(IEnumerable<int> rootFolderIds);
+    Task<Dictionary<int, int>> GetAncestorLevelsAsync(int folderId);
     Task<List<MetadataTemplateLink>> GetLinksByTemplateAsync(int templateId);
     Task<List<MetadataValue>> GetValueEntriesAsync(int fieldId);
-    Task RemoveCascadeBatchAsync(IReadOnlyCollection<int> entryIds, FileEntryType entryType, int sourceFolderId, IReadOnlyCollection<int> templateIds);
 }

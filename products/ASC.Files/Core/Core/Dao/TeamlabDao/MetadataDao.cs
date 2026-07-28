@@ -443,13 +443,13 @@ internal class MetadataDao(
         }
     }
 
-    public async Task DeleteLinksBySourceFolderAsync(int sourceFolderId, int? templateId = null)
+    public async Task ConvertCascadeLinksToDirectAsync(int sourceFolderId, int? templateId = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await filesDbContext.DeleteMetadataLinksBySourceFolderAsync(tenantId, sourceFolderId, templateId);
+        await filesDbContext.ConvertMetadataCascadeLinksToDirectAsync(tenantId, sourceFolderId, templateId);
     }
 
     public async Task SetValuesAsync(int entryId, FileEntryType entryType, IEnumerable<MetadataValue> values)
@@ -667,21 +667,53 @@ internal class MetadataDao(
         });
     }
 
-    public async Task<List<MetadataTemplateLink>> GetLinksBySourceFolderAsync(int sourceFolderId, int? templateId = null)
+    public async Task<List<MetadataTemplateLink>> GetCascadeLinksByFoldersAsync(IEnumerable<int> folderIds)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var query = filesDbContext.MetadataLinks
-            .Where(r => r.TenantId == tenantId && r.SourceFolderId == sourceFolderId);
+        return await filesDbContext.MetadataLinks
+            .Where(r => r.TenantId == tenantId && r.Cascade && r.EntryType == FileEntryType.Folder && folderIds.Contains(r.EntryId))
+            .Select(r => ToLink(r))
+            .ToListAsync();
+    }
 
-        if (templateId.HasValue)
-        {
-            query = query.Where(r => r.TemplateId == templateId.Value);
-        }
+    public async Task<Dictionary<int, int>> GetAncestorLevelsAsync(int folderId)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        return await query.Select(r => ToLink(r)).ToListAsync();
+        return await filesDbContext.Tree
+            .Where(t => t.FolderId == folderId && t.ParentId != folderId)
+            .ToDictionaryAsync(t => t.ParentId, t => t.Level);
+    }
+
+    public async Task<List<MetadataTemplateLink>> GetCascadeLinksInSubtreeAsync(int rootFolderId, IEnumerable<int> templateIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.Tree
+            .Where(t => t.ParentId == rootFolderId && t.FolderId != rootFolderId)
+            .Join(filesDbContext.MetadataLinks
+                    .Where(l => l.TenantId == tenantId && l.Cascade && l.EntryType == FileEntryType.Folder && templateIds.Contains(l.TemplateId)),
+                t => t.FolderId,
+                l => l.EntryId,
+                (t, l) => l)
+            .Select(l => ToLink(l))
+            .ToListAsync();
+    }
+
+    public async Task<List<int>> GetFolderIdsInSubtreesAsync(IEnumerable<int> rootFolderIds)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.Tree
+            .Where(t => rootFolderIds.Contains(t.ParentId))
+            .Select(t => t.FolderId)
+            .Distinct()
+            .ToListAsync();
     }
 
     public async Task<List<MetadataTemplateLink>> GetLinksByTemplateAsync(int templateId)
@@ -706,60 +738,6 @@ internal class MetadataDao(
             .Where(r => r.TenantId == tenantId && r.FieldId == fieldId)
             .Select(r => new MetadataValue { FieldId = r.FieldId, EntryId = r.EntryId, EntryType = r.EntryType })
             .ToListAsync();
-    }
-
-    public async Task RemoveCascadeBatchAsync(IReadOnlyCollection<int> entryIds, FileEntryType entryType, int sourceFolderId, IReadOnlyCollection<int> templateIds)
-    {
-        if (entryIds.Count == 0 || templateIds.Count == 0)
-        {
-            return;
-        }
-
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        var strategy = filesDbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await context.Database.BeginTransactionAsync();
-
-            await context.MetadataLinks
-                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId)
-                    && templateIds.Contains(r.TemplateId) && r.SourceFolderId == sourceFolderId)
-                .ExecuteDeleteAsync();
-
-            var remainingLinks = await context.MetadataLinks
-                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId) && templateIds.Contains(r.TemplateId))
-                .Select(r => new { r.EntryId, r.TemplateId })
-                .ToListAsync();
-
-            var remainingLinkSet = remainingLinks.Select(l => (l.EntryId, l.TemplateId)).ToHashSet();
-
-            var fieldsByTemplate = await context.MetadataFields
-                .Where(r => r.TenantId == tenantId && templateIds.Contains(r.TemplateId))
-                .Select(r => new { r.Id, r.TemplateId })
-                .ToListAsync();
-
-            foreach (var entryId in entryIds)
-            {
-                var orphanedFieldIds = fieldsByTemplate
-                    .Where(f => !remainingLinkSet.Contains((entryId, f.TemplateId)))
-                    .Select(f => f.Id)
-                    .ToList();
-
-                if (orphanedFieldIds.Count > 0)
-                {
-                    await context.MetadataValues
-                        .Where(r => r.TenantId == tenantId && r.EntryType == entryType && r.EntryId == entryId && orphanedFieldIds.Contains(r.FieldId))
-                        .ExecuteDeleteAsync();
-                }
-            }
-
-            await tx.CommitAsync();
-        });
     }
 
     private static MetadataTemplate ToTemplate(DbFilesMetadataTemplate dbTemplate)

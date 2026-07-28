@@ -41,11 +41,11 @@ public class MetadataCascadeWorker(
 {
     private readonly DistributedTaskQueue<MetadataCascadeOperation> _queue = queueFactory.CreateQueue<MetadataCascadeOperation>();
 
-    public async Task<string> StartAsync(int tenantId, Guid userId, int folderId, IEnumerable<int> templateIds, MetadataConflictResolveType conflict, bool unassign)
+    public async Task<string> StartAsync(int tenantId, Guid userId, int folderId, IEnumerable<int> templateIds, MetadataConflictResolveType conflict, MetadataCascadeMode mode)
     {
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"lock_metadata_cascade_{tenantId}"))
         {
-            var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.FolderId == folderId);
+            var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.FolderId == folderId && t.Mode == mode);
 
             if (item is { IsCompleted: true })
             {
@@ -57,7 +57,7 @@ public class MetadataCascadeWorker(
             {
                 item = serviceProvider.GetService<MetadataCascadeOperation>();
 
-                item.Init(tenantId, userId, folderId, templateIds, conflict, unassign);
+                item.Init(tenantId, userId, folderId, templateIds, conflict, mode);
 
                 await _queue.EnqueueTask(item);
             }
@@ -68,6 +68,6 @@ public class MetadataCascadeWorker(
 
     public async Task<MetadataCascadeOperation> GetStatusAsync(int tenantId, int folderId)
     {
-        return (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.FolderId == folderId);
+        return (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.FolderId == folderId && t.Mode == MetadataCascadeMode.Assign);
     }
 }

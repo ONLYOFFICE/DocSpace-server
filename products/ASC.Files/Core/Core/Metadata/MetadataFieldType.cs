@@ -67,3 +67,16 @@ public enum MetadataConflictResolveType
     [Description("Overwrite existing values")]
     Overwrite = 1
 }
+
+/// <summary>
+/// The cascade operation mode.
+/// </summary>
+[EnumExtensions]
+public enum MetadataCascadeMode
+{
+    [Description("Materialize the templates assigned to the folder onto its subtree")]
+    Assign = 0,
+
+    [Description("Stamp a moved subtree with the cascade templates of its new ancestors")]
+    Stamp = 1
+}

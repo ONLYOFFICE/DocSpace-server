@@ -105,9 +105,10 @@ public class MetadataAutofillService(
             return [];
         }
 
-        var systemTemplate = await metadataService.GetOrCreateSystemTemplateAsync();
+        // only the existing names are needed here, so the template is never created as a side effect
+        var systemTemplate = await metadataService.GetSystemTemplateAsync();
 
-        var existingNames = systemTemplate.Fields.Select(f => f.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var existingNames = (systemTemplate?.Fields ?? []).Select(f => f.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var responseText = await CompleteAsync(MetadataAutofillPrompt.BuildSuggestInstruction(existingNames), content);
 
@@ -338,14 +339,22 @@ public static class MetadataAutofillPrompt
                 }
 
                 var title = titleElement.GetString();
-                if (string.IsNullOrWhiteSpace(title) || existingNames.Contains(title))
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    continue;
+                }
+
+                title = title.Trim();
+
+                // the comparison must not depend on the comparer of the collection passed in
+                if (existingNames.Any(n => string.Equals(n, title, StringComparison.OrdinalIgnoreCase)))
                 {
                     continue;
                 }
 
                 var type = MetadataFieldType.String;
                 if (element.TryGetProperty("type", out var typeElement) && typeElement.ValueKind == JsonValueKind.String &&
-                    Enum.TryParse<MetadataFieldType>(typeElement.GetString(), true, out var parsedType))
+                    Enum.TryParse<MetadataFieldType>(typeElement.GetString(), true, out var parsedType) && Enum.IsDefined(parsedType))
                 {
                     type = parsedType;
                 }
@@ -366,7 +375,7 @@ public static class MetadataAutofillPrompt
                     value = valueElement.ValueKind == JsonValueKind.String ? valueElement.GetString() : valueElement.ToString();
                 }
 
-                suggestions.Add(new MetadataFieldSuggestion(title.Trim(), type, options, value));
+                suggestions.Add(new MetadataFieldSuggestion(title, type, options, value));
             }
         }
         catch (JsonException e)
@@ -452,6 +461,11 @@ public static class MetadataAutofillPrompt
 
     private static string CutJson(string text, char open, char close)
     {
+        if (string.IsNullOrEmpty(text))
+        {
+            return null;
+        }
+
         var start = text.IndexOf(open);
         var end = text.LastIndexOf(close);
 

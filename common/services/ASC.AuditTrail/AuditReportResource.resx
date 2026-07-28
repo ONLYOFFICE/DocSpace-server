@@ -1212,4 +1212,34 @@
   <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
     <value>Docs Connect quota report downloaded</value>
   </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Metadata template created</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Metadata template updated</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Metadata template deleted</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Metadata field created</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Metadata field updated</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Metadata field deleted</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Metadata template assigned</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Metadata template unassigned</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Metadata values updated</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Metadata cascade assignment started</value>
+  </data>
 </root>

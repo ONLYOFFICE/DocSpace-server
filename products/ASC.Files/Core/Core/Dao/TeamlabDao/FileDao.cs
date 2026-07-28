@@ -1331,6 +1331,13 @@ internal class FileDao(
                     needDeleteVectors = await context.MarkVectorizationDeletedAsync(tenantId, fileId) > 0;
                 }
 
+                if (toFolderId != trashId)
+                {
+                    // stamped inside the transaction, otherwise a failure right after the commit
+                    // would leave the moved file without the metadata inherited at the destination
+                    await context.ApplyMetadataCascadeLinksAsync(tenantId, fileId, FileEntryType.File, toFolderId, _authContext.CurrentAccount.ID);
+                }
+
                 await tx.CommitAsync();
 
                 foreach (var f in fromFolders)
@@ -1349,11 +1356,6 @@ internal class FileDao(
                 }
 
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
-            }
-
-            if (toFolderId != trashId)
-            {
-                await context.ApplyMetadataCascadeLinksAsync(tenantId, fileId, FileEntryType.File, toFolderId, _authContext.CurrentAccount.ID);
             }
 
             await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)

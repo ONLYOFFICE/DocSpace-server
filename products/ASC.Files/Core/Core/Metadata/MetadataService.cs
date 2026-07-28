@@ -58,15 +58,21 @@ public class MetadataService(
 
         await CheckTemplateNameIsFreeAsync(metadataDao, name, 0);
 
+        var fieldsList = fields?.ToList();
+
+        // the whole batch is validated before anything is persisted, otherwise an invalid
+        // field would leave an orphan template behind
+        foreach (var field in fieldsList ?? [])
+        {
+            PrepareField(field, isSystemTemplate: false);
+        }
+
         var template = await metadataDao.SaveTemplateAsync(new MetadataTemplate { Name = name, Visible = visible });
 
-        if (fields != null)
+        foreach (var field in fieldsList ?? [])
         {
-            foreach (var field in fields)
-            {
-                field.TemplateId = template.Id;
-                template.Fields.Add(await CreateFieldInternalAsync(metadataDao, template, field));
-            }
+            field.TemplateId = template.Id;
+            template.Fields.Add(await metadataDao.SaveFieldAsync(field));
         }
 
         filesMessageService.Send(MessageAction.MetadataTemplateCreated, template.Name);
@@ -134,6 +140,15 @@ public class MetadataService(
         return daoFactory.GetMetadataDao<int>().GetTemplatesAsync(visible, includeSystem: true, withFields);
     }
 
+    /// <summary>
+    /// Returns the system template or <c>null</c> when it has not been created yet. Unlike
+    /// <see cref="GetOrCreateSystemTemplateAsync"/> this never writes, so it is safe for read-only requests.
+    /// </summary>
+    public async Task<MetadataTemplate> GetSystemTemplateAsync()
+    {
+        return await daoFactory.GetMetadataDao<int>().GetSystemTemplateAsync();
+    }
+
     public async Task<MetadataTemplate> GetOrCreateSystemTemplateAsync()
     {
         var metadataDao = daoFactory.GetMetadataDao<int>();
@@ -180,7 +195,7 @@ public class MetadataService(
         return saved;
     }
 
-    public async Task<MetadataField> UpdateFieldAsync(int fieldId, MetadataField update)
+    public async Task<MetadataField> UpdateFieldAsync(int fieldId, MetadataField update, int? order = null)
     {
         await DemandTemplateManagementAsync(create: false);
 
@@ -211,9 +226,12 @@ public class MetadataService(
 
         if (update.Options != null)
         {
+            // new options arrive without an id and must get one here as well, not only on create
+            var options = WithGeneratedOptionIds(update.Options);
+
             var removedOptionIds = (field.Options ?? [])
                 .Select(o => o.Id)
-                .Except(update.Options.Select(o => o.Id))
+                .Except(options.Select(o => o.Id))
                 .ToList();
 
             if (removedOptionIds.Count > 0 && await metadataDao.HasValuesAsync(fieldId))
@@ -221,10 +239,10 @@ public class MetadataService(
                 throw new ArgumentException(@"An option in use cannot be removed", nameof(update));
             }
 
-            field.Options = update.Options;
+            field.Options = options;
         }
 
-        field.Order = update.Order;
+        field.Order = order ?? field.Order;
 
         ValidateField(field);
 
@@ -357,10 +375,10 @@ public class MetadataService(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        return await cascadeWorker.StartAsync(tenantId, authContext.CurrentAccount.ID, folderId, templateIdsList, conflict, unassign: false);
+        return await cascadeWorker.StartAsync(tenantId, authContext.CurrentAccount.ID, folderId, templateIdsList, conflict, MetadataCascadeMode.Assign);
     }
 
-    public async Task<string> UnassignTemplateFromFolderAsync(int folderId, int templateId, bool deleteValues = true)
+    public async Task UnassignTemplateFromFolderAsync(int folderId, int templateId, bool deleteValues = true)
     {
         var entry = await DemandEntryAccessAsync(folderId, FileEntryType.Folder, edit: true);
 
@@ -373,14 +391,12 @@ public class MetadataService(
 
         await NotifyUpdateAsync(entry);
 
-        if (link is not { Cascade: true })
+        if (link is { Cascade: true })
         {
-            return null;
+            // cancelling the cascade never touches the sub-entries: their inherited
+            // links become direct assignments and the inherited values stay
+            await metadataDao.ConvertCascadeLinksToDirectAsync(folderId, templateId);
         }
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        return await cascadeWorker.StartAsync(tenantId, authContext.CurrentAccount.ID, folderId, [templateId], MetadataConflictResolveType.Skip, unassign: true);
     }
 
     public async Task<MetadataCascadeOperation> GetCascadeStatusAsync(int folderId)
@@ -474,13 +490,24 @@ public class MetadataService(
 
         if (field == null)
         {
-            field = await metadataDao.SaveFieldAsync(new MetadataField
+            var tenantId = tenantManager.GetCurrentTenantId();
+
+            // the field name is not unique in the schema, so concurrent calls with the same name
+            // are serialized by the same lock that guards the system template itself
+            await using (await distributedLockProvider.TryAcquireFairLockAsync($"metadata_system_template_{tenantId}"))
             {
-                TemplateId = systemTemplate.Id,
-                Name = name,
-                Type = MetadataFieldType.String,
-                Order = systemTemplate.Fields.Count
-            });
+                systemTemplate = await metadataDao.GetTemplateAsync(systemTemplate.Id) ?? systemTemplate;
+
+                field = systemTemplate.Fields.FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+                field ??= await metadataDao.SaveFieldAsync(new MetadataField
+                {
+                    TemplateId = systemTemplate.Id,
+                    Name = name,
+                    Type = MetadataFieldType.String,
+                    Order = systemTemplate.Fields.Count
+                });
+            }
         }
 
         var metadataValue = new MetadataValue { FieldId = field.Id, StringValue = value };
@@ -537,7 +564,8 @@ public class MetadataService(
                     throw new ArgumentException($@"The field '{field.Name}' accepts option values only", nameof(value));
                 }
 
-                if (field.Type == MetadataFieldType.SingleChoice && value.OptionIds.Count > 1)
+                // duplicates are collapsed on write, so repeating the same option is still a single choice
+                if (field.Type == MetadataFieldType.SingleChoice && value.OptionIds.Distinct().Count() > 1)
                 {
                     throw new ArgumentException($@"The field '{field.Name}' accepts a single option only", nameof(value));
                 }
@@ -573,18 +601,28 @@ public class MetadataService(
         return entry;
     }
 
-    private async Task<MetadataField> CreateFieldInternalAsync(IMetadataDao<int> metadataDao, MetadataTemplate template, MetadataField field)
+    private static async Task<MetadataField> CreateFieldInternalAsync(IMetadataDao<int> metadataDao, MetadataTemplate template, MetadataField field)
     {
-        if (template.IsSystem && field.Type != MetadataFieldType.String)
+        PrepareField(field, template.IsSystem);
+
+        return await metadataDao.SaveFieldAsync(field);
+    }
+
+    private static void PrepareField(MetadataField field, bool isSystemTemplate)
+    {
+        if (isSystemTemplate && field.Type != MetadataFieldType.String)
         {
             throw new ArgumentException(@"The system template supports only string fields", nameof(field));
         }
 
-        field.Options = field.Options?.Select(o => o.Id == Guid.Empty ? o with { Id = Guid.NewGuid() } : o).ToList();
+        field.Options = WithGeneratedOptionIds(field.Options);
 
         ValidateField(field);
+    }
 
-        return await metadataDao.SaveFieldAsync(field);
+    private static List<MetadataFieldOption> WithGeneratedOptionIds(List<MetadataFieldOption> options)
+    {
+        return options?.Select(o => o.Id == Guid.Empty ? o with { Id = Guid.NewGuid() } : o).ToList();
     }
 
     private static void ValidateField(MetadataField field)
@@ -609,6 +647,11 @@ public class MetadataService(
             {
                 throw new ArgumentException(@"Option values must be unique", nameof(field));
             }
+
+            if (field.Options.Select(o => o.Id).Distinct().Count() != field.Options.Count)
+            {
+                throw new ArgumentException(@"Option identifiers must be unique", nameof(field));
+            }
         }
         else if (field.Options is { Count: > 0 })
         {
@@ -632,6 +675,12 @@ public class MetadataService(
 
     private async Task CheckTemplateNameIsFreeAsync(IMetadataDao<int> metadataDao, string name, int exceptTemplateId)
     {
+        // the system template is created lazily, so its name has to be reserved even before it exists
+        if (name.Equals(SystemTemplateName, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException($@"Template with name '{name}' already exists", nameof(name));
+        }
+
         var exists = await metadataDao.GetTemplatesAsync()
             .AnyAsync(t => t.Id != exceptTemplateId && t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 

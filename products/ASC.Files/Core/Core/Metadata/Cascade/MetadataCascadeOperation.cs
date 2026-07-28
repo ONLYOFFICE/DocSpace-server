@@ -41,7 +41,6 @@ public class MetadataCascadeOperation : DistributedTaskProgress
     private Guid _userId;
     private int[] _templateIds;
     private MetadataConflictResolveType _conflict;
-    private bool _unassign;
     private int _processed;
     private int _total;
     private MetadataIndexHelper _metadataIndexHelper;
@@ -49,6 +48,7 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
     public int TenantId { get; set; }
     public int FolderId { get; set; }
+    public MetadataCascadeMode Mode { get; set; }
 
     public MetadataCascadeOperation()
     {
@@ -59,14 +59,14 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         _serviceProvider = serviceProvider;
     }
 
-    public void Init(int tenantId, Guid userId, int folderId, IEnumerable<int> templateIds, MetadataConflictResolveType conflict, bool unassign)
+    public void Init(int tenantId, Guid userId, int folderId, IEnumerable<int> templateIds, MetadataConflictResolveType conflict, MetadataCascadeMode mode)
     {
         TenantId = tenantId;
         FolderId = folderId;
+        Mode = mode;
         _userId = userId;
         _templateIds = templateIds.Distinct().ToArray();
         _conflict = conflict;
-        _unassign = unassign;
     }
 
     protected override async Task DoJob()
@@ -95,9 +95,9 @@ public class MetadataCascadeOperation : DistributedTaskProgress
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            if (_unassign)
+            if (Mode == MetadataCascadeMode.Stamp)
             {
-                await UnassignAsync(metadataDao);
+                await StampAsync(metadataDao, folder);
             }
             else
             {
@@ -123,18 +123,10 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
     private async Task AssignAsync(IMetadataDao<int> metadataDao, Folder<int> folder)
     {
-        var templateFieldIds = new HashSet<int>();
-
-        foreach (var templateId in _templateIds)
-        {
-            await foreach (var field in metadataDao.GetFieldsAsync(templateId))
-            {
-                templateFieldIds.Add(field.Id);
-            }
-        }
+        var fieldTemplates = await GetFieldTemplatesAsync(metadataDao, _templateIds);
 
         var folderValues = await metadataDao.GetValuesAsync(FolderId, FileEntryType.Folder)
-            .Where(v => templateFieldIds.Contains(v.FieldId) && !v.IsEmpty)
+            .Where(v => fieldTemplates.ContainsKey(v.FieldId) && !v.IsEmpty)
             .ToListAsync();
 
         _total = folder.FoldersCount + folder.FilesCount + 1;
@@ -142,9 +134,106 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
         var subfolderIds = await metadataDao.GetSubtreeFolderIdsAsync(FolderId).ToListAsync();
 
+        // nested folders cascading the same template keep their own values (the nearest
+        // ancestor wins): their subtrees are excluded from the pass for that template
+        var nestedCascadeLinks = await metadataDao.GetCascadeLinksInSubtreeAsync(FolderId, _templateIds);
+
+        if (nestedCascadeLinks.Count == 0)
+        {
+            await ApplyToSubtreeAsync(metadataDao, subfolderIds, _templateIds, FolderId, folderValues, _conflict);
+            return;
+        }
+
+        var nestedRootsByTemplate = nestedCascadeLinks
+            .GroupBy(l => l.TemplateId)
+            .ToDictionary(g => g.Key, g => g.Select(l => (int)l.EntryId).ToHashSet());
+
+        var emptyRoots = new HashSet<int>();
+
+        // templates sharing the same set of nested cascading folders are processed in a single pass
+        foreach (var group in _templateIds.GroupBy(t => nestedRootsByTemplate.GetValueOrDefault(t, emptyRoots), HashSet<int>.CreateSetComparer()))
+        {
+            var groupTemplateIds = group.ToArray();
+            var groupValues = folderValues.Where(v => groupTemplateIds.Contains(fieldTemplates[v.FieldId])).ToList();
+
+            var groupSubfolderIds = subfolderIds;
+
+            if (group.Key.Count > 0)
+            {
+                var excluded = (await metadataDao.GetFolderIdsInSubtreesAsync(group.Key)).ToHashSet();
+                groupSubfolderIds = subfolderIds.Where(id => !excluded.Contains(id)).ToList();
+            }
+
+            await ApplyToSubtreeAsync(metadataDao, groupSubfolderIds, groupTemplateIds, FolderId, groupValues, _conflict);
+        }
+    }
+
+    private async Task StampAsync(IMetadataDao<int> metadataDao, Folder<int> folder)
+    {
+        var levelByFolderId = await metadataDao.GetAncestorLevelsAsync(FolderId);
+
+        if (levelByFolderId.Count == 0)
+        {
+            return;
+        }
+
+        var cascadeLinks = await metadataDao.GetCascadeLinksByFoldersAsync(levelByFolderId.Keys);
+
+        if (cascadeLinks.Count == 0)
+        {
+            return;
+        }
+
+        var linkTuples = cascadeLinks.Select(l => (l.TemplateId, (int)l.EntryId)).ToList();
+
+        var nearestSources = MetadataCascadeResolver.ResolveNearestSources(linkTuples, levelByFolderId);
+
+        var fieldTemplates = await GetFieldTemplatesAsync(metadataDao, nearestSources.Keys);
+
+        var sourceFolderIds = cascadeLinks.Select(l => (int)l.EntryId).Distinct().ToList();
+
+        var sourceValues = await metadataDao.GetValuesAsync(sourceFolderIds, FileEntryType.Folder)
+            .Where(v => fieldTemplates.ContainsKey(v.FieldId) && !v.IsEmpty)
+            .ToListAsync();
+
+        var fieldSources = MetadataCascadeResolver.ResolveFieldSources(
+            sourceValues.Select(v => (v.FieldId, (int)v.EntryId)),
+            linkTuples,
+            fieldTemplates,
+            levelByFolderId);
+
+        // the effective inherited rows: for each field, the whole group from its resolved source folder
+        var effectiveValues = sourceValues
+            .Where(v => fieldSources.TryGetValue(v.FieldId, out var sourceId) && (int)v.EntryId == sourceId)
+            .ToList();
+
+        _total = folder.FoldersCount + folder.FilesCount + 1;
+        _processed = 0;
+
+        var subfolderIds = await metadataDao.GetSubtreeFolderIdsAsync(FolderId).ToListAsync();
+
+        foreach (var group in nearestSources.GroupBy(s => s.Value))
+        {
+            var groupTemplateIds = group.Select(s => s.Key).ToArray();
+            var groupValues = effectiveValues.Where(v => groupTemplateIds.Contains(fieldTemplates[v.FieldId])).ToList();
+
+            // the moved folder itself was stamped inline during the move, its files were not;
+            // stamping uses Skip so the entries' own values always survive
+            await ApplyToSubtreeAsync(metadataDao, subfolderIds, groupTemplateIds, group.Key, groupValues, MetadataConflictResolveType.Skip);
+        }
+    }
+
+    private async Task ApplyToSubtreeAsync(
+        IMetadataDao<int> metadataDao,
+        IReadOnlyCollection<int> subfolderIds,
+        IReadOnlyCollection<int> templateIds,
+        int sourceFolderId,
+        IReadOnlyCollection<MetadataValue> values,
+        MetadataConflictResolveType conflict)
+    {
         foreach (var batch in subfolderIds.Chunk(BatchSize))
         {
-            await metadataDao.ApplyCascadeBatchAsync(batch, FileEntryType.Folder, _templateIds, FolderId, folderValues, _conflict);
+            await metadataDao.ApplyCascadeBatchAsync(batch, FileEntryType.Folder, templateIds, sourceFolderId, values, conflict);
             await _metadataIndexHelper.IndexEntriesAsync(FileEntryType.Folder, batch);
             await ReportProgressAsync(batch.Length);
         }
@@ -157,46 +246,26 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
             foreach (var batch in fileIds.Chunk(BatchSize))
             {
-                await metadataDao.ApplyCascadeBatchAsync(batch, FileEntryType.File, _templateIds, FolderId, folderValues, _conflict);
+                await metadataDao.ApplyCascadeBatchAsync(batch, FileEntryType.File, templateIds, sourceFolderId, values, conflict);
                 await _metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, batch);
                 await ReportProgressAsync(batch.Length);
             }
         }
     }
 
-    private async Task UnassignAsync(IMetadataDao<int> metadataDao)
+    private static async Task<Dictionary<int, int>> GetFieldTemplatesAsync(IMetadataDao<int> metadataDao, IEnumerable<int> templateIds)
     {
-        var templateIds = _templateIds.Length > 0 ? _templateIds : null;
+        var fieldTemplates = new Dictionary<int, int>();
 
-        var links = new List<MetadataTemplateLink>();
-
-        if (templateIds != null)
+        foreach (var templateId in templateIds)
         {
-            foreach (var templateId in templateIds)
+            await foreach (var field in metadataDao.GetFieldsAsync(templateId))
             {
-                links.AddRange(await metadataDao.GetLinksBySourceFolderAsync(FolderId, templateId));
+                fieldTemplates[field.Id] = templateId;
             }
         }
-        else
-        {
-            links = await metadataDao.GetLinksBySourceFolderAsync(FolderId);
-        }
 
-        _total = links.Count + 1;
-        _processed = 0;
-
-        foreach (var group in links.GroupBy(l => l.EntryType))
-        {
-            var groupTemplateIds = group.Select(l => l.TemplateId).Distinct().ToList();
-            var entryIds = group.Select(l => (int)l.EntryId).Distinct().ToList();
-
-            foreach (var batch in entryIds.Chunk(BatchSize))
-            {
-                await metadataDao.RemoveCascadeBatchAsync(batch, group.Key, FolderId, groupTemplateIds);
-                await _metadataIndexHelper.IndexEntriesAsync(group.Key, batch);
-                await ReportProgressAsync(batch.Length);
-            }
-        }
+        return fieldTemplates;
     }
 
     private async Task ReportProgressAsync(int count)

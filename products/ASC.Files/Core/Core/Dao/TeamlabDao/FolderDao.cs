@@ -1042,12 +1042,14 @@ internal class FolderDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
         var trashIdTask = globalFolder.GetFolderTrashAsync(daoFactory);
+        var movedFolderHasContent = false;
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
             var folder = await GetFolderAsync(folderId);
             var oldParentId = folder.ParentId;
+            movedFolderHasContent = folder.FoldersCount > 0 || folder.FilesCount > 0;
 
             if (folder.FolderType is not (FolderType.DEFAULT or FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone) &&
                 !folder.IsRoom)
@@ -1166,6 +1168,18 @@ internal class FolderDao(
 
             await filesDbContext.SaveChangesAsync();
         });
+
+        var movedToTrash = (await trashIdTask).Equals(toFolderId);
+
+        // the moved folder itself is stamped inline in the transaction above; its content is
+        // stamped by a background pass over the subtree (the cascade has no live link, so the
+        // template of the new ancestors is materialized once, on entry into their tree)
+        if (movedFolderHasContent && !movedToTrash && await filesDbContext.MetadataCascadeLinksExistAsync(tenantId, toFolderId))
+        {
+            var cascadeWorker = _serviceProvider.GetRequiredService<MetadataCascadeWorker>();
+
+            await cascadeWorker.StartAsync(tenantId, currentAccount, folderId, [], MetadataConflictResolveType.Skip, MetadataCascadeMode.Stamp);
+        }
 
         return folderId;
     }
