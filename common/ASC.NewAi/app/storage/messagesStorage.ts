@@ -31,9 +31,9 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString, getNumber } from "../narrow.js";
-import type { MessagesStorage } from "@onlyoffice/ai-chat/core";
+import type { MessagesStorage, MessagesCursor } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 
 const THREADS_PATH = "/threads";
@@ -106,21 +106,21 @@ export class HttpMessagesStorage implements MessagesStorage {
     }
   }
 
+  // The C# messages endpoint paginates by offset (`limit`/`startIndex`)
+  // and cannot express the library's keyset cursor (`createdAt` + `id`),
+  // so pagination parameters are ignored and the full thread is returned
+  // — explicitly allowed by the MessagesStorage contract ("callers
+  // detect that and stop paging"). Partial support (honoring `count`
+  // while ignoring `cursor`) would be worse than none: the client's page
+  // walker would receive the same first page again, see no new ids, and
+  // stop with a truncated history.
   async readByThread(
     threadId: string,
-    limit?: number,
-    startIndex?: number,
+    _count?: number,
+    _cursor?: MessagesCursor,
   ): Promise<ThreadMessageLike[]> {
-    const query: Record<string, QueryValue> = {};
-    if (limit !== undefined) {
-      query["limit"] = limit;
-    }
-    if (startIndex !== undefined) {
-      query["startIndex"] = startIndex;
-    }
     const raw = await aiService.get(
       `${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`,
-      Object.keys(query).length > 0 ? { query } : undefined,
     );
     if (!Array.isArray(raw)) {
       return [];

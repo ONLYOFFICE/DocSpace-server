@@ -3018,6 +3018,30 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       }
@@ -3064,19 +3088,19 @@
             }
           },
           {
-            "name": "limit",
+            "name": "count",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer"
+              "type": "string"
             }
           },
           {
-            "name": "startIndex",
+            "name": "cursor",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer"
+              "type": "string"
             }
           }
         ]
