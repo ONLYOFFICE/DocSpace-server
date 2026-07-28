@@ -133,6 +133,7 @@ public class TariffService(
 
                             DateTime? quotaDueDate = null;
                             int? nextQuantity = null;
+                            int? nextQuota = null;
                             if (quota.Wallet)
                             {
                                 quotaDueDate = currentPayment.EndDate;
@@ -140,6 +141,7 @@ public class TariffService(
                                 if (existingQuota != null && existingQuota.DueDate == currentPayment.EndDate && existingQuota.Quantity == currentPayment.Quantity)
                                 {
                                     nextQuantity = existingQuota.NextQuantity;
+                                    nextQuota = existingQuota.NextQuota;
                                 }
                                 if (quota is { Additional: false })
                                 {
@@ -164,7 +166,7 @@ public class TariffService(
                             }
 
                             asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
-                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Additional, quota.Wallet, quotaDueDate, nextQuantity));
+                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Additional, quota.Wallet, quotaDueDate, nextQuantity, nextQuota));
                             email = currentPayment.PaymentEmail;
                         }
 
