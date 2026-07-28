@@ -61,20 +61,40 @@ public class MetadataApiClient(HttpClient client)
 
     #region Assignment and values
 
-    public async Task AssignFolderTemplatesAsync(int folderId, IEnumerable<int> templateIds, bool cascade, CancellationToken cancellationToken)
+    public Task AssignFolderTemplatesAsync(int folderId, IEnumerable<int> templateIds, bool cascade, CancellationToken cancellationToken)
+    {
+        return AssignTemplatesAsync("folder", folderId, templateIds, cascade, cancellationToken);
+    }
+
+    public Task AssignFileTemplatesAsync(int fileId, IEnumerable<int> templateIds, CancellationToken cancellationToken)
+    {
+        return AssignTemplatesAsync("file", fileId, templateIds, cascade: false, cancellationToken);
+    }
+
+    public Task SetFolderValuesAsync(int folderId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
+    {
+        return SetValuesAsync("folder", folderId, values, cancellationToken);
+    }
+
+    public Task SetFileValuesAsync(int fileId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
+    {
+        return SetValuesAsync("file", fileId, values, cancellationToken);
+    }
+
+    private async Task AssignTemplatesAsync(string entryKind, int entryId, IEnumerable<int> templateIds, bool cascade, CancellationToken cancellationToken)
     {
         var body = new { templateIds = templateIds.ToList(), cascade };
 
-        using var response = await PutAsync($"api/2.0/files/metadata/folder/{folderId}/templates", body, cancellationToken);
+        using var response = await PutAsync($"api/2.0/files/metadata/{entryKind}/{entryId}/templates", body, cancellationToken);
 
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task SetFolderValuesAsync(int folderId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
+    private async Task SetValuesAsync(string entryKind, int entryId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
     {
         var body = new { values = values.ToList() };
 
-        using var response = await PutAsync($"api/2.0/files/metadata/folder/{folderId}/values", body, cancellationToken);
+        using var response = await PutAsync($"api/2.0/files/metadata/{entryKind}/{entryId}/values", body, cancellationToken);
 
         response.EnsureSuccessStatusCode();
     }
@@ -149,6 +169,51 @@ public class MetadataApiClient(HttpClient client)
         using var response = await GetRoomsResponseAsync(metadataTemplateId, metadataFilters, filterValue, searchArea, roomType, cancellationToken: cancellationToken);
 
         return await ReadAsync<RoomsContentResponse>(response, cancellationToken);
+    }
+
+    #endregion
+
+    #region Folder listing
+
+    /// <summary>
+    /// Requests the folder content. <paramref name="withSubFolders"/> is left unset by default, which means the
+    /// endpoint applies its own default of <c>true</c> — the search goes through the whole subtree.
+    /// </summary>
+    public async Task<FolderContentResponse> GetFolderContentAsync(
+        int folderId,
+        int? metadataTemplateId = null,
+        IEnumerable<object>? metadataFilters = null,
+        string? filterValue = null,
+        bool? withSubFolders = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new List<string>();
+
+        if (metadataTemplateId.HasValue)
+        {
+            query.Add($"metadataTemplateId={metadataTemplateId.Value}");
+        }
+
+        if (metadataFilters != null)
+        {
+            query.Add($"metadataFilters={Uri.EscapeDataString(JsonSerializer.Serialize(metadataFilters, _jsonOptions))}");
+        }
+
+        if (!string.IsNullOrEmpty(filterValue))
+        {
+            query.Add($"filterValue={Uri.EscapeDataString(filterValue)}");
+        }
+
+        if (withSubFolders.HasValue)
+        {
+            query.Add($"withSubFolders={(withSubFolders.Value ? "true" : "false")}");
+        }
+
+        var path = $"api/2.0/files/{folderId}" + (query.Count > 0 ? "?" + string.Join('&', query) : "");
+
+        using var response = await client.GetAsync(path, cancellationToken);
+
+        return await ReadAsync<FolderContentResponse>(response, cancellationToken);
     }
 
     #endregion
@@ -255,6 +320,24 @@ public class RoomsContentResponse
     public List<int> RoomIds()
     {
         return Folders.Select(f => f.Id).ToList();
+    }
+}
+
+public class FolderContentResponse
+{
+    public List<RoomEntryResponse> Folders { get; init; } = [];
+    public List<RoomEntryResponse> Files { get; init; } = [];
+    public int Total { get; init; }
+    public int Count { get; init; }
+
+    public List<int> FolderIds()
+    {
+        return Folders.Select(f => f.Id).ToList();
+    }
+
+    public List<int> FileIds()
+    {
+        return Files.Select(f => f.Id).ToList();
     }
 }
 

@@ -2687,8 +2687,9 @@ internal class FileDao(
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
+        var searchByMetadata = metadataFilter is { Conditions.Count: > 0 };
 
-        if (withSubfolders && (searchByText || searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
+        if (withSubfolders && (searchByText || searchByExtension || searchByMetadata || filterType != FilterType.None || subjectID != Guid.Empty))
         {
             q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
                 .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
@@ -2751,7 +2752,7 @@ internal class FileDao(
             }
         }
 
-        if (metadataFilter is { Conditions.Count: > 0 })
+        if (searchByMetadata)
         {
             var funcForMetadata = MetadataSearchQuery.BuildSelector<DbFileMetadataSearch>(metadataFilter, MetadataSearchScope.For(parentId, withSubfolders));
             Expression<Func<Selector<DbFileMetadataSearch>, Selector<DbFileMetadataSearch>>> expressionMetadata = s => funcForMetadata(s);

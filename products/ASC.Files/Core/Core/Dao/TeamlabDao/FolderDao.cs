@@ -222,7 +222,7 @@ internal class FolderDao(
             BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectOwnerId, subjectEntriesIds, quotaFilter, groupId, privacyFilter) :
             BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectOwnerId, subjectEntriesIds, privacyFilter);
 
-        q = await ApplyRoomsSearchAsync(q, filesDbContext, searchText, metadataFilter);
+        q = await ApplyFolderSearchAsync(q, filesDbContext, searchText, metadataFilter);
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
@@ -264,7 +264,7 @@ internal class FolderDao(
             BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectOwnerId, subjectEntriesIds, groupId: groupId, privacyFilter: privacyFilter) :
             BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectOwnerId, subjectEntriesIds, privacyFilter);
 
-        q = await ApplyRoomsSearchAsync(q, filesDbContext, searchText, metadataFilter);
+        q = await ApplyFolderSearchAsync(q, filesDbContext, searchText, metadataFilter);
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
@@ -273,14 +273,17 @@ internal class FolderDao(
     }
 
     /// <summary>
-    /// Narrows the rooms query by the free text and by the structured metadata filter.
+    /// Narrows a folder query by the free text and by the structured metadata filter.
+    /// Shared by the rooms listing and by the sub-folders listing.
     /// </summary>
     /// <remarks>
-    /// The metadata queries are not scoped to the rooms section: the query itself is already limited to the
-    /// requested rooms, and the tenant is applied centrally by the indexer. Scoping by the ancestor tree stored
-    /// inside the metadata document would break for the archived rooms, whose documents are not rebuilt on move.
+    /// The metadata queries are deliberately not scoped by the folder tree: the query itself is already limited
+    /// to the requested folders, and the tenant is applied centrally by the indexer. Scoping by the ancestor
+    /// chain stored inside the metadata document would break whenever an entry is moved without triggering a
+    /// cascade, because the document is not rebuilt then — an archived room is the most visible case.
+    /// The price is <see cref="BaseIndexer{T}.QueryLimit"/> being applied tenant-wide rather than per folder.
     /// </remarks>
-    private async Task<IQueryable<DbFolder>> ApplyRoomsSearchAsync(IQueryable<DbFolder> q, FilesDbContext filesDbContext, string searchText, MetadataFilter metadataFilter)
+    private async Task<IQueryable<DbFolder>> ApplyFolderSearchAsync(IQueryable<DbFolder> q, FilesDbContext filesDbContext, string searchText, MetadataFilter metadataFilter)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -291,7 +294,7 @@ internal class FolderDao(
             if (success)
             {
                 // the string values of the globally visible system template participate in the general text search:
-                // the room matches when either its title or its global metadata match, so the id sets are united
+                // the folder matches when either its title or its global metadata match, so the id sets are united
                 var funcForGlobalText = MetadataSearchQuery.BuildGlobalTextSelector<DbFolderMetadataSearch>(searchText, MetadataSearchScope.None);
                 Expression<Func<Selector<DbFolderMetadataSearch>, Selector<DbFolderMetadataSearch>>> expressionGlobalText = s => funcForGlobalText(s);
 
@@ -336,7 +339,8 @@ internal class FolderDao(
     }
 
     public async Task<int> GetFoldersCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, List<FolderType> folderType = null)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -345,12 +349,14 @@ internal class FolderDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        if (filterType == FilterType.None && subjectId == Guid.Empty && string.IsNullOrEmpty(searchText) && !withSubfolders && !excludeSubject && roomId == 0 && (folderType == null || folderType.Count == 0))
+        // the shortcut counts the direct children as they are, so it must stay off whenever anything narrows them
+        if (filterType == FilterType.None && subjectId == Guid.Empty && string.IsNullOrEmpty(searchText) && !withSubfolders && !excludeSubject && roomId == 0 && (folderType == null || folderType.Count == 0) &&
+            metadataFilter is not { Conditions.Count: > 0 })
         {
             return await filesDbContext.Tree.CountAsync(r => r.ParentId == parentId && r.Level == 1);
         }
 
-        var q = await GetFoldersQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, withSubfolders, excludeSubject, roomId, filesDbContext, folderType);
+        var q = await GetFoldersQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, withSubfolders, excludeSubject, roomId, filesDbContext, folderType, metadataFilter);
 
         if (additionalFilterOption != AdditionalFilterOption.All)
         {
@@ -361,7 +367,8 @@ internal class FolderDao(
     }
 
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
-        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null)
+        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null)
     {
         if (CheckInvalidFilter(filterType) || count == 0)
         {
@@ -372,7 +379,7 @@ internal class FolderDao(
         var currentUserId = _authContext.CurrentAccount.ID;
         var tenantId = _tenantManager.GetCurrentTenantId();
 
-        var q = await GetFoldersQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, roomId, filesDbContext, folderType);
+        var q = await GetFoldersQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, roomId, filesDbContext, folderType, metadataFilter);
 
         q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == tenantId && x.InternalEntryId == r.Id && x.EntryType == FileEntryType.Folder && x.Share == FileShare.Restrict && x.Subject == currentUserId));
 
@@ -2432,13 +2439,14 @@ internal class FolderDao(
         bool excludeSubject,
         int roomId,
         FilesDbContext filesDbContext,
-        List<FolderType> folderType = null)
+        List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         var q = GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
 
-        if (withSubfolders && (filterType != FilterType.None || subjectId != Guid.Empty || !string.IsNullOrEmpty(searchText)))
+        if (withSubfolders && (filterType != FilterType.None || subjectId != Guid.Empty || !string.IsNullOrEmpty(searchText) || metadataFilter is { Conditions.Count: > 0 }))
         {
             q = GetFolderQuery(filesDbContext)
                     .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
@@ -2446,11 +2454,7 @@ internal class FolderDao(
                     .Select(r => r.folder);
         }
 
-        if (!string.IsNullOrEmpty(searchText))
-        {
-            var (success, searchIds) = await factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
-            q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
-        }
+        q = await ApplyFolderSearchAsync(q, filesDbContext, searchText, metadataFilter);
 
         q = orderBy == null ? q : orderBy.SortedBy switch
         {
