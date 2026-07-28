@@ -71,6 +71,21 @@ async function resolveConfig(
   );
 }
 
+// System-server entries are whitelist markers pinned to the canonical
+// internal endpoint (see resolveConfig above). Redact — never drop — the
+// config on the way out: system servers run server-side only (see
+// tools/systemTools.ts), so the browser must not receive a config it
+// would try to start itself, and the internal endpoint must not leak.
+// The name still round-trips: the agent dialog pre-selects by key, and
+// saving the whole map from the chat config editor re-pins the entry
+// through resolveConfig.
+function redactSystemServer(
+  name: string,
+  config: McpServerConfig,
+): McpServerConfig {
+  return getSystemServerConfig(name) ? {} : config;
+}
+
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
@@ -114,13 +129,17 @@ export const toolsController = {
     }
     const entityId = asString(req.query["entityId"]);
     const config = await engine.getCustomServer(name, entityId);
-    res.json(config);
+    res.json(config === null ? null : redactSystemServer(name, config));
   }),
 
   listCustomServers: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     const servers = await engine.listCustomServers(entityId);
-    res.json(servers);
+    const redacted: Record<string, McpServerConfig> = {};
+    for (const [name, config] of Object.entries(servers)) {
+      redacted[name] = redactSystemServer(name, config);
+    }
+    res.json(redacted);
   }),
 
   listSystemTools: asyncHandler(async (req, res) => {
