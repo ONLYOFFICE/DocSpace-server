@@ -92,7 +92,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         }
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
-        await context.UpdateThreadTitleAsync(tenantId, threadId, title);
+        await context.UpdateThreadTitleAsync(tenantId, threadId, title, TruncateToMilliseconds(DateTime.UtcNow));
     }
 
     public async Task TouchAsync(int tenantId, Guid threadId, DateTime lastEditDate, Guid? profileId = null, bool clearProfile = false)

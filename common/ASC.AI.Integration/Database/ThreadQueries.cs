@@ -66,9 +66,9 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateThreadTitleAsync(int tenantId, Guid id, string title)
+    public Task<int> UpdateThreadTitleAsync(int tenantId, Guid id, string title, DateTime lastEditDate)
     {
-        return ThreadQueriesContainer.UpdateThreadTitleAsync(this, tenantId, id, title);
+        return ThreadQueriesContainer.UpdateThreadTitleAsync(this, tenantId, id, title, lastEditDate);
     }
 
     [PreCompileQuery]
@@ -143,11 +143,13 @@ static file class ThreadQueriesContainer
                     .ThenByDescending(x => x.Id)
                     .Take(count));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, string, Task<int>> UpdateThreadTitleAsync =
-        (AiIntegrationContext ctx, int tenantId, Guid id, string title) =>
+    public static readonly Func<AiIntegrationContext, int, Guid, string, DateTime, Task<int>> UpdateThreadTitleAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid id, string title, DateTime lastEditDate) =>
             ctx.Threads
                 .Where(x => x.TenantId == tenantId && x.Id == id)
-                .ExecuteUpdateAsync(x => x.SetProperty(y => y.Title, title));
+                .ExecuteUpdateAsync(x => x
+                    .SetProperty(y => y.Title, title)
+                    .SetProperty(y => y.LastEditDate, lastEditDate));
 
     public static readonly Func<AiIntegrationContext, int, Guid, DateTime, Task<int>> TouchThreadAsync =
         (AiIntegrationContext ctx, int tenantId, Guid id, DateTime lastEditDate) =>
