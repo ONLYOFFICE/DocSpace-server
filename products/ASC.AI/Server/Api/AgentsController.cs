@@ -62,7 +62,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderContentDto<int>))]
-    [HttpGet("integration/agents")]
+    [HttpGet("agents")]
     public async Task<FolderContentDto<int>> GetAgents(GetAgentListRequestDto inDto)
     {
         var parentId = await globalFolderHelper.GetFolderAiAgentsAsync();
@@ -118,7 +118,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
-    [HttpPost("integration/agents")]
+    [HttpPost("agents")]
     public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
     {
         var lifetime = inDto.Lifetime.Map();
@@ -169,7 +169,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
-    [HttpGet("integration/agents/{id}")]
+    [HttpGet("agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
     {
         var folder = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
@@ -184,7 +184,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Updated agent information", typeof(FolderDto<int>))]
-    [HttpPut("integration/agents/{id}")]
+    [HttpPut("agents/{id}")]
     public async Task<FolderDto<int>> UpdateAgent(UpdateRoomRequestDto<int> inDto)
     {
         var room = await fileStorageService.UpdateRoomAsync(inDto.Id, inDto.UpdateRoom);
@@ -199,7 +199,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
-    [HttpDelete("integration/agents/{id}")]
+    [HttpDelete("agents/{id}")]
     public async Task<FileOperationDto> DeleteAgent(DeleteRoomRequestDto<int> inDto)
     {
         var agent = await fileStorageService.GetFolderAsync(inDto.Id);
@@ -229,7 +229,7 @@ public class AgentsController(
     /// <collection>list</collection>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
-    [HttpPut("integration/agents/agentquota")]
+    [HttpPut("agents/agentquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
     {
         var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
@@ -263,7 +263,7 @@ public class AgentsController(
     /// <collection>list</collection>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
-    [HttpPut("integration/agents/resetquota")]
+    [HttpPut("agents/resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
     {
         var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
@@ -288,7 +288,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/news</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of new items", typeof(List<NewItemsDto<AgentNewItemsDto>>))]
-    [HttpGet("integration/agents/news")]
+    [HttpGet("agents/news")]
     public async Task<List<NewItemsDto<AgentNewItemsDto>>> GetAgentsNewItems()
     {
         var rootId = await globalFolderHelper.FolderAiAgentsAsync;

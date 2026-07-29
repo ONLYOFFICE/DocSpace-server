@@ -39,7 +39,7 @@ import {
 } from "../requestContext.js";
 import type { ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/profiles";
+const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
 function withOnlyofficeProviderOverrides(
