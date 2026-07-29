@@ -43,7 +43,7 @@ public class ToolPrefsStorageService(
     FileSecurity fileSecurity,
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
-    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAsync(string? entityId = null)
     {

@@ -678,16 +678,15 @@ static file class FolderQueries
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, int, int, Guid, Task<int>> UpdateFoldersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, int parentId, Guid modifiedBy) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == folderId)
-                    .ExecuteUpdate(toUpdate => toUpdate
-                        .SetProperty(p => p.ParentId, parentId)
-                        .SetProperty(p => p.ModifiedOn, DateTime.UtcNow)
-                        .SetProperty(p => p.ModifiedBy, modifiedBy)
-                    ));
+        (FilesDbContext ctx, int tenantId, int folderId, int parentId, Guid modifiedBy) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.Id == folderId)
+                .ExecuteUpdateAsync(toUpdate => toUpdate
+                    .SetProperty(p => p.ParentId, parentId)
+                    .SetProperty(p => p.ModifiedOn, DateTime.UtcNow)
+                    .SetProperty(p => p.ModifiedBy, modifiedBy)
+                );
 
     public static readonly Func<FilesDbContext, int, string, int, Task<bool>> DbFoldersAnyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -775,59 +774,53 @@ static file class FolderQueries
                     .Count());
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> UpdateFoldersCountAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int id) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId)
-                    .Join(ctx.Tree, r => r.Id, r => r.ParentId, (file, tree) => new { file, tree })
-                    .Where(r => r.tree.FolderId == id)
-                    .Select(r => r.file)
-                    .ExecuteUpdate(q =>
-                        q.SetProperty(r => r.FoldersCount, r => ctx.Tree.Count(t => t.ParentId == r.Id) - 1)
-                    ));
+        (FilesDbContext ctx, int tenantId, int id) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId)
+                .Join(ctx.Tree, r => r.Id, r => r.ParentId, (file, tree) => new { file, tree })
+                .Where(r => r.tree.FolderId == id)
+                .Select(r => r.file)
+                .ExecuteUpdateAsync(q =>
+                    q.SetProperty(r => r.FoldersCount, r => ctx.Tree.Count(t => t.ParentId == r.Id) - 1)
+                );
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> UpdateFoldersCountsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> ids) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId)
-                    .Join(ctx.Tree, r => r.Id, r => r.ParentId, (file, tree) => new { file, tree })
-                    .Where(r => ids.Contains(r.tree.FolderId))
-                    .Select(r => r.file)
-                    .ExecuteUpdate(q =>
-                        q.SetProperty(r => r.FoldersCount, r => ctx.Tree.Count(t => t.ParentId == r.Id) - 1)
-                    ));
+        (FilesDbContext ctx, int tenantId, IEnumerable<int> ids) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId)
+                .Join(ctx.Tree, r => r.Id, r => r.ParentId, (file, tree) => new { file, tree })
+                .Where(r => ids.Contains(r.tree.FolderId))
+                .Select(r => r.file)
+                .ExecuteUpdateAsync(q =>
+                    q.SetProperty(r => r.FoldersCount, r => ctx.Tree.Count(t => t.ParentId == r.Id) - 1)
+                );
 
     public static readonly Func<FilesDbContext, int, Guid, Guid, Task<int>> ReassignFoldersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.CreateBy == oldOwnerId)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.CreateBy, newOwnerId)));
+        (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.CreateBy == oldOwnerId)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.CreateBy, newOwnerId));
 
     public static readonly Func<FilesDbContext, int, Guid, Guid, IEnumerable<int>, Task<int>> ReassignFoldersPartiallyAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds) =>
-                ctx.Folders
-                    .Where(f => f.TenantId == tenantId)
-                    .Where(f => f.CreateBy == oldOwnerId)
-                    .Where(f => ctx.Tree.FirstOrDefault(t => t.FolderId == f.Id && exceptFolderIds.Contains(t.ParentId)) == null)
-                    .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+        (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds) =>
+            ctx.Folders
+                .Where(f => f.TenantId == tenantId)
+                .Where(f => f.CreateBy == oldOwnerId)
+                .Where(f => ctx.Tree.FirstOrDefault(t => t.FolderId == f.Id && exceptFolderIds.Contains(t.ParentId)) == null)
+                .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Guid, Task<int>> ReassignSpecificFoldersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> foldersIds, Guid newOwnerId) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId && foldersIds.Contains(r.Id))
-                    .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+        (FilesDbContext ctx, int tenantId, IEnumerable<int> foldersIds, Guid newOwnerId) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId && foldersIds.Contains(r.Id))
+                .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<FolderType>, Guid, Guid, Task<int>> ReassignRoomsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<FolderType> roomTypes, Guid oldOwnerId, Guid newOwnerId) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId && roomTypes.Contains(r.FolderType) && r.CreateBy == oldOwnerId)
-                    .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+        (FilesDbContext ctx, int tenantId, IEnumerable<FolderType> roomTypes, Guid oldOwnerId, Guid newOwnerId) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId && roomTypes.Contains(r.FolderType) && r.CreateBy == oldOwnerId)
+                .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
     public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<FolderReassignInfo>> GetRoomsFoldersReassignInfoAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -996,27 +989,25 @@ static file class FolderQueries
                     .Select(f => new FolderTypeUsedSpacePair { FolderType = f.Select(r => r.FolderType).FirstOrDefault(), UsedSpace = f.Sum(r => r.Counter) }));
 
     public static readonly Func<FilesDbContext, int, int, long, Task<int>> UpdateTreeFolderCounterAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, long size) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId)
-                    .AsNoTracking()
-                    .Join(ctx.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
-                    .Where(r => r.tree.FolderId == folderId)
-                    .OrderByDescending(r => r.tree.Level)
-                    .ExecuteUpdate(toUpdate => toUpdate
-                            .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
-                        ));
+        (FilesDbContext ctx, int tenantId, int folderId, long size) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId)
+                .AsNoTracking()
+                .Join(ctx.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
+                .Where(r => r.tree.FolderId == folderId)
+                .OrderByDescending(r => r.tree.Level)
+                .ExecuteUpdateAsync(toUpdate => toUpdate
+                        .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
+                    );
 
     public static readonly Func<FilesDbContext, int, int, long, Task<int>> UpdateFolderCounterAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, long size) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId && r.Id == folderId)
-                    .AsNoTracking()
-                    .ExecuteUpdate(toUpdate => toUpdate
-                            .SetProperty(p => p.Counter, p => p.Counter + size)
-                        ));
+        (FilesDbContext ctx, int tenantId, int folderId, long size) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId && r.Id == folderId)
+                .AsNoTracking()
+                .ExecuteUpdateAsync(toUpdate => toUpdate
+                        .SetProperty(p => p.Counter, p => p.Counter + size)
+                    );
 
     public static readonly Func<FilesDbContext, int, int, Task<bool>> IsInsideFillingFormsRoomAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

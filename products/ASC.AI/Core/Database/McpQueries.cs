@@ -335,11 +335,11 @@ static file class McpQueries
                     .Where(x => x.TenantId == tenantId && id.Contains(x.ServerId)));
 
     public static readonly Func<AiDbContext, int, int, Guid, Guid, string, Task<int>> UpdateOauthCredentials =
-        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId, Guid serverId, string token) => 
+        (AiDbContext ctx, int tenantId, int roomId, Guid userId, Guid serverId, string token) =>
             ctx.RoomMcpServerSettings
                 .Where(x => x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && x.ServerId == serverId)
-                .ExecuteUpdate(x => 
-                    x.SetProperty(y => y.OauthCredentials, token)));
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(y => y.OauthCredentials, token));
 
     public static readonly Func<AiDbContext, int, string, Task<McpServerShort?>> GetServerByNameAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, string name) =>

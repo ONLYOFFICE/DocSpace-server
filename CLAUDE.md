@@ -44,21 +44,21 @@ server/
 ├── sdk/                 # Multi-language API SDKs (git submodules)
 ├── migrations/          # DB migrations (mysql/, postgre/ × SaaS/Standalone)
 ├── thirdparty/          # Third-party libs (Google.Authenticator, MS Graph, etc.)
-└── .aspire/             # Aspire AppHost configuration
+└── .aspire/             # Aspire CLI settings (settings.json); the AppHost project lives in common/ASC.AppHost
 ```
 
 ## Build & Run
 
 **Solution files:**
 - `ASC.Web.sln` — main solution
-- `ASC.Tests.sln` — test solution
+- `ASC.Tests.slnx` — test solution
 - `ASC.Migrations.sln` — database migrations
 
 **Common commands:**
 ```bash
 dotnet build ASC.Web.sln
-dotnet test ASC.Tests.sln
-dotnet run --project .aspire/AppHost  # Run via Aspire orchestration
+dotnet test ASC.Tests.slnx
+dotnet run --project common/ASC.AppHost  # Run via Aspire orchestration
 ```
 
 **Package management:** Centralized in `Directory.Packages.props` (all version pins live there).
@@ -118,7 +118,7 @@ public static partial class FooLogger
 - **Test locations**: `common/Tests/`, `products/*/Tests/`
 
 ```bash
-dotnet test ASC.Tests.sln
+dotnet test ASC.Tests.slnx
 ```
 
 ## Git Workflow

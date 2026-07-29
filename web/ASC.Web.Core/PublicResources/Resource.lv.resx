@@ -1420,12 +1420,39 @@
     <value>Administratori</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Iegūstiet piekļuvi plašam AI modeļu klāstam, izmantojot OpenRouter integrāciju. Maksājiet tikai par to, ko izmantojat; summa tiek norakstīta no jūsu Maka.</value>
+    <value>Iegūstiet piekļuvi plašam MI modeļu klāstam, izmantojot OpenRouter integrāciju. Maksājiet tikai par to, ko izmantojat; summa tiek norakstīta no jūsu Maka.</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
     <value>Izmantojiet MI meklētājprogrammu, lai bagātinātu MI tērzēšanu ar reāllaika informāciju no interneta</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Lietotāji</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Lietotāji</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Pilnvaras</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Docs Connect izstrādātāju pakotne</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Attēls</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>DocsCloud kvotu atskaite ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Ieguliet ONLYOFFICE Docs redaktorus savā lietotnē ar mākonī mitinātiem nomniekiem un savām API atslēgām.</value>
   </data>
 </root>

@@ -168,4 +168,10 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>방</value>
   </data>
+  <data name="Files" xml:space="preserve">
+    <value>파일</value>
+  </data>
+  <data name="Forms" xml:space="preserve">
+    <value>양식</value>
+  </data>
 </root>

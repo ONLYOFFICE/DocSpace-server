@@ -595,4 +595,10 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>양식 데이터를 외부 데이터베이스에 동기화하지 못했습니다.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>양식이 변경되었습니다. 이 초안은 오래되어 제출할 수 없습니다.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>AI 에이전트의 지시는 {0}자를 초과할 수 없습니다</value>
+  </data>
 </root>

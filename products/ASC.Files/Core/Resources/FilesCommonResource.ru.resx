@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Не удалось синхронизировать данные формы с внешней базой данных.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Форма была изменена. Этот черновик устарел и не может быть отправлен.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Инструкция ИИ-агента не может превышать {0} символов</value>
+  </data>
 </root>
