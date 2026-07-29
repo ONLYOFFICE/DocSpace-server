@@ -495,19 +495,17 @@ public class PaymentHelper(
         return result;
     }
 
-    // -15: DocsCloud, -16: DocsCloudDevPack, -17: DocsCloudTrial (not exposed as a TenantWalletService enum
-    // value); only one of them can be active at a time, and they are all surfaced as a single "docscloud" service.
-    private static bool IsDocsCloudService(int quotaId)
-    {
-        return quotaId is (int)TenantWalletService.DocsCloud or (int)TenantWalletService.DocsCloudDevPack or -17;
-    }
-
     private async Task<ActiveServiceDto> ToActiveServiceDtoAsync(TenantQuota definition, int? quantity, int tenantId)
     {
-        var isDocsCloud = IsDocsCloudService(definition.TenantId);
+        // -15: DocsCloud, -16: DocsCloudDevPack, -17: DocsCloudTrial (not exposed as a TenantWalletService enum
+        // value); only one of them can be active at a time, and they are all surfaced as a single "docscloud" service.
+        var isDocsCloud = definition.DocsCloud > 0;
 
-        var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(
-            isDocsCloud ? "docscloud" : definition.ServiceName ?? definition.Name, []);
+        var service = string.IsNullOrEmpty(definition.ServiceName)
+            ? (isDocsCloud ? "docscloud" : definition.Name)
+            : definition.ServiceName;
+
+        var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(service, []);
 
         var dto = new ActiveServiceDto
         {
@@ -544,7 +542,7 @@ public class PaymentHelper(
 
             if (perUnitBytes > 0)
             {
-                var limitBytes = perUnitBytes * (long)quantity.Value;
+                var limitBytes = perUnitBytes * quantity.Value;
                 var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
                 var usedBytes = await maxTotalSizeStatistic.GetValueAsync();
                 var usedBytesForStorage = Math.Max(usedBytes - (currentQuota.MaxTotalSize - limitBytes), 0);
