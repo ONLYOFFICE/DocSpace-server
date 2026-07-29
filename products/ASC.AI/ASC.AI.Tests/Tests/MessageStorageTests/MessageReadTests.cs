@@ -90,53 +90,106 @@ public class MessageReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task ReadByThread_NonExistentThread_Returns404()
     {
         using var response = await Ai.GetAsync(
-            $"{ThreadsPath}/{Guid.NewGuid()}/messages",
+            $"{ThreadsPath}/{Guid.NewGuid()}/messages?count={DefaultPageCount}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
-    public async Task ReadByThread_WithLimit_ReturnsBoundedResults()
+    public async Task ReadByThread_WithoutCount_Returns400()
+    {
+        var thread = await CreateThreadAsync();
+
+        using var response = await Ai.GetAsync(
+            $"{ThreadsPath}/{thread.Id}/messages",
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task ReadByThread_WithCount_ReturnsBoundedResultsAndCursor()
     {
         var thread = await CreateThreadAsync();
         var first = await CreateMessageAsync(thread.Id, BuildMessageContents("first"));
         var second = await CreateMessageAsync(thread.Id, BuildMessageContents("second"));
         await CreateMessageAsync(thread.Id, BuildMessageContents("third"));
 
-        var messages = await ReadMessagesByThreadAsync(thread.Id, limit: 2);
+        var page = await ReadMessagesPageAsync(thread.Id, 2);
 
-        messages.Should().HaveCount(2);
-        messages.Select(m => m.Id).Should().ContainInOrder(first.Id, second.Id);
+        page.Items.Should().HaveCount(2);
+        page.Items.Select(m => m.Id).Should().ContainInOrder(first.Id, second.Id);
+        page.Cursor.Should().NotBeNull();
+        page.Cursor!.Id.Should().Be(second.Id);
     }
 
     [Fact]
-    public async Task ReadByThread_WithStartIndex_SkipsLeadingMessages()
+    public async Task ReadByThread_LastPage_HasNoCursor()
     {
         var thread = await CreateThreadAsync();
         await CreateMessageAsync(thread.Id, BuildMessageContents("first"));
         await CreateMessageAsync(thread.Id, BuildMessageContents("second"));
-        var third = await CreateMessageAsync(thread.Id, BuildMessageContents("third"));
 
-        var messages = await ReadMessagesByThreadAsync(thread.Id, startIndex: 2);
+        var page = await ReadMessagesPageAsync(thread.Id, 2);
 
-        messages.Should().ContainSingle();
-        messages[0].Id.Should().Be(third.Id);
+        page.Items.Should().HaveCount(2);
+        page.Cursor.Should().BeNull();
     }
 
     [Fact]
-    public async Task ReadByThread_WithLimitAndStartIndex_ReturnsWindow()
+    public async Task ReadByThread_WithCursor_ReturnsNextPage()
     {
         var thread = await CreateThreadAsync();
-        await CreateMessageAsync(thread.Id, BuildMessageContents("first"));
+        var first = await CreateMessageAsync(thread.Id, BuildMessageContents("first"));
         var second = await CreateMessageAsync(thread.Id, BuildMessageContents("second"));
         var third = await CreateMessageAsync(thread.Id, BuildMessageContents("third"));
-        await CreateMessageAsync(thread.Id, BuildMessageContents("fourth"));
+        var fourth = await CreateMessageAsync(thread.Id, BuildMessageContents("fourth"));
 
-        var messages = await ReadMessagesByThreadAsync(thread.Id, limit: 2, startIndex: 1);
+        var firstPage = await ReadMessagesPageAsync(thread.Id, 2);
+        firstPage.Items.Select(m => m.Id).Should().ContainInOrder(first.Id, second.Id);
+        firstPage.Cursor.Should().NotBeNull();
 
-        messages.Should().HaveCount(2);
-        messages.Select(m => m.Id).Should().ContainInOrder(second.Id, third.Id);
+        var secondPage = await ReadMessagesPageAsync(
+            thread.Id,
+            2,
+            firstPage.Cursor!.CreatedAt,
+            firstPage.Cursor.Id);
+
+        secondPage.Items.Select(m => m.Id).Should().ContainInOrder(third.Id, fourth.Id);
+        secondPage.Cursor.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ReadByThread_PagingByOne_WalksEveryMessageWithoutGaps()
+    {
+        var thread = await CreateThreadAsync();
+        var created = new List<Guid>();
+        for (var i = 0; i < 5; i++)
+        {
+            var message = await CreateMessageAsync(thread.Id, BuildMessageContents($"message-{i}"));
+            created.Add(message.Id);
+        }
+
+        var walked = new List<Guid>();
+        DateTimeOffset? cursorCreatedAt = null;
+        Guid? cursorId = null;
+
+        while (true)
+        {
+            var page = await ReadMessagesPageAsync(thread.Id, 1, cursorCreatedAt, cursorId);
+            walked.AddRange(page.Items.Select(m => m.Id));
+
+            if (page.Cursor is null)
+            {
+                break;
+            }
+
+            cursorCreatedAt = page.Cursor.CreatedAt;
+            cursorId = page.Cursor.Id;
+        }
+
+        walked.Should().Equal(created);
     }
 
     [Fact]

@@ -91,4 +91,96 @@ public class ThreadReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         scoped.Should().ContainSingle(t => t.Id == scopedThread.Id);
         scoped.Should().NotContain(t => t.Id == globalThread.Id);
     }
+
+    [Fact]
+    public async Task ReadAll_WithoutCount_Returns400()
+    {
+        using var response = await Ai.GetAsync(ThreadsPath, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task ReadAll_WithCount_ReturnsBoundedResultsAndCursor()
+    {
+        await CreateThreadAsync("first");
+        await CreateThreadAsync("second");
+        await CreateThreadAsync("third");
+
+        var page = await ReadThreadsPageAsync(2);
+
+        page.Items.Should().HaveCount(2);
+        page.Cursor.Should().NotBeNull();
+        page.Cursor!.Id.Should().Be(page.Items[^1].Id);
+        page.Cursor.LastEditDate.Should().Be(page.Items[^1].LastEditDate);
+    }
+
+    [Fact]
+    public async Task ReadAll_LastPage_HasNoCursor()
+    {
+        await CreateThreadAsync("first");
+        await CreateThreadAsync("second");
+
+        var page = await ReadThreadsPageAsync(2);
+
+        page.Items.Should().HaveCount(2);
+        page.Cursor.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ReadAll_PagingByOne_WalksEveryThreadWithoutGaps()
+    {
+        var created = new List<Guid>();
+        for (var i = 0; i < 5; i++)
+        {
+            var thread = await CreateThreadAsync($"thread-{i}");
+            created.Add(thread.Id);
+        }
+
+        var expected = await ReadAllThreadsAsync();
+        expected.Select(t => t.Id).Should().BeEquivalentTo(created);
+
+        var walked = new List<Guid>();
+        long? cursorLastEditDate = null;
+        Guid? cursorId = null;
+
+        while (true)
+        {
+            var page = await ReadThreadsPageAsync(1, cursorLastEditDate: cursorLastEditDate, cursorId: cursorId);
+            walked.AddRange(page.Items.Select(t => t.Id));
+
+            if (page.Cursor is null)
+            {
+                break;
+            }
+
+            cursorLastEditDate = page.Cursor.LastEditDate;
+            cursorId = page.Cursor.Id;
+        }
+
+        walked.Should().Equal(expected.Select(t => t.Id));
+    }
+
+    [Fact]
+    public async Task ReadAll_WithCursor_ScopedByEntity()
+    {
+        var roomId = await CreateRoomAsync();
+        await CreateThreadAsync("scoped-first", entityId: roomId.ToString());
+        await CreateThreadAsync("scoped-second", entityId: roomId.ToString());
+        await CreateThreadAsync("global");
+
+        var firstPage = await ReadThreadsPageAsync(1, roomId.ToString());
+        firstPage.Items.Should().ContainSingle();
+        firstPage.Cursor.Should().NotBeNull();
+
+        var secondPage = await ReadThreadsPageAsync(
+            1,
+            roomId.ToString(),
+            firstPage.Cursor!.LastEditDate,
+            firstPage.Cursor.Id);
+
+        secondPage.Items.Should().ContainSingle();
+        secondPage.Items[0].Id.Should().NotBe(firstPage.Items[0].Id);
+        secondPage.Cursor.Should().BeNull();
+    }
 }

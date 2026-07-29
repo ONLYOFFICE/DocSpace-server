@@ -31,17 +31,39 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ThreadsCursor = ASC.AI.Integration.Threads.ThreadsCursor;
+
 namespace ASC.AI.Models.RequestDto.Integration;
 
-public class ReadMessagesByThreadRequestDto
+public class ThreadsCursorDto
 {
-    [FromRoute(Name = "threadId")]
-    public required Guid ThreadId { get; init; }
+    private const string MinUnixTimeMilliseconds = "-62135596800000";
+    private const string MaxUnixTimeMilliseconds = "253402300799999";
 
-    [FromQuery(Name = "count")]
-    [Range(1, 1000)]
-    public required int Count { get; init; }
+    [FromQuery(Name = "lastEditDate")]
+    [BindRequired]
+    [Range(typeof(long), MinUnixTimeMilliseconds, MaxUnixTimeMilliseconds)]
+    public long LastEditDate { get; init; }
 
-    [FromQuery(Name = "cursor")]
-    public MessagesCursorDto? Cursor { get; init; }
+    [FromQuery(Name = "id")]
+    [BindRequired]
+    public Guid Id { get; init; }
+
+    public ThreadsCursor ToCursor()
+    {
+        return new ThreadsCursor
+        {
+            LastEditDate = DateTimeOffset.FromUnixTimeMilliseconds(LastEditDate).UtcDateTime,
+            Id = Id
+        };
+    }
+
+    public static ThreadsCursorDto FromCursor(ThreadsCursor cursor)
+    {
+        return new ThreadsCursorDto
+        {
+            LastEditDate = new DateTimeOffset(DateTime.SpecifyKind(cursor.LastEditDate, DateTimeKind.Utc)).ToUnixTimeMilliseconds(),
+            Id = cursor.Id
+        };
+    }
 }

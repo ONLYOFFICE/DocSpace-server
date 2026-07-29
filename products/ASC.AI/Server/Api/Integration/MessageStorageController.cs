@@ -33,6 +33,8 @@
 
 using MessageDto = ASC.AI.Models.ResponseDto.Integration.MessageDto;
 using MessageMapper = ASC.AI.Models.ResponseDto.Integration.MessageMapper;
+using MessagesPageDto = ASC.AI.Models.ResponseDto.Integration.MessagesPageDto;
+using MessagesPageMapper = ASC.AI.Models.ResponseDto.Integration.MessagesPageMapper;
 
 namespace ASC.AI.Api.Integration;
 
@@ -59,10 +61,10 @@ public class MessageStorageController(MessageStorageService messageStorageServic
     }
 
     [HttpGet("integration/threads/{threadId}/messages")]
-    public async Task<List<MessageDto>> ReadByThreadAsync(ReadMessagesByThreadRequestDto inDto)
+    public async Task<MessagesPageDto> ReadByThreadAsync(ReadMessagesByThreadRequestDto inDto)
     {
-        var messages = await messageStorageService.ReadByThreadAsync(inDto.ThreadId, inDto.Limit, inDto.StartIndex);
-        return messages.Select(MessageMapper.MapToDto).ToList();
+        var page = await messageStorageService.ReadByThreadAsync(inDto.ThreadId, inDto.Count, inDto.Cursor?.ToCursor());
+        return MessagesPageMapper.MapToDto(page);
     }
 
     [HttpPut("integration/messages/{id}")]

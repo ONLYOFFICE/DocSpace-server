@@ -98,6 +98,7 @@ global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
 
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.AI;
 

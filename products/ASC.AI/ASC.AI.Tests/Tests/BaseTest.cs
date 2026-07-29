@@ -47,6 +47,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
     protected const string SystemToolsServerType = "00000000-0000-0000-0000-000000000001";
 
+    protected const int DefaultPageCount = 100;
+
     private static readonly JsonSerializerOptions _readJsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -153,12 +155,35 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
     protected async Task<List<ThreadDto>> ReadAllThreadsAsync(string? entityId = null)
     {
-        var path = entityId is null
-            ? ThreadsPath
-            : $"{ThreadsPath}?entityId={entityId}";
+        var page = await ReadThreadsPageAsync(DefaultPageCount, entityId);
+        return page.Items;
+    }
 
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<List<ThreadDto>>(response, TestContext.Current.CancellationToken);
+    protected async Task<ThreadsPageDto> ReadThreadsPageAsync(
+        int count,
+        string? entityId = null,
+        long? cursorLastEditDate = null,
+        Guid? cursorId = null)
+    {
+        var query = new List<string> { $"count={count}" };
+
+        if (entityId is not null)
+        {
+            query.Add($"entityId={entityId}");
+        }
+        if (cursorLastEditDate is not null)
+        {
+            query.Add($"cursor.lastEditDate={cursorLastEditDate}");
+        }
+        if (cursorId is not null)
+        {
+            query.Add($"cursor.id={cursorId}");
+        }
+
+        using var response = await Ai.GetAsync(
+            $"{ThreadsPath}?{string.Join("&", query)}",
+            TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<ThreadsPageDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected static string BuildMessageContents(string? text = null) =>
@@ -191,26 +216,33 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await Ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<List<MessageDto>> ReadMessagesByThreadAsync(Guid threadId, int? limit = null, int? startIndex = null)
+    protected async Task<List<MessageDto>> ReadMessagesByThreadAsync(Guid threadId, int count = DefaultPageCount)
     {
-        var query = new List<string>();
-        if (limit is not null)
+        var page = await ReadMessagesPageAsync(threadId, count);
+        return page.Items;
+    }
+
+    protected async Task<MessagesPageDto> ReadMessagesPageAsync(
+        Guid threadId,
+        int count,
+        DateTimeOffset? cursorCreatedAt = null,
+        Guid? cursorId = null)
+    {
+        var query = new List<string> { $"count={count}" };
+
+        if (cursorCreatedAt is not null)
         {
-            query.Add($"limit={limit}");
+            query.Add($"cursor.createdAt={HttpUtility.UrlEncode(cursorCreatedAt.Value.ToString("O"))}");
         }
-        if (startIndex is not null)
+        if (cursorId is not null)
         {
-            query.Add($"startIndex={startIndex}");
+            query.Add($"cursor.id={cursorId}");
         }
 
-        var path = $"{ThreadsPath}/{threadId}/messages";
-        if (query.Count > 0)
-        {
-            path += "?" + string.Join("&", query);
-        }
-
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<List<MessageDto>>(response, TestContext.Current.CancellationToken);
+        using var response = await Ai.GetAsync(
+            $"{ThreadsPath}/{threadId}/messages?{string.Join("&", query)}",
+            TestContext.Current.CancellationToken);
+        return await Ai.ReadAsync<MessagesPageDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<int> CreateRoomAsync(string? title = null)

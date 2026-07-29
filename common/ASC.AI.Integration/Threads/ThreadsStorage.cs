@@ -40,7 +40,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var now = DateTime.UtcNow;
+        var now = TruncateToMilliseconds(DateTime.UtcNow);
         var entity = new DbThread
         {
             Id = Guid.CreateVersion7(),
@@ -67,13 +67,17 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         return entity == null ? null : ToDomainEntity(entity);
     }
 
-    public async Task<IEnumerable<Thread>> ReadAllAsync(int tenantId, Guid createdBy, int? entryId = null)
+    public async Task<List<Thread>> ReadAllAsync(int tenantId, Guid createdBy, int count, int? entryId = null, ThreadsCursor? cursor = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var threads = entryId.HasValue
-            ? context.GetAllThreadsByEntryAsync(tenantId, createdBy, entryId.Value)
-            : context.GetAllThreadsAsync(tenantId, createdBy);
+        var threads = cursor == null
+            ? entryId.HasValue
+                ? context.GetThreadsByEntryAsync(tenantId, createdBy, entryId.Value, count)
+                : context.GetThreadsAsync(tenantId, createdBy, count)
+            : entryId.HasValue
+                ? context.GetThreadsByEntryFromCursorAsync(tenantId, createdBy, entryId.Value, cursor.LastEditDate, cursor.Id, count)
+                : context.GetThreadsFromCursorAsync(tenantId, createdBy, cursor.LastEditDate, cursor.Id, count);
 
         return await threads
             .Select(ToDomainEntity)
@@ -111,6 +115,11 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         await context.DeleteThreadAsync(tenantId, threadId);
+    }
+
+    private static DateTime TruncateToMilliseconds(DateTime value)
+    {
+        return new DateTime(value.Ticks - value.Ticks % TimeSpan.TicksPerMillisecond, value.Kind);
     }
 
     private static Thread ToDomainEntity(DbThread entity)

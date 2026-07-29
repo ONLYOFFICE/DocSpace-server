@@ -58,10 +58,10 @@ public class ThreadStorageController(ThreadStorageService threadStorageService) 
     }
 
     [HttpGet("integration/threads")]
-    public async Task<IEnumerable<ThreadDto>> ReadAllAsync(ReadAllThreadsRequestDto inDto)
+    public async Task<ThreadsPageDto> ReadAllAsync(ReadAllThreadsRequestDto inDto)
     {
-        var threads = await threadStorageService.ReadAllAsync(inDto.EntityId);
-        return threads.Select(ThreadMapper.MapToDto);
+        var page = await threadStorageService.ReadAllAsync(inDto.Count, inDto.Cursor?.ToCursor(), inDto.EntityId);
+        return ThreadsPageMapper.MapToDto(page);
     }
 
     [HttpPut("integration/threads/{id}")]

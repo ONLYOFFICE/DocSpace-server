@@ -60,11 +60,27 @@ public class MessageStorageService(
         return threadMessage.Message;
     }
 
-    public async Task<List<Message>> ReadByThreadAsync(Guid threadId, int? limit = null, int? startIndex = null)
+    public async Task<MessagesPage> ReadByThreadAsync(Guid threadId, int count, MessagesCursor? cursor = null)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
+
         var thread = await threadStorageService.ReadByIdAsync(threadId);
 
-        return await storage.ReadByThreadAsync(tenantManager.GetCurrentTenantId(), thread.Id, limit, startIndex);
+        var messages = await storage.ReadByThreadAsync(tenantManager.GetCurrentTenantId(), thread.Id, count + 1, cursor);
+
+        if (messages.Count <= count)
+        {
+            return new MessagesPage { Messages = messages };
+        }
+
+        messages.RemoveAt(count);
+        var last = messages[^1];
+
+        return new MessagesPage
+        {
+            Messages = messages,
+            Cursor = new MessagesCursor { Timestamp = last.Timestamp, Id = last.Id }
+        };
     }
 
     public async Task UpdateAsync(Guid messageId, string contents)

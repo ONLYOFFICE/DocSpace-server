@@ -31,17 +31,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.RequestDto.Integration;
+namespace ASC.AI.Integration.Threads;
 
-public class ReadMessagesByThreadRequestDto
+public class ThreadsPage
 {
-    [FromRoute(Name = "threadId")]
-    public required Guid ThreadId { get; init; }
-
-    [FromQuery(Name = "count")]
-    [Range(1, 1000)]
-    public required int Count { get; init; }
-
-    [FromQuery(Name = "cursor")]
-    public MessagesCursorDto? Cursor { get; init; }
+    public required List<Thread> Threads { get; init; }
+    public ThreadsCursor? Cursor { get; init; }
 }
