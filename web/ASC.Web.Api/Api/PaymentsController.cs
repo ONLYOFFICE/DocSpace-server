@@ -241,6 +241,14 @@ public class PaymentController(
             {
                 targetQuota = (int)TenantWalletService.DocsCloudDevPack;
                 nextQuota = (int)TenantWalletService.DocsCloud;
+
+                // a scheduled switch is a real purchase of a new product, so unlike a plain quantity
+                // change there's no "reset to default" for 0/null - it would just be silently dropped
+                // at renewal by RenewSubscriptionAsync's NextQuantity <= 0 guard
+                if (productQty is null or <= 0)
+                {
+                    throw new ArgumentException("Invalid quantity");
+                }
             }
 
             // saving null value is equivalent to resetting to default
