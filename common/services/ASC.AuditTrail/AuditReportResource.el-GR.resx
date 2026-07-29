@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Οι ενεργές συνδέσεις για τον χρήστη αποσυνδέθηκαν: {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Η διαμόρφωση του Docs Connect ενημερώθηκε</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Η αναφορά χωρητικότητας του Docs Connect</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Οι ρυθμίσεις AI του χρήστη ενημερώθηκαν</value>
+  </data>
 </root>

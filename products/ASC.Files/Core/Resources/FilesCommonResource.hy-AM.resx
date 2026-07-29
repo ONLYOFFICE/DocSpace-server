@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Ձևի տվյալները արտաքին տվյալների բազայի հետ համաժամացնել չհաջողվեց:</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>ԱԲ գործակալի հրահանգը չի կարող գերազանցել {0} նիշ</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Ձևը փոփոխվել է: Այս սևագիրն հնացած է և չի կարող ներկայացվել:</value>
+  </data>
 </root>

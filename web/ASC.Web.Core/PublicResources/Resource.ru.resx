@@ -1420,12 +1420,39 @@
     <value>Администраторы</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Получите доступ к широкому набору моделей ИИ благодаря интеграции с OpenRouter. Платите только за то, что используете — списание происходит с вашего Кошелька.</value>
+    <value>Получите доступ к широкому спектру ИИ-моделей благодаря интеграции с OpenRouter. Платите только за то, что используете — списание происходит с вашего кошелька.</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
     <value>Используйте поисковую систему на базе ИИ, чтобы дополнять чаты с ИИ актуальной информацией из интернета в реальном времени</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Токены</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Пакет разработчика Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Изображение</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Отчет о квоте DocsCloud ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Встройте редакторы ONLYOFFICE Docs в свое приложение с облачными арендаторами и собственными API-ключами.</value>
   </data>
 </root>

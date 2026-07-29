@@ -247,7 +247,7 @@
     <value>Klantabonnement bijgewerkt: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Instellingen voor ingeschakelde klantportemonnee-services bijgewerkt</value>
+    <value>Instellingen voor ingeschakelde klantwallet-services bijgewerkt</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Klant wallet opgeladen: {0}</value>
@@ -952,7 +952,7 @@
     <value>Start portaalregio migratie</value>
   </data>
   <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
-    <value>Abonnementssaldo verplaatst naar portemonnee: {0}</value>
+    <value>Abonnementssaldo verplaatst naar wallet: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Systeemaccount</value>
@@ -1202,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Actieve verbindingen voor gebruiker uitgelogd: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect-configuratie bijgewerkt</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect-quotumrapport gedownload</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>AI-instellingen van gebruiker bijgewerkt</value>
   </data>
 </root>
