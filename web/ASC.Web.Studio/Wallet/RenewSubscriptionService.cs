@@ -160,6 +160,9 @@ public class RenewSubscriptionService(
                 await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, owner.Id);
             }
 
+            // when a switch to a different quota is scheduled, buy that quota outright instead of renewing the current one
+            var targetQuota = data.NextQuota is { } nextQuotaId ? _walletQuotas[nextQuotaId] : walletQuota;
+
             var walletQuotaFeatureName = walletQuota.Additional
                 ? walletQuota.Features.Split(':').FirstOrDefault()
                 : "manager"; // wallet quota must contains only one feature
@@ -180,7 +183,7 @@ public class RenewSubscriptionService(
 
                     var usedSize = await maxTotalSizeStatistic.GetValueAsync();
 
-                    var walletQuotaSize = walletQuota.GetFeature<long>(feature.Name).Value; // wallet quota size by database
+                    var walletQuotaSize = targetQuota.GetFeature<long>(feature.Name).Value; // wallet quota size by database
 
                     if (walletQuotaSize > 0 && usedSize > tenantQuotaSize + walletQuotaSize * nextQuantity)
                     {
@@ -193,7 +196,7 @@ public class RenewSubscriptionService(
                 {
                     var usedCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupRoomAdmin.ID)).Length;
 
-                    var walletQuotaCount = walletQuota.GetFeature<int>(feature.Name).Value; // wallet quota count by database
+                    var walletQuotaCount = targetQuota.GetFeature<int>(feature.Name).Value; // wallet quota count by database
 
                     if (walletQuotaCount > 0 && usedCount > walletQuotaCount * nextQuantity)
                     {
@@ -202,8 +205,6 @@ public class RenewSubscriptionService(
                 }
             }
 
-            // when a switch to a different quota is scheduled, buy that quota outright instead of renewing the current one
-            var targetQuota = data.NextQuota is { } nextQuotaId ? _walletQuotas[nextQuotaId] : walletQuota;
             var productQuantityType = data.NextQuota is null ? ProductQuantityType.Renew : ProductQuantityType.Set;
 
             var quantity = new Dictionary<string, int>
