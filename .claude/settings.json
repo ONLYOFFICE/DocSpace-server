@@ -1,5 +1,6 @@
 {
   "enabledPlugins": {
-    "aspire@aspire-skills": true
+    "aspire@aspire-skills": true,
+    "csharp-lsp@claude-plugins-official": true
   }
 }
