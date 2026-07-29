@@ -247,6 +247,12 @@ public class PaymentHelper(
                 continue;
             }
 
+            // DocsCloudTrial is not a wallet service, but it must be displayed.
+            if (!quota.Wallet && definition.DocsCloud == 0)
+            {
+                continue;
+            }
+
             result.Add(await ToActiveServiceDtoAsync(definition, quota.Quantity, tenantId));
         }
 
@@ -497,8 +503,6 @@ public class PaymentHelper(
 
     private async Task<ActiveServiceDto> ToActiveServiceDtoAsync(TenantQuota definition, int? quantity, int tenantId)
     {
-        // -15: DocsCloud, -16: DocsCloudDevPack, -17: DocsCloudTrial (not exposed as a TenantWalletService enum
-        // value); only one of them can be active at a time, and they are all surfaced as a single "docscloud" service.
         var isDocsCloud = definition.DocsCloud > 0;
 
         var service = string.IsNullOrEmpty(definition.ServiceName)
