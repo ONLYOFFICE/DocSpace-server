@@ -36,6 +36,7 @@ global using System.Globalization;
 global using System.Net;
 global using System.Security.Cryptography;
 global using System.Text;
+global using System.Text.Json;
 
 global using ASC.Common.Caching;
 global using ASC.Core.Billing;

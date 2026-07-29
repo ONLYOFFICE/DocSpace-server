@@ -48,7 +48,7 @@ public class ProfileStorageService(
     private readonly AiGateway _aiGateway = aiGateway;
 
     private static readonly IEnumerable<EmployeeType> _writeTypes = [EmployeeType.DocSpaceAdmin];
-    private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+    private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     private const string ImageModality = "image";
     private const string ToolsCapability = "tools";

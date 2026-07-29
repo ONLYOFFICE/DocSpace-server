@@ -1420,12 +1420,39 @@
     <value>Administrateurs</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Accédez à un large éventail de modèles d'IA grâce à l'intégration OpenRouter. Ne payez que ce que vous utilisez, débité de votre Portefeuille.</value>
+    <value>Accédez à une large gamme de modèles d'IA grâce à l'intégration d'OpenRouter. Payez uniquement ce que vous utilisez, facturé depuis votre Portefeuille.</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
     <value>Utilisez un moteur de recherche IA pour enrichir les discussions IA avec des informations en temps réel provenant d'Internet</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Utilisateurs</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Utilisateurs</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Jetons</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Pack développeur Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Intégrez les éditeurs ONLYOFFICE Docs dans votre application avec des locataires hébergés dans le cloud et vos propres clés API.</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Rapport de quota DocsCloud ({0})</value>
   </data>
 </root>

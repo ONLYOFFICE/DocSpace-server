@@ -31,6 +31,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.Files.Core.ApiModels.ResponseDto;
+using ASC.Files.Core.IntegrationEvents.Events;
+using ASC.Files.Core.Services.DocumentBuilderService;
+
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("docscloud")]
@@ -47,7 +51,11 @@ public class DocsCloudController(
     WebItemManager webItemManager,
     IFusionCache fusionCache,
     IConfiguration configuration,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    CommonLinkUtility commonLinkUtility,
+    IEventBus eventBus,
+    DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
+    IServiceProvider serviceProvider)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -274,18 +282,84 @@ public class DocsCloudController(
     }
 
     /// <remarks>
-    /// Generates the DocsCloud user quota report as a CSV file and saves it in "My Documents".
+    /// Starts generating the DocsCloud user quota report as an "xlsx" file and saves it in "My Documents".
     /// </remarks>
-    /// <summary>Generate the DocsCloud tenant quota report</summary>
+    /// <summary>Start the DocsCloud tenant quota report generation</summary>
     /// <path>api/2.0/settings/docscloud/tenant/quota/report</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "URL to the CSV report file", typeof(string))]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("tenant/quota/report")]
-    public async Task<string> CreateTenantQuotaReport()
+    public async Task<DocumentBuilderTaskDto> CreateTenantQuotaReport()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await paymentHelper.CreateTenantQuotaReportAsync(await GetPortalIdAsync());
+        var tenantId = tenantManager.GetCurrentTenant().Id;
+        var userId = securityContext.CurrentAccount.ID;
+
+        var task = serviceProvider.GetRequiredService<CustomerOperationsReportTask>();
+
+        var baseUri = commonLinkUtility.ServerRootPath;
+
+        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, (int)ReportType.DocsCloudUserQuota));
+
+        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
+
+        var headers = MessageSettings.GetHttpHeaders(Request)?
+            .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
+
+        // The quota is a point-in-time snapshot; pass the current date so the report file name reflects today.
+        var evt = new CustomerOperationsReportIntegrationEvent(
+            userId,
+            tenantId,
+            baseUri,
+            ReportType.DocsCloudUserQuota,
+            startDate: DateTime.UtcNow,
+            headers: headers);
+
+        await eventBus.PublishAsync(evt);
+
+        return DocumentBuilderTaskDto.Get(taskProgress);
+    }
+
+    /// <remarks>
+    /// Returns the status of generating the DocsCloud user quota report.
+    /// </remarks>
+    /// <summary>Get the status of the DocsCloud tenant quota report generation</summary>
+    /// <path>api/2.0/settings/docscloud/tenant/quota/report</path>
+    [Tags("Settings / DocsCloud")]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("tenant/quota/report")]
+    public async Task<DocumentBuilderTaskDto> GetTenantQuotaReport()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantId = tenantManager.GetCurrentTenant().Id;
+
+        var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID, (int)ReportType.DocsCloudUserQuota);
+
+        return DocumentBuilderTaskDto.Get(task);
+    }
+
+    /// <remarks>
+    /// Terminates generating the DocsCloud user quota report.
+    /// </remarks>
+    /// <summary>Terminate the DocsCloud tenant quota report generation</summary>
+    /// <path>api/2.0/settings/docscloud/tenant/quota/report</path>
+    [Tags("Settings / DocsCloud")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpDelete("tenant/quota/report")]
+    public async Task TerminateTenantQuotaReport()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantId = tenantManager.GetCurrentTenant().Id;
+
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, ReportType.DocsCloudUserQuota, terminate: true);
+
+        await eventBus.PublishAsync(evt);
     }
 
     /// <remarks>

@@ -101,7 +101,7 @@ public class BaseWorkerStartup(IConfiguration configuration)
         services.AddSocketHttpClient(Configuration);
         services.AddTransient<DistributedTaskProgress>();
 
-        services.AddBillingHttpClient();
+        services.AddBillingHttpClient(Configuration);
         services.AddAccountingHttpClient(Configuration);
         services.AddDocsCloudHttpClient(Configuration);
     }

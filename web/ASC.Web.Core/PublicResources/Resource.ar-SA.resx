@@ -1428,4 +1428,31 @@
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>تجاري</value>
   </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>مستخدمين</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>مستخدمين</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>الرموز (Tokens)</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>صورة</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>حزمة Docs Connect للمطورين</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>تقرير حصة DocsCloud ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>قم بتضمين محرري ONLYOFFICE Docs في تطبيقك مع مستأجرين مستضافين على السحابة ومفاتيح API الخاصة بك.</value>
+  </data>
 </root>

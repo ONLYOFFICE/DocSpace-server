@@ -237,9 +237,8 @@ writeTable(infoTable);
 
 var dataTable = prepareData(currentColIndex, currentRowIndex);
 
-var freezePanes = oWorksheet.GetFreezePanes();;
-var range = Api.GetRange(toColumnName(dataTable[0].dataArray.length) + currentRowIndex);
-freezePanes.FreezeAt(range);
+var freezePanes = oWorksheet.GetFreezePanes();
+freezePanes.FreezeRows(currentRowIndex);
 
 var formattedTableRange = toColumnName(currentColIndex) + (currentRowIndex) + ":" + toColumnName(dataTable[0].dataArray.length) + (currentRowIndex + dataTable.length - 3);
 

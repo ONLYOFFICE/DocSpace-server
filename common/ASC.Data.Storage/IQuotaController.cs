@@ -48,5 +48,9 @@ public interface IQuotaController
 
     Task QuotaUsedCheckAsync(long size, Guid ownerId);
 
+    // Single-threaded warm-up of the in-memory running total before a concurrent fan-out of
+    // QuotaUsed*/QuotaUser* calls, so the controller's lock never wraps the blocking DB seed query.
+    void PreloadCurrentSize();
+
     string ExcludePattern { get; set; }
 }

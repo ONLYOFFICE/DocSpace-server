@@ -62,6 +62,7 @@ public sealed class PortalClients : IDisposable
     public RoomsApi RoomsApi { get; }
     public SettingsApi SettingsApi { get; }
     public QuotaApi QuotaApi { get; }
+    public PaymentApi PaymentApi { get; }
     public SharingApi SharingApi { get; }
     public PrivacyroomApi PrivacyroomApi { get; }
 
@@ -110,6 +111,7 @@ public sealed class PortalClients : IDisposable
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
         PortalUsersApi = new UsersApi(WebApiHttpClient, webApiConfig);
         SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(WebApiHttpClient, webApiConfig);
+        PaymentApi = new PaymentApi(WebApiHttpClient, webApiConfig);
 
         // Associate every client with this portal's authentication endpoint so the
         // HttpClient.Authenticate(user) extension knows where to sign in.

@@ -76,6 +76,9 @@ global using ASC.Files.Tests.ApiFactories;
 
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
+// Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
+global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;
+
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
 global using CreateFolder = DocSpace.API.SDK.Model.CreateFolder;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;

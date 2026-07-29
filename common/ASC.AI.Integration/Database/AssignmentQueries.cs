@@ -157,18 +157,16 @@ static file class AssignmentQueriesContainer
                     .Where(x => x.TenantId == tenantId && x.EntryId == entryId && actionTypes.Contains(x.ActionType)));
 
     public static readonly Func<AiIntegrationContext, int, ActionType, Guid, Task<int>> UpdateAssignmentProfileAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, ActionType actionType, Guid profileId) =>
-                ctx.Assignments
-                    .Where(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == null)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.ProfileId, profileId)));
+        (AiIntegrationContext ctx, int tenantId, ActionType actionType, Guid profileId) =>
+            ctx.Assignments
+                .Where(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.ProfileId, profileId));
 
     public static readonly Func<AiIntegrationContext, int, ActionType, int, Guid, Task<int>> UpdateAssignmentProfileByEntryAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, ActionType actionType, int entryId, Guid profileId) =>
-                ctx.Assignments
-                    .Where(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == entryId)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.ProfileId, profileId)));
+        (AiIntegrationContext ctx, int tenantId, ActionType actionType, int entryId, Guid profileId) =>
+            ctx.Assignments
+                .Where(x => x.TenantId == tenantId && x.ActionType == actionType && x.EntryId == entryId)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.ProfileId, profileId));
 
     public static readonly Func<AiIntegrationContext, int, ActionType, Task<int>> DeleteAssignmentAsync =
         EF.CompileAsyncQuery(

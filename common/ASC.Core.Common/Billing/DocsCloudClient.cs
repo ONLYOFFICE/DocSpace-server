@@ -145,13 +145,6 @@ public class DocsCloudClient(
         return quota;
     }
 
-    public async Task<Stream> DownloadTenantQuotaAsync(string portalId)
-    {
-        EnsureConfigured();
-
-        return await docsCloudApi.DownloadTenantQuotaAsync(portalId);
-    }
-
     public async Task<DocsCloudUsage> GetTenantUsageAsync(string portalId, bool refresh = false)
     {
         EnsureConfigured();

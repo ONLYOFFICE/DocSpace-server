@@ -1054,17 +1054,19 @@ internal class FolderDao(
 
             await filesDbContext.DeleteFilesSecurityAsync(tenantId, subfolders.Select(r => r));
 
-            await filesDbContext.DeleteBunchObjectsAsync(tenantId, folderId.ToString());
+            // subtree-wide cleanups: the cascade removes every subfolder row,
+            // so the related records of subfolders must go too, not only the root ones
+            await filesDbContext.DeleteBunchObjectsByIdsAsync(tenantId, subfoldersStrings);
 
-            await DeleteCustomOrder(filesDbContext, folderId);
+            await filesDbContext.DeleteOrderByFolderIdsAsync(tenantId, subfolders);
 
-            await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
-            await filesDbContext.DeleteChatsAsync(folderId);
-            await filesDbContext.DeleteAttachmentsAsync(tenantId, folderId);
-            await filesDbContext.DeleteThreadsAsync(tenantId, folderId);
-            await filesDbContext.DeleteAssignmentsAsync(tenantId, folderId);
-            await filesDbContext.DeleteMcpServerToolPrefsAsync(tenantId, folderId);
-            await filesDbContext.DeleteMcpServersAsync(tenantId, folderId);
+            await filesDbContext.DeleteAuditReferencesByFolderIdsAsync(subfolders);
+            await filesDbContext.DeleteChatsByRoomIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteAttachmentsByFolderIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteThreadsByFolderIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteAssignmentsByFolderIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteMcpServerToolPrefsByFolderIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteMcpServersByFolderIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteRoomGroupRefByFolderIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteMetadataLinksByEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
             await filesDbContext.DeleteMetadataValuesByEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
@@ -1072,6 +1074,7 @@ internal class FolderDao(
             await context.SaveChangesAsync();
             await tx.CommitAsync();
             await RecalculateFoldersCountAsync(parent, tenantId);
+
         });
 
         if (deletedFolderIds is { Count: > 0 })

@@ -595,4 +595,10 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>フォームデータを外部データベースに同期できませんでした。</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>フォームが変更されました。この下書きは古くなっており、送信できません。</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>AIエージェントの指示は{0}文字を超えることはできません</value>
+  </data>
 </root>

@@ -357,6 +357,11 @@ public class FileSecurity(
         return CanReadAsync(entries, authContext.CurrentAccount.ID);
     }
 
+    public IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanDeleteAsync<T>(IAsyncEnumerable<FileEntry<T>> entries)
+    {
+        return CanAsync(entries, authContext.CurrentAccount.ID, FilesSecurityActions.Delete);
+    }
+
     public async Task<bool> CanReadAsync<T>(FileEntry<T> entry)
     {
         return await CanReadAsync(entry, authContext.CurrentAccount.ID);
@@ -2511,7 +2516,7 @@ public class FileSecurity(
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomManager)
+                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
                         {
                             return true;
                         }

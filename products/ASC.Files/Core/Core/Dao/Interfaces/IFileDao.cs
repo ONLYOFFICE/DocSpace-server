@@ -224,6 +224,25 @@ public interface IFileDao<T>
     /// <param name="fileId">file id</param>
     /// <param name="ownerId">file owner id</param>
     Task DeleteFileAsync(T fileId, Guid ownerId);
+
+    /// <summary>
+    ///   Deletes a batch of files including all previous versions and returns the ids
+    ///   that were actually deleted (ids already removed by a concurrent flow are excluded)
+    /// </summary>
+    /// <param name="owners">file id to quota owner id pairs</param>
+    async Task<IEnumerable<T>> DeleteFilesAsync(IEnumerable<KeyValuePair<T, Guid>> owners)
+    {
+        var deleted = new List<T>();
+
+        foreach (var (fileId, ownerId) in owners)
+        {
+            await DeleteFileAsync(fileId, ownerId);
+            deleted.Add(fileId);
+        }
+
+        return deleted;
+    }
+
     /// <summary>
     ///     Checks whether or not file
     /// </summary>
@@ -260,6 +279,43 @@ public interface IFileDao<T>
     Task<TTo> MoveFileAsync<TTo>(T fileId, TTo toFolderId, bool deleteLinks = false);
     Task<string> MoveFileAsync(T fileId, string toFolderId, bool deleteLinks = false);
     Task<int> MoveFileAsync(T fileId, int toFolderId, bool deleteLinks = false);
+
+    /// <summary>
+    ///   Moves a batch of files into the given folder and returns the ids that were
+    ///   actually moved. Covers only the plain case: no link deletion, no conflict
+    ///   resolution, no quota owner change. Files whose parent no longer matches
+    ///   the given snapshot are left untouched.
+    /// </summary>
+    async Task<IEnumerable<T>> MoveFilesAsync(IEnumerable<T> fileIds, T toFolderId, IEnumerable<T> fromParentIds = null)
+    {
+        var moved = new List<T>();
+
+        foreach (var fileId in fileIds)
+        {
+            await MoveFileAsync(fileId, toFolderId);
+            moved.Add(fileId);
+        }
+
+        return moved;
+    }
+
+    /// <summary>
+    ///   Returns the titles from the given set that already exist in the folder
+    /// </summary>
+    async Task<IEnumerable<string>> GetExistingTitlesAsync(T parentId, IEnumerable<string> titles)
+    {
+        var result = new List<string>();
+
+        foreach (var title in titles.Distinct())
+        {
+            if (await IsExistAsync(title, parentId))
+            {
+                result.Add(title);
+            }
+        }
+
+        return result;
+    }
 
     /// <summary>
     ///  Copy the files in a folder
