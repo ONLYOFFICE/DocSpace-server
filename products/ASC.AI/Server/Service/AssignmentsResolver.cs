@@ -56,7 +56,7 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
         {
             ActionType = ActionType.ImageGeneration,
             ModelType = "image",
-            TierOrder = [ModelTier.Standard, ModelTier.Light]
+            TierOrder = [ModelTier.Standard, ModelTier.Flagship, ModelTier.Light]
         }
     ];
 
