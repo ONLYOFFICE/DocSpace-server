@@ -66,6 +66,12 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<DbThread> GetThreadsForIndexingAsync(DateTime lastIndexed, int tenantId, Guid id, int count)
+    {
+        return ThreadQueriesContainer.GetThreadsForIndexingAsync(this, lastIndexed, tenantId, id, count);
+    }
+
+    [PreCompileQuery]
     public Task<int> UpdateThreadTitleAsync(int tenantId, Guid id, string title, DateTime lastEditDate)
     {
         return ThreadQueriesContainer.UpdateThreadTitleAsync(this, tenantId, id, title, lastEditDate);
@@ -141,6 +147,16 @@ static file class ThreadQueriesContainer
                                     || (x.LastEditDate == lastEditDate && x.Id.CompareTo(id) < 0)))
                     .OrderByDescending(x => x.LastEditDate)
                     .ThenByDescending(x => x.Id)
+                    .Take(count));
+
+    public static readonly Func<AiIntegrationContext, DateTime, int, Guid, int, IAsyncEnumerable<DbThread>> GetThreadsForIndexingAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, DateTime lastIndexed, int tenantId, Guid id, int count) =>
+                ctx.Threads
+                    .Where(x => x.LastEditDate >= lastIndexed && x.Tenant.Status == TenantStatus.Active)
+                    .Where(x => x.TenantId > tenantId || (x.TenantId == tenantId && x.Id.CompareTo(id) > 0))
+                    .OrderBy(x => x.TenantId)
+                    .ThenBy(x => x.Id)
                     .Take(count));
 
     public static readonly Func<AiIntegrationContext, int, Guid, string, DateTime, Task<int>> UpdateThreadTitleAsync =
