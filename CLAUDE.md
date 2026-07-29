@@ -63,6 +63,13 @@ dotnet run --project common/ASC.AppHost  # Run via Aspire orchestration
 
 **Package management:** Centralized in `Directory.Packages.props` (all version pins live there).
 
+## Logs & Configs (Local Dev)
+
+Both live **outside this repo**, as siblings of `server/` in the parent `docspace/` directory:
+
+- **Configs**: `../buildtools/config/` — the effective runtime configuration for all services: `appsettings*.json`, `apisystem.json`, `redis.json`, `rabbitmq.json`, `elastic.json`, `autofac*.json`, `nlog.config`, `nginx/`, etc. Environment variables override values from these files; local `config/` files inside this repo are NOT the source of truth.
+- **Logs**: `../Logs/` — one file per service: `web.api.log`, `files.log`, `files.worker.log`, `backup.log`, `notify.log`, `people.log`, `apisystem.log`, etc. Some are date-suffixed (e.g. `web.login.07-29.log`). Check these first when diagnosing a running service.
+
 ## Coding Conventions
 
 ### Naming
