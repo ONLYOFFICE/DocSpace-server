@@ -22,7 +22,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\common\ASC.AI.Integration\ASC.AI.Integration.csproj" />
       <ProjectReference Include="..\..\..\common\ASC.Common\ASC.Common.csproj" />
       <ProjectReference Include="..\..\..\common\ASC.Core.Common\ASC.Core.Common.csproj" />
       <ProjectReference Include="..\..\ASC.Files\Core\ASC.Files.Core.csproj" />

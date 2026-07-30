@@ -101,7 +101,7 @@
     }
   ],
   "paths": {
-    "/api/2.0/new-ai/ai/send": {
+    "/api/2.0/ai/ai/send": {
       "post": {
         "tags": [
           "New AI / AI"
@@ -164,7 +164,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/ai/send-custom": {
+    "/api/2.0/ai/ai/send-custom": {
       "post": {
         "tags": [
           "New AI / AI"
@@ -228,7 +228,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/ai/send-with-stream": {
+    "/api/2.0/ai/ai/send-with-stream": {
       "post": {
         "tags": [
           "New AI / AI"
@@ -269,7 +269,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/ai/send-with-stream-openai": {
+    "/api/2.0/ai/ai/send-with-stream-openai": {
       "post": {
         "tags": [
           "New AI / AI"
@@ -310,7 +310,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/ai/regenerate-stream": {
+    "/api/2.0/ai/ai/regenerate-stream": {
       "post": {
         "tags": [
           "New AI / AI"
@@ -370,7 +370,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/ai/approve-tool-call": {
+    "/api/2.0/ai/ai/approve-tool-call": {
       "post": {
         "tags": [
           "New AI / AI"
@@ -453,7 +453,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/ai/deny-tool-call": {
+    "/api/2.0/ai/ai/deny-tool-call": {
       "post": {
         "tags": [
           "New AI / AI"
@@ -494,7 +494,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/assignments/resolve-for-action": {
+    "/api/2.0/ai/assignments/resolve-for-action": {
       "get": {
         "tags": [
           "New AI / Assignments"
@@ -543,7 +543,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/assignments/try-resolve-for-action": {
+    "/api/2.0/ai/assignments/try-resolve-for-action": {
       "get": {
         "tags": [
           "New AI / Assignments"
@@ -597,7 +597,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/assignments/assign": {
+    "/api/2.0/ai/assignments/assign": {
       "put": {
         "tags": [
           "New AI / Assignments"
@@ -653,7 +653,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/assignments/unassign": {
+    "/api/2.0/ai/assignments/unassign": {
       "delete": {
         "tags": [
           "New AI / Assignments"
@@ -694,7 +694,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/assignments/bulk-assign": {
+    "/api/2.0/ai/assignments/bulk-assign": {
       "put": {
         "tags": [
           "New AI / Assignments"
@@ -738,7 +738,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/assignments/get-assignment": {
+    "/api/2.0/ai/assignments/get-assignment": {
       "get": {
         "tags": [
           "New AI / Assignments"
@@ -780,7 +780,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/assignments/get-all-assignments": {
+    "/api/2.0/ai/assignments/get-all-assignments": {
       "get": {
         "tags": [
           "New AI / Assignments"
@@ -824,7 +824,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/assignments/cascade-profile-delete": {
+    "/api/2.0/ai/assignments/cascade-profile-delete": {
       "delete": {
         "tags": [
           "New AI / Assignments"
@@ -865,7 +865,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/attachments/save-file": {
+    "/api/2.0/ai/attachments/save-file": {
       "post": {
         "tags": [
           "New AI / Attachments"
@@ -944,7 +944,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/attachments/save-files-many": {
+    "/api/2.0/ai/attachments/save-files-many": {
       "post": {
         "tags": [
           "New AI / Attachments"
@@ -1028,7 +1028,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/attachments/save-image": {
+    "/api/2.0/ai/attachments/save-image": {
       "post": {
         "tags": [
           "New AI / Attachments"
@@ -1101,7 +1101,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/attachments/save-images-many": {
+    "/api/2.0/ai/attachments/save-images-many": {
       "post": {
         "tags": [
           "New AI / Attachments"
@@ -1180,7 +1180,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/attachments/get": {
+    "/api/2.0/ai/attachments/get": {
       "post": {
         "tags": [
           "New AI / Attachments"
@@ -1226,7 +1226,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/attachments/get-many": {
+    "/api/2.0/ai/attachments/get-many": {
       "post": {
         "tags": [
           "New AI / Attachments"
@@ -1278,7 +1278,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/attachments/delete": {
+    "/api/2.0/ai/attachments/delete": {
       "delete": {
         "tags": [
           "New AI / Attachments"
@@ -1319,7 +1319,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/attachments/delete-many": {
+    "/api/2.0/ai/attachments/delete-many": {
       "delete": {
         "tags": [
           "New AI / Attachments"
@@ -1363,7 +1363,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/attachments/link-to-message": {
+    "/api/2.0/ai/attachments/link-to-message": {
       "post": {
         "tags": [
           "New AI / Attachments"
@@ -1427,7 +1427,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/preferences/get-deep-mode": {
+    "/api/2.0/ai/preferences/get-deep-mode": {
       "get": {
         "tags": [
           "New AI / Preferences"
@@ -1468,7 +1468,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/preferences/set-deep-mode": {
+    "/api/2.0/ai/preferences/set-deep-mode": {
       "put": {
         "tags": [
           "New AI / Preferences"
@@ -1522,7 +1522,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/preferences/clear-deep-mode": {
+    "/api/2.0/ai/preferences/clear-deep-mode": {
       "delete": {
         "tags": [
           "New AI / Preferences"
@@ -1563,7 +1563,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/preferences/is-deep-mode-set": {
+    "/api/2.0/ai/preferences/is-deep-mode-set": {
       "get": {
         "tags": [
           "New AI / Preferences"
@@ -1604,7 +1604,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/profiles/create": {
+    "/api/2.0/ai/profiles/create": {
       "post": {
         "tags": [
           "New AI / Profiles"
@@ -1645,7 +1645,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/profiles/update": {
+    "/api/2.0/ai/profiles/update": {
       "put": {
         "tags": [
           "New AI / Profiles"
@@ -1686,7 +1686,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/profiles/delete": {
+    "/api/2.0/ai/profiles/delete": {
       "delete": {
         "tags": [
           "New AI / Profiles"
@@ -1727,7 +1727,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/profiles/list-models": {
+    "/api/2.0/ai/profiles/list-models": {
       "get": {
         "tags": [
           "New AI / Profiles"
@@ -1771,7 +1771,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/profiles/list-provider-models": {
+    "/api/2.0/ai/profiles/list-provider-models": {
       "post": {
         "tags": [
           "New AI / Profiles"
@@ -1835,7 +1835,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/profiles/test-connection": {
+    "/api/2.0/ai/profiles/test-connection": {
       "post": {
         "tags": [
           "New AI / Profiles"
@@ -1892,7 +1892,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/profiles/get-by-id": {
+    "/api/2.0/ai/profiles/get-by-id": {
       "get": {
         "tags": [
           "New AI / Profiles"
@@ -1933,7 +1933,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/profiles/list": {
+    "/api/2.0/ai/profiles/list": {
       "get": {
         "tags": [
           "New AI / Profiles"
@@ -1967,7 +1967,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/create": {
+    "/api/2.0/ai/prompts/create": {
       "post": {
         "tags": [
           "New AI / Prompts"
@@ -2008,7 +2008,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/update": {
+    "/api/2.0/ai/prompts/update": {
       "put": {
         "tags": [
           "New AI / Prompts"
@@ -2077,7 +2077,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/move": {
+    "/api/2.0/ai/prompts/move": {
       "put": {
         "tags": [
           "New AI / Prompts"
@@ -2134,7 +2134,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/delete": {
+    "/api/2.0/ai/prompts/delete": {
       "delete": {
         "tags": [
           "New AI / Prompts"
@@ -2175,7 +2175,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/list": {
+    "/api/2.0/ai/prompts/list": {
       "get": {
         "tags": [
           "New AI / Prompts"
@@ -2219,7 +2219,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/prompts/create-folder": {
+    "/api/2.0/ai/prompts/create-folder": {
       "post": {
         "tags": [
           "New AI / Prompts"
@@ -2260,7 +2260,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/rename-folder": {
+    "/api/2.0/ai/prompts/rename-folder": {
       "put": {
         "tags": [
           "New AI / Prompts"
@@ -2316,7 +2316,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/delete-folder": {
+    "/api/2.0/ai/prompts/delete-folder": {
       "delete": {
         "tags": [
           "New AI / Prompts"
@@ -2357,7 +2357,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/list-folders": {
+    "/api/2.0/ai/prompts/list-folders": {
       "get": {
         "tags": [
           "New AI / Prompts"
@@ -2391,7 +2391,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/export": {
+    "/api/2.0/ai/prompts/export": {
       "get": {
         "tags": [
           "New AI / Prompts"
@@ -2422,7 +2422,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/import-bundle": {
+    "/api/2.0/ai/prompts/import-bundle": {
       "post": {
         "tags": [
           "New AI / Prompts"
@@ -2483,7 +2483,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/prompts/get-by-id": {
+    "/api/2.0/ai/prompts/get-by-id": {
       "get": {
         "tags": [
           "New AI / Prompts"
@@ -2529,7 +2529,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/prompts/get-folder-by-id": {
+    "/api/2.0/ai/prompts/get-folder-by-id": {
       "get": {
         "tags": [
           "New AI / Prompts"
@@ -2575,7 +2575,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/threads/create": {
+    "/api/2.0/ai/threads/create": {
       "post": {
         "tags": [
           "New AI / Threads"
@@ -2634,7 +2634,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/threads/open-or-create": {
+    "/api/2.0/ai/threads/open-or-create": {
       "post": {
         "tags": [
           "New AI / Threads"
@@ -2675,7 +2675,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/threads/append-user-message": {
+    "/api/2.0/ai/threads/append-user-message": {
       "post": {
         "tags": [
           "New AI / Threads"
@@ -2733,7 +2733,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/threads/touch": {
+    "/api/2.0/ai/threads/touch": {
       "post": {
         "tags": [
           "New AI / Threads"
@@ -2786,7 +2786,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/threads/rename": {
+    "/api/2.0/ai/threads/rename": {
       "put": {
         "tags": [
           "New AI / Threads"
@@ -2841,7 +2841,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/threads/delete": {
+    "/api/2.0/ai/threads/delete": {
       "delete": {
         "tags": [
           "New AI / Threads"
@@ -2882,7 +2882,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/threads/clear-messages": {
+    "/api/2.0/ai/threads/clear-messages": {
       "delete": {
         "tags": [
           "New AI / Threads"
@@ -2923,7 +2923,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/threads/regenerate-title": {
+    "/api/2.0/ai/threads/regenerate-title": {
       "post": {
         "tags": [
           "New AI / Threads"
@@ -2978,7 +2978,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/threads/list": {
+    "/api/2.0/ai/threads/list": {
       "get": {
         "tags": [
           "New AI / Threads"
@@ -3046,7 +3046,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/threads/read-messages": {
+    "/api/2.0/ai/threads/read-messages": {
       "get": {
         "tags": [
           "New AI / Threads"
@@ -3106,7 +3106,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/threads/get-by-id": {
+    "/api/2.0/ai/threads/get-by-id": {
       "get": {
         "tags": [
           "New AI / Threads"
@@ -3152,7 +3152,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/threads/get-message-by-id": {
+    "/api/2.0/ai/threads/get-message-by-id": {
       "get": {
         "tags": [
           "New AI / Threads"
@@ -3198,7 +3198,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/threads/update-message": {
+    "/api/2.0/ai/threads/update-message": {
       "put": {
         "tags": [
           "New AI / Threads"
@@ -3253,7 +3253,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/threads/delete-message": {
+    "/api/2.0/ai/threads/delete-message": {
       "delete": {
         "tags": [
           "New AI / Threads"
@@ -3294,7 +3294,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/tools/add-custom-server": {
+    "/api/2.0/ai/tools/add-custom-server": {
       "post": {
         "tags": [
           "New AI / Tools"
@@ -3353,7 +3353,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/tools/update-custom-server": {
+    "/api/2.0/ai/tools/update-custom-server": {
       "put": {
         "tags": [
           "New AI / Tools"
@@ -3410,7 +3410,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/tools/remove-custom-server": {
+    "/api/2.0/ai/tools/remove-custom-server": {
       "delete": {
         "tags": [
           "New AI / Tools"
@@ -3463,7 +3463,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/tools/get-custom-server": {
+    "/api/2.0/ai/tools/get-custom-server": {
       "get": {
         "tags": [
           "New AI / Tools"
@@ -3517,7 +3517,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/tools/list-custom-servers": {
+    "/api/2.0/ai/tools/list-custom-servers": {
       "get": {
         "tags": [
           "New AI / Tools"
@@ -3561,7 +3561,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/tools/list-system-tools": {
+    "/api/2.0/ai/tools/list-system-tools": {
       "get": {
         "tags": [
           "New AI / Tools"
@@ -3608,7 +3608,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/tools/replace-all-custom-servers": {
+    "/api/2.0/ai/tools/replace-all-custom-servers": {
       "put": {
         "tags": [
           "New AI / Tools"
@@ -3665,7 +3665,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/tools/set-disabled": {
+    "/api/2.0/ai/tools/set-disabled": {
       "put": {
         "tags": [
           "New AI / Tools"
@@ -3726,7 +3726,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/tools/get-disabled": {
+    "/api/2.0/ai/tools/get-disabled": {
       "get": {
         "tags": [
           "New AI / Tools"
@@ -3773,7 +3773,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/tools/is-tool-disabled": {
+    "/api/2.0/ai/tools/is-tool-disabled": {
       "get": {
         "tags": [
           "New AI / Tools"
@@ -3830,7 +3830,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/tools/set-allow-always": {
+    "/api/2.0/ai/tools/set-allow-always": {
       "put": {
         "tags": [
           "New AI / Tools"
@@ -3892,7 +3892,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/tools/get-allow-always": {
+    "/api/2.0/ai/tools/get-allow-always": {
       "get": {
         "tags": [
           "New AI / Tools"
@@ -3936,7 +3936,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/tools/is-allow-always": {
+    "/api/2.0/ai/tools/is-allow-always": {
       "get": {
         "tags": [
           "New AI / Tools"
@@ -3993,7 +3993,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/web-search/get-active-config": {
+    "/api/2.0/ai/web-search/get-active-config": {
       "get": {
         "tags": [
           "New AI / Web search"
@@ -4039,7 +4039,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/web-search/is-configured": {
+    "/api/2.0/ai/web-search/is-configured": {
       "get": {
         "tags": [
           "New AI / Web search"
@@ -4080,7 +4080,7 @@
         ]
       }
     },
-    "/api/2.0/new-ai/web-search/test-connection": {
+    "/api/2.0/ai/web-search/test-connection": {
       "post": {
         "tags": [
           "New AI / Web search"
@@ -4137,7 +4137,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/web-search/configure": {
+    "/api/2.0/ai/web-search/configure": {
       "put": {
         "tags": [
           "New AI / Web search"
@@ -4190,7 +4190,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/web-search/set-active-config": {
+    "/api/2.0/ai/web-search/set-active-config": {
       "put": {
         "tags": [
           "New AI / Web search"
@@ -4243,7 +4243,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/web-search/clear": {
+    "/api/2.0/ai/web-search/clear": {
       "delete": {
         "tags": [
           "New AI / Web search"
@@ -4284,7 +4284,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/text-to-docx": {
+    "/api/2.0/ai/text-to-docx": {
       "post": {
         "tags": [
           "New AI / Export"
@@ -4362,7 +4362,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/agents": {
+    "/api/2.0/ai/agents": {
       "get": {
         "tags": [
           "New AI / Agents"
@@ -4505,7 +4505,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/agents/news": {
+    "/api/2.0/ai/agents/news": {
       "get": {
         "tags": [
           "New AI / Agents"
@@ -4536,7 +4536,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/agents/{id}": {
+    "/api/2.0/ai/agents/{id}": {
       "get": {
         "tags": [
           "New AI / Agents"
@@ -4744,7 +4744,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/agents/agentquota": {
+    "/api/2.0/ai/agents/agentquota": {
       "put": {
         "tags": [
           "New AI / Agents"
@@ -4811,7 +4811,7 @@
         }
       }
     },
-    "/api/2.0/new-ai/agents/resetquota": {
+    "/api/2.0/ai/agents/resetquota": {
       "put": {
         "tags": [
           "New AI / Agents"
@@ -4867,6 +4867,221 @@
                   "roomIds"
                 ],
                 "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/config": {
+      "get": {
+        "tags": [
+          "New AI / Settings"
+        ],
+        "operationId": "newAiSettingsGet",
+        "summary": "Get AI settings",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiAiSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/config/vectorization": {
+      "get": {
+        "tags": [
+          "New AI / Settings"
+        ],
+        "operationId": "newAiSettingsGetVectorization",
+        "summary": "Get vectorization settings",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiVectorizationSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "New AI / Settings"
+        ],
+        "operationId": "newAiSettingsSetVectorization",
+        "summary": "Update vectorization settings",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiVectorizationSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/config/user": {
+      "get": {
+        "tags": [
+          "New AI / Settings"
+        ],
+        "operationId": "newAiSettingsGetUser",
+        "summary": "Get user AI settings",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiAiUserSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "New AI / Settings"
+        ],
+        "operationId": "newAiSettingsSetUser",
+        "summary": "Update user AI settings",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiAiUserSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/vectorization/tasks": {
+      "post": {
+        "tags": [
+          "New AI / Vectorization"
+        ],
+        "operationId": "newAiVectorizationStartTask",
+        "summary": "Start a vectorization task",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
               }
             }
           }
@@ -6174,6 +6389,305 @@
         "required": [
           "success"
         ]
+      },
+      "NewAiAiUserSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/NewAiAiUserSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "NewAiAiUserSettingsDto": {
+        "type": "object",
+        "properties": {
+          "chatRecommendedModelVisible": {
+            "type": "boolean",
+            "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The per-user AI settings."
+      },
+      "NewAiVectorizationSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/NewAiVectorizationSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "NewAiVectorizationSettingsDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/NewAiEmbeddingProviderType"
+          },
+          "needReset": {
+            "type": "boolean",
+            "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
+            "example": false
+          }
+        },
+        "additionalProperties": false,
+        "description": "The vectorization settings."
+      },
+      "NewAiEmbeddingProviderType": {
+        "oneOf": [
+          {
+            "enum": [
+              "None",
+              "OpenAi",
+              "OpenRouter",
+              "PortalAi"
+            ],
+            "type": "string",
+            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]",
+            "example": "None"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]",
+            "example": 0,
+            "x-enum-varnames": [
+              "None",
+              "OpenAi",
+              "OpenRouter",
+              "PortalAi"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
+      "NewAiAiSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/NewAiAiSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "NewAiAiSettingsDto": {
+        "required": [
+          "embeddingModel",
+          "generateDocxToolName",
+          "generateFormToolName",
+          "generatePresentationToolName",
+          "knowledgeSearchToolName",
+          "modelAliases",
+          "webCrawlingToolName",
+          "webSearchToolName"
+        ],
+        "type": "object",
+        "properties": {
+          "webSearchEnabled": {
+            "type": "boolean",
+            "description": "Indicates whether web search is enabled for AI chat sessions.",
+            "example": true
+          },
+          "webSearchNeedReset": {
+            "type": "boolean",
+            "description": "Indicates whether the web search API key needs to be reconfigured.",
+            "example": false
+          },
+          "vectorizationEnabled": {
+            "type": "boolean",
+            "description": "Indicates whether document vectorization is enabled.",
+            "example": true
+          },
+          "vectorizationNeedReset": {
+            "type": "boolean",
+            "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
+            "example": false
+          },
+          "aiReady": {
+            "type": "boolean",
+            "description": "Indicates whether the AI subsystem is fully configured and operational.",
+            "example": true
+          },
+          "aiReadyNeedReset": {
+            "type": "boolean",
+            "description": "Indicates whether the AI provider API key needs to be reconfigured.",
+            "example": false
+          },
+          "portalMcpServerId": {
+            "type": "string",
+            "description": "The unique identifier of the portal-level MCP server, if configured.",
+            "format": "uuid",
+            "nullable": true,
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "embeddingModel": {
+            "type": "string",
+            "description": "The name of the embedding model used for document vectorization.",
+            "nullable": true,
+            "example": "text-embedding-3-small"
+          },
+          "modelAliases": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Mapping of model identifiers to human-readable aliases.",
+            "nullable": true,
+            "example": {
+              "gpt-5.2": "GPT-5.2",
+              "claude-sonnet-4-20250514": "Claude Sonnet 4"
+            }
+          },
+          "knowledgeSearchToolName": {
+            "type": "string",
+            "description": "The tool name used by the AI assistant for knowledge base search.",
+            "nullable": true,
+            "example": "knowledge_search"
+          },
+          "webSearchToolName": {
+            "type": "string",
+            "description": "The tool name used by the AI assistant for web search.",
+            "nullable": true,
+            "example": "web_search"
+          },
+          "webCrawlingToolName": {
+            "type": "string",
+            "description": "The tool name used by the AI assistant for web page crawling.",
+            "nullable": true,
+            "example": "web_crawling"
+          },
+          "generateDocxToolName": {
+            "type": "string",
+            "description": "The tool name used by the AI to launch docx creation in the editor.",
+            "nullable": true,
+            "example": "generate_docx"
+          },
+          "generateFormToolName": {
+            "type": "string",
+            "description": "The tool name used by the AI assistant to launch form creation in the editor.",
+            "nullable": true,
+            "example": "generate_form"
+          },
+          "generatePresentationToolName": {
+            "type": "string",
+            "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
+            "nullable": true,
+            "example": "generate_presentation"
+          },
+          "systemAiEnabled": {
+            "type": "boolean",
+            "description": "Indicates whether the system-level AI provider is enabled.",
+            "example": true
+          },
+          "recommendedModelForForms": {
+            "type": "string",
+            "description": "The identifier of the model recommended for form generation.",
+            "nullable": true,
+            "example": "gpt-5.4"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The AI module settings."
       },
       "NewAiFolderIntegerArrayWrapper": {
         "type": "object",

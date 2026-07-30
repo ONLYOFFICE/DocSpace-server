@@ -57,7 +57,7 @@ public class ThreadUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreateThreadAsync("original");
 
-        await Task.Delay(50, TestContext.Current.CancellationToken);
+        await Task.Delay(1100, TestContext.Current.CancellationToken);
 
         using var response = await Ai.PutAsync(
             $"{ThreadsPath}/{created.Id}",

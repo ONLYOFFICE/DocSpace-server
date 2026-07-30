@@ -31,67 +31,86 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using ASC.Api.Core;
-global using ASC.Api.Core.Core;
-global using ASC.Api.Core.Convention;
-global using ASC.Api.Core.Extensions;
-global using ASC.Api.Utils;
+global using System.ComponentModel;
+global using System.ComponentModel.DataAnnotations;
+global using System.Net.Http.Headers;
+global using System.Security;
+global using System.Text;
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
 
-global using ASC.AI.Core.Chat;
-global using ASC.AI.Core.Chat.Data;
-global using ASC.AI.Core.Chat.Completion;
-global using ASC.AI.Core.Provider;
-global using ASC.AI.Core.Provider.Data;
+global using ASC.AI.Core.MCP;
+global using ASC.AI.Core.MCP.Data;
+global using ASC.AI.Core.MCP.Transport;
+global using ASC.AI.Core.Retrieval.Knowledge;
+global using ASC.AI.Core.Settings;
 global using ASC.AI.Integration.Assignments;
 global using ASC.AI.Integration.Attachments;
+global using ASC.AI.Integration.Messages;
 global using ASC.AI.Integration.Preferences;
 global using ASC.AI.Integration.Profiles;
 global using ASC.AI.Integration.Prompts;
 global using ASC.AI.Integration.ToolPrefs;
+global using ASC.AI.Integration.Threads;
+global using ASC.AI.Models.RequestDto.Agents;
+global using ASC.AI.Models.RequestDto.Assignments;
+global using ASC.AI.Models.RequestDto.Attachments;
+global using ASC.AI.Models.RequestDto.McpServers;
+global using ASC.AI.Models.RequestDto.Messages;
+global using ASC.AI.Models.RequestDto.Preferences;
+global using ASC.AI.Models.RequestDto.Profiles;
+global using ASC.AI.Models.RequestDto.PromptFolders;
+global using ASC.AI.Models.RequestDto.Prompts;
+global using ASC.AI.Models.RequestDto.Settings;
+global using ASC.AI.Models.RequestDto.TextToDocx;
+global using ASC.AI.Models.RequestDto.Threads;
+global using ASC.AI.Models.RequestDto.ToolPreferences;
+global using ASC.AI.Models.RequestDto.Tools;
+global using ASC.AI.Models.RequestDto.Vectorization;
+global using ASC.AI.Models.RequestDto.WebSearch;
 global using ASC.AI.Models.ResponseDto;
-global using ASC.AI.Models.RequestDto;
-global using ASC.AI.Models.RequestDto.Integration;
-global using ASC.AI.Core.MCP;
-global using ASC.AI.Core.MCP.Data;
-global using ASC.AI.Core.MCP.Transport;
-global using ASC.AI.Core.Settings;
-global using ASC.AI.Core.Retrieval.Web;
-global using ASC.AI.Core.Retrieval.Knowledge;
 global using ASC.AI.Service;
 global using ASC.AI.Tools.Core;
-global using ASC.AI.Core.Tools.Editor;
-global using ASC.Core;
-global using ASC.Core.Common.AI;
+
+global using ASC.Api.Core;
+global using ASC.Api.Core.Convention;
+global using ASC.Api.Core.Core;
+global using ASC.Api.Core.Extensions;
+global using ASC.Api.Utils;
 
 global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Web;
+
+global using ASC.Core;
 global using ASC.Core.Common;
+global using ASC.Core.Common.AI;
 global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
+
 global using ASC.Files.Core;
-global using ASC.Files.Core.ExternalDatabase;
-global using ASC.Files.Core.Helpers;
-global using ASC.Files.Core.Text;
 global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
-global using ASC.Files.Core.VirtualRooms;
-global using ASC.Files.Core.Vectorization;
-global using ASC.Files.Core.Vectorization.Settings;
+global using ASC.Files.Core.ExternalDatabase;
+global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
+global using ASC.Files.Core.Text;
 global using ASC.Files.Core.Utils;
+global using ASC.Files.Core.Vectorization;
+global using ASC.Files.Core.Vectorization.Settings;
+global using ASC.Files.Core.VirtualRooms;
+
 global using ASC.MessagingSystem.Core;
-global using ASC.MessagingSystem.EF.Model;
-global using ASC.Web.Core.Files;
+
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
+global using ASC.Web.Core.Files;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Helpers;
 global using ASC.Web.Files.Services.WCFService;
@@ -99,18 +118,7 @@ global using ASC.Web.Files.Services.WCFService.FileOperations;
 
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
-global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.AI;
 
-global using System.ComponentModel;
-global using System.ComponentModel.DataAnnotations;
-global using System.Net.Http.Headers;
-global using System.Text;
-global using System.Text.Json;
-global using System.Text.Json.Serialization;
-global using System.Threading.Channels;
-global using System.Security;
-
-global using Swashbuckle.AspNetCore.Annotations;
-
 global using Riok.Mapperly.Abstractions;
+global using Swashbuckle.AspNetCore.Annotations;

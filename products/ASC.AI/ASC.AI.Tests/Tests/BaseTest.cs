@@ -36,14 +36,14 @@ namespace ASC.AI.Tests.Tests;
 [Collection("Test Collection")]
 public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 {
-    protected const string ProfilesPath = "/internal/ai/integration/profiles";
-    protected const string ProfilesBatchPath = "/internal/ai/integration/profiles/batch";
-    protected const string AssignmentsPath = "/internal/ai/integration/assignments";
-    protected const string ThreadsPath = "/internal/ai/integration/threads";
-    protected const string MessagesPath = "/internal/ai/integration/messages";
-    protected const string McpServersPath = "/internal/ai/integration/mcp-servers";
-    protected const string PreferencesPath = "/internal/ai/integration/preferences";
-    protected const string ToolPrefsPath = "/internal/ai/integration/tool-prefs";
+    protected const string ProfilesPath = "/internal/ai/profiles";
+    protected const string ProfilesBatchPath = "/internal/ai/profiles/batch";
+    protected const string AssignmentsPath = "/internal/ai/assignments";
+    protected const string ThreadsPath = "/internal/ai/threads";
+    protected const string MessagesPath = "/internal/ai/messages";
+    protected const string McpServersPath = "/internal/ai/mcp-servers";
+    protected const string PreferencesPath = "/internal/ai/preferences";
+    protected const string ToolPrefsPath = "/internal/ai/tool-prefs";
 
     protected const string SystemToolsServerType = "00000000-0000-0000-0000-000000000001";
 
@@ -163,13 +163,18 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         int count,
         string? entityId = null,
         long? cursorLastEditDate = null,
-        Guid? cursorId = null)
+        Guid? cursorId = null,
+        string? search = null)
     {
         var query = new List<string> { $"count={count}" };
 
         if (entityId is not null)
         {
             query.Add($"entityId={entityId}");
+        }
+        if (search is not null)
+        {
+            query.Add($"search={Uri.EscapeDataString(search)}");
         }
         if (cursorLastEditDate is not null)
         {
