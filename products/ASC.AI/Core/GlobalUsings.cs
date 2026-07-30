@@ -51,7 +51,6 @@ global using ASC.AI.Core.Resources;
 global using ASC.AI.Core.Retrieval.Knowledge;
 global using ASC.AI.Core.Retrieval.Web;
 global using ASC.AI.Core.Retrieval.Web.Engine;
-global using ASC.AI.Core.Search;
 global using ASC.AI.Core.Utils;
 
 global using ASC.Common;
@@ -65,12 +64,10 @@ global using ASC.Core.Billing;
 global using ASC.Core.Common.AI;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
-global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 
 global using ASC.EventBus.Abstractions;
@@ -107,8 +104,6 @@ global using ASC.Web.Files.Services.WCFService.FileOperations;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Utility;
 
-global using ASC.ElasticSearch;
-global using ASC.ElasticSearch.Core;
 global using ASC.ElasticSearch.VectorData;
 
 global using Anthropic.SDK;
@@ -124,8 +119,6 @@ global using Microsoft.Extensions.Logging;
 
 global using OpenAI;
 
-global using OpenSearch.Client;
-
 global using ProtoBuf;
 
 global using System.Buffers;
@@ -136,7 +129,6 @@ global using System.Collections.Concurrent;
 global using System.Collections.Frozen;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
-global using System.Linq.Expressions;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
@@ -152,7 +144,3 @@ global using System.Threading.Channels;
 global using Riok.Mapperly.Abstractions;
 
 global using ZiggyCreatures.Caching.Fusion;
-
-global using AiIntegrationContext = ASC.AI.Integration.Database.AiIntegrationContext;
-global using DbThread = ASC.AI.Integration.Database.Models.DbThread;
-global using LogLevel = Microsoft.Extensions.Logging.LogLevel;

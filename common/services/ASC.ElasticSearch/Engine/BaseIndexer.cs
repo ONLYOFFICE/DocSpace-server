@@ -323,7 +323,7 @@ public abstract class BaseIndexer<T>(Client client,
             return;
         }
 
-        await client.Instance.UpdateAsync(DocumentPath<T>.Id(GetDocumentId(data)), r => GetMetaForUpdate(r, data, immediately, fields));
+        await client.Instance.UpdateAsync(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, immediately, fields));
     }
 
     internal async Task UpdateAsync(T data, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
@@ -333,7 +333,7 @@ public abstract class BaseIndexer<T>(Client client,
             return;
         }
 
-        await client.Instance.UpdateAsync(DocumentPath<T>.Id(GetDocumentId(data)), r => GetMetaForUpdate(r, data, action, fields, immediately));
+        await client.Instance.UpdateAsync(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, action, fields, immediately));
     }
 
     internal async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
@@ -415,11 +415,6 @@ public abstract class BaseIndexer<T>(Client client,
         return Task.FromResult(CheckExist(data));
     }
 
-    protected virtual Id GetDocumentId(T data)
-    {
-        return data.Id;
-    }
-
     private async Task ClearAsync()
     {
         await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -439,11 +434,11 @@ public abstract class BaseIndexer<T>(Client client,
 
     private IIndexRequest<T> GetMeta(IndexDescriptor<T> request, T data, bool immediately = true)
     {
-        var result = request.Index(data.IndexName).Id(GetDocumentId(data));
+        var result = request.Index(data.IndexName).Id(data.Id);
 
         if (immediately)
         {
-            result.Refresh(Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         if (data is ISearchItemDocument)
@@ -455,7 +450,7 @@ public abstract class BaseIndexer<T>(Client client,
     }
     private IBulkIndexOperation<T> GetMeta(BulkIndexDescriptor<T> desc, T data)
     {
-        var result = desc.Index(IndexName).Id(GetDocumentId(data));
+        var result = desc.Index(IndexName).Id(data.Id);
 
         if (data is ISearchItemDocument { Document: not null })
         {
@@ -480,7 +475,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         if (immediately)
         {
-            result.Refresh(Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         return result;
@@ -539,7 +534,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         if (immediately)
         {
-            result.Refresh(Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         return result;

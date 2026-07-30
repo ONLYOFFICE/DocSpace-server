@@ -45,7 +45,6 @@ global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Settings;
-global using ASC.Core.Tenants;
 global using ASC.Security.Cryptography;
 
 global using Microsoft.EntityFrameworkCore;
