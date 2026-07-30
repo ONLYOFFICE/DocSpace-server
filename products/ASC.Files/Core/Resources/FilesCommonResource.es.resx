@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Error al sincronizar los datos del formulario con la base de datos externa.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>El formulario ha sido modificado. Este borrador está desactualizado y no puede enviarse.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>La instrucción de un agente de IA no puede tener más de {0} caracteres</value>
+  </data>
 </root>

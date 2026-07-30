@@ -36,7 +36,7 @@ import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getString } from "../narrow.js";
 import type { McpServersStorage, McpServerConfig } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/mcp-servers";
+const PATH = "/mcp-servers";
 
 function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
   return entityId ? { entityId } : undefined;

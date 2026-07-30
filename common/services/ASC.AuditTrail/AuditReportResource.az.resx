@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>İstifadəçi üçün aktiv bağlantılardan çıxış edildi: {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect konfiqurasiyası yeniləndi</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect kvota hesabatı yükləndi</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>İstifadəçi AI parametrləri yeniləndi</value>
+  </data>
 </root>

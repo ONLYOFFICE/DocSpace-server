@@ -35,8 +35,8 @@ import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { PromptsStorage, Prompt } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/prompts";
-const FOLDERS_PATH = "/integration/prompt-folders";
+const PATH = "/prompts";
+const FOLDERS_PATH = "/prompt-folders";
 
 function parsePrompt(raw: unknown): Prompt | null {
   if (!isObject(raw)) {
@@ -91,7 +91,7 @@ export class HttpPromptsStorage implements PromptsStorage {
     if (prompts.length === 0) {
       return [];
     }
-    // The C# `POST /integration/prompts/batch` endpoint currently
+    // The C# `POST /prompts/batch` endpoint currently
     // returns `NoContent` and so cannot deliver server-assigned ids
     // back to us. Until it returns the persisted list we fan out as
     // N parallel single-creates — slower for large bundles, but

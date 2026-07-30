@@ -595,4 +595,10 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Form verileri harici veritabanıyla senkronize edilemedi.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Form değiştirildi. Bu taslak güncel değil ve gönderilemez.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Bir AI ajanının talimatı {0} karakterden uzun olamaz</value>
+  </data>
 </root>

@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Aktive Verbindungen für Benutzer abgemeldet: {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect-Konfiguration aktualisiert</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect-Kontingentbericht</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>KI-Einstellungen des Benutzers wurden aktualisiert</value>
+  </data>
 </root>

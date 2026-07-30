@@ -36,7 +36,7 @@ import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
 import type { ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
 
-const BASE_PATH = "/integration/tool-prefs";
+const BASE_PATH = "/tool-prefs";
 const DISABLED_PATH = `${BASE_PATH}/disabled`;
 const ALLOW_ALWAYS_PATH = `${BASE_PATH}/allow-always`;
 

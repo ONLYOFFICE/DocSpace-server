@@ -595,4 +595,10 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Synchronisierung der Formulardaten mit der externen Datenbank fehlgeschlagen.</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Die Anweisung eines KI-Agenten darf nicht länger als {0} Zeichen sein</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Das Formular wurde geändert. Dieser Entwurf ist veraltet und kann nicht eingereicht werden.</value>
+  </data>
 </root>
