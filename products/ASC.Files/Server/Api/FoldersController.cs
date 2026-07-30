@@ -119,7 +119,7 @@ public class FoldersControllerInternal(
         var headers = MessageSettings.GetHttpHeaders(Request)?
             .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
 
-        var evt = new AuditReportIntegrationEvent(userId, tenantId, baseUri, AuditReportKind.FolderHistory, inDto.Format, null, null, headers, folderId: inDto.FolderId);
+        var evt = new AuditReportIntegrationEvent(userId, tenantId, baseUri, AuditReportKind.FolderHistory, inDto.Format, inDto.From, inDto.To, headers, folderId: inDto.FolderId);
 
         await eventBus.PublishAsync(evt);
 

@@ -51,4 +51,18 @@ public class FolderHistoryReportRequestDto
     /// <example>Xlsx</example>
     [FromQuery(Name = "format")]
     public AuditReportFormat Format { get; set; } = AuditReportFormat.Xlsx;
+
+    /// <summary>
+    /// The start date of the history period to export.
+    /// </summary>
+    /// <example>2026-01-01T00:00:00</example>
+    [FromQuery(Name = "from")]
+    public DateTime? From { get; set; }
+
+    /// <summary>
+    /// The end date of the history period to export.
+    /// </summary>
+    /// <example>2026-07-30T00:00:00</example>
+    [FromQuery(Name = "to")]
+    public DateTime? To { get; set; }
 }
