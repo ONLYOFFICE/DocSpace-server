@@ -163,13 +163,18 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         int count,
         string? entityId = null,
         long? cursorLastEditDate = null,
-        Guid? cursorId = null)
+        Guid? cursorId = null,
+        string? search = null)
     {
         var query = new List<string> { $"count={count}" };
 
         if (entityId is not null)
         {
             query.Add($"entityId={entityId}");
+        }
+        if (search is not null)
+        {
+            query.Add($"search={Uri.EscapeDataString(search)}");
         }
         if (cursorLastEditDate is not null)
         {

@@ -84,6 +84,40 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             .ToListAsync();
     }
 
+    public async Task<List<Thread>> SearchAsync(int tenantId, Guid createdBy, string text, int count, int? entryId = null, ThreadsCursor? cursor = null)
+    {
+        var tokens = BuildSearchTokens(text);
+        if (tokens.Count == 0)
+        {
+            return [];
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var query = context.Threads.Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy);
+
+        query = entryId.HasValue
+            ? query.Where(x => x.EntryId == entryId)
+            : query.Where(x => x.EntryId == null);
+
+        query = tokens.Aggregate(query, (current, token) => current
+            .Where(x => x.Title.ToLower().Replace("ё", "е").Contains(token)));
+
+        if (cursor != null)
+        {
+            query = query.Where(x => x.LastEditDate < cursor.LastEditDate
+                                     || (x.LastEditDate == cursor.LastEditDate && x.Id.CompareTo(cursor.Id) < 0));
+        }
+
+        return await query
+            .OrderByDescending(x => x.LastEditDate)
+            .ThenByDescending(x => x.Id)
+            .Take(count)
+            .AsAsyncEnumerable()
+            .Select(ToDomainEntity)
+            .ToListAsync();
+    }
+
     public async Task UpdateAsync(int tenantId, Guid threadId, string? title)
     {
         if (title == null)
@@ -115,6 +149,17 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         await context.DeleteThreadAsync(tenantId, threadId);
+    }
+
+    private static List<string> BuildSearchTokens(string text)
+    {
+        return
+        [
+            .. text
+                .ToLowerInvariant()
+                .Replace('ё', 'е')
+                .Split([' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        ];
     }
 
     private static DateTime TruncateToMilliseconds(DateTime value)

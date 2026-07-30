@@ -82,13 +82,23 @@ public class ThreadStorageService(
         return thread;
     }
 
-    public async Task<ThreadsPage> ReadAllAsync(int count, ThreadsCursor? cursor = null, string? entityId = null)
+    public async Task<ThreadsPage> ReadAllAsync(
+        int count,
+        ThreadsCursor? cursor = null,
+        string? entityId = null,
+        string? searchText = null)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
 
         var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
-        var threads = await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, count + 1, entryId, cursor);
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var checkCount = count + 1;
+
+        var threads = string.IsNullOrWhiteSpace(searchText)
+            ? await storage.ReadAllAsync(tenantId, CurrentUserId, checkCount, entryId, cursor)
+            : await storage.SearchAsync(tenantId, CurrentUserId, searchText, checkCount, entryId, cursor);
 
         if (threads.Count <= count)
         {

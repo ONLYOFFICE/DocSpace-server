@@ -42,6 +42,10 @@ public class ReadAllThreadsRequestDto
     [Range(1, 1000)]
     public required int Count { get; init; }
 
+    [FromQuery(Name = "search")]
+    [MaxLength(255)]
+    public string? Search { get; init; }
+
     [FromQuery(Name = "cursor")]
     public ThreadsCursorDto? Cursor { get; init; }
 }
