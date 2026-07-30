@@ -302,22 +302,22 @@ public class AttachmentHandler(
             return (false, []);
         }
 
-        var fileDao = daoFactory.GetFileDao<int>();
-        var file = await fileDao.GetFileAsync(fileId);
-        if (file is not { IsForm: true })
-        {
-            return (false, []);
-        }
-
-        var properties = await fileDao.GetProperties(fileId);
-        var formFilling = properties?.FormFilling;
-        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != fileId)
-        {
-            return (false, []);
-        }
-
         try
         {
+            var fileDao = daoFactory.GetFileDao<int>();
+            var file = await fileDao.GetFileAsync(fileId);
+            if (file is not { IsForm: true })
+            {
+                return (false, []);
+            }
+
+            var properties = await fileDao.GetProperties(fileId);
+            var formFilling = properties?.FormFilling;
+            if (formFilling?.StartFilling != true || formFilling.OriginalFormId != fileId)
+            {
+                return (false, []);
+            }
+
             var tableName = FormFillingReportCreator.GetTableName(fileId, file.Version);
             if (!await client.TableExistsAsync(tableName))
             {

@@ -433,6 +433,7 @@ public class GlobalFolder(
     SettingsManager settingsManager,
     CommonLinkUtility commonLinkUtility,
     ILogger<GlobalFolder> logger,
+    IDistributedLockProvider distributedLockProvider,
     IServiceProvider serviceProvider)
 {
     internal static readonly IDictionary<int, int> ProjectsRootFolderCache = new ConcurrentDictionary<int, int>(); /*Use SYNCHRONIZED for cross thread blocks*/
@@ -853,8 +854,18 @@ public class GlobalFolder(
             return;
         }
 
-        settings.IsCreated = true;
-        await settingsManager.SaveAsync(settings, tenantId);
+        // Serialize the check-then-set so concurrent owner visits can't each schedule a demo room.
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"demo_form_room_{tenantId}"))
+        {
+            settings = await settingsManager.LoadAsync<DemoFormRoomSettings>(tenantId);
+            if (settings.IsCreated)
+            {
+                return;
+            }
+
+            settings.IsCreated = true;
+            await settingsManager.SaveAsync(settings, tenantId);
+        }
 
         RunFireAndForget(async () => await CreateDemoFormRoomAsync(serviceProvider, tenantId, userId, baseUri));
     }
@@ -887,7 +898,7 @@ public class GlobalFolder(
                 logger.WarnDemoFormAssetMissing($"{await globalStore.GetStartDocsPath(storeTemplate, true, culture)}*.pdf");
 
                 // Asset not deployed yet — un-flag so the next owner visit retries.
-                await ResetDemoFormRoomFlagAsync(tenantId);
+                await ResetDemoFormRoomFlagAsync(serviceProvider, tenantId);
 
                 return;
             }
@@ -908,7 +919,7 @@ public class GlobalFolder(
             logger.ErrorCreateDemoFormRoom(e);
 
             // Transient failure — un-flag so the next owner visit retries.
-            await ResetDemoFormRoomFlagAsync(tenantId);
+            await ResetDemoFormRoomFlagAsync(serviceProvider, tenantId);
         }
     }
 
@@ -927,13 +938,17 @@ public class GlobalFolder(
         return pdf == null ? null : path + pdf;
     }
 
-    private async Task ResetDemoFormRoomFlagAsync(int tenantId)
+    private async Task ResetDemoFormRoomFlagAsync(IServiceProvider serviceProvider, int tenantId)
     {
         try
         {
-            var settings = await settingsManager.LoadAsync<DemoFormRoomSettings>(tenantId);
+            // Fresh scope: this runs after the request scope (and its SettingsManager) is disposed.
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var scopedSettingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+
+            var settings = await scopedSettingsManager.LoadAsync<DemoFormRoomSettings>(tenantId);
             settings.IsCreated = false;
-            await settingsManager.SaveAsync(settings, tenantId);
+            await scopedSettingsManager.SaveAsync(settings, tenantId);
         }
         catch (Exception e)
         {

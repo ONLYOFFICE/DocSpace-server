@@ -249,6 +249,8 @@ global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json.Linq;
 
+global using Npgsql;
+
 global using OpenSearch.Client;
 
 global using OpenAI;

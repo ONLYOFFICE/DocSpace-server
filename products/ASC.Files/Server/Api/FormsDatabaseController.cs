@@ -49,7 +49,7 @@ public class FormsDatabaseController(
     /// <path>api/2.0/files/builtin-db/connection-string</path>
     [Tags("Files / Built-in Database")]
     [SwaggerResponse(200, "Read-only PostgreSQL connection details for the portal's form data", typeof(BuiltinDbConnectionDto))]
-    [SwaggerResponse(402, "Built-in database feature is not configured")]
+    [SwaggerResponse(403, "No access to portal settings, or the built-in database feature is not configured")]
     [HttpGet("builtin-db/connection-string")]
     public async Task<BuiltinDbConnectionDto> GetConnectionStringAsync()
     {

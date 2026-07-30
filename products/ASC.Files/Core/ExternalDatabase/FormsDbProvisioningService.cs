@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Npgsql;
-
 #nullable enable
 namespace ASC.Files.Core.ExternalDatabase;
 
@@ -50,6 +48,7 @@ public record FormsDbCredentials(
 public class FormsDbProvisioningService(
     IConfiguration configuration,
     SettingsManager settingsManager,
+    IDistributedLockProvider distributedLockProvider,
     ILogger<FormsDbProvisioningService> logger)
 {
     private string? AdminConnectionString => configuration["ConnectionStrings:formsAdmin:connectionString"];
@@ -73,7 +72,18 @@ public class FormsDbProvisioningService(
             logger.WarnFormsDbSchemaMissing(tenantId, settings.SchemaName!);
         }
 
-        return await ProvisionAsync(tenantId);
+        // Serialize provisioning per tenant so concurrent submissions don't race to create the schema/roles.
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"forms_db_provision_{tenantId}"))
+        {
+            // Re-check under the lock: another worker may have provisioned while we waited.
+            settings = await settingsManager.LoadAsync<BuiltinFormsDbSettings>(tenantId);
+            if (settings.IsProvisioned && await SchemaExistsAsync(settings.SchemaName!))
+            {
+                return BuildCredentials(settings);
+            }
+
+            return await ProvisionAsync(tenantId);
+        }
     }
 
     private async Task<FormsDbCredentials> ProvisionAsync(int tenantId)

@@ -204,6 +204,13 @@ internal static class FormsQuerySqlBuilder
 
     public static string BuildDatePartExpr(string column, string datePart, ExternalDatabaseType dbType, char q)
     {
+        // Defense-in-depth: the MySQL branch injects datePart as a raw SQL token, so allowlist it here
+        // regardless of the dialect (the PostgreSQL/SQLite switches already reject unknown values).
+        if (!AllowedDateParts.Contains(datePart))
+        {
+            throw new UnauthorizedAccessException($"Date part not allowed: {datePart}");
+        }
+
         if (dbType == ExternalDatabaseType.MySql)
         {
             return $"{datePart.ToUpperInvariant()}({q}{column}{q})";

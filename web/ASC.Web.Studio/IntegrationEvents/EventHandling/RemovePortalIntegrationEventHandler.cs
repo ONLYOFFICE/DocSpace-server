@@ -45,8 +45,23 @@ public class RemovePortalIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            await formsProvisioner.DeprovisionAsync(@event.TenantId);
+            // Best-effort: a forms-DB deprovision failure must not block portal removal.
+            try
+            {
+                await formsProvisioner.DeprovisionAsync(@event.TenantId);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorFormsDeprovisionFailed(e, @event.TenantId);
+            }
+
             await worker.StartAsync(@event.TenantId);
         }
     }
+}
+
+internal static partial class RemovePortalIntegrationEventHandlerLogger
+{
+    [LoggerMessage(LogLevel.Error, "Failed to deprovision forms database for tenant {tenantId}")]
+    public static partial void ErrorFormsDeprovisionFailed(this ILogger logger, Exception exception, int tenantId);
 }

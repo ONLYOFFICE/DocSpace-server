@@ -34,6 +34,7 @@
 import { AttachmentsEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
+import logger from "../log.js";
 
 const engine = new AttachmentsEngine({ storage });
 
@@ -72,7 +73,14 @@ export const attachmentsController = {
     const entryIds = inputs
       .map((input) => input.path)
       .filter((path): path is string => typeof path === "string" && path.length > 0);
-    const analysis = await storage.attachments.getFormAnalysis(entryIds);
+
+    // Best-effort enrichment: a form-analysis lookup failure must not fail the whole save.
+    let analysis: Awaited<ReturnType<typeof storage.attachments.getFormAnalysis>> = [];
+    try {
+      analysis = await storage.attachments.getFormAnalysis(entryIds);
+    } catch (err) {
+      logger.warn(`saveFilesMany: form-analysis lookup failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
 
     if (Array.isArray(result) && analysis.length > 0) {
       const byEntryId = new Map(analysis.map((item) => [item.entryId, item]));

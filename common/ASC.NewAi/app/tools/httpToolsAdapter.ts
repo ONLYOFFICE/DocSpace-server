@@ -221,8 +221,8 @@ function parseList(raw: unknown): ToolsList {
  * dialog before running them.
  */
 export class HttpToolsAdapter implements ToolsAdapter {
-    // `_config.attachmentId` (the engine's ref collection over the whole
-    // thread) is intentionally unused — see `toContext`.
+    // `config.attachmentId` (the engine's ref collection over the thread) is
+    // forwarded to `list` so `toContext` can resolve the attached form.
     async getTools(
         entityId?: string,
         config?: { attachmentId: string[] },

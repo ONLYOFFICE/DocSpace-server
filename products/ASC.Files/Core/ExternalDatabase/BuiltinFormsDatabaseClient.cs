@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Npgsql;
-
 #nullable enable
 namespace ASC.Files.Core.ExternalDatabase;
 
@@ -50,11 +48,12 @@ public class BuiltinFormsDatabaseClient(
 
     private static void ValidateTableName(string tableName) => FormsQuerySqlBuilder.ValidateTableName(tableName);
 
-    private async Task<(NpgsqlConnection connection, string schemaName)> OpenConnectionAsync()
+    private async Task<(NpgsqlConnection connection, string schemaName)> OpenConnectionAsync(bool readOnly = false)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var credentials = await provisioner.GetOrProvisionAsync(tenantId);
-        var connection = new NpgsqlConnection(credentials.RwConnectionString);
+        var connectionString = readOnly ? credentials.RoConnectionString : credentials.RwConnectionString;
+        var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync();
         return (connection, credentials.SchemaName);
     }
@@ -107,7 +106,7 @@ public class BuiltinFormsDatabaseClient(
         }
 
         ValidateTableName(tableName);
-        var (connection, schemaName) = await OpenConnectionAsync();
+        var (connection, schemaName) = await OpenConnectionAsync(readOnly: true);
         await using (connection)
         {
             await using var cmd = connection.CreateCommand();
@@ -130,7 +129,7 @@ public class BuiltinFormsDatabaseClient(
     public async Task<bool> TableExistsAsync(string tableName)
     {
         ValidateTableName(tableName);
-        var (connection, schemaName) = await OpenConnectionAsync();
+        var (connection, schemaName) = await OpenConnectionAsync(readOnly: true);
         await using (connection)
         {
             await using var cmd = connection.CreateCommand();
@@ -154,7 +153,7 @@ public class BuiltinFormsDatabaseClient(
     public async Task<long> CountAsync(string tableName)
     {
         ValidateTableName(tableName);
-        var (connection, schemaName) = await OpenConnectionAsync();
+        var (connection, schemaName) = await OpenConnectionAsync(readOnly: true);
         await using (connection)
         {
             await using var cmd = connection.CreateCommand();
@@ -277,7 +276,7 @@ public class BuiltinFormsDatabaseClient(
             groupByParts.Add(expr);
         }
 
-        var (connection, schemaName) = await OpenConnectionAsync();
+        var (connection, schemaName) = await OpenConnectionAsync(readOnly: true);
         await using (connection)
         {
             var qualifiedTable = $"{Q}{schemaName}{Q}.{Q}{tableName}{Q}";
@@ -434,7 +433,7 @@ public class BuiltinFormsDatabaseClient(
             whereParts.Add($"{ddExpr} {dateDiffFilter.Operator} {dateDiffFilter.Value}");
         }
 
-        var (connection, schemaName) = await OpenConnectionAsync();
+        var (connection, schemaName) = await OpenConnectionAsync(readOnly: true);
         await using (connection)
         {
             var qualifiedTable = $"{Q}{schemaName}{Q}.{Q}{tableName}{Q}";
@@ -650,7 +649,7 @@ public class BuiltinFormsDatabaseClient(
             }
         }
 
-        var (connection, schemaName) = await OpenConnectionAsync();
+        var (connection, schemaName) = await OpenConnectionAsync(readOnly: true);
         await using (connection)
         {
             var qualifiedTable = $"{Q}{schemaName}{Q}.{Q}{tableName}{Q}";

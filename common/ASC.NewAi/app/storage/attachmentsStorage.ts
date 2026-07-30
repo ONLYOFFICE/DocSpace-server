@@ -278,6 +278,26 @@ export interface FormAnalysis {
   keys: FormAnalysisKey[];
 }
 
+function isFormAnalysisKey(value: unknown): value is FormAnalysisKey {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as FormAnalysisKey).key === "string" &&
+    typeof (value as FormAnalysisKey).type === "string"
+  );
+}
+
+function isFormAnalysis(value: unknown): value is FormAnalysis {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as FormAnalysis).entryId === "string" &&
+    typeof (value as FormAnalysis).canAnalyze === "boolean" &&
+    Array.isArray((value as FormAnalysis).keys) &&
+    (value as FormAnalysis).keys.every(isFormAnalysisKey)
+  );
+}
+
 export class HttpAttachmentsStorage implements AttachmentsStorage {
   async create(input: Omit<Attachment, "id" | "createdAt">): Promise<Attachment> {
     const [result] = await this.createMany([input]);
@@ -427,7 +447,8 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     }
 
     const raw = await aiService.post(`${PATH}/form-analysis`, { entryIds });
-    return Array.isArray(raw) ? (raw as FormAnalysis[]) : [];
+    // Validate the backend response shape and drop any malformed entries.
+    return Array.isArray(raw) ? raw.filter(isFormAnalysis) : [];
   }
 
   // Persist a tool-generated image (raw base64, `source === "tool"`). The bytes
