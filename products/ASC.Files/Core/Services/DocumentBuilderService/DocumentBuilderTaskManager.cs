@@ -62,6 +62,13 @@ public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilder
         return await GetTask(taskId);
     }
 
+    public async Task<T> GetTask(int tenantId, Guid userId, string discriminator)
+    {
+        var taskId = DocumentBuilderTaskManager.GetTaskId(tenantId, userId, discriminator);
+
+        return await GetTask(taskId);
+    }
+
     private async Task<T> GetTask(string taskId)
     {
         return await _queue.PeekTask(taskId);
@@ -80,6 +87,16 @@ public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilder
     public async Task TerminateTask(int tenantId, Guid userId, int formId)
     {
         var task = await GetTask(tenantId, userId, formId);
+
+        if (task != null)
+        {
+            await _queue.DequeueTask(task.Id);
+        }
+    }
+
+    public async Task TerminateTask(int tenantId, Guid userId, string discriminator)
+    {
+        var task = await GetTask(tenantId, userId, discriminator);
 
         if (task != null)
         {
@@ -132,6 +149,11 @@ public static class DocumentBuilderTaskManager
 
     public static string GetTaskId(int tenantId, Guid userId, int formId)
     {
-        return $"DocumentBuilderTask_{tenantId}_{userId}_{formId}";
+        return GetTaskId(tenantId, userId, formId.ToString(CultureInfo.InvariantCulture));
+    }
+
+    public static string GetTaskId(int tenantId, Guid userId, string discriminator)
+    {
+        return $"DocumentBuilderTask_{tenantId}_{userId}_{discriminator}";
     }
 }

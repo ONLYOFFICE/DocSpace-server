@@ -53,7 +53,7 @@ public class AuditReportIntegrationEventHandler(
 
             try
             {
-                var discriminator = @event.FolderId ?? (int)@event.Kind;
+                var discriminator = AuditReportTask.GetTaskDiscriminator(@event.Kind, @event.FolderId);
 
                 if (@event.Terminate)
                 {

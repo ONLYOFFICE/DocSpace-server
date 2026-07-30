@@ -112,7 +112,7 @@ public class FoldersControllerInternal(
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
-        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, inDto.FolderId));
+        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, AuditReportTask.GetTaskDiscriminator(AuditReportKind.FolderHistory, inDto.FolderId)));
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
@@ -145,7 +145,7 @@ public class FoldersControllerInternal(
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
 
-        var task = await documentBuilderTaskManager.GetTask(tenantId, userId, folderId);
+        var task = await documentBuilderTaskManager.GetTask(tenantId, userId, AuditReportTask.GetTaskDiscriminator(AuditReportKind.FolderHistory, folderId));
 
         return DocumentBuilderTaskDto.Get(task);
     }

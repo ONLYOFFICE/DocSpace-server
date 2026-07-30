@@ -46,6 +46,13 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
     {
     }
 
+    public static string GetTaskDiscriminator(AuditReportKind kind, int? folderId = null)
+    {
+        return folderId.HasValue
+            ? $"{kind}_{folderId.Value.ToString(CultureInfo.InvariantCulture)}"
+            : $"{kind}";
+    }
+
     protected override Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         throw new NotSupportedException();

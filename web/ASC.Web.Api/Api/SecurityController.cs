@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -382,7 +382,7 @@ public class SecurityController(
 
         var baseUri = commonLinkUtility.ServerRootPath;
 
-        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, (int)kind));
+        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, AuditReportTask.GetTaskDiscriminator(kind)));
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
@@ -398,7 +398,7 @@ public class SecurityController(
 
     private async Task<DocumentBuilderTaskDto> GetAuditReportStatusAsync(AuditReportKind kind)
     {
-        var task = await documentBuilderTaskManager.GetTask(tenantManager.GetCurrentTenantId(), securityContext.CurrentAccount.ID, (int)kind);
+        var task = await documentBuilderTaskManager.GetTask(tenantManager.GetCurrentTenantId(), securityContext.CurrentAccount.ID, AuditReportTask.GetTaskDiscriminator(kind));
 
         return DocumentBuilderTaskDto.Get(task);
     }
