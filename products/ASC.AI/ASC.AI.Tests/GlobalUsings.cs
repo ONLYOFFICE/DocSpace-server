@@ -70,13 +70,13 @@ global using ASC.AI.Integration.Profiles;
 global using ASC.AI.Integration.ToolPrefs;
 global using ASC.Core.Users;
 
-global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Integration.CreateProfileRequestDto;
-global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Integration.CreateProfilesRequestDto;
-global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.McpServerDto;
-global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.MessageDto;
-global using PreferencesDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.PreferencesDto;
-global using ProfileDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.ProfileDto;
-global using ThreadDto = ASCAi::ASC.AI.Models.ResponseDto.Integration.ThreadDto;
-global using UpdateProfileBody = ASCAi::ASC.AI.Models.RequestDto.Integration.UpdateProfileBody;
+global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfileRequestDto;
+global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfilesRequestDto;
+global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;
+global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.MessageDto;
+global using PreferencesDto = ASCAi::ASC.AI.Models.ResponseDto.PreferencesDto;
+global using ProfileDto = ASCAi::ASC.AI.Models.ResponseDto.ProfileDto;
+global using ThreadDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadDto;
+global using UpdateProfileBody = ASCAi::ASC.AI.Models.RequestDto.Profiles.UpdateProfileBody;
 
 global using Task = System.Threading.Tasks.Task;

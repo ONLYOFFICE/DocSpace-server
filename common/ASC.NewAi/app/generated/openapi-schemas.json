@@ -1286,6 +1286,305 @@
         "success"
       ]
     },
+    "NewAiAiUserSettingsWrapper": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/components/schemas/NewAiAiUserSettingsDto"
+        },
+        "count": {
+          "type": "integer",
+          "description": "The total number of items in the response",
+          "format": "int32"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "href": {
+                "type": "string",
+                "description": "URL of the link"
+              },
+              "action": {
+                "type": "string",
+                "description": "Action associated with the link"
+              }
+            }
+          },
+          "description": "List of links related to the response"
+        },
+        "status": {
+          "type": "integer",
+          "description": "HTTP status code of the response",
+          "format": "int32"
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code of the response (duplicate of status)",
+          "format": "int32"
+        }
+      }
+    },
+    "NewAiAiUserSettingsDto": {
+      "type": "object",
+      "properties": {
+        "chatRecommendedModelVisible": {
+          "type": "boolean",
+          "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user.",
+          "example": true
+        }
+      },
+      "additionalProperties": false,
+      "description": "The per-user AI settings."
+    },
+    "NewAiVectorizationSettingsWrapper": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/components/schemas/NewAiVectorizationSettingsDto"
+        },
+        "count": {
+          "type": "integer",
+          "description": "The total number of items in the response",
+          "format": "int32"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "href": {
+                "type": "string",
+                "description": "URL of the link"
+              },
+              "action": {
+                "type": "string",
+                "description": "Action associated with the link"
+              }
+            }
+          },
+          "description": "List of links related to the response"
+        },
+        "status": {
+          "type": "integer",
+          "description": "HTTP status code of the response",
+          "format": "int32"
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code of the response (duplicate of status)",
+          "format": "int32"
+        }
+      }
+    },
+    "NewAiVectorizationSettingsDto": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/components/schemas/NewAiEmbeddingProviderType"
+        },
+        "needReset": {
+          "type": "boolean",
+          "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
+          "example": false
+        }
+      },
+      "additionalProperties": false,
+      "description": "The vectorization settings."
+    },
+    "NewAiEmbeddingProviderType": {
+      "oneOf": [
+        {
+          "enum": [
+            "None",
+            "OpenAi",
+            "OpenRouter",
+            "PortalAi"
+          ],
+          "type": "string",
+          "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]",
+          "example": "None"
+        },
+        {
+          "enum": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "type": "integer",
+          "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]",
+          "example": 0,
+          "x-enum-varnames": [
+            "None",
+            "OpenAi",
+            "OpenRouter",
+            "PortalAi"
+          ]
+        }
+      ],
+      "x-enum-type": "integer"
+    },
+    "NewAiAiSettingsWrapper": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/components/schemas/NewAiAiSettingsDto"
+        },
+        "count": {
+          "type": "integer",
+          "description": "The total number of items in the response",
+          "format": "int32"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "href": {
+                "type": "string",
+                "description": "URL of the link"
+              },
+              "action": {
+                "type": "string",
+                "description": "Action associated with the link"
+              }
+            }
+          },
+          "description": "List of links related to the response"
+        },
+        "status": {
+          "type": "integer",
+          "description": "HTTP status code of the response",
+          "format": "int32"
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code of the response (duplicate of status)",
+          "format": "int32"
+        }
+      }
+    },
+    "NewAiAiSettingsDto": {
+      "required": [
+        "embeddingModel",
+        "generateDocxToolName",
+        "generateFormToolName",
+        "generatePresentationToolName",
+        "knowledgeSearchToolName",
+        "modelAliases",
+        "webCrawlingToolName",
+        "webSearchToolName"
+      ],
+      "type": "object",
+      "properties": {
+        "webSearchEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether web search is enabled for AI chat sessions.",
+          "example": true
+        },
+        "webSearchNeedReset": {
+          "type": "boolean",
+          "description": "Indicates whether the web search API key needs to be reconfigured.",
+          "example": false
+        },
+        "vectorizationEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether document vectorization is enabled.",
+          "example": true
+        },
+        "vectorizationNeedReset": {
+          "type": "boolean",
+          "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
+          "example": false
+        },
+        "aiReady": {
+          "type": "boolean",
+          "description": "Indicates whether the AI subsystem is fully configured and operational.",
+          "example": true
+        },
+        "aiReadyNeedReset": {
+          "type": "boolean",
+          "description": "Indicates whether the AI provider API key needs to be reconfigured.",
+          "example": false
+        },
+        "portalMcpServerId": {
+          "type": "string",
+          "description": "The unique identifier of the portal-level MCP server, if configured.",
+          "format": "uuid",
+          "nullable": true,
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "embeddingModel": {
+          "type": "string",
+          "description": "The name of the embedding model used for document vectorization.",
+          "nullable": true,
+          "example": "text-embedding-3-small"
+        },
+        "modelAliases": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Mapping of model identifiers to human-readable aliases.",
+          "nullable": true,
+          "example": {
+            "gpt-5.2": "GPT-5.2",
+            "claude-sonnet-4-20250514": "Claude Sonnet 4"
+          }
+        },
+        "knowledgeSearchToolName": {
+          "type": "string",
+          "description": "The tool name used by the AI assistant for knowledge base search.",
+          "nullable": true,
+          "example": "knowledge_search"
+        },
+        "webSearchToolName": {
+          "type": "string",
+          "description": "The tool name used by the AI assistant for web search.",
+          "nullable": true,
+          "example": "web_search"
+        },
+        "webCrawlingToolName": {
+          "type": "string",
+          "description": "The tool name used by the AI assistant for web page crawling.",
+          "nullable": true,
+          "example": "web_crawling"
+        },
+        "generateDocxToolName": {
+          "type": "string",
+          "description": "The tool name used by the AI to launch docx creation in the editor.",
+          "nullable": true,
+          "example": "generate_docx"
+        },
+        "generateFormToolName": {
+          "type": "string",
+          "description": "The tool name used by the AI assistant to launch form creation in the editor.",
+          "nullable": true,
+          "example": "generate_form"
+        },
+        "generatePresentationToolName": {
+          "type": "string",
+          "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
+          "nullable": true,
+          "example": "generate_presentation"
+        },
+        "systemAiEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether the system-level AI provider is enabled.",
+          "example": true
+        },
+        "recommendedModelForForms": {
+          "type": "string",
+          "description": "The identifier of the model recommended for form generation.",
+          "nullable": true,
+          "example": "gpt-5.4"
+        }
+      },
+      "additionalProperties": false,
+      "description": "The AI module settings."
+    },
     "NewAiFolderIntegerArrayWrapper": {
       "type": "object",
       "properties": {
@@ -4461,6 +4760,31 @@
     "newAiAgentsGet": {
       "response": {
         "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
+      }
+    },
+    "newAiSettingsGet": {
+      "response": {
+        "$ref": "#/components/schemas/NewAiAiSettingsWrapper"
+      }
+    },
+    "newAiSettingsGetVectorization": {
+      "response": {
+        "$ref": "#/components/schemas/NewAiVectorizationSettingsWrapper"
+      }
+    },
+    "newAiSettingsSetVectorization": {
+      "response": {
+        "$ref": "#/components/schemas/NewAiVectorizationSettingsWrapper"
+      }
+    },
+    "newAiSettingsGetUser": {
+      "response": {
+        "$ref": "#/components/schemas/NewAiAiUserSettingsWrapper"
+      }
+    },
+    "newAiSettingsSetUser": {
+      "response": {
+        "$ref": "#/components/schemas/NewAiAiUserSettingsWrapper"
       }
     }
   }

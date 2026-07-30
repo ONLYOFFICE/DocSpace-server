@@ -131,16 +131,15 @@ static file class Queries
                     .FirstOrDefault(r => r.Id == linkId && r.TenantId == tenantId));
 
     public static readonly Func<FilesDbContext, int, int, string, string, string, string, Task<int>> UpdateThirdPartyAccountsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int linkId, string login, string password, string token, string url) =>
-                ctx.ThirdpartyAccount
-                    .Where(r => r.Id == linkId)
-                    .Where(r => r.TenantId == tenantId)
-                    .ExecuteUpdate(f => f
-                        .SetProperty(p => p.UserName, login)
-                        .SetProperty(p => p.Password, password)
-                        .SetProperty(p => p.Token, token)
-                        .SetProperty(p => p.Url, url)));
+        (FilesDbContext ctx, int tenantId, int linkId, string login, string password, string token, string url) =>
+            ctx.ThirdpartyAccount
+                .Where(r => r.Id == linkId)
+                .Where(r => r.TenantId == tenantId)
+                .ExecuteUpdateAsync(f => f
+                    .SetProperty(p => p.UserName, login)
+                    .SetProperty(p => p.Password, password)
+                    .SetProperty(p => p.Token, token)
+                    .SetProperty(p => p.Url, url));
 
     public static readonly Func<FilesDbContext, int, int, Task<DbFilesThirdpartyAccount>> ThirdPartyAccountByLinkIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -56,6 +56,7 @@ public class StudioNotifyService(
     ILoggerFactory loggerFactory)
 {
     public static string EMailSenderName => Constants.NotifyEMailSenderSysName;
+    public static string TelegramSenderName => Constants.NotifyTelegramSenderSysName;
 
     private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
 
@@ -866,7 +867,8 @@ public class StudioNotifyService(
         {
             topUpWalletErrorNotifyAction.Init(user);
 
-            await studioNotifyServiceHelper.SendNoticeToAsync(topUpWalletErrorNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+            var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
+            await studioNotifyServiceHelper.SendNoticeToAsync(topUpWalletErrorNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
         }
     }
 
@@ -882,7 +884,8 @@ public class StudioNotifyService(
         {
             renewSubscriptionErrorNotifyAction.Init(user);
 
-            await studioNotifyServiceHelper.SendNoticeToAsync(renewSubscriptionErrorNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+            var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
+            await studioNotifyServiceHelper.SendNoticeToAsync(renewSubscriptionErrorNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
         }
     }
 

@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Conexiunile active ale utilizatorului au fost deconectate: {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Configurația Docs Connect a fost actualizată</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Raportul de cotă Docs Connect a fost descărcat</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Setările AI ale utilizatorului au fost actualizate</value>
+  </data>
 </root>

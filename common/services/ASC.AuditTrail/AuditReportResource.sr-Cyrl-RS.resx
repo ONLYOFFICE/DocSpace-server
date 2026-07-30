@@ -729,9 +729,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Портал преименован</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Приватна соба је онемогућена</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Производи [{0}]. Приступ отворен</value>
   </data>
@@ -1205,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Активне везе корисника су одјављене: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Конфигурација Docs Connect је ажурирана</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Извештај о квоти Docs Connect је преузет</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Подешавања AI корисника су ажурирана</value>
   </data>
 </root>

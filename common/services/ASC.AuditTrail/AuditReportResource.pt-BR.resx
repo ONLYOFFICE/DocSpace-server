@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Conexões ativas desconectadas para o usuário: {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Configuração do Docs Connect atualizada</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Relatório de cota do Docs Connect baixado</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Configurações de IA do usuário atualizadas</value>
+  </data>
 </root>

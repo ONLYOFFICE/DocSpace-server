@@ -595,4 +595,10 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Échec de la synchronisation des données du formulaire avec la base de données externe.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Le formulaire a été modifié. Ce brouillon est obsolète et ne peut pas être soumis.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>L'instruction d'un agent IA ne peut pas dépasser {0} caractères</value>
+  </data>
 </root>

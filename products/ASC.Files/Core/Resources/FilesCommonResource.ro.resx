@@ -595,4 +595,10 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Sincronizarea datelor formularului cu baza de date externă a eșuat.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Formularul a fost modificat. Acest draft este depășit și nu poate fi trimis.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Instrucțiunea unui agent IA nu poate depăși {0} caractere</value>
+  </data>
 </root>

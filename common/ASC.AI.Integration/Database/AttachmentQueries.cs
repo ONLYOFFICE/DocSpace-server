@@ -80,12 +80,11 @@ static file class AttachmentQueriesContainer
                     .Where(x => x.TenantId == tenantId && ids.Contains(x.Id)));
 
     public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, Guid, Task<int>> UpdateAttachmentBindingsByIdsAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids, Guid messageId) =>
-                ctx.Attachments
-                    .Where(x => x.TenantId == tenantId && ids.Contains(x.Id))
-                    .ExecuteUpdate(x => x
-                        .SetProperty(y => y.MessageId, messageId)));
+        (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids, Guid messageId) =>
+            ctx.Attachments
+                .Where(x => x.TenantId == tenantId && ids.Contains(x.Id))
+                .ExecuteUpdateAsync(x => x
+                    .SetProperty(y => y.MessageId, messageId));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteAttachmentAsync =
         EF.CompileAsyncQuery(

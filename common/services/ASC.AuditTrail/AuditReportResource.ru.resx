@@ -744,9 +744,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Портал переименован</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Приватная комната отключена</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Продукты [{0}]. Открыт доступ</value>
   </data>
@@ -970,7 +967,7 @@
     <value>Начат перенос портала в другой регион</value>
   </data>
   <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
-    <value>Баланс подписки перенесён в кошелёк: {0}</value>
+    <value>Баланс подписки перенесен в кошелек: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Системная учетная запись</value>
@@ -1205,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Активные сессии завершены для пользователя: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Обновлена конфигурация Docs Connect</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Загружен отчет о квоте Docs Connect</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>ИИ-настройки пользователя обновлены</value>
   </data>
 </root>

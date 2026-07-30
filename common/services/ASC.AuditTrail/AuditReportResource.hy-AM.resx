@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Օգտատիրոջ ակտիվ կապերը դուրս են գրանցվել. {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect-ի կոնֆիգուրացիան թարմացվել է</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect-ի քվոտայի հաշվետվությունը</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Օգտատիրոջ ԱԲ կարգավորումները թարմացվել են</value>
+  </data>
 </root>

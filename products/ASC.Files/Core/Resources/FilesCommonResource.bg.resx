@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Неуспешна синхронизация на данните от формуляра с външната база данни.</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Инструкцията на AI агента не може да бъде по-дълга от {0} знака</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Формулярът е променен. Тази чернова е остаряла и не може да бъде изпратена.</value>
+  </data>
 </root>
