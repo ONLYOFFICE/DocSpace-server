@@ -31,38 +31,34 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ThreadsCursor = ASC.AI.Integration.Threads.ThreadsCursor;
+using ASC.AI.Integration.Messages;
 
-namespace ASC.AI.Models.RequestDto.Integration;
+namespace ASC.AI.Models.RequestDto.Messages;
 
-public class ThreadsCursorDto
+public class MessagesCursorDto
 {
-    private const string MinUnixTimeMilliseconds = "-62135596800000";
-    private const string MaxUnixTimeMilliseconds = "253402300799999";
-
-    [FromQuery(Name = "lastEditDate")]
+    [FromQuery(Name = "createdAt")]
     [BindRequired]
-    [Range(typeof(long), MinUnixTimeMilliseconds, MaxUnixTimeMilliseconds)]
-    public long LastEditDate { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
 
     [FromQuery(Name = "id")]
     [BindRequired]
     public Guid Id { get; init; }
 
-    public ThreadsCursor ToCursor()
+    public MessagesCursor ToCursor()
     {
-        return new ThreadsCursor
+        return new MessagesCursor
         {
-            LastEditDate = DateTimeOffset.FromUnixTimeMilliseconds(LastEditDate).UtcDateTime,
+            Timestamp = CreatedAt.UtcDateTime,
             Id = Id
         };
     }
 
-    public static ThreadsCursorDto FromCursor(ThreadsCursor cursor)
+    public static MessagesCursorDto FromCursor(MessagesCursor cursor)
     {
-        return new ThreadsCursorDto
+        return new MessagesCursorDto
         {
-            LastEditDate = new DateTimeOffset(DateTime.SpecifyKind(cursor.LastEditDate, DateTimeKind.Utc)).ToUnixTimeMilliseconds(),
+            CreatedAt = new DateTimeOffset(DateTime.SpecifyKind(cursor.Timestamp, DateTimeKind.Utc)),
             Id = cursor.Id
         };
     }

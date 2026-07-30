@@ -33,7 +33,7 @@
 
 using MessagesPage = ASC.AI.Integration.Messages.MessagesPage;
 
-namespace ASC.AI.Models.ResponseDto.Integration;
+namespace ASC.AI.Models.ResponseDto;
 
 public class MessagesPageDto
 {

@@ -33,7 +33,7 @@
 
 using ThreadsPage = ASC.AI.Integration.Threads.ThreadsPage;
 
-namespace ASC.AI.Models.ResponseDto.Integration;
+namespace ASC.AI.Models.ResponseDto;
 
 public class ThreadsPageDto
 {
