@@ -135,7 +135,9 @@ public class HistoryApiHelper(
     FileSecurity fileSecurity,
     TenantUtil tenantUtil,
     AuditInterpreter interpreter,
-    AuditEventMapper mapper)
+    AuditEventMapper mapper,
+    CoreBaseSettings coreBaseSettings,
+    TenantManager tenantManager)
 {
     public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
@@ -255,6 +257,13 @@ public class HistoryApiHelper(
 
     public async Task DemandFolderHistoryReportPermissionAsync(int folderId)
     {
+        if (!coreBaseSettings.Standalone
+        && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString())
+            || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
         var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId)
             ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
 
