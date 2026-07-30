@@ -2835,7 +2835,8 @@ public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUti
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_top_up_wallet_error, () => WebstudioNotifyPatternResource.pattern_top_up_wallet_error)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_top_up_wallet_error, () => WebstudioNotifyPatternResource.pattern_top_up_wallet_error),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_top_up_wallet_error)
         ];
     }
 
@@ -2864,7 +2865,8 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_renew_subscription_error, () => WebstudioNotifyPatternResource.pattern_renew_subscription_error)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_renew_subscription_error, () => WebstudioNotifyPatternResource.pattern_renew_subscription_error),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_renew_subscription_error)
         ];
     }
 
