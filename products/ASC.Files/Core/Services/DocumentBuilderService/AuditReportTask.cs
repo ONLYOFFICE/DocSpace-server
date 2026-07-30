@@ -162,6 +162,41 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
+        var header = await BuildReportHeaderAsync(serviceProvider, culture);
+
+        var period = _data.From.HasValue && _data.To.HasValue
+            ? $"{_data.From.Value.ToShortDateString()} - {_data.To.Value.ToShortDateString()}"
+            : _data.From?.ToShortDateString() ?? _data.To?.ToShortDateString() ?? string.Empty;
+
+        var scriptInputData = new
+        {
+            resources = new
+            {
+                company = Resource.AccountingReportCompany + ":",
+                report = Resource.AccountingReportTitle + ":",
+                period = Resource.AccountingReportPeriod + ":",
+                dateGenerated = Resource.AccountingReportDateGenerated + ":",
+                sheetName = GetSheetName(reportNameFormat),
+                dateGeneratedFormat = header.DateGeneratedFormat
+            },
+            info = new
+            {
+                company = header.Company,
+                report = GetReportTitle(reportNameFormat),
+                period,
+                dateGenerated = header.DateGenerated
+            },
+            logoSrc = header.LogoSrc,
+            themeColors = new
+            {
+                mainBgColor = header.MainBgColor,
+                lightBgColor = header.LightBgColor,
+                mainFontColor = header.MainFontColor
+            },
+            keys = headers,
+            aligns = headers.Select(_ => "left").ToList()
+        };
+
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
 
         var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
@@ -169,9 +204,8 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
         var outputFileName = string.Format(reportNameFormat + ".xlsx", nameArg0, nameArg1);
 
         script = script
-            .Replace("${sheetName}", GetSheetName(reportNameFormat))
-            .Replace("${tempFileName}", tempFileName)
-            .Replace("${dataKeys}", JsonSerializer.Serialize(headers, jsonOptions));
+            .Replace("${inputData}", JsonSerializer.Serialize(scriptInputData, jsonOptions))
+            .Replace("${tempFileName}", tempFileName);
 
         var scriptParts = script.Split("${dataValues}");
 
@@ -319,7 +353,7 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
         return (headers, props);
     }
 
-    private static string GetSheetName(string reportNameFormat)
+    private static string GetReportTitle(string reportNameFormat)
     {
         var name = reportNameFormat;
 
@@ -329,8 +363,55 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
             name = name[..index].Trim();
         }
 
+        return name;
+    }
+
+    private static string GetSheetName(string reportNameFormat)
+    {
+        var name = GetReportTitle(reportNameFormat);
+
         return name.Length > 31 ? name[..31] : name;
     }
+
+    private static async Task<ReportHeader> BuildReportHeaderAsync(IServiceProvider serviceProvider, CultureInfo culture)
+    {
+        var settingsManager = serviceProvider.GetService<SettingsManager>();
+        var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
+        var tenantLogoManager = serviceProvider.GetService<TenantLogoManager>();
+        var tenantWhiteLabelSettingsHelper = serviceProvider.GetService<TenantWhiteLabelSettingsHelper>();
+        var documentServiceConnector = serviceProvider.GetService<DocumentServiceConnector>();
+        var tenantUtil = serviceProvider.GetService<TenantUtil>();
+
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+        var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall);
+        logoPath = documentServiceConnector.ReplaceCommunityAddress(logoPath);
+        var logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath.Split('?')[0]);
+
+        var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
+        var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
+
+        var dateGeneratedFormat = $"{culture.DateTimeFormat.ShortDatePattern} {culture.DateTimeFormat.LongTimePattern.Replace("tt", "AM/PM")}";
+
+        return new ReportHeader(
+            logoSrc,
+            DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1),
+            DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08),
+            DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1),
+            logoText,
+            tenantUtil.DateTimeNow().ToString("G", CultureInfo.InvariantCulture),
+            dateGeneratedFormat);
+    }
+
+    private sealed record ReportHeader(
+        string LogoSrc,
+        int[] MainBgColor,
+        int[] LightBgColor,
+        int[] MainFontColor,
+        string Company,
+        string DateGenerated,
+        string DateGeneratedFormat);
 
     private sealed record Cell(string Value, string Format, string Halign = null);
 }
