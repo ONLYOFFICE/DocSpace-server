@@ -32,11 +32,34 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { ThreadsEngine } from "@onlyoffice/ai-chat/core";
-import type { Profile, OpenOrCreateInput } from "@onlyoffice/ai-chat/core";
+import type {
+  Profile,
+  OpenOrCreateInput,
+  MessagesCursor,
+} from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString, parseInt10 } from "../narrow.js";
+import { asString, parseInt10, isObject, getString } from "../narrow.js";
+
+// `cursor` arrives JSON-stringified in the query (see the route table in
+// the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
+// values degrade to `undefined` — an unpaginated read — rather than 400,
+// matching the storage contract's "may ignore pagination" latitude.
+function parseMessagesCursor(raw: unknown): MessagesCursor | undefined {
+  if (typeof raw !== "string" || raw.length === 0) {
+    return undefined;
+  }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (isObject(parsed) && getString(parsed, "id") !== undefined) {
+      return parsed as unknown as MessagesCursor;
+    }
+  } catch {
+    // fall through — not JSON
+  }
+  return undefined;
+}
 
 const engine = new ThreadsEngine({ storage });
 
@@ -146,9 +169,9 @@ export const threadsController = {
       res.json([]);
       return;
     }
-    const limit = parseInt10(req.query["limit"]);
-    const startIndex = parseInt10(req.query["startIndex"]);
-    const messages = await engine.readMessages(threadId, limit, startIndex);
+    const count = parseInt10(req.query["count"]);
+    const cursor = parseMessagesCursor(req.query["cursor"]);
+    const messages = await engine.readMessages(threadId, count, cursor);
     res.json(messages);
   }),
 
