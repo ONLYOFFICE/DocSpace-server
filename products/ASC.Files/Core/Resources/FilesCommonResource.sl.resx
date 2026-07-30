@@ -595,4 +595,10 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Sinhronizacija podatkov obrazca z zunanjo bazo podatkov ni uspela.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Obrazec je bil spremenjen. Ta osnutek je zastarel in ga ni mogoče oddati.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Navodilo AI agenta ne sme biti daljše od {0} znakov</value>
+  </data>
 </root>

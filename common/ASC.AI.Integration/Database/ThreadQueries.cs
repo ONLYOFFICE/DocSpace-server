@@ -108,27 +108,24 @@ static file class ThreadQueriesContainer
                     .AsQueryable());
 
     public static readonly Func<AiIntegrationContext, int, Guid, string, Task<int>> UpdateThreadTitleAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid id, string title) =>
-                ctx.Threads
-                    .Where(x => x.TenantId == tenantId && x.Id == id)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.Title, title)));
+        (AiIntegrationContext ctx, int tenantId, Guid id, string title) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.Id == id)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.Title, title));
 
     public static readonly Func<AiIntegrationContext, int, Guid, DateTime, Task<int>> TouchThreadAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid id, DateTime lastEditDate) =>
-                ctx.Threads
-                    .Where(x => x.TenantId == tenantId && x.Id == id)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.LastEditDate, lastEditDate)));
+        (AiIntegrationContext ctx, int tenantId, Guid id, DateTime lastEditDate) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.Id == id)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.LastEditDate, lastEditDate));
 
     public static readonly Func<AiIntegrationContext, int, Guid, DateTime, Guid?, Task<int>> TouchThreadWithProfileAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid id, DateTime lastEditDate, Guid? profileId) =>
-                ctx.Threads
-                    .Where(x => x.TenantId == tenantId && x.Id == id)
-                    .ExecuteUpdate(x => x
-                        .SetProperty(y => y.LastEditDate, lastEditDate)
-                        .SetProperty(y => y.ProfileId, profileId)));
+        (AiIntegrationContext ctx, int tenantId, Guid id, DateTime lastEditDate, Guid? profileId) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.Id == id)
+                .ExecuteUpdateAsync(x => x
+                    .SetProperty(y => y.LastEditDate, lastEditDate)
+                    .SetProperty(y => y.ProfileId, profileId));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteThreadAsync =
         EF.CompileAsyncQuery(
@@ -138,9 +135,8 @@ static file class ThreadQueriesContainer
                     .ExecuteDelete());
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> ClearThreadsProfileAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid profileId) =>
-                ctx.Threads
-                    .Where(x => x.TenantId == tenantId && x.ProfileId == profileId)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.ProfileId, (Guid?)null)));
+        (AiIntegrationContext ctx, int tenantId, Guid profileId) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.ProfileId == profileId)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.ProfileId, (Guid?)null));
 }

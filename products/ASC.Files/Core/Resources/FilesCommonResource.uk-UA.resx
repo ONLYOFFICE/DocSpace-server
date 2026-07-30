@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Не вдалося синхронізувати дані форми із зовнішньою базою даних.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Форму було змінено. Цей чернетка застаріла і не може бути надіслана.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Інструкція AI-агента не може перевищувати {0} символів</value>
+  </data>
 </root>

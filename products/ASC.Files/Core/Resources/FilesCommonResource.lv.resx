@@ -595,4 +595,10 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Neizdevās sinhronizēt veidlapas datus ar ārējo datubāzi.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Veidlapa ir mainīta. Šis melnraksts ir novecojis un to nevar iesniegt.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>MI aģenta instrukcija nevar būt garāka par {0} rakstzīmēm</value>
+  </data>
 </root>

@@ -35,15 +35,15 @@ import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Reuse of the .NET AI service's OpenAPI document for the agent proxy routes.
+// Reuse of the .NET AI service's OpenAPI document for the proxy routes.
 //
-// The `/agents/*` routes forward verbatim to the .NET AI service and return
-// its raw DocSpace response envelope (the `*Wrapper` schemas). Rather than
-// re-describe those responses by hand — and drift from the C# DTOs' XML docs —
-// this module reads the sibling `ai_2.0.json` (already generated from the C#
-// source by the .NET ApiDescription pipeline) and lifts the concrete 200
-// response schemas out of it, so the New AI document stops emitting the opaque
-// generic-object fallback for these operations.
+// The `/agents/*` and `/config/*` routes forward verbatim to the .NET AI
+// service and return its raw DocSpace response envelope (the `*Wrapper`
+// schemas). Rather than re-describe those responses by hand — and drift from
+// the C# DTOs' XML docs — this module reads the sibling `ai_2.0.json` (already
+// generated from the C# source by the .NET ApiDescription pipeline) and lifts
+// the concrete 200 response schemas out of it, so the New AI document stops
+// emitting the opaque generic-object fallback for these operations.
 //
 // The document must already exist and contain the mapped operations: it is
 // produced by the ASC.AI.Server build into the shared `json/` folder. This
@@ -74,11 +74,14 @@ const AI_DOCUMENT = path.join(SHARED_JSON_DIR, "ai_2.0.json");
 // generated TypeScript schemas already use.
 const SCHEMA_NAMESPACE = "NewAi";
 
-// New AI operationId → .NET AI operationId. Each New AI agent route proxies
-// the same-shaped response as the .NET operation named here; kept in sync by
-// hand with `apiCatalog.ts` (the `/agents/*` custom routes) and the .NET
-// `AgentsController`.
-const AGENT_RESPONSE_SOURCES: Readonly<Record<string, string>> = {
+// New AI operationId → .NET AI operationId. Each New AI proxy route forwards
+// verbatim to the .NET AI service and returns the same-shaped response as the
+// .NET operation named here; kept in sync by hand with `apiCatalog.ts` (the
+// custom routes) and the .NET controllers (`AgentsController`,
+// `SettingsController`). Only operations with a JSON 200 response belong here —
+// fire-and-forget routes (e.g. `vectorization/tasks`, which returns no body)
+// are intentionally omitted and fall back to the generic response shape.
+const PROXY_RESPONSE_SOURCES: Readonly<Record<string, string>> = {
   newAiAgentsList: "getAgents",
   newAiAgentsCreate: "createAgent",
   newAiAgentsNews: "getAgentsNewItems",
@@ -87,12 +90,17 @@ const AGENT_RESPONSE_SOURCES: Readonly<Record<string, string>> = {
   newAiAgentsDelete: "deleteAgent",
   newAiAgentsUpdateQuota: "updateAgentsQuota",
   newAiAgentsResetQuota: "resetAgentsQuota",
+  newAiSettingsGet: "getAiSettings",
+  newAiSettingsGetVectorization: "getVectorizationSettings",
+  newAiSettingsSetVectorization: "setVectorizationSettings",
+  newAiSettingsGetUser: "getAiUserSettings",
+  newAiSettingsSetUser: "setAiUserSettings",
 };
 
 type JsonObject = Record<string, unknown>;
 
 /** Concrete response schemas lifted from the .NET AI document. */
-export interface DotnetAgentSchemas {
+export interface DotnetProxySchemas {
   /** Namespaced component name → its (ref-rewritten) schema. */
   readonly components: Record<string, unknown>;
   /** New AI operationId → its 200 response schema (a namespaced `$ref`). */
@@ -101,7 +109,7 @@ export interface DotnetAgentSchemas {
 
 function fail(message: string): never {
   throw new Error(
-    `Cannot enrich the New AI agent routes from ${AI_DOCUMENT}: ${message}. `
+    `Cannot enrich the New AI proxy routes from ${AI_DOCUMENT}: ${message}. `
     + "Build ASC.AI.Server (which emits ai_2.0.json) before generating the "
     + "New AI OpenAPI document.",
   );
@@ -160,11 +168,11 @@ function namespaceRefs(node: unknown): unknown {
 
 /**
  * Read the .NET AI OpenAPI document and lift the 200 response schemas of the
- * agent operations, together with the transitive closure of components they
+ * proxied operations, together with the transitive closure of components they
  * reference. Throws (never falls back silently) when the document is missing,
  * unparseable, or does not contain a mapped operation / referenced component.
  */
-export function extractDotnetAgentSchemas(): DotnetAgentSchemas {
+export function extractDotnetProxySchemas(): DotnetProxySchemas {
   let raw: string;
   try {
     raw = readFileSync(AI_DOCUMENT, "utf8");
@@ -216,7 +224,7 @@ export function extractDotnetAgentSchemas(): DotnetAgentSchemas {
   const responses: Record<string, unknown> = {};
   const rootRefs = new Set<string>();
   const missing: string[] = [];
-  for (const [newAiOperationId, dotnetOperationId] of Object.entries(AGENT_RESPONSE_SOURCES)) {
+  for (const [newAiOperationId, dotnetOperationId] of Object.entries(PROXY_RESPONSE_SOURCES)) {
     const schema = responseByOperation.get(dotnetOperationId);
     if (schema === undefined) {
       missing.push(dotnetOperationId);

@@ -36,7 +36,7 @@ import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getBoolean } from "../narrow.js";
 import type { PreferencesStorage } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/preferences";
+const PATH = "/preferences";
 
 function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
   return entityId ? { entityId } : undefined;

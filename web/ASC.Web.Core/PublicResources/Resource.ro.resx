@@ -1420,12 +1420,39 @@
     <value>Administratori</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Obțineți acces la o gamă largă de modele AI prin integrarea OpenRouter. Plătiți doar pentru ceea ce utilizați, suma fiind dedusă din Portofelul dvs.</value>
+    <value>Obțineți acces la o gamă largă de modele IA prin integrarea OpenRouter. Plătiți doar pentru ceea ce utilizați, suma fiind dedusă din Portofelul dvs.</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
     <value>Utilizați un motor de căutare IA pentru a îmbogăți conversațiile IA cu informații în timp real de pe internet</value>
   </data>
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Utilizatori</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Utilizatori</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Token-uri</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Pachet pentru dezvoltatori Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Imagine</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Raport cotă DocsCloud ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Încorporați editorii ONLYOFFICE Docs în aplicația dvs. cu chiriași găzduiți în cloud și propriile chei API.</value>
   </data>
 </root>

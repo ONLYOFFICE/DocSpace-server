@@ -39,8 +39,8 @@ import { getArray, getString, isObject, parseInt10 } from "../narrow.js";
 import logger from "../log.js";
 import type { ToolsAdapter, TMCPItem } from "@onlyoffice/ai-chat/core";
 
-const LIST_PATH = "/integration/tools/list";
-const CALL_PATH = "/integration/tools/call";
+const LIST_PATH = "/tools/list";
+const CALL_PATH = "/tools/call";
 
 // Group key for the disabled / allow-always filters in `storage.toolPrefs`.
 // DocSpace tools are a single logical source, so they share one serverType.
@@ -125,7 +125,7 @@ export function extractAttachmentRefIds(message: unknown): string[] {
 // Resolve an attachment ref id to the DocSpace numeric file id the C# side
 // expects as `formId`. `HttpAttachmentsStorage` composes `path` as
 // `${entryId}/${title}` (see `dtoToAttachment`) — the leading segment is the
-// DocSpace entry id, echoed back verbatim from `/integration/attachments`.
+// DocSpace entry id, echoed back verbatim from `/attachments`.
 // Whether the file actually is a started form is validated on the C# side
 // (`FormDataToolsFactory.TryInitAsync`); a non-form id resolves to an empty
 // tool bundle.
@@ -214,7 +214,7 @@ function parseList(raw: unknown): ToolsList {
 
 /**
  * {@link ToolsAdapter} backed by the DocSpace AI integration endpoints
- * (`integration/tools/list` / `integration/tools/call`). Most tools served
+ * (`tools/list` / `tools/call`). Most tools served
  * by this adapter are executed in-engine and the chat resumes automatically
  * with no approval round-trip; the tools in `APPROVAL_TOOL_NAMES` are
  * emitted under a separate serverType so the engine surfaces an approval

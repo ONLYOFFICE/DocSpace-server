@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>فشل مزامنة بيانات النموذج مع قاعدة البيانات الخارجية.</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>لا يمكن أن تتجاوز تعليمات وكيل الذكاء الاصطناعي {0} حرفًا</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>تم تغيير النموذج. هذا المسودة قديمة ولا يمكن إرسالها.</value>
+  </data>
 </root>

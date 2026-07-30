@@ -98,7 +98,7 @@ interface CreateAgentBody {
 
 export const agentsController = {
   // POST agents — creates an AI agent. Creation is delegated to the .NET
-  // endpoint `POST internal/ai/integration/agents` (AgentsController.CreateAgent).
+  // endpoint `POST internal/ai/agents` (AgentsController.CreateAgent).
   // The caller's body is forwarded as-is except that `profileId` and `prompt`
   // are stripped. The profile is then bound to the created agent via an
   // assignment (profileId + the agent's entry id); a binding failure is an
@@ -127,7 +127,7 @@ export const agentsController = {
     // returned to the client in the same shape as a direct .NET call; the
     // agent id is read out of `response` for the assignment.
     const envelope = await aiService.post(
-      "/integration/agents",
+      "/agents",
       { ...rest, chatSettings: { prompt } },
       { raw: true },
     );
@@ -147,10 +147,10 @@ export const agentsController = {
   }),
 
   // GET agents — lists AI agents. Query params are forwarded as-is to
-  // `GET internal/ai/integration/agents` (AgentsController.GetAgents), which
+  // `GET internal/ai/agents` (AgentsController.GetAgents), which
   // reads them via [FromQuery]. Returns the upstream FolderContentDto.
   getAgents: asyncHandler(async (req, res) => {
-    const content = await aiService.get("/integration/agents", {
+    const content = await aiService.get("/agents", {
       query: forwardQuery(req.query),
       raw: true,
     });
@@ -158,17 +158,17 @@ export const agentsController = {
   }),
 
   // GET agents/news — returns the agents' new items
-  // (`GET internal/ai/integration/agents/news`).
+  // (`GET internal/ai/agents/news`).
   getAgentsNews: asyncHandler(async (_req, res) => {
-    const news = await aiService.get("/integration/agents/news", { raw: true });
+    const news = await aiService.get("/agents/news", { raw: true });
     res.json(news);
   }),
 
   // GET agents/{id} — returns a single agent
-  // (`GET internal/ai/integration/agents/{id}`).
+  // (`GET internal/ai/agents/{id}`).
   getAgentInfo: asyncHandler(async (req, res) => {
     const id = agentIdParam(req.params["id"]);
-    const envelope = await aiService.get(`/integration/agents/${id}`, { raw: true });
+    const envelope = await aiService.get(`/agents/${id}`, { raw: true });
 
     // Enrich the agent with its assigned profile so the edit dialog can
     // prefill the profile selector: the binding lives in the assignment
@@ -189,7 +189,7 @@ export const agentsController = {
   }),
 
   // PUT agents/{id} — updates an agent. The body (UpdateRoomRequest) is
-  // forwarded as-is to `PUT internal/ai/integration/agents/{id}`. `chatSettings`
+  // forwarded as-is to `PUT internal/ai/agents/{id}`. `chatSettings`
   // is the caller's responsibility here: the upstream still requires a valid
   // providerId/modelId when chatSettings is present.
   updateAgent: asyncHandler(async (req, res) => {
@@ -206,7 +206,7 @@ export const agentsController = {
     }
     const { profileId: _profileId, ...rest } = body;
 
-    const agent = await aiService.put(`/integration/agents/${id}`, rest, { raw: true });
+    const agent = await aiService.put(`/agents/${id}`, rest, { raw: true });
 
     if (profileId !== undefined) {
       const existing = await storage.assignments
@@ -228,13 +228,13 @@ export const agentsController = {
 
   // DELETE agents/{id} — removes an agent. The body (DeleteRoomRequest,
   // e.g. `{ deleteAfter }`) is forwarded to
-  // `DELETE internal/ai/integration/agents/{id}`. The per-agent profile
+  // `DELETE internal/ai/agents/{id}`. The per-agent profile
   // assignment is intentionally left untouched: the .NET assignment API
   // exposes no per-entry delete, so cleanup of orphaned assignment rows is
   // out of scope here.
   deleteAgent: asyncHandler(async (req, res) => {
     const id = agentIdParam(req.params["id"]);
-    const operation = await aiService.delete(`/integration/agents/${id}`, {
+    const operation = await aiService.delete(`/agents/${id}`, {
       body: req.body ?? {},
       raw: true,
     });
@@ -242,16 +242,16 @@ export const agentsController = {
   }),
 
   // PUT agents/agentquota — changes the quota for the given agents
-  // (`PUT internal/ai/integration/agents/agentquota`, body `{ roomIds, quota }`).
+  // (`PUT internal/ai/agents/agentquota`, body `{ roomIds, quota }`).
   updateAgentsQuota: asyncHandler(async (req, res) => {
-    const result = await aiService.put("/integration/agents/agentquota", req.body ?? {}, { raw: true });
+    const result = await aiService.put("/agents/agentquota", req.body ?? {}, { raw: true });
     res.json(result);
   }),
 
   // PUT agents/resetquota — resets the quota for the given agents
-  // (`PUT internal/ai/integration/agents/resetquota`, body `{ roomIds }`).
+  // (`PUT internal/ai/agents/resetquota`, body `{ roomIds }`).
   resetAgentsQuota: asyncHandler(async (req, res) => {
-    const result = await aiService.put("/integration/agents/resetquota", req.body ?? {}, { raw: true });
+    const result = await aiService.put("/agents/resetquota", req.body ?? {}, { raw: true });
     res.json(result);
   }),
 };

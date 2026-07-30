@@ -168,4 +168,10 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>Các phòng</value>
   </data>
+  <data name="Files" xml:space="preserve">
+    <value>Tập tin</value>
+  </data>
+  <data name="Forms" xml:space="preserve">
+    <value>Biểu mẫu</value>
+  </data>
 </root>

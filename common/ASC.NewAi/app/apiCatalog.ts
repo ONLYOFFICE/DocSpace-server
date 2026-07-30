@@ -79,8 +79,14 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
   { method: "DELETE", path: "/agents/{id}", tag: "Agents", operationId: "newAiAgentsDelete", summary: "Delete an agent", pathParams: ["id"], hasBody: true },
   { method: "PUT", path: "/agents/agentquota", tag: "Agents", operationId: "newAiAgentsUpdateQuota", summary: "Update agents' quota", hasBody: true },
   { method: "PUT", path: "/agents/resetquota", tag: "Agents", operationId: "newAiAgentsResetQuota", summary: "Reset agents' quota", hasBody: true },
+  { method: "GET", path: "/config", tag: "Settings", operationId: "newAiSettingsGet", summary: "Get AI settings" },
+  { method: "GET", path: "/config/vectorization", tag: "Settings", operationId: "newAiSettingsGetVectorization", summary: "Get vectorization settings" },
+  { method: "PUT", path: "/config/vectorization", tag: "Settings", operationId: "newAiSettingsSetVectorization", summary: "Update vectorization settings", hasBody: true },
+  { method: "GET", path: "/config/user", tag: "Settings", operationId: "newAiSettingsGetUser", summary: "Get user AI settings" },
+  { method: "PUT", path: "/config/user", tag: "Settings", operationId: "newAiSettingsSetUser", summary: "Update user AI settings", hasBody: true },
+  { method: "POST", path: "/vectorization/tasks", tag: "Vectorization", operationId: "newAiVectorizationStartTask", summary: "Start a vectorization task", hasBody: true },
 ];
 
 // Base path the service is mounted under (the DocSpace nginx route). Shared
 // by the router registration and the emitted document's absolute paths.
-export const API_PREFIX = "/api/2.0/new-ai";
+export const API_PREFIX = "/api/2.0/ai";

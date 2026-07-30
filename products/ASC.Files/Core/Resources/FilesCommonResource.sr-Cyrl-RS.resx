@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Није успела синхронизација података обрасца са спољном базом података.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Образац је промењен. Овај нацрт је застарео и не може бити поднет.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Инструкција AI агента не може бити дужа од {0} знакова</value>
+  </data>
 </root>

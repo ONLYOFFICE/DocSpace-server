@@ -221,11 +221,10 @@ static file class SecurityQueries
 
     public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, FileShare, Task<int>>
         UpdateShareByFolderTypesAsync =
-            Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-                (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<FolderType> folderTypes, FileShare share) =>
-                    ctx.Security
-                        .Where(r => r.TenantId == tenantId && r.Subject == subject && r.EntryType == FileEntryType.Folder)
-                        .Where(r => ctx.Folders.Any(f =>
-                            f.Id == r.InternalEntryId && f.TenantId == tenantId && folderTypes.Contains(f.FolderType)))
-                        .ExecuteUpdate(f => f.SetProperty(p => p.Share, share)));
+            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<FolderType> folderTypes, FileShare share) =>
+                ctx.Security
+                    .Where(r => r.TenantId == tenantId && r.Subject == subject && r.EntryType == FileEntryType.Folder)
+                    .Where(r => ctx.Folders.Any(f =>
+                        f.Id == r.InternalEntryId && f.TenantId == tenantId && folderTypes.Contains(f.FolderType)))
+                    .ExecuteUpdateAsync(f => f.SetProperty(p => p.Share, share));
 }

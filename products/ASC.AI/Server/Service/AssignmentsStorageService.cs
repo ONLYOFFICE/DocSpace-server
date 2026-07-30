@@ -45,7 +45,7 @@ public class AssignmentsStorageService(
 {
     private static readonly EmployeeType[] _writeGlobalTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _writeLocalTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
-    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async Task CreateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {

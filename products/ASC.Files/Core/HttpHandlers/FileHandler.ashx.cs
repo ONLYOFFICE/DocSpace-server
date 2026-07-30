@@ -788,7 +788,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         {
             var fileName = context.Request.Query[FilesLinkUtility.FileTitle];
             var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
-            if (!string.IsNullOrEmpty(signatureSecret))
+            if (!authContext.IsAuthenticated && !string.IsNullOrEmpty(signatureSecret))
             {
                 try
                 {

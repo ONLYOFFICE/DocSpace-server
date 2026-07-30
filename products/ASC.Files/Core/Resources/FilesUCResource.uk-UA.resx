@@ -168,4 +168,10 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>Кімнати</value>
   </data>
+  <data name="Files" xml:space="preserve">
+    <value>Файли</value>
+  </data>
+  <data name="Forms" xml:space="preserve">
+    <value>Форми</value>
+  </data>
 </root>
