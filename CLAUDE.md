@@ -66,6 +66,8 @@ cd common/Tools/ASC.Migration.Runner && dotnet run                    # Apply DB
 
 The AppHost has 5 launch profiles: `development`, `test`, `preview`, `integration-test`, `frontend-dev` — always pass `--launch-profile` explicitly.
 
+**Aspire CLI:** works from the repo root — the committed `.aspire/settings.json` points to the AppHost, no `--apphost` flag needed. The resource graph is defined in `common/ASC.AppHost/Program.cs` plus `common/ASC.AppHost/Configuration/` (`ProjectConfigurator.cs`, `ConnectionStringManager.cs`, `NginxConfiguration.cs`) — not in a single-file `apphost.cs`.
+
 **Package management:** Centralized in `Directory.Packages.props` — all version pins AND the global `TargetFramework` (net10.0) live there. `Directory.Build.props` only enables OpenAPI doc generation and strips native NuGet .pdb files; most csprojs set no TFM of their own.
 
 **More detail:** `README.md` documents service ports (Web.Api 5000, Studio 5003, People 5004, Files 5007/5009, AI 5157/5154), Aspire dashboard / Scalar / DBGate / Mailpit URLs, prerequisites, and troubleshooting.
