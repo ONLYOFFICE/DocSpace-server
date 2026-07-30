@@ -302,18 +302,15 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     private static async Task<ReportHeader> BuildReportHeaderAsync(RenderContext ctx)
     {
         var settingsManager = ctx.ServiceProvider.GetService<SettingsManager>();
-        var commonLinkUtility = ctx.ServiceProvider.GetService<CommonLinkUtility>();
         var tenantLogoManager = ctx.ServiceProvider.GetService<TenantLogoManager>();
-        var tenantWhiteLabelSettingsHelper = ctx.ServiceProvider.GetService<TenantWhiteLabelSettingsHelper>();
-        var documentServiceConnector = ctx.ServiceProvider.GetService<DocumentServiceConnector>();
         var tenantUtil = ctx.ServiceProvider.GetService<TenantUtil>();
 
         var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-        var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-        var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall);
-        logoPath = documentServiceConnector.ReplaceCommunityAddress(logoPath);
-        var logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath.Split('?')[0]);
+        // the document builder currently cannot embed a logo referenced by URL, so we inline it
+        // as a base64 data URI. Once the builder's image handling is fixed, switch back to the URL:
+        var logoSrc = await tenantLogoManager.GetTopLogoDataUriAsync()
+                      ?? await tenantLogoManager.GetTopLogoAbsoluteUrlAsync();
 
         var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
