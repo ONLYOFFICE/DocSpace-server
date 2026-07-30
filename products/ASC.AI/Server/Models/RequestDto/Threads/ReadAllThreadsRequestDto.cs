@@ -40,7 +40,7 @@ public class ReadAllThreadsRequestDto
 
     [FromQuery(Name = "count")]
     [Range(1, 1000)]
-    public required int Count { get; init; }
+    public required int Count { get; init; } = 100;
 
     [FromQuery(Name = "search")]
     [MaxLength(255)]

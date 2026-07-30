@@ -40,7 +40,7 @@ public class ReadMessagesByThreadRequestDto
 
     [FromQuery(Name = "count")]
     [Range(1, 1000)]
-    public required int Count { get; init; }
+    public required int Count { get; init; } = 100;
 
     [FromQuery(Name = "cursor")]
     public MessagesCursorDto? Cursor { get; init; }
