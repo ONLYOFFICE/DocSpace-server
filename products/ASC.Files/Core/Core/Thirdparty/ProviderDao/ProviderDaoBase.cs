@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -82,7 +82,7 @@ internal class ProviderDaoBase(IServiceProvider serviceProvider,
             deleteSourceFile);
     }
 
-    protected async Task<File<int>> PerformCrossDaoFileCopyAsync(string fromFileId, int toFolderId, bool deleteSourceFile, Guid chatId = default)
+    protected async Task<File<int>> PerformCrossDaoFileCopyAsync(string fromFileId, int toFolderId, bool deleteSourceFile)
     {
         var fromSelector = _selectorFactory.GetSelector(fromFileId);
 
@@ -93,8 +93,7 @@ internal class ProviderDaoBase(IServiceProvider serviceProvider,
             toFolderId, 
             _serviceProvider.GetService<IFileDao<int>>(), 
             r => r,
-            deleteSourceFile, 
-            chatId);
+            deleteSourceFile);
     }
 
     protected Task<Folder<string>> PerformCrossDaoFolderCopyAsync(string fromFolderId, string toRootFolderId, bool deleteSourceFolder, CancellationToken? cancellationToken)

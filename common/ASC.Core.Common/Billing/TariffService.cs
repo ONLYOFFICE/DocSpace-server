@@ -1274,6 +1274,19 @@ public class TariffService(
 
     public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null, bool waitForChanges = false)
     {
+        var (_, result) = await TopUpDepositInternalAsync(tenantId, amount, currency, customerParticipantName, siteName, metadata, waitForChanges);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Deposits funds and reports whether the outcome could actually be confirmed.
+    /// <see cref="TopUpOutcome.Unknown"/> means the billing response was lost (e.g. a timeout) or the
+    /// balance did not reflect the change in time - the deposit may or may not have been applied on the
+    /// billing side, so callers must not blindly retry with a recomputed amount, or they risk depositing twice.
+    /// </summary>
+    private async Task<(TopUpOutcome Outcome, bool Result)> TopUpDepositInternalAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata, bool waitForChanges)
+    {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
         decimal? oldBalanceAmount = 0;
@@ -1286,20 +1299,23 @@ public class TariffService(
 
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
         var result = false;
+        TopUpOutcome outcome;
 
         try
         {
             result = await billingClient.TopUpDepositAsync(portalId, amount, currency, customerParticipantName, siteName, metadata);
+            outcome = result ? TopUpOutcome.Confirmed : TopUpOutcome.Rejected;
         }
         catch (Exception error)
         {
             logger.ErrorWithException(error);
+            outcome = TopUpOutcome.Unknown;
         }
 
         if (!result || !waitForChanges)
         {
             await hybridCache.RemoveAsync(cacheKey);
-            return result;
+            return (outcome, result);
         }
 
         var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
@@ -1316,9 +1332,13 @@ public class TariffService(
         {
             logger.ErrorBilling(tenantId.ToString(), "Balance value is not updated after replenishment");
             await hybridCache.RemoveAsync(cacheKey);
+
+            // Billing reported success, but we could not confirm it against the balance in time:
+            // treat as unknown rather than confirmed so the caller does not act as if it were final.
+            outcome = TopUpOutcome.Unknown;
         }
 
-        return result;
+        return (outcome, result);
     }
 
     public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null)
@@ -1330,7 +1350,7 @@ public class TariffService(
         {
             var topUpAmount = Math.Ceiling((requiredAmount - balanceAmount) * 100) / 100;
 
-            var toppedUp = await TopUpDepositAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
+            var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
             if (toppedUp)
             {
                 var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
@@ -1338,9 +1358,26 @@ public class TariffService(
             }
 
             balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+
+            if (outcome == TopUpOutcome.Unknown)
+            {
+                // Whether this attempt actually succeeded on the billing side is unconfirmed. Retrying would
+                // recompute the shortfall and fire another real deposit, doubling it if the unconfirmed one
+                // did land - so stop here and let the caller treat the balance as still insufficient.
+                logger.ErrorBilling(tenantId.ToString(), "Top-up outcome is unknown, stopping retries to avoid a duplicate deposit");
+
+                break;
+            }
         }
 
         return balanceAmount >= requiredAmount;
+    }
+
+    private enum TopUpOutcome
+    {
+        Confirmed,
+        Rejected,
+        Unknown
     }
 
     private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)
