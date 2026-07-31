@@ -47,9 +47,6 @@ public class AgentsController(
     FolderContentDtoHelper folderContentDtoHelper,
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
-    SystemMcpConfig systemMcpConfig,
-    McpService mcpService,
-    ILogger<AgentsController> logger,
     ApiDateTimeHelper apiDateTimeHelper,
     RootNewItemsDtoHelper rootNewItemsDtoHelper,
     FileSecurity fileSecurity)
@@ -138,26 +135,6 @@ public class AgentsController(
             inDto.Tags,
             inDto.Logo,
             inDto.ChatSettings);
-
-        if (!inDto.AttachDefaultTools)
-        {
-            return await folderDtoHelper.GetAsync(room);
-        }
-
-        try
-        {
-            var server = systemMcpConfig.Servers.Values.FirstOrDefault(
-                x => x.Type == ServerType.DocSpace);
-
-            if (server != null)
-            {
-                await mcpService.AddServersToRoomAsync(room, [server.Id]);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.ErrorWithException(e);
-        }
 
         return await folderDtoHelper.GetAsync(room);
     }
