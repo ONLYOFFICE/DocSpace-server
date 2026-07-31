@@ -46,7 +46,8 @@ public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, Cor
         new WebStudioModuleSpecifics(helpers),
         new CoreModuleSpecifics(helpers),
         new IdentityModuleSpecifics(helpers),
-        new AiModuleSpecifics(helpers)
+        new AiModuleSpecifics(helpers),
+        new AiIntegrationModuleSpecifics(helpers)
     };
 
     private IModuleSpecifics RoomLogosModule { get; } = new RoomLogosModuleSpecifics(helpers);

@@ -97,3 +97,78 @@ public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
             : base.GetSelectCommandConditionText(tenantId, table);
     }
 }
+
+public class AiIntegrationModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
+{
+    public override ModuleName ModuleName => ModuleName.Ai;
+    public override IEnumerable<TableInfo> Tables => _tables;
+    public override IEnumerable<RelationInfo> TableRelations => _tableRelations;
+
+    private readonly TableInfo[] _tables =
+    [
+        new("ai_integration_profiles", "tenant_id", "id", IdType.Guid)
+        {
+            DateColumns = new Dictionary<string, bool> { { "created_at", false } }
+        },
+        new("ai_integration_threads", "tenant_id", "id", IdType.Guid)
+        {
+            UserIDColumns = ["created_by"],
+            DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "last_edit_date", false } }
+        },
+        new("ai_integration_messages", "tenant_id", "id", IdType.Guid)
+        {
+            DateColumns = new Dictionary<string, bool> { { "timestamp", false } }
+        },
+        new("ai_integration_attachments", "tenant_id", "id", IdType.Guid)
+        {
+            DateColumns = new Dictionary<string, bool> { { "created_at", false } }
+        },
+        new("ai_integration_prompt_folders", "tenant_id", "id", IdType.Guid)
+        {
+            UserIDColumns = ["created_by"],
+            DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "updated_at", false } }
+        },
+        new("ai_integration_prompts", "tenant_id", "id", IdType.Guid)
+        {
+            UserIDColumns = ["created_by"],
+            DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "updated_at", false } }
+        },
+        new("ai_integration_preferences", "tenant_id", "id", IdType.Guid)
+        {
+            UserIDColumns = ["created_by"]
+        },
+        new("ai_integration_tool_preferences", "tenant_id", "id", IdType.Guid)
+        {
+            UserIDColumns = ["created_by"],
+            DateColumns = new Dictionary<string, bool> { { "created_at", false } }
+        },
+        new("ai_integration_mcp_servers", "tenant_id", "id", IdType.Guid)
+        {
+            DateColumns = new Dictionary<string, bool> { { "created_at", false } }
+        },
+        new("ai_integration_assignments", "tenant_id", "id", IdType.Guid)
+        {
+            DateColumns = new Dictionary<string, bool> { { "created_at", false } }
+        }
+    ];
+
+    private readonly RelationInfo[] _tableRelations =
+    [
+        new("core_user", "id", "ai_integration_threads", "created_by"),
+        new("core_user", "id", "ai_integration_prompt_folders", "created_by"),
+        new("core_user", "id", "ai_integration_prompts", "created_by"),
+        new("core_user", "id", "ai_integration_preferences", "created_by"),
+        new("core_user", "id", "ai_integration_tool_preferences", "created_by"),
+        new("files_folder", "id", "ai_integration_threads", "entry_id"),
+        new("files_folder", "id", "ai_integration_preferences", "entry_id"),
+        new("files_folder", "id", "ai_integration_tool_preferences", "entry_id"),
+        new("files_folder", "id", "ai_integration_mcp_servers", "entry_id"),
+        new("files_folder", "id", "ai_integration_assignments", "entry_id"),
+        new("files_file", "id", "ai_integration_attachments", "entry_id"),
+        new("ai_integration_profiles", "id", "ai_integration_threads", "profile_id"),
+        new("ai_integration_profiles", "id", "ai_integration_assignments", "profile_id"),
+        new("ai_integration_prompt_folders", "id", "ai_integration_prompts", "folder_id"),
+        new("ai_integration_threads", "id", "ai_integration_messages", "thread_id"),
+        new("ai_integration_messages", "id", "ai_integration_attachments", "message_id")
+    ];
+}
