@@ -53,6 +53,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
+import { safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -173,6 +174,19 @@ function withContextPrompt<T>(body: T): T {
   const entityId =
     typeof body["entityId"] === "string" ? body["entityId"] : undefined;
   return appendActionPrompt(body, buildContextFragment(entityId));
+}
+
+// Fold the picked agent's stored instruction (`chatSettings.prompt`, set on
+// the agent room) into the action's prompt override. Scoped to the round's
+// context (the agent room when one is picked, like the tools fragment) so a
+// plain chat in a regular folder gets nothing. Applied innermost so the
+// instruction leads the system prompt, ahead of the tools/context fragments.
+async function withAgentInstruction<T>(body: T): Promise<T> {
+  if (!isObject(body)) {
+    return body;
+  }
+  const instruction = await safeGetAgentInstruction(contextScopeOf(body));
+  return instruction ? appendActionPrompt(body, instruction) : body;
 }
 
 const toolsAdapter = new HttpToolsAdapter();
@@ -344,7 +358,9 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
+    const body = withContextPrompt(
+      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+    );
     await streamNdjson(
       res,
       logStreamErrors("ai/send-with-stream", engine.sendWithStream(body)),
@@ -356,7 +372,9 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
+    const body = withContextPrompt(
+      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+    );
     await streamOpenAiSse(
       res,
       logStreamErrors("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body)),
@@ -367,7 +385,9 @@ export const aiController = {
     markForwardHeadersToProvider();
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
-    const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
+    const body = withContextPrompt(
+      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+    );
     await streamNdjson(
       res,
       logStreamErrors("ai/regenerate-stream", engine.regenerateStream(body)),
