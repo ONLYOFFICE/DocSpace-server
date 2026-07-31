@@ -106,47 +106,47 @@ public class AiIntegrationModuleSpecifics(Helpers helpers) : ModuleSpecificsBase
 
     private readonly TableInfo[] _tables =
     [
-        new("ai_integration_profiles", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_profiles", "tenant_id", "id", IdType.GuidV7)
         {
             DateColumns = new Dictionary<string, bool> { { "created_at", false } }
         },
-        new("ai_integration_threads", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_threads", "tenant_id", "id", IdType.GuidV7)
         {
             UserIDColumns = ["created_by"],
             DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "last_edit_date", false } }
         },
-        new("ai_integration_messages", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_messages", "tenant_id", "id", IdType.GuidV7)
         {
             DateColumns = new Dictionary<string, bool> { { "timestamp", false } }
         },
-        new("ai_integration_attachments", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_attachments", "tenant_id", "id", IdType.GuidV7)
         {
             DateColumns = new Dictionary<string, bool> { { "created_at", false } }
         },
-        new("ai_integration_prompt_folders", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_prompt_folders", "tenant_id", "id", IdType.GuidV7)
         {
             UserIDColumns = ["created_by"],
             DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "updated_at", false } }
         },
-        new("ai_integration_prompts", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_prompts", "tenant_id", "id", IdType.GuidV7)
         {
             UserIDColumns = ["created_by"],
             DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "updated_at", false } }
         },
-        new("ai_integration_preferences", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_preferences", "tenant_id", "id", IdType.GuidV7)
         {
             UserIDColumns = ["created_by"]
         },
-        new("ai_integration_tool_preferences", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_tool_preferences", "tenant_id", "id", IdType.GuidV7)
         {
             UserIDColumns = ["created_by"],
             DateColumns = new Dictionary<string, bool> { { "created_at", false } }
         },
-        new("ai_integration_mcp_servers", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_mcp_servers", "tenant_id", "id", IdType.GuidV7)
         {
             DateColumns = new Dictionary<string, bool> { { "created_at", false } }
         },
-        new("ai_integration_assignments", "tenant_id", "id", IdType.Guid)
+        new("ai_integration_assignments", "tenant_id", "id", IdType.GuidV7)
         {
             DateColumns = new Dictionary<string, bool> { { "created_at", false } }
         }
