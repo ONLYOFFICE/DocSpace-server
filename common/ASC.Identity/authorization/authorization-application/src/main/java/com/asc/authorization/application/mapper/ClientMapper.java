@@ -39,6 +39,7 @@ import com.asc.common.service.transfer.response.ClientResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -138,5 +139,20 @@ public class ClientMapper {
                 .reuseRefreshTokens(false)
                 .build())
         .build();
+  }
+
+  /**
+   * Maps a gRPC client to a {@link RegisteredClient} when it is public and enabled.
+   *
+   * @param clientResponse the gRPC client response
+   * @return the mapped client, or empty if the client is private or disabled
+   */
+  public Optional<RegisteredClient> toAccessibleRegisteredClient(
+      com.asc.common.application.proto.ClientResponse clientResponse) {
+    if (!clientResponse.getIsPublic()) return Optional.empty();
+
+    if (!clientResponse.getEnabled()) return Optional.empty();
+
+    return Optional.of(toRegisteredClient(clientResponse));
   }
 }

@@ -35,6 +35,7 @@ package com.asc.authorization.application.security.oauth.service;
 
 import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
 import com.asc.authorization.application.mapper.ClientMapper;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -124,30 +125,18 @@ public class RegisteredClientService
   }
 
   /**
-   * Validates whether a registered client is accessible.
+   * Loads a registered client in a single remote call when it is public and enabled.
    *
-   * <p>The client is considered accessible if it is public and enabled.
-   *
-   * @param clientId the client ID of the registered client.
-   * @return {@code true} if the client is accessible, {@code false} otherwise.
+   * @param clientId the client ID of the registered client
+   * @return the accessible client, or empty if missing, private, or disabled
    */
-  public boolean validateClientAccessibility(String clientId) {
+  public Optional<RegisteredClient> findAccessibleClient(String clientId) {
     try {
-      var client = grpcRegisteredClientService.getClient(clientId);
-      if (!client.getIsPublic()) {
-        log.warn("Client {} is not accessible", client.getClientId());
-        return false;
-      }
-
-      if (!client.getEnabled()) {
-        log.warn("Client {} is disabled", client.getClientId());
-        return false;
-      }
-
-      return true;
+      return clientMapper.toAccessibleRegisteredClient(
+          grpcRegisteredClientService.getClient(clientId));
     } catch (Exception e) {
       log.warn("Registered client not found for client ID: {}", clientId);
-      return false;
+      return Optional.empty();
     }
   }
 }
