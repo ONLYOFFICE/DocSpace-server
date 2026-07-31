@@ -60,14 +60,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
     public DbSet<DbFilesGroup> RoomGroup { get; set; }
     public DbSet<DbFilesRoomGroup> RoomGroupRef { get; set; }
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> ChatMessages { get; set; }
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
-    public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
-    public DbSet<DbMcpServerSettings> McpServerSettings { get; set; }
-    public DbSet<DbAiProvider> AiProviders { get; set; }
-    public DbSet<DbChatMessageAttachment> MessageAttachments { get; set; }
-    public DbSet<DbAiModelSettings> AiModelSettings { get; set; }
     public DbSet<DbFileKeys> DbFileKeys { get; set; }
     public DbSet<DbThread> Threads { get; set; }
     public DbSet<DbAssignment> Assignments { get; set; }
@@ -102,14 +95,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddUserGroup()
             .AddFilesAuditReference()
             .AddUserRelation()
-            .AddDbChats()
-            .AddDbChatsMessages()
             .AddDbFileVectorization()
-            .AddDbUserChatSettings()
-            .AddDbMcpServerSettings()
-            .AddDbAiProviders()
-            .AddDbAiModelSettings()
-            .AddDbChatMessageAttachment()
             .AddDbFileKeys()
             .AddDbThreads()
             .AddDbProfiles()

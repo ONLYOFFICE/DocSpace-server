@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -207,19 +207,6 @@ public class SocketManager(
         });
     }
 
-    public async Task UpdateChatAsync<T>(Folder<T> folder, Guid chatId, string chatTitle, Guid userId)
-    {
-        var room = FolderRoom(folder.Id);
-
-        await base.MakeRequest("update-chat", new { room, chatId, chatTitle, userId });
-    }
-
-    public async Task CommitMessageAsync(Guid chatId, long messageId)
-    {
-        var room = ChatRoom(chatId);
-        await MakeRequest("commit-chat-message", new { room, messageId });
-    }
-
     public async Task ChangeAccessRightsAsync<T>(FileEntry<T> fileEntry, Guid userId, FileShare access)
     {
         var room = fileEntry.FileEntryType == FileEntryType.File ? FileRoom(fileEntry.Id) : FolderRoom(fileEntry.Id);
@@ -386,11 +373,6 @@ public class SocketManager(
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         return $"{tenantId}-DIR-{folderId}";
-    }
-
-    private string ChatRoom(Guid chatId)
-    {
-        return $"{_tenantManager.GetCurrentTenantId()}-CHAT-{chatId}";
     }
 
     private async Task<string> Serialize<T>(FileEntry<T> entry)

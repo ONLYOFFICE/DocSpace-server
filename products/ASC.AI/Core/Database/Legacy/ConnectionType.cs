@@ -31,46 +31,13 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using ASC.AI.Integration.Extensions;
-global using ASC.Api.Core;
-global using ASC.Api.Core.Extensions;
-global using ASC.AI.Worker;
-global using ASC.AI.Worker.BackgroundServices;
-global using ASC.AI.Worker.Extensions;
-global using ASC.AI.Worker.Handlers;
-global using ASC.AI.Worker.Log;
+namespace ASC.AI.Core.Database.Legacy;
 
-global using ASC.Core;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.Hosting;
-global using ASC.Common;
-global using ASC.Common.DependencyInjection;
-global using ASC.Common.Log;
-
-global using ASC.Common.Threading;
-global using ASC.Common.Threading.HeartBeat.Abstractions;
-
-global using ASC.ElasticSearch.VectorData;
-
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Log;
-
-global using ASC.Files.Core;
-global using ASC.Files.Core.Core;
-global using ASC.Files.Core.EF;
-global using ASC.Files.Core.Vectorization;
-global using ASC.Files.Core.Vectorization.Events;
-
-
-global using Autofac;
-
-global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using Microsoft.EntityFrameworkCore;
-
-global using NLog;
-
-global using System.Text;
-global using System.Threading.Channels;
-
-global using ASC.Web.Files.Utils;
+/// <summary>
+/// Schema-only: retained for the legacy `ai_mcp_servers` column type.
+/// </summary>
+public enum ConnectionType
+{
+    Direct,
+    OAuth
+}

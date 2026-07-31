@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,46 +31,13 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using ASC.AI.Integration.Extensions;
-global using ASC.Api.Core;
-global using ASC.Api.Core.Extensions;
-global using ASC.AI.Worker;
-global using ASC.AI.Worker.BackgroundServices;
-global using ASC.AI.Worker.Extensions;
-global using ASC.AI.Worker.Handlers;
-global using ASC.AI.Worker.Log;
+namespace ASC.AI.Tools.Core;
 
-global using ASC.Core;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.Hosting;
-global using ASC.Common;
-global using ASC.Common.DependencyInjection;
-global using ASC.Common.Log;
+public class ToolResponse<T>
+{
+    [JsonPropertyName("data")]
+    public T? Data { get; init; }
 
-global using ASC.Common.Threading;
-global using ASC.Common.Threading.HeartBeat.Abstractions;
-
-global using ASC.ElasticSearch.VectorData;
-
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Log;
-
-global using ASC.Files.Core;
-global using ASC.Files.Core.Core;
-global using ASC.Files.Core.EF;
-global using ASC.Files.Core.Vectorization;
-global using ASC.Files.Core.Vectorization.Events;
-
-
-global using Autofac;
-
-global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using Microsoft.EntityFrameworkCore;
-
-global using NLog;
-
-global using System.Text;
-global using System.Threading.Channels;
-
-global using ASC.Web.Files.Utils;
+    [JsonPropertyName("error")]
+    public string? Error { get; init; }
+}
