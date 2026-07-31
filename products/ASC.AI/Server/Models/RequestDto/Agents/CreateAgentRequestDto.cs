@@ -121,10 +121,4 @@ public class CreateAgentRequestDto
     /// </summary>
     /// <example>{"model": "gpt-4", "temperature": 0.7}</example>
     public ChatSettings? ChatSettings { get; set; }
-
-    /// <summary>
-    /// Specifies whether to attach default tools to the agent or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool AttachDefaultTools { get; set; } = true;
 }

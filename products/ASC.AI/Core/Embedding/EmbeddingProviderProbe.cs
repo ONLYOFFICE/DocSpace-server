@@ -31,46 +31,26 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using ASC.AI.Integration.Extensions;
-global using ASC.Api.Core;
-global using ASC.Api.Core.Extensions;
-global using ASC.AI.Worker;
-global using ASC.AI.Worker.BackgroundServices;
-global using ASC.AI.Worker.Extensions;
-global using ASC.AI.Worker.Handlers;
-global using ASC.AI.Worker.Log;
+namespace ASC.AI.Core.Embedding;
 
-global using ASC.Core;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.Hosting;
-global using ASC.Common;
-global using ASC.Common.DependencyInjection;
-global using ASC.Common.Log;
+[Scope]
+public class EmbeddingProviderProbe(IHttpClientFactory httpClientFactory)
+{
+    public async Task PingAsync(EmbeddingProviderType type, string url, string apiKey)
+    {
+        var endpoint = type switch
+        {
+            EmbeddingProviderType.OpenAi => "models",
+            EmbeddingProviderType.OpenRouter => "models/user",
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
 
-global using ASC.Common.Threading;
-global using ASC.Common.Threading.HeartBeat.Abstractions;
+        using var client = httpClientFactory.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{url.TrimEnd('/')}/{endpoint}");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-global using ASC.ElasticSearch.VectorData;
+        using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Log;
-
-global using ASC.Files.Core;
-global using ASC.Files.Core.Core;
-global using ASC.Files.Core.EF;
-global using ASC.Files.Core.Vectorization;
-global using ASC.Files.Core.Vectorization.Events;
-
-
-global using Autofac;
-
-global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using Microsoft.EntityFrameworkCore;
-
-global using NLog;
-
-global using System.Text;
-global using System.Threading.Channels;
-
-global using ASC.Web.Files.Utils;
+        response.EnsureSuccessStatusCode();
+    }
+}
