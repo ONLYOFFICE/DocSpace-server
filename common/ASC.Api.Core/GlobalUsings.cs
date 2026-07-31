@@ -35,6 +35,7 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Net;
+global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Serialization;
@@ -178,5 +179,7 @@ global using RedisRateLimiting.AspNetCore;
 global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
 global using StackExchange.Redis.Extensions.Core.Configuration;
+
+global using ZiggyCreatures.Caching.Fusion;
 
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
