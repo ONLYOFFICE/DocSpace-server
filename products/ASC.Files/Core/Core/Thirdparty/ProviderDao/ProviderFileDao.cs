@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -256,7 +256,7 @@ internal class ProviderFileDao(
         return await SaveFileAsync(file, fileStream);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -419,7 +419,7 @@ internal class ProviderFileDao(
     {
         if (toFolderId is int tId)
         {
-            return await CopyFileAsync(fileId, tId, Guid.Empty) as File<TTo>;
+            return await PerformCrossDaoFileCopyAsync(fileId, tId, false) as File<TTo>;
         }
 
         if (toFolderId is string tsId)
@@ -428,11 +428,6 @@ internal class ProviderFileDao(
         }
 
         throw new NotImplementedException();
-    }
-
-    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
-    {
-        return await PerformCrossDaoFileCopyAsync(fileId, toFolderId, false, chatId);
     }
 
     public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)

@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -995,7 +995,6 @@ internal class FolderDao(
             await filesDbContext.DeleteOrderByFolderIdsAsync(tenantId, subfolders);
 
             await filesDbContext.DeleteAuditReferencesByFolderIdsAsync(subfolders);
-            await filesDbContext.DeleteChatsByRoomIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteAttachmentsByFolderIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteThreadsByFolderIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteAssignmentsByFolderIdsAsync(tenantId, subfolders);
