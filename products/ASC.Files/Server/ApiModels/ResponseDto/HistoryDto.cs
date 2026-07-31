@@ -258,7 +258,7 @@ public class HistoryApiHelper(
     public async Task DemandFolderHistoryReportPermissionAsync(int folderId)
     {
         if (!coreBaseSettings.Standalone
-        && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString())
+        && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
             || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);

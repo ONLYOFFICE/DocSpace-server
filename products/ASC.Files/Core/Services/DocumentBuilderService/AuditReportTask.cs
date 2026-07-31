@@ -348,13 +348,22 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 
     private static (List<string> Headers, List<PropertyInfo> Props) GetColumns<T>() where T : BaseEvent
     {
-        var props = typeof(T).GetProperties()
-            .Where(p => p.GetCustomAttribute<EventAttribute>() != null)
-            .OrderBy(p => p.GetCustomAttribute<EventAttribute>().Order)
+        var columns = typeof(T).GetProperties()
+            .Select(p => new
+            {
+                Property = p,
+                Attribute = p.GetCustomAttribute<EventAttribute>()
+            })
+            .Where(x => x.Attribute != null)
+            .OrderBy(x => x.Attribute!.Order)
             .ToList();
 
-        var headers = props
-            .Select(p => AuditReportResource.ResourceManager.GetString(p.GetCustomAttribute<EventAttribute>().Resource))
+        var headers = columns
+            .Select(c => AuditReportResource.ResourceManager.GetString(c.Attribute!.Resource))
+            .ToList();
+
+        var props = columns
+            .Select(x => x.Property)
             .ToList();
 
         return (headers, props);

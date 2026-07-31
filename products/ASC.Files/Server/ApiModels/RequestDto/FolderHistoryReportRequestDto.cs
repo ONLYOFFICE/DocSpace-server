@@ -55,14 +55,14 @@ public class FolderHistoryReportRequestDto
     /// <summary>
     /// The start date of the history period to export.
     /// </summary>
-    /// <example>2026-01-01T00:00:00</example>
+    /// <example>2025-01-01T00:00:00.0000000Z</example>
     [FromQuery(Name = "from")]
-    public DateTime? From { get; set; }
+    public ApiDateTime From { get; set; }
 
     /// <summary>
     /// The end date of the history period to export.
     /// </summary>
-    /// <example>2026-07-30T00:00:00</example>
+    /// <example>2025-12-31T23:59:59.0000000Z</example>
     [FromQuery(Name = "to")]
-    public DateTime? To { get; set; }
+    public ApiDateTime To { get; set; }
 }
