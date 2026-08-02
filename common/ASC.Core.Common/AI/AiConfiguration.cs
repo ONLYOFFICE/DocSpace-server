@@ -32,8 +32,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 #nullable enable
-using ASC.Core.Common.EF.Model.Ai;
-
 namespace ASC.Core.Common.AI;
 
 [Singleton]

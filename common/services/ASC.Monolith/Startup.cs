@@ -31,7 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.ApiSystem.Extensions;
 using ASC.Data.Backup.Extensions;
 using ASC.Data.Backup.Worker.Extensions;
 using ASC.Files.Extensions;

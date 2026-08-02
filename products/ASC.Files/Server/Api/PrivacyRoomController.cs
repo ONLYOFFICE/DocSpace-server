@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.MessagingSystem.EF.Model;
-
 namespace ASC.Api.Documents;
 
 /// <summary>

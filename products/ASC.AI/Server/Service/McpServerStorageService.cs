@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Integration.McpServers;
-
 using McpServer = ASC.AI.Integration.McpServers.McpServer;
 
 namespace ASC.AI.Service;
