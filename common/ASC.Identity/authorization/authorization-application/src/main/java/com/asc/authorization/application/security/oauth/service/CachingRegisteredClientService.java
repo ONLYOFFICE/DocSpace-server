@@ -52,7 +52,6 @@ import org.springframework.stereotype.Service;
 @ConditionalOnClass(RedisTemplate.class)
 public class CachingRegisteredClientService implements RegisteredClientCacheService {
   private static final String CACHE_PREFIX = "identity:authorization:client";
-  private static final String CACHE_KEY_TENANT_CLIENT_SEPARATOR = "_";
   private static final String CACHE_KEY_SEPARATOR = ":";
 
   private static final int CACHE_EXPIRE_AFTER_WRITE_MINUTES = 5;
@@ -65,20 +64,8 @@ public class CachingRegisteredClientService implements RegisteredClientCacheServ
     this.redisTemplate = redisTemplate;
   }
 
-  private String buildCacheKey(long tenantId, String clientId) {
-    return CACHE_PREFIX
-        + CACHE_KEY_SEPARATOR
-        + tenantId
-        + CACHE_KEY_TENANT_CLIENT_SEPARATOR
-        + clientId;
-  }
-
-  private String buildTenantCacheKeyPattern(long tenantId) {
-    return CACHE_PREFIX + CACHE_KEY_SEPARATOR + tenantId + CACHE_KEY_TENANT_CLIENT_SEPARATOR + "*";
-  }
-
-  private String buildAnyTenantCacheKeyPattern(String clientId) {
-    return CACHE_PREFIX + CACHE_KEY_SEPARATOR + "*" + CACHE_KEY_TENANT_CLIENT_SEPARATOR + clientId;
+  private String buildCacheKey(String clientId) {
+    return CACHE_PREFIX + CACHE_KEY_SEPARATOR + clientId;
   }
 
   @Override
@@ -88,7 +75,7 @@ public class CachingRegisteredClientService implements RegisteredClientCacheServ
       return;
     }
 
-    var key = buildCacheKey(client.getTenantId(), client.getClientId());
+    var key = buildCacheKey(client.getClientId());
     try {
       redisTemplate
           .opsForValue()
@@ -104,35 +91,23 @@ public class CachingRegisteredClientService implements RegisteredClientCacheServ
   public Optional<CachedRegisteredClient> get(String clientId) {
     if (clientId == null || clientId.isEmpty()) return Optional.empty();
 
+    var key = buildCacheKey(clientId);
     try {
-      var pattern = buildAnyTenantCacheKeyPattern(clientId);
-      var keys = redisTemplate.keys(pattern);
-
-      if (keys != null && !keys.isEmpty()) {
-        for (var key : keys) {
-          try {
-            var cached = redisTemplate.opsForValue().get(key);
-            if (cached instanceof CachedRegisteredClient client) {
-              log.info("Cache hit for registered client");
-              return Optional.of(client);
-            }
-
-          } catch (Exception e) {
-            log.info("Failed to retrieve cached entry for key {}", key);
-            try {
-              redisTemplate.delete(key);
-            } catch (Exception dex) {
-              log.error("Failed to delete corrupted cache entry", dex);
-            }
-          }
-        }
+      var cached = redisTemplate.opsForValue().get(key);
+      if (cached instanceof CachedRegisteredClient client) {
+        log.info("Cache hit for registered client");
+        return Optional.of(client);
       }
     } catch (Exception e) {
-      log.error("Failed to search cache for registered client", e);
+      log.error("Failed to retrieve cached registered client", e);
+      try {
+        redisTemplate.delete(key);
+      } catch (Exception dex) {
+        log.error("Failed to delete corrupted cache entry", dex);
+      }
     }
 
     log.info("Cache miss for registered client");
-
     return Optional.empty();
   }
 
@@ -143,23 +118,17 @@ public class CachingRegisteredClientService implements RegisteredClientCacheServ
       return;
     }
 
-    var key = buildCacheKey(tenantId, clientId);
     try {
-      redisTemplate.delete(key);
+      redisTemplate.delete(buildCacheKey(clientId));
     } catch (Exception e) {
       log.error("Failed to evict registered client from cache", e);
     }
   }
 
+  // NOTE: Tenant removal is rare, so trading a bit of over-eviction
   @Override
   public void evictAllByTenantId(long tenantId) {
-    try {
-      var pattern = buildTenantCacheKeyPattern(tenantId);
-      var keys = redisTemplate.keys(pattern);
-      if (keys != null && !keys.isEmpty()) redisTemplate.delete(keys);
-    } catch (Exception e) {
-      log.error("Failed to evict registered clients for tenant", e);
-    }
+    clear();
   }
 
   @Override
