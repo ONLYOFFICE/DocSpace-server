@@ -35,6 +35,7 @@ package com.asc.authorization.application.security.oauth.service;
 
 import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
 import com.asc.authorization.application.mapper.ClientMapper;
+import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class RegisteredClientService
     implements RegisteredClientRepository, RegisteredClientAccessibilityService {
+  private final RegisteredClientCacheService registeredClientCacheService;
   private final GrpcRegisteredClientService grpcRegisteredClientService;
   private final ClientMapper clientMapper;
 
@@ -75,7 +77,8 @@ public class RegisteredClientService
   /**
    * Finds a registered client by its ID.
    *
-   * <p>The client is retrieved from the gRPC service. If the client is disabled, a {@link
+   * <p>The cache is consulted first; on a miss, the client is retrieved from the gRPC service and
+   * the cache is populated for subsequent lookups. If the client is disabled, a {@link
    * RegisteredClientPermissionException} is thrown. If the client is not found, null is returned.
    *
    * @param id the ID of the registered client.
@@ -86,13 +89,18 @@ public class RegisteredClientService
       MDC.put("client_id", id);
       log.info("Trying to find registered client by id");
 
-      var client = grpcRegisteredClientService.getClient(id);
+      var cachedClient = registeredClientCacheService.get(id).orElse(null);
+      if (cachedClient == null) {
+        var client = grpcRegisteredClientService.getClient(id);
+        cachedClient = clientMapper.toCachedRegisteredClient(client);
+        registeredClientCacheService.put(cachedClient);
+      }
 
-      if (!client.getEnabled())
+      if (!cachedClient.isEnabled())
         throw new RegisteredClientPermissionException(
             String.format("Client with id %s is disabled", id));
 
-      return clientMapper.toRegisteredClient(client);
+      return clientMapper.toRegisteredClient(cachedClient);
     } catch (Exception e) {
       log.warn("Could not find registered client", e);
       return null;
@@ -125,15 +133,23 @@ public class RegisteredClientService
   }
 
   /**
-   * Loads a registered client in a single remote call when it is public and enabled.
+   * Loads a registered client, preferring the cache, when it is public and enabled.
    *
    * @param clientId the client ID of the registered client
    * @return the accessible client, or empty if missing, private, or disabled
    */
   public Optional<RegisteredClient> findAccessibleClient(String clientId) {
     try {
-      return clientMapper.toAccessibleRegisteredClient(
-          grpcRegisteredClientService.getClient(clientId));
+      var cachedClient = registeredClientCacheService.get(clientId).orElse(null);
+      if (cachedClient == null) {
+        var client = grpcRegisteredClientService.getClient(clientId);
+        cachedClient = clientMapper.toCachedRegisteredClient(client);
+        registeredClientCacheService.put(cachedClient);
+      }
+
+      if (!cachedClient.isPublicClient() || !cachedClient.isEnabled()) return Optional.empty();
+
+      return Optional.of(clientMapper.toRegisteredClient(cachedClient));
     } catch (Exception e) {
       log.warn("Registered client not found for client ID: {}", clientId);
       return Optional.empty();
