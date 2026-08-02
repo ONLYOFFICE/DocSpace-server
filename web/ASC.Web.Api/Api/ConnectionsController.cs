@@ -38,9 +38,7 @@ namespace ASC.Web.Api;
 /// </remarks>
 /// <name>security</name>
 [Scope]
-[DefaultRoute("activeconnections")]
-[ApiController]
-[ControllerName("security")]
+[ApiEndpoint("security", "activeconnections")]
 public class ConnectionsController(
     UserManager userManager,
     SecurityContext securityContext,

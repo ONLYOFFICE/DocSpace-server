@@ -32,9 +32,7 @@ namespace ASC.Web.Api.Controllers;
 /// Portal applications API. Returns the list of apps registered in configuration with per-tenant state and JSON settings overrides.
 /// </remarks>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("apps")]
+[ApiEndpoint("apps")]
 public class AppsController(
     AppSettingsService appSettingsService,
     AppsSocketManager appsSocketManager,

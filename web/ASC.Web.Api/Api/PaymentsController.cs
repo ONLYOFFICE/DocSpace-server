@@ -44,10 +44,8 @@ namespace ASC.Web.Api.Controllers;
 ///</remarks>
 ///<name>portal</name>
 [Scope]
-[DefaultRoute("payment")]
-[ApiController]
+[ApiEndpoint("portal", "payment")]
 [AllowNotPayment]
-[ControllerName("portal")]
 public class PaymentController(
     CoreSettings coreSettings,
     UserManager userManager,

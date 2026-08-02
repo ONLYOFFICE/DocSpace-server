@@ -33,7 +33,7 @@
 
 namespace ASC.Files.Api;
 
-[DefaultRoute("roomtemplate")]
+[ApiEndpoint(Template = "roomtemplate")]
 public class RoomTemplatesController(IEventBus eventBus,
     AuthContext authContext,
     TenantManager tenantManager,

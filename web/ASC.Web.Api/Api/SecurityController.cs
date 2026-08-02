@@ -43,9 +43,7 @@ namespace ASC.Web.Api.Controllers;
 /// </remarks>
 /// <name>security</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("security")]
+[ApiEndpoint("security")]
 public class SecurityController(
     PermissionContext permissionContext,
         TenantManager tenantManager,
