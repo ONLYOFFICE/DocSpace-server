@@ -31,9 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Tools;
-using ASC.AI.Tools.Core;
-
 namespace ASC.AI.Models.RequestDto.Tools;
 
 public class ToolsCallRequestDto : ToolContext

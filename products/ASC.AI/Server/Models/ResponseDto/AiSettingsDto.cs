@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -39,18 +39,6 @@ namespace ASC.AI.Models.ResponseDto;
 public class AiSettingsDto
 {
     /// <summary>
-    /// Indicates whether web search is enabled for AI chat sessions.
-    /// </summary>
-    /// <example>true</example>
-    public bool WebSearchEnabled { get; init; }
-
-    /// <summary>
-    /// Indicates whether the web search API key needs to be reconfigured.
-    /// </summary>
-    /// <example>false</example>
-    public bool WebSearchNeedReset { get; init; }
-
-    /// <summary>
     /// Indicates whether document vectorization is enabled.
     /// </summary>
     /// <example>true</example>
@@ -69,65 +57,11 @@ public class AiSettingsDto
     public bool AiReady { get; init; }
 
     /// <summary>
-    /// Indicates whether the AI provider API key needs to be reconfigured.
-    /// </summary>
-    /// <example>false</example>
-    public bool AiReadyNeedReset { get; init; }
-
-    /// <summary>
-    /// The unique identifier of the portal-level MCP server, if configured.
-    /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
-    public Guid? PortalMcpServerId { get; init; }
-
-    /// <summary>
     /// The name of the embedding model used for document vectorization.
     /// </summary>
     /// <example>text-embedding-3-small</example>
     public required string EmbeddingModel { get; init; }
     
-    /// <summary>
-    /// Mapping of model identifiers to human-readable aliases.
-    /// </summary>
-    /// <example>{"gpt-5.2": "GPT-5.2", "claude-sonnet-4-20250514": "Claude Sonnet 4"}</example>
-    public required IReadOnlyDictionary<string, string> ModelAliases { get; init; }
-
-    /// <summary>
-    /// The tool name used by the AI assistant for knowledge base search.
-    /// </summary>
-    /// <example>knowledge_search</example>
-    public required string KnowledgeSearchToolName { get; init; }
-
-    /// <summary>
-    /// The tool name used by the AI assistant for web search.
-    /// </summary>
-    /// <example>web_search</example>
-    public required string WebSearchToolName { get; init; }
-
-    /// <summary>
-    /// The tool name used by the AI assistant for web page crawling.
-    /// </summary>
-    /// <example>web_crawling</example>
-    public required string WebCrawlingToolName { get; init; }
-    
-    /// <summary>
-    /// The tool name used by the AI to launch docx creation in the editor.
-    /// </summary>
-    /// <example>generate_docx</example>
-    public required string GenerateDocxToolName { get; init; }
-    
-    /// <summary>
-    /// The tool name used by the AI assistant to launch form creation in the editor.
-    /// </summary>
-    /// <example>generate_form</example>
-    public required string GenerateFormToolName { get; init; }
-    
-    /// <summary>
-    /// The tool name used by the AI assistant to launch presentation creation in the editor.
-    /// </summary>
-    /// <example>generate_presentation</example>
-    public required string GeneratePresentationToolName { get; init; }
-
     /// <summary>
     /// Indicates whether the system-level AI provider is enabled.
     /// </summary>

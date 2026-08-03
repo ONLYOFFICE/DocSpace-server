@@ -37,7 +37,6 @@ using ASC.Data.Storage.Encryption;
 using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 using ASC.Files.Core.RoomTemplates.Operations;
 using ASC.Files.Core.Services.NotifyService;
-using ASC.Files.Worker.IntegrationEvents.EventHandling;
 using ASC.Files.Worker.Services;
 using ASC.Web.Files.Configuration;
 
