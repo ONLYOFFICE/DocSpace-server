@@ -802,13 +802,15 @@ public class TariffService(
 
         var tariff = await CreateDefaultAsync(true);
         tariff.Id = r.Id;
-        tariff.DueDate = r.Stamp.Year < 9999 ? r.Stamp : DateTime.MaxValue;
+        tariff.DueDate = RestoreMaxValueSentinel(r.Stamp);
         tariff.CustomerId = r.CustomerId;
 
         var quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
 
         foreach (var q in quotas)
         {
+            RestoreMaxValueSentinel(q);
+
             if (q is { Additional: true, State: QuotaState.Overdue })
             {
                 tariff.OverdueQuotas ??= [];
@@ -838,17 +840,11 @@ public class TariffService(
             {
                 await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
 
-                var stamp = tariffInfo.DueDate;
-                if (stamp.Equals(DateTime.MaxValue))
-                {
-                    stamp = stamp.Date.Add(new TimeSpan(tariffInfo.DueDate.Hour, tariffInfo.DueDate.Minute, tariffInfo.DueDate.Second));
-                }
-
                 var efTariff = new DbTariff
                 {
                     Id = tariffInfo.Id,
                     TenantId = tenant,
-                    Stamp = stamp,
+                    Stamp = TruncateToWholeSeconds(tariffInfo.DueDate),
                     CustomerId = tariffInfo.CustomerId,
                     CreateOn = DateTime.UtcNow
                 };
@@ -869,7 +865,7 @@ public class TariffService(
                         TariffId = efTariff.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = q.NextQuantity,
                         NextQuota = q.NextQuota,
                         TenantId = tenant
@@ -906,6 +902,30 @@ public class TariffService(
         return inserted;
     }
 
+    // MySQL "datetime" columns have no fractional-second precision; DateTime.MaxValue's sub-second ticks
+    // round up to the next (invalid, year 10000) day and get silently stored as a zero-date otherwise.
+    private static DateTime TruncateToWholeSeconds(DateTime value)
+    {
+        return value.Equals(DateTime.MaxValue)
+            ? value.Date.Add(new TimeSpan(value.Hour, value.Minute, value.Second))
+            : value;
+    }
+
+    // Reverses TruncateToWholeSeconds on read, so a due date persisted as the "no expiration" sentinel
+    // compares equal (via Quota.Equals) to the in-memory DateTime.MaxValue it originated from.
+    private static DateTime RestoreMaxValueSentinel(DateTime value)
+    {
+        return value.Year < 9999 ? value : DateTime.MaxValue;
+    }
+
+    private static void RestoreMaxValueSentinel(Quota q)
+    {
+        if (q.DueDate.HasValue)
+        {
+            q.DueDate = RestoreMaxValueSentinel(q.DueDate.Value);
+        }
+    }
+
     public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity, int? nextQuota = null)
     {
         try
@@ -939,7 +959,7 @@ public class TariffService(
                         TariffId = tariffInfo.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = nextQuantity,
                         NextQuota = nextQuota,
                         TenantId = tenant
@@ -1094,6 +1114,7 @@ public class TariffService(
 
         if (toAdd != null)
         {
+            RestoreMaxValueSentinel(toAdd);
             tariff.Quotas.Insert(0, toAdd);
         }
         else

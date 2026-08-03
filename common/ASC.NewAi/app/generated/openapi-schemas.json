@@ -1,6 +1,6 @@
 {
   "components": {
-    "NewAiSuccessResponse": {
+    "AiSuccessResponse": {
       "type": "object",
       "properties": {
         "success": {
@@ -13,7 +13,7 @@
       "additionalProperties": false,
       "description": "Generic success acknowledgement for mutations that return no data."
     },
-    "NewAiErrorResponse": {
+    "AiErrorResponse": {
       "type": "object",
       "properties": {
         "error": {
@@ -26,13 +26,13 @@
       "additionalProperties": false,
       "description": "Error body — a single human-readable message."
     },
-    "NewAiAiActionArgs": {
+    "AiAiActionArgs": {
       "type": "object",
       "properties": {
         "tools": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiTMCPItem"
+            "$ref": "#/components/schemas/AiTMCPItem"
           },
           "description": "Extra tools offered to the model for this request."
         },
@@ -64,7 +64,7 @@
       },
       "additionalProperties": false
     },
-    "NewAiTMCPItem": {
+    "AiTMCPItem": {
       "type": "object",
       "properties": {
         "name": {
@@ -96,7 +96,7 @@
       "additionalProperties": false,
       "description": "Descriptor for a tool exposed by an MCP server."
     },
-    "NewAiActionType": {
+    "AiActionType": {
       "type": "string",
       "enum": [
         "Default",
@@ -110,7 +110,7 @@
         "Vision"
       ]
     },
-    "NewAiThreadMessageLike": {
+    "AiThreadMessageLike": {
       "type": "object",
       "properties": {
         "id": {
@@ -185,7 +185,7 @@
       ],
       "additionalProperties": false
     },
-    "NewAiAiSendStreamBody": {
+    "AiAiSendStreamBody": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -193,11 +193,11 @@
           "description": "Target thread; a new one is created (with an auto title) when omitted."
         },
         "userMessage": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike",
+          "$ref": "#/components/schemas/AiThreadMessageLike",
           "description": "The user turn to send."
         },
         "actionArgs": {
-          "$ref": "#/components/schemas/NewAiAiActionArgs"
+          "$ref": "#/components/schemas/AiAiActionArgs"
         },
         "entityId": {
           "type": "string",
@@ -213,7 +213,7 @@
       ],
       "additionalProperties": false
     },
-    "NewAiChatEvent": {
+    "AiChatEvent": {
       "description": "Discriminated event emitted by the streaming methods of  {@link  AIEngine } . The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a  {@link  ChatEvent }  so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via  {@link  AIEngine.approveToolCall }  or  {@link  AIEngine.denyToolCall } .\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant   reply lifecycle.\n- `message-incomplete` — the provider returned an error or   incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
       "type": "object",
       "properties": {
@@ -231,7 +231,7 @@
           "description": "Emitted once per `sendWithStream` call, immediately after the user message has been persisted by storage and before the assistant stream starts. Carries the storage-assigned `id` and `createdAt`. The UI uses it to render the user bubble — no client-side optimistic placeholder is needed, which keeps the runtime tree free of phantom nodes from index-fallback ids."
         },
         "message": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike"
+          "$ref": "#/components/schemas/AiThreadMessageLike"
         },
         "messageId": {
           "type": "string"
@@ -261,18 +261,18 @@
         "type"
       ]
     },
-    "NewAiOpenAIStreamChunk": {
+    "AiOpenAIStreamChunk": {
       "anyOf": [
         {
-          "$ref": "#/components/schemas/NewAiOpenAIChatCompletionChunk"
+          "$ref": "#/components/schemas/AiOpenAIChatCompletionChunk"
         },
         {
-          "$ref": "#/components/schemas/NewAiOpenAIStreamError"
+          "$ref": "#/components/schemas/AiOpenAIStreamError"
         }
       ],
       "description": "A chunk or the terminal error envelope emitted on a failed stream."
     },
-    "NewAiOpenAIChatCompletionChunk": {
+    "AiOpenAIChatCompletionChunk": {
       "type": "object",
       "properties": {
         "id": {
@@ -293,7 +293,7 @@
         "choices": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiOpenAIChunkChoice"
+            "$ref": "#/components/schemas/AiOpenAIChunkChoice"
           }
         }
       },
@@ -306,17 +306,17 @@
       ],
       "additionalProperties": false
     },
-    "NewAiOpenAIChunkChoice": {
+    "AiOpenAIChunkChoice": {
       "type": "object",
       "properties": {
         "index": {
           "type": "number"
         },
         "delta": {
-          "$ref": "#/components/schemas/NewAiOpenAIChoiceDelta"
+          "$ref": "#/components/schemas/AiOpenAIChoiceDelta"
         },
         "finish_reason": {
-          "$ref": "#/components/schemas/NewAiOpenAIFinishReason"
+          "$ref": "#/components/schemas/AiOpenAIFinishReason"
         }
       },
       "required": [
@@ -326,7 +326,7 @@
       ],
       "additionalProperties": false
     },
-    "NewAiOpenAIChoiceDelta": {
+    "AiOpenAIChoiceDelta": {
       "type": "object",
       "properties": {
         "role": {
@@ -342,13 +342,13 @@
         "tool_calls": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiOpenAIToolCallDelta"
+            "$ref": "#/components/schemas/AiOpenAIToolCallDelta"
           }
         }
       },
       "additionalProperties": false
     },
-    "NewAiOpenAIToolCallDelta": {
+    "AiOpenAIToolCallDelta": {
       "type": "object",
       "properties": {
         "index": {
@@ -381,7 +381,7 @@
       ],
       "additionalProperties": false
     },
-    "NewAiOpenAIFinishReason": {
+    "AiOpenAIFinishReason": {
       "nullable": true,
       "type": "string",
       "enum": [
@@ -393,7 +393,7 @@
       ],
       "description": "OpenAI Chat Completions streaming shapes.\n\n {@link  toOpenAIChatCompletionStream }  maps the engine's transport-agnostic  {@link  ChatEvent }  stream onto these chunks so a host can expose an OpenAI-compatible `POST /v1/chat/completions` (`stream: true`) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent."
     },
-    "NewAiOpenAIStreamError": {
+    "AiOpenAIStreamError": {
       "type": "object",
       "properties": {
         "error": {
@@ -429,7 +429,7 @@
       "additionalProperties": false,
       "description": "OpenAI streaming error envelope. When the upstream request fails mid-stream the OpenAI API emits a single `data:` line carrying an `error` object (no `choices`), then closes the stream — the official SDK turns this into a thrown `APIError`. Mirrors that shape so a host exposing an OpenAI-compatible endpoint stays wire-compatible."
     },
-    "NewAiAiToolCallData": {
+    "AiAiToolCallData": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -445,11 +445,11 @@
           "description": "Index of the tool-call content part inside `message.content`."
         },
         "message": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike",
+          "$ref": "#/components/schemas/AiThreadMessageLike",
           "description": "Snapshot of the assistant message at the time the tool call surfaced."
         },
         "actionArgs": {
-          "$ref": "#/components/schemas/NewAiAiActionArgs"
+          "$ref": "#/components/schemas/AiAiActionArgs"
         },
         "entityId": {
           "type": "string"
@@ -466,14 +466,14 @@
       ],
       "additionalProperties": false
     },
-    "NewAiResolvedAssignment": {
+    "AiResolvedAssignment": {
       "type": "object",
       "properties": {
         "profileId": {
           "type": "string"
         },
         "profile": {
-          "$ref": "#/components/schemas/NewAiProfile"
+          "$ref": "#/components/schemas/AiProfile"
         }
       },
       "required": [
@@ -483,7 +483,7 @@
       "additionalProperties": false,
       "description": "Resolved profile for an action — both the storage row and its ID."
     },
-    "NewAiProfile": {
+    "AiProfile": {
       "type": "object",
       "properties": {
         "id": {
@@ -495,11 +495,11 @@
           "description": "User-defined profile display name."
         },
         "providerType": {
-          "$ref": "#/components/schemas/NewAiProviderType",
+          "$ref": "#/components/schemas/AiProviderType",
           "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
         },
         "basedOn": {
-          "$ref": "#/components/schemas/NewAiBuiltinProviderType",
+          "$ref": "#/components/schemas/AiBuiltinProviderType",
           "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
         },
         "baseUrl": {
@@ -560,10 +560,10 @@
       "additionalProperties": false,
       "description": "Complete AI provider + model configuration saved by the user. Profiles are the primary way users save and reuse provider configurations."
     },
-    "NewAiProviderType": {
+    "AiProviderType": {
       "anyOf": [
         {
-          "$ref": "#/components/schemas/NewAiBuiltinProviderType"
+          "$ref": "#/components/schemas/AiBuiltinProviderType"
         },
         {
           "type": "string"
@@ -571,7 +571,7 @@
       ],
       "description": "Provider type identifier. Accepts all 17 built-in types with autocomplete, plus any custom `string` for dynamically registered providers."
     },
-    "NewAiBuiltinProviderType": {
+    "AiBuiltinProviderType": {
       "type": "string",
       "enum": [
         "anthropic",
@@ -594,7 +594,7 @@
       ],
       "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
     },
-    "NewAiAssignmentMutationResult": {
+    "AiAssignmentMutationResult": {
       "description": "Outcome of  {@link  AssignmentsEngine.assign }  /  {@link  AssignmentsEngine.unassign } . Either a success or a field-scoped error suitable for displaying in the profile editor.",
       "type": "object",
       "properties": {
@@ -602,14 +602,14 @@
           "type": "boolean"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiTErrorData": {
+    "AiTErrorData": {
       "type": "object",
       "properties": {
         "field": {
@@ -630,7 +630,7 @@
       ],
       "additionalProperties": false
     },
-    "NewAiBulkAssignmentResult": {
+    "AiBulkAssignmentResult": {
       "description": "Outcome of  {@link  AssignmentsEngine.bulkAssign } . Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
       "type": "object",
       "properties": {
@@ -643,10 +643,10 @@
             "type": "object",
             "properties": {
               "actionType": {
-                "$ref": "#/components/schemas/NewAiActionType"
+                "$ref": "#/components/schemas/AiActionType"
               },
               "error": {
-                "$ref": "#/components/schemas/NewAiTErrorData"
+                "$ref": "#/components/schemas/AiTErrorData"
               }
             },
             "required": [
@@ -661,7 +661,7 @@
         "success"
       ]
     },
-    "NewAiAttachment": {
+    "AiAttachment": {
       "type": "object",
       "properties": {
         "id": {
@@ -730,7 +730,7 @@
       "additionalProperties": false,
       "description": "Persistent record for a single attachment (file or image) referenced from a user message. Files carry extracted text in `content`; images carry base64 data in `base64`. Metadata (`title`, `path`, `type`) is always present for display purposes regardless of whether the heavy payload is loaded."
     },
-    "NewAiCreateProfileInput": {
+    "AiCreateProfileInput": {
       "type": "object",
       "properties": {
         "name": {
@@ -738,11 +738,11 @@
           "description": "User-defined profile display name."
         },
         "providerType": {
-          "$ref": "#/components/schemas/NewAiProviderType",
+          "$ref": "#/components/schemas/AiProviderType",
           "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
         },
         "basedOn": {
-          "$ref": "#/components/schemas/NewAiBuiltinProviderType",
+          "$ref": "#/components/schemas/AiBuiltinProviderType",
           "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
         },
         "baseUrl": {
@@ -798,7 +798,7 @@
       "additionalProperties": false,
       "description": "Input for creating a new profile — the same shape as  {@link  Profile }  without the engine-generated fields (`id`, `createdAt`)."
     },
-    "NewAiProfileMutationResult": {
+    "AiProfileMutationResult": {
       "description": "Outcome of `create` / `update` — either a success carrying the persisted profile, or a failure with a field-level error description from the name check or the provider credential check.",
       "type": "object",
       "properties": {
@@ -806,17 +806,17 @@
           "type": "boolean"
         },
         "profile": {
-          "$ref": "#/components/schemas/NewAiProfile"
+          "$ref": "#/components/schemas/AiProfile"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiModel": {
+    "AiModel": {
       "type": "object",
       "properties": {
         "id": {
@@ -828,7 +828,7 @@
           "description": "Human-readable model name for display in the UI."
         },
         "provider": {
-          "$ref": "#/components/schemas/NewAiProviderType",
+          "$ref": "#/components/schemas/AiProviderType",
           "description": "Provider that offers this model."
         },
         "reasoning": {
@@ -848,7 +848,7 @@
       "additionalProperties": false,
       "description": "AI model metadata. Describes a single model available from a provider."
     },
-    "NewAiCreatePromptInput": {
+    "AiCreatePromptInput": {
       "type": "object",
       "properties": {
         "name": {
@@ -869,7 +869,7 @@
       "additionalProperties": false,
       "description": "Input for creating a prompt — the engine generates `id`/`createdAt`/`updatedAt`."
     },
-    "NewAiPromptMutationResult": {
+    "AiPromptMutationResult": {
       "description": "Outcome of `create` / `update` / `move` on a prompt — either the persisted prompt or a field-scoped error.",
       "type": "object",
       "properties": {
@@ -877,17 +877,17 @@
           "type": "boolean"
         },
         "prompt": {
-          "$ref": "#/components/schemas/NewAiPrompt"
+          "$ref": "#/components/schemas/AiPrompt"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiPrompt": {
+    "AiPrompt": {
       "type": "object",
       "properties": {
         "id": {
@@ -925,7 +925,7 @@
       "additionalProperties": false,
       "description": "Saved prompt template that users can quickly insert into the chat."
     },
-    "NewAiFolderMutationResult": {
+    "AiFolderMutationResult": {
       "description": "Outcome of `createFolder` / `renameFolder` — either the persisted folder or a field-scoped error.",
       "type": "object",
       "properties": {
@@ -933,17 +933,17 @@
           "type": "boolean"
         },
         "folder": {
-          "$ref": "#/components/schemas/NewAiPromptFolder"
+          "$ref": "#/components/schemas/AiPromptFolder"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiPromptFolder": {
+    "AiPromptFolder": {
       "type": "object",
       "properties": {
         "id": {
@@ -972,7 +972,7 @@
       "additionalProperties": false,
       "description": "Folder for organizing saved prompts."
     },
-    "NewAiPromptBundle": {
+    "AiPromptBundle": {
       "type": "object",
       "properties": {
         "version": {
@@ -984,13 +984,13 @@
         "folders": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiPromptFolder"
+            "$ref": "#/components/schemas/AiPromptFolder"
           }
         },
         "prompts": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiPrompt"
+            "$ref": "#/components/schemas/AiPrompt"
           }
         }
       },
@@ -1002,7 +1002,7 @@
       "additionalProperties": false,
       "description": "Versioned, self-contained bundle of every saved prompt and folder. Stable wire format — `version` lets the import path migrate older shapes if the schema ever changes."
     },
-    "NewAiImportMode": {
+    "AiImportMode": {
       "type": "string",
       "enum": [
         "replace",
@@ -1010,7 +1010,7 @@
       ],
       "description": "Mode passed to  {@link  PromptsEngine.importBundle } ."
     },
-    "NewAiImportResult": {
+    "AiImportResult": {
       "description": "Outcome of  {@link  PromptsEngine.importBundle } . Either every entry persisted with counts, or no entries persisted plus a per-entry error report.",
       "type": "object",
       "properties": {
@@ -1036,7 +1036,7 @@
         "errors": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiImportError"
+            "$ref": "#/components/schemas/AiImportError"
           }
         }
       },
@@ -1044,7 +1044,7 @@
         "success"
       ]
     },
-    "NewAiImportError": {
+    "AiImportError": {
       "type": "object",
       "properties": {
         "kind": {
@@ -1059,7 +1059,7 @@
           "type": "string"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
@@ -1070,7 +1070,7 @@
       "additionalProperties": false,
       "description": "Per-entry error reported by  {@link  PromptsEngine.importBundle } ."
     },
-    "NewAiThread": {
+    "AiThread": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -1086,11 +1086,11 @@
           "description": "Timestamp (ms since epoch) of the last message in this thread. Used for sorting."
         },
         "provider": {
-          "$ref": "#/components/schemas/NewAiTProvider",
+          "$ref": "#/components/schemas/AiTProvider",
           "description": "Provider configuration at the time of last message. Used for thread-level provider display."
         },
         "model": {
-          "$ref": "#/components/schemas/NewAiModel",
+          "$ref": "#/components/schemas/AiModel",
           "description": "Model info at the time of last message."
         },
         "profileId": {
@@ -1104,11 +1104,11 @@
       "additionalProperties": false,
       "description": "Chat conversation metadata. Represents a single chat session (thread)."
     },
-    "NewAiTProvider": {
+    "AiTProvider": {
       "type": "object",
       "properties": {
         "type": {
-          "$ref": "#/components/schemas/NewAiProviderType",
+          "$ref": "#/components/schemas/AiProviderType",
           "description": "Provider type identifier."
         },
         "name": {
@@ -1132,20 +1132,20 @@
       "additionalProperties": false,
       "description": "Minimal provider connection configuration. Used to connect to a provider API."
     },
-    "NewAiOpenOrCreateInput": {
+    "AiOpenOrCreateInput": {
       "type": "object",
       "properties": {
         "threadId": {
           "type": "string"
         },
         "profile": {
-          "$ref": "#/components/schemas/NewAiProfile"
+          "$ref": "#/components/schemas/AiProfile"
         },
         "profileId": {
           "type": "string"
         },
         "firstMessage": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike"
+          "$ref": "#/components/schemas/AiThreadMessageLike"
         },
         "entityId": {
           "type": "string",
@@ -1160,7 +1160,7 @@
       "additionalProperties": false,
       "description": "Input for  {@link  ThreadsEngine.openOrCreate } : open an existing thread if `threadId` is given, otherwise create a new one with an auto-generated title derived from `firstMessage`."
     },
-    "NewAiOpenOrCreateResult": {
+    "AiOpenOrCreateResult": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -1173,7 +1173,7 @@
         "priorMessages": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike"
+            "$ref": "#/components/schemas/AiThreadMessageLike"
           }
         }
       },
@@ -1185,11 +1185,11 @@
       "additionalProperties": false,
       "description": "Resolved thread state returned by  {@link  ThreadsEngine.openOrCreate } ."
     },
-    "NewAiMcpServerConfig": {
+    "AiMcpServerConfig": {
       "type": "object",
       "description": "One MCP server configuration. The shape is intentionally open — MCP allows per-transport fields (`command`/`args` for stdio, `url` for HTTP, plus env, headers, etc.) and the storage layer stays agnostic to which transport is in use."
     },
-    "NewAiToolsMutationResult": {
+    "AiToolsMutationResult": {
       "description": "Outcome of an MCP-server CRUD call. Either success or a field-scoped error suitable for the settings form.",
       "type": "object",
       "properties": {
@@ -1197,14 +1197,14 @@
           "type": "boolean"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiToolsBulkResult": {
+    "AiToolsBulkResult": {
       "description": "Outcome of  {@link  ToolsEngine.replaceAllCustomServers }  — either every entry persisted, or no entries persisted plus a per-key error report.",
       "type": "object",
       "properties": {
@@ -1220,7 +1220,7 @@
                 "type": "string"
               },
               "error": {
-                "$ref": "#/components/schemas/NewAiTErrorData"
+                "$ref": "#/components/schemas/AiTErrorData"
               }
             },
             "required": [
@@ -1235,7 +1235,7 @@
         "success"
       ]
     },
-    "NewAiWebSearchConfig": {
+    "AiWebSearchConfig": {
       "type": "object",
       "properties": {
         "provider": {
@@ -1268,7 +1268,7 @@
       "additionalProperties": false,
       "description": "Web-search provider configuration. Credentials and provider selection for the built-in web-search tool group."
     },
-    "NewAiWebSearchMutationResult": {
+    "AiWebSearchMutationResult": {
       "description": "Outcome of  {@link  WebSearchEngine.configure }  — either the persisted config or a field-scoped error suitable for the settings form.",
       "type": "object",
       "properties": {
@@ -1276,21 +1276,21 @@
           "type": "boolean"
         },
         "config": {
-          "$ref": "#/components/schemas/NewAiWebSearchConfig"
+          "$ref": "#/components/schemas/AiWebSearchConfig"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiAiUserSettingsWrapper": {
+    "AiAiUserSettingsWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiAiUserSettingsDto"
+          "$ref": "#/components/schemas/AiAiUserSettingsDto"
         },
         "count": {
           "type": "integer",
@@ -1326,7 +1326,7 @@
         }
       }
     },
-    "NewAiAiUserSettingsDto": {
+    "AiAiUserSettingsDto": {
       "type": "object",
       "properties": {
         "chatRecommendedModelVisible": {
@@ -1338,11 +1338,11 @@
       "additionalProperties": false,
       "description": "The per-user AI settings."
     },
-    "NewAiVectorizationSettingsWrapper": {
+    "AiVectorizationSettingsWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiVectorizationSettingsDto"
+          "$ref": "#/components/schemas/AiVectorizationSettingsDto"
         },
         "count": {
           "type": "integer",
@@ -1378,11 +1378,11 @@
         }
       }
     },
-    "NewAiVectorizationSettingsDto": {
+    "AiVectorizationSettingsDto": {
       "type": "object",
       "properties": {
         "type": {
-          "$ref": "#/components/schemas/NewAiEmbeddingProviderType"
+          "$ref": "#/components/schemas/AiEmbeddingProviderType"
         },
         "needReset": {
           "type": "boolean",
@@ -1393,7 +1393,7 @@
       "additionalProperties": false,
       "description": "The vectorization settings."
     },
-    "NewAiEmbeddingProviderType": {
+    "AiEmbeddingProviderType": {
       "oneOf": [
         {
           "enum": [
@@ -1426,11 +1426,11 @@
       ],
       "x-enum-type": "integer"
     },
-    "NewAiAiSettingsWrapper": {
+    "AiAiSettingsWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiAiSettingsDto"
+          "$ref": "#/components/schemas/AiAiSettingsDto"
         },
         "count": {
           "type": "integer",
@@ -1466,29 +1466,12 @@
         }
       }
     },
-    "NewAiAiSettingsDto": {
+    "AiAiSettingsDto": {
       "required": [
-        "embeddingModel",
-        "generateDocxToolName",
-        "generateFormToolName",
-        "generatePresentationToolName",
-        "knowledgeSearchToolName",
-        "modelAliases",
-        "webCrawlingToolName",
-        "webSearchToolName"
+        "embeddingModel"
       ],
       "type": "object",
       "properties": {
-        "webSearchEnabled": {
-          "type": "boolean",
-          "description": "Indicates whether web search is enabled for AI chat sessions.",
-          "example": true
-        },
-        "webSearchNeedReset": {
-          "type": "boolean",
-          "description": "Indicates whether the web search API key needs to be reconfigured.",
-          "example": false
-        },
         "vectorizationEnabled": {
           "type": "boolean",
           "description": "Indicates whether document vectorization is enabled.",
@@ -1504,71 +1487,11 @@
           "description": "Indicates whether the AI subsystem is fully configured and operational.",
           "example": true
         },
-        "aiReadyNeedReset": {
-          "type": "boolean",
-          "description": "Indicates whether the AI provider API key needs to be reconfigured.",
-          "example": false
-        },
-        "portalMcpServerId": {
-          "type": "string",
-          "description": "The unique identifier of the portal-level MCP server, if configured.",
-          "format": "uuid",
-          "nullable": true,
-          "example": "00000000-0000-0000-0000-000000000000"
-        },
         "embeddingModel": {
           "type": "string",
           "description": "The name of the embedding model used for document vectorization.",
           "nullable": true,
           "example": "text-embedding-3-small"
-        },
-        "modelAliases": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Mapping of model identifiers to human-readable aliases.",
-          "nullable": true,
-          "example": {
-            "gpt-5.2": "GPT-5.2",
-            "claude-sonnet-4-20250514": "Claude Sonnet 4"
-          }
-        },
-        "knowledgeSearchToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant for knowledge base search.",
-          "nullable": true,
-          "example": "knowledge_search"
-        },
-        "webSearchToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant for web search.",
-          "nullable": true,
-          "example": "web_search"
-        },
-        "webCrawlingToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant for web page crawling.",
-          "nullable": true,
-          "example": "web_crawling"
-        },
-        "generateDocxToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI to launch docx creation in the editor.",
-          "nullable": true,
-          "example": "generate_docx"
-        },
-        "generateFormToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant to launch form creation in the editor.",
-          "nullable": true,
-          "example": "generate_form"
-        },
-        "generatePresentationToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
-          "nullable": true,
-          "example": "generate_presentation"
         },
         "systemAiEnabled": {
           "type": "boolean",
@@ -1585,13 +1508,13 @@
       "additionalProperties": false,
       "description": "The AI module settings."
     },
-    "NewAiFolderIntegerArrayWrapper": {
+    "AiFolderIntegerArrayWrapper": {
       "type": "object",
       "properties": {
         "response": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiFolderDtoInteger"
+            "$ref": "#/components/schemas/AiFolderDtoInteger"
           }
         },
         "count": {
@@ -1628,10 +1551,10 @@
         }
       }
     },
-    "NewAiFolderDtoInteger": {
+    "AiFolderDtoInteger": {
       "allOf": [
         {
-          "$ref": "#/components/schemas/NewAiFileEntryDtoInteger"
+          "$ref": "#/components/schemas/AiFileEntryDtoInteger"
         },
         {
           "type": "object",
@@ -1684,7 +1607,7 @@
               ]
             },
             "logo": {
-              "$ref": "#/components/schemas/NewAiLogo"
+              "$ref": "#/components/schemas/AiLogo"
             },
             "pinned": {
               "type": "boolean",
@@ -1692,7 +1615,7 @@
               "example": false
             },
             "roomType": {
-              "$ref": "#/components/schemas/NewAiRoomType"
+              "$ref": "#/components/schemas/AiRoomType"
             },
             "private": {
               "type": "boolean",
@@ -1710,13 +1633,13 @@
               "example": false
             },
             "lifetime": {
-              "$ref": "#/components/schemas/NewAiRoomDataLifetimeDto"
+              "$ref": "#/components/schemas/AiRoomDataLifetimeDto"
             },
             "watermark": {
-              "$ref": "#/components/schemas/NewAiWatermarkDto"
+              "$ref": "#/components/schemas/AiWatermarkDto"
             },
             "type": {
-              "$ref": "#/components/schemas/NewAiFolderType"
+              "$ref": "#/components/schemas/AiFolderType"
             },
             "inRoom": {
               "type": "boolean",
@@ -1758,10 +1681,10 @@
               "deprecated": true
             },
             "chatSettings": {
-              "$ref": "#/components/schemas/NewAiChatSettingsDto"
+              "$ref": "#/components/schemas/AiChatSettingsDto"
             },
             "rootRoomType": {
-              "$ref": "#/components/schemas/NewAiRoomType"
+              "$ref": "#/components/schemas/AiRoomType"
             },
             "saveFormAsXLSX": {
               "type": "boolean",
@@ -1788,7 +1711,7 @@
       "additionalProperties": false,
       "description": "The folder parameters."
     },
-    "NewAiChatSettingsDto": {
+    "AiChatSettingsDto": {
       "type": "object",
       "properties": {
         "prompt": {
@@ -1801,7 +1724,7 @@
       "additionalProperties": false,
       "description": "The chat settings parameters."
     },
-    "NewAiFolderType": {
+    "AiFolderType": {
       "oneOf": [
         {
           "enum": [
@@ -1913,7 +1836,7 @@
       "description": "The folder type.",
       "x-enum-type": "integer"
     },
-    "NewAiWatermarkDto": {
+    "AiWatermarkDto": {
       "required": [
         "additions",
         "imageHeight",
@@ -1924,7 +1847,7 @@
       "type": "object",
       "properties": {
         "additions": {
-          "$ref": "#/components/schemas/NewAiWatermarkAdditions"
+          "$ref": "#/components/schemas/AiWatermarkAdditions"
         },
         "text": {
           "type": "string",
@@ -1966,7 +1889,7 @@
       "additionalProperties": false,
       "description": "The watermark settings."
     },
-    "NewAiWatermarkAdditions": {
+    "AiWatermarkAdditions": {
       "oneOf": [
         {
           "enum": [
@@ -2003,7 +1926,7 @@
       "description": "The watermark additions.",
       "x-enum-type": "integer"
     },
-    "NewAiRoomDataLifetimeDto": {
+    "AiRoomDataLifetimeDto": {
       "type": "object",
       "properties": {
         "deletePermanently": {
@@ -2012,7 +1935,7 @@
           "example": true
         },
         "period": {
-          "$ref": "#/components/schemas/NewAiRoomDataLifetimePeriod"
+          "$ref": "#/components/schemas/AiRoomDataLifetimePeriod"
         },
         "value": {
           "maximum": 999,
@@ -2033,7 +1956,7 @@
       "additionalProperties": false,
       "description": "The room data lifetime information."
     },
-    "NewAiRoomDataLifetimePeriod": {
+    "AiRoomDataLifetimePeriod": {
       "oneOf": [
         {
           "enum": [
@@ -2064,7 +1987,7 @@
       "description": "The room data lifetime period.",
       "x-enum-type": "integer"
     },
-    "NewAiRoomType": {
+    "AiRoomType": {
       "oneOf": [
         {
           "enum": [
@@ -2104,7 +2027,7 @@
       "description": "The room type.",
       "x-enum-type": "integer"
     },
-    "NewAiLogo": {
+    "AiLogo": {
       "required": [
         "large",
         "medium",
@@ -2144,13 +2067,13 @@
           "example": "#4781D1"
         },
         "cover": {
-          "$ref": "#/components/schemas/NewAiLogoCover"
+          "$ref": "#/components/schemas/AiLogoCover"
         }
       },
       "additionalProperties": false,
       "description": "The room logo information."
     },
-    "NewAiLogoCover": {
+    "AiLogoCover": {
       "required": [
         "data",
         "id"
@@ -2173,10 +2096,10 @@
       "additionalProperties": false,
       "description": "The logo cover information."
     },
-    "NewAiFileEntryDtoInteger": {
+    "AiFileEntryDtoInteger": {
       "allOf": [
         {
-          "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+          "$ref": "#/components/schemas/AiFileEntryBaseDto"
         },
         {
           "type": "object",
@@ -2462,7 +2385,7 @@
               "example": false
             },
             "expirationDate": {
-              "$ref": "#/components/schemas/NewAiApiDateTime"
+              "$ref": "#/components/schemas/AiApiDateTime"
             },
             "isLinkExpired": {
               "type": "boolean",
@@ -2476,7 +2399,7 @@
       "additionalProperties": false,
       "description": "The generic file entry information."
     },
-    "NewAiApiDateTime": {
+    "AiApiDateTime": {
       "type": "object",
       "properties": {
         "utcTime": {
@@ -2497,7 +2420,7 @@
       "additionalProperties": false,
       "description": "The API date and time parameters."
     },
-    "NewAiFileEntryBaseDto": {
+    "AiFileEntryBaseDto": {
       "type": "object",
       "properties": {
         "title": {
@@ -2507,13 +2430,13 @@
           "example": "Some title.txt"
         },
         "access": {
-          "$ref": "#/components/schemas/NewAiFileShare"
+          "$ref": "#/components/schemas/AiFileShare"
         },
         "sharedBy": {
-          "$ref": "#/components/schemas/NewAiEmployeeDto"
+          "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "ownedBy": {
-          "$ref": "#/components/schemas/NewAiEmployeeDto"
+          "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "shared": {
           "type": "boolean",
@@ -2543,25 +2466,25 @@
           "example": "http://localhost/s/abc123"
         },
         "created": {
-          "$ref": "#/components/schemas/NewAiApiDateTime"
+          "$ref": "#/components/schemas/AiApiDateTime"
         },
         "createdBy": {
-          "$ref": "#/components/schemas/NewAiEmployeeDto"
+          "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "updated": {
-          "$ref": "#/components/schemas/NewAiApiDateTime"
+          "$ref": "#/components/schemas/AiApiDateTime"
         },
         "autoDelete": {
-          "$ref": "#/components/schemas/NewAiApiDateTime"
+          "$ref": "#/components/schemas/AiApiDateTime"
         },
         "rootFolderType": {
-          "$ref": "#/components/schemas/NewAiFolderType"
+          "$ref": "#/components/schemas/AiFolderType"
         },
         "parentRoomType": {
-          "$ref": "#/components/schemas/NewAiFolderType"
+          "$ref": "#/components/schemas/AiFolderType"
         },
         "updatedBy": {
-          "$ref": "#/components/schemas/NewAiEmployeeDto"
+          "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "providerItem": {
           "type": "boolean",
@@ -2595,7 +2518,7 @@
           "example": false
         },
         "fileEntryType": {
-          "$ref": "#/components/schemas/NewAiFileEntryType"
+          "$ref": "#/components/schemas/AiFileEntryType"
         }
       },
       "additionalProperties": false,
@@ -2608,7 +2531,7 @@
         "FolderDtoString"
       ]
     },
-    "NewAiFileEntryType": {
+    "AiFileEntryType": {
       "oneOf": [
         {
           "enum": [
@@ -2636,7 +2559,7 @@
       "description": "The file entry type.",
       "x-enum-type": "integer"
     },
-    "NewAiEmployeeDto": {
+    "AiEmployeeDto": {
       "type": "object",
       "properties": {
         "id": {
@@ -2701,7 +2624,7 @@
       "additionalProperties": false,
       "description": "The user parameters."
     },
-    "NewAiFileShare": {
+    "AiFileShare": {
       "oneOf": [
         {
           "enum": [
@@ -2759,11 +2682,11 @@
       "description": "The access rights type.",
       "x-enum-type": "integer"
     },
-    "NewAiFileOperationWrapper": {
+    "AiFileOperationWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiFileOperationDto"
+          "$ref": "#/components/schemas/AiFileOperationDto"
         },
         "count": {
           "type": "integer",
@@ -2799,7 +2722,7 @@
         }
       }
     },
-    "NewAiFileOperationDto": {
+    "AiFileOperationDto": {
       "required": [
         "error",
         "finished",
@@ -2817,7 +2740,7 @@
           "example": "00000000-0000-0000-0000-000000000000"
         },
         "Operation": {
-          "$ref": "#/components/schemas/NewAiFileOperationType"
+          "$ref": "#/components/schemas/AiFileOperationType"
         },
         "progress": {
           "type": "integer",
@@ -2852,7 +2775,7 @@
         "files": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of files of the file operation.",
           "nullable": true,
@@ -2866,7 +2789,7 @@
         "folders": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of folders of the file operation.",
           "nullable": true,
@@ -2878,13 +2801,13 @@
           ]
         },
         "status": {
-          "$ref": "#/components/schemas/NewAiDistributedTaskStatus"
+          "$ref": "#/components/schemas/AiDistributedTaskStatus"
         }
       },
       "additionalProperties": false,
       "description": "The file operation information."
     },
-    "NewAiDistributedTaskStatus": {
+    "AiDistributedTaskStatus": {
       "oneOf": [
         {
           "enum": [
@@ -2920,7 +2843,7 @@
       ],
       "x-enum-type": "integer"
     },
-    "NewAiFileOperationType": {
+    "AiFileOperationType": {
       "oneOf": [
         {
           "enum": [
@@ -2966,13 +2889,13 @@
       "description": "The file operation type.",
       "x-enum-type": "integer"
     },
-    "NewAiNewItemsAgentNewItemsArrayWrapper": {
+    "AiNewItemsAgentNewItemsArrayWrapper": {
       "type": "object",
       "properties": {
         "response": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiNewItemsDtoAgentNewItemsDto"
+            "$ref": "#/components/schemas/AiNewItemsDtoAgentNewItemsDto"
           }
         },
         "count": {
@@ -3009,7 +2932,7 @@
         }
       }
     },
-    "NewAiNewItemsDtoAgentNewItemsDto": {
+    "AiNewItemsDtoAgentNewItemsDto": {
       "required": [
         "date",
         "items"
@@ -3017,12 +2940,12 @@
       "type": "object",
       "properties": {
         "date": {
-          "$ref": "#/components/schemas/NewAiApiDateTime"
+          "$ref": "#/components/schemas/AiApiDateTime"
         },
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiAgentNewItemsDto"
+            "$ref": "#/components/schemas/AiAgentNewItemsDto"
           },
           "description": "The list of items.",
           "nullable": true
@@ -3031,7 +2954,7 @@
       "additionalProperties": false,
       "description": "The new item parameters."
     },
-    "NewAiAgentNewItemsDto": {
+    "AiAgentNewItemsDto": {
       "required": [
         "agent",
         "items"
@@ -3039,12 +2962,12 @@
       "type": "object",
       "properties": {
         "agent": {
-          "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+          "$ref": "#/components/schemas/AiFileEntryBaseDto"
         },
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of file entry items.",
           "nullable": true
@@ -3053,11 +2976,11 @@
       "additionalProperties": false,
       "description": "The agent new item's information."
     },
-    "NewAiFolderIntegerWrapper": {
+    "AiFolderIntegerWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiFolderDtoInteger"
+          "$ref": "#/components/schemas/AiFolderDtoInteger"
         },
         "count": {
           "type": "integer",
@@ -3093,11 +3016,11 @@
         }
       }
     },
-    "NewAiFolderContentIntegerWrapper": {
+    "AiFolderContentIntegerWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiFolderContentDtoInteger"
+          "$ref": "#/components/schemas/AiFolderContentDtoInteger"
         },
         "count": {
           "type": "integer",
@@ -3133,7 +3056,7 @@
         }
       }
     },
-    "NewAiFolderContentDtoInteger": {
+    "AiFolderContentDtoInteger": {
       "required": [
         "pathParts",
         "total"
@@ -3143,7 +3066,7 @@
         "files": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of files in the folder.",
           "nullable": true,
@@ -3157,7 +3080,7 @@
         "folders": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of folders in the folder.",
           "nullable": true,
@@ -3169,7 +3092,7 @@
           ]
         },
         "current": {
-          "$ref": "#/components/schemas/NewAiFolderDtoInteger"
+          "$ref": "#/components/schemas/AiFolderDtoInteger"
         },
         "pathParts": {
           "description": "The folder path.",
@@ -3206,20 +3129,20 @@
     }
   },
   "operations": {
-    "newAiAiSend": {
+    "aiAiSend": {
       "request": {
         "type": "object",
         "properties": {
           "actionType": {
-            "$ref": "#/components/schemas/NewAiActionType",
+            "$ref": "#/components/schemas/AiActionType",
             "description": "Which AI action to run — selects the assignment slot and action."
           },
           "userMessage": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "$ref": "#/components/schemas/AiThreadMessageLike",
             "description": "The user turn to send."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/NewAiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs"
           },
           "entityId": {
             "type": "string",
@@ -3233,10 +3156,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiThreadMessageLike"
+        "$ref": "#/components/schemas/AiThreadMessageLike"
       }
     },
-    "newAiAiSendCustom": {
+    "aiAiSendCustom": {
       "request": {
         "type": "object",
         "properties": {
@@ -3249,10 +3172,10 @@
             "description": "Caller-supplied system prompt for this one-turn call."
           },
           "userMessage": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike"
+            "$ref": "#/components/schemas/AiThreadMessageLike"
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/NewAiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs"
           }
         },
         "required": [
@@ -3263,27 +3186,27 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiThreadMessageLike",
+        "$ref": "#/components/schemas/AiThreadMessageLike",
         "description": "One-shot mode (`isStream: false`) returns the assistant message shown here; streaming mode instead emits a newline-delimited `ChatEvent` stream."
       }
     },
-    "newAiAiSendWithStream": {
+    "aiAiSendWithStream": {
       "request": {
-        "$ref": "#/components/schemas/NewAiAiSendStreamBody"
+        "$ref": "#/components/schemas/AiAiSendStreamBody"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiChatEvent"
+        "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "newAiAiSendWithStreamOpenAI": {
+    "aiAiSendWithStreamOpenAI": {
       "request": {
-        "$ref": "#/components/schemas/NewAiAiSendStreamBody"
+        "$ref": "#/components/schemas/AiAiSendStreamBody"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiOpenAIStreamChunk"
+        "$ref": "#/components/schemas/AiOpenAIStreamChunk"
       }
     },
-    "newAiAiRegenerateStream": {
+    "aiAiRegenerateStream": {
       "request": {
         "type": "object",
         "properties": {
@@ -3292,7 +3215,7 @@
             "description": "Target thread (must already exist)."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/NewAiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs"
           },
           "entityId": {
             "type": "string"
@@ -3307,10 +3230,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiChatEvent"
+        "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "newAiAiApproveToolCall": {
+    "aiAiApproveToolCall": {
       "request": {
         "type": "object",
         "additionalProperties": false,
@@ -3335,11 +3258,11 @@
             "description": "Index of the tool-call content part inside `message.content`."
           },
           "message": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "$ref": "#/components/schemas/AiThreadMessageLike",
             "description": "Snapshot of the assistant message at the time the tool call surfaced."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/NewAiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs"
           },
           "entityId": {
             "type": "string"
@@ -3357,38 +3280,38 @@
         ]
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiChatEvent"
+        "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "newAiAiDenyToolCall": {
+    "aiAiDenyToolCall": {
       "request": {
-        "$ref": "#/components/schemas/NewAiAiToolCallData"
+        "$ref": "#/components/schemas/AiAiToolCallData"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiChatEvent"
+        "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "newAiAssignmentsResolveForAction": {
+    "aiAssignmentsResolveForAction": {
       "response": {
-        "$ref": "#/components/schemas/NewAiResolvedAssignment"
+        "$ref": "#/components/schemas/AiResolvedAssignment"
       }
     },
-    "newAiAssignmentsTryResolveForAction": {
+    "aiAssignmentsTryResolveForAction": {
       "response": {
         "nullable": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/NewAiResolvedAssignment"
+            "$ref": "#/components/schemas/AiResolvedAssignment"
           }
         ]
       }
     },
-    "newAiAssignmentsAssign": {
+    "aiAssignmentsAssign": {
       "request": {
         "type": "object",
         "properties": {
           "actionType": {
-            "$ref": "#/components/schemas/NewAiActionType",
+            "$ref": "#/components/schemas/AiActionType",
             "description": "Action the assignment applies to."
           },
           "profileId": {
@@ -3403,15 +3326,15 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiAssignmentMutationResult"
+        "$ref": "#/components/schemas/AiAssignmentMutationResult"
       }
     },
-    "newAiAssignmentsUnassign": {
+    "aiAssignmentsUnassign": {
       "request": {
-        "$ref": "#/components/schemas/NewAiActionType"
+        "$ref": "#/components/schemas/AiActionType"
       }
     },
-    "newAiAssignmentsBulkAssign": {
+    "aiAssignmentsBulkAssign": {
       "request": {
         "type": "object",
         "additionalProperties": {
@@ -3419,16 +3342,16 @@
         }
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiBulkAssignmentResult"
+        "$ref": "#/components/schemas/AiBulkAssignmentResult"
       }
     },
-    "newAiAssignmentsGetAssignment": {
+    "aiAssignmentsGetAssignment": {
       "response": {
         "nullable": true,
         "type": "string"
       }
     },
-    "newAiAssignmentsGetAllAssignments": {
+    "aiAssignmentsGetAllAssignments": {
       "response": {
         "type": "object",
         "additionalProperties": {
@@ -3436,12 +3359,12 @@
         }
       }
     },
-    "newAiAssignmentsCascadeProfileDelete": {
+    "aiAssignmentsCascadeProfileDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiAttachmentsSaveFile": {
+    "aiAttachmentsSaveFile": {
       "request": {
         "type": "object",
         "properties": {
@@ -3484,10 +3407,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiAttachment"
+        "$ref": "#/components/schemas/AiAttachment"
       }
     },
-    "newAiAttachmentsSaveFilesMany": {
+    "aiAttachmentsSaveFilesMany": {
       "request": {
         "type": "object",
         "properties": {
@@ -3534,11 +3457,11 @@
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiAttachment"
+          "$ref": "#/components/schemas/AiAttachment"
         }
       }
     },
-    "newAiAttachmentsSaveImage": {
+    "aiAttachmentsSaveImage": {
       "request": {
         "type": "object",
         "properties": {
@@ -3575,10 +3498,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiAttachment"
+        "$ref": "#/components/schemas/AiAttachment"
       }
     },
-    "newAiAttachmentsSaveImagesMany": {
+    "aiAttachmentsSaveImagesMany": {
       "request": {
         "type": "object",
         "properties": {
@@ -3620,11 +3543,11 @@
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiAttachment"
+          "$ref": "#/components/schemas/AiAttachment"
         }
       }
     },
-    "newAiAttachmentsGet": {
+    "aiAttachmentsGet": {
       "request": {
         "type": "string"
       },
@@ -3632,12 +3555,12 @@
         "nullable": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/NewAiAttachment"
+            "$ref": "#/components/schemas/AiAttachment"
           }
         ]
       }
     },
-    "newAiAttachmentsGetMany": {
+    "aiAttachmentsGetMany": {
       "request": {
         "type": "array",
         "items": {
@@ -3650,18 +3573,18 @@
           "nullable": true,
           "allOf": [
             {
-              "$ref": "#/components/schemas/NewAiAttachment"
+              "$ref": "#/components/schemas/AiAttachment"
             }
           ]
         }
       }
     },
-    "newAiAttachmentsDelete": {
+    "aiAttachmentsDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiAttachmentsDeleteMany": {
+    "aiAttachmentsDeleteMany": {
       "request": {
         "type": "array",
         "items": {
@@ -3669,7 +3592,7 @@
         }
       }
     },
-    "newAiAttachmentsLinkToMessage": {
+    "aiAttachmentsLinkToMessage": {
       "request": {
         "type": "object",
         "properties": {
@@ -3697,12 +3620,12 @@
         "additionalProperties": false
       }
     },
-    "newAiPreferencesGetDeepMode": {
+    "aiPreferencesGetDeepMode": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiPreferencesSetDeepMode": {
+    "aiPreferencesSetDeepMode": {
       "request": {
         "type": "object",
         "properties": {
@@ -3720,51 +3643,51 @@
         "additionalProperties": false
       }
     },
-    "newAiPreferencesClearDeepMode": {
+    "aiPreferencesClearDeepMode": {
       "request": {
         "type": "string"
       }
     },
-    "newAiPreferencesIsDeepModeSet": {
+    "aiPreferencesIsDeepModeSet": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiProfilesCreate": {
+    "aiProfilesCreate": {
       "request": {
-        "$ref": "#/components/schemas/NewAiCreateProfileInput"
+        "$ref": "#/components/schemas/AiCreateProfileInput"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiProfileMutationResult"
+        "$ref": "#/components/schemas/AiProfileMutationResult"
       }
     },
-    "newAiProfilesUpdate": {
+    "aiProfilesUpdate": {
       "request": {
-        "$ref": "#/components/schemas/NewAiProfile"
+        "$ref": "#/components/schemas/AiProfile"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiProfileMutationResult"
+        "$ref": "#/components/schemas/AiProfileMutationResult"
       }
     },
-    "newAiProfilesDelete": {
+    "aiProfilesDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiProfilesListModels": {
+    "aiProfilesListModels": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiModel"
+          "$ref": "#/components/schemas/AiModel"
         }
       }
     },
-    "newAiProfilesListProviderModels": {
+    "aiProfilesListProviderModels": {
       "request": {
         "type": "object",
         "properties": {
           "providerType": {
-            "$ref": "#/components/schemas/NewAiProviderType",
+            "$ref": "#/components/schemas/AiProviderType",
             "description": "Provider whose catalog to list."
           },
           "baseUrl": {
@@ -3786,11 +3709,11 @@
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiModel"
+          "$ref": "#/components/schemas/AiModel"
         }
       }
     },
-    "newAiProfilesTestConnection": {
+    "aiProfilesTestConnection": {
       "request": {
         "type": "string"
       },
@@ -3814,28 +3737,28 @@
         ]
       }
     },
-    "newAiProfilesGetById": {
+    "aiProfilesGetById": {
       "response": {
-        "$ref": "#/components/schemas/NewAiProfile"
+        "$ref": "#/components/schemas/AiProfile"
       }
     },
-    "newAiProfilesList": {
+    "aiProfilesList": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiProfile"
+          "$ref": "#/components/schemas/AiProfile"
         }
       }
     },
-    "newAiPromptsCreate": {
+    "aiPromptsCreate": {
       "request": {
-        "$ref": "#/components/schemas/NewAiCreatePromptInput"
+        "$ref": "#/components/schemas/AiCreatePromptInput"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiPromptMutationResult"
+        "$ref": "#/components/schemas/AiPromptMutationResult"
       }
     },
-    "newAiPromptsUpdate": {
+    "aiPromptsUpdate": {
       "request": {
         "type": "object",
         "properties": {
@@ -3868,10 +3791,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiPromptMutationResult"
+        "$ref": "#/components/schemas/AiPromptMutationResult"
       }
     },
-    "newAiPromptsMove": {
+    "aiPromptsMove": {
       "request": {
         "type": "object",
         "properties": {
@@ -3892,31 +3815,31 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiPromptMutationResult"
+        "$ref": "#/components/schemas/AiPromptMutationResult"
       }
     },
-    "newAiPromptsDelete": {
+    "aiPromptsDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiPromptsList": {
+    "aiPromptsList": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiPrompt"
+          "$ref": "#/components/schemas/AiPrompt"
         }
       }
     },
-    "newAiPromptsCreateFolder": {
+    "aiPromptsCreateFolder": {
       "request": {
         "type": "string"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderMutationResult"
+        "$ref": "#/components/schemas/AiFolderMutationResult"
       }
     },
-    "newAiPromptsRenameFolder": {
+    "aiPromptsRenameFolder": {
       "request": {
         "type": "object",
         "properties": {
@@ -3936,40 +3859,40 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderMutationResult"
+        "$ref": "#/components/schemas/AiFolderMutationResult"
       }
     },
-    "newAiPromptsDeleteFolder": {
+    "aiPromptsDeleteFolder": {
       "request": {
         "type": "string"
       }
     },
-    "newAiPromptsListFolders": {
+    "aiPromptsListFolders": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiPromptFolder"
+          "$ref": "#/components/schemas/AiPromptFolder"
         }
       }
     },
-    "newAiPromptsExport": {
+    "aiPromptsExport": {
       "response": {
-        "$ref": "#/components/schemas/NewAiPromptBundle"
+        "$ref": "#/components/schemas/AiPromptBundle"
       }
     },
-    "newAiPromptsImportBundle": {
+    "aiPromptsImportBundle": {
       "request": {
         "type": "object",
         "properties": {
           "bundle": {
-            "$ref": "#/components/schemas/NewAiPromptBundle",
+            "$ref": "#/components/schemas/AiPromptBundle",
             "description": "Bundle to restore."
           },
           "options": {
             "type": "object",
             "properties": {
               "mode": {
-                "$ref": "#/components/schemas/NewAiImportMode"
+                "$ref": "#/components/schemas/AiImportMode"
               }
             },
             "additionalProperties": false,
@@ -3982,30 +3905,30 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiImportResult"
+        "$ref": "#/components/schemas/AiImportResult"
       }
     },
-    "newAiPromptsGetById": {
+    "aiPromptsGetById": {
       "response": {
         "nullable": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/NewAiPrompt"
+            "$ref": "#/components/schemas/AiPrompt"
           }
         ]
       }
     },
-    "newAiPromptsGetFolderById": {
+    "aiPromptsGetFolderById": {
       "response": {
         "nullable": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/NewAiPromptFolder"
+            "$ref": "#/components/schemas/AiPromptFolder"
           }
         ]
       }
     },
-    "newAiThreadsCreate": {
+    "aiThreadsCreate": {
       "request": {
         "type": "object",
         "properties": {
@@ -4028,18 +3951,18 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiThread"
+        "$ref": "#/components/schemas/AiThread"
       }
     },
-    "newAiThreadsOpenOrCreate": {
+    "aiThreadsOpenOrCreate": {
       "request": {
-        "$ref": "#/components/schemas/NewAiOpenOrCreateInput"
+        "$ref": "#/components/schemas/AiOpenOrCreateInput"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiOpenOrCreateResult"
+        "$ref": "#/components/schemas/AiOpenOrCreateResult"
       }
     },
-    "newAiThreadsAppendUserMessage": {
+    "aiThreadsAppendUserMessage": {
       "request": {
         "type": "object",
         "properties": {
@@ -4047,7 +3970,7 @@
             "type": "string"
           },
           "message": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "$ref": "#/components/schemas/AiThreadMessageLike",
             "description": "Message to persist (id/createdAt are storage-assigned)."
           },
           "profileId": {
@@ -4061,10 +3984,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiThreadMessageLike"
+        "$ref": "#/components/schemas/AiThreadMessageLike"
       }
     },
-    "newAiThreadsTouch": {
+    "aiThreadsTouch": {
       "request": {
         "type": "object",
         "properties": {
@@ -4081,7 +4004,7 @@
         "additionalProperties": false
       }
     },
-    "newAiThreadsRename": {
+    "aiThreadsRename": {
       "request": {
         "type": "object",
         "properties": {
@@ -4100,17 +4023,17 @@
         "additionalProperties": false
       }
     },
-    "newAiThreadsDelete": {
+    "aiThreadsDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiThreadsClearMessages": {
+    "aiThreadsClearMessages": {
       "request": {
         "type": "string"
       }
     },
-    "newAiThreadsRegenerateTitle": {
+    "aiThreadsRegenerateTitle": {
       "request": {
         "type": "object",
         "properties": {
@@ -4118,7 +4041,7 @@
             "type": "string"
           },
           "profile": {
-            "$ref": "#/components/schemas/NewAiProfile",
+            "$ref": "#/components/schemas/AiProfile",
             "description": "Profile used to regenerate the title."
           }
         },
@@ -4132,43 +4055,43 @@
         "type": "string"
       }
     },
-    "newAiThreadsList": {
+    "aiThreadsList": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiThread"
+          "$ref": "#/components/schemas/AiThread"
         }
       }
     },
-    "newAiThreadsReadMessages": {
+    "aiThreadsReadMessages": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike"
+          "$ref": "#/components/schemas/AiThreadMessageLike"
         }
       }
     },
-    "newAiThreadsGetById": {
+    "aiThreadsGetById": {
       "response": {
         "nullable": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/NewAiThread"
+            "$ref": "#/components/schemas/AiThread"
           }
         ]
       }
     },
-    "newAiThreadsGetMessageById": {
+    "aiThreadsGetMessageById": {
       "response": {
         "nullable": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike"
+            "$ref": "#/components/schemas/AiThreadMessageLike"
           }
         ]
       }
     },
-    "newAiThreadsUpdateMessage": {
+    "aiThreadsUpdateMessage": {
       "request": {
         "type": "object",
         "properties": {
@@ -4176,7 +4099,7 @@
             "type": "string"
           },
           "message": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "$ref": "#/components/schemas/AiThreadMessageLike",
             "description": "Replacement message content."
           }
         },
@@ -4187,12 +4110,12 @@
         "additionalProperties": false
       }
     },
-    "newAiThreadsDeleteMessage": {
+    "aiThreadsDeleteMessage": {
       "request": {
         "type": "string"
       }
     },
-    "newAiToolsAddCustomServer": {
+    "aiToolsAddCustomServer": {
       "request": {
         "type": "object",
         "properties": {
@@ -4201,7 +4124,7 @@
             "description": "Server name (unique within scope)."
           },
           "config": {
-            "$ref": "#/components/schemas/NewAiMcpServerConfig",
+            "$ref": "#/components/schemas/AiMcpServerConfig",
             "description": "Server transport configuration."
           },
           "entityId": {
@@ -4215,10 +4138,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiToolsMutationResult"
+        "$ref": "#/components/schemas/AiToolsMutationResult"
       }
     },
-    "newAiToolsUpdateCustomServer": {
+    "aiToolsUpdateCustomServer": {
       "request": {
         "type": "object",
         "properties": {
@@ -4226,7 +4149,7 @@
             "type": "string"
           },
           "config": {
-            "$ref": "#/components/schemas/NewAiMcpServerConfig"
+            "$ref": "#/components/schemas/AiMcpServerConfig"
           },
           "entityId": {
             "type": "string"
@@ -4239,10 +4162,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiToolsMutationResult"
+        "$ref": "#/components/schemas/AiToolsMutationResult"
       }
     },
-    "newAiToolsRemoveCustomServer": {
+    "aiToolsRemoveCustomServer": {
       "request": {
         "type": "object",
         "properties": {
@@ -4259,43 +4182,43 @@
         "additionalProperties": false
       }
     },
-    "newAiToolsGetCustomServer": {
+    "aiToolsGetCustomServer": {
       "response": {
         "nullable": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/NewAiMcpServerConfig"
+            "$ref": "#/components/schemas/AiMcpServerConfig"
           }
         ]
       }
     },
-    "newAiToolsListCustomServers": {
+    "aiToolsListCustomServers": {
       "response": {
         "type": "object",
         "additionalProperties": {
-          "$ref": "#/components/schemas/NewAiMcpServerConfig"
+          "$ref": "#/components/schemas/AiMcpServerConfig"
         }
       }
     },
-    "newAiToolsListSystemTools": {
+    "aiToolsListSystemTools": {
       "response": {
         "type": "object",
         "additionalProperties": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiTMCPItem"
+            "$ref": "#/components/schemas/AiTMCPItem"
           }
         }
       }
     },
-    "newAiToolsReplaceAllCustomServers": {
+    "aiToolsReplaceAllCustomServers": {
       "request": {
         "type": "object",
         "properties": {
           "map": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/NewAiMcpServerConfig"
+              "$ref": "#/components/schemas/AiMcpServerConfig"
             },
             "description": "Full replacement set, keyed by server name."
           },
@@ -4309,10 +4232,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiToolsBulkResult"
+        "$ref": "#/components/schemas/AiToolsBulkResult"
       }
     },
-    "newAiToolsSetDisabled": {
+    "aiToolsSetDisabled": {
       "request": {
         "type": "object",
         "properties": {
@@ -4337,7 +4260,7 @@
         "additionalProperties": false
       }
     },
-    "newAiToolsGetDisabled": {
+    "aiToolsGetDisabled": {
       "response": {
         "type": "object",
         "additionalProperties": {
@@ -4348,12 +4271,12 @@
         }
       }
     },
-    "newAiToolsIsToolDisabled": {
+    "aiToolsIsToolDisabled": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiToolsSetAllowAlways": {
+    "aiToolsSetAllowAlways": {
       "request": {
         "type": "object",
         "properties": {
@@ -4379,7 +4302,7 @@
         "additionalProperties": false
       }
     },
-    "newAiToolsGetAllowAlways": {
+    "aiToolsGetAllowAlways": {
       "response": {
         "type": "array",
         "items": {
@@ -4387,29 +4310,29 @@
         }
       }
     },
-    "newAiToolsIsAllowAlways": {
+    "aiToolsIsAllowAlways": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiWebSearchGetActiveConfig": {
+    "aiWebSearchGetActiveConfig": {
       "response": {
         "nullable": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/NewAiWebSearchConfig"
+            "$ref": "#/components/schemas/AiWebSearchConfig"
           }
         ]
       }
     },
-    "newAiWebSearchIsConfigured": {
+    "aiWebSearchIsConfigured": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiWebSearchTestConnection": {
+    "aiWebSearchTestConnection": {
       "request": {
-        "$ref": "#/components/schemas/NewAiWebSearchConfig"
+        "$ref": "#/components/schemas/AiWebSearchConfig"
       },
       "response": {
         "anyOf": [
@@ -4431,12 +4354,12 @@
         ]
       }
     },
-    "newAiWebSearchConfigure": {
+    "aiWebSearchConfigure": {
       "request": {
         "type": "object",
         "properties": {
           "config": {
-            "$ref": "#/components/schemas/NewAiWebSearchConfig"
+            "$ref": "#/components/schemas/AiWebSearchConfig"
           },
           "entityId": {
             "type": "string"
@@ -4448,15 +4371,15 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiWebSearchMutationResult"
+        "$ref": "#/components/schemas/AiWebSearchMutationResult"
       }
     },
-    "newAiWebSearchSetActiveConfig": {
+    "aiWebSearchSetActiveConfig": {
       "request": {
         "type": "object",
         "properties": {
           "config": {
-            "$ref": "#/components/schemas/NewAiWebSearchConfig"
+            "$ref": "#/components/schemas/AiWebSearchConfig"
           },
           "entityId": {
             "type": "string"
@@ -4468,12 +4391,12 @@
         "additionalProperties": false
       }
     },
-    "newAiWebSearchClear": {
+    "aiWebSearchClear": {
       "request": {
         "type": "string"
       }
     },
-    "newAiExportTextToDocx": {
+    "aiExportTextToDocx": {
       "request": {
         "type": "object",
         "properties": {
@@ -4518,7 +4441,7 @@
         "description": "Accepted-for-processing acknowledgement (conversion is asynchronous)."
       }
     },
-    "newAiAgentsCreate": {
+    "aiAgentsCreate": {
       "request": {
         "type": "object",
         "additionalProperties": false,
@@ -4596,10 +4519,10 @@
         ]
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
       }
     },
-    "newAiAgentsUpdate": {
+    "aiAgentsUpdate": {
       "request": {
         "type": "object",
         "additionalProperties": false,
@@ -4666,10 +4589,10 @@
         }
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
       }
     },
-    "newAiAgentsDelete": {
+    "aiAgentsDelete": {
       "request": {
         "type": "object",
         "properties": {
@@ -4681,10 +4604,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFileOperationWrapper"
+        "$ref": "#/components/schemas/AiFileOperationWrapper"
       }
     },
-    "newAiAgentsUpdateQuota": {
+    "aiAgentsUpdateQuota": {
       "request": {
         "type": "object",
         "properties": {
@@ -4715,10 +4638,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
       }
     },
-    "newAiAgentsResetQuota": {
+    "aiAgentsResetQuota": {
       "request": {
         "type": "object",
         "properties": {
@@ -4744,47 +4667,47 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
       }
     },
-    "newAiAgentsList": {
+    "aiAgentsList": {
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderContentIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderContentIntegerWrapper"
       }
     },
-    "newAiAgentsNews": {
+    "aiAgentsNews": {
       "response": {
-        "$ref": "#/components/schemas/NewAiNewItemsAgentNewItemsArrayWrapper"
+        "$ref": "#/components/schemas/AiNewItemsAgentNewItemsArrayWrapper"
       }
     },
-    "newAiAgentsGet": {
+    "aiAgentsGet": {
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
       }
     },
-    "newAiSettingsGet": {
+    "aiSettingsGet": {
       "response": {
-        "$ref": "#/components/schemas/NewAiAiSettingsWrapper"
+        "$ref": "#/components/schemas/AiAiSettingsWrapper"
       }
     },
-    "newAiSettingsGetVectorization": {
+    "aiSettingsGetVectorization": {
       "response": {
-        "$ref": "#/components/schemas/NewAiVectorizationSettingsWrapper"
+        "$ref": "#/components/schemas/AiVectorizationSettingsWrapper"
       }
     },
-    "newAiSettingsSetVectorization": {
+    "aiSettingsSetVectorization": {
       "response": {
-        "$ref": "#/components/schemas/NewAiVectorizationSettingsWrapper"
+        "$ref": "#/components/schemas/AiVectorizationSettingsWrapper"
       }
     },
-    "newAiSettingsGetUser": {
+    "aiSettingsGetUser": {
       "response": {
-        "$ref": "#/components/schemas/NewAiAiUserSettingsWrapper"
+        "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
       }
     },
-    "newAiSettingsSetUser": {
+    "aiSettingsSetUser": {
       "response": {
-        "$ref": "#/components/schemas/NewAiAiUserSettingsWrapper"
+        "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
       }
     }
   }
