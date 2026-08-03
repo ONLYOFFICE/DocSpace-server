@@ -2050,7 +2050,7 @@ public class EntryManager(IDaoFactory daoFactory,
         resultsFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".xlsx");
         resultsFile.CreateBy = createBy;
 
-        var file = await fileDao.SaveFileAsync(resultsFile, textStream, false);
+        var file = await fileDao.SaveFormFileAsync(resultsFile, textStream, false);
 
         return file.Id;
     }
@@ -2186,7 +2186,7 @@ public class EntryManager(IDaoFactory daoFactory,
             if (tmpStream.CanSeek)
             {
                 pdfFile.ContentLength = tmpStream.Length;
-                result = await fileDao.SaveFileAsync(pdfFile, tmpStream, false);
+                result = await fileDao.SaveFormFileAsync(pdfFile, tmpStream, false);
             }
             else
             {
@@ -2194,7 +2194,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 try
                 {
                     pdfFile.ContentLength = buffered.Length;
-                    result = await fileDao.SaveFileAsync(pdfFile, buffered, false);
+                    result = await fileDao.SaveFormFileAsync(pdfFile, buffered, false);
                 }
                 finally
                 {
@@ -2294,7 +2294,7 @@ public class EntryManager(IDaoFactory daoFactory,
         if (stream.CanSeek)
         {
             pdfFile.ContentLength = stream.Length;
-            result = await fileDao.SaveFileAsync(pdfFile, stream, false);
+            result = await fileDao.SaveFormFileAsync(pdfFile, stream, false);
         }
         else
         {
@@ -2302,7 +2302,7 @@ public class EntryManager(IDaoFactory daoFactory,
             try
             {
                 pdfFile.ContentLength = buffered.Length;
-                result = await fileDao.SaveFileAsync(pdfFile, buffered, false);
+                result = await fileDao.SaveFormFileAsync(pdfFile, buffered, false);
             }
             finally
             {
@@ -2377,7 +2377,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     if (stream.CanSeek)
                     {
                         form.ContentLength = stream.Length;
-                        await fileDao.SaveFileAsync(form, stream, false);
+                        await fileDao.SaveFormFileAsync(form, stream, false);
                     }
                     else
                     {
@@ -2385,7 +2385,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         try
                         {
                             form.ContentLength = buffered.Length;
-                            await fileDao.SaveFileAsync(form, buffered, false);
+                            await fileDao.SaveFormFileAsync(form, buffered, false);
                         }
                         finally
                         {

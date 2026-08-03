@@ -314,7 +314,7 @@ internal class SharePointFileDao(
         return Task.FromResult(false);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    public async Task<File<string>> SaveFormFileAsync(File<string> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream);
     }

@@ -189,7 +189,8 @@ public interface IFileDao<T>
 
     /// <summary>
     ///  Saves / updates the version of the file
-    ///  and save stream of file
+    ///  and save stream of file, for use in form-filling flows where the
+    ///  destination folder existence check can be skipped
     /// </summary>
     /// <param name="file"></param>
     /// <param name="fileStream"> </param>
@@ -202,7 +203,7 @@ public interface IFileDao<T>
     ///
     /// Save in all other cases
     /// </remarks>
-    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, bool checkFolder);
+    Task<File<T>> SaveFormFileAsync(File<T> file, Stream fileStream, bool checkFolder);
 
     /// <summary>
     ///

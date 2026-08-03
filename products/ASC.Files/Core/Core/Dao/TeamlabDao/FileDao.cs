@@ -471,7 +471,7 @@ internal class FileDao(
         return await SaveFileAsync(file, fileStream, true, true, null, allowQuotaGrace);
     }
 
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkFolder)
+    public async Task<File<int>> SaveFormFileAsync(File<int> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream, true, checkFolder);
     }
