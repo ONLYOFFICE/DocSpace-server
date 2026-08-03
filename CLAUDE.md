@@ -81,7 +81,7 @@ Both live **outside this repo**, as siblings of `server/` in the parent `docspac
 
 ## Coding Conventions
 
-C# naming, style, and API conventions live in `.claude/rules/csharp-style.md` (loaded automatically when working with `.cs` files). Logging conventions: `.claude/rules/logging.md`. Code navigation rules (LSP-only): `.claude/rules/csharp-lsp.md`.
+C# naming, style, and API conventions live in `.claude/rules/csharp-style.md` (loaded automatically when working with `.cs` files). Logging conventions: `.claude/rules/logging.md`. Caching conventions (FusionCache only — never hand-rolled caches; two cache instances, keys/tags, invalidation): `.claude/rules/caching.md`. Code navigation rules (LSP-only): `.claude/rules/csharp-lsp.md`.
 
 ## Testing
 
