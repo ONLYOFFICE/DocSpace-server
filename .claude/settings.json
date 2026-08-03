@@ -1,12 +1,4 @@
 {
-  "extraKnownMarketplaces": {
-    "aspire-skills": {
-      "source": {
-        "source": "github",
-        "repo": "microsoft/aspire-skills"
-      }
-    }
-  },
   "enabledPlugins": {
     "csharp-lsp@claude-plugins-official": true
   },
