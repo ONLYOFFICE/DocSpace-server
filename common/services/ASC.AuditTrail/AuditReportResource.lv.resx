@@ -1203,4 +1203,13 @@
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Lietotāja aktīvie savienojumi atteicās: {0}</value>
   </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect konfigurācija atjaunināta</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect kvotu atskaite lejupielādēta</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Lietotāja MI iestatījumi atjaunināti</value>
+  </data>
 </root>

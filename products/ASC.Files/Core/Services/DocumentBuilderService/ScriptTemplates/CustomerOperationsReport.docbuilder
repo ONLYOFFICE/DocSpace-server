@@ -2,20 +2,33 @@ builder.CreateFile("xlsx");
 
 var defaultFontSize = 11;
 var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
-var currentRowIndex = 1;
-var currentColIndex = 1;
-var MAX_COLUMN_WIDTH = 100;
-var MAX_ROW_HEIGHT = 125;
+var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
+var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
-var inputData = {
-    keys: ${dataKeys},
-    values: [${dataValues}]
-};
+var MAX_COLUMN_WIDTH = 100;
+
+var inputData = ${inputData};
+
+var values = [${dataValues}];
 
 var oWorksheet = Api.GetActiveSheet();
 
+var currentRowIndex = 1;
+var currentColIndex = 1;
+
+var columnMaxLengths = {};
+
+var colors = {
+    mainBgColor: Api.CreateColorFromRGB(inputData.themeColors.mainBgColor[0], inputData.themeColors.mainBgColor[1], inputData.themeColors.mainBgColor[2]),
+    lightBgColor: Api.CreateColorFromRGB(inputData.themeColors.lightBgColor[0], inputData.themeColors.lightBgColor[1], inputData.themeColors.lightBgColor[2]),
+    mainFontColor: Api.CreateColorFromRGB(inputData.themeColors.mainFontColor[0], inputData.themeColors.mainFontColor[1], inputData.themeColors.mainFontColor[2])
+};
+
 function getMaxLineLength(text) {
-    if (!text || typeof text !== 'string') return 0;
+    if (text == null) {
+        return 0;
+    }
+    text = String(text);
     var lines = text.split('\n');
     var maxLength = 0;
     for (var i = 0; i < lines.length; i++) {
@@ -26,11 +39,6 @@ function getMaxLineLength(text) {
     return maxLength;
 }
 
-function countLineBreaks(text) {
-    if (!text || typeof text !== 'string') return 0;
-    return (text.match(/\n/g) || []).length;
-}
-
 function toColumnName(num) {
     for (var res = '', a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) {
         res = String.fromCharCode(parseInt((num % b) / a) + 65) + res;
@@ -39,103 +47,252 @@ function toColumnName(num) {
 }
 
 function customizeWorksheet() {
-    oWorksheet.SetName("${sheetName}");
+    oWorksheet.SetName(inputData.resources.sheetName);
+    oWorksheet.SetDisplayGridlines(false);
+
+    oWorksheet.SetColumnWidth(0, 20);
+    oWorksheet.SetColumnWidth(1, 20);
+    oWorksheet.SetColumnWidth(2, 20);
+    oWorksheet.SetColumnWidth(3, 20);
+    oWorksheet.SetColumnWidth(4, 20);
+    oWorksheet.SetColumnWidth(5, 20);
+    oWorksheet.SetColumnWidth(6, 20);
 }
 
-function prepareData(startColIndex, startRowIndex) {
-    var kA = [];
-    for (var i = 0; i < inputData.keys.length; i++) {
-        kA.push({ value: inputData.keys[i], bold: true, fontColor: defaultFontColorBlack, valign: "center" });
-    }
-    var dataTable = [{
-        height: 19.5,
-        dataArray: kA
-    }];
-
-    for (var i = 0; i < inputData.values.length; i++) {
-        var rowValues = [];
-        for (var j = 0; j < inputData.values[i].length; j++) {
-            rowValues.push({
-                value: inputData.values[i][j].value,
-                url: inputData.values[i][j].url,
-                fontSize: (defaultFontSize + 1),
-                halign: inputData.values[i][j].halign,
-                valign: "center",
-                format: inputData.values[i][j].format
-            });
+function prepareInfo() {
+    return [
+        {
+            height: 15.5,
+            dataArray: [
+                { "value": inputData.resources.company, "bold": true, valign: "center" },
+                { "value": inputData.info.company, "fontColor": defaultFontColorGray, "format": "@", valign: "center" }
+            ]
+        },
+        {
+            height: 15.5,
+            dataArray: [
+                { "value": inputData.resources.report, "bold": true, valign: "center" },
+                { "value": inputData.info.report, "fontColor": defaultFontColorGray, "format": "@", valign: "center" }
+            ]
+        },
+        {
+            height: 15.5,
+            dataArray: [
+                { "value": inputData.resources.period, "bold": true, valign: "center" },
+                { "value": inputData.info.period, "fontColor": defaultFontColorGray, "format": "@", valign: "center" }
+            ]
+        },
+        {
+            height: 15.5,
+            dataArray: [
+                { "value": inputData.resources.dateGenerated, "bold": true, valign: "center" },
+                { "value": inputData.info.dateGenerated, "fontColor": defaultFontColorGray, "format": inputData.resources.dateGeneratedFormat, valign: "center" }
+            ]
+        },
+        {
+            height: 15.5,
+            dataArray: []
         }
-        dataTable.push({
-            height: 19.5,
-            dataArray: rowValues
+    ];
+}
+
+function prepareHeader() {
+    var row = [];
+    for (var i = 0; i < inputData.keys.length; i++) {
+        row.push({
+            "value": inputData.keys[i],
+            "bold": true,
+            "fontColor": colors.mainFontColor,
+            "bgColor": colors.mainBgColor,
+            "halign": inputData.aligns[i],
+            valign: "center",
+            "borderColor": defaultBorderColorWhite
         });
     }
-    return dataTable;
+    return { height: 19.5, dataArray: row };
+}
+
+function prepareData() {
+    var table = [];
+    for (var i = 0; i < values.length; i++) {
+        var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
+        var rowValues = [];
+        for (var j = 0; j < values[i].length; j++) {
+            var cell = values[i][j];
+            rowValues.push({
+                "value": cell.value,
+                "url": cell.url,
+                "halign": cell.halign,
+                valign: "center",
+                "format": cell.format,
+                "bgColor": bgColor,
+                "borderColor": defaultBorderColorWhite
+            });
+        }
+        table.push({ height: 19.5, dataArray: rowValues });
+    }
+    return table;
+}
+
+function prepareTotal(headerRowIndex) {
+    if (!inputData.totalColumns || inputData.totalColumns.length == 0 || values.length == 0) {
+        return null;
+    }
+
+    // Summing across different currencies would be meaningless, so skip the total row entirely
+    // when the currency column holds more than one distinct value.
+    var currencyCol = inputData.totalCurrencyColumn;
+    var firstCurrency = currencyCol >= 0 && values[0][currencyCol] != null ? values[0][currencyCol].value : null;
+    if (currencyCol >= 0) {
+        for (var r = 1; r < values.length; r++) {
+            var currency = values[r][currencyCol] != null ? values[r][currencyCol].value : null;
+            if (currency !== firstCurrency) {
+                return null;
+            }
+        }
+    }
+
+    var firstDataRow = headerRowIndex + 1;
+    var lastDataRow = headerRowIndex + values.length;
+
+    // Continue the row banding: the total row is the next row after the data, so its fill
+    // follows the same alternation (data row index i is shaded when i is odd).
+    var totalBgColor = values.length % 2 == 0 ? null : colors.lightBgColor;
+
+    var row = [];
+    for (var i = 0; i < inputData.keys.length; i++) {
+        var cell = { "bold": true, "bgColor": totalBgColor, valign: "center", "borderColor": defaultBorderColorWhite };
+
+        if (i == 0) {
+            cell.value = inputData.resources.total;
+        } else if (inputData.totalColumns.indexOf(i) >= 0) {
+            var col = toColumnName(i + 1);
+            cell.value = "=SUM(" + col + firstDataRow + ":" + col + lastDataRow + ")";
+            cell.format = inputData.resources.totalFormat;
+            cell.halign = inputData.aligns[i];
+        } else if (i == inputData.totalCurrencyColumn) {
+            // Echo the currency code shared by all data rows.
+            cell.value = firstCurrency;
+            cell.format = "@";
+            cell.halign = inputData.aligns[i];
+        }
+
+        row.push(cell);
+    }
+
+    return { height: 19.5, dataArray: row };
 }
 
 function writeCell(position, data) {
-    if (data == null) return;
+    if (data == null) {
+        return;
+    }
+
     var sRange = oWorksheet.GetRange(position);
-    if (data.format) sRange.SetNumberFormat(data.format);
+
+    if (data.format) {
+        sRange.SetNumberFormat(data.format);
+    }
+
     if (data.url) {
         oWorksheet.SetHyperlink(position, data.url, "", data.value, data.value);
     } else if (data.value != null) {
         sRange.SetValue(data.value);
         sRange.SetWrap(true);
     }
+
     sRange.SetFontSize(data.fontSize || defaultFontSize);
     sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
     sRange.SetBold(data.bold || false);
     sRange.SetAlignHorizontal(data.halign || "left");
     sRange.SetAlignVertical(data.valign || "bottom");
-    if (data.bgColor) sRange.SetFillColor(data.bgColor);
+
+    if (data.bgColor) {
+        sRange.SetFillColor(data.bgColor);
+    }
+
+    if (data.borderColor) {
+        sRange.SetBorders("Bottom", "Medium", data.borderColor);
+        sRange.SetBorders("Top", "Medium", data.borderColor);
+        sRange.SetBorders("Left", "Medium", data.borderColor);
+        sRange.SetBorders("Right", "Medium", data.borderColor);
+    }
 }
 
 function writeTable(table) {
-    var columnMaxLengths = {};
-    var rowMaxBreaks = {};
-    var baseRowHeight = 19.5;
-    var lineHeight = 15;
-
     for (var i = 0; i < table.length; i++) {
-        rowMaxBreaks[i] = 0;
-        for (var j = 0; j < table[i].dataArray.length; j++) {
-            var currentLength = getMaxLineLength(table[i].dataArray[j].value);
-            if (!columnMaxLengths[j] || currentLength > columnMaxLengths[j]) {
-                columnMaxLengths[j] = currentLength;
-            }
-            var breaksCount = countLineBreaks(table[i].dataArray[j].value);
-            if (breaksCount > rowMaxBreaks[i]) {
-                rowMaxBreaks[i] = breaksCount;
-            }
-        }
-    }
+        var row = table[i];
 
-    for (var i = 0; i < table.length; i++) {
-        var rowNum = currentRowIndex + i;
-        var calculatedHeight = baseRowHeight + (rowMaxBreaks[i] * lineHeight);
-        oWorksheet.GetRange("A" + rowNum).SetRowHeight(Math.min(calculatedHeight, MAX_ROW_HEIGHT));
-        for (var j = 0; j < table[i].dataArray.length; j++) {
-            var position = toColumnName(currentColIndex) + rowNum;
-            writeCell(position, table[i].dataArray[j]);
+        for (var j = 0; j < row.dataArray.length; j++) {
+            var data = row.dataArray[j];
+            if (data == null) {
+                currentColIndex++;
+                continue;
+            }
+
+            var length = getMaxLineLength(data.value);
+            if (!columnMaxLengths[currentColIndex] || length > columnMaxLengths[currentColIndex]) {
+                columnMaxLengths[currentColIndex] = length;
+            }
+
+            var position = toColumnName(currentColIndex) + currentRowIndex;
+            writeCell(position, data);
+
             currentColIndex++;
         }
+
+        oWorksheet.GetRange("A" + currentRowIndex).SetRowHeight(row.height);
+
+        currentRowIndex++;
         currentColIndex = 1;
     }
+}
 
-    currentRowIndex += table.length;
+function writeImg() {
+    if (!inputData.logoSrc) {
+        return;
+    }
+    oWorksheet.AddImage(inputData.logoSrc, 87 * 36000, 10 * 36000, 7, -87 * 36000, 0, 10 * 36000);
+}
 
+function setColumnWidths() {
     for (var col in columnMaxLengths) {
         if (columnMaxLengths.hasOwnProperty(col)) {
-            var columnLetter = toColumnName(parseInt(col) + 1);
+            var columnLetter = toColumnName(parseInt(col));
             oWorksheet.GetRange(columnLetter + "1").SetColumnWidth(Math.min(columnMaxLengths[col] * 1.2, MAX_COLUMN_WIDTH));
         }
     }
 }
 
 customizeWorksheet();
-var dataTable = prepareData(currentColIndex, currentRowIndex);
-writeTable(dataTable);
-oWorksheet.GetRange(toColumnName(1) + 1).Select();
+
+writeImg();
+
+writeTable(prepareInfo());
+
+var headerRowIndex = currentRowIndex;
+var colCount = inputData.keys.length;
+
+writeTable([prepareHeader()]);
+
+writeTable(prepareData());
+
+var totalRow = prepareTotal(headerRowIndex);
+if (totalRow != null) {
+    writeTable([totalRow]);
+}
+
+setColumnWidths();
+
+var freezePanes = oWorksheet.GetFreezePanes();
+freezePanes.FreezeRows(headerRowIndex);
+
+if (values.length > 0) {
+    var formattedTableRange = "A" + headerRowIndex + ":" + toColumnName(colCount) + (headerRowIndex + values.length);
+    oWorksheet.FormatAsTable(formattedTableRange);
+}
+
+oWorksheet.GetRange("A1").Select();
 
 Api.Save();
 builder.SaveFile("xlsx", "${tempFileName}");

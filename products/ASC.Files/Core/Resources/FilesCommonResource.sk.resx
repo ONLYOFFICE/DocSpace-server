@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Synchronizácia údajov formulára s externou databázou zlyhala.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Formulár bol zmenený. Tento koncept je zastaraný a nemožno ho odoslať.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Inštrukcia AI agenta nemôže byť dlhšia ako {0} znakov</value>
+  </data>
 </root>

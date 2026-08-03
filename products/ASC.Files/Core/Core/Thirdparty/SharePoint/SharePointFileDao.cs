@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -319,7 +319,7 @@ internal class SharePointFileDao(
         return await SaveFileAsync(file, fileStream);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default, bool allowQuotaGrace = false)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(fileStream);
 
@@ -437,14 +437,6 @@ internal class SharePointFileDao(
         }
 
         throw new NotImplementedException();
-    }
-
-    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
-    {
-        return await crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, sharePointDaoSelector.ConvertId,
-            toFolderId, fileDao, r => r,
-            false, chatId);
     }
 
     public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)

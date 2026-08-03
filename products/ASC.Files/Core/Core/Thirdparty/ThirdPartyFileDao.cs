@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -360,7 +360,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return await SaveFileAsync(file, fileStream);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default, bool allowQuotaGrace = false)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(fileStream);
@@ -563,14 +563,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         await ProviderInfo.CacheResetAsync(Dao.GetId(toFolder));
 
         return Dao.ToFile(newFile);
-    }
-
-    public Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
-    {
-        return crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, daoSelector.ConvertId,
-            toFolderId, fileDao, r => r,
-            false, chatId);
     }
 
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)

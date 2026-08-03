@@ -595,4 +595,10 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Lomakkeen tietojen synkronointi ulkoiseen tietokantaan epäonnistui.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Lomaketta on muutettu. Tämä luonnos on vanhentunut eikä sitä voi lähettää.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>AI-agentin ohje ei voi olla pidempi kuin {0} merkkiä</value>
+  </data>
 </root>

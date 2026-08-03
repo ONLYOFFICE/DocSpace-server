@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -96,24 +96,6 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> RemoveUserRoomChatsAsync(int tenantId, int roomId, Guid userId)
-    {
-        return SecurityQueries.RemoveUserRoomChatsAsync(this, tenantId, roomId, userId);
-    }
-
-    [PreCompileQuery]
-    public Task<int> RemoveUserRoomChatsSettingsAsync(int tenantId, int roomId, Guid userId)
-    {
-        return SecurityQueries.RemoveUserRoomChatsSettingsAsync(this, tenantId, roomId, userId);
-    }
-
-    [PreCompileQuery]
-    public Task<int> RemoveUserRoomMcpSettingsAsync(int tenantId, int roomId, Guid userId)
-    {
-        return SecurityQueries.RemoveUserRoomMcpSettingsAsync(this, tenantId, roomId, userId);
-    }
-
-    [PreCompileQuery]
     public Task<int> UpdateShareByFolderTypesAsync(int tenantId, Guid subject, IEnumerable<FolderType> folderTypes, FileShare share)
     {
         return SecurityQueries.UpdateShareByFolderTypesAsync(this, tenantId, subject, folderTypes, share);
@@ -198,34 +180,12 @@ static file class SecurityQueries
                         r.SubjectType == subjectType)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, Guid, Task<int>> RemoveUserRoomChatsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
-                ctx.Chats
-                    .Where(r => r.TenantId == tenantId && r.RoomId == roomId && r.UserId == userId)
-                    .ExecuteDelete());
-
-    public static readonly Func<FilesDbContext, int, int, Guid, Task<int>> RemoveUserRoomChatsSettingsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
-                ctx.UserChatSettings
-                    .Where(r => r.TenantId == tenantId && r.RoomId == roomId && r.UserId == userId)
-                    .ExecuteDelete());
-
-    public static readonly Func<FilesDbContext, int, int, Guid, Task<int>> RemoveUserRoomMcpSettingsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
-                ctx.McpServerSettings
-                    .Where(r => r.TenantId == tenantId && r.RoomId == roomId && r.UserId == userId)
-                    .ExecuteDelete());
-
     public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, FileShare, Task<int>>
         UpdateShareByFolderTypesAsync =
-            Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-                (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<FolderType> folderTypes, FileShare share) =>
-                    ctx.Security
-                        .Where(r => r.TenantId == tenantId && r.Subject == subject && r.EntryType == FileEntryType.Folder)
-                        .Where(r => ctx.Folders.Any(f =>
-                            f.Id == r.InternalEntryId && f.TenantId == tenantId && folderTypes.Contains(f.FolderType)))
-                        .ExecuteUpdate(f => f.SetProperty(p => p.Share, share)));
+            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<FolderType> folderTypes, FileShare share) =>
+                ctx.Security
+                    .Where(r => r.TenantId == tenantId && r.Subject == subject && r.EntryType == FileEntryType.Folder)
+                    .Where(r => ctx.Folders.Any(f =>
+                        f.Id == r.InternalEntryId && f.TenantId == tenantId && folderTypes.Contains(f.FolderType)))
+                    .ExecuteUpdateAsync(f => f.SetProperty(p => p.Share, share));
 }

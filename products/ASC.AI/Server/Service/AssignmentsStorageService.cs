@@ -39,13 +39,14 @@ public class AssignmentsStorageService(
     AuthContext authContext,
     TenantManager tenantManager,
     AssignmentsStorage storage,
+    AssignmentsResolver resolver,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _writeGlobalTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _writeLocalTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
-    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async Task CreateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
@@ -63,14 +64,18 @@ public class AssignmentsStorageService(
     {
         var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
-        return await storage.ReadByTypeAsync(tenantManager.GetCurrentTenantId(), actionType, entryId);
+        var stored = await storage.ReadByTypeAsync(tenantManager.GetCurrentTenantId(), actionType, entryId);
+
+        return await resolver.ResolveByTypeAsync(actionType, stored, applyDefaults: entryId == null);
     }
 
     public async Task<Dictionary<ActionType, Guid>> ReadAllAsync(string? entityId = null)
     {
         var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
-        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
+        var stored = await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
+
+        return await resolver.ResolveAsync(stored, applyDefaults: entryId == null);
     }
 
     public async Task UpdateAsync(ActionType actionType, Guid profileId, string? entityId = null)

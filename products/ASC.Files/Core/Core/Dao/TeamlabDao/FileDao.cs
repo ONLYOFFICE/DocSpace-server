@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -466,9 +466,9 @@ internal class FileDao(
         return (tenantQuotaLock, true);
     }
 
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, Guid chatId = default, bool allowQuotaGrace = false)
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool allowQuotaGrace = false)
     {
-        return await SaveFileAsync(file, fileStream, true, true, null, chatId, allowQuotaGrace);
+        return await SaveFileAsync(file, fileStream, true, true, null, allowQuotaGrace);
     }
 
     public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkFolder)
@@ -482,7 +482,6 @@ internal class FileDao(
         bool checkQuota,
         bool checkFolder,
         ChunkedUploadSession<int> uploadSession = null,
-        Guid chatId = default,
         bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
@@ -701,18 +700,6 @@ internal class FileDao(
                                     });
                         }
 
-                        if (chatId != Guid.Empty)
-                        {
-                            var attachment = new DbChatMessageAttachment
-                            {
-                                TenantId = tenantId,
-                                ChatId = chatId,
-                                FileId = file.Id,
-                                ModifiedOn = DateTime.UtcNow
-                            };
-
-                            await filesDbContext.MessageAttachments.AddAsync(attachment);
-                        }
                         await filesDbContext.SaveChangesAsync();
                         await tx.CommitAsync();
                     });
@@ -1134,7 +1121,6 @@ internal class FileDao(
             await context.DeleteTagsAsync(tenantId);
             await context.DeleteSecurityByFileIdsAsync(tenantId, fileIds);
             await context.DeleteOrderByFileIdsAsync(tenantId, fileIds);
-            await context.DeleteMessageAttachmentsByFileIdsAsync(tenantId, fileIds);
 
             var entryEventsIds = await context.AuditEventsIdsByFileIdsAsync(fileIds).ToListAsync();
             await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
@@ -1683,7 +1669,7 @@ internal class FileDao(
         throw new NotImplementedException();
     }
 
-    private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId, Guid chatId = default)
+    private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId)
     {
         var fileState = await fileHelper.GetFileState(file);
 
@@ -1705,7 +1691,7 @@ internal class FileDao(
         await using (var stream = await GetFileStreamAsync(file))
         {
             copy.ContentLength = stream.CanSeek ? stream.Length : file.ContentLength;
-            copy = await SaveFileAsync(copy, stream, true, true, null, chatId);
+            copy = await SaveFileAsync(copy, stream, true, true, null);
         }
 
         if (file.ThumbnailStatus != Thumbnail.Created)
@@ -1731,17 +1717,12 @@ internal class FileDao(
         return copy;
     }
 
-    public Task<File<int>> CopyFileAsync(int fileId, int toFolderId)
-    {
-        return CopyFileAsync(fileId, toFolderId, Guid.Empty);
-    }
-
-    public async Task<File<int>> CopyFileAsync(int fileId, int toFolderId, Guid chatId)
+    public async Task<File<int>> CopyFileAsync(int fileId, int toFolderId)
     {
         var file = await GetFileAsync(fileId);
         if (file != null)
         {
-            return await CopyFileAsync(file, toFolderId, chatId);
+            return await CopyFileAsync(file, toFolderId);
         }
 
         return null;

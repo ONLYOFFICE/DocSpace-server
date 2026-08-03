@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Integration.McpServers;
-
 using McpServer = ASC.AI.Integration.McpServers.McpServer;
 
 namespace ASC.AI.Service;
@@ -48,7 +46,7 @@ public class McpServerStorageService(
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
-    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async Task CreateAsync(string name, string config, string? entityId = null)
     {

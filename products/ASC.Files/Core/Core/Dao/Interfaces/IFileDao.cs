@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -176,7 +176,6 @@ public interface IFileDao<T>
     /// </summary>
     /// <param name="file"></param>
     /// <param name="fileStream"> </param>
-    /// <param name="chatId"></param>
     /// <param name="allowQuotaGrace">Allow a single overshoot of the portal (tariff) storage quota within a grace (editor saves only)</param>
     /// <returns></returns>
     /// <remarks>
@@ -186,7 +185,7 @@ public interface IFileDao<T>
     ///
     /// Save in all other cases
     /// </remarks>
-    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, Guid chatId = default, bool allowQuotaGrace = false);
+    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, bool allowQuotaGrace = false);
 
     /// <summary>
     ///  Saves / updates the version of the file
@@ -327,7 +326,6 @@ public interface IFileDao<T>
     Task<File<T>> CopyFileAsync(T fileId, T toFolderId);
     Task<File<TTo>> CopyFileAsync<TTo>(T fileId, TTo toFolderId);
     Task<File<string>> CopyFileAsync(T fileId, string toFolderId);
-    Task<File<int>> CopyFileAsync(T fileId, int toFolderId, Guid chatId);
 
     /// <summary>
     ///   Rename file

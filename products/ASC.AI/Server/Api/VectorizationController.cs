@@ -34,23 +34,20 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[DefaultRoute]
+[InternalRoute]
 [ApiController]
 [AiFeature]
 [ControllerName("ai")]
 public class VectorizationController(
     VectorizationTaskPublisher vectorizationTaskPublisher) : ControllerBase
 {
-    /// <summary>
-    /// Start a vectorization task
-    /// </summary>
     /// <remarks>
-    /// Submits the specified files for vectorization. Each file is processed asynchronously by the configured embedding provider
-    /// and indexed for semantic search in AI chat sessions. Only files accessible to the current user can be vectorized.
+    /// Submits the specified files for vectorization processing.
     /// </remarks>
+    /// <summary>Start a vectorization task</summary>
     /// <path>api/2.0/ai/vectorization/tasks</path>
     [Tags("AI / Vectorization")]
-    [SwaggerResponse(200, "The vectorization task was successfully submitted")]
+    [SwaggerResponse(200, "Ok")]
     [HttpPost("vectorization/tasks")]
     public async Task StartTaskAsync(VectorizationStartRequestDto inDto)
     {

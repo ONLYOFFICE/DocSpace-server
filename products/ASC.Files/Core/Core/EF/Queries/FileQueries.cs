@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -177,12 +177,6 @@ public partial class FilesDbContext
     public Task<int> MarkVectorizationDeletedByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
     {
         return FileQueries.MarkVectorizationDeletedByFileIdsAsync(this, tenantId, fileIds, DateTime.UtcNow);
-    }
-
-    [PreCompileQuery]
-    public Task<int> DeleteMessageAttachmentsByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
-    {
-        return FileQueries.DeleteMessageAttachmentsByFileIdsAsync(this, tenantId, fileIds);
     }
 
     [PreCompileQuery]
@@ -699,12 +693,11 @@ static file class FileQueries
                 ctx.Files.OrderByDescending(r => r.Id).Select(r => r.Id).FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DisableCurrentVersionAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == fileId && r.CurrentVersion)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.CurrentVersion, false)));
+        (FilesDbContext ctx, int tenantId, int fileId) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.Id == fileId && r.CurrentVersion)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.CurrentVersion, false));
 
     public static readonly Func<FilesDbContext, int, IAsyncEnumerable<DbFolderTree>> DbFolderTreesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -715,13 +708,12 @@ static file class FileQueries
                     .AsQueryable());
 
     public static readonly Func<FilesDbContext, IEnumerable<int>, DateTime, Guid, int, Task<int>> UpdateFoldersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, IEnumerable<int> parentFoldersIds, DateTime modifiedOn, Guid modifiedBy, int tenantId) =>
-                ctx.Folders
-                    .Where(r => parentFoldersIds.Contains(r.Id) && r.TenantId == tenantId)
-                    .ExecuteUpdate(f => f
-                        .SetProperty(p => p.ModifiedOn, modifiedOn)
-                        .SetProperty(p => p.ModifiedBy, modifiedBy)));
+        (FilesDbContext ctx, IEnumerable<int> parentFoldersIds, DateTime modifiedOn, Guid modifiedBy, int tenantId) =>
+            ctx.Folders
+                .Where(r => parentFoldersIds.Contains(r.Id) && r.TenantId == tenantId)
+                .ExecuteUpdateAsync(f => f
+                    .SetProperty(p => p.ModifiedOn, modifiedOn)
+                    .SetProperty(p => p.ModifiedBy, modifiedBy));
 
     public static readonly Func<FilesDbContext, int, int, int, Task<DbFile>> DbFileByVersionAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -748,12 +740,11 @@ static file class FileQueries
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, int, int, Task<int>> UpdateDbFilesByVersionAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, int version) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == fileId && r.Version == version)
-                    .ExecuteUpdate(q => q.SetProperty(p => p.CurrentVersion, true)));
+        (FilesDbContext ctx, int tenantId, int fileId, int version) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.Id == fileId && r.Version == version)
+                .ExecuteUpdateAsync(q => q.SetProperty(p => p.CurrentVersion, true));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> ParentIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -825,18 +816,10 @@ static file class FileQueries
                     .Select(r => r.FileId));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, DateTime, Task<int>> MarkVectorizationDeletedByFileIdsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, DateTime deletedOn) =>
-                ctx.FileVectorization
-                    .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
-                    .ExecuteUpdate(f => f.SetProperty(x => x.DeletedOn, deletedOn)));
-
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteMessageAttachmentsByFileIdsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
-                ctx.MessageAttachments
-                    .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
-                    .ExecuteDelete());
+        (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, DateTime deletedOn) =>
+            ctx.FileVectorization
+                .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
+                .ExecuteUpdateAsync(f => f.SetProperty(x => x.DeletedOn, deletedOn));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteOrderByFileIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -904,12 +887,11 @@ static file class FileQueries
     // the parent guard keeps files moved concurrently (their parent no longer matches the
     // caller's snapshot) untouched — such files need the full per-file move handling
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, IEnumerable<int>, int, Task<int>> UpdateFilesFolderIdAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, IEnumerable<int> fromParentIds, int parentId) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => fileIds.Contains(r.Id) && fromParentIds.Contains(r.ParentId))
-                    .ExecuteUpdate(f => f.SetProperty(p => p.ParentId, parentId)));
+        (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, IEnumerable<int> fromParentIds, int parentId) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => fileIds.Contains(r.Id) && fromParentIds.Contains(r.ParentId))
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, parentId));
 
     public static readonly Func<FilesDbContext, int, int, IEnumerable<string>, IAsyncEnumerable<string>> ConflictTitlesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -935,22 +917,20 @@ static file class FileQueries
                 ctx.Files.FirstOrDefault(r => r.TenantId == tenantId && r.Id == fileId && r.CurrentVersion));
 
     public static readonly Func<FilesDbContext, int, int, int, string, Task<int>> UpdateDbFilesCommentAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, int fileVersion, string comment) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == fileId)
-                    .Where(r => r.Version == fileVersion)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.Comment, comment)));
+        (FilesDbContext ctx, int tenantId, int fileId, int fileVersion, string comment) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.Id == fileId)
+                .Where(r => r.Version == fileVersion)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.Comment, comment));
 
     public static readonly Func<FilesDbContext, int, int, int, Task<int>> UpdateDbFilesVersionGroupAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, int fileVersion) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == fileId)
-                    .Where(r => r.Version > fileVersion)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.VersionGroup, p => p.VersionGroup + 1)));
+        (FilesDbContext ctx, int tenantId, int fileId, int fileVersion) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.Id == fileId)
+                .Where(r => r.Version > fileVersion)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.VersionGroup, p => p.VersionGroup + 1));
 
     public static readonly Func<FilesDbContext, int, int, int, Task<int>> VersionGroupAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -964,46 +944,41 @@ static file class FileQueries
                     .FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, int, int, Task<int>> UpdateVersionGroupAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, int fileVersion, int versionGroup) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == fileId)
-                    .Where(r => r.Version > fileVersion)
-                    .Where(r => r.VersionGroup > versionGroup)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.VersionGroup, p => p.VersionGroup - 1)));
+        (FilesDbContext ctx, int tenantId, int fileId, int fileVersion, int versionGroup) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.Id == fileId)
+                .Where(r => r.Version > fileVersion)
+                .Where(r => r.VersionGroup > versionGroup)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.VersionGroup, p => p.VersionGroup - 1));
 
     public static readonly Func<FilesDbContext, int, Guid, Guid, Task<int>> ReassignFilesByCreateByAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.CreateBy == oldOwnerId)
-                    .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+        (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.CreateBy == oldOwnerId)
+                .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
     public static readonly Func<FilesDbContext, int, Guid, IEnumerable<int>, Task<int>> ReassignFilesAsync =
-    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
         (FilesDbContext ctx, int tenantId, Guid newOwnerId, IEnumerable<int> fileIds) =>
             ctx.Files
                 .Where(r => r.TenantId == tenantId)
                 .Where(r => fileIds.Contains(r.Id))
-                .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+                .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
     public static readonly Func<FilesDbContext, int, Guid, Guid, IEnumerable<int>, Task<int>> ReassignFilesPartiallyAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds) =>
-                ctx.Files
-                    .Where(f => f.TenantId == tenantId)
-                    .Where(f => f.CreateBy == oldOwnerId)
-                    .Where(f => ctx.Tree.FirstOrDefault(t => t.FolderId == f.ParentId && exceptFolderIds.Contains(t.ParentId)) == null)
-                    .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+        (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds) =>
+            ctx.Files
+                .Where(f => f.TenantId == tenantId)
+                .Where(f => f.CreateBy == oldOwnerId)
+                .Where(f => ctx.Tree.FirstOrDefault(t => t.FolderId == f.ParentId && exceptFolderIds.Contains(t.ParentId)) == null)
+                .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Guid, Task<int>> ReassignSpecificFilesAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> filesIds, Guid newOwnerId) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId && filesIds.Contains(r.Id))
-                    .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+        (FilesDbContext ctx, int tenantId, IEnumerable<int> filesIds, Guid newOwnerId) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId && filesIds.Contains(r.Id))
+                .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
     public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<FileReassignInfo>> GetRoomsFilesReassignInfoAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -1050,13 +1025,12 @@ static file class FileQueries
                     }));
 
     public static readonly Func<FilesDbContext, int, int, int, string, Task<int>> UpdateChangesAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, int version, string changes) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == fileId)
-                    .Where(r => r.Version == version)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.Changes, changes)));
+        (FilesDbContext ctx, int tenantId, int fileId, int version, string changes) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.Id == fileId)
+                .Where(r => r.Version == version)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.Changes, changes));
 
     public static readonly Func<FilesDbContext, int, int, int, IAsyncEnumerable<DbFile>> DbFilesByVersionAndWithoutForcesaveAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -1143,11 +1117,10 @@ static file class FileQueries
                     .Distinct());
 
     public static readonly Func<FilesDbContext, int, int, int, Thumbnail, Task<int>> UpdateThumbnailStatusAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, int version, Thumbnail status) =>
-                ctx.Files
-                    .Where(r => r.Id == fileId && r.Version == version && r.TenantId == tenantId)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.ThumbnailStatus, status)));
+        (FilesDbContext ctx, int tenantId, int fileId, int version, Thumbnail status) =>
+            ctx.Files
+                .Where(r => r.Id == fileId && r.Version == version && r.TenantId == tenantId)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.ThumbnailStatus, status));
 
     public static readonly Func<FilesDbContext, int, string, Task<string>> DataAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -1270,41 +1243,37 @@ static file class FileQueries
                 ctx.FilesFormRoleMapping.FirstOrDefault(r => r.TenantId == tenantId && r.FormId == formId && r.RoleName == roleName && r.UserId == userId));
 
     public static readonly Func<FilesDbContext, int, int, int, int, ForcesaveType, Task<int>> UpdateDbFilesCategoryForcesaveAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, int fileVersion, int category, ForcesaveType forcesave) =>
-                ctx.Files
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == fileId)
-                    .Where(r => r.Version == fileVersion)
-                    .ExecuteUpdate(f => f
-                        .SetProperty(p => p.Category, category)
-                        .SetProperty(p => p.Forcesave, forcesave)));
+        (FilesDbContext ctx, int tenantId, int fileId, int fileVersion, int category, ForcesaveType forcesave) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.Id == fileId)
+                .Where(r => r.Version == fileVersion)
+                .ExecuteUpdateAsync(f => f
+                    .SetProperty(p => p.Category, category)
+                    .SetProperty(p => p.Forcesave, forcesave));
 
     public static readonly Func<FilesDbContext, int, int, VectorizationStatus, DateTime, Task<int>> UpdateVectorizationStatusAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, VectorizationStatus status, DateTime date) =>
-                ctx.FileVectorization
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.FileId == fileId)
-                    .ExecuteUpdate(f => f
-                        .SetProperty(x => x.Status, status)
-                        .SetProperty(x => x.UpdatedOn, date)));
+        (FilesDbContext ctx, int tenantId, int fileId, VectorizationStatus status, DateTime date) =>
+            ctx.FileVectorization
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.FileId == fileId)
+                .ExecuteUpdateAsync(f => f
+                    .SetProperty(x => x.Status, status)
+                    .SetProperty(x => x.UpdatedOn, date));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, VectorizationStatus, DateTime, Task<int>> UpdateVectorizationStatusesAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> filesIds, VectorizationStatus status, DateTime date) =>
-                ctx.FileVectorization
-                    .Where(r => r.TenantId == tenantId && filesIds.Contains(r.FileId))
-                    .ExecuteUpdate(f => f
-                        .SetProperty(x => x.Status, status)
-                        .SetProperty(x => x.UpdatedOn, date)));
+        (FilesDbContext ctx, int tenantId, IEnumerable<int> filesIds, VectorizationStatus status, DateTime date) =>
+            ctx.FileVectorization
+                .Where(r => r.TenantId == tenantId && filesIds.Contains(r.FileId))
+                .ExecuteUpdateAsync(f => f
+                    .SetProperty(x => x.Status, status)
+                    .SetProperty(x => x.UpdatedOn, date));
 
     public static readonly Func<FilesDbContext, int, int, DateTime, Task<int>> MarkVectorizationDeletedAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, DateTime deletedOn) =>
-                ctx.FileVectorization
-                    .Where(r => r.TenantId == tenantId && r.FileId == fileId)
-                    .ExecuteUpdate(f => f.SetProperty(x => x.DeletedOn, deletedOn)));
+        (FilesDbContext ctx, int tenantId, int fileId, DateTime deletedOn) =>
+            ctx.FileVectorization
+                .Where(r => r.TenantId == tenantId && r.FileId == fileId)
+                .ExecuteUpdateAsync(f => f.SetProperty(x => x.DeletedOn, deletedOn));
 
     public static readonly Func<FilesDbContext, int, int, Task<bool>> IsVectorizationDeletedAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -1328,10 +1297,9 @@ static file class FileQueries
                     .Take(take));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, DateTime, Task<int>> UpdateVectorizationsDeletedOnAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, DateTime deletedOn) =>
-                ctx.FileVectorization
-                    .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
-                    .ExecuteUpdate(f => f.SetProperty(x => x.DeletedOn, deletedOn)));
+        (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, DateTime deletedOn) =>
+            ctx.FileVectorization
+                .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
+                .ExecuteUpdateAsync(f => f.SetProperty(x => x.DeletedOn, deletedOn));
 
 }

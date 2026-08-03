@@ -595,4 +595,10 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Forma məlumatlarının xarici verilənlər bazası ilə sinxronizasiyası uğursuz oldu.</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>AI agentinin təlimatı {0} simvoldan uzun ola bilməz</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Forma dəyişdirildi. Bu qaralama köhnəlmişdir və göndərilə bilməz.</value>
+  </data>
 </root>

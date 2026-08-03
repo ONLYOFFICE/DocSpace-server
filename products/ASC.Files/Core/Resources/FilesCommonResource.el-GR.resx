@@ -595,4 +595,10 @@
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Αποτυχία συγχρονισμού δεδομένων φόρμας με εξωτερική βάση δεδομένων.</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Η οδηγία ενός AI πράκτορα δεν μπορεί να υπερβαίνει τους {0} χαρακτήρες</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Η φόρμα έχει αλλάξει. Αυτό το προσχέδιο είναι παρωχημένο και δεν μπορεί να υποβληθεί.</value>
+  </data>
 </root>

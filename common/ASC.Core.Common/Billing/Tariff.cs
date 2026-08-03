@@ -204,6 +204,13 @@ public class Quota : IEquatable<Quota>
     public bool Additional { get; set; }
 
     /// <summary>
+    /// The quota ID to switch to at the next period.
+    /// </summary>
+    /// <example></example>
+    [ProtoMember(7)]
+    public int? NextQuota { get; set; }
+
+    /// <summary>
     /// The quota state.
     /// </summary>
     /// <example>Active</example>
@@ -219,7 +226,7 @@ public class Quota : IEquatable<Quota>
         Quantity = quantity;
     }
 
-    public Quota(int id, int quantity, bool additional, bool wallet, DateTime? dueDate, int? nextQuantity)
+    public Quota(int id, int quantity, bool additional, bool wallet, DateTime? dueDate, int? nextQuantity, int? nextQuota = null)
     {
         Id = id;
         Quantity = quantity;
@@ -227,11 +234,12 @@ public class Quota : IEquatable<Quota>
         Wallet = wallet;
         DueDate = dueDate;
         NextQuantity = nextQuantity;
+        NextQuota = nextQuota;
     }
 
     public bool Equals(Quota other)
     {
-        return other != null && other.Id == Id && other.Quantity == Quantity && other.Wallet == Wallet && other.DueDate == DueDate && other.NextQuantity == NextQuantity;
+        return other != null && other.Id == Id && other.Quantity == Quantity && other.Wallet == Wallet && other.DueDate == DueDate && other.NextQuantity == NextQuantity && other.NextQuota == NextQuota;
     }
 }
 
