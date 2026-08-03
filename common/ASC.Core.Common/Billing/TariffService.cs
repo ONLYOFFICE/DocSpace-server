@@ -838,17 +838,11 @@ public class TariffService(
             {
                 await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
 
-                var stamp = tariffInfo.DueDate;
-                if (stamp.Equals(DateTime.MaxValue))
-                {
-                    stamp = stamp.Date.Add(new TimeSpan(tariffInfo.DueDate.Hour, tariffInfo.DueDate.Minute, tariffInfo.DueDate.Second));
-                }
-
                 var efTariff = new DbTariff
                 {
                     Id = tariffInfo.Id,
                     TenantId = tenant,
-                    Stamp = stamp,
+                    Stamp = TruncateToWholeSeconds(tariffInfo.DueDate),
                     CustomerId = tariffInfo.CustomerId,
                     CreateOn = DateTime.UtcNow
                 };
@@ -869,7 +863,7 @@ public class TariffService(
                         TariffId = efTariff.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = q.NextQuantity,
                         NextQuota = q.NextQuota,
                         TenantId = tenant
@@ -906,6 +900,15 @@ public class TariffService(
         return inserted;
     }
 
+    // MySQL "datetime" columns have no fractional-second precision; DateTime.MaxValue's sub-second ticks
+    // round up to the next (invalid, year 10000) day and get silently stored as a zero-date otherwise.
+    private static DateTime TruncateToWholeSeconds(DateTime value)
+    {
+        return value.Equals(DateTime.MaxValue)
+            ? value.Date.Add(new TimeSpan(value.Hour, value.Minute, value.Second))
+            : value;
+    }
+
     public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity, int? nextQuota = null)
     {
         try
@@ -939,7 +942,7 @@ public class TariffService(
                         TariffId = tariffInfo.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = nextQuantity,
                         NextQuota = nextQuota,
                         TenantId = tenant
