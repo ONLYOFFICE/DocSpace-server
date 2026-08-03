@@ -124,7 +124,7 @@ export type AiActionArgs = {
   prompt?: { mode: "replace" | "append"; text: string };
 };
 
-export type Req_newAiAiSend = {
+export type Req_aiAiSend = {
   /** Which AI action to run — selects the assignment slot and action. */
   actionType: ActionType;
   /** The user turn to send. */
@@ -133,9 +133,9 @@ export type Req_newAiAiSend = {
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;
 };
-export type Res_newAiAiSend = ThreadMessageLike;
+export type Res_aiAiSend = ThreadMessageLike;
 
-export type Req_newAiAiSendCustom = {
+export type Req_aiAiSendCustom = {
   /** Stream the reply (ndjson) when true, else return a single message. */
   isStream: boolean;
   /** Caller-supplied system prompt for this one-turn call. */
@@ -147,7 +147,7 @@ export type Req_newAiAiSendCustom = {
  * One-shot mode (`isStream: false`) returns the assistant message shown here;
  * streaming mode instead emits a newline-delimited `ChatEvent` stream.
  */
-export type Res_newAiAiSendCustom = ThreadMessageLike;
+export type Res_aiAiSendCustom = ThreadMessageLike;
 
 // Shared body of the two streaming send endpoints (`sendWithStream` and its
 // OpenAI-framed twin) — the `Chat` action is implied, so there is no
@@ -164,20 +164,20 @@ export type AiSendStreamBody = {
   profileId?: string;
 };
 
-export type Req_newAiAiSendWithStream = AiSendStreamBody;
-export type Res_newAiAiSendWithStream = ChatEvent;
+export type Req_aiAiSendWithStream = AiSendStreamBody;
+export type Res_aiAiSendWithStream = ChatEvent;
 
-export type Req_newAiAiSendWithStreamOpenAI = AiSendStreamBody;
-export type Res_newAiAiSendWithStreamOpenAI = OpenAIStreamChunk;
+export type Req_aiAiSendWithStreamOpenAI = AiSendStreamBody;
+export type Res_aiAiSendWithStreamOpenAI = OpenAIStreamChunk;
 
-export type Req_newAiAiRegenerateStream = {
+export type Req_aiAiRegenerateStream = {
   /** Target thread (must already exist). */
   threadId: string;
   actionArgs?: AiActionArgs;
   entityId?: string;
   profileId?: string;
 };
-export type Res_newAiAiRegenerateStream = ChatEvent;
+export type Res_aiAiRegenerateStream = ChatEvent;
 
 // Identifies a pending tool call to resume — mirrors the library
 // `ToolCallData` (its serializable fields).
@@ -195,34 +195,34 @@ export type AiToolCallData = {
   profileId?: string;
 };
 
-export type Req_newAiAiApproveToolCall = AiToolCallData & {
+export type Req_aiAiApproveToolCall = AiToolCallData & {
   /** Final result of the tool call, as the model should see it. */
   result: unknown;
   /** Persist auto-approve for this tool's name. */
   allowAlways?: boolean;
 };
-export type Res_newAiAiApproveToolCall = ChatEvent;
+export type Res_aiAiApproveToolCall = ChatEvent;
 
-export type Req_newAiAiDenyToolCall = AiToolCallData;
-export type Res_newAiAiDenyToolCall = ChatEvent;
+export type Req_aiAiDenyToolCall = AiToolCallData;
+export type Res_aiAiDenyToolCall = ChatEvent;
 
 /* --------------------------- Assignments ------------------------------- */
 
-export type Res_newAiAssignmentsResolveForAction = ResolvedAssignment;
-export type Res_newAiAssignmentsTryResolveForAction = ResolvedAssignment | null;
-export type Req_newAiAssignmentsAssign = {
+export type Res_aiAssignmentsResolveForAction = ResolvedAssignment;
+export type Res_aiAssignmentsTryResolveForAction = ResolvedAssignment | null;
+export type Req_aiAssignmentsAssign = {
   /** Action the assignment applies to. */
   actionType: ActionType;
   /** Profile id to bind. */
   profileId: string;
 };
-export type Res_newAiAssignmentsAssign = AssignmentMutationResult;
-export type Req_newAiAssignmentsUnassign = ActionType;
-export type Req_newAiAssignmentsBulkAssign = Record<string, string>;
-export type Res_newAiAssignmentsBulkAssign = BulkAssignmentResult;
-export type Res_newAiAssignmentsGetAssignment = string | null;
-export type Res_newAiAssignmentsGetAllAssignments = Record<string, string>;
-export type Req_newAiAssignmentsCascadeProfileDelete = string;
+export type Res_aiAssignmentsAssign = AssignmentMutationResult;
+export type Req_aiAssignmentsUnassign = ActionType;
+export type Req_aiAssignmentsBulkAssign = Record<string, string>;
+export type Res_aiAssignmentsBulkAssign = BulkAssignmentResult;
+export type Res_aiAssignmentsGetAssignment = string | null;
+export type Res_aiAssignmentsGetAllAssignments = Record<string, string>;
+export type Req_aiAssignmentsCascadeProfileDelete = string;
 
 /* ---------------------------- Attachments ------------------------------ */
 
@@ -247,34 +247,34 @@ type SaveImageInput = {
   title?: string;
 };
 
-export type Req_newAiAttachmentsSaveFile = {
+export type Req_aiAttachmentsSaveFile = {
   input: SaveFileInput;
   /** Optional entity (room) scope. */
   entityId?: string;
 };
-export type Res_newAiAttachmentsSaveFile = Attachment;
-export type Req_newAiAttachmentsSaveFilesMany = {
+export type Res_aiAttachmentsSaveFile = Attachment;
+export type Req_aiAttachmentsSaveFilesMany = {
   inputs: SaveFileInput[];
   entityId?: string;
 };
-export type Res_newAiAttachmentsSaveFilesMany = Attachment[];
-export type Req_newAiAttachmentsSaveImage = {
+export type Res_aiAttachmentsSaveFilesMany = Attachment[];
+export type Req_aiAttachmentsSaveImage = {
   input: SaveImageInput;
   entityId?: string;
 };
-export type Res_newAiAttachmentsSaveImage = Attachment;
-export type Req_newAiAttachmentsSaveImagesMany = {
+export type Res_aiAttachmentsSaveImage = Attachment;
+export type Req_aiAttachmentsSaveImagesMany = {
   inputs: SaveImageInput[];
   entityId?: string;
 };
-export type Res_newAiAttachmentsSaveImagesMany = Attachment[];
-export type Req_newAiAttachmentsGet = string;
-export type Res_newAiAttachmentsGet = Attachment | null;
-export type Req_newAiAttachmentsGetMany = string[];
-export type Res_newAiAttachmentsGetMany = (Attachment | null)[];
-export type Req_newAiAttachmentsDelete = string;
-export type Req_newAiAttachmentsDeleteMany = string[];
-export type Req_newAiAttachmentsLinkToMessage = {
+export type Res_aiAttachmentsSaveImagesMany = Attachment[];
+export type Req_aiAttachmentsGet = string;
+export type Res_aiAttachmentsGet = Attachment | null;
+export type Req_aiAttachmentsGetMany = string[];
+export type Res_aiAttachmentsGetMany = (Attachment | null)[];
+export type Req_aiAttachmentsDelete = string;
+export type Req_aiAttachmentsDeleteMany = string[];
+export type Req_aiAttachmentsLinkToMessage = {
   /** Attachment ids to bind. */
   ids: string[];
   /** Owning message id. */
@@ -285,24 +285,24 @@ export type Req_newAiAttachmentsLinkToMessage = {
 
 /* ---------------------------- Preferences ------------------------------ */
 
-export type Res_newAiPreferencesGetDeepMode = boolean;
-export type Req_newAiPreferencesSetDeepMode = {
+export type Res_aiPreferencesGetDeepMode = boolean;
+export type Req_aiPreferencesSetDeepMode = {
   /** New deep-mode value. */
   value: boolean;
   entityId?: string;
 };
-export type Req_newAiPreferencesClearDeepMode = string;
-export type Res_newAiPreferencesIsDeepModeSet = boolean;
+export type Req_aiPreferencesClearDeepMode = string;
+export type Res_aiPreferencesIsDeepModeSet = boolean;
 
 /* ------------------------------ Profiles ------------------------------- */
 
-export type Req_newAiProfilesCreate = CreateProfileInput;
-export type Res_newAiProfilesCreate = ProfileMutationResult;
-export type Req_newAiProfilesUpdate = Profile;
-export type Res_newAiProfilesUpdate = ProfileMutationResult;
-export type Req_newAiProfilesDelete = string;
-export type Res_newAiProfilesListModels = Model[];
-export type Req_newAiProfilesListProviderModels = {
+export type Req_aiProfilesCreate = CreateProfileInput;
+export type Res_aiProfilesCreate = ProfileMutationResult;
+export type Req_aiProfilesUpdate = Profile;
+export type Res_aiProfilesUpdate = ProfileMutationResult;
+export type Req_aiProfilesDelete = string;
+export type Res_aiProfilesListModels = Model[];
+export type Req_aiProfilesListProviderModels = {
   /** Provider whose catalog to list. */
   providerType: ProviderType;
   /** Provider API base URL. */
@@ -310,17 +310,17 @@ export type Req_newAiProfilesListProviderModels = {
   /** Provider API key. */
   apiKey: string;
 };
-export type Res_newAiProfilesListProviderModels = Model[];
-export type Req_newAiProfilesTestConnection = string;
-export type Res_newAiProfilesTestConnection = true | { message?: string };
-export type Res_newAiProfilesGetById = Profile;
-export type Res_newAiProfilesList = Profile[];
+export type Res_aiProfilesListProviderModels = Model[];
+export type Req_aiProfilesTestConnection = string;
+export type Res_aiProfilesTestConnection = true | { message?: string };
+export type Res_aiProfilesGetById = Profile;
+export type Res_aiProfilesList = Profile[];
 
 /* ------------------------------- Prompts ------------------------------- */
 
-export type Req_newAiPromptsCreate = CreatePromptInput;
-export type Res_newAiPromptsCreate = PromptMutationResult;
-export type Req_newAiPromptsUpdate = {
+export type Req_aiPromptsCreate = CreatePromptInput;
+export type Res_aiPromptsCreate = PromptMutationResult;
+export type Req_aiPromptsUpdate = {
   /** Prompt id to update. */
   id: string;
   /** Fields to change. */
@@ -330,41 +330,41 @@ export type Req_newAiPromptsUpdate = {
     folderId?: string | null;
   };
 };
-export type Res_newAiPromptsUpdate = PromptMutationResult;
-export type Req_newAiPromptsMove = {
+export type Res_aiPromptsUpdate = PromptMutationResult;
+export type Req_aiPromptsMove = {
   /** Prompt id to move. */
   id: string;
   /** Target folder id, or `null` for root. */
   folderId: string | null;
 };
-export type Res_newAiPromptsMove = PromptMutationResult;
-export type Req_newAiPromptsDelete = string;
-export type Res_newAiPromptsList = Prompt[];
-export type Req_newAiPromptsCreateFolder = string;
-export type Res_newAiPromptsCreateFolder = FolderMutationResult;
-export type Req_newAiPromptsRenameFolder = {
+export type Res_aiPromptsMove = PromptMutationResult;
+export type Req_aiPromptsDelete = string;
+export type Res_aiPromptsList = Prompt[];
+export type Req_aiPromptsCreateFolder = string;
+export type Res_aiPromptsCreateFolder = FolderMutationResult;
+export type Req_aiPromptsRenameFolder = {
   /** Folder id to rename. */
   id: string;
   /** New folder name. */
   name: string;
 };
-export type Res_newAiPromptsRenameFolder = FolderMutationResult;
-export type Req_newAiPromptsDeleteFolder = string;
-export type Res_newAiPromptsListFolders = PromptFolder[];
-export type Res_newAiPromptsExport = PromptBundle;
-export type Req_newAiPromptsImportBundle = {
+export type Res_aiPromptsRenameFolder = FolderMutationResult;
+export type Req_aiPromptsDeleteFolder = string;
+export type Res_aiPromptsListFolders = PromptFolder[];
+export type Res_aiPromptsExport = PromptBundle;
+export type Req_aiPromptsImportBundle = {
   /** Bundle to restore. */
   bundle: PromptBundle;
   /** Import options. */
   options?: { mode?: ImportMode };
 };
-export type Res_newAiPromptsImportBundle = ImportResult;
-export type Res_newAiPromptsGetById = Prompt | null;
-export type Res_newAiPromptsGetFolderById = PromptFolder | null;
+export type Res_aiPromptsImportBundle = ImportResult;
+export type Res_aiPromptsGetById = Prompt | null;
+export type Res_aiPromptsGetFolderById = PromptFolder | null;
 
 /* ------------------------------- Threads ------------------------------- */
 
-export type Req_newAiThreadsCreate = {
+export type Req_aiThreadsCreate = {
   /** Thread title. */
   title: string;
   /** Optional profile to bind. */
@@ -372,111 +372,111 @@ export type Req_newAiThreadsCreate = {
   /** Optional entity (room) scope. */
   entityId?: string;
 };
-export type Res_newAiThreadsCreate = Thread;
-export type Req_newAiThreadsOpenOrCreate = OpenOrCreateInput;
-export type Res_newAiThreadsOpenOrCreate = OpenOrCreateResult;
-export type Req_newAiThreadsAppendUserMessage = {
+export type Res_aiThreadsCreate = Thread;
+export type Req_aiThreadsOpenOrCreate = OpenOrCreateInput;
+export type Res_aiThreadsOpenOrCreate = OpenOrCreateResult;
+export type Req_aiThreadsAppendUserMessage = {
   threadId: string;
   /** Message to persist (id/createdAt are storage-assigned). */
   message: ThreadMessageLike;
   profileId?: string;
 };
-export type Res_newAiThreadsAppendUserMessage = ThreadMessageLike;
-export type Req_newAiThreadsTouch = {
+export type Res_aiThreadsAppendUserMessage = ThreadMessageLike;
+export type Req_aiThreadsTouch = {
   threadId: string;
   profileId?: string;
 };
-export type Req_newAiThreadsRename = {
+export type Req_aiThreadsRename = {
   threadId: string;
   /** New thread title. */
   title: string;
 };
-export type Req_newAiThreadsDelete = string;
-export type Req_newAiThreadsClearMessages = string;
-export type Req_newAiThreadsRegenerateTitle = {
+export type Req_aiThreadsDelete = string;
+export type Req_aiThreadsClearMessages = string;
+export type Req_aiThreadsRegenerateTitle = {
   threadId: string;
   /** Profile used to regenerate the title. */
   profile: Profile;
 };
-export type Res_newAiThreadsRegenerateTitle = string;
-export type Res_newAiThreadsList = Thread[];
-export type Res_newAiThreadsReadMessages = ThreadMessageLike[];
-export type Res_newAiThreadsGetById = Thread | null;
-export type Res_newAiThreadsGetMessageById = ThreadMessageLike | null;
-export type Req_newAiThreadsUpdateMessage = {
+export type Res_aiThreadsRegenerateTitle = string;
+export type Res_aiThreadsList = Thread[];
+export type Res_aiThreadsReadMessages = ThreadMessageLike[];
+export type Res_aiThreadsGetById = Thread | null;
+export type Res_aiThreadsGetMessageById = ThreadMessageLike | null;
+export type Req_aiThreadsUpdateMessage = {
   messageId: string;
   /** Replacement message content. */
   message: ThreadMessageLike;
 };
-export type Req_newAiThreadsDeleteMessage = string;
+export type Req_aiThreadsDeleteMessage = string;
 
 /* -------------------------------- Tools -------------------------------- */
 
-export type Req_newAiToolsAddCustomServer = {
+export type Req_aiToolsAddCustomServer = {
   /** Server name (unique within scope). */
   name: string;
   /** Server transport configuration. */
   config: McpServerConfig;
   entityId?: string;
 };
-export type Res_newAiToolsAddCustomServer = ToolsMutationResult;
-export type Req_newAiToolsUpdateCustomServer = {
+export type Res_aiToolsAddCustomServer = ToolsMutationResult;
+export type Req_aiToolsUpdateCustomServer = {
   name: string;
   config: McpServerConfig;
   entityId?: string;
 };
-export type Res_newAiToolsUpdateCustomServer = ToolsMutationResult;
-export type Req_newAiToolsRemoveCustomServer = {
+export type Res_aiToolsUpdateCustomServer = ToolsMutationResult;
+export type Req_aiToolsRemoveCustomServer = {
   name: string;
   entityId?: string;
 };
-export type Res_newAiToolsGetCustomServer = McpServerConfig | null;
-export type Res_newAiToolsListCustomServers = Record<string, McpServerConfig>;
-export type Res_newAiToolsListSystemTools = Record<string, TMCPItem[]>;
-export type Req_newAiToolsReplaceAllCustomServers = {
+export type Res_aiToolsGetCustomServer = McpServerConfig | null;
+export type Res_aiToolsListCustomServers = Record<string, McpServerConfig>;
+export type Res_aiToolsListSystemTools = Record<string, TMCPItem[]>;
+export type Req_aiToolsReplaceAllCustomServers = {
   /** Full replacement set, keyed by server name. */
   map: Record<string, McpServerConfig>;
   entityId?: string;
 };
-export type Res_newAiToolsReplaceAllCustomServers = ToolsBulkResult;
-export type Req_newAiToolsSetDisabled = {
+export type Res_aiToolsReplaceAllCustomServers = ToolsBulkResult;
+export type Req_aiToolsSetDisabled = {
   serverType: string;
   /** Tool names to disable. */
   toolNames: string[];
   entityId?: string;
 };
-export type Res_newAiToolsGetDisabled = Record<string, string[]>;
-export type Res_newAiToolsIsToolDisabled = boolean;
-export type Req_newAiToolsSetAllowAlways = {
+export type Res_aiToolsGetDisabled = Record<string, string[]>;
+export type Res_aiToolsIsToolDisabled = boolean;
+export type Req_aiToolsSetAllowAlways = {
   serverType: string;
   toolName: string;
   /** Whether the tool is always allowed. */
   value: boolean;
   entityId?: string;
 };
-export type Res_newAiToolsGetAllowAlways = string[];
-export type Res_newAiToolsIsAllowAlways = boolean;
+export type Res_aiToolsGetAllowAlways = string[];
+export type Res_aiToolsIsAllowAlways = boolean;
 
 /* ----------------------------- Web search ------------------------------ */
 
-export type Res_newAiWebSearchGetActiveConfig = WebSearchConfig | null;
-export type Res_newAiWebSearchIsConfigured = boolean;
-export type Req_newAiWebSearchTestConnection = WebSearchConfig;
-export type Res_newAiWebSearchTestConnection = true | { message?: string };
-export type Req_newAiWebSearchConfigure = {
+export type Res_aiWebSearchGetActiveConfig = WebSearchConfig | null;
+export type Res_aiWebSearchIsConfigured = boolean;
+export type Req_aiWebSearchTestConnection = WebSearchConfig;
+export type Res_aiWebSearchTestConnection = true | { message?: string };
+export type Req_aiWebSearchConfigure = {
   config: WebSearchConfig;
   entityId?: string;
 };
-export type Res_newAiWebSearchConfigure = WebSearchMutationResult;
-export type Req_newAiWebSearchSetActiveConfig = {
+export type Res_aiWebSearchConfigure = WebSearchMutationResult;
+export type Req_aiWebSearchSetActiveConfig = {
   config: WebSearchConfig;
   entityId?: string;
 };
-export type Req_newAiWebSearchClear = string;
+export type Req_aiWebSearchClear = string;
 
 /* --------------------- Custom routes (agents / export) ----------------- */
 
-export type Req_newAiExportTextToDocx = {
+export type Req_aiExportTextToDocx = {
   /** Document title (also the file name). */
   title: string;
   /** Markdown content to convert. */
@@ -485,7 +485,7 @@ export type Req_newAiExportTextToDocx = {
   folderId: string | number;
 };
 /** Accepted-for-processing acknowledgement (conversion is asynchronous). */
-export type Res_newAiExportTextToDocx = { success: boolean };
+export type Res_aiExportTextToDocx = { success: boolean };
 /**
  * A DocSpace room id: an integer for native rooms, a string for
  * third-party-backed ones.
@@ -523,7 +523,7 @@ type AgentRoomFields = {
   cover?: string;
 };
 
-export type Req_newAiAgentsCreate = AgentRoomFields & {
+export type Req_aiAgentsCreate = AgentRoomFields & {
   /** Profile id bound to the agent. */
   profileId: string;
   /** Agent system prompt; stored as the room's `chatSettings.prompt`. */
@@ -536,7 +536,7 @@ export type Req_newAiAgentsCreate = AgentRoomFields & {
   attachDefaultTools?: boolean;
 };
 
-export type Req_newAiAgentsUpdate = AgentRoomFields & {
+export type Req_aiAgentsUpdate = AgentRoomFields & {
   /** Profile id to rebind (optional). */
   profileId?: string;
   /** Chat settings (`ChatSettings`); requires a valid provider/model. */
@@ -547,19 +547,19 @@ export type Req_newAiAgentsUpdate = AgentRoomFields & {
   saveFormAsXLSX?: boolean;
 };
 
-export type Req_newAiAgentsDelete = {
+export type Req_aiAgentsDelete = {
   /** Delete the room after the editing session finishes. */
   deleteAfter?: boolean;
 };
 
-export type Req_newAiAgentsUpdateQuota = {
+export type Req_aiAgentsUpdateQuota = {
   /** Agent (room) ids to update. */
   roomIds: RoomId[];
   /** New quota in bytes; a negative value disables the custom quota. */
   quota: number;
 };
 
-export type Req_newAiAgentsResetQuota = {
+export type Req_aiAgentsResetQuota = {
   /** Agent (room) ids to reset to the tenant default quota. */
   roomIds: RoomId[];
 };

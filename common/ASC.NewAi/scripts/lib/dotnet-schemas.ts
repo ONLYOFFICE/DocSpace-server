@@ -42,7 +42,7 @@ import { fileURLToPath } from "url";
 // schemas). Rather than re-describe those responses by hand — and drift from
 // the C# DTOs' XML docs — this module reads the sibling `ai_2.0.json` (already
 // generated from the C# source by the .NET ApiDescription pipeline) and lifts
-// the concrete 200 response schemas out of it, so the New AI document stops
+// the concrete 200 response schemas out of it, so this service's document stops
 // emitting the opaque generic-object fallback for these operations.
 //
 // The document must already exist and contain the mapped operations: it is
@@ -55,7 +55,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // The shared `json/` folder consumed by `OpenapiJoiner`, resolved from a fixed
 // location — NOT from the generator's `--out` override — so the input is found
-// regardless of where the New AI document is written.
+// regardless of where this service's document is written.
 const SHARED_JSON_DIR = path.resolve(
   __dirname,
   "..",
@@ -70,11 +70,11 @@ const AI_DOCUMENT = path.join(SHARED_JSON_DIR, "ai_2.0.json");
 
 // Prefix applied to every lifted component name (and its `$ref`s) so the
 // copied schemas cannot collide with the .NET services' own components once
-// `OpenapiJoiner` merges the documents — matching the `NewAi` namespace the
+// `OpenapiJoiner` merges the documents — matching the `Ai` namespace the
 // generated TypeScript schemas already use.
-const SCHEMA_NAMESPACE = "NewAi";
+const SCHEMA_NAMESPACE = "Ai";
 
-// New AI operationId → .NET AI operationId. Each New AI proxy route forwards
+// Local operationId → .NET AI operationId. Each local proxy route forwards
 // verbatim to the .NET AI service and returns the same-shaped response as the
 // .NET operation named here; kept in sync by hand with `apiCatalog.ts` (the
 // custom routes) and the .NET controllers (`AgentsController`,
@@ -82,19 +82,19 @@ const SCHEMA_NAMESPACE = "NewAi";
 // fire-and-forget routes (e.g. `vectorization/tasks`, which returns no body)
 // are intentionally omitted and fall back to the generic response shape.
 const PROXY_RESPONSE_SOURCES: Readonly<Record<string, string>> = {
-  newAiAgentsList: "getAgents",
-  newAiAgentsCreate: "createAgent",
-  newAiAgentsNews: "getAgentsNewItems",
-  newAiAgentsGet: "getAgentInfo",
-  newAiAgentsUpdate: "updateAgent",
-  newAiAgentsDelete: "deleteAgent",
-  newAiAgentsUpdateQuota: "updateAgentsQuota",
-  newAiAgentsResetQuota: "resetAgentsQuota",
-  newAiSettingsGet: "getAiSettings",
-  newAiSettingsGetVectorization: "getVectorizationSettings",
-  newAiSettingsSetVectorization: "setVectorizationSettings",
-  newAiSettingsGetUser: "getAiUserSettings",
-  newAiSettingsSetUser: "setAiUserSettings",
+  aiAgentsList: "getAgents",
+  aiAgentsCreate: "createAgent",
+  aiAgentsNews: "getAgentsNewItems",
+  aiAgentsGet: "getAgentInfo",
+  aiAgentsUpdate: "updateAgent",
+  aiAgentsDelete: "deleteAgent",
+  aiAgentsUpdateQuota: "updateAgentsQuota",
+  aiAgentsResetQuota: "resetAgentsQuota",
+  aiSettingsGet: "getAiSettings",
+  aiSettingsGetVectorization: "getVectorizationSettings",
+  aiSettingsSetVectorization: "setVectorizationSettings",
+  aiSettingsGetUser: "getAiUserSettings",
+  aiSettingsSetUser: "setAiUserSettings",
 };
 
 type JsonObject = Record<string, unknown>;
@@ -103,15 +103,15 @@ type JsonObject = Record<string, unknown>;
 export interface DotnetProxySchemas {
   /** Namespaced component name → its (ref-rewritten) schema. */
   readonly components: Record<string, unknown>;
-  /** New AI operationId → its 200 response schema (a namespaced `$ref`). */
+  /** Local operationId → its 200 response schema (a namespaced `$ref`). */
   readonly responses: Record<string, unknown>;
 }
 
 function fail(message: string): never {
   throw new Error(
-    `Cannot enrich the New AI proxy routes from ${AI_DOCUMENT}: ${message}. `
+    `Cannot enrich the proxy routes from ${AI_DOCUMENT}: ${message}. `
     + "Build ASC.AI.Server (which emits ai_2.0.json) before generating the "
-    + "New AI OpenAPI document.",
+    + "OpenAPI document for this service.",
   );
 }
 
@@ -148,7 +148,7 @@ function collectRefs(node: unknown, acc: Set<string>): void {
   }
 }
 
-// Rewrite every `#/components/schemas/X` ref to the namespaced `NewAiX`.
+// Rewrite every `#/components/schemas/X` ref to the namespaced `AiX`.
 function namespaceRefs(node: unknown): unknown {
   if (Array.isArray(node)) {
     return node.map(namespaceRefs);
@@ -224,14 +224,14 @@ export function extractDotnetProxySchemas(): DotnetProxySchemas {
   const responses: Record<string, unknown> = {};
   const rootRefs = new Set<string>();
   const missing: string[] = [];
-  for (const [newAiOperationId, dotnetOperationId] of Object.entries(PROXY_RESPONSE_SOURCES)) {
+  for (const [aiOperationId, dotnetOperationId] of Object.entries(PROXY_RESPONSE_SOURCES)) {
     const schema = responseByOperation.get(dotnetOperationId);
     if (schema === undefined) {
       missing.push(dotnetOperationId);
       continue;
     }
     collectRefs(schema, rootRefs);
-    responses[newAiOperationId] = namespaceRefs(schema);
+    responses[aiOperationId] = namespaceRefs(schema);
   }
   if (missing.length > 0) {
     fail(`no 200 JSON response for operation(s): ${missing.sort().join(", ")}`);
