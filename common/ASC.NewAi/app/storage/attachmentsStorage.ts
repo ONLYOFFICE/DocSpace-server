@@ -41,7 +41,7 @@ import { getNumber, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/attachments";
+const PATH = "/attachments";
 
 // In-memory cache for raw-payload drafts (device upload, dnd) that arrive
 // without a DocSpace entry id. The C# backend currently has no endpoint
@@ -207,7 +207,7 @@ async function inlineImagesAsync(attachments: (Attachment | null)[]): Promise<vo
 }
 
 // The C# `AttachmentsStorageController` exposes a DocSpace-specific shape
-// (`POST /integration/attachments { entryIds: [...] }`) and does not provide
+// (`POST /attachments { entryIds: [...] }`) and does not provide
 // `update`, `deleteByMessage`, or `deleteByThread`. The fields `messageId`,
 // `threadId`, and `entityId` aren't carried in `AttachmentDto`.
 // Cascade-on-message/thread cleanup is expected to happen server-side.
@@ -534,7 +534,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     if (ids.length === 0) {
       return;
     }
-    // The C# side only supports message-binding via `PUT /integration/attachments`
+    // The C# side only supports message-binding via `PUT /attachments`
     // — `{ids, messageId}`. Other patches (threadId, entityId, content, etc.)
     // are not actionable on the backend and are silently skipped.
     if (patch.messageId === undefined) {

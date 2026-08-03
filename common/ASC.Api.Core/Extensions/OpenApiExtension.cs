@@ -34,11 +34,7 @@
 using System.Text.Json.Nodes;
 using System.Xml.XPath;
 
-using Microsoft.OpenApi;
-
 using Scalar.AspNetCore;
-
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
 

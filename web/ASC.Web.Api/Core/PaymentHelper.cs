@@ -283,9 +283,9 @@ public class PaymentHelper(
         return result;
     }
 
-    public async Task<bool> UpdateNextQuantityAsync(int tenantId, Tariff tariff, int quotaId, int? nextQuantity, string productName)
+    public async Task<bool> UpdateNextQuantityAsync(int tenantId, Tariff tariff, int quotaId, int? nextQuantity, string productName, int? nextQuota = null)
     {
-        var updated = await tariffService.UpdateNextQuantityAsync(tenantId, tariff, quotaId, nextQuantity);
+        var updated = await tariffService.UpdateNextQuantityAsync(tenantId, tariff, quotaId, nextQuantity, nextQuota);
 
         if (updated)
         {

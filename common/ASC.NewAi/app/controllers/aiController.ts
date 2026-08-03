@@ -53,6 +53,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
+import { safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -112,14 +113,30 @@ function appendActionPrompt<T>(body: T, fragment: string): T {
   } as T;
 }
 
+// The round's context scope: `contextEntityId` (agent workspace picked from
+// outside its room — the thread stays under `entityId`) wins over `entityId`.
+// Mirrors the engine's own `contextEntityId ?? entityId` resolution.
+function contextScopeOf(body: unknown): string | undefined {
+  if (!isObject(body)) {
+    return undefined;
+  }
+  const context = body["contextEntityId"];
+  if (typeof context === "string") {
+    return context;
+  }
+  return typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+}
+
 async function withToolsPrompt<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
   }
-  const entityId =
-    typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+  // The tools fragment describes the tool set the engine actually wires up
+  // for the round, so it follows the round's context scope (the agent when
+  // one is picked), unlike the location fragment below.
+  const contextScope = contextScopeOf(body);
   const attachmentId = extractAttachmentRefIds(body["userMessage"]);
-  const fragment = await safeGetToolsPrompt(toolsAdapter, entityId, attachmentId);
+  const fragment = await safeGetToolsPrompt(toolsAdapter, contextScope, attachmentId);
   return fragment ? appendActionPrompt(body, fragment) : body;
 }
 
@@ -149,9 +166,27 @@ function withContextPrompt<T>(body: T): T {
   if (!isObject(body)) {
     return body;
   }
+  // Always the folder/room the chat is invoked from (`entityId`), even when
+  // the round runs against an agent's context (`contextEntityId`): the
+  // location line must tell the model where the USER is — picking agent 10
+  // while browsing folder 2 keeps the location at 2. The agent's own scope
+  // reaches the model through the tools fragment and tool execution.
   const entityId =
     typeof body["entityId"] === "string" ? body["entityId"] : undefined;
   return appendActionPrompt(body, buildContextFragment(entityId));
+}
+
+// Fold the picked agent's stored instruction (`chatSettings.prompt`, set on
+// the agent room) into the action's prompt override. Scoped to the round's
+// context (the agent room when one is picked, like the tools fragment) so a
+// plain chat in a regular folder gets nothing. Applied innermost so the
+// instruction leads the system prompt, ahead of the tools/context fragments.
+async function withAgentInstruction<T>(body: T): Promise<T> {
+  if (!isObject(body)) {
+    return body;
+  }
+  const instruction = await safeGetAgentInstruction(contextScopeOf(body));
+  return instruction ? appendActionPrompt(body, instruction) : body;
 }
 
 const toolsAdapter = new HttpToolsAdapter();
@@ -323,7 +358,9 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
+    const body = withContextPrompt(
+      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+    );
     await streamNdjson(
       res,
       logStreamErrors("ai/send-with-stream", engine.sendWithStream(body)),
@@ -335,7 +372,9 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
+    const body = withContextPrompt(
+      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+    );
     await streamOpenAiSse(
       res,
       logStreamErrors("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body)),
@@ -344,7 +383,11 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = await withToolsPrompt(withRequestSignal(res, req.body));
+    // Same prompt envelope as sendWithStream: the regenerated round must
+    // see the identical workspace-context fragment the original reply had.
+    const body = withContextPrompt(
+      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+    );
     await streamNdjson(
       res,
       logStreamErrors("ai/regenerate-stream", engine.regenerateStream(body)),

@@ -211,9 +211,15 @@ public class EncryptionKeyPairDtoHelper(
 
         var fileKeysPair = (await Task.WhenAll(tasks))
             .Where(keyPair => keyPair != null)
-            .SelectMany(keyPair => keyPair);
+            .SelectMany(keyPair => keyPair)
+            .ToList();
 
-        return fileKeysPair.ToList();
+        if(fileKeysPair.All(r => r.UserId != authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return fileKeysPair;
     }
 
     public async Task<List<EncryptionKeyDto>> DeleteAsync(Guid id)
