@@ -6572,27 +6572,10 @@
       },
       "NewAiAiSettingsDto": {
         "required": [
-          "embeddingModel",
-          "generateDocxToolName",
-          "generateFormToolName",
-          "generatePresentationToolName",
-          "knowledgeSearchToolName",
-          "modelAliases",
-          "webCrawlingToolName",
-          "webSearchToolName"
+          "embeddingModel"
         ],
         "type": "object",
         "properties": {
-          "webSearchEnabled": {
-            "type": "boolean",
-            "description": "Indicates whether web search is enabled for AI chat sessions.",
-            "example": true
-          },
-          "webSearchNeedReset": {
-            "type": "boolean",
-            "description": "Indicates whether the web search API key needs to be reconfigured.",
-            "example": false
-          },
           "vectorizationEnabled": {
             "type": "boolean",
             "description": "Indicates whether document vectorization is enabled.",
@@ -6608,71 +6591,11 @@
             "description": "Indicates whether the AI subsystem is fully configured and operational.",
             "example": true
           },
-          "aiReadyNeedReset": {
-            "type": "boolean",
-            "description": "Indicates whether the AI provider API key needs to be reconfigured.",
-            "example": false
-          },
-          "portalMcpServerId": {
-            "type": "string",
-            "description": "The unique identifier of the portal-level MCP server, if configured.",
-            "format": "uuid",
-            "nullable": true,
-            "example": "00000000-0000-0000-0000-000000000000"
-          },
           "embeddingModel": {
             "type": "string",
             "description": "The name of the embedding model used for document vectorization.",
             "nullable": true,
             "example": "text-embedding-3-small"
-          },
-          "modelAliases": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Mapping of model identifiers to human-readable aliases.",
-            "nullable": true,
-            "example": {
-              "gpt-5.2": "GPT-5.2",
-              "claude-sonnet-4-20250514": "Claude Sonnet 4"
-            }
-          },
-          "knowledgeSearchToolName": {
-            "type": "string",
-            "description": "The tool name used by the AI assistant for knowledge base search.",
-            "nullable": true,
-            "example": "knowledge_search"
-          },
-          "webSearchToolName": {
-            "type": "string",
-            "description": "The tool name used by the AI assistant for web search.",
-            "nullable": true,
-            "example": "web_search"
-          },
-          "webCrawlingToolName": {
-            "type": "string",
-            "description": "The tool name used by the AI assistant for web page crawling.",
-            "nullable": true,
-            "example": "web_crawling"
-          },
-          "generateDocxToolName": {
-            "type": "string",
-            "description": "The tool name used by the AI to launch docx creation in the editor.",
-            "nullable": true,
-            "example": "generate_docx"
-          },
-          "generateFormToolName": {
-            "type": "string",
-            "description": "The tool name used by the AI assistant to launch form creation in the editor.",
-            "nullable": true,
-            "example": "generate_form"
-          },
-          "generatePresentationToolName": {
-            "type": "string",
-            "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
-            "nullable": true,
-            "example": "generate_presentation"
           },
           "systemAiEnabled": {
             "type": "boolean",
