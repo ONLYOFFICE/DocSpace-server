@@ -1380,9 +1380,7 @@ public class PaymentController(
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
+        await paymentHelper.DemandAdminAsync();
 
         return await paymentHelper.ChangeWalletServiceStateAsync(inDto.Service, inDto.Enabled);
     }
@@ -1515,9 +1513,7 @@ public class PaymentController(
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
+        await paymentHelper.DemandAdminAsync();
 
         return await paymentHelper.SetRestrictedAiModelsAsync(inDto.Models);
     }
