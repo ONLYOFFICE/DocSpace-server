@@ -82768,6 +82768,30 @@
           "createdAt": {
             "type": "number",
             "description": "Storage-assigned creation timestamp."
+          },
+          "canAnalyze": {
+            "type": "boolean",
+            "description": "Whether the attached form can be analyzed."
+          },
+          "formKeys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Keys of the fields inside the form. `key` is the field identifier, `text` its human-readable label."
           }
         },
         "required": [

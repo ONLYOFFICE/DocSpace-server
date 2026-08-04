@@ -188,7 +188,7 @@ public class EncryptionKeyPairDtoHelper(
 
         if (room.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)
         {
-            throw new NotSupportedException();
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_PrivateRoomOnly);
         }
 
         var tmpFiles = await fileSharing.GetSharedInfoAsync(room);

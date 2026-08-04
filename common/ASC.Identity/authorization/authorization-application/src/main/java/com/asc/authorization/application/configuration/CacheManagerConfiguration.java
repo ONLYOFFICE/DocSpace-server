@@ -45,9 +45,11 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
@@ -129,5 +131,28 @@ public class CacheManagerConfiguration {
         .cacheDefaults(redisCacheConfiguration(cacheSerializer))
         .transactionAware()
         .build();
+  }
+
+  /**
+   * Creates a {@link RedisTemplate} for callers that need direct Redis access instead of the
+   * higher-level {@link CacheManager} abstraction - for example, pattern-based multi-key eviction,
+   * which {@link CacheManager}'s {@code Cache} interface does not expose.
+   *
+   * @param connectionFactory the Redis connection factory
+   * @param cacheSerializer the custom serializer for cache values
+   * @return a configured {@link RedisTemplate} keyed and valued as {@link Object}
+   */
+  @Bean
+  @Profile("saas")
+  public RedisTemplate<String, Object> registeredClientCacheRedisTemplate(
+      RedisConnectionFactory connectionFactory, CacheObjectSerializer cacheSerializer) {
+    var template = new RedisTemplate<String, Object>();
+    template.setConnectionFactory(connectionFactory);
+    template.setKeySerializer(RedisSerializer.string());
+    template.setValueSerializer(cacheSerializer);
+    template.setHashKeySerializer(RedisSerializer.string());
+    template.setHashValueSerializer(cacheSerializer);
+    template.afterPropertiesSet();
+    return template;
   }
 }
