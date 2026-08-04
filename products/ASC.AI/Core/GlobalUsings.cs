@@ -31,27 +31,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using ASC.AI.Core.Database;
-global using ASC.AI.Core.Database.Models;
-global using ASC.AI.Core.Chat.Data;
-global using ASC.AI.Core.Chat.Deletion;
-global using ASC.AI.Core.Chat.History;
-global using ASC.AI.Core.MCP;
-global using ASC.AI.Core.MCP.Auth;
-global using ASC.AI.Core.MCP.Data;
-global using ASC.AI.Core.MCP.Transport;
-global using ASC.AI.Core.Tools;
-global using ASC.AI.Core.Tools.Editor;
-global using ASC.AI.Core.Tools.Retrieval;
-global using ASC.AI.Core.Provider;
-global using ASC.AI.Core.Provider.Data;
-global using ASC.AI.Core.Provider.Model;
-global using ASC.AI.Core.Chat.Tool;
+global using ASC.AI.Core.Database.Legacy;
+global using ASC.AI.Core.Embedding;
 global using ASC.AI.Core.Resources;
-global using ASC.AI.Core.Retrieval.Knowledge;
-global using ASC.AI.Core.Retrieval.Web;
-global using ASC.AI.Core.Retrieval.Web.Engine;
-global using ASC.AI.Core.Utils;
+global using ASC.AI.Core.Settings;
 
 global using ASC.Common;
 global using ASC.Common.Log;
@@ -106,18 +89,12 @@ global using ASC.Web.Studio.Utility;
 
 global using ASC.ElasticSearch.VectorData;
 
-global using Anthropic.SDK;
-
-global using ModelContextProtocol.Client;
-
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.AI;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
-
-global using OpenAI;
 
 global using ProtoBuf;
 

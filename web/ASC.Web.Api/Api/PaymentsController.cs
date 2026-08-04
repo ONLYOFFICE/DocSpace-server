@@ -218,18 +218,6 @@ public class PaymentController(
             throw new BillingException("Tariff is not paid");
         }
 
-        if (quota.TenantId == (int)TenantWalletService.DocsCloud &&
-            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloudDevPack))
-        {
-            throw new ArgumentException("Quota is already set");
-        }
-
-        if (quota.TenantId == (int)TenantWalletService.DocsCloudDevPack &&
-            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloud))
-        {
-            throw new ArgumentException("Quota is already set");
-        }
-
         var minValue = quota.TenantId switch
         {
             (int)TenantWalletService.Storage => configuration.GetValue<int?>("core:accounting:minStorageQuantity") ?? 100,
@@ -244,11 +232,42 @@ public class PaymentController(
                 throw new ArgumentException("Invalid quantity");
             }
 
+            // requesting the DocsCloud product while DocsCloudDevPack is active schedules a reversion to
+            // DocsCloud at the next period, rather than an immediate switch
+            var targetQuota = quota.TenantId;
+            int? nextQuota = null;
+            if (targetQuota == (int)TenantWalletService.DocsCloud &&
+                tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloudDevPack))
+            {
+                targetQuota = (int)TenantWalletService.DocsCloudDevPack;
+                nextQuota = (int)TenantWalletService.DocsCloud;
+
+                // a scheduled switch is a real purchase of a new product, so unlike a plain quantity
+                // change there's no "reset to default" for 0/null - it would just be silently dropped
+                // at renewal by RenewSubscriptionAsync's NextQuantity <= 0 guard
+                if (productQty is null or <= 0)
+                {
+                    throw new ArgumentException("Invalid quantity");
+                }
+            }
+
             // saving null value is equivalent to resetting to default
-            return await paymentHelper.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty, productName);
+            return await paymentHelper.UpdateNextQuantityAsync(tenant.Id, tariff, targetQuota, productQty, productName, nextQuota);
         }
 
         // inDto.ProductQuantityType === ProductQuantityType.Add
+
+        if (quota.TenantId == (int)TenantWalletService.DocsCloud &&
+            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloudDevPack))
+        {
+            throw new ArgumentException("Quota is already set");
+        }
+
+        if (quota.TenantId == (int)TenantWalletService.DocsCloudDevPack &&
+            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloud))
+        {
+            throw new ArgumentException("Quota is already set");
+        }
 
         if (productQty is null or <= 0)
         {
@@ -964,15 +983,42 @@ public class PaymentController(
             return null;
         }
 
+        var tenantQuotas = (await quotaService.GetTenantQuotasAsync()).ToList();
+        var walletQuotas = tenantQuotas.Where(x => x.Wallet)
+            .ToDictionary(x => x.ServiceName, x => x);
+
         var customUom = new Dictionary<string, string>();
-        var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+        var aiQuota = tenantQuotas.SingleOrDefault(q => q.TenantId == (int)TenantWalletService.AITools);
         if (aiQuota != null)
         {
             // For ai-tools, usage is displayed in Tokens instead of AI Credits.
             customUom.Add(aiQuota.ServiceName, "chat");
         }
 
-        return new CustomerServiceUsageReportDto(report, customUom);
+        return new CustomerServiceUsageReportDto(report, walletQuotas, customUom);
+    }
+
+    /// <remarks>
+    /// Returns all the active wallet services (quotas) of the current portal: the active additional quotas
+    /// from the tariff, plus the services enabled manually via the wallet service settings.
+    /// </remarks>
+    /// <summary>
+    /// Get the active wallet services
+    /// </summary>
+    /// <path>api/2.0/portal/payment/activeservices</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The list of active wallet services", typeof(IEnumerable<ActiveServiceDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("activeservices")]
+    public async Task<List<ActiveServiceDto>> GetActiveServices()
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        return await paymentHelper.GetActiveServicesAsync(tenant.Id);
     }
 
     /// <remarks>

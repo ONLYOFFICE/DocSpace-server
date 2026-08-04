@@ -33,7 +33,7 @@
 
 import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 
-// OpenAPI document generation for the New AI service.
+// OpenAPI document generation for the AI service.
 //
 // The engine routes are declared as data (the `DEFAULT_*_ROUTES`
 // `RouteSpec` maps from `@onlyoffice/ai-chat/core`) and registered in a
@@ -73,7 +73,7 @@ export interface CustomRouteDoc {
   /**
    * Unique operation id. Required so the merged documentation tool
    * (`OpenapiJoiner`) can name the generated SDK method; it must not clash
-   * with any other service's ids, hence the `newAi`-scoped values.
+   * with any other service's ids, hence the `ai`-scoped values.
    */
   readonly operationId: string;
   /** Path parameter names present in `path` (the `{name}` segments). */
@@ -85,8 +85,8 @@ export interface CustomRouteDoc {
 export interface OpenApiOptions {
   /**
    * Base path the service is mounted under behind the DocSpace nginx, e.g.
-   * `/api/2.0/new-ai`. Every path key is emitted absolute (prefixed with
-   * this value, `/api/2.0/new-ai/ai/send`) so both the standalone docs UI
+   * `/api/2.0/ai`. Every path key is emitted absolute (prefixed with
+   * this value, `/api/2.0/ai/ai/send`) so both the standalone docs UI
    * and any client show the full, proxy-correct URL, and so the documents
    * merge cleanly with the .NET services.
    */
@@ -120,9 +120,10 @@ export interface OpenApiSchemaBundle {
 }
 
 // Tags are grouped under this single heading (via `x-tagGroups`) and each
-// tag name is namespaced with the same prefix (`New AI / AI`, …) so they
-// stay distinct from the .NET AI service's `AI / *` tags once merged.
-const TAG_GROUP = "New AI";
+// tag name is namespaced with the same prefix (`AI / AI`, …). The prefix
+// matches the .NET AI service's `AI / *` tags, so the two documents share
+// one group and identically named tags collapse once merged.
+const TAG_GROUP = "AI";
 const TAG_PREFIX = `${TAG_GROUP} / `;
 
 function tag(name: string): string {
@@ -140,11 +141,11 @@ const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex"]);
 const JSON_OBJECT_SCHEMA: Json = { type: "object", additionalProperties: true };
 
 // Shared response components emitted from `schemaTypes.ts` (the generator
-// namespaces every schema with the `NewAi` prefix). Referenced in place of
+// namespaces every schema with the `Ai` prefix). Referenced in place of
 // the opaque generic object so the 401 and the no-body success fallback carry
 // a concrete shape: `{ error }` and `{ success }` respectively.
-const ERROR_RESPONSE_REF: Json = { $ref: "#/components/schemas/NewAiErrorResponse" };
-const SUCCESS_RESPONSE_REF: Json = { $ref: "#/components/schemas/NewAiSuccessResponse" };
+const ERROR_RESPONSE_REF: Json = { $ref: "#/components/schemas/AiErrorResponse" };
+const SUCCESS_RESPONSE_REF: Json = { $ref: "#/components/schemas/AiSuccessResponse" };
 
 function jsonResponse(description: string, schema: Json = JSON_OBJECT_SCHEMA): Json {
   return {
@@ -211,23 +212,23 @@ type OperationSchemaLookup = Readonly<Record<string, OperationSchemas>>;
 // reflects the framing (newline-delimited JSON vs. SSE). Applied by
 // `responseFor` when building the success response.
 const STREAMING_RESPONSES: Readonly<Record<string, { mediaType: string; description: string }>> = {
-  newAiAiSendWithStream: {
+  aiAiSendWithStream: {
     mediaType: "application/x-ndjson",
     description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
   },
-  newAiAiRegenerateStream: {
+  aiAiRegenerateStream: {
     mediaType: "application/x-ndjson",
     description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
   },
-  newAiAiApproveToolCall: {
+  aiAiApproveToolCall: {
     mediaType: "application/x-ndjson",
     description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
   },
-  newAiAiDenyToolCall: {
+  aiAiDenyToolCall: {
     mediaType: "application/x-ndjson",
     description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
   },
-  newAiAiSendWithStreamOpenAI: {
+  aiAiSendWithStreamOpenAI: {
     mediaType: "text/event-stream",
     description: "Server-sent events stream of OpenAI `chat.completion.chunk` objects, terminated by a `[DONE]` sentinel.",
   },
@@ -267,9 +268,9 @@ function engineOperation(
   operations: OperationSchemaLookup,
 ): Json {
   const isGet = spec.method === "GET";
-  // lowerCamelCase, `newAi`-scoped so it stays unique across engines and
+  // lowerCamelCase, `ai`-scoped so it stays unique across engines and
   // does not clash with the .NET services' ids once merged.
-  const operationId = `newAi${capitalize(engine.name)}${capitalize(methodName)}`;
+  const operationId = `ai${capitalize(engine.name)}${capitalize(methodName)}`;
   const operation: Record<string, Json> = {
     tags: [tag(engine.tag)],
     operationId,
@@ -331,7 +332,7 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
   const operations: OperationSchemaLookup = schemas?.operations ?? {};
 
   // Path keys are absolute: prefixed with the service's proxy route so both
-  // the docs UI and clients show the full `/api/2.0/new-ai/...` URL.
+  // the docs UI and clients show the full `/api/2.0/ai/...` URL.
   const key = (relative: string): string => `${apiPrefix}${relative}`;
 
   const paths: Record<string, Json> = {};
@@ -357,7 +358,7 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
   // gate) and not part of the public API surface. They remain served by the
   // app — this only hides them from the generated docs/SDKs.
 
-  // `name` carries the full `New AI / …` value (used by operations, the
+  // `name` carries the full `AI / …` value (used by operations, the
   // `x-tagGroups` grouping and the URL slug); `x-displayName` is the short
   // label the docs UI shows in the sidebar (matching the .NET services).
   const tagEntry = (name: string, description: string): Json => ({
@@ -372,7 +373,7 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
     tagEntry("Export", "Markdown → docx export."),
   ];
 
-  // Group every tag under a single "New AI" heading in the merged reference
+  // Group every tag under a single "AI" heading in the merged reference
   // (a Redocly/Scalar extension; harmless for the standalone document).
   const tagGroup: Json = {
     name: TAG_GROUP,
@@ -381,7 +382,7 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
 
   // Shared `{baseUrl}` server template (default empty = same origin),
   // matching the .NET service documents. Paths already carry the full
-  // `/api/2.0/new-ai/...` route, so requests resolve to the proxied URL.
+  // `/api/2.0/ai/...` route, so requests resolve to the proxied URL.
   const servers: Json = [
     {
       url: "{baseUrl}",
@@ -393,10 +394,10 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
   return {
     openapi: "3.0.3",
     info: {
-      title: "ONLYOFFICE DocSpace New AI Service API",
+      title: "ONLYOFFICE DocSpace AI Service API",
       version: "2.0",
       description:
-        "HTTP API of the New AI service. Requests are authenticated with the "
+        "HTTP API of the AI service. Requests are authenticated with the "
         + "DocSpace `asc_auth_key` session cookie or an `Authorization` header "
         + "and forwarded to the AI engine and the .NET AI integration service.",
     },
@@ -428,7 +429,7 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
 }
 
 // Self-contained HTML for the Scalar API reference UI. The DocSpace .NET
-// services expose their docs through Scalar too, so this keeps the New AI
+// services expose their docs through Scalar too, so this keeps the AI
 // service consistent. The script is loaded from the CDN; `specUrl` is the
 // same-origin path to the generated document.
 export function docsHtml(specUrl: string): string {
@@ -437,7 +438,7 @@ export function docsHtml(specUrl: string): string {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>New AI Service API</title>
+    <title>AI Service API</title>
   </head>
   <body>
     <script id="api-reference" data-url="${specUrl}"></script>

@@ -33,7 +33,7 @@
 
 import { proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { getForwardedHeaders } from "../requestContext.js";
-import { isObject, getNumber, getObject } from "../narrow.js";
+import { isObject, getNumber, getObject, getString } from "../narrow.js";
 import logger from "../log.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
@@ -42,6 +42,11 @@ import logger from "../log.js";
 export interface DocspaceFolderInfo {
   /** Whether the folder is an AI agent room (`FolderType.AiRoom` on the C# side). */
   isAgent: boolean;
+  /**
+   * The agent room's stored instruction (`chatSettings.prompt`), when set.
+   * Only agent rooms carry one — `undefined` for a regular folder.
+   */
+  prompt?: string;
 }
 
 // Mirrors `FolderType.IsAgent()` in
@@ -72,8 +77,11 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   }
   const folderType = getNumber(envelope, "type");
   const roomType = getNumber(envelope, "roomType");
+  const chatSettings = getObject(envelope, "chatSettings");
+  const prompt = chatSettings ? getString(chatSettings, "prompt") : undefined;
   return {
     isAgent: folderType === FOLDER_TYPE_AI_ROOM || roomType === ROOM_TYPE_AI_ROOM,
+    prompt,
   };
 }
 
@@ -105,6 +113,31 @@ export async function getFolderInfo(
     return parsed;
   } finally {
     cancel();
+  }
+}
+
+/**
+ * Best-effort fetch of an agent room's stored instruction
+ * (`chatSettings.prompt`). Never throws — a failed fetch, an absent scope,
+ * or a non-agent folder simply yields an empty string, leaving the system
+ * prompt unchanged (mirrors {@link safeGetToolsPrompt}).
+ */
+export async function safeGetAgentInstruction(
+  entityId: string | undefined,
+): Promise<string> {
+  if (!entityId) {
+    return "";
+  }
+  try {
+    const info = await getFolderInfo(entityId);
+    return info?.prompt ?? "";
+  } catch (err) {
+    logger.warn(
+      `agent instruction fetch failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return "";
   }
 }
 
