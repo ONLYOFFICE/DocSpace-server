@@ -188,7 +188,13 @@ public class TopUpWalletService(
             logger.ErrorWithException(ex);
         }
 
-        await SendTopUpWalletErrorAsync(data.TenantId, payer, owner, settings);
+        // the shared preamble above now also runs for tenants without auto top-up enabled (their
+        // balance still needs to be fetched for the low-balance check), so a failure there must not
+        // be reported as an "auto top-up failed" error for a tenant who never opted into auto top-up
+        if (settings?.Enabled == true)
+        {
+            await SendTopUpWalletErrorAsync(data.TenantId, payer, owner, settings);
+        }
     }
 
     // recovery must clear at a higher level than the drop threshold, otherwise a balance oscillating
