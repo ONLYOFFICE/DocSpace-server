@@ -31,19 +31,43 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.authorization.application.security.oauth.service;
+package com.asc.authorization.data.client.cache;
 
 import java.util.Optional;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 
-/** Repository interface for validating the accessibility of registered clients. */
-public interface RegisteredClientAccessibilityService {
+/** Service interface for caching registered clients resolved from the registration service. */
+public interface RegisteredClientCacheService {
 
   /**
-   * Loads a registered client in a single remote call when it is public and enabled.
+   * Stores a client in the cache.
    *
-   * @param clientId the ID of the registered client
-   * @return the accessible client, or empty if missing, private, or disabled
+   * @param client the client to cache.
    */
-  Optional<RegisteredClient> findAccessibleClient(String clientId);
+  void put(CachedRegisteredClient client);
+
+  /**
+   * Retrieves a client from the cache by its client ID, regardless of tenant.
+   *
+   * @param clientId the client ID to look up.
+   * @return an {@link Optional} containing the cached client, or empty if not present.
+   */
+  Optional<CachedRegisteredClient> get(String clientId);
+
+  /**
+   * Evicts a single client from the cache.
+   *
+   * @param clientId the client ID to evict.
+   * @param tenantId the tenant ID the client belongs to.
+   */
+  void evict(String clientId, long tenantId);
+
+  /**
+   * Evicts every client belonging to a tenant from the cache.
+   *
+   * @param tenantId the tenant ID whose clients should be evicted.
+   */
+  void evictAllByTenantId(long tenantId);
+
+  /** Clears the entire registered client cache. */
+  void clear();
 }

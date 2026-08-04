@@ -31,19 +31,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.authorization.application.security.oauth.service;
+package com.asc.authorization.application.exception.client;
 
-import java.util.Optional;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import io.grpc.StatusRuntimeException;
 
-/** Repository interface for validating the accessibility of registered clients. */
-public interface RegisteredClientAccessibilityService {
-
-  /**
-   * Loads a registered client in a single remote call when it is public and enabled.
-   *
-   * @param clientId the ID of the registered client
-   * @return the accessible client, or empty if missing, private, or disabled
-   */
-  Optional<RegisteredClient> findAccessibleClient(String clientId);
+/**
+ * Wraps gRPC failures that should not be retried (for example {@code DEADLINE_EXCEEDED} or {@code
+ * NOT_FOUND}).
+ */
+public class NonRetryableGrpcException extends RuntimeException {
+  public NonRetryableGrpcException(StatusRuntimeException cause) {
+    super(cause.getStatus().getCode() + ": " + cause.getStatus().getDescription(), cause);
+  }
 }

@@ -33,17 +33,34 @@
 
 package com.asc.authorization.application.security.oauth.service;
 
+import com.asc.authorization.data.client.cache.CachedRegisteredClient;
+import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
 import java.util.Optional;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
-/** Repository interface for validating the accessibility of registered clients. */
-public interface RegisteredClientAccessibilityService {
+/** No-op implementation of {@link RegisteredClientCacheService} for non-SaaS profiles. */
+@Slf4j
+@Service
+@Profile("!saas")
+public class NoOpRegisteredClientCacheService implements RegisteredClientCacheService {
+  @Override
+  public void put(CachedRegisteredClient client) {
+    log.info("Skipping registered client cache write: caching is disabled outside saas profile");
+  }
 
-  /**
-   * Loads a registered client in a single remote call when it is public and enabled.
-   *
-   * @param clientId the ID of the registered client
-   * @return the accessible client, or empty if missing, private, or disabled
-   */
-  Optional<RegisteredClient> findAccessibleClient(String clientId);
+  @Override
+  public Optional<CachedRegisteredClient> get(String clientId) {
+    return Optional.empty();
+  }
+
+  @Override
+  public void evict(String clientId, long tenantId) {}
+
+  @Override
+  public void evictAllByTenantId(long tenantId) {}
+
+  @Override
+  public void clear() {}
 }

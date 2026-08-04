@@ -31,19 +31,34 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.authorization.application.security.oauth.service;
+package com.asc.authorization.data.client.cache;
 
-import java.util.Optional;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/** Repository interface for validating the accessibility of registered clients. */
-public interface RegisteredClientAccessibilityService {
-
-  /**
-   * Loads a registered client in a single remote call when it is public and enabled.
-   *
-   * @param clientId the ID of the registered client
-   * @return the accessible client, or empty if missing, private, or disabled
-   */
-  Optional<RegisteredClient> findAccessibleClient(String clientId);
+/**
+ * A flat, plain-serializable snapshot of the fields required to reconstruct a Spring Authorization
+ * Server {@code RegisteredClient} from a cache entry, without depending on the gRPC transport types
+ * or the framework's immutable, builder-only {@code RegisteredClient} representation.
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CachedRegisteredClient implements Serializable {
+  private String clientId;
+  private String clientSecret;
+  private String name;
+  private Set<String> authenticationMethods;
+  private Set<String> redirectUris;
+  private Set<String> scopes;
+  private Instant createdOn;
+  private long tenantId;
+  private boolean enabled;
+  private boolean publicClient;
 }
