@@ -5,7 +5,7 @@
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
@@ -31,25 +31,43 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Common.Utils;
+package com.asc.authorization.data.client.cache;
 
-public class RateLimiterSettings
-{
-    public int SlidingWindowLimit { get; init; } = 1500;
-    public int ConcurrentGetLimit { get; init; } = 50;
-    public int DefaultConcurrencyWriteRequests { get; init; } = 15;
-    public int DailyWriteLimit { get; init; } = 10000;
+import java.util.Optional;
 
-    public int SensitiveApiLimit { get; init; } = 5;
-    public int SensitiveApiWindowMinutes { get; init; } = 15;
+/** Service interface for caching registered clients resolved from the registration service. */
+public interface RegisteredClientCacheService {
 
-    public int PaymentsApiLimit { get; init; } = 10;
-    public int PaymentsApiWindowMinutes { get; init; } = 1;
+  /**
+   * Stores a client in the cache.
+   *
+   * @param client the client to cache.
+   */
+  void put(CachedRegisteredClient client);
 
-    public int? MaxEmailInvitationsPerDay { get; init; }
+  /**
+   * Retrieves a client from the cache by its client ID, regardless of tenant.
+   *
+   * @param clientId the client ID to look up.
+   * @return an {@link Optional} containing the cached client, or empty if not present.
+   */
+  Optional<CachedRegisteredClient> get(String clientId);
 
-    public List<string> KnownNetworks { get; init; } = [];
-    public List<string> KnownIPAddresses { get; init; } = [];
-    public string KnownIPAddressesUrl { get; init; }
-    public int KnownIPAddressesRefreshMinutes { get; init; } = 15;
+  /**
+   * Evicts a single client from the cache.
+   *
+   * @param clientId the client ID to evict.
+   * @param tenantId the tenant ID the client belongs to.
+   */
+  void evict(String clientId, long tenantId);
+
+  /**
+   * Evicts every client belonging to a tenant from the cache.
+   *
+   * @param tenantId the tenant ID whose clients should be evicted.
+   */
+  void evictAllByTenantId(long tenantId);
+
+  /** Clears the entire registered client cache. */
+  void clear();
 }

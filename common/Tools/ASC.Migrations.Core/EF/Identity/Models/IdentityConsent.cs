@@ -67,6 +67,8 @@ public static class IdentityConsentExtension
 
                 entity.ToTable("identity_consents");
 
+                entity.HasIndex(e => e.PrincipalId, "idx_identity_consents_principal_id");
+
                 entity.Property(e => e.PrincipalId)
                     .HasMaxLength(255)
                     .HasColumnName("principal_id");

@@ -5,7 +5,7 @@
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
@@ -31,25 +31,34 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Common.Utils;
+package com.asc.authorization.data.client.cache;
 
-public class RateLimiterSettings
-{
-    public int SlidingWindowLimit { get; init; } = 1500;
-    public int ConcurrentGetLimit { get; init; } = 50;
-    public int DefaultConcurrencyWriteRequests { get; init; } = 15;
-    public int DailyWriteLimit { get; init; } = 10000;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    public int SensitiveApiLimit { get; init; } = 5;
-    public int SensitiveApiWindowMinutes { get; init; } = 15;
-
-    public int PaymentsApiLimit { get; init; } = 10;
-    public int PaymentsApiWindowMinutes { get; init; } = 1;
-
-    public int? MaxEmailInvitationsPerDay { get; init; }
-
-    public List<string> KnownNetworks { get; init; } = [];
-    public List<string> KnownIPAddresses { get; init; } = [];
-    public string KnownIPAddressesUrl { get; init; }
-    public int KnownIPAddressesRefreshMinutes { get; init; } = 15;
+/**
+ * A flat, plain-serializable snapshot of the fields required to reconstruct a Spring Authorization
+ * Server {@code RegisteredClient} from a cache entry, without depending on the gRPC transport types
+ * or the framework's immutable, builder-only {@code RegisteredClient} representation.
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CachedRegisteredClient implements Serializable {
+  private String clientId;
+  private String clientSecret;
+  private String name;
+  private Set<String> authenticationMethods;
+  private Set<String> redirectUris;
+  private Set<String> scopes;
+  private Instant createdOn;
+  private long tenantId;
+  private boolean enabled;
+  private boolean publicClient;
 }
