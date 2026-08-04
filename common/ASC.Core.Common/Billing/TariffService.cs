@@ -133,6 +133,7 @@ public class TariffService(
 
                             DateTime? quotaDueDate = null;
                             int? nextQuantity = null;
+                            int? nextQuota = null;
                             if (quota.Wallet)
                             {
                                 quotaDueDate = currentPayment.EndDate;
@@ -140,6 +141,7 @@ public class TariffService(
                                 if (existingQuota != null && existingQuota.DueDate == currentPayment.EndDate && existingQuota.Quantity == currentPayment.Quantity)
                                 {
                                     nextQuantity = existingQuota.NextQuantity;
+                                    nextQuota = existingQuota.NextQuota;
                                 }
                                 if (quota is { Additional: false })
                                 {
@@ -164,7 +166,7 @@ public class TariffService(
                             }
 
                             asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
-                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Additional, quota.Wallet, quotaDueDate, nextQuantity));
+                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Additional, quota.Wallet, quotaDueDate, nextQuantity, nextQuota));
                             email = currentPayment.PaymentEmail;
                         }
 
@@ -800,13 +802,15 @@ public class TariffService(
 
         var tariff = await CreateDefaultAsync(true);
         tariff.Id = r.Id;
-        tariff.DueDate = r.Stamp.Year < 9999 ? r.Stamp : DateTime.MaxValue;
+        tariff.DueDate = RestoreMaxValueSentinel(r.Stamp);
         tariff.CustomerId = r.CustomerId;
 
         var quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
 
         foreach (var q in quotas)
         {
+            RestoreMaxValueSentinel(q);
+
             if (q is { Additional: true, State: QuotaState.Overdue })
             {
                 tariff.OverdueQuotas ??= [];
@@ -836,17 +840,11 @@ public class TariffService(
             {
                 await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
 
-                var stamp = tariffInfo.DueDate;
-                if (stamp.Equals(DateTime.MaxValue))
-                {
-                    stamp = stamp.Date.Add(new TimeSpan(tariffInfo.DueDate.Hour, tariffInfo.DueDate.Minute, tariffInfo.DueDate.Second));
-                }
-
                 var efTariff = new DbTariff
                 {
                     Id = tariffInfo.Id,
                     TenantId = tenant,
-                    Stamp = stamp,
+                    Stamp = TruncateToWholeSeconds(tariffInfo.DueDate),
                     CustomerId = tariffInfo.CustomerId,
                     CreateOn = DateTime.UtcNow
                 };
@@ -867,8 +865,9 @@ public class TariffService(
                         TariffId = efTariff.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = q.NextQuantity,
+                        NextQuota = q.NextQuota,
                         TenantId = tenant
                     });
                 }
@@ -903,11 +902,41 @@ public class TariffService(
         return inserted;
     }
 
-    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity)
+    // MySQL "datetime" columns have no fractional-second precision; DateTime.MaxValue's sub-second ticks
+    // round up to the next (invalid, year 10000) day and get silently stored as a zero-date otherwise.
+    private static DateTime TruncateToWholeSeconds(DateTime value)
+    {
+        return value.Equals(DateTime.MaxValue)
+            ? value.Date.Add(new TimeSpan(value.Hour, value.Minute, value.Second))
+            : value;
+    }
+
+    // Reverses TruncateToWholeSeconds on read, so a due date persisted as the "no expiration" sentinel
+    // compares equal (via Quota.Equals) to the in-memory DateTime.MaxValue it originated from.
+    private static DateTime RestoreMaxValueSentinel(DateTime value)
+    {
+        return value.Year < 9999 ? value : DateTime.MaxValue;
+    }
+
+    private static void RestoreMaxValueSentinel(Quota q)
+    {
+        if (q.DueDate.HasValue)
+        {
+            q.DueDate = RestoreMaxValueSentinel(q.DueDate.Value);
+        }
+    }
+
+    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity, int? nextQuota = null)
     {
         try
         {
             if (nextQuantity is < 0)
+            {
+                return false;
+            }
+
+            // the only supported scheduled quota switch today is reverting from DocsCloudDevPack back to DocsCloud
+            if (nextQuota is not null && (quotaId != (int)TenantWalletService.DocsCloudDevPack || nextQuota != (int)TenantWalletService.DocsCloud))
             {
                 return false;
             }
@@ -923,14 +952,16 @@ public class TariffService(
                 if (q.Id == quotaId)
                 {
                     q.NextQuantity = nextQuantity;
+                    q.NextQuota = nextQuota;
 
                     await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
                     {
                         TariffId = tariffInfo.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = nextQuantity,
+                        NextQuota = nextQuota,
                         TenantId = tenant
                     });
 
@@ -1083,6 +1114,7 @@ public class TariffService(
 
         if (toAdd != null)
         {
+            RestoreMaxValueSentinel(toAdd);
             tariff.Quotas.Insert(0, toAdd);
         }
         else
@@ -1263,6 +1295,19 @@ public class TariffService(
 
     public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null, bool waitForChanges = false)
     {
+        var (_, result) = await TopUpDepositInternalAsync(tenantId, amount, currency, customerParticipantName, siteName, metadata, waitForChanges);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Deposits funds and reports whether the outcome could actually be confirmed.
+    /// <see cref="TopUpOutcome.Unknown"/> means the billing response was lost (e.g. a timeout) or the
+    /// balance did not reflect the change in time - the deposit may or may not have been applied on the
+    /// billing side, so callers must not blindly retry with a recomputed amount, or they risk depositing twice.
+    /// </summary>
+    private async Task<(TopUpOutcome Outcome, bool Result)> TopUpDepositInternalAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata, bool waitForChanges)
+    {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
         decimal? oldBalanceAmount = 0;
@@ -1275,20 +1320,23 @@ public class TariffService(
 
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
         var result = false;
+        TopUpOutcome outcome;
 
         try
         {
             result = await billingClient.TopUpDepositAsync(portalId, amount, currency, customerParticipantName, siteName, metadata);
+            outcome = result ? TopUpOutcome.Confirmed : TopUpOutcome.Rejected;
         }
         catch (Exception error)
         {
             logger.ErrorWithException(error);
+            outcome = TopUpOutcome.Unknown;
         }
 
         if (!result || !waitForChanges)
         {
             await hybridCache.RemoveAsync(cacheKey);
-            return result;
+            return (outcome, result);
         }
 
         var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
@@ -1305,9 +1353,13 @@ public class TariffService(
         {
             logger.ErrorBilling(tenantId.ToString(), "Balance value is not updated after replenishment");
             await hybridCache.RemoveAsync(cacheKey);
+
+            // Billing reported success, but we could not confirm it against the balance in time:
+            // treat as unknown rather than confirmed so the caller does not act as if it were final.
+            outcome = TopUpOutcome.Unknown;
         }
 
-        return result;
+        return (outcome, result);
     }
 
     public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null)
@@ -1319,7 +1371,7 @@ public class TariffService(
         {
             var topUpAmount = Math.Ceiling((requiredAmount - balanceAmount) * 100) / 100;
 
-            var toppedUp = await TopUpDepositAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
+            var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
             if (toppedUp)
             {
                 var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
@@ -1327,9 +1379,26 @@ public class TariffService(
             }
 
             balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+
+            if (outcome == TopUpOutcome.Unknown)
+            {
+                // Whether this attempt actually succeeded on the billing side is unconfirmed. Retrying would
+                // recompute the shortfall and fire another real deposit, doubling it if the unconfirmed one
+                // did land - so stop here and let the caller treat the balance as still insufficient.
+                logger.ErrorBilling(tenantId.ToString(), "Top-up outcome is unknown, stopping retries to avoid a duplicate deposit");
+
+                break;
+            }
         }
 
         return balanceAmount >= requiredAmount;
+    }
+
+    private enum TopUpOutcome
+    {
+        Confirmed,
+        Rejected,
+        Unknown
     }
 
     private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)

@@ -15007,12 +15007,12 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Generate the DocsCloud tenant quota report",
-        "description": "Generates the DocsCloud user quota report as a CSV file and saves it in \"My Documents\".",
+        "summary": "Start the DocsCloud tenant quota report generation",
+        "description": "Starts generating the DocsCloud user quota report as an \"xlsx\" file and saves it in \"My Documents\".",
         "operationId": "createTenantQuotaReport",
         "responses": {
           "200": {
-            "description": "URL to the CSV report file",
+            "description": "Operation execution status",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
@@ -15039,10 +15039,198 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StringWrapper"
+                  "$ref": "#/components/schemas/DocumentBuilderTaskWrapper"
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Settings / DocsCloud"
+        ],
+        "summary": "Get the status of the DocsCloud tenant quota report generation",
+        "description": "Returns the status of generating the DocsCloud user quota report.",
+        "operationId": "getTenantQuotaReport",
+        "responses": {
+          "200": {
+            "description": "Operation execution status",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentBuilderTaskWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "schema": {
+                  "type": "integer",
+                  "example": 30
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Settings / DocsCloud"
+        ],
+        "summary": "Terminate the DocsCloud tenant quota report generation",
+        "description": "Terminates generating the DocsCloud user quota report.",
+        "operationId": "terminateTenantQuotaReport",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1500
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1
+                }
+              },
+              "X-RateLimit-Reset": {
+                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
+                "schema": {
+                  "type": "integer",
+                  "example": 1750000000
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -34183,6 +34371,13 @@
             "description": "Indicates whether the quota is primary or additional.",
             "example": false
           },
+          "nextQuota": {
+            "type": "integer",
+            "description": "The quota ID to switch to at the next period.",
+            "format": "int32",
+            "nullable": true,
+            "example": ""
+          },
           "state": {
             "$ref": "#/components/schemas/QuotaState"
           }
@@ -34240,7 +34435,6 @@
           "id",
           "nonProfit",
           "price",
-          "title",
           "trial"
         ],
         "type": "object",
