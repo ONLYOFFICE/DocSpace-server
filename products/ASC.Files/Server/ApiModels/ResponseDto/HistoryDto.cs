@@ -137,7 +137,9 @@ public class HistoryApiHelper(
     AuditInterpreter interpreter,
     AuditEventMapper mapper,
     CoreBaseSettings coreBaseSettings,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    UserManager userManager,
+    SecurityContext securityContext)
 {
     public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
@@ -262,6 +264,11 @@ public class HistoryApiHelper(
             || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
+        if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId)
