@@ -31,21 +31,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ILogger = Microsoft.Extensions.Logging.ILogger;
-
 namespace ASC.Api.Core.Log;
 
 internal static partial class RateLimiterIpAllowListLogger
 {
     [LoggerMessage(LogLevel.Information, "Rate limiter IP allow list refreshed from {Url}: {Count} entries, updated at {UpdatedAt}")]
-    public static partial void InformationAllowListRefreshed(this ILogger logger, string Url, int Count, string UpdatedAt);
+    public static partial void InformationAllowListRefreshed(this ILogger<RateLimiterIpAllowList> logger, string url, int count, string updatedAt);
 
     [LoggerMessage(LogLevel.Warning, "Failed to refresh rate limiter IP allow list from {Url}")]
-    public static partial void WarningAllowListRefreshFailed(this ILogger logger, string Url, Exception exception);
+    public static partial void WarningAllowListRefreshFailed(this ILogger<RateLimiterIpAllowList> logger, string url, Exception exception);
 
     [LoggerMessage(LogLevel.Debug, "Rate limiter IP allow list from {Url} not modified, etag {ETag}")]
-    public static partial void DebugAllowListNotModified(this ILogger logger, string Url, string ETag);
+    public static partial void DebugAllowListNotModified(this ILogger<RateLimiterIpAllowList> logger, string url, string etag);
 
     [LoggerMessage(LogLevel.Debug, "Skipping invalid rate limiter IP allow list entry: {Entry}")]
-    public static partial void DebugInvalidAllowListEntry(this ILogger logger, string Entry);
+    public static partial void DebugInvalidAllowListEntry(this ILogger<RateLimiterIpAllowList> logger, string entry);
 }
