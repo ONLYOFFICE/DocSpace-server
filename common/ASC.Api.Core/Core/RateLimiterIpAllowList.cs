@@ -45,6 +45,7 @@ public class RateLimiterIpAllowList
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<RateLimiterIpAllowList> _logger;
     private readonly string _url;
+    private readonly string _redactedUrl;
     private readonly TimeSpan _refreshInterval;
     private readonly Snapshot _static;
 
@@ -54,6 +55,7 @@ public class RateLimiterIpAllowList
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _url = settings.Value.KnownIPAddressesUrl;
+        _redactedUrl = RedactUrl(_url);
         _refreshInterval = TimeSpan.FromMinutes(Math.Max(1, settings.Value.KnownIPAddressesRefreshMinutes));
         _static = Parse(settings.Value.KnownIPAddresses.Concat(settings.Value.KnownNetworks));
     }
@@ -105,7 +107,7 @@ public class RateLimiterIpAllowList
 
             if (response.StatusCode == HttpStatusCode.NotModified)
             {
-                _logger.DebugAllowListNotModified(_url, ctx.ETag);
+                _logger.DebugAllowListNotModified(_redactedUrl, ctx.ETag);
                 return ctx.NotModified();
             }
 
@@ -117,13 +119,13 @@ public class RateLimiterIpAllowList
             var updatedAt = regions.Count > 0 ? regions.Values.Max(r => r.UpdatedAt).ToString("O") : string.Empty;
 
             var snapshot = Parse(regions.Values.SelectMany(r => r.Ips ?? []));
-            _logger.InformationAllowListRefreshed(_url, snapshot.Addresses.Count + snapshot.Networks.Length, updatedAt);
+            _logger.InformationAllowListRefreshed(_redactedUrl, snapshot.Addresses.Count + snapshot.Networks.Length, updatedAt);
 
             return ctx.Modified(snapshot, etag: response.Headers.ETag?.ToString());
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
-            _logger.WarningAllowListRefreshFailed(_url, e);
+            _logger.WarningAllowListRefreshFailed(_redactedUrl, e);
             throw;
         }
     }
@@ -161,6 +163,10 @@ public class RateLimiterIpAllowList
 
         return new Snapshot(addresses, [.. networks]);
     }
+
+    // The URL may carry an API key in its query string — never log it verbatim
+    private static string RedactUrl(string url) =>
+        Uri.TryCreate(url, UriKind.Absolute, out var uri) ? $"{uri.Scheme}://{uri.Host}{uri.AbsolutePath}" : "(invalid url)";
 
     private static bool Contains(Snapshot snapshot, IPAddress address)
     {
