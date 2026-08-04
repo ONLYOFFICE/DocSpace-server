@@ -31,25 +31,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Common.Utils;
+namespace ASC.Api.Core.Log;
 
-public class RateLimiterSettings
+internal static partial class RateLimiterIpAllowListLogger
 {
-    public int SlidingWindowLimit { get; init; } = 1500;
-    public int ConcurrentGetLimit { get; init; } = 50;
-    public int DefaultConcurrencyWriteRequests { get; init; } = 15;
-    public int DailyWriteLimit { get; init; } = 10000;
+    [LoggerMessage(LogLevel.Information, "Rate limiter IP allow list refreshed from {Url}: {Count} entries, updated at {UpdatedAt}")]
+    public static partial void InformationAllowListRefreshed(this ILogger<RateLimiterIpAllowList> logger, string url, int count, string updatedAt);
 
-    public int SensitiveApiLimit { get; init; } = 5;
-    public int SensitiveApiWindowMinutes { get; init; } = 15;
+    [LoggerMessage(LogLevel.Warning, "Failed to refresh rate limiter IP allow list from {Url}")]
+    public static partial void WarningAllowListRefreshFailed(this ILogger<RateLimiterIpAllowList> logger, string url, Exception exception);
 
-    public int PaymentsApiLimit { get; init; } = 10;
-    public int PaymentsApiWindowMinutes { get; init; } = 1;
+    [LoggerMessage(LogLevel.Debug, "Rate limiter IP allow list from {Url} not modified, etag {ETag}")]
+    public static partial void DebugAllowListNotModified(this ILogger<RateLimiterIpAllowList> logger, string url, string etag);
 
-    public int? MaxEmailInvitationsPerDay { get; init; }
-
-    public List<string> KnownNetworks { get; init; } = [];
-    public List<string> KnownIPAddresses { get; init; } = [];
-    public string KnownIPAddressesUrl { get; init; }
-    public int KnownIPAddressesRefreshMinutes { get; init; } = 15;
+    [LoggerMessage(LogLevel.Debug, "Skipping invalid rate limiter IP allow list entry: {Entry}")]
+    public static partial void DebugInvalidAllowListEntry(this ILogger<RateLimiterIpAllowList> logger, string entry);
 }
