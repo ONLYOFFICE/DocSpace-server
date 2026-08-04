@@ -89,6 +89,7 @@ global using ASC.Core.Common.Notify.Engine;
 global using ASC.Core.Common.Notify.Push;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
+global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.WhiteLabel;
