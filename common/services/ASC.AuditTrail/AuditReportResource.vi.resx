@@ -253,7 +253,7 @@
     <value>Ví của khách hang đã được nạp tiền: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Đã cập nhật cài đặt nạp tiền vào ví của khách hàng</value>
+    <value>Đã cập nhật cài đặt nạp tiền vào ví của khách hàng: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Cài đặt Điều hướng Tùy chỉnh</value>

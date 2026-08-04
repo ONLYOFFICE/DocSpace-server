@@ -253,7 +253,7 @@
     <value>Carteira do cliente recarregada: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Configurações de recarga da carteira do cliente atualizadas</value>
+    <value>Configurações de recarga da carteira do cliente atualizadas: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Configurações de navegação personalizadas Atualizadas</value>

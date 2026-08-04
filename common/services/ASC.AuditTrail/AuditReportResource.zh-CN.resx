@@ -253,7 +253,7 @@
     <value>客户钱包已充值: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>客户钱包充值设置已更新</value>
+    <value>客户钱包充值设置已更新: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>自定义导航设置已更新</value>

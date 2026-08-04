@@ -253,7 +253,7 @@
     <value>Klant wallet opgeladen: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Instellingen voor het opladen van klant wallet bijgewerkt</value>
+    <value>Instellingen voor het opladen van klant wallet bijgewerkt: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Aangepaste Navigatie Instellingen Bijgewerkt</value>

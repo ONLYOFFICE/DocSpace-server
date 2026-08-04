@@ -253,7 +253,7 @@
     <value>Հաճախորդի դրամապանակը լիցքավորվել է՝ {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Հաճախորդի դրամապանակի լիցքավորման կարգավորումները թարմացվեցին</value>
+    <value>Հաճախորդի դրամապանակի լիցքավորման կարգավորումները թարմացվեցին՝ {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Հարմարեցված նավիգացիայի կարգավորումները թարմացվել են</value>

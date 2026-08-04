@@ -253,7 +253,7 @@
     <value>Korisnički novčanik je dopunjen: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Podešavanja dopune korisničkog novčanika su ažurirana</value>
+    <value>Podešavanja dopune korisničkog novčanika su ažurirana: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Podešavanja prilagođene navigacije ažurirana</value>

@@ -400,7 +400,7 @@ public class PaymentHelper(
             throw new InvalidOperationException("Failed to save tenant wallet service settings");
         }
 
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, service.ToStringFast());
 
         if (service == TenantWalletService.AITools)
         {
@@ -487,7 +487,7 @@ public class PaymentHelper(
     {
         var result = await aiGateway.SetRestrictedModelsAsync(models);
 
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, string.Join(", ", models));
 
         return result;
     }

@@ -247,7 +247,7 @@
     <value>Müştəri pul kisəsinə pul yükləndi: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Müştəri pul kisəsinin artırılması parametrləri yeniləndi</value>
+    <value>Müştəri pul kisəsinin artırılması parametrləri yeniləndi: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Fərdi Naviqasiya Parametrləri Yeniləndi</value>

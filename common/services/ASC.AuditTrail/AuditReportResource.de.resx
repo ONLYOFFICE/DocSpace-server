@@ -253,7 +253,7 @@
     <value>Kunden-Wallet aufgeladen: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Einstellungen für Kunden-Wallet-Aufladung aktualisiert</value>
+    <value>Einstellungen für Kunden-Wallet-Aufladung aktualisiert: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Benutzerdefinierte Navigationseinstellungen sind aktualisiert</value>

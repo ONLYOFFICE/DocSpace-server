@@ -247,7 +247,7 @@
     <value>顧客ウォレットがチャージされました: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>顧客ウォレットチャージ設定が更新されました</value>
+    <value>顧客ウォレットチャージ設定が更新されました: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>カスタム・ナビゲーション設定を更新しました</value>

@@ -253,7 +253,7 @@
     <value>Denarnica stranke napolnjena: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Nastavitve polnjenja denarnice stranke posodobljene</value>
+    <value>Nastavitve polnjenja denarnice stranke posodobljene: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Posodobljene nastavitve navigacije po meri</value>

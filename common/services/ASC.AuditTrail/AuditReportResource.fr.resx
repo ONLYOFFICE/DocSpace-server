@@ -253,7 +253,7 @@
     <value>Wallet du client rechargé : {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Paramètres de recharge du wallet client mis à jour</value>
+    <value>Paramètres de recharge du wallet client mis à jour : {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Paramètres de navigation personnalisés mis à jour</value>

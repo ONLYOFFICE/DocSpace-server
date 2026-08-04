@@ -262,7 +262,7 @@
     <value>Customer wallet topped up: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Customer wallet top up settings updated</value>
+    <value>Customer wallet top up settings updated: {0}</value>
   </data>
   <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
     <value>Subscription balance moved to wallet: {0}</value>

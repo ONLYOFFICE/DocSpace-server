@@ -253,7 +253,7 @@
     <value>Portofelul clientului a fost alimentat: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Setările de alimentare a portofelului de client au fost actualizate</value>
+    <value>Setările de alimentare a portofelului de client au fost actualizate: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Setări de navigare particularizate au fost actualizate</value>

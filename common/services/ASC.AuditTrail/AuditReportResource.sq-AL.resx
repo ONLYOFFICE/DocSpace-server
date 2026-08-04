@@ -247,7 +247,7 @@
     <value>Portofoli i klientit u rimbush: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Cilësimet e rimbushjes së portofolit të klientit u përditësuan</value>
+    <value>Cilësimet e rimbushjes së portofolit të klientit u përditësuan: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e navigacionit të personalizuar është përditësuar</value>

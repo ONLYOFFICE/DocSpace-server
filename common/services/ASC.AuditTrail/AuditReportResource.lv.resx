@@ -253,7 +253,7 @@
     <value>Klienta maks papildināts: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Klienta maka papildināšanas iestatījumi atjaunināti</value>
+    <value>Klienta maka papildināšanas iestatījumi atjaunināti: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Personalizētās navigācijas uzstādījumi atjaunināti</value>

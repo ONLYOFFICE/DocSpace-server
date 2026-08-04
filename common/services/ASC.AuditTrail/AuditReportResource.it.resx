@@ -253,7 +253,7 @@
     <value>Portafoglio cliente ricaricato: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Impostazioni di ricarica del portafoglio cliente aggiornate</value>
+    <value>Impostazioni di ricarica del portafoglio cliente aggiornate: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Impostazioni navigazione personalizzata aggiornate</value>

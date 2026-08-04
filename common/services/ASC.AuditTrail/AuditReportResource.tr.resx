@@ -253,7 +253,7 @@
     <value>Müşteri cüzdanına para yüklendi: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Müşteri cüzdanına para yükleme ayarları güncellendi</value>
+    <value>Müşteri cüzdanına para yükleme ayarları güncellendi: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Özel Navigasyon Ayarları Güncellendi</value>

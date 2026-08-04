@@ -259,7 +259,7 @@
     <value>Кошелек клиента пополнен: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Настройки пополнения кошелька клиента обновлены</value>
+    <value>Настройки пополнения кошелька клиента обновлены: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки пользовательской навигации</value>

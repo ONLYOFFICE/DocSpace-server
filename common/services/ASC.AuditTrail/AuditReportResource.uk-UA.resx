@@ -253,7 +253,7 @@
     <value>Гаманець клієнта поповнено: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Параметри поповнення гаманця клієнта оновлено</value>
+    <value>Параметри поповнення гаманця клієнта оновлено: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Параметри настроюваної навігації оновлено</value>

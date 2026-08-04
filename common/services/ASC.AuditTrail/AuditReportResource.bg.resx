@@ -253,7 +253,7 @@
     <value>Зареден потребителски портфейл: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Актуализирани настройки за зареждане на потребителски портфейл</value>
+    <value>Актуализирани настройки за зареждане на потребителски портфейл: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Потребителски настройки за навигация Актуализирани</value>

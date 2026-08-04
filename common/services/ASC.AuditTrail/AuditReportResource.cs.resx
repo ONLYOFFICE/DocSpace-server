@@ -247,7 +247,7 @@
     <value>Peněženka zákazníka dobita: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Nastavení doplnění peněženky zákazníka aktualizováno</value>
+    <value>Nastavení doplnění peněženky zákazníka aktualizováno: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Vlastní nastavení navigace aktualizováno</value>

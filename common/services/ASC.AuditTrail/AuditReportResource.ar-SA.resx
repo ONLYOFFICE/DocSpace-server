@@ -253,7 +253,7 @@
     <value>تم تعبئة محفظة العميل: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>تم تحديث إعدادات تعبئة محفظة العميل</value>
+    <value>تم تحديث إعدادات تعبئة محفظة العميل: {0}</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>تم تحديق إعدادات التصفح المخصص</value>
