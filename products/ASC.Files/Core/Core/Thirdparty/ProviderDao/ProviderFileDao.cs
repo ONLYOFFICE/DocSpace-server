@@ -251,12 +251,12 @@ internal class ProviderFileDao(
 
         return streamUri;
     }
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    public async Task<File<string>> SaveFormFileAsync(File<string> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -276,14 +276,14 @@ internal class ProviderFileDao(
             }
 
             var fileDao = selector.GetFileDao(fileId);
-            fileSaved = await fileDao.SaveFileAsync(file, fileStream);
+            fileSaved = await fileDao.SaveFileAsync(file, fileStream, allowQuotaGrace: allowQuotaGrace);
         }
         else if (folderId != null)
         {
             selector = _selectorFactory.GetSelector(folderId);
             file.ParentId = selector.ConvertId(folderId);
             var fileDao = selector.GetFileDao(folderId);
-            fileSaved = await fileDao.SaveFileAsync(file, fileStream);
+            fileSaved = await fileDao.SaveFileAsync(file, fileStream, allowQuotaGrace: allowQuotaGrace);
         }
 
         if (fileSaved != null)
@@ -294,7 +294,7 @@ internal class ProviderFileDao(
         throw new ArgumentException("No file id or folder id toFolderId determine provider");
     }
 
-    public async Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
+    public async Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -317,7 +317,7 @@ internal class ProviderFileDao(
 
         var fileDao = selector.GetFileDao(fileId);
 
-        return await fileDao.ReplaceFileVersionAsync(file, fileStream);
+        return await fileDao.ReplaceFileVersionAsync(file, fileStream, allowQuotaGrace);
     }
 
     public async Task DeleteFileAsync(string fileId)

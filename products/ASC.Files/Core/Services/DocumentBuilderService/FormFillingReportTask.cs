@@ -87,7 +87,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
             resultFile.VersionGroup++;
             resultFile.ContentLength = stream.Length;
 
-            resultFile = await fileDao.SaveFileAsync(resultFile, stream, false);
+            resultFile = await fileDao.SaveFormFileAsync(resultFile, stream, false);
             origProperties.FormFilling.IsVersionChanged = false;
             await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
         }

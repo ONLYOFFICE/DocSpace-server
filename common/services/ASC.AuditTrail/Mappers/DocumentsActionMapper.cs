@@ -68,6 +68,7 @@ internal class FilesActionMapper : ILocationActionMapper
                             MessageAction.FormStartedToFill, MessageAction.FormPartiallyFilled, MessageAction.FormCompletelyFilled, MessageAction.FormStopped,
                             MessageAction.FileSavedButUserQuotaExceeded, MessageAction.FileNotSavedDueToUserQuota,
                             MessageAction.FileSavedButRoomQuotaExceeded, MessageAction.FileNotSavedDueToRoomQuota,
+                            MessageAction.FileSavedButTenantQuotaExceeded, MessageAction.FileNotSavedDueToTenantQuota,
                             MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling,
                             MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered, MessageAction.FileCustomFilterEnabled, MessageAction.FileCustomFilterDisabled,
                             MessageAction.FileExternalLinkUpdated
