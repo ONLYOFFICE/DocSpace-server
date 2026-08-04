@@ -148,7 +148,7 @@ public class TopUpWalletService(
             // mutually exclusive branches on the same snapshot, so they can never race each other
             if (!settings.Enabled)
             {
-                await CheckLowBalanceAsync(scope, data.TenantId, settings, balance, payer, owner);
+                await CheckLowBalanceAsync(scope, data.TenantId, settings, balance, tariffService, payer, owner);
                 return;
             }
 
@@ -199,7 +199,7 @@ public class TopUpWalletService(
     // isolated from TopUpWalletAsync's try/catch on purpose: a failure here must never fall through to
     // SendTopUpWalletErrorAsync, which sends an "auto top-up failed" email that makes no sense for a
     // tenant who never enabled auto top-up in the first place
-    private async Task CheckLowBalanceAsync(AsyncServiceScope scope, int tenantId, TenantWalletSettings settings, Balance balance, UserInfo payer, UserInfo owner)
+    private async Task CheckLowBalanceAsync(AsyncServiceScope scope, int tenantId, TenantWalletSettings settings, Balance balance, ITariffService tariffService, UserInfo payer, UserInfo owner)
     {
         try
         {
@@ -208,7 +208,7 @@ public class TopUpWalletService(
                 return;
             }
 
-            var currency = string.IsNullOrEmpty(settings.Currency) ? "USD" : settings.Currency;
+            var currency = string.IsNullOrEmpty(settings.Currency) ? tariffService.GetSupportedAccountingCurrencies().First() : settings.Currency;
             var subAccount = balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency);
             if (subAccount == null)
             {
