@@ -583,6 +583,24 @@ public class BackupService(
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.Backup);
     }
 
+    public async Task EnsureBackupServiceEnabledAsync(int tenantId, MessageService messageService)
+    {
+        const TenantWalletService service = TenantWalletService.Backup;
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+        var enabledServices = settings.EnabledServices ?? [];
+
+        if (enabledServices.Contains(service))
+        {
+            return;
+        }
+
+        enabledServices.Add(service);
+        settings.EnabledServices = enabledServices;
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, service.ToStringFast());
+    }
+
     private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)
     {
         var schedule = await backupRepository.GetBackupScheduleAsync(tenantId, dump);

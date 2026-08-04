@@ -243,17 +243,13 @@ public class BackupController(
             }
             catch (TenantQuotaException)
             {
-                var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(tenantId);
-                if (!backupServiceEnabled)
-                {
-                    throw;
-                }
-
                 billingSession = await backupService.OpenCustomerSessionForBackupAsync(tenantId);
                 if (billingSession == null)
                 {
                     throw new BillingException(Resource.ErrorNotAllowedOption);
                 }
+
+                await backupService.EnsureBackupServiceEnabledAsync(tenantId, messageService);
             }
 
             var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
