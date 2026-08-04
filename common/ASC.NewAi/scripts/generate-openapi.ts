@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// Build-time OpenAPI emitter. Writes the New AI service's OpenAPI document
+// Build-time OpenAPI emitter. Writes this AI service's OpenAPI document
 // as `newai_2.0.json` into the shared documentation folder, so it can be
 // merged with the .NET services' documents by ASC.Api.Documentation.
 //
@@ -42,7 +42,7 @@
 // into the ASC.Api.Documentation build via an MSBuild `<Exec>` target.
 //
 // The document is emitted in "merge" shape: absolute path keys prefixed with
-// the service's route (`/api/2.0/new-ai/...`) and the shared `{baseUrl}`
+// the service's route (`/api/2.0/ai/...`) and the shared `{baseUrl}`
 // server template — matching the .NET service documents so `OpenapiJoiner`
 // can combine them without rewriting paths.
 
