@@ -309,6 +309,9 @@
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Sorry, this file format isn't supported</value>
   </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>This action is only available in a private room</value>
+  </data>
   <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
     <value>This provider is already connected to the room</value>
   </data>

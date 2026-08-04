@@ -671,7 +671,16 @@ namespace ASC.Files.Core.Resources {
                 return ResourceManager.GetString("ErrorMessage_NotSupportedFormat", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to This action is only available in a private room.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomOnly {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomOnly", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to An AI agent&apos;s instruction cannot be longer than {0} characters.
         /// </summary>
