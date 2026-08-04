@@ -98,9 +98,6 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
     private Lazy<long> _lazyCurrentSize;
     public string ExcludePattern { get; set; }
 
-    // See IQuotaController: set by FileDao only around a serialized editor file-save write; off otherwise.
-    public bool AllowTenantQuotaGrace { get; set; }
-
     public void Init(int tenant, string excludePattern = null)
     {
         _tenant = tenant;
@@ -109,12 +106,12 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
             .Sum(r => r.Counter));
         ExcludePattern = excludePattern;
     }
-    public async Task QuotaUserUsedAddAsync(string module, string domain, string dataTag, long size, Guid ownerId, bool quotaCheckFileSize = true)
+    public async Task QuotaUserUsedAddAsync(string module, string domain, string dataTag, long size, Guid ownerId, bool quotaCheckFileSize = true, bool allowQuotaGrace = false)
     {
         size = Math.Abs(size);
         if (UsedInQuota(dataTag))
         {
-            var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
+            var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId, allowQuotaGrace);
             AddCurrentSize(size);
             if (result == QuotaCheckResult.QuotaExceeded)
             {
@@ -128,12 +125,12 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
     {
         await QuotaUsedAddAsync(module, domain, dataTag, size, Guid.Empty, quotaCheckFileSize);
     }
-    public async Task QuotaUsedAddAsync(string module, string domain, string dataTag, long size, Guid ownerId, bool quotaCheckFileSize = true)
+    public async Task QuotaUsedAddAsync(string module, string domain, string dataTag, long size, Guid ownerId, bool quotaCheckFileSize = true, bool allowQuotaGrace = false)
     {
         size = Math.Abs(size);
         if (UsedInQuota(dataTag))
         {
-            var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
+            var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId, allowQuotaGrace);
             AddCurrentSize(size);
             if (result == QuotaCheckResult.QuotaExceeded)
             {
@@ -189,12 +186,12 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, false, Guid.Empty);
     }
 
-    public async Task QuotaUsedCheckAsync(long size, Guid ownedId)
+    public async Task QuotaUsedCheckAsync(long size, Guid ownedId, bool allowQuotaGrace = false)
     {
-        await QuotaUsedCheckAsync(size, true, ownedId);
+        await QuotaUsedCheckAsync(size, true, ownedId, allowQuotaGrace);
     }
 
-    public async Task<QuotaCheckResult> QuotaUsedCheckAsync(long size, bool quotaCheckFileSize, Guid ownerId)
+    public async Task<QuotaCheckResult> QuotaUsedCheckAsync(long size, bool quotaCheckFileSize, Guid ownerId, bool allowQuotaGrace = false)
     {
         var result = QuotaCheckResult.Ok;
 
@@ -208,7 +205,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
 
             if (quota.MaxTotalSize != 0)
             {
-                result = await CheckMaxTotalSizeAsync(quota, CurrentSize + size);
+                result = await CheckMaxTotalSizeAsync(quota, CurrentSize + size, allowQuotaGrace);
             }
         }
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
@@ -234,19 +231,19 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
 
     // Enforces the portal (tariff) MaxTotalSize quota. Throws on a hard failure; otherwise returns whether
     // the write is a soft overshoot within the grace (QuotaExceeded) or fits (Ok).
-    // Strict for non-file-save writes (avatars, thumbnails, backups, ...); editor saves (AllowTenantQuotaGrace)
+    // Strict for non-file-save writes (avatars, thumbnails, backups, ...); editor saves (allowQuotaGrace)
     // may overshoot within tenantQuotaConfig.AvailableFileSize, but only once - hard-fail once already over
     // the limit or beyond the grace.
-    private async Task<QuotaCheckResult> CheckMaxTotalSizeAsync(TenantQuota quota, long newTotal)
+    private async Task<QuotaCheckResult> CheckMaxTotalSizeAsync(TenantQuota quota, long newTotal, bool allowQuotaGrace)
     {
-        if (!AllowTenantQuotaGrace || CurrentSize > quota.MaxTotalSize || newTotal > quota.MaxTotalSize + tenantQuotaConfig.AvailableFileSize)
+        if (!allowQuotaGrace || CurrentSize > quota.MaxTotalSize || newTotal > quota.MaxTotalSize + tenantQuotaConfig.AvailableFileSize)
         {
             await maxTotalSizeChecker.CheckAddAsync(_tenant, newTotal); // throws when newTotal exceeds MaxTotalSize
             return QuotaCheckResult.Ok;
         }
 
-        // soft overshoot within grace: caller fires the socket notification. The file-save path opts in
-        // (AllowTenantQuotaGrace) and serializes this via a tenant-scoped lock (see
+        // soft overshoot within grace: caller fires the socket notification. The file-save path passes
+        // allowQuotaGrace and serializes this via a tenant-scoped lock (see
         // FileDao.TryAllowTenantQuotaGraceAsync) so it is consumed once.
         return newTotal > quota.MaxTotalSize ? QuotaCheckResult.QuotaExceeded : QuotaCheckResult.Ok;
     }

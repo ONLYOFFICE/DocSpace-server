@@ -1044,26 +1044,7 @@ internal class FileDao(
     {
         var folderDao = daoFactory.GetFolderDao<int>();
 
-        var store = await globalStore.GetStoreAsync();
-
-        // carry the caller's grace opt-in to the storage layer (TenantQuotaController.QuotaUsedCheckAsync) for
-        // this write only; other quota-checked writes keep the strict MaxTotalSize limit
-        if (allowQuotaGrace && store.QuotaController != null)
-        {
-            store.QuotaController.AllowTenantQuotaGrace = true;
-        }
-
-        try
-        {
-            await store.SaveAsync(string.Empty, GetUniqFilePath(file), file.GetFileQuotaOwner(), stream, file.Title);
-        }
-        finally
-        {
-            if (allowQuotaGrace && store.QuotaController != null)
-            {
-                store.QuotaController.AllowTenantQuotaGrace = false;
-            }
-        }
+        await (await globalStore.GetStoreAsync()).SaveAsync(string.Empty, GetUniqFilePath(file), file.GetFileQuotaOwner(), stream, file.Title, allowQuotaGrace: allowQuotaGrace);
 
         currentFolder ??= await folderDao.GetFolderAsync(file.FolderIdDisplay);
 
