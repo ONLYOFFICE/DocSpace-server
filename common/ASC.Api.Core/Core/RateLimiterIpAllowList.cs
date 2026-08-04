@@ -70,11 +70,6 @@ public class RateLimiterIpAllowList
             address = address.MapToIPv4();
         }
 
-        if (address.AddressFamily != AddressFamily.InterNetwork)
-        {
-            return false;
-        }
-
         return Contains(_static, address) || Contains(GetRemote(), address);
     }
 
@@ -149,15 +144,15 @@ public class RateLimiterIpAllowList
 
             if (trimmed.Contains('/'))
             {
-                if (IPNetwork.TryParse(trimmed, out var network) && network.BaseAddress.AddressFamily == AddressFamily.InterNetwork)
+                if (IPNetwork.TryParse(trimmed, out var network))
                 {
                     networks.Add(network);
                     continue;
                 }
             }
-            else if (IPAddress.TryParse(trimmed, out var address) && address.AddressFamily == AddressFamily.InterNetwork)
+            else if (IPAddress.TryParse(trimmed, out var address))
             {
-                addresses.Add(address);
+                addresses.Add(address.IsIPv4MappedToIPv6 ? address.MapToIPv4() : address);
                 continue;
             }
 
