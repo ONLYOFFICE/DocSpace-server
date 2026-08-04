@@ -5,7 +5,12 @@
   "permissions": {
     "allow": [
       "Bash(dotnet build *)",
-      "Bash(dotnet test *)"
+      "Bash(dotnet test *)",
+      "Bash(openspec *)"
+    ],
+    "additionalDirectories": [
+      "../buildtools/config",
+      "../Logs"
     ]
   }
 }

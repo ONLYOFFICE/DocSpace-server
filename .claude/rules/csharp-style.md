@@ -30,6 +30,10 @@ paths:
 - **License header**: AGPL 3.0 header required on all source files
 - **Line endings**: CRLF; `insert_final_newline = true`; trailing whitespace trimmed
 
+## JSON
+- **Prefer typed deserialization**: `JsonSerializer.Deserialize<T>` into records/DTOs when the payload shape is known. Manual `JsonDocument`/`JsonElement` traversal only for truly dynamic shapes.
+- **Cache `JsonSerializerOptions`** in a `private static readonly` field (e.g. with `PropertyNameCaseInsensitive = true`) — never allocate options per call.
+
 ## API Patterns
 - API versioning via `Asp.Versioning`
 - Swagger annotations for OpenAPI generation
