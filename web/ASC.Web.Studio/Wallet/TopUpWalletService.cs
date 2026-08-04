@@ -53,7 +53,8 @@ namespace ASC.Web.Studio.Wallet;
 public class TopUpWalletService(
         IServiceScopeFactory scopeFactory,
         ILogger<TopUpWalletService> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        TenantWalletSettingsConfig walletSettingsConfig)
     : ActivePassiveBackgroundService<TopUpWalletService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
@@ -114,10 +115,6 @@ public class TopUpWalletService(
             }
 
             settings = JsonSerializer.Deserialize<TenantWalletSettings>(data.Setting, _options);
-            if (!settings.Enabled)
-            {
-                return;
-            }
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             owner = await userManager.GetUsersAsync(tenant.OwnerId);
@@ -144,6 +141,14 @@ public class TopUpWalletService(
             if (balance == null)
             {
                 logger.Error($"TopUpWalletService: balance is null for tenant {data.TenantId}");
+                return;
+            }
+
+            // one balance read per tenant per cycle: auto top-up and low-balance notification are
+            // mutually exclusive branches on the same snapshot, so they can never race each other
+            if (!settings.Enabled)
+            {
+                await CheckLowBalanceAsync(scope, data.TenantId, settings, balance, payer, owner);
                 return;
             }
 
@@ -186,6 +191,60 @@ public class TopUpWalletService(
         await SendTopUpWalletErrorAsync(data.TenantId, payer, owner, settings);
     }
 
+    // recovery must clear at a higher level than the drop threshold, otherwise a balance oscillating
+    // right at the threshold would re-notify on every cycle
+    private const decimal LowBalanceRecoveryMultiplier = 2m;
+
+
+    // isolated from TopUpWalletAsync's try/catch on purpose: a failure here must never fall through to
+    // SendTopUpWalletErrorAsync, which sends an "auto top-up failed" email that makes no sense for a
+    // tenant who never enabled auto top-up in the first place
+    private async Task CheckLowBalanceAsync(AsyncServiceScope scope, int tenantId, TenantWalletSettings settings, Balance balance, UserInfo payer, UserInfo owner)
+    {
+        try
+        {
+            if (settings.LowBalanceThreshold <= 0)
+            {
+                return;
+            }
+
+            var currency = string.IsNullOrEmpty(settings.Currency) ? "USD" : settings.Currency;
+            var subAccount = balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency);
+            if (subAccount == null)
+            {
+                return;
+            }
+
+            var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+
+            if (subAccount.Amount < settings.LowBalanceThreshold)
+            {
+                if (settings.LowBalanceNotified)
+                {
+                    return;
+                }
+
+                var socketManager = scope.ServiceProvider.GetRequiredService<QuotaSocketManager>();
+                await socketManager.WalletLowBalanceAsync();
+
+                var studioNotifyService = scope.ServiceProvider.GetRequiredService<StudioNotifyService>();
+                await studioNotifyService.SendLowWalletBalanceAsync(payer, owner);
+
+                settings.LowBalanceNotified = true;
+                await settingsManager.SaveAsync(settings, tenantId);
+            }
+            else if (settings.LowBalanceNotified && subAccount.Amount >= settings.LowBalanceThreshold * LowBalanceRecoveryMultiplier)
+            {
+                settings.LowBalanceNotified = false;
+                await settingsManager.SaveAsync(settings, tenantId);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+        }
+    }
+
     private async Task SendTopUpWalletErrorAsync(int tenantId, UserInfo payer, UserInfo owner, TenantWalletSettings settings)
     {
         try
@@ -208,6 +267,8 @@ public class TopUpWalletService(
 
             settings ??= new TenantWalletSettings();
             settings.Enabled = false;
+            // auto top-up just got disabled: fall back to low-balance monitoring instead of going dark
+            settings.LowBalanceThreshold = walletSettingsConfig.LowBalanceThreshold;
             await settingsManager.SaveAsync(settings, tenantId);
 
             messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletTopUpSettingsUpdated);
@@ -226,7 +287,7 @@ static file class Queries
             (WebstudioDbContext ctx, Guid id) =>
                 ctx.WebstudioSettings
                    .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (settings, tenants) => new { settings, tenants })
-                   .Where(x => x.tenants.Status == TenantStatus.Active && x.settings.Id == id && x.settings.Data.Contains("\"Enabled\":true"))
+                   .Where(x => x.tenants.Status == TenantStatus.Active && x.settings.Id == id)
                    .Select(r => new TenantWalletSettingsData(r.tenants.Id, r.settings.Data)));
 }
 

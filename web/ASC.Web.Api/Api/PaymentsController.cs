@@ -1333,6 +1333,17 @@ public class PaymentController(
 
         var settings = inDto?.Settings ?? new TenantWalletSettings();
 
+        if (settings.Enabled)
+        {
+            settings.LowBalanceNotified = false;
+        }
+        else
+        {
+            // keep the settings row persisted (not equal to GetDefault()) even when auto top-up is
+            // turned off, so the low-balance poller can still discover this tenant
+            settings.LowBalanceThreshold = paymentHelper.GetDefaultLowBalanceThreshold();
+        }
+
         var result = await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.CustomerWalletTopUpSettingsUpdated);

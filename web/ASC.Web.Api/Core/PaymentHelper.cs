@@ -45,7 +45,8 @@ public class PaymentHelper(
     QuotaSocketManager quotaSocketManager,
     AiGateway aiGateway,
     DocsCloudClient docsCloudClient,
-    WalletStaticProvider walletStaticProvider)
+    WalletStaticProvider walletStaticProvider,
+    TenantWalletSettingsConfig walletSettingsConfig)
 {
     public void DemandConfigured()
     {
@@ -257,9 +258,35 @@ public class PaymentHelper(
             messageService.Send(MessageAction.CustomerWalletToppedUp, $"{amount} {currency}");
 
             await quotaSocketManager.TopUpWallet(false);
+
+            await EnsureLowBalanceThresholdAsync();
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The wallet balance below which a low-balance notification is sent, sourced from config (not user-configurable).
+    /// </summary>
+    public int GetDefaultLowBalanceThreshold()
+    {
+        return walletSettingsConfig.LowBalanceThreshold;
+    }
+
+    // stamps a non-default TenantWalletSettings row for tenants without auto top-up configured, so the low-balance
+    // poller (which only scans persisted wallet-settings rows) can discover them without scanning every active tenant
+    private async Task EnsureLowBalanceThresholdAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantWalletSettings>();
+        if (settings.Enabled)
+        {
+            return;
+        }
+
+        settings.LowBalanceThreshold = GetDefaultLowBalanceThreshold();
+        settings.LowBalanceNotified = false;
+
+        await settingsManager.SaveAsync(settings);
     }
 
     public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId)

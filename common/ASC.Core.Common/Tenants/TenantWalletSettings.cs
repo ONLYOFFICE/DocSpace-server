@@ -41,7 +41,7 @@ public class TenantWalletSettingsWrapper
     /// <summary>
     /// The tenant wallet settings.
     /// </summary>
-    /// <example>{"enabled": true, "minBalance": 10, "upToBalance": 100, "currency": "USD"}</example>
+    /// <example>{"enabled": true, "minBalance": 10, "upToBalance": 100, "currency": "USD", "lowBalanceThreshold": 1, "lowBalanceNotified": false}</example>
     public TenantWalletSettings Settings { get; set; }
 }
 
@@ -78,6 +78,18 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     /// <example>USD</example>
     public string Currency { get; set; }
 
+    /// <summary>
+    /// The wallet balance below which a low-balance notification is sent. Set internally, not user-configurable.
+    /// </summary>
+    /// <example>1</example>
+    public int LowBalanceThreshold { get; set; }
+
+    /// <summary>
+    /// Specifies whether a low-balance notification has already been sent for the current dip below <see cref="LowBalanceThreshold"/>.
+    /// </summary>
+    /// <example>false</example>
+    public bool LowBalanceNotified { get; set; }
+
 
     public static Guid ID => new("{40069709-492A-4F41-988C-F1A053A8A560}");
 
@@ -91,4 +103,14 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     /// </summary>
     /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
+}
+
+/// <summary>
+/// The default low-balance notification threshold, read once from config and shared by every caller
+/// (the wallet top-up API and the low-balance background poller) instead of re-parsing it each time.
+/// </summary>
+[Singleton]
+public class TenantWalletSettingsConfig(IConfiguration configuration)
+{
+    public int LowBalanceThreshold { get; } = int.Parse(configuration["core:accounting:lowbalancethreshold"] ?? "1", CultureInfo.InvariantCulture);
 }
