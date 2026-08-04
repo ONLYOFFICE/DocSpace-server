@@ -209,6 +209,10 @@ dotnet_naming_rule.private_field_should_be_begin_with_underscore.severity = warn
 dotnet_naming_rule.private_field_should_be_begin_with_underscore.symbols = private_field
 dotnet_naming_rule.private_field_should_be_begin_with_underscore.style = begin_with_underscore
 
+dotnet_naming_rule.parameters_and_locals_should_be_camel_case.severity = warning
+dotnet_naming_rule.parameters_and_locals_should_be_camel_case.symbols = parameters_and_locals
+dotnet_naming_rule.parameters_and_locals_should_be_camel_case.style = camel_case
+
 # Symbol specifications
 
 dotnet_naming_symbols.interface.applicable_kinds = interface
@@ -227,9 +231,14 @@ dotnet_naming_symbols.public_field.applicable_accessibilities = public, internal
 dotnet_naming_symbols.private_field.applicable_kinds = field
 dotnet_naming_symbols.private_field.applicable_accessibilities = private, protected, private_protected
 
+dotnet_naming_symbols.parameters_and_locals.applicable_kinds = parameter, local
+dotnet_naming_symbols.parameters_and_locals.applicable_accessibilities = *
+
 # Naming styles
 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style.camel_case.capitalization = camel_case
 
 dotnet_naming_style.begins_with_i.required_prefix = I
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
