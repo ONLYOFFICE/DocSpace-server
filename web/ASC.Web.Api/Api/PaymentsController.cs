@@ -315,9 +315,7 @@ public class PaymentController(
             throw new ArgumentException("Invalid product quantity type");
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
@@ -333,11 +331,11 @@ public class PaymentController(
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-        await paymentHelper.GetSubAccountRequiredAsync(tenant.Id, defaultCurrency);
+        await paymentHelper.GetSubAccountRequiredAsync(tenantId, defaultCurrency);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentCalculateAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency);
+        var result = await tariffService.PaymentCalculateAsync(tenantId, quantity, inDto.ProductQuantityType, defaultCurrency);
 
         return result;
     }
