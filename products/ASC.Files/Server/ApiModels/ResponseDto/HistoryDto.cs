@@ -137,9 +137,7 @@ public class HistoryApiHelper(
     AuditInterpreter interpreter,
     AuditEventMapper mapper,
     CoreBaseSettings coreBaseSettings,
-    TenantManager tenantManager,
-    UserManager userManager,
-    SecurityContext securityContext)
+    TenantManager tenantManager)
 {
     public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
@@ -151,13 +149,6 @@ public class HistoryApiHelper(
     {
         var events = GetEntryEventsAsync(folderId, FileEntryType.Folder, fromDate, toDate, offset, count);
         return ToHistoryAsync(events);
-    }
-
-    public async Task<IEnumerable<AuditEvent>> GetFolderEventsAsync(int folderId)
-    {
-        var events = GetEntryEventsAsync(folderId, FileEntryType.Folder, null, null, 0, int.MaxValue, false);
-
-        return await ToEventsAsync(events).ToListAsync();
     }
 
     private async IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetEntryEventsAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count, bool setCount = true)
@@ -266,15 +257,10 @@ public class HistoryApiHelper(
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
-        if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
         var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId)
             ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
 
-        if (!await fileSecurity.CanReadHistoryAsync(folder))
+        if (!await fileSecurity.CanExportHistoryAsync(folder))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
