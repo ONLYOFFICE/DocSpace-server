@@ -73,7 +73,7 @@ public class RoomIndexExportStartPermissionsTests(
     /// being a portal member without an invitation.
     /// </summary>
     [Theory]
-    [MemberData(nameof(RoomAccessData.NonManagerInvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
+    [MemberData(nameof(RoomAccessData.VdrNonManagerInvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
     public async Task StartIndexExport_InvitedMember_Forbidden(EmployeeType employeeType, FileShare access)
     {
         // Arrange

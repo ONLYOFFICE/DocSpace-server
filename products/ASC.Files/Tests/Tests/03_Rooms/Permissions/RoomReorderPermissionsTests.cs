@@ -81,7 +81,7 @@ public class RoomReorderPermissionsTests(
     /// Only management access (RoomManager) lets an invited RoomAdmin reorder the index.
     /// </summary>
     [Theory]
-    [MemberData(nameof(RoomAccessData.AllRoomAccesses), MemberType = typeof(RoomAccessData))]
+    [MemberData(nameof(RoomAccessData.VdrRoomAccesses), MemberType = typeof(RoomAccessData))]
     public async Task ReorderRoom_InvitedRoomAdmin_MatchesAccessLevel(FileShare access)
     {
         // Arrange

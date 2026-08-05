@@ -50,9 +50,26 @@ public static class RoomAccessData
         FileShare.Read, FileShare.Comment, FileShare.Review, FileShare.Editing, FileShare.ContentCreator
     ];
 
+    /// <summary>
+    /// The access levels a Virtual Data Room accepts. Comment and Review are rejected at invitation
+    /// time for a VDR, so any matrix used against a VDR has to leave them out.
+    /// </summary>
+    private static readonly FileShare[] _vdrRoomAccesses =
+    [
+        FileShare.Read, FileShare.Editing, FileShare.ContentCreator, FileShare.RoomManager
+    ];
+
+    private static readonly FileShare[] _vdrNonManagerRoomAccesses =
+    [
+        FileShare.Read, FileShare.Editing, FileShare.ContentCreator
+    ];
+
     public static TheoryData<FileShare> AllRoomAccesses => [.. _allRoomAccesses];
 
     public static TheoryData<FileShare> NonManagerAccesses => [.. _nonManagerRoomAccesses];
+
+    /// <inheritdoc cref="_vdrRoomAccesses"/>
+    public static TheoryData<FileShare> VdrRoomAccesses => [.. _vdrRoomAccesses];
 
     public static TheoryData<FileShare, int> UpdateRoomAccesses => new()
     {
@@ -137,21 +154,22 @@ public static class RoomAccessData
         }
     }
 
-    public static TheoryData<EmployeeType, FileShare> NonManagerInvitedMemberAccesses
+    /// <inheritdoc cref="_vdrRoomAccesses"/>
+    public static TheoryData<EmployeeType, FileShare> VdrNonManagerInvitedMemberAccesses =>
+        BuildInvitedMemberMatrix(_vdrNonManagerRoomAccesses);
+
+    private static TheoryData<EmployeeType, FileShare> BuildInvitedMemberMatrix(FileShare[] accesses)
     {
-        get
+        var data = new TheoryData<EmployeeType, FileShare>();
+
+        foreach (var employeeType in new[] { EmployeeType.RoomAdmin, EmployeeType.User, EmployeeType.Guest })
         {
-            var data = new TheoryData<EmployeeType, FileShare>();
-
-            foreach (var employeeType in new[] { EmployeeType.RoomAdmin, EmployeeType.User, EmployeeType.Guest })
+            foreach (var access in accesses)
             {
-                foreach (var access in _nonManagerRoomAccesses)
-                {
-                    data.Add(employeeType, access);
-                }
+                data.Add(employeeType, access);
             }
-
-            return data;
         }
+
+        return data;
     }
 }

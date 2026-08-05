@@ -75,7 +75,7 @@ public class RoomIndexExportTerminatePermissionsTests(
     /// The owner's running task must stay untouched.
     /// </summary>
     [Theory]
-    [MemberData(nameof(RoomAccessData.NonManagerInvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
+    [MemberData(nameof(RoomAccessData.VdrNonManagerInvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
     public async Task TerminateIndexExport_InvitedMember_IsNoOp(EmployeeType employeeType, FileShare access)
     {
         // Arrange
