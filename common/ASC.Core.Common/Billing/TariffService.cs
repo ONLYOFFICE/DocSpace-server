@@ -355,20 +355,20 @@ public class TariffService(
 
         var productIds = checkQuota ? await CheckQuotaAndGetProductIds(tenantId, quantity) : await GetProductIds(quantity);
 
+        bool changed;
+
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            var changed = await billingClient.ChangePaymentAsync(portalId, productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
+            changed = await billingClient.ChangePaymentAsync(portalId, productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
 
-            if (!changed)
+            if (changed)
             {
-                return throwIfNotSuccess ? throw new BillingException("Payment change was declined") : false;
+                await ClearCacheAsync(tenantId);
+
+                await docsCloudClient.ClearCacheAsync(portalId);
             }
-
-            await ClearCacheAsync(tenantId);
-
-            await docsCloudClient.ClearCacheAsync(portalId);
         }
         catch (Exception error)
         {
@@ -382,7 +382,12 @@ public class TariffService(
             return false;
         }
 
-        return true;
+        if (!changed && throwIfNotSuccess)
+        {
+            throw new BillingException("Payment change was declined");
+        }
+
+        return changed;
     }
 
     public async Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
