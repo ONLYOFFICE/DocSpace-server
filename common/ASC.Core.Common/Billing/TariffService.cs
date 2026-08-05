@@ -363,7 +363,7 @@ public class TariffService(
 
             if (!changed)
             {
-                return false;
+                return throwIfNotSuccess ? throw new BillingException("Payment change was declined") : false;
             }
 
             await ClearCacheAsync(tenantId);
