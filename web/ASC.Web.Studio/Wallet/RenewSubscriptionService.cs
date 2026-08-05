@@ -161,7 +161,12 @@ public class RenewSubscriptionService(
             }
 
             // when a switch to a different quota is scheduled, buy that quota outright instead of renewing the current one
-            var targetQuota = data.NextQuota is { } nextQuotaId ? _walletQuotas[nextQuotaId] : walletQuota;
+            var targetQuota = walletQuota;
+            if (data.NextQuota is { } nextQuotaId && !_walletQuotas.TryGetValue(nextQuotaId, out targetQuota))
+            {
+                logger.ErrorRenewSubscriptionServiceUnknownNextQuota(data.TenantId, nextQuotaId);
+                return;
+            }
 
             var walletQuotaFeatureName = walletQuota.Additional
                 ? walletQuota.Features.Split(':').FirstOrDefault()
