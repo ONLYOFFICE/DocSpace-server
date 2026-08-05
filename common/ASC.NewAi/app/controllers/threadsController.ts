@@ -223,6 +223,12 @@ export const threadsController = {
       return;
     }
     const thread = await engine.getById(threadId);
+    // Storage returns null for a missing thread; without this guard the handler
+    // answers 200 with a null body for a nonexistent threadId (Bug 82718).
+    if (thread === null) {
+      res.status(404).json({ error: "thread not found" });
+      return;
+    }
     res.json(thread);
   }),
 
