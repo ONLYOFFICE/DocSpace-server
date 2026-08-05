@@ -249,7 +249,7 @@ public class BackupController(
                     throw new BillingException(Resource.ErrorNotAllowedOption);
                 }
 
-                await backupService.EnsureBackupServiceEnabledAsync(tenantId, messageService);
+                await backupService.EnsureBackupServiceEnabledAsync(tenantId);
             }
 
             var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null

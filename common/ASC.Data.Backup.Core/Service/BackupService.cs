@@ -55,7 +55,8 @@ public class BackupService(
         PermissionContext permissionContext,
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
-        StorageFactory storageFactory)
+        StorageFactory storageFactory,
+        MessageService messageService)
 {
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
@@ -583,7 +584,7 @@ public class BackupService(
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.Backup);
     }
 
-    public async Task EnsureBackupServiceEnabledAsync(int tenantId, MessageService messageService)
+    public async Task EnsureBackupServiceEnabledAsync(int tenantId)
     {
         const TenantWalletService service = TenantWalletService.Backup;
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
