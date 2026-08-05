@@ -185,7 +185,16 @@ export const threadsController = {
 
   regenerateTitle: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "profile"] as const);
-    const title = await engine.regenerateTitle(args.threadId as string, args.profile as Profile);
+    // The engine dereferences `profile` (and needs a real threadId); a missing
+    // profile makes it throw a TypeError → 500 (Bug 82828). Validate both up
+    // front and return a clean 400.
+    if (typeof args.threadId !== "string" || !isObject(args.profile)) {
+      res.status(400).json({
+        error: "threadId (string) and profile (object) are required",
+      });
+      return;
+    }
+    const title = await engine.regenerateTitle(args.threadId, args.profile as Profile);
     res.json({ title });
   }),
 
