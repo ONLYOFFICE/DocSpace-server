@@ -247,13 +247,13 @@
     <value>Pretplata korisnika je ažurirana: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Podešavanja usluga omogućenih za korisnički novčanik su ažurirana</value>
+    <value>Podešavanja usluga omogućenih za korisnički novčanik su ažurirana: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Korisnički novčanik je dopunjen: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Podešavanja dopune korisničkog novčanika su ažurirana: {0}</value>
+    <value>Podešavanja dopune korisničkog novčanika su ažurirana</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Podešavanja prilagođene navigacije ažurirana</value>

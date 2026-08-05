@@ -247,13 +247,13 @@
     <value>Subskrypcja klienta została zaktualizowana: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta</value>
+    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Portfel klienta został zasilony: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Ustawienia zasilania portfela klienta zostały zaktualizowane: {0}</value>
+    <value>Ustawienia zasilania portfela klienta zostały zaktualizowane</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Zaktualizowano niestandardowe ustawienia nawigacji</value>

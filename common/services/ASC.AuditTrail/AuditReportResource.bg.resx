@@ -247,13 +247,13 @@
     <value>Актуализиран потребителски абонамент: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Актуализирани са настройките за услуги с активиран клиентски портфейл</value>
+    <value>Актуализирани са настройките за услуги с активиран клиентски портфейл: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Зареден потребителски портфейл: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Актуализирани настройки за зареждане на потребителски портфейл: {0}</value>
+    <value>Актуализирани настройки за зареждане на потребителски портфейл</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Потребителски настройки за навигация Актуализирани</value>

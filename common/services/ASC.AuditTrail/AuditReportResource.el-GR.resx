@@ -247,13 +247,13 @@
     <value>Η συνδρομή πελάτη ενημερώθηκε: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Οι ρυθμίσεις υπηρεσιών με δυνατότητα πορτοφολιού πελάτη ενημερώθηκαν</value>
+    <value>Οι ρυθμίσεις υπηρεσιών με δυνατότητα πορτοφολιού πελάτη ενημερώθηκαν: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Το ποσό στο πορτοφόλι πελάτη ανανεώθηκε: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Έγινε ενημέρωση ρυθμίσεων ανανέωσης ποσού πορτοφολιού πελάτη: {0}</value>
+    <value>Έγινε ενημέρωση ρυθμίσεων ανανέωσης ποσού πορτοφολιού πελάτη</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Έγινε ενημέρωση ρυθμίσεων προσαρμοσμένης πλοήγησης</value>

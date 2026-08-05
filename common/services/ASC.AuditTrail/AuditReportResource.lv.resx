@@ -247,13 +247,13 @@
     <value>Klienta abonements atjaunināts: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti</value>
+    <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Klienta maks papildināts: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Klienta maka papildināšanas iestatījumi atjaunināti: {0}</value>
+    <value>Klienta maka papildināšanas iestatījumi atjaunināti</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Personalizētās navigācijas uzstādījumi atjaunināti</value>

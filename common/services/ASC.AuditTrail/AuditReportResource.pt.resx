@@ -247,13 +247,13 @@
     <value>Assinatura do cliente atualizada: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Configurações de serviços habilitados para carteira de cliente atualizadas</value>
+    <value>Configurações de serviços habilitados para carteira de cliente atualizadas: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Carteira do cliente recarregada: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Configurações de recarga da carteira do cliente atualizadas: {0}</value>
+    <value>Configurações de recarga da carteira do cliente atualizadas</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>As Definições de Navegação Personalizada foram Atualizadas</value>

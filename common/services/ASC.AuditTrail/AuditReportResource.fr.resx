@@ -247,13 +247,13 @@
     <value>Abonnement client mis à jour : {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Paramètres des services activés via le wallet client mis à jour</value>
+    <value>Paramètres des services activés via le wallet client mis à jour : {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Wallet du client rechargé : {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Paramètres de recharge du wallet client mis à jour : {0}</value>
+    <value>Paramètres de recharge du wallet client mis à jour</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Paramètres de navigation personnalisés mis à jour</value>

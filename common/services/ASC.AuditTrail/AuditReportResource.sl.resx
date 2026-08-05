@@ -247,13 +247,13 @@
     <value>Naročnina stranke posodobljena: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Nastavitve storitev, omogočenih za denarnico strank, so bile posodobljene</value>
+    <value>Nastavitve storitev, omogočenih za denarnico strank, so bile posodobljene: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Denarnica stranke napolnjena: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Nastavitve polnjenja denarnice stranke posodobljene: {0}</value>
+    <value>Nastavitve polnjenja denarnice stranke posodobljene</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Posodobljene nastavitve navigacije po meri</value>

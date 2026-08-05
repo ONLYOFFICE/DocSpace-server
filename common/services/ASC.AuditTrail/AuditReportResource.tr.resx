@@ -247,13 +247,13 @@
     <value>Müşteri aboneliği güncellendi: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi</value>
+    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Müşteri cüzdanına para yüklendi: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Müşteri cüzdanına para yükleme ayarları güncellendi: {0}</value>
+    <value>Müşteri cüzdanına para yükleme ayarları güncellendi</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Özel Navigasyon Ayarları Güncellendi</value>

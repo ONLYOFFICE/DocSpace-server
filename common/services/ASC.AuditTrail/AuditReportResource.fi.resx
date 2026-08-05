@@ -247,13 +247,13 @@
     <value>Asiakkaan tilaus päivitetty: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty</value>
+    <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Asiakkaan lompakko ladattu: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Asiakkaan lompakon latausasetukset päivitetty: {0}</value>
+    <value>Asiakkaan lompakon latausasetukset päivitetty</value>
   </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Mukautetut navigointiasetukset päivitetty</value>
