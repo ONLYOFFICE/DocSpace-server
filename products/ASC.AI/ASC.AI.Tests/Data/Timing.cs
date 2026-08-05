@@ -31,40 +31,54 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Tests.ProfileStorageTests;
+namespace ASC.AI.Tests.Data;
 
-[Trait("Category", "CRUD")]
-[Trait("Feature", "AI/Profiles")]
-public class ProfileCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
+/// <summary>
+/// Temporary per-phase stopwatch instrumentation. Writes elapsed ms to the test output so we can
+/// see where a test's wall-clock time actually goes. Remove once the profiling is done.
+/// </summary>
+internal static class Timing
 {
-    [Fact]
-    public async Task Create_Owner_ReturnsCreatedProfile()
+    public static async Task<T> Measure<T>(string name, Func<Task<T>> action)
     {
-        var dto = BuildCreateDto("my-profile");
-
-        var created = await CreateProfileAsync(dto);
-
-        created.Should().NotBeNull();
-        created.Id.Should().NotBe(Guid.Empty);
-        created.Name.Should().Be(dto.Name);
-        created.ProviderType.Should().Be(dto.ProviderType);
-        created.BaseUrl.Should().Be(dto.BaseUrl);
-        created.ModelId.Should().Be(dto.ModelId);
-        created.Reasoning.Should().Be(dto.Reasoning);
-        created.Capabilities.Should().Be(dto.Capabilities);
-        created.UseResponsesApi.Should().Be(dto.UseResponsesApi);
-        created.CanUseTool.Should().Be(dto.CanUseTool);
-        created.Key.Should().Be(dto.Key);
-        created.CreatedAt.Should().BeGreaterThan(0);
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            return await action();
+        }
+        finally
+        {
+            Write(name, sw.ElapsedMilliseconds);
+        }
     }
 
-    [Fact]
-    public async Task Create_InvalidJson_Returns400()
+    public static async ValueTask Measure(string name, Func<ValueTask> action)
     {
-        const string invalidJson = """{ "name": "x", "providerType": "openai", "baseUrl": "https://api.openai.com", "modelId": "gpt", "capabilities": "INVALID_VALUE" }""";
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            await action();
+        }
+        finally
+        {
+            Write(name, sw.ElapsedMilliseconds);
+        }
+    }
 
-        using var response = await _ai.PostRawAsync(ProfilesPath, invalidJson, TestContext.Current.CancellationToken);
+    public static void Write(string name, long elapsedMs)
+    {
+        var message = $"[timing] {name}: {elapsedMs} ms";
+        var ctx = TestContext.Current;
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        // TestOutputHelper is attached per-test (shows under the test node in the IDE). During
+        // InitializeAsync it can be null, so fall back to the diagnostic sink.
+        if (ctx.TestOutputHelper != null)
+        {
+            ctx.TestOutputHelper.WriteLine(message);
+        }
+        else
+        {
+            ctx.SendDiagnosticMessage(message);
+        }
     }
 }

@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ProfileStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Profiles")]
 public class ProfileDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -43,17 +42,17 @@ public class ProfileDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreateProfileAsync();
 
-        using var deleteResponse = await Ai.DeleteAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
+        using var deleteResponse = await _ai.DeleteAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        using var getResponse = await Ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
+        using var getResponse = await _ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
         getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task Delete_NonExisting_ReturnsNoContent()
     {
-        using var response = await Ai.DeleteAsync($"{ProfilesPath}/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
+        using var response = await _ai.DeleteAsync($"{ProfilesPath}/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -63,10 +62,10 @@ public class ProfileDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreateProfileAsync();
 
-        var regularUser = await Initializer.InviteContactAsync(EmployeeType.User, TestContext.Current.CancellationToken);
-        await AiClient.Authenticate(regularUser);
+        var regularUser = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
+        await _aiClient.Authenticate(regularUser);
 
-        using var response = await Ai.DeleteAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
+        using var response = await _ai.DeleteAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -75,9 +74,9 @@ public class ProfileDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task Delete_Unauthorized_Returns401()
     {
         var created = await CreateProfileAsync();
-        await AiClient.Authenticate(null);
+        await _aiClient.Authenticate(null);
 
-        using var response = await Ai.DeleteAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
+        using var response = await _ai.DeleteAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }

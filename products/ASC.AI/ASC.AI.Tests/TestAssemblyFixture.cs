@@ -31,40 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Tests.ProfileStorageTests;
-
-[Trait("Category", "CRUD")]
-[Trait("Feature", "AI/Profiles")]
-public class ProfileCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
-{
-    [Fact]
-    public async Task Create_Owner_ReturnsCreatedProfile()
-    {
-        var dto = BuildCreateDto("my-profile");
-
-        var created = await CreateProfileAsync(dto);
-
-        created.Should().NotBeNull();
-        created.Id.Should().NotBe(Guid.Empty);
-        created.Name.Should().Be(dto.Name);
-        created.ProviderType.Should().Be(dto.ProviderType);
-        created.BaseUrl.Should().Be(dto.BaseUrl);
-        created.ModelId.Should().Be(dto.ModelId);
-        created.Reasoning.Should().Be(dto.Reasoning);
-        created.Capabilities.Should().Be(dto.Capabilities);
-        created.UseResponsesApi.Should().Be(dto.UseResponsesApi);
-        created.CanUseTool.Should().Be(dto.CanUseTool);
-        created.Key.Should().Be(dto.Key);
-        created.CreatedAt.Should().BeGreaterThan(0);
-    }
-
-    [Fact]
-    public async Task Create_InvalidJson_Returns400()
-    {
-        const string invalidJson = """{ "name": "x", "providerType": "openai", "baseUrl": "https://api.openai.com", "modelId": "gpt", "capabilities": "INVALID_VALUE" }""";
-
-        using var response = await _ai.PostRawAsync(ProfilesPath, invalidJson, TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-}
+// The single Aspire application is shared across the whole assembly via an assembly fixture
+// (instead of a collection fixture). This lets test classes run in parallel — each test still
+// registers and runs inside its own portal — while the expensive Aspire host starts only once.
+[assembly: AssemblyFixture(typeof(AspireAppFixture))]
