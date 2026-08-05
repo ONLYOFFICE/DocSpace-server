@@ -202,16 +202,14 @@ public class PaymentController(
             throw new ArgumentException("Invalid product quantity type");
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id, refresh: true);
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
         var productQty = product.Value;
         var quota = await paymentHelper.GetQuotaByProductNameAsync(productName, wallet: true);
 
-        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+        var tariff = await tariffService.GetTariffAsync(tenantId);
 
         if (tariff.State > TariffState.Paid && quota.Additional)
         {
@@ -252,7 +250,7 @@ public class PaymentController(
             }
 
             // saving null value is equivalent to resetting to default
-            return await paymentHelper.UpdateNextQuantityAsync(tenant.Id, tariff, targetQuota, productQty, productName, nextQuota);
+            return await paymentHelper.UpdateNextQuantityAsync(tenantId, tariff, targetQuota, productQty, productName, nextQuota);
         }
 
         // inDto.ProductQuantityType === ProductQuantityType.Add
@@ -288,11 +286,11 @@ public class PaymentController(
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-        await paymentHelper.GetSubAccountRequiredAsync(tenant.Id, defaultCurrency, refresh: true);
+        await paymentHelper.GetSubAccountRequiredAsync(tenantId, defaultCurrency, refresh: true);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        return await paymentHelper.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString());
+        return await paymentHelper.PaymentChangeAsync(tenantId, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString());
     }
 
     /// <remarks>
@@ -1407,7 +1405,7 @@ public class PaymentController(
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await paymentHelper.DemandAdminAsync();
+        await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         return await paymentHelper.ChangeWalletServiceStateAsync(inDto.Service, inDto.Enabled);
     }
@@ -1540,7 +1538,7 @@ public class PaymentController(
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await paymentHelper.DemandAdminAsync();
+        await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         return await paymentHelper.SetRestrictedAiModelsAsync(inDto.Models);
     }
