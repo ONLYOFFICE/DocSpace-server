@@ -41,6 +41,7 @@ import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
+import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -66,6 +67,27 @@ const engine = new ThreadsEngine({ storage });
 interface CreateBody {
   title: string;
   profileId?: string;
+  entityId?: string;
+}
+
+// A `entityId` on thread creation is the id of the AI agent room the thread
+// belongs to; it must reference a real agent room. `resolveAgentEntityId`
+// silently degrades a nonexistent or non-agent id to the global (unscoped)
+// space — correct for best-effort reads, but on *create* it would persist an
+// orphaned thread that no agent owns yet still surfaces in every unscoped
+// `list` (Bug 82719). Reject such a create with 404 before it reaches storage.
+// An absent/empty entityId stays the legitimate global scope. (A no-access
+// entityId makes resolveAgentEntityId throw a DocspaceApiHttpError → 403.)
+async function assertAgentExists(entityId: string | undefined): Promise<void> {
+  if (typeof entityId !== "string" || entityId.length === 0) {
+    return;
+  }
+  if ((await resolveAgentEntityId(entityId)) === undefined) {
+    throw Object.assign(new Error(`AI agent "${entityId}" does not exist`), {
+      status: 404,
+      expose: true,
+    });
+  }
 }
 
 type ThreadMessageInput = Omit<ThreadMessageLike, "id" | "createdAt">;
@@ -98,6 +120,7 @@ interface UpdateMessageBody {
 
 export const threadsController = {
   create: asyncHandler<CreateBody>(async (req, res) => {
+    await assertAgentExists(req.body?.entityId);
     const thread = await engine.create(req.body);
     res.json(thread);
   }),
