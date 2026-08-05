@@ -164,8 +164,18 @@ export const profilesController = {
       res.status(400).json({ error: "profileId required" });
       return;
     }
-    const models = await engine.listModels(profileId);
-    res.json(models);
+    try {
+      const models = await engine.listModels(profileId);
+      res.json(models);
+    } catch (err) {
+      const { status, message } = describeProviderError(err);
+      logger.warn(
+        `listModels failed (profileId=${profileId}) -> ${status}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      res.status(status).json({ error: message });
+    }
   }),
 
   testConnection: asyncHandler(async (req, res) => {
