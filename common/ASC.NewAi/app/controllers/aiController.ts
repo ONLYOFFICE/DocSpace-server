@@ -332,6 +332,42 @@ async function* logStreamErrors<T>(
   }
 }
 
+// A user message must carry some non-whitespace text before a stream is
+// opened. `content` is either a plain string or an array of parts; text
+// lives on `{ type: "text", text }` parts (and bare string parts), mirroring
+// the engine's own text extraction. Attachment-only parts (file/image) do
+// not count — an empty prompt otherwise reaches the provider and streams
+// back nothing (Bug 82720).
+function hasNonEmptyText(userMessage: unknown): boolean {
+  if (!isObject(userMessage)) {
+    return false;
+  }
+  const content = userMessage["content"];
+  if (typeof content === "string") {
+    return content.trim().length > 0;
+  }
+  if (!Array.isArray(content)) {
+    return false;
+  }
+  for (const part of content) {
+    if (typeof part === "string") {
+      if (part.trim().length > 0) {
+        return true;
+      }
+      continue;
+    }
+    if (
+      isObject(part)
+      && part["type"] === "text"
+      && typeof part["text"] === "string"
+      && part["text"].trim().length > 0
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
     // Without this the provider request runs without the forwarded auth /
@@ -366,6 +402,15 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Reject an empty prompt before opening the stream: a user message with
+    // no non-whitespace text otherwise reaches the provider and streams back
+    // nothing (Bug 82720).
+    if (!hasNonEmptyText(req.body.userMessage)) {
+      res.status(400).json({
+        error: "userMessage must contain non-empty text content",
+      });
+      return;
+    }
     const body = withContextPrompt(
       await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
     );
