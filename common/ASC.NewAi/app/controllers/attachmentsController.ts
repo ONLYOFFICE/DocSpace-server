@@ -53,8 +53,25 @@ interface ImageInput {
 export const attachmentsController = {
   saveFile: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["input", "entityId"] as const);
+    // Validate the required `input` shape up front: without it, an undefined or
+    // malformed `input` reaches the engine and throws a TypeError that collapses
+    // to a generic 500 (Bug 82739). Reject with a clean 400 instead.
+    const input = args.input as Partial<FileInput> | undefined;
+    if (
+      typeof input !== "object"
+      || input === null
+      || typeof input.path !== "string"
+      || typeof input.content !== "string"
+      || typeof input.type !== "number"
+    ) {
+      res.status(400).json({
+        error:
+          "input is required and must include path (string), content (string) and type (number)",
+      });
+      return;
+    }
     const result = await engine.saveFile(
-      args.input as FileInput,
+      input as FileInput,
       args.entityId as string | undefined,
     );
     res.json(result);
