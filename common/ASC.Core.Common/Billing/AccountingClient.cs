@@ -37,20 +37,12 @@ namespace ASC.Core.Billing;
 public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IAccountingApi accountingApi)
 {
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
-    public bool SubAccountsEnabled { get => configuration.Value.SubAccounts; }
 
     public async Task<Balance> GetCustomerBalanceAsync(string portalId)
     {
         EnsureConfigured();
 
         return await accountingApi.GetCustomerBalanceAsync(portalId);
-    }
-
-    public async Task<Balance> GetCustomerAiBalanceAsync(string portalId)
-    {
-        EnsureConfigured();
-
-        return await accountingApi.GetCustomerAiBalanceAsync(portalId);
     }
 
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
@@ -82,21 +74,6 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
 
         await accountingApi.CompleteCustomerSessionAsync(new SessionCompleteOperation(portalId, serviceName, sessionId, quantity,
             customerParticipantName, metadata));
-    }
-
-    public async Task<ServicePayment> MakeAiCreditAsync(string portalId, decimal amount, string currency,
-        string customerParticipantName, Dictionary<string, string> metadata = null)
-    {
-        EnsureConfigured();
-
-        return await accountingApi.MakeAiCreditAsync(new AiCreditOperation(portalId, amount, currency, customerParticipantName, metadata));
-    }
-
-    public async Task<Report> GetCustomerAiOperationsAsync(string portalId, OperationFilter filter)
-    {
-        EnsureConfigured();
-
-        return await accountingApi.GetCustomerAiOperationsAsync(portalId, filter);
     }
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter)
@@ -811,48 +788,6 @@ public class Currency
     public string Code { get; init; }
 }
 
-/// <summary>
-/// Represents service payment information.
-/// </summary>
-public class ServicePayment
-{
-    /// <summary>
-    /// The payment operation ID.
-    /// </summary>
-    /// <example>12345</example>
-    public int OperationId { get; init; }
-    /// <summary>
-    /// The balance of the sub-account in the specified currency.
-    /// </summary>
-    /// <example>1500.75</example>
-    public decimal Amount { get; init; }
-    /// <summary>
-    /// The three-character ISO 4217 currency symbol.
-    /// </summary>
-    /// <example>USD</example>
-    public string Currency { get; init; }
-    /// <summary>
-    /// Total quantity of operations.
-    /// </summary>
-    /// <example>10</example>
-    public int Quantity { get; init; }
-    /// <summary>
-    /// The subscription ID
-    /// </summary>
-    /// <example>12345</example>
-    public int? SubscriptionId { get; init; }
-    /// <summary>
-    /// The subscription start date.
-    /// </summary>
-    /// <example>2024-01-15T10:30:00Z</example>
-    public DateTime? StartDate { get; init; }
-    /// <summary>
-    /// The subscription end date.
-    /// </summary>
-    /// <example>2024-01-15T10:30:00Z</example>
-    public DateTime? EndDate { get; init; }
-}
-
 public record SessionOpenOperation(
     string CustomerName,
     string ServiceName,
@@ -865,13 +800,6 @@ public record SessionCompleteOperation(
     string ServiceName,
     int SessionId,
     int Quantity,
-    string CustomerParticipantName,
-    Dictionary<string, string> Metadata);
-
-public record AiCreditOperation(
-    string CustomerName,
-    decimal Sum,
-    string Currency,
     string CustomerParticipantName,
     Dictionary<string, string> Metadata);
 
