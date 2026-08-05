@@ -1522,7 +1522,7 @@ public class PaymentController(
     /// <remarks>
     /// Overwrites the entire set of restricted AI model IDs for the current tenant.
     /// The request body must contain the complete desired set — to add a restriction, include the new model alongside existing ones;
-    /// to remove one, omit it. An empty set lifts all restrictions. Only the portal payer can perform this action.
+    /// to remove one, omit it. An empty set lifts all restrictions. Only portal administrators can perform this action.
     /// </remarks>
     /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
     [Tags("Portal / Payment")]
