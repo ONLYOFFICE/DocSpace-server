@@ -96,6 +96,7 @@ public static class FilesWorkerServiceExtensions
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
         services.RegisterQueue<EncryptionOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
         services.RegisterQueue<CustomerOperationsReportTask>();
+        services.RegisterQueue<AuditReportTask>();
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
 
@@ -167,6 +168,8 @@ public static class FilesWorkerServiceExtensions
             eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent,
                 DataStorageEncryptionIntegrationEventHandler>(),
             eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent,
-                CustomerOperationsReportIntegrationEventHandler>());
+                CustomerOperationsReportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<AuditReportIntegrationEvent,
+                AuditReportIntegrationEventHandler>());
     }
 }
