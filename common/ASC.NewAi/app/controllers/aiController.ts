@@ -334,11 +334,19 @@ async function* logStreamErrors<T>(
 
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
+    // Without this the provider request runs without the forwarded auth /
+    // request headers, so a correct call comes back with an empty message
+    // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
+    // Mirrors sendWithStream.
+    markForwardHeadersToProvider();
     const result = await engine.send(req.body);
     res.json(result);
   }),
 
   sendCustom: asyncHandler<SendCustomInput>(async (req, res) => {
+    // As with `send`, the forwarded headers must be marked before the
+    // provider call or a correct request fails with a 500 (Bug 82836).
+    markForwardHeadersToProvider();
     const body = withRequestSignal(res, req.body);
     const result = engine.sendCustom(body);
     if (body.isStream) {
