@@ -225,6 +225,16 @@ public class PaymentController(
             _ => 1
         };
 
+        // requesting DocsCloudDevPack while DocsCloud is active is never valid here, in either flow -
+        // that upgrade goes through DocsCloudController.SwitchToDevPack instead. Only the reverse
+        // direction (DocsCloud while DevPack is active) is allowed here, and only to schedule a
+        // reversion via the Set branch below
+        if (quota.TenantId == (int)TenantWalletService.DocsCloudDevPack &&
+            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloud))
+        {
+            throw new ArgumentException("Quota is already set");
+        }
+
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
             if (productQty.HasValue && productQty.Value != 0 && productQty.Value < minValue)
@@ -259,12 +269,6 @@ public class PaymentController(
 
         if (quota.TenantId == (int)TenantWalletService.DocsCloud &&
             tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloudDevPack))
-        {
-            throw new ArgumentException("Quota is already set");
-        }
-
-        if (quota.TenantId == (int)TenantWalletService.DocsCloudDevPack &&
-            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloud))
         {
             throw new ArgumentException("Quota is already set");
         }
