@@ -109,6 +109,17 @@ interface ListProviderModelsBody {
   apiKey?: string;
 }
 
+// A profile carries the raw provider connection config the user entered on
+// the model form: the API `key` (a secret), any extra `headers` (which may
+// carry an `Authorization` token), and a `baseUrl`. Per `assertSafeBaseUrl`,
+// that base URL is deliberately allowed to be an internal / on-prem address
+// (loopback, RFC1918) for local model servers, so echoing it back on a
+// single-profile read leaks credentials and internal network topology.
+// Strip the secrets and blank the base URL before responding (Bug 82821).
+function redactProfile(profile: Profile): Profile {
+  return { ...profile, baseUrl: "", key: undefined, headers: undefined };
+}
+
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
     assertSafeBaseUrl(req.body?.baseUrl);
@@ -196,7 +207,11 @@ export const profilesController = {
       return;
     }
     const profile = await engine.getById(id);
-    res.json(profile ?? null);
+    if (!profile) {
+      res.status(404).json({ error: "Profile not found" });
+      return;
+    }
+    res.json(redactProfile(profile));
   }),
 
   list: asyncHandler(async (_req, res) => {
