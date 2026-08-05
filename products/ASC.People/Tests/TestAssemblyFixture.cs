@@ -31,42 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-extern alias ASCPeople;
-global using System.Diagnostics;
-global using System.Net;
-global using System.Net.Http.Headers;
-global using System.Runtime.CompilerServices;
-global using System.Text;
-global using System.Text.Json;
-
-global using ASC.People.Tests.ApiFactories;
-global using ASC.People.Tests.Data;
-
-global using Aspire.Hosting;
-global using Aspire.Hosting.ApplicationModel;
-global using Aspire.Hosting.Testing;
-
-global using Bogus;
-global using Bogus.DataSets;
-
-global using DocSpace.API.SDK.Api.Authentication;
-global using DocSpace.API.SDK.Api.Group;
-global using DocSpace.API.SDK.Api.People;
-global using DocSpace.API.SDK.Api.Portal;
-global using DocSpace.API.SDK.Api.Rooms;
-global using DocSpace.API.SDK.Api.Settings;
-global using DocSpace.API.SDK.Client;
-global using DocSpace.API.SDK.Model;
-
-global using FluentAssertions;
-
-global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-
-global using Xunit;
-
-// Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
-global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;
-
-global using FileShare = DocSpace.API.SDK.Model.FileShare;
-global using RoomType = DocSpace.API.SDK.Model.RoomType;
-global using User = ASC.People.Tests.Data.User;
+// The single Aspire application is shared across the whole assembly via an assembly fixture
+// (instead of a collection fixture). This lets test classes run in parallel — each test still
+// registers and runs inside its own portal — while the expensive Aspire host starts only once.
+[assembly: AssemblyFixture(typeof(AspireAppFixture))]
