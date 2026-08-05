@@ -814,34 +814,6 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the AI quota balance of a customer from the accounting service.
-    /// </remarks>
-    /// <summary>
-    /// Get the customer AI balance
-    /// </summary>
-    /// <path>api/2.0/portal/payment/customer/aibalance</path>
-    [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer AI balance", typeof(Balance))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("customer/aibalance")]
-    public async Task<Balance> GetCustomerAiBalance(PaymentInformationRequestDto inDto)
-    {
-        paymentHelper.DemandConfigured();
-
-        await paymentHelper.DemandAdminAsync();
-
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            return null;
-        }
-
-        return await tariffService.GetCustomerAiBalanceAsync(tenant.Id, inDto.Refresh);
-    }
-
-    /// <remarks>
     /// Returns the report of customer operations from the accounting service.
     /// </remarks>
     /// <summary>
@@ -1416,67 +1388,6 @@ public class PaymentController(
         await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
 
         return await paymentHelper.ChangeWalletServiceStateAsync(inDto.Service, inDto.Enabled);
-    }
-
-    /// <summary>
-    /// Credit AI balance
-    /// </summary>
-    /// <remarks>
-    /// Credits AI quota to the customer AI sub-account from their main balance.
-    /// Requires the customer to have a configured payment method.
-    /// </remarks>
-    /// <path>api/2.0/portal/payment/creditaibalance</path>
-    [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
-    [SwaggerResponse(400, "Unsupported currency or insufficient balance")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Customer or AiTools quota could not be found")]
-    [HttpPost("creditaibalance")]
-    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    public async Task<ServicePayment> CreditAiBalance(CreditAiBalanceRequestDto inDto)
-    {
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
-
-        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
-        if (balance == null)
-        {
-            throw new ItemNotFoundException("Balance could not be found");
-        }
-
-        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
-
-        if (string.IsNullOrEmpty(inDto.Currency))
-        {
-            inDto.Currency = supportedCurrencies.FirstOrDefault();
-        }
-
-        if (!supportedCurrencies.Contains(inDto.Currency))
-        {
-            throw new ArgumentException("Unsupported currency");
-        }
-
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == inDto.Currency);
-        if (subAccount == null)
-        {
-            throw new ItemNotFoundException("Subaccount could not be found");
-        }
-
-        if (subAccount.Amount < inDto.Amount)
-        {
-            throw new ArgumentException("Insufficient balance");
-        }
-
-        // The method must throw an exception if the AiTools quota is hidden or not found in the database!
-        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
-        var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
-        if (aiToolsQuota == null)
-        {
-            throw new ItemNotFoundException("AiTools quota not found");
-        }
-
-        return await paymentHelper.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), aiToolsQuota.ServiceName);
     }
 
     /// <summary>
