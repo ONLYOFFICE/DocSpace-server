@@ -126,7 +126,16 @@ export const threadsController = {
   }),
 
   openOrCreate: asyncHandler<OpenOrCreateInput>(async (req, res) => {
-    const result = await engine.openOrCreate(req.body);
+    // `profile` is required by OpenOrCreateInput; when the caller omits it the
+    // engine dereferences it while creating a thread from the first message and
+    // throws a TypeError that collapses to a generic 500 (Bug 82826). Reject a
+    // missing/non-object profile with a clean 400 first.
+    const body = req.body;
+    if (!isObject(body) || !isObject(body.profile)) {
+      res.status(400).json({ error: "profile is required and must be an object" });
+      return;
+    }
+    const result = await engine.openOrCreate(body);
     res.json(result);
   }),
 
