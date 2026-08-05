@@ -124,7 +124,7 @@ public class PaymentHelper(
     /// Ensures that the tariff service is configured, the current user has administrator rights and the customer exists.
     /// </summary>
     /// <returns>The tenant ID of the validated customer.</returns>
-    public async Task<int> EnsureCustomerAndAdminRightsAsync()
+    public async Task<int> EnsureCustomerAndAdminRightsAsync(bool refresh = false)
     {
         DemandConfigured();
 
@@ -132,7 +132,7 @@ public class PaymentHelper(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        await GetCustomerInfoRequiredAsync(tenantId);
+        await GetCustomerInfoRequiredAsync(tenantId, refresh);
 
         return tenantId;
     }

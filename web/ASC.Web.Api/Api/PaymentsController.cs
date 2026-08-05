@@ -202,7 +202,7 @@ public class PaymentController(
             throw new ArgumentException("Invalid product quantity type");
         }
 
-        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync(refresh: true);
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
