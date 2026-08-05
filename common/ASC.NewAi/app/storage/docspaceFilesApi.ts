@@ -35,6 +35,7 @@ import { proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { isObject, getNumber, getObject, getString } from "../narrow.js";
 import logger from "../log.js";
+import { sanitizeInstruction } from "../sanitizeInstruction.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
@@ -130,7 +131,9 @@ export async function safeGetAgentInstruction(
   }
   try {
     const info = await getFolderInfo(entityId);
-    return info?.prompt ?? "";
+    // Untrusted: strip markup before the instruction reaches the model prompt
+    // so stored HTML can't round-trip into another user's reply (Bug 82726).
+    return sanitizeInstruction(info?.prompt ?? "");
   } catch (err) {
     logger.warn(
       `agent instruction fetch failed: ${

@@ -29,7 +29,8 @@
     "tsx": "^4.19.0",
     "winston": "^3.8.2",
     "winston-cloudwatch": "^6.1.1",
-    "winston-daily-rotate-file": "^4.5.5"
+    "winston-daily-rotate-file": "^4.5.5",
+    "xss": "^1.0.15"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
