@@ -5,7 +5,7 @@
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
@@ -31,25 +31,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Common.Utils;
+package com.asc.authorization.application.exception.client;
 
-public class RateLimiterSettings
-{
-    public int SlidingWindowLimit { get; init; } = 1500;
-    public int ConcurrentGetLimit { get; init; } = 50;
-    public int DefaultConcurrencyWriteRequests { get; init; } = 15;
-    public int DailyWriteLimit { get; init; } = 10000;
+import io.grpc.StatusRuntimeException;
 
-    public int SensitiveApiLimit { get; init; } = 5;
-    public int SensitiveApiWindowMinutes { get; init; } = 15;
-
-    public int PaymentsApiLimit { get; init; } = 10;
-    public int PaymentsApiWindowMinutes { get; init; } = 1;
-
-    public int? MaxEmailInvitationsPerDay { get; init; }
-
-    public List<string> KnownNetworks { get; init; } = [];
-    public List<string> KnownIPAddresses { get; init; } = [];
-    public string KnownIPAddressesUrl { get; init; }
-    public int KnownIPAddressesRefreshMinutes { get; init; } = 15;
+/**
+ * Wraps gRPC failures that should not be retried (for example {@code DEADLINE_EXCEEDED} or {@code
+ * NOT_FOUND}).
+ */
+public class NonRetryableGrpcException extends RuntimeException {
+  public NonRetryableGrpcException(StatusRuntimeException cause) {
+    super(cause.getStatus().getCode() + ": " + cause.getStatus().getDescription(), cause);
+  }
 }

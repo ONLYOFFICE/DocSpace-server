@@ -5,7 +5,7 @@
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
@@ -31,25 +31,36 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Common.Utils;
+package com.asc.authorization.application.security.oauth.service;
 
-public class RateLimiterSettings
-{
-    public int SlidingWindowLimit { get; init; } = 1500;
-    public int ConcurrentGetLimit { get; init; } = 50;
-    public int DefaultConcurrencyWriteRequests { get; init; } = 15;
-    public int DailyWriteLimit { get; init; } = 10000;
+import com.asc.authorization.data.client.cache.CachedRegisteredClient;
+import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
-    public int SensitiveApiLimit { get; init; } = 5;
-    public int SensitiveApiWindowMinutes { get; init; } = 15;
+/** No-op implementation of {@link RegisteredClientCacheService} for non-SaaS profiles. */
+@Slf4j
+@Service
+@Profile("!saas")
+public class NoOpRegisteredClientCacheService implements RegisteredClientCacheService {
+  @Override
+  public void put(CachedRegisteredClient client) {
+    log.info("Skipping registered client cache write: caching is disabled outside saas profile");
+  }
 
-    public int PaymentsApiLimit { get; init; } = 10;
-    public int PaymentsApiWindowMinutes { get; init; } = 1;
+  @Override
+  public Optional<CachedRegisteredClient> get(String clientId) {
+    return Optional.empty();
+  }
 
-    public int? MaxEmailInvitationsPerDay { get; init; }
+  @Override
+  public void evict(String clientId, long tenantId) {}
 
-    public List<string> KnownNetworks { get; init; } = [];
-    public List<string> KnownIPAddresses { get; init; } = [];
-    public string KnownIPAddressesUrl { get; init; }
-    public int KnownIPAddressesRefreshMinutes { get; init; } = 15;
+  @Override
+  public void evictAllByTenantId(long tenantId) {}
+
+  @Override
+  public void clear() {}
 }

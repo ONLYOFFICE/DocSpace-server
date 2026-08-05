@@ -35,7 +35,9 @@ package com.asc.authorization.application.mapper;
 
 import com.asc.authorization.application.configuration.properties.RegisteredClientConfigurationProperties;
 import com.asc.authorization.application.security.oauth.grant.ExtendedAuthorizationGrantType;
+import com.asc.authorization.data.client.cache.CachedRegisteredClient;
 import com.asc.common.service.transfer.response.ClientResponse;
+import com.asc.common.utilities.crypto.EncryptionService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashSet;
@@ -52,6 +54,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ClientMapper {
   private final RegisteredClientConfigurationProperties configuration;
+  private final EncryptionService encryptionService;
 
   /**
    * Converts a {@link ClientResponse} to a {@link RegisteredClient}.
@@ -124,6 +127,62 @@ public class ClientMapper {
         .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
         .redirectUris(uris -> uris.addAll(clientResponse.getRedirectUrisList()))
         .scopes(scopes -> scopes.addAll(clientResponse.getScopesList()))
+        .clientSettings(
+            ClientSettings.builder()
+                .requireProofKey(false)
+                .requireAuthorizationConsent(true)
+                .build())
+        .tokenSettings(
+            TokenSettings.builder()
+                .accessTokenTimeToLive(Duration.ofMinutes(configuration.getAccessTokenMinutesTTL()))
+                .refreshTokenTimeToLive(Duration.ofDays(configuration.getRefreshTokenDaysTTL()))
+                .authorizationCodeTimeToLive(
+                    Duration.ofMinutes(configuration.getAuthorizationCodeMinutesTTL()))
+                .reuseRefreshTokens(false)
+                .build())
+        .build();
+  }
+
+  /**
+   * Converts a {@link com.asc.common.application.proto.ClientResponse} to a {@link
+   * CachedRegisteredClient} snapshot suitable for caching.
+   */
+  public CachedRegisteredClient toCachedRegisteredClient(
+      com.asc.common.application.proto.ClientResponse clientResponse) {
+    return CachedRegisteredClient.builder()
+        .clientId(clientResponse.getClientId())
+        .clientSecret(encryptionService.encrypt(clientResponse.getClientSecret()))
+        .name(clientResponse.getName())
+        .authenticationMethods(new HashSet<>(clientResponse.getAuthenticationMethodsList()))
+        .redirectUris(new HashSet<>(clientResponse.getRedirectUrisList()))
+        .scopes(new HashSet<>(clientResponse.getScopesList()))
+        .createdOn(
+            Instant.ofEpochSecond(
+                clientResponse.getCreatedOn().getSeconds(),
+                clientResponse.getCreatedOn().getNanos()))
+        .tenantId(clientResponse.getTenant())
+        .enabled(clientResponse.getEnabled())
+        .publicClient(clientResponse.getIsPublic())
+        .build();
+  }
+
+  /** Converts a {@link CachedRegisteredClient} cache entry to a {@link RegisteredClient}. */
+  public RegisteredClient toRegisteredClient(CachedRegisteredClient cachedClient) {
+    return RegisteredClient.withId(cachedClient.getClientId())
+        .clientId(cachedClient.getClientId())
+        .clientIdIssuedAt(cachedClient.getCreatedOn())
+        .clientSecret(encryptionService.decrypt(cachedClient.getClientSecret()))
+        .clientName(cachedClient.getName())
+        .clientAuthenticationMethods(
+            methods -> {
+              for (var method : cachedClient.getAuthenticationMethods())
+                methods.add(new ClientAuthenticationMethod(method));
+            })
+        .authorizationGrantType(ExtendedAuthorizationGrantType.PERSONAL_ACCESS_TOKEN)
+        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+        .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+        .redirectUris(uris -> uris.addAll(cachedClient.getRedirectUris()))
+        .scopes(scopes -> scopes.addAll(cachedClient.getScopes()))
         .clientSettings(
             ClientSettings.builder()
                 .requireProofKey(false)

@@ -6,6 +6,7 @@
     "allow": [
       "Bash(dotnet build *)",
       "Bash(dotnet test *)",
+      "Bash(dotnet format *)",
       "Bash(openspec *)"
     ],
     "additionalDirectories": [
