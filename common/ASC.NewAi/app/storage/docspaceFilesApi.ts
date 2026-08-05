@@ -58,11 +58,13 @@ const ROOM_TYPE_AI_ROOM = 9;
 
 export class DocspaceApiHttpError extends Error {
   public readonly status: number;
+  public readonly statusText: string;
   public readonly url: string;
 
   constructor(status: number, statusText: string, url: string) {
     super(`DocSpace API ${status} ${statusText} for ${url}`);
     this.status = status;
+    this.statusText = statusText;
     this.url = url;
   }
 }
