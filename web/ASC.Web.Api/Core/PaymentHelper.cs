@@ -271,9 +271,9 @@ public class PaymentHelper(
         return result;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, bool throwIfNotSuccess = false)
     {
-        var result = await tariffService.PaymentChangeAsync(tenantId, quantity, productQuantityType, currency, checkQuota, customerParticipantName);
+        var result = await tariffService.PaymentChangeAsync(tenantId, quantity, productQuantityType, currency, checkQuota, customerParticipantName, null, throwIfNotSuccess);
 
         if (result)
         {

@@ -188,7 +188,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(400, "Invalid request parameters")]
-    [SwaggerResponse(402, "Tariff is not paid")]
+    [SwaggerResponse(402, "Payment required")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "Customer could not be found")]
     [HttpPut("updatewallet")]
@@ -290,7 +290,7 @@ public class PaymentController(
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        return await paymentHelper.PaymentChangeAsync(tenantId, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString());
+        return await paymentHelper.PaymentChangeAsync(tenantId, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString(), true);
     }
 
     /// <remarks>

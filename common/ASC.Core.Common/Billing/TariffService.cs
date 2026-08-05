@@ -346,7 +346,7 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null, bool throwIfNotSuccess = false)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -373,6 +373,11 @@ public class TariffService(
         catch (Exception error)
         {
             logger.ErrorWithException(error);
+
+            if (throwIfNotSuccess)
+            {
+                throw;
+            }
 
             return false;
         }
