@@ -59,6 +59,19 @@ public class DocumentBuilderScriptHelper
         return await streamReader.ReadToEndAsync();
     }
 
+    // Cell format patterns for the document builder: the culture's date and time patterns with the
+    // .NET "tt" designator swapped for the builder's own AM/PM token. The only place that mapping
+    // is done — everything that needs a date cell format goes through these two.
+    public static string GetShortDateTimeFormat(CultureInfo culture)
+    {
+        return $"{culture.DateTimeFormat.ShortDatePattern} {culture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
+    }
+
+    public static string GetLongDateTimeFormat(CultureInfo culture)
+    {
+        return $"{culture.DateTimeFormat.ShortDatePattern} {culture.DateTimeFormat.LongTimePattern.Replace("tt", "AM/PM")}";
+    }
+
     public static int[] ConvertHtmlColorToRgb(string color, double opacity)
     {
         if (color[0] != '#' || color.Length != 7 || opacity < 0 || opacity > 1)
