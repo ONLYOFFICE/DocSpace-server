@@ -276,10 +276,26 @@ export const attachmentsController = {
 
   linkToMessage: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["ids", "messageId", "threadId"] as const);
+    // Require every param up front: an empty body would otherwise reach storage
+    // as undefined ids/messageId/threadId and fail late (Bug 82771).
+    if (
+      !Array.isArray(args.ids)
+      || args.ids.length === 0
+      || typeof args.messageId !== "string"
+      || args.messageId.length === 0
+      || typeof args.threadId !== "string"
+      || args.threadId.length === 0
+    ) {
+      res.status(400).json({
+        error:
+          "ids (non-empty array), messageId (string) and threadId (string) are required",
+      });
+      return;
+    }
     await engine.linkToMessage(
-      (args.ids as string[]) ?? [],
-      args.messageId as string,
-      args.threadId as string,
+      args.ids as string[],
+      args.messageId,
+      args.threadId,
     );
     res.json({ success: true });
   }),
