@@ -39,7 +39,7 @@ public class RoomPinInvitedMemberPermissionsTests(
     : RoomsPermissionsTestBase(fixture)
 {
     [Theory]
-    [MemberData(nameof(RoomAccessData.InvitedMemberAccessesForTagging), MemberType = typeof(RoomAccessData))]
+    [MemberData(nameof(RoomAccessData.InvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
     public async Task PinRoom_InvitedMember_Pinned(EmployeeType employeeType, FileShare access)
     {
         // Arrange

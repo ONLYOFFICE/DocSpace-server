@@ -111,6 +111,11 @@ public static class RoomAccessData
         }
     }
 
+    /// <summary>
+    /// Every role/access combination an invitation can actually produce in a regular room. Only a
+    /// RoomAdmin may be granted RoomManager access — the API rejects that access level for a User
+    /// or a Guest, so those two combinations are left out.
+    /// </summary>
     public static TheoryData<EmployeeType, FileShare> InvitedMemberAccesses
     {
         get
@@ -121,26 +126,6 @@ public static class RoomAccessData
             {
                 foreach (var access in _allRoomAccesses)
                 {
-                    data.Add(employeeType, access);
-                }
-            }
-
-            return data;
-        }
-    }
-
-    public static TheoryData<EmployeeType, FileShare> InvitedMemberAccessesForTagging
-    {
-        get
-        {
-            var data = new TheoryData<EmployeeType, FileShare>();
-
-            foreach (var employeeType in new[] { EmployeeType.RoomAdmin, EmployeeType.User, EmployeeType.Guest })
-            {
-                foreach (var access in _allRoomAccesses)
-                {
-                    // Only a RoomAdmin can be assigned RoomManager access — the API rejects that
-                    // access level for a User or a Guest.
                     if (access == FileShare.RoomManager && employeeType != EmployeeType.RoomAdmin)
                     {
                         continue;

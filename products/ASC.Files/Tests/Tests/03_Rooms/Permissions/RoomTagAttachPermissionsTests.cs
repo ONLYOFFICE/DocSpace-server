@@ -121,7 +121,7 @@ public class RoomTagAttachPermissionsTests(
     /// level gets 403. RoomManager cannot be granted to a User or a Guest, so that pair is excluded.
     /// </summary>
     [Theory]
-    [MemberData(nameof(RoomAccessData.InvitedMemberAccessesForTagging), MemberType = typeof(RoomAccessData))]
+    [MemberData(nameof(RoomAccessData.InvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
     public async Task AddRoomTags_InvitedMember_MatchesAccessLevel(EmployeeType employeeType, FileShare access)
     {
         // Arrange

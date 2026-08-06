@@ -39,7 +39,7 @@ public class RoomUnpinInvitedMemberPermissionsTests(
     : RoomsPermissionsTestBase(fixture)
 {
     [Theory]
-    [MemberData(nameof(RoomAccessData.InvitedMemberAccessesForTagging), MemberType = typeof(RoomAccessData))]
+    [MemberData(nameof(RoomAccessData.InvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
     public async Task UnpinRoom_InvitedMember_Unpinned(EmployeeType employeeType, FileShare access)
     {
         // Arrange

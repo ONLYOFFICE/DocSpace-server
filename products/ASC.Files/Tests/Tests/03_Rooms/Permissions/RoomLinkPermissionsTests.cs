@@ -126,35 +126,6 @@ public class RoomLinkPermissionsTests(
     [Fact]
     public async Task GetPrimaryExternalLink_UserInvitedWithRead_Forbidden()
     {
-        /*
-         *   test("User invited with Read access gets 403", async ({ apiSdk }) => {
-    const ownerApi = apiSdk.forRole("owner");
-    const { data: roomData } = await ownerApi.rooms.createRoom({
-      createRoomRequestDto: {
-        title: "Autotest Primary Link User Invited",
-        roomType: RoomType.PublicRoom,
-      },
-    });
-    const roomId = roomData.response!.id!;
-
-    const { api: userApi, data: memberData } =
-      await apiSdk.addAuthenticatedMember("owner", "User");
-
-    await ownerApi.rooms.setRoomSecurity({
-      id: roomId,
-      roomInvitationRequest: {
-        invitations: [{ id: memberData.response!.id!, access: FileShare.Read }],
-        notify: false,
-      },
-    });
-
-    const { data } = await userApi.rooms.getRoomsPrimaryExternalLink({
-      id: roomId,
-    });
-
-    expect(data.statusCode).toBe(403);
-  });
-         */
         // Arrange
         await _filesClient.Authenticate(Owner);
         var room = await CreatePublicRoom("Autotest Primary Link User Invited");

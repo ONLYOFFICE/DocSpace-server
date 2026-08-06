@@ -119,14 +119,15 @@ public class RoomTagDetachPermissionsTests(
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var room = await CreateCustomRoom("Autotest Disabled Detach Room");
+        var room = await CreateCustomRoom("Autotest Disabled Detach Room");//
         await _roomsApi.AddRoomTagsAsync(room.Id, new BatchTagsRequestDto(["Autotest Disabled Detach Tag"]), TestContext.Current.CancellationToken);
 
-        var user = await InviteMember(EmployeeType.User);
-        await InviteToRoom(room.Id, user, FileShare.RoomManager);
+        // RoomManager access can only be granted to a RoomAdmin — the API rejects it for a User.
+        var roomManager = await InviteMember(EmployeeType.RoomAdmin);
+        await InviteToRoom(room.Id, roomManager, FileShare.RoomManager);
 
-        await _filesClient.Authenticate(user);
-        await TerminateUser(user);
+        await _filesClient.Authenticate(roomManager);
+        await TerminateUser(roomManager);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -143,7 +144,7 @@ public class RoomTagDetachPermissionsTests(
     /// Detaching a tag is room-metadata management: only RoomManager access allows it.
     /// </summary>
     [Theory]
-    [MemberData(nameof(RoomAccessData.InvitedMemberAccessesForTagging), MemberType = typeof(RoomAccessData))]
+    [MemberData(nameof(RoomAccessData.InvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
     public async Task DeleteRoomTags_InvitedMember_MatchesAccessLevel(EmployeeType employeeType, FileShare access)
     {
         // Arrange

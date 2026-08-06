@@ -150,7 +150,7 @@ public class RoomResendPermissionsTests(
     /// forbidden. RoomManager cannot be granted to a User or a Guest, so that pair is excluded.
     /// </summary>
     [Theory]
-    [MemberData(nameof(RoomAccessData.InvitedMemberAccessesForTagging), MemberType = typeof(RoomAccessData))]
+    [MemberData(nameof(RoomAccessData.InvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
     public async Task ResendInvitations_InvitedMember_MatchesAccessLevel(EmployeeType employeeType, FileShare access)
     {
         // Arrange

@@ -127,7 +127,7 @@ public class RoomReadPermissionsTests(
     /// a User or a Guest at invitation time, so that pair is excluded.
     /// </summary>
     [Theory]
-    [MemberData(nameof(RoomAccessData.InvitedMemberAccessesForTagging), MemberType = typeof(RoomAccessData))]
+    [MemberData(nameof(RoomAccessData.InvitedMemberAccesses), MemberType = typeof(RoomAccessData))]
     public async Task GetRoomInfo_InvitedMember_ReturnsRoom(EmployeeType employeeType, FileShare access)
     {
         // Arrange
