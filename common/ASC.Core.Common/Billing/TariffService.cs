@@ -346,7 +346,7 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null, bool throwIfNotSuccess = false)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null, bool throwIfFailure = false)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -374,7 +374,7 @@ public class TariffService(
         {
             logger.ErrorWithException(error);
 
-            if (throwIfNotSuccess)
+            if (throwIfFailure)
             {
                 throw;
             }
@@ -382,7 +382,7 @@ public class TariffService(
             return false;
         }
 
-        if (!changed && throwIfNotSuccess)
+        if (!changed && throwIfFailure)
         {
             throw new BillingException("Payment change was declined");
         }
