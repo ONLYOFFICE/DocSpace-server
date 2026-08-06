@@ -256,7 +256,7 @@
     <value>Customer subscription updated: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Customer wallet enabled services settings updated</value>
+    <value>Customer wallet enabled services settings updated: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Customer wallet topped up: {0}</value>

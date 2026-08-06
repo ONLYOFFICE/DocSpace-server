@@ -247,7 +247,7 @@
     <value>Müşteri aboneliği güncellendi: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi</value>
+    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Müşteri cüzdanına para yüklendi: {0}</value>

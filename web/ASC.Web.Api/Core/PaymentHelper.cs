@@ -124,7 +124,7 @@ public class PaymentHelper(
     /// Ensures that the tariff service is configured, the current user has administrator rights and the customer exists.
     /// </summary>
     /// <returns>The tenant ID of the validated customer.</returns>
-    public async Task<int> EnsureCustomerAndAdminRightsAsync()
+    public async Task<int> EnsureCustomerAndAdminRightsAsync(bool refresh = false)
     {
         DemandConfigured();
 
@@ -132,7 +132,7 @@ public class PaymentHelper(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        await GetCustomerInfoRequiredAsync(tenantId);
+        await GetCustomerInfoRequiredAsync(tenantId, refresh);
 
         return tenantId;
     }
@@ -271,9 +271,9 @@ public class PaymentHelper(
         return result;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, bool throwIfFailure = false)
     {
-        var result = await tariffService.PaymentChangeAsync(tenantId, quantity, productQuantityType, currency, checkQuota, customerParticipantName);
+        var result = await tariffService.PaymentChangeAsync(tenantId, quantity, productQuantityType, currency, checkQuota, customerParticipantName, null, throwIfFailure);
 
         if (result)
         {
@@ -387,7 +387,7 @@ public class PaymentHelper(
             throw new InvalidOperationException("Failed to save tenant wallet service settings");
         }
 
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, service.ToStringFast());
 
         if (service == TenantWalletService.AITools)
         {
@@ -474,7 +474,7 @@ public class PaymentHelper(
     {
         var result = await aiGateway.SetRestrictedModelsAsync(models);
 
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, string.Join(", ", models));
 
         return result;
     }

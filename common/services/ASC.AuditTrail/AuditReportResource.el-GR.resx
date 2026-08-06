@@ -247,7 +247,7 @@
     <value>Η συνδρομή πελάτη ενημερώθηκε: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Οι ρυθμίσεις υπηρεσιών με δυνατότητα πορτοφολιού πελάτη ενημερώθηκαν</value>
+    <value>Οι ρυθμίσεις υπηρεσιών με δυνατότητα πορτοφολιού πελάτη ενημερώθηκαν: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Το ποσό στο πορτοφόλι πελάτη ανανεώθηκε: {0}</value>

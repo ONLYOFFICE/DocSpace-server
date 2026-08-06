@@ -492,7 +492,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Customer wallet enabled services settings updated.
+        ///   Looks up a localized string similar to Customer wallet enabled services settings updated: {0}.
         /// </summary>
         public static string CustomerWalletServicesSettingsUpdated {
             get {
