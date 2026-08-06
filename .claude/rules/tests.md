@@ -147,10 +147,15 @@ Reference layout: `products/ASC.Files/Tests/Tests/03_Rooms/Permissions/`.
 
 ## Known bugs
 
-A test that documents an open bug gets `[Trait("Bug", "12345")]` and stays red until the bug
-is fixed. Do not skip it and do not assert the buggy behaviour. When porting from the
-TypeScript suite, `test.fail(...)` marks exactly these; the inventory for rooms is in
-`products/ASC.Files/Tests/Tests/03_Rooms/KNOWN_FAILURES.md`.
+A test that covers a bug gets `[Trait("Bug", "12345")]`. Do not skip it and do not assert the
+buggy behaviour — assert what the product is supposed to do, so the test is red while the bug
+is open and turns green when it is fixed. When porting from the TypeScript suite,
+`test.fail(...)` marks exactly these.
+
+**The trait stays after the fix.** It is the permanent link between the test and the bug
+record, which is what makes a regression immediately attributable: if that test goes red
+again, the bug number is right there. Only the `<summary>` changes — describe the old
+behaviour in the past tense and say how it was fixed.
 
 ## Running
 
