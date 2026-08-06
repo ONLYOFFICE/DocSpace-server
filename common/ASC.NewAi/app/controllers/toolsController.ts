@@ -40,6 +40,7 @@ import {
 } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
+import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
 
@@ -90,10 +91,20 @@ export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = args.name as string;
+    const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    // A custom MCP server can only be scoped to an AI agent room. Registering
+    // one under a non-agent folder persists it under a scope the listing path
+    // (which resolves entityId to the agent scope) can never read back, so the
+    // server is saved yet invisible in every list (Bug 82863). Reject a
+    // non-agent entityId with 404; an absent entityId stays the portal scope.
+    if (entityId && (await resolveAgentEntityId(entityId)) === undefined) {
+      res.status(404).json({ error: `AI agent "${entityId}" does not exist` });
+      return;
+    }
     const result = await engine.addCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
-      args.entityId as string | undefined,
+      entityId,
     );
     res.json(result);
   }),
