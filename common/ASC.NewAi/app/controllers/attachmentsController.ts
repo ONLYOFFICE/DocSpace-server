@@ -168,8 +168,25 @@ export const attachmentsController = {
 
   saveFilesMany: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["inputs", "entityId"] as const);
+    // Validate each element with the same rules as save-file; a bad element
+    // must fail with a clean 400 rather than crash the engine (Bug 82754).
+    const rawInputs = args.inputs;
+    if (rawInputs !== undefined && rawInputs !== null && !Array.isArray(rawInputs)) {
+      res.status(400).json({ error: "inputs must be an array" });
+      return;
+    }
+    const list = Array.isArray(rawInputs) ? rawInputs : [];
+    const inputs: FileInput[] = [];
+    for (let i = 0; i < list.length; i++) {
+      const parsed = parseFileInput(list[i]);
+      if (!parsed.ok) {
+        res.status(400).json({ error: `inputs[${i}]: ${parsed.error}` });
+        return;
+      }
+      inputs.push(parsed.value);
+    }
     const result = await engine.saveFilesMany(
-      (args.inputs as FileInput[]) ?? [],
+      inputs,
       args.entityId as string | undefined,
     );
     res.json(result);
