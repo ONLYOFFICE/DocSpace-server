@@ -348,19 +348,6 @@ public class PaymentHelper(
         return result;
     }
 
-    public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string serviceName)
-    {
-        var result = await tariffService.MakeAiCreditAsync(tenantId, amount, currency, customerParticipantName, metadata: null);
-
-        if (result != null)
-        {
-            messageService.Send(MessageAction.CustomerOperationPerformed, null, $"{serviceName} {amount} {currency}");
-
-            await EnableAiToolsServiceAsync();
-        }
-
-        return result;
-    }
 
     public async Task<TenantWalletServiceSettings> ChangeWalletServiceStateAsync(TenantWalletService service, bool enabled)
     {
@@ -564,20 +551,6 @@ public class PaymentHelper(
         var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
         return payer.Id != ASC.Core.Users.Constants.LostUser.Id && securityContext.CurrentAccount.ID == payer.Id;
-    }
-
-    private async Task EnableAiToolsServiceAsync()
-    {
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
-
-        if (settings.EnabledServices?.Contains(TenantWalletService.AITools) == true)
-        {
-            return;
-        }
-
-        // Delegate to the canonical enable path so the save-failure guard, list normalization,
-        // audit message and AI-config socket signal stay in a single place.
-        await ChangeWalletServiceStateAsync(TenantWalletService.AITools, true);
     }
 
     /// <summary>

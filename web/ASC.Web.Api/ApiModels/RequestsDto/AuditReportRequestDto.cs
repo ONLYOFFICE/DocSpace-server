@@ -31,8 +31,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests;
+using ASC.Files.Core.Services.DocumentBuilderService;
 
-[CollectionDefinition("Test Collection")]
-public class SharedTestCollection :
-    ICollectionFixture<AspireAppFixture>;
+namespace ASC.Web.Api.ApiModels.RequestsDto;
+
+/// <summary>
+/// The request parameters for generating an audit report.
+/// </summary>
+public class AuditReportRequestDto
+{
+    /// <summary>
+    /// The output file format of the report. Defaults to XLSX.
+    /// </summary>
+    /// <example>Xlsx</example>
+    [FromQuery(Name = "format")]
+    public AuditReportFormat Format { get; set; } = AuditReportFormat.Xlsx;
+}

@@ -566,11 +566,6 @@ public class TariffService(
         return $"{tenantId}:accounting:balance";
     }
 
-    internal static string GetAccountingAiBalanceCacheKey(int tenantId)
-    {
-        return $"{tenantId}:accounting:ai:balance";
-    }
-
     private async Task ClearCacheAsync(int tenantId)
     {
         await hybridCache.RemoveAsync(GetTariffCacheKey(tenantId));
@@ -1480,61 +1475,6 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<Balance> GetCustomerAiBalanceAsync(int tenantId, bool refresh = false)
-    {
-        if (!accountingClient.Configured)
-        {
-            return null;
-        }
-
-        if (!accountingClient.SubAccountsEnabled)
-        {
-            throw new InvalidOperationException("Accounting client does not support sub-accounts");
-        }
-
-        var cacheKey = GetAccountingAiBalanceCacheKey(tenantId);
-
-        if (refresh)
-        {
-            await hybridCache.RemoveAsync(cacheKey);
-        }
-
-        var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
-
-        if (balance != null)
-        {
-            return balance.IsDefault() ? null : balance;
-        }
-
-        await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
-        {
-            balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
-
-            if (balance != null)
-            {
-                return balance.IsDefault() ? null : balance;
-            }
-
-            try
-            {
-                var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerAiBalanceAsync(portalId);
-            }
-            catch (AccountingCustomerNotFoundException exception)
-            {
-                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
-                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
-            }
-            catch (Exception error)
-            {
-                LogError(error, tenantId.ToString());
-                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
-            }
-        }
-
-        return balance;
-    }
-
     public async Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
@@ -1563,38 +1503,11 @@ public class TariffService(
         return true;
     }
 
-    public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
-    {
-        if (!accountingClient.SubAccountsEnabled)
-        {
-            throw new InvalidOperationException("Accounting client does not support sub-accounts");
-        }
-
-        var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency, customerParticipantName, metadata);
-        await hybridCache.RemoveAsync(GetAccountingAiBalanceCacheKey(tenantId));
-        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
-        return result;
-    }
-
     public async Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter)
     {
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
-
-            if (accountingClient.SubAccountsEnabled && filter.ServiceName is { Count: 1 })
-            {
-                var filterServiceName = filter.ServiceName.First();
-                if (!string.IsNullOrEmpty(filterServiceName))
-                {
-                    var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-                    if (aiQuota != null && aiQuota.ServiceName == filterServiceName)
-                    {
-                        return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
-                    }
-                }
-            }
 
             return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
         }

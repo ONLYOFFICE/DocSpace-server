@@ -161,10 +161,17 @@ public class RenewSubscriptionService(
             }
 
             // when a switch to a different quota is scheduled, buy that quota outright instead of renewing the current one
-            var targetQuota = data.NextQuota is { } nextQuotaId ? _walletQuotas[nextQuotaId] : walletQuota;
+            var targetQuota = walletQuota;
+            if (data.NextQuota is { } nextQuotaId && !_walletQuotas.TryGetValue(nextQuotaId, out targetQuota))
+            {
+                logger.ErrorRenewSubscriptionServiceUnknownNextQuota(data.TenantId, nextQuotaId);
+                return;
+            }
 
-            var walletQuotaFeatureName = walletQuota.Additional
-                ? walletQuota.Features.Split(':').FirstOrDefault()
+            // the feature/capacity being checked concerns whatever is actually being purchased (targetQuota),
+            // not the quota being replaced - they only happen to match for the DevPack/DocsCloud switch today
+            var walletQuotaFeatureName = targetQuota.Additional
+                ? targetQuota.Features.Split(':').FirstOrDefault()
                 : "manager"; // wallet quota must contains only one feature
 
             var nextQuantity = data.NextQuantity ?? data.Quantity;
@@ -192,7 +199,7 @@ public class RenewSubscriptionService(
                     }
                 }
 
-                if (feature is CountPaidUserFeature && !walletQuota.Additional)
+                if (feature is CountPaidUserFeature && !targetQuota.Additional)
                 {
                     var usedCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupRoomAdmin.ID)).Length;
 

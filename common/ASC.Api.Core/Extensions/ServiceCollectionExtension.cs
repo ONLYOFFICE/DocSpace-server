@@ -39,7 +39,6 @@ using ASC.EventBus.RedisMQ;
 
 using Microsoft.Extensions.Caching.Memory;
 
-using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 
 namespace ASC.Api.Core.Extensions;
