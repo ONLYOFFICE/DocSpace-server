@@ -211,8 +211,25 @@ export const attachmentsController = {
 
   saveImagesMany: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["inputs", "entityId"] as const);
+    // Validate each element with the same rules as save-image; an element
+    // without a payload must fail with a clean 400 (Bug 82755).
+    const rawInputs = args.inputs;
+    if (rawInputs !== undefined && rawInputs !== null && !Array.isArray(rawInputs)) {
+      res.status(400).json({ error: "inputs must be an array" });
+      return;
+    }
+    const list = Array.isArray(rawInputs) ? rawInputs : [];
+    const inputs: ImageInput[] = [];
+    for (let i = 0; i < list.length; i++) {
+      const parsed = parseImageInput(list[i]);
+      if (!parsed.ok) {
+        res.status(400).json({ error: `inputs[${i}]: ${parsed.error}` });
+        return;
+      }
+      inputs.push(parsed.value);
+    }
     const result = await engine.saveImagesMany(
-      (args.inputs as ImageInput[]) ?? [],
+      inputs,
       args.entityId as string | undefined,
     );
     res.json(result);
