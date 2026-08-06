@@ -96,8 +96,9 @@ public class RoomCustomTagValidationPermissionsTests(
     }
 
     /// <remarks>
-    /// BUG 81689: blank entries inside the names array are silently accepted (200) instead of
-    /// producing a validation error (400). Marked <c>test.fail</c> in the TypeScript suite.
+    /// Blank entries inside the names array used to be silently accepted with 200 instead of
+    /// producing a validation error — bug 81689, fixed by validating the elements of
+    /// <c>BatchTagsRequestDto.Names</c>, which DataAnnotations does not do on its own.
     /// </remarks>
     [Theory]
     [InlineData("""{"names":[""]}""")]
