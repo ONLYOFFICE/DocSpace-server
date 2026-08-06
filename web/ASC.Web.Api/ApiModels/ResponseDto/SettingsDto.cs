@@ -252,6 +252,12 @@ public class SettingsDto
     public bool AiEnabled { get; set; }
 
     /// <summary>
+    /// Specifies whether the tenant wallet balance is currently below the low-balance threshold. Only returned to portal administrators.
+    /// </summary>
+    /// <example>false</example>
+    public bool? WalletLowBalance { get; set; }
+
+    /// <summary>
     /// The user name validation regex.
     /// </summary>
     /// <example>^[a-zA-Z0-9_]{3,20}$</example>

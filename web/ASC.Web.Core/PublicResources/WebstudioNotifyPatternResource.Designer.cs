@@ -1247,7 +1247,24 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("pattern_join", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///We’re reaching out to let you know that your DocSpace Wallet balance is running low.
+        ///
+        ///We kindly ask you to top up your wallet balance to avoid any interruption of paid services.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_low_wallet_balance {
+            get {
+                return ResourceManager.GetString("pattern_low_wallet_balance", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
@@ -2815,7 +2832,16 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("subject_join", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Action required: Your ${LetterLogoText} DocSpace Wallet balance is running low.
+        /// </summary>
+        public static string subject_low_wallet_balance {
+            get {
+                return ResourceManager.GetString("subject_low_wallet_balance", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Mailbox creation.
         /// </summary>

@@ -1332,6 +1332,24 @@ public class PaymentController(
 
         var settings = inDto?.Settings ?? new TenantWalletSettings();
 
+        // LowBalanceThreshold/LowBalanceNotified are internal-only: never trust them from client input,
+        // always recompute from what was previously persisted so a stale GET->POST round-trip can't
+        // resurrect an old value (e.g. permanently suppressing the low-balance notification)
+        var existing = await settingsManager.LoadAsync<TenantWalletSettings>();
+        settings.LowBalanceThreshold = existing.LowBalanceThreshold;
+        settings.LowBalanceNotified = existing.LowBalanceNotified;
+
+        if (settings.Enabled)
+        {
+            settings.LowBalanceNotified = false;
+        }
+        else
+        {
+            // keep the settings row persisted (not equal to GetDefault()) even when auto top-up is
+            // turned off, so the low-balance poller can still discover this tenant
+            settings.LowBalanceThreshold = paymentHelper.GetDefaultLowBalanceThreshold();
+        }
+
         var result = await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.CustomerWalletTopUpSettingsUpdated);
