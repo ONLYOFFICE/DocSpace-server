@@ -63,10 +63,11 @@ public class RoomCoverValidationTests(
         exception.ErrorCode.Should().Be(400, because);
     }
 
-    /// <remarks>
-    /// BUG 81558: a colour that is too short ("123") is silently accepted with 200 and treated as a
-    /// no-op instead of failing validation. Marked <c>test.fail</c> in the TypeScript suite.
-    /// </remarks>
+    /// <summary>
+    /// The colour must be a full six-digit RRGGBB value. Three-digit shorthand used to be accepted
+    /// by the request validation and then silently ignored downstream — bug 81558, fixed by
+    /// tightening the regular expression on <c>CoverRequestDto.Color</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "81558")]
     public async Task ChangeCover_TooShortColor_BadRequest()
