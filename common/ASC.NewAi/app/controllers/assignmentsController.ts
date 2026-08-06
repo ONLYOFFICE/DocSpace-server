@@ -34,7 +34,7 @@
 import { AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { asString, isObject } from "../narrow.js";
 
 const engine = new AssignmentsEngine({ storage });
 
@@ -112,12 +112,32 @@ export const assignmentsController = {
   }),
 
   bulkAssign: asyncHandler<BulkAssignBody>(async (req, res) => {
+    // Validate the whole body up front: an unknown ActionType key or a
+    // non-string value used to be silently dropped, so a caller that mistyped
+    // an action or sent a bad profileId got a partial (or empty) assignment
+    // under a 200 with no signal anything was wrong (Bug 82831). Reject with a
+    // descriptive 400 instead of building a map from only the valid entries.
+    const body = req.body;
+    if (!isObject(body)) {
+      res.status(400).json({
+        error: "body must be an object mapping actionType to profileId",
+      });
+      return;
+    }
     const map: Partial<Record<ActionType, string>> = {};
-    for (const [k, v] of Object.entries(req.body ?? {})) {
+    for (const [k, v] of Object.entries(body)) {
       const actionType = asActionType(k);
-      if (actionType && typeof v === "string") {
-        map[actionType] = v;
+      if (!actionType) {
+        res.status(400).json({ error: `invalid actionType "${k}"` });
+        return;
       }
+      if (typeof v !== "string") {
+        res.status(400).json({
+          error: `profileId for actionType "${k}" must be a string`,
+        });
+        return;
+      }
+      map[actionType] = v;
     }
     const result = await engine.bulkAssign(map);
     res.json(result);
