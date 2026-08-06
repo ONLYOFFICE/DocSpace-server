@@ -237,7 +237,14 @@ export const attachmentsController = {
 
   get: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["id"] as const);
-    const result = await engine.get(args.id as string);
+    // An empty/absent id reaches the DocSpace storage as a bare route and
+    // comes back as a 405; validate it here so the caller gets a clean 400
+    // (Bug 82756).
+    if (typeof args.id !== "string" || args.id.length === 0) {
+      res.status(400).json({ error: "id is required" });
+      return;
+    }
+    const result = await engine.get(args.id);
     res.json(result);
   }),
 
