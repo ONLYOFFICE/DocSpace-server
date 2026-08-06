@@ -105,12 +105,9 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
         var userManager = serviceProvider.GetService<UserManager>();
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var settingsManager = serviceProvider.GetService<SettingsManager>();
-        var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
         var tenantLogoManager = serviceProvider.GetService<TenantLogoManager>();
-        var tenantWhiteLabelSettingsHelper = serviceProvider.GetService<TenantWhiteLabelSettingsHelper>();
         var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
-        var documentServiceConnector = serviceProvider.GetService<DocumentServiceConnector>();
         var tempPath = serviceProvider.GetService<TempPath>();
 
         var user = await userManager.GetUsersAsync(userId);
@@ -127,11 +124,10 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-        var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-
-        var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall);
-
-        logoPath = documentServiceConnector.ReplaceCommunityAddress(logoPath);
+        // the document builder currently cannot embed a logo referenced by URL, so we inline it
+        // as a base64 data URI. Once the builder's image handling is fixed, switch back to the URL:
+        var logoSrc = await tenantLogoManager.GetTopLogoDataUriAsync()
+                      ?? await tenantLogoManager.GetTopLogoAbsoluteUrlAsync();
 
         var data = new
         {
@@ -154,7 +150,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
                 dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}"
             },
 
-            logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath.Split('?')[0]),
+            logoSrc,
 
             themeColors = new
             {

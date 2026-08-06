@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
 public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -43,13 +42,13 @@ public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         await CreateMcpServerAsync("server-1");
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{McpServersPath}/server-1",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        using var readResponse = await Ai.GetAsync(
+        using var readResponse = await _ai.GetAsync(
             $"{McpServersPath}/server-1",
             TestContext.Current.CancellationToken);
         readResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -58,7 +57,7 @@ public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Delete_NonExisting_NoContent()
     {
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{McpServersPath}/missing",
             TestContext.Current.CancellationToken);
 
@@ -75,14 +74,14 @@ public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         await CreateMcpServerAsync("server-1", globalConfig);
         await CreateMcpServerAsync("server-1", scopedConfig, roomId.ToString());
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{McpServersPath}/server-1?entityId={roomId}",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         JsonEquals((await ReadMcpServerAsync("server-1")).Config, globalConfig).Should().BeTrue();
 
-        using var scopedRead = await Ai.GetAsync(
+        using var scopedRead = await _ai.GetAsync(
             $"{McpServersPath}/server-1?entityId={roomId}",
             TestContext.Current.CancellationToken);
         scopedRead.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -98,12 +97,12 @@ public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         await CreateMcpServerAsync("server-1", globalConfig);
         await CreateMcpServerAsync("server-1", scopedConfig, roomId.ToString());
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{McpServersPath}/server-1",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        using var globalRead = await Ai.GetAsync(
+        using var globalRead = await _ai.GetAsync(
             $"{McpServersPath}/server-1",
             TestContext.Current.CancellationToken);
         globalRead.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -116,7 +115,7 @@ public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         await CreateMcpServerAsync("server-1");
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{McpServersPath}/server-1?entityId=999999999",
             TestContext.Current.CancellationToken);
 

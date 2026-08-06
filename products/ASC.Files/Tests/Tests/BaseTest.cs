@@ -174,39 +174,42 @@ public class BaseTest(
         return new User(fakeMember.Email, fakeMember.Password) { Id = createMemberResponse.Data.Response.Id };
     }
 
+
     protected async Task<User> InviteGuest(User? user = null)
     {
         user ??= Owner;
-        await _filesClient.Authenticate(user);
         await _peopleClient.Authenticate(user);
 
-        // Create a public room
-        var guestEmail = Initializer.FakerMember.Generate().Email;
-        var room = await CreatePublicRoom("Test Room For Existing Guest");
+        var fakeGuest = Initializer.FakerMember.Generate();
 
-        // Act - Add existing guest to the room
-        var invitation = new RoomInvitation
+        var payload = JsonSerializer.Serialize(new
         {
-            Access = FileShare.ContentCreator,
-            Email = guestEmail,
-        };
+            firstName = fakeGuest.FirstName,
+            lastName = fakeGuest.LastName,
+            email = fakeGuest.Email,
+            password = fakeGuest.Password,
+            type = nameof(EmployeeType.Guest),
+            cultureName = "en-US",
+            spam = false
+        });
 
-        var roomInvitation = new RoomInvitationRequest
+        using var content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+        var guestSw = Stopwatch.StartNew();
+        using var response = await _peopleClient.PostAsync("api/2.0/people/active", content, TestContext.Current.CancellationToken);
+        Timing.Write($"invite.guest({user.Email})", guestSw.ElapsedMilliseconds);
+
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        if (!response.IsSuccessStatusCode)
         {
-            Invitations = [invitation],
-            Notify = false,
-            Message = "",
-            Culture = "en-US"
-        };
+            throw new HttpRequestException($"Unable to create a guest ({(int)response.StatusCode}): {body}");
+        }
 
-        await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation, cancellationToken: TestContext.Current.CancellationToken);
-        var result = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var guestId = result.First(r => r.SharedToUser.Email == guestEmail).SharedToUser.Id;
+        using var json = JsonDocument.Parse(body);
+        var guestId = json.RootElement.GetProperty("response").GetProperty("id").GetGuid();
 
-        return new User(guestEmail, "")
-        {
-            Id = guestId
-        };
+        return new User(fakeGuest.Email, fakeGuest.Password) { Id = guestId };
     }
 
     protected async Task<FileDtoInteger> GetFile(int fileId)

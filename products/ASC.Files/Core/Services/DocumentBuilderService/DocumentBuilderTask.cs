@@ -34,11 +34,11 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
 {
-    private string _baseUri;
-    private int _tenantId;
+    protected string _baseUri;
+    protected int _tenantId;
     protected Guid _userId;
     protected TData _data;
-    private readonly IServiceScopeFactory _serviceProvider;
+    protected readonly IServiceScopeFactory _serviceProvider;
 
     public TId ResultFileId { get; set; }
     public string ResultFileName { get; set; }

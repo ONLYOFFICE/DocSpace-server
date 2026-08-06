@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
 public class ThreadCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -83,7 +82,7 @@ public class ThreadCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Create_NonExistentProfileId_Returns404()
     {
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             ThreadsPath,
             new { title = "x", profileId = Guid.NewGuid() },
             TestContext.Current.CancellationToken);
@@ -94,7 +93,7 @@ public class ThreadCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Create_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             ThreadsPath,
             new { title = "x", entityId = "999999999" },
             TestContext.Current.CancellationToken);
@@ -107,7 +106,7 @@ public class ThreadCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         const string invalidJson = """{ "profileId": null }""";
 
-        using var response = await Ai.PostRawAsync(ThreadsPath, invalidJson, TestContext.Current.CancellationToken);
+        using var response = await _ai.PostRawAsync(ThreadsPath, invalidJson, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

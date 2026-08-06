@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.PreferencesStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Preferences")]
 public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -43,7 +42,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         await UpsertPreferencesAsync(deepMode: true);
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             PreferencesPath,
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -58,7 +57,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
         var roomId = await CreateRoomAsync();
         await UpsertPreferencesAsync(deepMode: true, entityId: roomId.ToString());
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={roomId}",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -70,7 +69,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     [Fact]
     public async Task Delete_Global_NoneStored_NoContent()
     {
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             PreferencesPath,
             TestContext.Current.CancellationToken);
 
@@ -82,7 +81,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var roomId = await CreateRoomAsync();
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={roomId}",
             TestContext.Current.CancellationToken);
 
@@ -96,7 +95,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
         await UpsertPreferencesAsync(deepMode: true);
         await UpsertPreferencesAsync(deepMode: false, entityId: roomId.ToString());
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={roomId}",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -116,7 +115,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
         await UpsertPreferencesAsync(deepMode: true);
         await UpsertPreferencesAsync(deepMode: false, entityId: roomId.ToString());
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             PreferencesPath,
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -137,7 +136,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
         await UpsertPreferencesAsync(deepMode: true, entityId: firstRoomId.ToString());
         await UpsertPreferencesAsync(deepMode: false, entityId: secondRoomId.ToString());
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={firstRoomId}",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -152,7 +151,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     [Fact]
     public async Task Delete_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId=999999999",
             TestContext.Current.CancellationToken);
 

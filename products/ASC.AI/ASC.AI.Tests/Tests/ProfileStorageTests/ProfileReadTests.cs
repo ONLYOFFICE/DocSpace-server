@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ProfileStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Profiles")]
 public class ProfileReadTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -43,8 +42,8 @@ public class ProfileReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreateProfileAsync();
 
-        using var response = await Ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
-        var profile = await Ai.ReadAsync<ProfileDto>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
+        var profile = await _ai.ReadAsync<ProfileDto>(response, TestContext.Current.CancellationToken);
 
         profile.Id.Should().Be(created.Id);
         profile.Name.Should().Be(created.Name);
@@ -57,7 +56,7 @@ public class ProfileReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadById_NonExisting_Returns404()
     {
-        using var response = await Ai.GetAsync($"{ProfilesPath}/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync($"{ProfilesPath}/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -68,8 +67,8 @@ public class ProfileReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         var first = await CreateProfileAsync(BuildCreateDto("a"));
         var second = await CreateProfileAsync(BuildCreateDto("b"));
 
-        using var response = await Ai.GetAsync(ProfilesPath, TestContext.Current.CancellationToken);
-        var all = await Ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(ProfilesPath, TestContext.Current.CancellationToken);
+        var all = await _ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
 
         all.Should().HaveCount(2);
         all.Select(p => p.Id).Should().BeEquivalentTo([first.Id, second.Id]);
@@ -78,8 +77,8 @@ public class ProfileReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadAll_Empty_ReturnsEmpty()
     {
-        using var response = await Ai.GetAsync(ProfilesPath, TestContext.Current.CancellationToken);
-        var all = await Ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(ProfilesPath, TestContext.Current.CancellationToken);
+        var all = await _ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
 
         all.Should().BeEmpty();
     }

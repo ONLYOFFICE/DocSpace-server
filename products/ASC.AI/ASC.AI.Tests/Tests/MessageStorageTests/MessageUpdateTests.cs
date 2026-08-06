@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.MessageStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Messages")]
 public class MessageUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -45,7 +44,7 @@ public class MessageUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         var created = await CreateMessageAsync(thread.Id, BuildMessageContents("original"));
         var updated = BuildMessageContents("updated");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{MessagesPath}/{created.Id}",
             new { contents = updated },
             TestContext.Current.CancellationToken);
@@ -57,7 +56,7 @@ public class MessageUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Update_NonExisting_Returns404()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{MessagesPath}/{Guid.NewGuid()}",
             new { contents = BuildMessageContents("updated") },
             TestContext.Current.CancellationToken);
@@ -71,7 +70,7 @@ public class MessageUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         var thread = await CreateThreadAsync();
         var created = await CreateMessageAsync(thread.Id);
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{MessagesPath}/{created.Id}",
             new { foo = "bar" },
             TestContext.Current.CancellationToken);

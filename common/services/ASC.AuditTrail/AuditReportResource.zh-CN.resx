@@ -247,7 +247,7 @@
     <value>客户订阅已更新: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>客户钱包已启用服务的设置已更新</value>
+    <value>客户钱包已启用服务的设置已更新: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>客户钱包已充值: {0}</value>
