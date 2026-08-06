@@ -411,6 +411,19 @@ export const aiController = {
       });
       return;
     }
+    // When the request omits profileId, the engine resolves the Chat
+    // assignment (or the Default slot) and persists it onto the thread,
+    // silently overwriting the model the thread was created with (Bug 82860).
+    // Pre-fill profileId from the thread's stored value: a session-level
+    // profileId is honored for the request without mutating persisted state,
+    // so the thread keeps its own model. The proper fix lives in the engine's
+    // profile resolution; this is a proxy-side guard.
+    if (!req.body.profileId && req.body.threadId) {
+      const thread = await storage.threads.readById(req.body.threadId);
+      if (thread?.profileId) {
+        req.body.profileId = thread.profileId;
+      }
+    }
     const body = withContextPrompt(
       await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
     );
