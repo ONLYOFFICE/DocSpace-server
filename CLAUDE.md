@@ -85,6 +85,8 @@ C# naming, style, and API conventions live in `.claude/rules/csharp-style.md` (l
 
 ## Testing
 
+Conventions for writing integration tests (per-test portal, roles, `ApiException` assertions, access-level matrices, class size vs parallelism): `.claude/rules/tests.md`.
+
 - **Framework**: xUnit v3 with `UseMicrosoftTestingPlatformRunner`
 - **Assertions**: FluentAssertions
 - **Infrastructure**: integration tests do NOT use Testcontainers — they boot the real Aspire AppHost via `Aspire.Hosting.Testing` (`DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>` with the `integration-test` launch profile), which provides MySQL/PostgreSQL/RabbitMQ/Redis/OpenSearch containers. Fixtures: `products/ASC.Files/Tests/ApiFactories/AspireAppFixture.cs`, `products/ASC.People/Tests/Factory/AspireAppFixture.cs`, `products/ASC.AI/ASC.AI.Tests/ApiFactories/AspireAppFixture.cs`
