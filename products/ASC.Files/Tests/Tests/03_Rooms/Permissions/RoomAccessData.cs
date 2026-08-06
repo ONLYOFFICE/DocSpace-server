@@ -79,18 +79,26 @@ public static class RoomAccessData
         { FileShare.RoomManager, 200 }
     };
 
+    /// <summary>
+    /// Access levels the link tests can grant inside a public room. A public room accepts only
+    /// RoomManager, ContentCreator and None for a user subject (see
+    /// <c>FileSecurity.AvailableRoomAccesses</c>), so Editing and Read are not expressible here.
+    /// Reading the primary external link is allowed for both levels.
+    /// </summary>
     public static TheoryData<FileShare, int> PrimaryLinkAccesses => new()
     {
         { FileShare.RoomManager, 200 },
-        { FileShare.ContentCreator, 200 },
-        { FileShare.Editing, 403 }
+        { FileShare.ContentCreator, 200 }
     };
 
+    /// <summary>
+    /// Same room constraint as <see cref="PrimaryLinkAccesses"/>, but managing links is stricter:
+    /// only RoomManager may do it, ContentCreator gets 403.
+    /// </summary>
     public static TheoryData<FileShare, int> SetRoomLinkAccesses => new()
     {
         { FileShare.RoomManager, 200 },
-        { FileShare.ContentCreator, 403 },
-        { FileShare.Editing, 403 }
+        { FileShare.ContentCreator, 403 }
     };
 
     public static TheoryData<EmployeeType, FileShare> NonManagerAccessesForUserAndGuest

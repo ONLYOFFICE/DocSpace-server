@@ -220,13 +220,16 @@ public class RoomCreatePermissionsTests(
         // Arrange
         var guest = await InviteMember(EmployeeType.Guest);
         await _filesClient.Authenticate(guest);
-        await EnsureEncryptionKeys();
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _roomsApi.CreateRoomAsync(
-                new CreateRoomRequestDto("Autotest Private Room", roomType: RoomType.CustomRoom, @private: true),
-                TestContext.Current.CancellationToken));
+            async () =>
+            {
+                await EnsureEncryptionKeys();
+                await _roomsApi.CreateRoomAsync(
+                    new CreateRoomRequestDto("Autotest Private Room", roomType: RoomType.CustomRoom, @private: true),
+                    TestContext.Current.CancellationToken);
+            });
 
         // Assert
         exception.ErrorCode.Should().Be(403);

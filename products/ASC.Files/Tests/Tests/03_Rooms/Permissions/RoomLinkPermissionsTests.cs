@@ -128,7 +128,10 @@ public class RoomLinkPermissionsTests(
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var room = await CreatePublicRoom("Autotest Primary Link User Invited");
+
+        // A custom room, not a public one: Read cannot be granted to a user inside a public room
+        // (see FileSecurity.AvailableRoomAccesses), and the point here is the low access level.
+        var room = await CreateCustomRoom("Autotest Primary Link User Invited");
 
         var user = await InviteMember(EmployeeType.User);
         await InviteToRoom(room.Id, user, FileShare.Read);
@@ -300,7 +303,10 @@ public class RoomLinkPermissionsTests(
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var room = await CreatePublicRoom("Autotest setLink Perm User Invited");
+
+        // A custom room, not a public one: Read cannot be granted to a user inside a public room
+        // (see FileSecurity.AvailableRoomAccesses), and the point here is the low access level.
+        var room = await CreateCustomRoom("Autotest setLink Perm User Invited");
 
         var user = await InviteMember(EmployeeType.User);
         await InviteToRoom(room.Id, user, FileShare.Read);
