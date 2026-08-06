@@ -39,7 +39,7 @@ import {
   getSystemServerConfig,
 } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { asString, isObject } from "../narrow.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
 
@@ -150,7 +150,15 @@ export const toolsController = {
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["map", "entityId"] as const);
-    const map = (args.map as Record<string, McpServerConfig>) ?? {};
+    // `map` is required. Without it the loop below yields an empty map and
+    // replaceAll wipes every registered MCP server for the scope, silently
+    // destroying the configuration on a malformed request (Bug 82864). Reject
+    // a missing/invalid map with a 400 instead.
+    if (!isObject(args.map)) {
+      res.status(400).json({ error: "map is required and must be an object" });
+      return;
+    }
+    const map = args.map as Record<string, McpServerConfig>;
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
       normalized[name] = await resolveConfig(name, config);
