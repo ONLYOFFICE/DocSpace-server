@@ -89,13 +89,15 @@ public class ProjectConfigurator(
         project.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
 
         // Every launch profile points $STORAGE_ROOT/log__dir at <root>/Data and <root>/Logs, and the
-        // integration tests reuse those very profiles. Redirect both into a `test` subfolder so a test
-        // run stays out of the developer's own trees. Applied after AddProject, so it wins over the
-        // same keys coming from the launch profile.
+        // integration tests reuse those very profiles. Redirect them into a `test` subfolder so a test
+        // run stays out of the developer's own trees. `web:temp` goes there too — no launch profile
+        // sets it, so services would otherwise write into <ContentRoot>/temp inside the sources.
+        // Applied after AddProject, so it wins over the same keys coming from the launch profile.
         if (isIntegrationTest)
         {
             project.WithEnvironment("$STORAGE_ROOT", AppPaths.GetTestStorageRoot(basePath))
-                .WithEnvironment("log__dir", AppPaths.GetTestLogsDirectory(basePath));
+                .WithEnvironment("log__dir", AppPaths.GetTestLogsDirectory(basePath))
+                .WithEnvironment("web:temp", AppPaths.GetTestTempDirectory(basePath));
         }
 
         switch (builder.Configuration["APP_EDITION"])
