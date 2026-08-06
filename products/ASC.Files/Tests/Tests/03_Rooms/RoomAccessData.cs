@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Tests.Tests._03_Rooms.Permissions;
+namespace ASC.Files.Tests.Tests._03_Rooms;
 
 /// <summary>
 /// Access-level matrices shared by the room permission suites, mirroring <c>roomAccesses</c>

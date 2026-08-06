@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Tests.Tests._03_Rooms.Permissions;
+namespace ASC.Files.Tests.Tests._03_Rooms;
 
 /// <summary>
 /// Shared setup for the room permission suites. The tests are split across several classes on
@@ -53,59 +53,6 @@ public abstract class RoomsPermissionsTestBase(
         return employeeType == EmployeeType.Guest
             ? await InviteGuest()
             : await InviteContact(employeeType);
-    }
-
-    /// <summary>
-    /// Ensures the currently authenticated user has an encryption key pair, which is a prerequisite
-    /// for creating private rooms. Idempotent: keys are only set when none exist.
-    /// </summary>
-    protected async Task EnsureEncryptionKeys()
-    {
-        var keys = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
-
-        if (keys != null)
-        {
-            return;
-        }
-
-        await _privacyRoomApi.SetKeysAsync(
-            new EncryptionKeyRequestDto(Guid.Empty, $"pk-{Guid.NewGuid():N}", $"prv-{Guid.NewGuid():N}"),
-            TestContext.Current.CancellationToken);
-    }
-
-    /// <summary>
-    /// Creates a private (encrypted) room, setting up the caller's encryption keys first.
-    /// </summary>
-    protected async Task<FolderDtoInteger> CreatePrivateRoom(string title, RoomType roomType)
-    {
-        await EnsureEncryptionKeys();
-
-        return (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto(title, roomType: roomType, @private: true),
-            TestContext.Current.CancellationToken)).Response;
-    }
-
-    /// <summary>
-    /// Polls the room-template creation status until it completes, then returns the new template id.
-    /// </summary>
-    protected async Task<int> WaitForRoomTemplate()
-    {
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            timeoutCts.Token,
-            TestContext.Current.CancellationToken);
-
-        while (true)
-        {
-            var status = (await _roomsApi.GetRoomTemplateCreatingStatusAsync(linkedCts.Token)).Response;
-
-            if (status is { IsCompleted: true })
-            {
-                return status.TemplateId;
-            }
-
-            await Task.Delay(500, linkedCts.Token);
-        }
     }
 
     /// <summary>Creates a room, turns it into a template with the given visibility and returns its id.</summary>

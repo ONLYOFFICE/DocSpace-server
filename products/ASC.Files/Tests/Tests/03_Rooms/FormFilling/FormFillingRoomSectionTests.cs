@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Tests.Tests._03_Rooms;
+namespace ASC.Files.Tests.Tests._03_Rooms.FormFilling;
 
 /// <summary>
 /// Verifies that form filling rooms are surfaced exclusively in the dedicated "Forms" section

@@ -33,7 +33,7 @@
 
 using System.Reflection;
 
-namespace ASC.Files.Tests.Tests._03_Rooms;
+namespace ASC.Files.Tests.Tests._03_Rooms.FormFilling;
 
 /// <summary>
 /// Verifies that the used space of form filling rooms is attributed to the dedicated "Forms"

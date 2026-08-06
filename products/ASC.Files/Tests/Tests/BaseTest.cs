@@ -300,9 +300,73 @@ public class BaseTest(
         return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
     }
 
+    /// <summary>
+    /// Returns the id of the first cover from the built-in cover gallery. The gallery is the same
+    /// for every portal, so any test that needs a valid cover can take the first one.
+    /// </summary>
+    protected async Task<string> GetFirstCoverId()
+    {
+        var covers = (await _roomsApi.GetRoomCoversAsync(TestContext.Current.CancellationToken)).Response;
+
+        return covers[0].Id;
+    }
+
     protected async Task<FolderDtoInteger> CreateVDRRoom(string roomTitle)
     {
         return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+    }
+
+    /// <summary>
+    /// Ensures the currently authenticated user has an encryption key pair, which is a prerequisite
+    /// for creating private rooms. Idempotent: keys are only set when none exist.
+    /// </summary>
+    protected async Task EnsureEncryptionKeys()
+    {
+        var keys = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
+
+        if (keys != null)
+        {
+            return;
+        }
+
+        await _privacyRoomApi.SetKeysAsync(
+            new EncryptionKeyRequestDto(Guid.Empty, $"pk-{Guid.NewGuid():N}", $"prv-{Guid.NewGuid():N}"),
+            TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>
+    /// Creates a private (encrypted) room, setting up the caller's encryption keys first.
+    /// </summary>
+    protected async Task<FolderDtoInteger> CreatePrivateRoom(string title, RoomType roomType)
+    {
+        await EnsureEncryptionKeys();
+
+        return (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(title, roomType: roomType, @private: true),
+            TestContext.Current.CancellationToken)).Response;
+    }
+
+    /// <summary>
+    /// Polls the room-template creation status until it completes, then returns the new template id.
+    /// </summary>
+    protected async Task<int> WaitForRoomTemplate()
+    {
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+            timeoutCts.Token,
+            TestContext.Current.CancellationToken);
+
+        while (true)
+        {
+            var status = (await _roomsApi.GetRoomTemplateCreatingStatusAsync(linkedCts.Token)).Response;
+
+            if (status is { IsCompleted: true })
+            {
+                return status.TemplateId;
+            }
+
+            await Task.Delay(500, linkedCts.Token);
+        }
     }
 
     protected async Task<List<FileOperationDto>?> WaitLongOperation(string? operationId = null)
