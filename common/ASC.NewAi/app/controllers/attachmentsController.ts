@@ -250,7 +250,15 @@ export const attachmentsController = {
 
   getMany: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["ids"] as const);
-    const result = await engine.getMany((args.ids as string[]) ?? []);
+    // An empty body leaves `ids` unset and the engine batch-scan throws,
+    // collapsing to a 500; require a present, non-empty array (Bug 82763).
+    if (!Array.isArray(args.ids) || args.ids.length === 0) {
+      res.status(400).json({
+        error: "ids is required and must be a non-empty array",
+      });
+      return;
+    }
+    const result = await engine.getMany(args.ids as string[]);
     res.json(result);
   }),
 
