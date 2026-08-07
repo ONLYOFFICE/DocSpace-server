@@ -718,17 +718,54 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
+    /// <summary>
+    /// Checks that the current user may turn <paramref name="roomId"/> into a template. Creating a
+    /// template runs as a background operation, so this has to be called before the operation is
+    /// queued — otherwise the caller gets a successful response for work that is bound to fail.
+    /// </summary>
+    public async Task<Folder<int>> CheckCanCreateRoomTemplateAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if (room is not { IsRoom: true } || room.RootId != await globalFolderHelper.FolderVirtualRoomsAsync || !await fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+
+        return room;
+    }
+
+    /// <summary>
+    /// Checks that the current user may read <paramref name="templateId"/> and is allowed to create
+    /// rooms at all. Same reason as <see cref="CheckCanCreateRoomTemplateAsync"/>: the work itself
+    /// happens in the background.
+    /// </summary>
+    public async Task CheckCanCreateRoomFromTemplateAsync(int templateId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var template = await folderDao.GetFolderAsync(templateId);
+
+        if (template is not { IsRoom: true } || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync || !await fileSecurity.CanReadAsync(template))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+
+        // Reading a template is not enough: the room still lands in the "Rooms" section, which a
+        // User or a Guest may not create in.
+        var roomsRoot = await folderDao.GetFolderAsync(await globalFolderHelper.FolderVirtualRoomsAsync);
+
+        if (!await fileSecurity.CanCreateAsync(roomsRoot))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
     public async Task<Folder<int>> CreateRoomTemplateAsync(int roomId, string title, IEnumerable<FileShareParams> share, IEnumerable<string> tags, LogoRequest logo, string cover, string color)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.FolderRoomTemplatesAsync;
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var room = await folderDao.GetFolderAsync(roomId);
-
-        if (!room.IsRoom || room.RootId != await globalFolderHelper.FolderVirtualRoomsAsync || !await fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
-        }
+        var room = await CheckCanCreateRoomTemplateAsync(roomId);
 
         WatermarkRequestDto watermarkRequestDto = null;
         if (room.SettingsWatermark != null)
@@ -769,12 +806,10 @@ public class FileStorageService //: IFileStorageService
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.FolderVirtualRoomsAsync;
         var folderDao = daoFactory.GetFolderDao<int>();
-        var template = await folderDao.GetFolderAsync(templateId);
 
-        if (!template.IsRoom || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync || !await fileSecurity.CanReadAsync(template))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
-        }
+        await CheckCanCreateRoomFromTemplateAsync(templateId);
+
+        var template = await folderDao.GetFolderAsync(templateId);
 
         WatermarkRequestDto watermarkDto = null;
         if (watermark != null)

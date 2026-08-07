@@ -61,8 +61,8 @@ public class RoomFromTemplatePermissionsTests(
     }
 
     /// <remarks>
-    /// BUG 81662 / 81663: a User or a Guest can create a room from a template even though neither has
-    /// the create-room permission. Marked <c>test.fail</c> in the TypeScript suite.
+    /// A User or a Guest used to be able to create a room from a template even though neither has
+    /// the create-room permission — bug 81662. Fixed by checking access synchronously in the controller, before the background operation is queued.
     /// </remarks>
     [Theory]
     [InlineData(EmployeeType.User)]
@@ -94,8 +94,8 @@ public class RoomFromTemplatePermissionsTests(
     }
 
     /// <remarks>
-    /// BUG 81664: a DocSpaceAdmin can create a room from a non-public template they do not own.
-    /// Marked <c>test.fail</c> in the TypeScript suite.
+    /// A DocSpaceAdmin used to be able to create a room from a non-public template they do not own
+    /// — bug 81664, closed by the same fix as 81662. Fixed by checking access synchronously in the controller, before the background operation is queued.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81664")]
@@ -123,8 +123,8 @@ public class RoomFromTemplatePermissionsTests(
     }
 
     /// <remarks>
-    /// BUG 81662: access to the source room does not imply access to the template, yet the room is
-    /// still created. Marked <c>test.fail</c> in the TypeScript suite.
+    /// Access to the source room does not imply access to the template, yet the room used to be
+    /// created anyway — bug 81662. Fixed by checking access synchronously in the controller, before the background operation is queued.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81662")]

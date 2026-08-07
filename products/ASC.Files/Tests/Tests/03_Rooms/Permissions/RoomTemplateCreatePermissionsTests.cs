@@ -67,8 +67,8 @@ public class RoomTemplateCreatePermissionsTests(
     }
 
     /// <remarks>
-    /// BUG 81693: creating a template from a room the caller has no access to succeeds instead of
-    /// returning 403. Marked <c>test.fail</c> in the TypeScript suite.
+    /// Creating a template from a room the caller had no access to used to succeed instead of
+    /// returning 403 — bug 81693. Fixed by checking access synchronously in the controller, before the background operation is queued.
     /// </remarks>
     [Theory]
     [InlineData(EmployeeType.DocSpaceAdmin)]
@@ -101,9 +101,8 @@ public class RoomTemplateCreatePermissionsTests(
     }
 
     /// <remarks>
-    /// BUG 81693: a User invited to the source room can create a template regardless of the access
-    /// level. Only write-level access should be enough, and none of these levels is. Marked
-    /// <c>test.fail</c> in the TypeScript suite.
+    /// A User invited to the source room used to be able to create a template regardless of the
+    /// access level, none of which is write-level — bug 81693. Fixed by checking access synchronously in the controller, before the background operation is queued.
     /// </remarks>
     [Theory]
     [MemberData(nameof(RoomAccessData.NonManagerAccesses), MemberType = typeof(RoomAccessData))]

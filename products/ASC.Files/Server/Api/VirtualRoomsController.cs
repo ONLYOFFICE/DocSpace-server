@@ -142,6 +142,11 @@ public class VirtualRoomsInternalController(
             };
         }
 
+        // The room is built by a background operation, so both the access to the template and the
+        // right to create rooms at all have to be verified here — otherwise the caller is told the
+        // request succeeded and only finds out later, from the operation status, that it could not.
+        await _fileStorageService.CheckCanCreateRoomFromTemplateAsync(dto.TemplateId);
+
         var taskId = await roomTemplatesWorker.StartCreateRoomAsync(tenantManager.GetCurrentTenantId(), _authContext.CurrentAccount.ID,
             dto.TemplateId,
             dto.Title,
