@@ -161,7 +161,7 @@ public partial class SuspiciousLoginNotifier(
             {
                 var seenAnyCountry = false;
                 var knownCountry = false;
-                foreach (var e in baseline)
+                foreach (var e in baseline.DistinctBy(e => e.Ip))
                 {
                     var country = (await geolocationHelper.GetGeolocationAsync(e.Ip))[0];
                     if (string.IsNullOrEmpty(country))
