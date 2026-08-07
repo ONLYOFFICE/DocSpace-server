@@ -127,7 +127,7 @@
     <value>Необходимо ввести лицензионный ключ</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Конфликт лицензий. Убедитесь, что вы установили правильную версию {0} DocSpace (Enterprise или Developer). Если у вас есть вопросы, обратитесь к менеджеру по продажам.</value>
+    <value>Конфликт лицензий. Убедитесь, что вы установили правильную версию {0} ONLYOFFICE Docs (Enterprise или Developer). Если у вас есть вопросы, обратитесь к менеджеру по продажам.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Новый документ</value>

@@ -247,7 +247,7 @@
     <value>AI agent space quota exceeded</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Failed to set quota per AI agent. The entered value is greater than the total DocSpace storage.</value>
+    <value>Failed to set quota per AI agent. The entered value is greater than the total storage.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatic renewal</value>
@@ -1156,7 +1156,7 @@
     <value>Room space quota exceeded</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Failed to set quota per room. The entered value is greater than the total DocSpace storage.</value>
+    <value>Failed to set quota per room. The entered value is greater than the total storage.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asia Pacific (Singapore)</value>
@@ -1327,7 +1327,7 @@
     <value>An unexpected error occurred. Please try again.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>You have been successfully connected Telegram to receive notifications from your DocSpace.</value>
+    <value>You have been successfully connected Telegram to receive notifications from ONLYOFFICE.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Incorrect code</value>
@@ -1342,7 +1342,7 @@
     <value>User space quota exceeded</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Failed to set quota per user. The entered value is greater than the total DocSpace storage.</value>
+    <value>Failed to set quota per user. The entered value is greater than the total storage.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>US West (Oregon) Region</value>

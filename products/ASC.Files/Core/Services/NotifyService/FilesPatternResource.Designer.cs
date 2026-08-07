@@ -19,7 +19,7 @@ namespace ASC.Files.Core.Services.NotifyService {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class FilesPatternResource {
@@ -343,7 +343,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification. AI agent deleted.
+        ///   Looks up a localized string similar to ONLYOFFICE notification. AI agent deleted.
         /// </summary>
         public static string subject_AgentRemoved {
             get {
@@ -397,7 +397,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification. Mentioned in document.
+        ///   Looks up a localized string similar to ONLYOFFICE notification. Mentioned in document.
         /// </summary>
         public static string subject_EditorMentions {
             get {
@@ -406,7 +406,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification. The form is filled out.
+        ///   Looks up a localized string similar to ONLYOFFICE notification. The form is filled out.
         /// </summary>
         public static string subject_FormReceived {
             get {
@@ -415,7 +415,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification..
+        ///   Looks up a localized string similar to ONLYOFFICE notification..
         /// </summary>
         public static string subject_FormStartedFilling {
             get {
@@ -424,7 +424,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification. The form is filled out.
+        ///   Looks up a localized string similar to ONLYOFFICE notification. The form is filled out.
         /// </summary>
         public static string subject_FormSubmitted {
             get {
@@ -433,7 +433,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification..
+        ///   Looks up a localized string similar to ONLYOFFICE notification..
         /// </summary>
         public static string subject_FormWasCompletelyFilled {
             get {
@@ -460,7 +460,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification. Room deleted.
+        ///   Looks up a localized string similar to ONLYOFFICE notification. Room deleted.
         /// </summary>
         public static string subject_RoomRemoved {
             get {
@@ -532,7 +532,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification..
+        ///   Looks up a localized string similar to ONLYOFFICE notification..
         /// </summary>
         public static string subject_StoppedFormFilling {
             get {
@@ -541,7 +541,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification..
+        ///   Looks up a localized string similar to ONLYOFFICE notification..
         /// </summary>
         public static string subject_YourTurnFormFilling {
             get {

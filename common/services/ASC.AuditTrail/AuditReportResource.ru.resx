@@ -916,7 +916,7 @@
     <value>Отправка</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Пользователь {0} отправил приглашение {1} в этот DocSpace</value>
+    <value>Пользователь {0} отправил приглашение {1} в ONLYOFFICE</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Отправлены пригласительные инструкции: {0}</value>

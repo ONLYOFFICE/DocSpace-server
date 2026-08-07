@@ -166,7 +166,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; добавлен(а) в комнату: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Добавлен новый пользователь DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Добавлен новый пользователь: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; удален из агента: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -178,7 +178,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; изменил(а) уровень доступа для пользователей &lt;b&gt;{1}&lt;/b&gt; на &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>Обновлен пользователь DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Обновлен пользователь: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>С уважением, команда ${LetterLogoText}</value>
@@ -211,7 +211,7 @@
     <value>Настроить приложение для аутентификации</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Работайте совместно в DocSpace</value>
+    <value>Работайте совместно в ONLYOFFICE</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Настроить прямо сейчас</value>
@@ -220,7 +220,7 @@
     <value>Подтвердить</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Подтвердите приглашение в DocSpace</value>
+    <value>Подтвердите приглашение в ONLYOFFICE</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Подтвердить смену владельца портала</value>
@@ -265,7 +265,7 @@
     <value>Оставить отзыв</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Открыть DocSpace</value>
+    <value>Открыть ONLYOFFICE</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Купить сейчас</value>
@@ -1879,13 +1879,13 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Пожалуйста, активируйте Ваш адрес электронной почты</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Срок действия вашего ключа API истек</value>
+    <value>${LetterLogoText}: Срок действия вашего ключа API истек</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. Создана резервная копия портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Не удалось выполнить резервное копирование вашего DocSpace</value>
+    <value>Не удалось выполнить резервное копирование вашего рабочего пространства</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Подтвердите изменение адреса электронной почты</value>
@@ -1906,76 +1906,76 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Смена владельца портала</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace Developer активирован</value>
+    <value>Льготный период для ${LetterLogoText} Developer активирован</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Срок действия вашей лицензии для ${LetterLogoText} DocSpace Developer скоро истекает</value>
+    <value>Срок действия вашей лицензии для ${LetterLogoText} Developer скоро истекает</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace Developer скоро истекает</value>
+    <value>Льготный период для ${LetterLogoText} Developer скоро истекает</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Ваш ${LetterLogoText} DocSpace Developer больше не доступен</value>
+    <value>${LetterLogoText} Developer больше не доступен</value>
   </data>
   <data name="subject_docs_tips" xml:space="preserve">
     <value>Несколько советов для эффективной работы с документами</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace Enterprise активирован</value>
+    <value>Льготный период для ${LetterLogoText} Enterprise активирован</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise скоро истекает</value>
+    <value>Срок действия вашей лицензии для ${LetterLogoText} Enterprise скоро истекает</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace Enterprise скоро истекает</value>
+    <value>Льготный период для ${LetterLogoText} Enterprise скоро истекает</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Ваш ${LetterLogoText} DocSpace Enterprise больше не доступен</value>
+    <value>${LetterLogoText} Enterprise больше не доступен</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise скоро истекает</value>
+    <value>Срок действия вашей лицензии для ${LetterLogoText} Enterprise скоро истекает</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise истекает сегодня</value>
+    <value>Срок действия вашей лицензии для ${LetterLogoText} Enterprise истекает сегодня</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Скачайте бесплатные приложения ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Узнайте о бизнес-подписке на ${LetterLogoText} DocSpace</value>
+    <value>Узнайте о бизнес-подписке на ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Стать участником ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Узнайте о бизнес-подписке на ${LetterLogoText} DocSpace</value>
+    <value>Узнайте о бизнес-подписке на ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Стать участником ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Сообщение пользователя для администраторов</value>
@@ -1996,7 +1996,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Ошибка при переносе портала в другой регион</value>
   </data>
   <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Миграция данных в ${LetterLogoText} DocSpace успешно завершена</value>
+    <value>Миграция данных в ${LetterLogoText} успешно завершена</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Начался перенос портала в другой регион</value>
@@ -2005,22 +2005,22 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Перенос портала в другой регион успешно завершен</value>
   </data>
   <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Узнайте о бизнес-подписке на ${LetterLogoText} DocSpace</value>
+    <value>Узнайте о бизнес-подписке на ${LetterLogoText}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>Приглашение на портал ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_opensource_user_activation_v1" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ваш пароль успешно изменен</value>
@@ -2032,10 +2032,10 @@ $TrulyYours</value>
     <value>Удаление портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace был удален</value>
+    <value>Рабочее пространство ${LetterLogoText} было удалено</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace был удален</value>
+    <value>Рабочее пространство ${LetterLogoText} было удалено</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Изменение адреса портала</value>
@@ -2062,7 +2062,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Не удалось выполнить удаление данных пользователя</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Необходимое действие: невозможно автоматически продлить тарифный план в вашем ${LetterLogoText} DocSpace</value>
+    <value>Необходимое действие: невозможно автоматически продлить тарифный план в ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Запрос лицензии на версию Enterprise</value>
@@ -2080,73 +2080,73 @@ $TrulyYours</value>
     <value>Новости Вашего портала ${__VirtualRootHost} за последний час</value>
   </data>
   <data name="subject_saas_admin_activation_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
-    <value>Ознакомьтесь с полезными интеграциями для ${LetterLogoText} DocSpace</value>
+    <value>Ознакомьтесь с полезными интеграциями для ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_modules_v1" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Настройте ваше рабочее пространство ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
-    <value>Ваш ${LetterLogoText} DocSpace будет удален</value>
+    <value>Ваша учетная запись ${LetterLogoText} будет удалена</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>Ваш ${LetterLogoText} DocSpace будет удален</value>
+    <value>Ваша учетная запись ${LetterLogoText} будет удалена</value>
   </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Скачайте бесплатные приложения ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Узнайте о бизнес-подписке на ${LetterLogoText} DocSpace</value>
+    <value>Узнайте о бизнес-подписке на ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>Вас пригласили в агент ${LetterLogoText} DocSpace</value>
+    <value>Вас пригласили в ИИ-агент ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: пройдите регистрацию</value>
+    <value>${LetterLogoText}: пройдите регистрацию</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Стать участником ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Льготный период для ${LetterLogoText} DocSpace активирован</value>
+    <value>Льготный период для ${LetterLogoText} активирован</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Предстоящий платеж за подписку на ваш ${LetterLogoText} DocSpace</value>
+    <value>Предстоящий платеж за подписку на ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace истек</value>
+    <value>Льготный период для ${LetterLogoText} истек</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace истекает завтра</value>
+    <value>Льготный период для ${LetterLogoText} истекает завтра</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>Вас пригласили в комнату ${LetterLogoText} DocSpace</value>
+    <value>Вас пригласили в комнату ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_user_activation_v1" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
-    <value>Изучите ${LetterLogoText} DocSpace еще лучше с помощью видеоинструкций</value>
+    <value>Изучите ${LetterLogoText} еще лучше с помощью видеоинструкций</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Не удалось выполнить автоматическое резервное копирование для вашего DocSpace</value>
+    <value>Не удалось выполнить автоматическое резервное копирование для вашего рабочего пространства</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Оповещение об изменении профиля на портале ${__VirtualRootHost}</value>
@@ -2155,7 +2155,7 @@ $TrulyYours</value>
     <value>Новости Вашего портала ${__VirtualRootHost} за $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Установить пароль для ${LetterLogoText} DocSpace</value>
+    <value>Установить пароль для учетной записи ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Тестовое письмо для проверки настроек SMTP</value>
@@ -2179,10 +2179,10 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Процесс шифрования завершен</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Необходимое действие: Невозможно автоматически пополнить баланс кошелька в вашем ${LetterLogoText} DocSpace</value>
+    <value>Необходимое действие: Невозможно автоматически пополнить баланс кошелька в ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Ваша роль в ИИ-агенте DocSpace изменилась</value>
+    <value>Ваша роль в ИИ-агенте изменилась</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Добавлен новый пользователь на портале ${LetterLogoText}</value>
@@ -2191,10 +2191,10 @@ $TrulyYours</value>
     <value>Вас пригласили стать участником ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Ваша роль в комнате DocSpace изменилась</value>
+    <value>Ваша роль в комнате изменилась</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Ваш тип пользователя DocSpace изменился</value>
+    <value>Ваш тип пользователя изменился</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
@@ -2213,5 +2213,8 @@ $TrulyYours</value>
   </data>
   <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; добавил(а) новый комментарий к версии документа: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Необходимое действие: баланс вашего кошелька ${LetterLogoText} заканчивается</value>
   </data>
 </root>
