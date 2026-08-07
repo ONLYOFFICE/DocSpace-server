@@ -109,17 +109,6 @@ interface ListProviderModelsBody {
   apiKey?: string;
 }
 
-// A profile carries the raw provider connection config the user entered on
-// the model form: the API `key` (a secret), any extra `headers` (which may
-// carry an `Authorization` token), and a `baseUrl`. Per `assertSafeBaseUrl`,
-// that base URL is deliberately allowed to be an internal / on-prem address
-// (loopback, RFC1918) for local model servers, so echoing it back on a
-// single-profile read leaks credentials and internal network topology.
-// Strip the secrets and blank the base URL before responding (Bug 82821).
-function redactProfile(profile: Profile): Profile {
-  return { ...profile, baseUrl: "", key: undefined, headers: undefined };
-}
-
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
     assertSafeBaseUrl(req.body?.baseUrl);
@@ -211,7 +200,13 @@ export const profilesController = {
       res.status(404).json({ error: "Profile not found" });
       return;
     }
-    res.json(redactProfile(profile));
+    // Return the full profile (same shape as `list`): the doceditor AI
+    // passthrough (packages/doceditor .../ai/passthrough) resolves the
+    // profile through this endpoint and needs baseUrl/key/headers to reach
+    // the provider. get-by-id is caller-scoped (a user reads their own
+    // profile), so this is not a cross-user leak — the earlier redaction
+    // (Bug 82821) broke the passthrough and is reverted.
+    res.json(profile);
   }),
 
   list: asyncHandler(async (_req, res) => {
