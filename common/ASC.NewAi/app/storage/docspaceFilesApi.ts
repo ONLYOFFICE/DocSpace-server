@@ -202,3 +202,37 @@ export async function resolveAgentEntityId(
   const folderInfo = await getFolderInfo(entityId);
   return folderInfo?.isAgent ? entityId : undefined;
 }
+
+/**
+ * Gate a client-supplied `entityId` on *accessibility* (not agent-ness). When
+ * an entityId is present it must reference a folder the caller can actually
+ * reach; a missing folder (404) or a no-access response (403) both surface as
+ * a 404 so the endpoint never reveals whether the entity exists. An absent
+ * entityId is the legitimate global scope and passes. Unlike
+ * {@link resolveAgentEntityId} this does NOT require an agent room — an
+ * accessible non-agent folder is a valid scope that degrades to global
+ * downstream. Used to gate thread creation and entity-scoped reads.
+ */
+export async function assertEntityAccessible(
+  entityId: string | undefined,
+): Promise<void> {
+  if (typeof entityId !== "string" || entityId.length === 0) {
+    return;
+  }
+  let accessible: boolean;
+  try {
+    accessible = (await getFolderInfo(entityId)) !== undefined;
+  } catch (err) {
+    if (err instanceof DocspaceApiHttpError && err.status === 403) {
+      accessible = false; // no access → treat as not found (don't reveal it)
+    } else {
+      throw err; // genuine upstream failure (5xx) → propagate as-is
+    }
+  }
+  if (!accessible) {
+    throw Object.assign(new Error(`Entity "${entityId}" not found`), {
+      status: 404,
+      expose: true,
+    });
+  }
+}

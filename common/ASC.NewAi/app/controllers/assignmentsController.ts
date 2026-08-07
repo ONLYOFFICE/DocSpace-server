@@ -35,7 +35,7 @@ import { AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
-import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
+import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
 const engine = new AssignmentsEngine({ storage });
 
@@ -156,22 +156,13 @@ export const assignmentsController = {
 
   getAllAssignments: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    // Read-side gating (Bug 82832): a supplied entityId must reference a real
-    // agent room. Otherwise resolveAgentEntityId silently degrades an unknown
-    // (or non-agent) id to the global scope, so getAllAssignments would return
-    // the global assignments under a 200 as if the unknown room existed.
-    // Reject with 404 instead. An absent/empty entityId stays the legitimate
-    // global scope. (A no-access id throws DocspaceApiHttpError -> 403.) This
-    // only gates the read path; write scoping in assignmentsStorage is
-    // unchanged.
-    if (
-      typeof entityId === "string"
-      && entityId.length > 0
-      && (await resolveAgentEntityId(entityId)) === undefined
-    ) {
-      res.status(404).json({ error: `AI agent "${entityId}" does not exist` });
-      return;
-    }
+    // Read-side gating (Bug 82832): a supplied entityId must reference a folder
+    // the caller can access — a nonexistent/no-access id 404s. But a valid
+    // *non-agent* folder is fine: it falls through and assignmentsStorage
+    // degrades the read to the global scope (review #2), so the model
+    // assignment still loads in ordinary rooms and My Documents. An
+    // absent/empty entityId stays the global scope.
+    await assertEntityAccessible(entityId);
     const result = await engine.getAllAssignments(entityId);
     res.json(result);
   }),
