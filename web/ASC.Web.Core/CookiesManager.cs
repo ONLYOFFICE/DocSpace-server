@@ -59,7 +59,8 @@ public class CookiesManager(
     IConfiguration configuration,
     SettingsManager settingsManager,
     CookieStorage cookieStorage,
-    IEventBus eventBus)
+    IEventBus eventBus,
+    ILogger<CookiesManager> logger)
 {
     public const string AuthCookiesName = "asc_auth_key";
     private const string SocketIOCookiesName = "socketio.sid";
@@ -278,7 +279,7 @@ public class CookiesManager(
             await dbLoginEventsManager.LogOutAllActiveConnectionsForTenantAsync(tenant.Id);
         }
 
-        await AuthenticateMeAndSetCookiesAsync(securityContext.CurrentAccount.ID);
+        await AuthenticateMeAndSetCookiesAsync(securityContext.CurrentAccount.ID, checkSuspiciousLogin: false);
     }
 
     public async Task<TenantCookieSettings> GetLifeTimeAsync()
@@ -299,7 +300,7 @@ public class CookiesManager(
 
         if (keepMeAuthenticated && targetUserId == securityContext.CurrentAccount.ID)
         {
-            await AuthenticateMeAndSetCookiesAsync(targetUserId);
+            await AuthenticateMeAndSetCookiesAsync(targetUserId, checkSuspiciousLogin: false);
         }
     }
 
@@ -319,7 +320,7 @@ public class CookiesManager(
         await dbLoginEventsManager.LogOutAllActiveConnectionsForTenantAsync(tenant.Id);
     }
 
-    public async Task<string> AuthenticateMeAndSetCookiesAsync(Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false, string initiator = null, params string[] description)
+    public async Task<string> AuthenticateMeAndSetCookiesAsync(Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false, string initiator = null, bool checkSuspiciousLogin = true, params string[] description)
     {
         var isSuccess = true;
         var cookies = string.Empty;
@@ -342,13 +343,18 @@ public class CookiesManager(
         }
 
         var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookies);
-        if (loginEventId != 0)
+        if (checkSuspiciousLogin && loginEventId != 0)
         {
             try
             {
                 await eventBus.PublishAsync(new SuspiciousLoginIntegrationEvent(userId, tenantManager.GetCurrentTenantId(), loginEventId));
+
+                logger.DebugSuspiciousLoginCheckRequested(userId, loginEventId);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                logger.ErrorSuspiciousLoginCheckRequest(userId, loginEventId, ex);
+            }
         }
 
         return cookies;
