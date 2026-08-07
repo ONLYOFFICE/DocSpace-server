@@ -592,7 +592,8 @@ public sealed class SuspiciousLoginNotifyAction(CommonLinkUtility commonLinkUtil
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_suspicious_login, () => WebstudioNotifyPatternResource.pattern_suspicious_login)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_suspicious_login, () => WebstudioNotifyPatternResource.pattern_suspicious_login),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_suspicious_login)
         ];
     }
 

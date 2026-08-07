@@ -120,7 +120,8 @@ public class StudioNotifyService(
         var suspiciousLoginNotifyAction = serviceProvider.GetService<SuspiciousLoginNotifyAction>();
         suspiciousLoginNotifyAction.Init(userInfo, loginEvent);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(suspiciousLoginNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
+        var recipient = new DirectRecipient(userInfo.Id.ToString(), null, [userInfo.Email], false);
+        await studioNotifyServiceHelper.SendNoticeToAsync(suspiciousLoginNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
     }
 
     #endregion
