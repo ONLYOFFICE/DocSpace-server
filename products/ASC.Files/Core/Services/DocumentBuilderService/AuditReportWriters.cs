@@ -79,7 +79,7 @@ public class AuditXlsxReportWriter(
         var dateFormat = header.LongDateFormat;
 
         var period = descriptor.From.HasValue && descriptor.To.HasValue
-            ? $"{descriptor.From.Value.ConvertNumerals("d")} - {descriptor.To.Value.ConvertNumerals("d")}"
+            ? $"{descriptor.From.Value.ConvertNumerals("d")} – {descriptor.To.Value.ConvertNumerals("d")}"
             : descriptor.From?.ConvertNumerals("d") ?? descriptor.To?.ConvertNumerals("d") ?? string.Empty;
 
         var scriptInputData = new

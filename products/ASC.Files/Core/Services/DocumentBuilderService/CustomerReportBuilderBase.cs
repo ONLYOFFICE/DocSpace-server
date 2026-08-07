@@ -165,7 +165,7 @@ public abstract class CustomerReportBuilderBase(
             {
                 company = header.Company,
                 report = definition.ReportTitle,
-                period = $"{localStartDate.ConvertNumerals("d")} - {localEndDate.ConvertNumerals("d")}",
+                period = $"{localStartDate.ConvertNumerals("d")} – {localEndDate.ConvertNumerals("d")}",
                 dateGenerated = header.DateGenerated
             },
             logoSrc = header.LogoSrc,

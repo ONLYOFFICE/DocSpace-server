@@ -35,7 +35,7 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 /// <summary>
 /// The shared report header: the portal logo, theme colors, the company/generation-date values
-/// printed above every generated report, and the two date cell formats reports use. The reporting
+/// printed above every generated report, and the single date cell format reports use. The reporting
 /// period is report-specific and is therefore assembled by the caller rather than carried here.
 /// </summary>
 public sealed record ReportHeader(
@@ -45,8 +45,7 @@ public sealed record ReportHeader(
     int[] MainFontColor,
     string Company,
     string DateGenerated,
-    string LongDateFormat,
-    string ShortDateFormat);
+    string LongDateFormat);
 
 [Scope]
 public class ReportHeaderService(
@@ -66,6 +65,9 @@ public class ReportHeaderService(
         var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
 
+        // Every date that reaches a report goes through ConvertNumerals rather than
+        // CultureInfo.InvariantCulture, so all reports carry one representation of a date. On ar-SA
+        // and ar-lb portals that means Arabic-Indic digits, which the document builder parses.
         return new ReportHeader(
             logoSrc,
             DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1),
@@ -73,7 +75,6 @@ public class ReportHeaderService(
             DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1),
             logoText,
             tenantUtil.DateTimeNow().ConvertNumerals("G"),
-            DocumentBuilderScriptHelper.GetLongDateTimeFormat(culture),
-            DocumentBuilderScriptHelper.GetShortDateTimeFormat(culture));
+            DocumentBuilderScriptHelper.GetLongDateTimeFormat(culture));
     }
 }

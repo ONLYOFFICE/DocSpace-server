@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Reflection;
-
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 public class DocumentBuilderScriptHelper
@@ -59,14 +57,13 @@ public class DocumentBuilderScriptHelper
         return await streamReader.ReadToEndAsync();
     }
 
-    // Cell format patterns for the document builder: the culture's date and time patterns with the
-    // .NET "tt" designator swapped for the builder's own AM/PM token. The only place that mapping
-    // is done — everything that needs a date cell format goes through these two.
-    public static string GetShortDateTimeFormat(CultureInfo culture)
-    {
-        return $"{culture.DateTimeFormat.ShortDatePattern} {culture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
-    }
-
+    // The date cell format for the document builder: the culture's short date pattern plus its long
+    // time pattern, with the .NET "tt" designator swapped for the builder's own AM/PM token. The only
+    // place that mapping is done — everything that needs a date cell format goes through here.
+    //
+    // The long time pattern is deliberate: reports show seconds. Audit events and wallet operations
+    // are ordered by time, so rows falling inside the same minute have to stay distinguishable. This
+    // is the single format for every report — header lines and data cells alike.
     public static string GetLongDateTimeFormat(CultureInfo culture)
     {
         return $"{culture.DateTimeFormat.ShortDatePattern} {culture.DateTimeFormat.LongTimePattern.Replace("tt", "AM/PM")}";

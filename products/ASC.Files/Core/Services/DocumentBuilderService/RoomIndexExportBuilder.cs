@@ -146,8 +146,8 @@ public class RoomIndexExportBuilder(
                 type = FilesCommonResource.RoomIndex_Room,
                 size = (string)null,
                 author = room.CreateByString,
-                created = room.CreateOn.ConvertNumerals("G"),
-                modified = room.ModifiedOn.ConvertNumerals("G")
+                created = FormatDate(room.CreateOn),
+                modified = FormatDate(room.ModifiedOn)
             }
         };
 
@@ -191,8 +191,8 @@ public class RoomIndexExportBuilder(
                     type = isFolder ? FilesCommonResource.RoomIndex_Folder : Path.GetExtension(entry.Title),
                     size = isFolder ? null : Math.Round(((File<T>)entry).ContentLength / 1024d / 1024d, 3).ToString(CultureInfo.InvariantCulture),
                     author = entry.CreateByString,
-                    created = entry.CreateOn.ConvertNumerals("G"),
-                    modified = entry.ModifiedOn.ConvertNumerals("G")
+                    created = FormatDate(entry.CreateOn),
+                    modified = FormatDate(entry.ModifiedOn)
                 });
             }
 
@@ -229,6 +229,13 @@ public class RoomIndexExportBuilder(
                 items = [];
             }
         }
+    }
+
+    // Mirrors FileEntry.CreateOnString/ModifiedOnString: an unset date must reach the script as null
+    // so that the builder leaves the cell empty instead of printing 01/01/0001.
+    private static string FormatDate(DateTime date)
+    {
+        return date.Equals(default) ? null : date.ConvertNumerals("G");
     }
 
     private record FolderIndex(int ChildFoldersCount, string Order);
