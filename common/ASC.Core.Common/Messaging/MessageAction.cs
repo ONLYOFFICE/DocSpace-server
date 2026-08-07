@@ -648,6 +648,12 @@ public enum MessageAction
     [Description("File not saved due to room quota exceeded")]
     FileNotSavedDueToRoomQuota = 5204,
 
+    [Description("File saved, tenant quota exceeded")]
+    FileSavedButTenantQuotaExceeded = 5205,
+
+    [Description("File not saved due to tenant quota exceeded")]
+    FileNotSavedDueToTenantQuota = 5206,
+
     #endregion
 
     #region Settings
@@ -999,6 +1005,12 @@ public enum MessageAction
 
     [Description("Subscription balance moved to wallet")]
     SubscriptionBalanceMovedToWallet = 6100,
+
+    [Description("Docs Cloud config updated")]
+    DocsCloudConfigUpdated = 6101,
+
+    [Description("Docs Cloud quota report downloaded")]
+    DocsCloudQuotaReportDownloaded = 6102,
 
     #endregion
 

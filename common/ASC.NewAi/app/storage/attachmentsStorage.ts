@@ -33,13 +33,15 @@
 
 import { randomUUID } from "node:crypto";
 
+import date from "date-and-time";
 import { aiService, AiServiceHttpError, proxyBaseUrl, withTimeout } from "./httpClient.js";
+import { getFolderInfo, getAgentResultStorageId } from "./docspaceFilesApi.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { getNumber, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/attachments";
+const PATH = "/attachments";
 
 // In-memory cache for raw-payload drafts (device upload, dnd) that arrive
 // without a DocSpace entry id. The C# backend currently has no endpoint
@@ -114,12 +116,14 @@ function extensionForMime(mime: string): string {
 // (internal int or thirdparty string, serialized as string).
 async function insertGeneratedImage(
   folderId: string,
-  title: string | undefined,
   base64: string,
 ): Promise<string> {
   const { bytes, mime } = decodeImagePayload(base64);
-  const baseName = title && title.trim() ? title.replace(/\.[^.]+$/, "") : "generate_image";
-  const fileName = `${baseName}${extensionForMime(mime)}`;
+  // The engine only ever passes the tool name ("generate_image") as the
+  // title, so a timestamp is the most meaningful name we can produce here.
+  // `createNewIfExist` still dedupes same-second collisions server-side.
+  const stamp = date.format(new Date(), "YYYY-MM-DD_HH-mm-ss");
+  const fileName = `generated_image_${stamp}${extensionForMime(mime)}`;
 
   const form = new FormData();
   form.append("title", fileName);
@@ -203,7 +207,7 @@ async function inlineImagesAsync(attachments: (Attachment | null)[]): Promise<vo
 }
 
 // The C# `AttachmentsStorageController` exposes a DocSpace-specific shape
-// (`POST /integration/attachments { entryIds: [...] }`) and does not provide
+// (`POST /attachments { entryIds: [...] }`) and does not provide
 // `update`, `deleteByMessage`, or `deleteByThread`. The fields `messageId`,
 // `threadId`, and `entityId` aren't carried in `AttachmentDto`.
 // Cascade-on-message/thread cleanup is expected to happen server-side.
@@ -418,18 +422,61 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       throw new Error("tool image attachment is missing entityId (target folder)");
     }
 
-    const entryId = await insertGeneratedImage(input.entityId, input.title, input.base64);
+    // Agent rooms must not hold generated files directly — artifacts belong
+    // in the agent's Result Storage system subfolder. Plain folders keep
+    // taking the upload as-is. Log each step and rethrow with context: the
+    // engine swallows persist failures into its console-only logger, so
+    // without this the file log shows nothing when an upload dies.
+    try {
+      let targetFolderId = input.entityId;
+      const folderInfo = await getFolderInfo(input.entityId);
+      if (folderInfo?.isAgent) {
+        const resultStorageId = await getAgentResultStorageId(input.entityId);
+        if (!resultStorageId) {
+          throw new Error(
+            `agent ${input.entityId} has no accessible Result Storage folder for the generated image`,
+          );
+        }
+        targetFolderId = resultStorageId;
+      }
+      logger.info(
+        `uploadToolImage: entityId=${input.entityId} isAgent=${folderInfo?.isAgent ?? "unknown"} -> target folder ${targetFolderId}`,
+      );
 
-    // Reuse the entry-based path: `path` routes this back through the DocSpace
-    // branch of `createMany` (no `source`, so it won't recurse here).
-    const [attachment] = await this.createMany([
-      { kind: "image", title: input.title, path: entryId },
-    ]);
-    if (!attachment) {
-      throw new Error("failed to create attachment for uploaded tool image");
+      const entryId = await insertGeneratedImage(targetFolderId, input.base64);
+
+      // Reuse the entry-based path: `path` routes this back through the
+      // DocSpace branch of `createMany` (no `source`, so it won't recurse
+      // here).
+      const [attachment] = await this.createMany([
+        { kind: "image", title: input.title, path: entryId },
+      ]);
+      if (!attachment) {
+        throw new Error("failed to create attachment for uploaded tool image");
+      }
+      attachment.source = "tool";
+      return attachment;
+    } catch (err) {
+      logger.error(
+        `uploadToolImage: entityId=${input.entityId} failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      // Don't rethrow: the engine's fallback would splice the raw base64
+      // into the tool result, ballooning the persisted message (and the
+      // model context) by megabytes. Return a synthetic record instead —
+      // without the payload and without caching it, so nothing leaks: the
+      // chat stores a lightweight dangling ref (`readById` returns null,
+      // the preview shows as unavailable) and the failure stays visible
+      // only in the log above.
+      return {
+        id: randomUUID(),
+        kind: "image",
+        title: input.title,
+        createdAt: Date.now(),
+        source: "tool",
+      };
     }
-    attachment.source = "tool";
-    return attachment;
   }
 
   async readById(id: string): Promise<Attachment | null> {
@@ -487,7 +534,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     if (ids.length === 0) {
       return;
     }
-    // The C# side only supports message-binding via `PUT /integration/attachments`
+    // The C# side only supports message-binding via `PUT /attachments`
     // — `{ids, messageId}`. Other patches (threadId, entityId, content, etc.)
     // are not actionable on the backend and are silently skipped.
     if (patch.messageId === undefined) {

@@ -32,10 +32,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
+import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
 import type { ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
 
-const BASE_PATH = "/integration/tool-prefs";
+const BASE_PATH = "/tool-prefs";
 const DISABLED_PATH = `${BASE_PATH}/disabled`;
 const ALLOW_ALWAYS_PATH = `${BASE_PATH}/allow-always`;
 
@@ -43,9 +44,26 @@ function entityIdQuery(entityId: string | undefined): Record<string, QueryValue>
   return entityId ? { entityId } : undefined;
 }
 
-function readToolPrefsRaw(entityId: string | undefined): Promise<unknown> {
-  const query = entityIdQuery(entityId);
+// `scopedEntityId` must already be gated via `resolveAgentEntityId`.
+async function fetchToolPrefs(scopedEntityId: string | undefined): Promise<unknown> {
+  const query = entityIdQuery(scopedEntityId);
   return aiService.get(BASE_PATH, query ? { query } : undefined);
+}
+
+async function readToolPrefsRaw(entityId: string | undefined): Promise<unknown> {
+  return fetchToolPrefs(await resolveAgentEntityId(entityId));
+}
+
+// Same fetch, but a missing prefs row (404) reads as "nothing stored".
+async function fetchToolPrefsSafe(scopedEntityId: string | undefined): Promise<unknown> {
+  try {
+    return await fetchToolPrefs(scopedEntityId);
+  } catch (err) {
+    if (err instanceof AiServiceHttpError && err.status === 404) {
+      return {};
+    }
+    throw err;
+  }
 }
 
 function pickStringArray(pref: unknown, key: string): string[] {
@@ -92,6 +110,20 @@ function parseAllowAlwaysTokens(raw: unknown): string[] {
   return tokens;
 }
 
+function parseAllowAlwaysGrouped(raw: unknown): Record<string, string[]> {
+  if (!isObject(raw)) {
+    return {};
+  }
+  const result: Record<string, string[]> = {};
+  for (const [serverType, pref] of Object.entries(raw)) {
+    const allowAlways = pickStringArray(pref, "allowAlways");
+    if (allowAlways.length > 0) {
+      result[serverType] = allowAlways;
+    }
+  }
+  return result;
+}
+
 // Engine composes tokens as `${serverType}_${toolName}`. Split on the first
 // underscore — tool names may contain `_`, server types are not expected to.
 function groupAllowAlwaysTokens(tokens: string[]): Record<string, string[]> {
@@ -108,12 +140,54 @@ function groupAllowAlwaysTokens(tokens: string[]): Record<string, string[]> {
   return grouped;
 }
 
+// The engine expresses "cleared" by dropping a server type from the map
+// (`ToolsEngine.setDisabled` deletes the key when every tool is enabled),
+// but the C# upsert merges by the keys present in the payload — an absent
+// key leaves the stored row untouched, and an empty payload is a no-op. To
+// keep the library's replace-snapshot semantics, re-add every stored server
+// type that vanished from the payload with an explicit empty list so the
+// upsert overwrites it.
+function withClearedKeys(
+  payload: Record<string, string[]>,
+  stored: Record<string, string[]>,
+): Record<string, string[]> {
+  const next: Record<string, string[]> = { ...payload };
+  for (const serverType of Object.keys(stored)) {
+    next[serverType] ??= [];
+  }
+  return next;
+}
+
+async function putDisabled(
+  disabled: Record<string, string[]>,
+  entityId: string | undefined,
+): Promise<void> {
+  const scopedEntityId = await resolveAgentEntityId(entityId);
+  const stored = parseDisabled(await fetchToolPrefsSafe(scopedEntityId));
+  await aiService.put(DISABLED_PATH, {
+    disabled: withClearedKeys(disabled, stored),
+    entityId: scopedEntityId,
+  });
+}
+
+async function putAllowAlways(
+  allowAlways: Record<string, string[]>,
+  entityId: string | undefined,
+): Promise<void> {
+  const scopedEntityId = await resolveAgentEntityId(entityId);
+  const stored = parseAllowAlwaysGrouped(await fetchToolPrefsSafe(scopedEntityId));
+  await aiService.put(ALLOW_ALWAYS_PATH, {
+    allowAlways: withClearedKeys(allowAlways, stored),
+    entityId: scopedEntityId,
+  });
+}
+
 export class HttpToolPrefsStorage implements ToolPrefsStorage {
   async createDisabled(
     disabled: Record<string, string[]>,
     entityId?: string,
   ): Promise<void> {
-    await aiService.put(DISABLED_PATH, { disabled, entityId });
+    await putDisabled(disabled, entityId);
   }
 
   async readDisabled(entityId?: string): Promise<Record<string, string[]>> {
@@ -132,26 +206,24 @@ export class HttpToolPrefsStorage implements ToolPrefsStorage {
     disabled: Record<string, string[]>,
     entityId?: string,
   ): Promise<void> {
-    await aiService.put(DISABLED_PATH, { disabled, entityId });
+    await putDisabled(disabled, entityId);
   }
 
   async upsertDisabled(
     disabled: Record<string, string[]>,
     entityId?: string,
   ): Promise<void> {
-    await aiService.put(DISABLED_PATH, { disabled, entityId });
+    await putDisabled(disabled, entityId);
   }
 
   async deleteDisabled(entityId?: string): Promise<void> {
-    // No DELETE endpoint on the C# side; clear by upserting an empty map.
-    await aiService.put(DISABLED_PATH, { disabled: {}, entityId });
+    // No DELETE endpoint on the C# side; clear by upserting an empty map
+    // (`putDisabled` re-adds every stored key with an empty list).
+    await putDisabled({}, entityId);
   }
 
   async createAllowAlways(tokens: string[], entityId?: string): Promise<void> {
-    await aiService.put(ALLOW_ALWAYS_PATH, {
-      allowAlways: groupAllowAlwaysTokens(tokens),
-      entityId,
-    });
+    await putAllowAlways(groupAllowAlwaysTokens(tokens), entityId);
   }
 
   async readAllowAlways(entityId?: string): Promise<string[]> {
@@ -167,20 +239,14 @@ export class HttpToolPrefsStorage implements ToolPrefsStorage {
   }
 
   async updateAllowAlways(tokens: string[], entityId?: string): Promise<void> {
-    await aiService.put(ALLOW_ALWAYS_PATH, {
-      allowAlways: groupAllowAlwaysTokens(tokens),
-      entityId,
-    });
+    await putAllowAlways(groupAllowAlwaysTokens(tokens), entityId);
   }
 
   async upsertAllowAlways(tokens: string[], entityId?: string): Promise<void> {
-    await aiService.put(ALLOW_ALWAYS_PATH, {
-      allowAlways: groupAllowAlwaysTokens(tokens),
-      entityId,
-    });
+    await putAllowAlways(groupAllowAlwaysTokens(tokens), entityId);
   }
 
   async deleteAllowAlways(entityId?: string): Promise<void> {
-    await aiService.put(ALLOW_ALWAYS_PATH, { allowAlways: {}, entityId });
+    await putAllowAlways({}, entityId);
   }
 }

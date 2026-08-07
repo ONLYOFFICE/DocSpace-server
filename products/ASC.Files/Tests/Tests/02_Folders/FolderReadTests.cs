@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._02_Folders;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Folders")]
 public class FolderReadTests(
@@ -46,9 +45,9 @@ public class FolderReadTests(
     public async Task ReadSubFolder_InOwnerDocuments_ByUser_Returns403()
     {
         var folderName = "Test folder";
-        var createdFolder = await CreateFolder(folderName, FolderType.USER, Initializer.Owner);
+        var createdFolder = await CreateFolder(folderName, FolderType.USER, Owner);
         
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _foldersApi.GetFoldersAsync(createdFolder.Id, TestContext.Current.CancellationToken));

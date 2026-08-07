@@ -261,7 +261,6 @@ public class FileStorageService //: IFileStorageService
         FormsItemDto formsItemDto = null,
         Location? location = null,
         int? groupId = null,
-        T parentFolderId = default,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
         List<FolderType> folderType = null)
     {
@@ -428,7 +427,6 @@ public class FileStorageService //: IFileStorageService
                 formsItemDto,
                 location,
                 groupId,
-                parentFolderId,
                 privacyFilter,
                 folderType);
         }
@@ -3022,7 +3020,7 @@ public class FileStorageService //: IFileStorageService
         var toFolder = await destFolderDao.GetFolderAsync(destFolderId);
         if (toFolder == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (!await fileSecurity.CanCreateAsync(toFolder))

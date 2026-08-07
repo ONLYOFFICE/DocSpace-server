@@ -39,7 +39,6 @@ using ASC.EventBus.RedisMQ;
 
 using Microsoft.Extensions.Caching.Memory;
 
-using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 
 namespace ASC.Api.Core.Extensions;
@@ -296,7 +295,9 @@ public static class ServiceCollectionExtension
                         retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                     }
 
-                    return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount);
+                    var lifetime = sp.GetRequiredService<IHostApplicationLifetime>();
+
+                    return new DefaultRabbitMQPersistentConnection(connectionFactory, logger, retryCount, lifetime.ApplicationStopping);
                 });
 
                 services.AddSingleton<IEventBus, EventBusRabbitMQ>(sp =>

@@ -247,7 +247,7 @@
     <value>Pretplata korisnika je ažurirana: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Podešavanja usluga omogućenih za korisnički novčanik su ažurirana</value>
+    <value>Podešavanja usluga omogućenih za korisnički novčanik su ažurirana: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Korisnički novčanik je dopunjen: {0}</value>
@@ -729,9 +729,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal preimenovan</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Privatna soba je onemogućena</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Proizvodi [{0}]. Pristup otvoren</value>
   </data>
@@ -1205,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Aktivne veze korisnika su odjavljene: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Konfiguracija Docs Connect je ažurirana</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Izveštaj o kvoti Docs Connect je preuzet</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Podešavanja AI korisnika su ažurirana</value>
   </data>
 </root>

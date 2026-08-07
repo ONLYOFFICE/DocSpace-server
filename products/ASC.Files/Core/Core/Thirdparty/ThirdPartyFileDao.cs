@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -355,12 +355,12 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.FromResult(false);
     }
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    public async Task<File<string>> SaveFormFileAsync(File<string> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(fileStream);
@@ -414,7 +414,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
     }
 
-    public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
+    public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         return SaveFileAsync(file, fileStream);
     }
@@ -563,14 +563,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         await ProviderInfo.CacheResetAsync(Dao.GetId(toFolder));
 
         return Dao.ToFile(newFile);
-    }
-
-    public Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
-    {
-        return crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, daoSelector.ConvertId,
-            toFolderId, fileDao, r => r,
-            false, chatId);
     }
 
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)
@@ -808,7 +800,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, string parentId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
@@ -862,12 +854,22 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.CompletedTask;
     }
-    
+
+    public Task<bool> IsVectorizationDeletedAsync(string fileId)
+    {
+        return Task.FromResult(false);
+    }
+
+    public Task DeleteVectorizationIfDeletedAsync(string fileId)
+    {
+        return Task.CompletedTask;
+    }
+
     public Task SetFileKey(string fileId, IEnumerable<FileKeyData> keys)
     {
         return Task.CompletedTask;
     }
-    
+
     public Task<List<FileKeys>> GetFileKeys(string fileId, Guid userId)
     {
         return Task.FromResult<List<FileKeys>>([]);

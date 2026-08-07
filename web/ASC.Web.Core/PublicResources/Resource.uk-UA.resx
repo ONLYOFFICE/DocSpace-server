@@ -1324,7 +1324,7 @@
     <value>Адміністратори</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Отримайте доступ до широкого набору моделей ШІ завдяки інтеграції з OpenRouter. Платіть лише за те, що використовуєте — кошти списуються з вашого Гаманця.</value>
+    <value>Отримайте доступ до широкого набору моделей AІ завдяки інтеграції з OpenRouter. Платіть лише за те, що використовуєте — кошти списуються з вашого Гаманця.</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
     <value>Використовуйте пошукову систему на базі AI, щоб доповнювати чати з AI актуальною інформацією з інтернету в реальному часі</value>
@@ -1337,5 +1337,95 @@
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Результати</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Користувачі</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Користувачі</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Маркери</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Пакет розробника Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Зображення</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Звіт про квоту DocsCloud ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Вбудуйте редактори ONLYOFFICE Docs у свій застосунок із хмарними орендарями та власними ключами API.</value>
+  </data>
+  <data name="ConsumersdbUser" xml:space="preserve">
+    <value>Користувач</value>
+  </data>
+  <data name="ConsumersNextcloudClientId" xml:space="preserve">
+    <value>Ідентифікатор клієнта</value>
+  </data>
+  <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
+    <value>Секрет клієнта</value>
+  </data>
+  <data name="ConsumersNextcloud" xml:space="preserve">
+    <value>Nextcloud</value>
+  </data>
+  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
+    <value>Агент</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
+    <value>Чат</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_fetch" xml:space="preserve">
+    <value>Сканування вебу</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
+    <value>Пошук у вебі</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
+    <value>Кредити AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_fetch" xml:space="preserve">
+    <value>Джерела</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Результати</value>
+  </data>
+  <data name="ConsumersdatabaseType" xml:space="preserve">
+    <value>Тип бази даних</value>
+  </data>
+  <data name="ConsumersdbHost" xml:space="preserve">
+    <value>Хост</value>
+  </data>
+  <data name="ConsumersdbName" xml:space="preserve">
+    <value>Назва бази даних</value>
+  </data>
+  <data name="ConsumersdbPassword" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="ConsumersdbPort" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="ConsumersdbSsl" xml:space="preserve">
+    <value>Використовувати SSL</value>
+  </data>
+  <data name="ConsumersExternalDb" xml:space="preserve">
+    <value>Підключення до бази даних</value>
+  </data>
+  <data name="ConsumersExternalDbDescription" xml:space="preserve">
+    <value>Зберігайте результати форми у зовнішній базі даних, наприклад MySQL або SQLite.</value>
+  </data>
+  <data name="ConsumersExternalDbInstruction" xml:space="preserve">
+    <value>Підключіть зовнішню базу даних для зберігання результатів форми.</value>
+  </data>
+  <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
+    <value>SQLite доступний лише в автономних інсталяціях.</value>
   </data>
 </root>

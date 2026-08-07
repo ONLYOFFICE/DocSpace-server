@@ -37,7 +37,6 @@ using ASC.Data.Storage.Encryption;
 using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 using ASC.Files.Core.RoomTemplates.Operations;
 using ASC.Files.Core.Services.NotifyService;
-using ASC.Files.Worker.IntegrationEvents.EventHandling;
 using ASC.Files.Worker.Services;
 using ASC.Web.Files.Configuration;
 
@@ -97,11 +96,13 @@ public static class FilesWorkerServiceExtensions
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
         services.RegisterQueue<EncryptionOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
         services.RegisterQueue<CustomerOperationsReportTask>();
+        services.RegisterQueue<AuditReportTask>();
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
 
         services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddAiIntegrationServices();
         services.AddScoped<IWebItem, ProductEntryPoint>();
 
         services.AddSingleton(Channel.CreateBounded<FileData<int>>(new BoundedChannelOptions(500)
@@ -112,6 +113,16 @@ public static class FilesWorkerServiceExtensions
         }));
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
+
+        services.AddSingleton(Channel.CreateBounded<IntegrationEvent>(new BoundedChannelOptions(1000)
+        {
+            FullMode = BoundedChannelFullMode.Wait,
+            SingleReader = true,
+            SingleWriter = false
+        }));
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<IntegrationEvent>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<IntegrationEvent>>().Writer);
+        services.AddHostedService<IndexEventProcessingService>();
         services.AddDocumentServiceHttpClient(configuration);
 
         services.AddScoped(_ => UrlEncoder.Default);
@@ -124,6 +135,10 @@ public static class FilesWorkerServiceExtensions
         await Task.WhenAll(
             eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent,
                 ThumbnailRequestedIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<FileIndexIntegrationEvent,
+                FileIndexIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<FolderIndexIntegrationEvent,
+                FolderIndexIntegrationEventHandler>(),
             eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent,
                 RoomIndexExportIntegrationEventHandler>(),
             eventBus.SubscribeAsync<DeleteIntegrationEvent,
@@ -153,6 +168,8 @@ public static class FilesWorkerServiceExtensions
             eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent,
                 DataStorageEncryptionIntegrationEventHandler>(),
             eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent,
-                CustomerOperationsReportIntegrationEventHandler>());
+                CustomerOperationsReportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<AuditReportIntegrationEvent,
+                AuditReportIntegrationEventHandler>());
     }
 }

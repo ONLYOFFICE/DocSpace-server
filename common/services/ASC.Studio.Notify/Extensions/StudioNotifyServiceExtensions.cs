@@ -47,6 +47,7 @@ public static class StudioNotifyServiceExtensions
         services.AddHostedService<ServiceLauncher>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddAiIntegrationServices();
         services.AddActivePassiveHostedService<NotifySchedulerService>(configuration, "StudioNotifySchedulerService");
         services.RegisterQuotaFeature();
         services.AddScoped(_ => UrlEncoder.Default);

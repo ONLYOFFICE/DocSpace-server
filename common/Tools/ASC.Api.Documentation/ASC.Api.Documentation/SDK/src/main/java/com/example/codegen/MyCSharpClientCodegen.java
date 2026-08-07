@@ -90,6 +90,10 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         supportingFiles.add(new SupportingFile(
             "README_nuget.mustache", "docs", "README_nuget.md"
         ));
+
+        supportingFiles.add(new SupportingFile(
+            "GlobalUsings.mustache", sourceFolder + File.separator + packageName, "GlobalUsings.cs"
+        ));
     }
 
     @Override

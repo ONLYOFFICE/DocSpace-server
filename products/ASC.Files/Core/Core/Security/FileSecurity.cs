@@ -321,6 +321,7 @@ public class FileSecurity(
                     FilesSecurityActions.Embed,
                     FilesSecurityActions.ChangeOwner,
                     FilesSecurityActions.IndexExport,
+                    FilesSecurityActions.HistoryExport,
                     FilesSecurityActions.UseChat,
                     FilesSecurityActions.CanUseAi
                 }
@@ -357,6 +358,11 @@ public class FileSecurity(
         return CanReadAsync(entries, authContext.CurrentAccount.ID);
     }
 
+    public IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanDeleteAsync<T>(IAsyncEnumerable<FileEntry<T>> entries)
+    {
+        return CanAsync(entries, authContext.CurrentAccount.ID, FilesSecurityActions.Delete);
+    }
+
     public async Task<bool> CanReadAsync<T>(FileEntry<T> entry)
     {
         return await CanReadAsync(entry, authContext.CurrentAccount.ID);
@@ -375,6 +381,16 @@ public class FileSecurity(
     public async Task<bool> CanReadHistoryAsync<T>(FileEntry<T> entry, Guid userId)
     {
         return await CanAsync(entry, userId, FilesSecurityActions.ReadHistory);
+    }
+
+    public async Task<bool> CanExportHistoryAsync<T>(FileEntry<T> entry)
+    {
+        return await CanExportHistoryAsync(entry, authContext.CurrentAccount.ID);
+    }
+
+    public async Task<bool> CanExportHistoryAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.HistoryExport);
     }
 
     public async Task<bool> CanCommentAsync<T>(FileEntry<T> entry, Guid userId)
@@ -1127,6 +1143,16 @@ public class FileSecurity(
         var folder = e as Folder<T>;
         var isRoom = folder is { IsRoom: true };
 
+        if (action == FilesSecurityActions.HistoryExport)
+        {
+            if (isGuest)
+            {
+                return false;
+            }
+
+            action = FilesSecurityActions.Read;
+        }
+
         if (file != null && action == FilesSecurityActions.FillForms && !file.IsForm)
         {
             return false;
@@ -1269,13 +1295,6 @@ public class FileSecurity(
             }
 
             if (action is FilesSecurityActions.Vectorization && !await aiAccessibility.IsVectorizationEnabledAsync())
-            {
-                return false;
-            }
-
-            if (action is FilesSecurityActions.Delete &&
-                file is { VectorizationStatus: VectorizationStatus.InProgress } &&
-                await vectorizationHelper.InProcessAsync(file.Id))
             {
                 return false;
             }
@@ -2518,7 +2537,7 @@ public class FileSecurity(
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomManager)
+                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
                         {
                             return true;
                         }
@@ -3902,6 +3921,9 @@ public class FileSecurity(
         AnalyzeResponses,
 
         [Description("Use AI")]
-        CanUseAi
+        CanUseAi,
+
+        [Description("History export")]
+        HistoryExport
     }
 }

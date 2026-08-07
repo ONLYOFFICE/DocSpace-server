@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Core.Common.AI;
-
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>

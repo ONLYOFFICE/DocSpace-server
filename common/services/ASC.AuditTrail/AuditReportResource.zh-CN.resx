@@ -247,7 +247,7 @@
     <value>客户订阅已更新: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>客户钱包已启用服务的设置已更新</value>
+    <value>客户钱包已启用服务的设置已更新: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>客户钱包已充值: {0}</value>
@@ -729,12 +729,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>门户已被重命名</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>私密房间已禁用</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>私密房间已启用</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>产品[{0}]。访问已打开</value>
   </data>
@@ -1208,5 +1202,14 @@
   </data>
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>品牌名称已更新</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect 配置已更新</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect 配额报告已下载</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>用户 AI 设置已更新</value>
   </data>
 </root>

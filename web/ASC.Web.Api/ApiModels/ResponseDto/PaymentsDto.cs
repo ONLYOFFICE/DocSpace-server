@@ -69,7 +69,7 @@ public class ReportDto
     /// The total quantity of operations in the report.
     /// </summary>
     /// <example>1</example>
-    public int TotalQuantity { get; set; }
+    public long TotalQuantity { get; set; }
     /// <summary>
     /// The total number of pages in the report.
     /// </summary>
@@ -81,7 +81,7 @@ public class ReportDto
     /// <example>1</example>
     public int CurrentPage { get; set; }
 
-    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string filterServiceName)
+    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -95,7 +95,7 @@ public class ReportDto
         {
             foreach (var operation in report.Collection)
             {
-                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames, filterServiceName));
+                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames));
             }
         }
     }
@@ -177,9 +177,9 @@ public class OperationDto
     /// <example>Unknown</example>
     public OperationType Type { get; set; }
 
-    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string filterServiceName)
+    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
-        var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filterServiceName, operation.Metadata);
+        var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, operation.Metadata);
         var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
 
         Date = apiDateTimeHelper.Get(operation.Date);
@@ -313,9 +313,26 @@ public class CustomerServiceUsageDto
     /// <example>1</example>
     public int OperationCount { get; set; }
 
-    public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, string> customUom)
+    /// <summary>
+    /// The price of the service.
+    /// </summary>
+    /// <example>0.14</example>
+    public decimal Price { get; set; }
+
+    /// <summary>
+    /// Indicates whether the service is subscription-based.
+    /// </summary>
+    /// <example>true</example>
+    public bool Subscription { get; set; }
+
+    public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, TenantQuota> walletQuotas, Dictionary<string, string> customUom)
     {
         var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(usage.Service, customUom);
+
+        if (!walletQuotas.TryGetValue(usage.Service, out var quota))
+        {
+            walletQuotas.TryGetValue(serviceName, out quota);
+        }
 
         Service = serviceName;
         Title = title;
@@ -324,6 +341,8 @@ public class CustomerServiceUsageDto
         TotalQuantity = usage.TotalQuantity;
         TotalAmount = usage.TotalAmount;
         OperationCount = usage.OperationCount;
+        Price = quota?.Price ?? 0;
+        Subscription = !string.IsNullOrEmpty(quota?.ProductId);
     }
 }
 
@@ -378,7 +397,7 @@ public class CustomerServiceUsageReportDto
     /// <example>1</example>
     public int CurrentPage { get; set; }
 
-    public CustomerServiceUsageReportDto(UsageReport report, Dictionary<string, string> customUom)
+    public CustomerServiceUsageReportDto(UsageReport report, Dictionary<string, TenantQuota> walletQuotas, Dictionary<string, string> customUom)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -392,10 +411,62 @@ public class CustomerServiceUsageReportDto
         {
             foreach (var usage in report.Collection)
             {
-                Collection.Add(new CustomerServiceUsageDto(usage, customUom));
+                Collection.Add(new CustomerServiceUsageDto(usage, walletQuotas, customUom));
             }
         }
     }
+}
+
+/// <summary>
+/// Represents an active wallet service (quota) of the current portal.
+/// </summary>
+/// <example>
+/// {
+///   "service": "disk-storage",
+///   "serviceUnit": "GB",
+///   "subscription": true,
+///   "title": "Additional disk storage",
+///   "limit": 500,
+///   "used": 320
+/// }
+/// </example>
+public class ActiveServiceDto
+{
+    /// <summary>
+    /// The name of the service.
+    /// </summary>
+    /// <example>disk-storage</example>
+    public string Service { get; set; }
+
+    /// <summary>
+    /// The unit of measurement for the service.
+    /// </summary>
+    /// <example>GB</example>
+    public string ServiceUnit { get; set; }
+
+    /// <summary>
+    /// Indicates whether the service is subscription-based.
+    /// </summary>
+    /// <example>true</example>
+    public bool Subscription { get; set; }
+
+    /// <summary>
+    /// The title of the service.
+    /// </summary>
+    /// <example>Additional disk storage</example>
+    public string Title { get; set; }
+
+    /// <summary>
+    /// The service limit. Populated only for the subscription-based services.
+    /// </summary>
+    /// <example>500</example>
+    public int? Limit { get; set; }
+
+    /// <summary>
+    /// The current service usage. Populated only for the subscription-based services.
+    /// </summary>
+    /// <example>320</example>
+    public int? Used { get; set; }
 }
 
 /// <summary>

@@ -235,6 +235,48 @@ public static class DbQuotaExtension
                 },
                 new DbQuota
                 {
+                    TenantId = -15,
+                    Name = "docscloud",
+                    Description = null,
+                    Features = "docscloud:1",
+                    Price = 8,
+                    ProductId = "1014",
+                    ServiceName = "docscloud",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = true
+                },
+                new DbQuota
+                {
+                    TenantId = -16,
+                    Name = "docsclouddevpack",
+                    Description = null,
+                    Features = "docscloud:1,docsclouddevpack",
+                    Price = 12,
+                    ProductId = "1015",
+                    ServiceName = "docscloud-devpack",
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true,
+                    Additional = true
+                },
+                new DbQuota
+                {
+                    TenantId = -17,
+                    Name = "docscloudtrial",
+                    Description = null,
+                    Features = "docscloud:1000,docsclouddevpack,docscloudtrial",
+                    Price = 0,
+                    ProductId = "1016",
+                    ServiceName = null,
+                    ServiceGroup = null,
+                    Visible = false,
+                    Wallet = false,
+                    Additional = true
+                },
+                new DbQuota
+                {
                     TenantId = -18,
                     Name = "aisearch",
                     Description = null,

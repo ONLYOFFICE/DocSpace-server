@@ -140,7 +140,11 @@ public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperatio
         try
         {
             var instanceTasks = await _tasks.GetAllTasks(DistributedTaskQueue<T>.INSTANCE_ID);
-            return _tasks.MaxThreadsCount < instanceTasks.Count;
+
+            // finished tasks stay in the queue until their client reads the result or the cleaner
+            // drops them (up to TimeUntilUnregisterInSeconds), so counting them would report a busy
+            // instance while nothing is actually running
+            return _tasks.MaxThreadsCount < instanceTasks.Count(t => t.Status <= DistributedTaskStatus.Running);
         }
         finally
         {

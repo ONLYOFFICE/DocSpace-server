@@ -247,7 +247,7 @@
     <value>Актуализиран потребителски абонамент: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Актуализирани са настройките за услуги с активиран клиентски портфейл</value>
+    <value>Актуализирани са настройките за услуги с активиран клиентски портфейл: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Зареден потребителски портфейл: {0}</value>
@@ -1202,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Активните връзки за потребителя са изключени: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Конфигурацията на Docs Connect е актуализирана</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Отчетът за квотата на Docs Connect е изтеглен</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Настройките на AI за потребителя са актуализирани</value>
   </data>
 </root>

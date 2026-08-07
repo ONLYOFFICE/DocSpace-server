@@ -34,18 +34,69 @@
 import { ToolsEngine } from "@onlyoffice/ai-chat/core";
 import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { systemToolsSource } from "../tools/systemTools.js";
+import {
+  systemToolsSource,
+  getSystemServerConfig,
+} from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { asString, isObject } from "../narrow.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
+
+// Resolve the config to store for an entry. Entries named after a
+// configured system server are whitelist markers (see agentServerWhitelist
+// in tools/systemTools.ts): they are pinned to the canonical system config
+// so a marker never shadows the system group with a broken connection.
+// When a caller attaches an existing portal-level server to an entity
+// without sending a config (the agent dialog flow), the portal-scope
+// config is copied.
+async function resolveConfig(
+  name: string,
+  provided: McpServerConfig | undefined,
+): Promise<McpServerConfig> {
+  const system = getSystemServerConfig(name);
+  if (system) {
+    return system;
+  }
+  if (provided && Object.keys(provided).length > 0) {
+    return provided;
+  }
+  const portal = await storage.mcpServers.readByName(name, undefined);
+  if (portal) {
+    return portal;
+  }
+  throw Object.assign(
+    new Error(`No config provided and no portal-level server named "${name}"`),
+    { status: 400, expose: true },
+  );
+}
+
+// System-server entries are whitelist markers pinned to the canonical
+// internal endpoint (see resolveConfig above). Redact — never drop — the
+// config on the way out: system servers run server-side only (see
+// tools/systemTools.ts), so the browser must not receive a config it
+// would try to start itself, and the internal endpoint must not leak.
+// The name still round-trips: the agent dialog pre-selects by key, and
+// saving the whole map from the chat config editor re-pins the entry
+// through resolveConfig.
+function redactSystemServer(
+  name: string,
+  config: McpServerConfig,
+): McpServerConfig {
+  return getSystemServerConfig(name) ? {} : config;
+}
 
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
+    const name = args.name as string;
+    // Scope is resolved inside mcpServersStorage (create/readAll both run the
+    // entityId through resolveAgentEntityId), so a non-agent folder writes to
+    // and reads back from the global scope and the server stays visible
+    // (Bug 82863) — no 404 gate needed here.
     const result = await engine.addCustomServer(
-      args.name as string,
-      args.config as McpServerConfig,
+      name,
+      await resolveConfig(name, args.config as McpServerConfig | undefined),
       args.entityId as string | undefined,
     );
     res.json(result);
@@ -53,9 +104,10 @@ export const toolsController = {
 
   updateCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
+    const name = args.name as string;
     const result = await engine.updateCustomServer(
-      args.name as string,
-      args.config as McpServerConfig,
+      name,
+      await resolveConfig(name, args.config as McpServerConfig | undefined),
       args.entityId as string | undefined,
     );
     res.json(result);
@@ -81,13 +133,17 @@ export const toolsController = {
     }
     const entityId = asString(req.query["entityId"]);
     const config = await engine.getCustomServer(name, entityId);
-    res.json(config);
+    res.json(config === null ? null : redactSystemServer(name, config));
   }),
 
   listCustomServers: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     const servers = await engine.listCustomServers(entityId);
-    res.json(servers);
+    const redacted: Record<string, McpServerConfig> = {};
+    for (const [name, config] of Object.entries(servers)) {
+      redacted[name] = redactSystemServer(name, config);
+    }
+    res.json(redacted);
   }),
 
   listSystemTools: asyncHandler(async (req, res) => {
@@ -98,9 +154,21 @@ export const toolsController = {
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["map", "entityId"] as const);
-    const map = (args.map as Record<string, McpServerConfig>) ?? {};
+    // `map` is required. Without it the loop below yields an empty map and
+    // replaceAll wipes every registered MCP server for the scope, silently
+    // destroying the configuration on a malformed request (Bug 82864). Reject
+    // a missing/invalid map with a 400 instead.
+    if (!isObject(args.map)) {
+      res.status(400).json({ error: "map is required and must be an object" });
+      return;
+    }
+    const map = args.map as Record<string, McpServerConfig>;
+    const normalized: Record<string, McpServerConfig> = {};
+    for (const [name, config] of Object.entries(map)) {
+      normalized[name] = await resolveConfig(name, config);
+    }
     const result = await engine.replaceAllCustomServers(
-      map,
+      normalized,
       args.entityId as string | undefined,
     );
     res.json(result);

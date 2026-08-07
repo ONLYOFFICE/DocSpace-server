@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -32,8 +32,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using Document = ASC.ElasticSearch.Document;
-using VectorChunk = ASC.Files.Core.Vectorization.Data.Chunk;
-
 namespace ASC.Files.Core.Data;
 
 [Scope(typeof(IFileDao<int>))]
@@ -76,7 +74,6 @@ internal class FileDao(
         FilesMessageService filesMessageService,
         QuotaSocketManager quotaSocketManager,
         CustomQuota customQuota,
-        VectorStore vectorStore,
         IEventBus eventBus,
         VectorizationGlobalSettings vectorizationGlobalSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -96,6 +93,7 @@ internal class FileDao(
     private const string FilePathPart = "file_";
     private const string FolderPathPart = "folder_";
     private const string FileIdGroupName = "id";
+    private const int StorageDeleteParallelism = 8;
 
     private static readonly Regex _pattern = new($"{FilePathPart}(?'id'\\d+)", RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -388,12 +386,92 @@ internal class FileDao(
 
         return await (await globalStore.GetStoreAsync(tenantId.Value)).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), 0);
     }
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, Guid chatId = default)
+    // Allows a file save to overshoot the portal (tariff) total-size quota within a grace of
+    // SetupInfo.AvailableFileSize, mirroring the soft-overshoot behavior of custom room/user quota.
+    // Returns true when the overshoot is within grace (file saved with a warning); the caller throws otherwise.
+    // Callers hold the tenant_quota_{tenantId} fair lock across this check and the write that consumes the
+    // quota, so the grace is granted at most once even under concurrent saves near the boundary (once
+    // used > MaxTotalSize the next open falls back to viewer and further saves are rejected).
+    private async Task<bool> TryAllowTenantQuotaGraceAsync(File<int> file)
     {
-        return await SaveFileAsync(file, fileStream, true, true, null, chatId);
+        var quota = await _tenantManager.GetCurrentTenantQuotaAsync();
+        if (quota == null || quota.MaxTotalSize == 0)
+        {
+            return false;
+        }
+
+        // the per-file cap stays absolute - no grace
+        if (quota.MaxFileSize != 0 && quota.MaxFileSize < file.ContentLength)
+        {
+            return false;
+        }
+
+        var used = await _maxTotalSizeStatistic.GetValueAsync();
+
+        // already over the limit -> no grace (grace is consumed only once; serialized by the caller's lock)
+        if (used > quota.MaxTotalSize)
+        {
+            return false;
+        }
+
+        if (used + file.ContentLength > quota.MaxTotalSize + _setupInfo.AvailableFileSize)
+        {
+            return false;
+        }
+
+        // the quota-row update path (TenantQuotaController.QuotaUsedCheckAsync) detects the same
+        // soft-overshoot and fires TenantQuotaExceededAsync, so the socket is not raised here to avoid
+        // notifying the client twice for a single save
+        await filesMessageService.SendAsync(MessageAction.FileSavedButTenantQuotaExceeded, file, MessageInitiator.DocsService, file.Title);
+
+        return true;
     }
 
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkFolder)
+    // Enforces the portal (tariff) total-size quota for a file content write. When the file does not fit in
+    // the remaining quota, editor saves (allowQuotaGrace) may take a bounded soft overshoot; the returned lock
+    // must be held by the caller across the write that consumes the quota, so the grace is granted at most once.
+    // Returns (null, false) when the file fits; throws when the write is not allowed.
+    private async Task<(IDistributedLockHandle TenantQuotaLock, bool GraceForThisSave)> EnforceTenantQuotaAsync(File<int> file, bool allowQuotaGrace, int tenantId)
+    {
+        var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
+        if (maxChunkedUploadSize >= file.ContentLength)
+        {
+            return (null, false);
+        }
+
+        // over the remaining tariff quota. Grace is opt-in per call: only editor saves pass allowQuotaGrace
+        // (see EntryManager.SaveEditingAsync); uploads/conversions/copies keep the strict tariff limit
+        if (!allowQuotaGrace)
+        {
+            throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
+        }
+
+        // serialize the grace check with the write that consumes it via a tenant-scoped fair lock (held by the
+        // caller until its method returns), so the overshoot is granted at most once under concurrency
+        var tenantQuotaLock = await _distributedLockProvider.TryAcquireFairLockAsync($"tenant_quota_{tenantId}");
+        try
+        {
+            if (!await TryAllowTenantQuotaGraceAsync(file))
+            {
+                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, file.Title);
+                throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
+            }
+        }
+        catch
+        {
+            await tenantQuotaLock.DisposeAsync();
+            throw;
+        }
+
+        return (tenantQuotaLock, true);
+    }
+
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool allowQuotaGrace = false)
+    {
+        return await SaveFileAsync(file, fileStream, true, true, null, allowQuotaGrace);
+    }
+
+    public async Task<File<int>> SaveFormFileAsync(File<int> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream, true, checkFolder);
     }
@@ -404,17 +482,17 @@ internal class FileDao(
         bool checkQuota,
         bool checkFolder,
         ChunkedUploadSession<int> uploadSession = null,
-        Guid chatId = default)
+        bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
 
-        var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
-        if (checkQuota && maxChunkedUploadSize < file.ContentLength)
-        {
-            throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
-        }
-
         var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var (tenantQuotaLock, graceForThisSave) = checkQuota
+            ? await EnforceTenantQuotaAsync(file, allowQuotaGrace, tenantId)
+            : ((IDistributedLockHandle)null, false);
+        await using var quotaLockScope = tenantQuotaLock;
+
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
@@ -428,74 +506,78 @@ internal class FileDao(
         var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
         UserInfo user = null;
         string quotaLockKey;
+        TenantEntityQuotaSettings roomQuotaSettings = null;
+        TenantUserQuotaSettings userQuotaSettings = null;
+
+        Folder<int> currentRoom = null;
 
         if (roomId != -1)
         {
             quotaLockKey = $"room_{roomId}";
+            currentRoom = await folderDao.GetFolderAsync(roomId);
+            // the folder type is immutable, so the settings type can be picked outside the lock
+            roomQuotaSettings = currentRoom.FolderType is FolderType.AiRoom
+                ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
         }
         else
         {
             user = await _userManager.GetUsersAsync(file.Id == 0 ? _authContext.CurrentAccount.ID : file.CreateBy);
             quotaLockKey = $"user_{user.Id}";
+            userQuotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
         }
 
-        await using (await _distributedLockProvider.TryAcquireFairLockAsync(quotaLockKey))
+        // the fair lock only serializes the quota check with the write that consumes the quota;
+        // when no quota is enforced there is nothing to protect, so the lock is skipped
+        var quotaEnabled = roomQuotaSettings is { EnableQuota: true } || userQuotaSettings is { EnableQuota: true };
+
+        await using (quotaEnabled ? await _distributedLockProvider.TryAcquireFairLockAsync(quotaLockKey) : null)
         {
-            if (roomId != -1)
+            if (roomId != -1 && roomQuotaSettings is { EnableQuota: true })
             {
-                var currentRoom = await folderDao.GetFolderAsync(roomId);
+                // re-read the room inside the lock so Counter reflects writes from previously serialized uploads
+                currentRoom = await folderDao.GetFolderAsync(roomId);
 
-                TenantEntityQuotaSettings quotaSettings = currentRoom.FolderType is FolderType.AiRoom
-                   ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaSettings.EnableQuota)
+                var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? roomQuotaSettings.DefaultQuota : currentRoom.SettingsQuota;
+                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
-                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : currentRoom.SettingsQuota;
-                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                     {
-                        if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
+                        if ((roomQuotaLimit * 2 < currentRoom.Counter + file.ContentLength) || roomQuotaLimit < currentRoom.Counter)
                         {
-                            if ((roomQuotaLimit * 2 < currentRoom.Counter + file.ContentLength) || roomQuotaLimit < currentRoom.Counter)
-                            {
-                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToRoomQuota, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
-                                throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
-                            }
-                            await quotaSocketManager.RoomQuotaExceededAsync(roomId);
-                            await filesMessageService.SendAsync(MessageAction.FileSavedButRoomQuotaExceeded, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
-
+                            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToRoomQuota, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
+                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
                         }
+
+                        await quotaSocketManager.RoomQuotaExceededAsync(roomId);
+                        await filesMessageService.SendAsync(MessageAction.FileSavedButRoomQuotaExceeded, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
                     }
                 }
             }
-            else if (user != null)
+            else if (user != null && userQuotaSettings is { EnableQuota: true })
             {
-                var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
-                if (quotaUserSettings.EnableQuota)
+                var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
+
+                var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? userQuotaSettings.DefaultQuota : userQuotaData.UserQuota;
+
+                if (userQuotaLimit != UserQuotaSettings.NoQuota)
                 {
-                    var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
+                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
 
-                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-
-                    if (userQuotaLimit != UserQuotaSettings.NoQuota)
+                    if (userQuotaLimit - userUsedSpace < file.ContentLength)
                     {
-                        var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-
-                        if (userQuotaLimit - userUsedSpace < file.ContentLength)
+                        if ((userQuotaLimit * 2 < userUsedSpace + file.ContentLength) || userQuotaLimit < userUsedSpace)
                         {
-                            if ((userQuotaLimit * 2 < userUsedSpace + file.ContentLength) || userQuotaLimit < userUsedSpace)
-                            {
-                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToUserQuota, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
-                                throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
-                            }
-                            await quotaSocketManager.UserQuotaExceededAsync(file.CreateBy);
-                            await filesMessageService.SendAsync(MessageAction.FileSavedButUserQuotaExceeded, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+                            await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToUserQuota, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+                            throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
                         }
+                        await quotaSocketManager.UserQuotaExceededAsync(file.CreateBy);
+                        await filesMessageService.SendAsync(MessageAction.FileSavedButUserQuotaExceeded, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
                     }
                 }
             }
 
             var isNew = false;
-            DbFile toInsert = null;
             var cloneStreamForSave = new MemoryStream();
             var streamChange = false;
             var needVectorization = false;
@@ -573,7 +655,7 @@ internal class FileDao(
                             }
                         }
 
-                        toInsert = new DbFile
+                        var toInsert = new DbFile
                         {
                             Id = file.Id,
                             Version = file.Version,
@@ -618,18 +700,6 @@ internal class FileDao(
                                     });
                         }
 
-                        if (chatId != Guid.Empty)
-                        {
-                            var attachment = new DbChatMessageAttachment
-                            {
-                                TenantId = tenantId,
-                                ChatId = chatId,
-                                FileId = file.Id,
-                                ModifiedOn = DateTime.UtcNow
-                            };
-
-                            await filesDbContext.MessageAttachments.AddAsync(attachment);
-                        }
                         await filesDbContext.SaveChangesAsync();
                         await tx.CommitAsync();
                     });
@@ -643,8 +713,6 @@ internal class FileDao(
                         await filesDbContext.UpdateFoldersAsync(parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy, tenantId);
                     }
 
-                    toInsert.Folders = parentFolders;
-
                     if (isNew)
                     {
                         file.Order = await SetCustomOrder(filesDbContext, file.Id, file.ParentId);
@@ -657,8 +725,7 @@ internal class FileDao(
 
                     if (roomId != -1 && checkFolder)
                     {
-                        var currentRoom = await folderDao.GetFolderAsync(roomId);
-                        if (currentRoom.FolderType == FolderType.FillingFormsRoom && currentRoom.RootFolderType != FolderType.RoomTemplates)
+                        if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && currentRoom.RootFolderType != FolderType.RoomTemplates)
                         {
                             var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
@@ -696,8 +763,7 @@ internal class FileDao(
                             }
                             else
                             {
-                                var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                                await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+                                await DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
 
                                 throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
@@ -710,7 +776,7 @@ internal class FileDao(
             {
                 try
                 {
-                    await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
+                    await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder, graceForThisSave);
                 }
                 catch (Exception saveException)
                 {
@@ -718,8 +784,7 @@ internal class FileDao(
                     {
                         if (isNew)
                         {
-                            var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                            await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+                            await DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
                         }
                         else if (!await IsExistOnStorageAsync(file))
                         {
@@ -747,7 +812,12 @@ internal class FileDao(
                 }
             }
 
-            _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toInsert));
+            await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
+            {
+                FileId = file.Id,
+                Version = file.Version,
+                Action = FileIndexAction.Index
+            });
 
             if (needVectorization)
             {
@@ -787,7 +857,7 @@ internal class FileDao(
                     filesDbContext.FileVectorization,
                     f => f.Id,
                     v => v.FileId, (f, v) => new { f, v })
-                .Where(x => x.v.Status == VectorizationStatus.Completed)
+                .Where(x => x.v.Status == VectorizationStatus.Completed && x.v.DeletedOn == null)
                 .Select(x => x.f);
         }
 
@@ -824,7 +894,7 @@ internal class FileDao(
         }
     }
 
-    public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
+    public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -833,15 +903,10 @@ internal class FileDao(
             throw new ArgumentException("No file id or folder id toFolderId determine provider");
         }
 
-        var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
-
-        if (maxChunkedUploadSize < file.ContentLength)
-        {
-            throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
-        }
-
         var tenantId = _tenantManager.GetCurrentTenantId();
-        DbFile toUpdate = null;
+
+        var (tenantQuotaLock, graceForThisSave) = await EnforceTenantQuotaAsync(file, allowQuotaGrace, tenantId);
+        await using var quotaLockScope = tenantQuotaLock;
 
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
@@ -869,7 +934,7 @@ internal class FileDao(
                     file.CreateOn = _tenantUtil.DateTimeNow();
                 }
 
-                toUpdate = await context.DbFileByVersionAsync(tenantId, file.Id, file.Version);
+                var toUpdate = await context.DbFileByVersionAsync(tenantId, file.Id, file.Version);
 
                 toUpdate.Version = file.Version;
                 toUpdate.VersionGroup = file.VersionGroup;
@@ -903,8 +968,6 @@ internal class FileDao(
             {
                 await filesDbContext.UpdateFoldersAsync(parentFoldersIds, _tenantUtil.DateTimeToUtc(file.ModifiedOn), file.ModifiedBy, tenantId);
             }
-
-            toUpdate.Folders = parentFolders;
         }
 
         if (fileStream != null)
@@ -912,7 +975,7 @@ internal class FileDao(
             try
             {
                 await DeleteVersionStreamAsync(file);
-                await SaveFileStreamAsync(file, fileStream);
+                await SaveFileStreamAsync(file, fileStream, allowQuotaGrace: graceForThisSave);
             }
             catch
             {
@@ -925,7 +988,12 @@ internal class FileDao(
             }
         }
 
-        _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toUpdate));
+        await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.ModifiedBy, tenantId)
+        {
+            FileId = file.Id,
+            Version = file.Version,
+            Action = FileIndexAction.Index
+        });
 
         return await GetFileAsync(file.Id);
     }
@@ -972,11 +1040,11 @@ internal class FileDao(
         await store.DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
     }
 
-    private async Task SaveFileStreamAsync(File<int> file, Stream stream, Folder<int> currentFolder = null)
+    private async Task SaveFileStreamAsync(File<int> file, Stream stream, Folder<int> currentFolder = null, bool allowQuotaGrace = false)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
 
-        await (await globalStore.GetStoreAsync()).SaveAsync(string.Empty, GetUniqFilePath(file), file.GetFileQuotaOwner(), stream, file.Title);
+        await (await globalStore.GetStoreAsync()).SaveAsync(string.Empty, GetUniqFilePath(file), file.GetFileQuotaOwner(), stream, file.Title, allowQuotaGrace: allowQuotaGrace);
 
         currentFolder ??= await folderDao.GetFolderAsync(file.FolderIdDisplay);
 
@@ -990,76 +1058,153 @@ internal class FileDao(
 
     public async Task DeleteFileAsync(int fileId, Guid ownerId)
     {
-        await DeleteFileAsync(fileId, true, ownerId);
+        // single deletion goes through the batched path so that the set of cleaned-up
+        // tables lives in one place
+        await DeleteFilesAsync([KeyValuePair.Create(fileId, ownerId)]);
     }
 
-    private async ValueTask DeleteFileAsync(int fileId, bool deleteFolder, Guid ownerId)
+    public async Task<IEnumerable<int>> DeleteFilesAsync(IEnumerable<KeyValuePair<int, Guid>> owners)
     {
-        if (fileId == 0)
+        var files = owners.Where(f => f.Key != 0).ToList();
+        if (files.Count == 0)
         {
-            return;
+            return [];
         }
 
+        var fileIds = files.Select(f => f.Key).ToList();
+        var fileIdsStrings = fileIds.Select(id => id.ToString()).ToList();
         var tenantId = _tenantManager.GetCurrentTenantId();
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        List<DbFile> toDeleteFiles = null;
+        List<int> vectorizedFileIds = null;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
 
-            var fromFolders = await context.ParentIdsAsync(tenantId, fileId).ToListAsync();
+            toDeleteFiles = await context.DbFilesByIdsAsync(tenantId, fileIds).ToListAsync();
 
-            await context.DeleteTagLinksAsync(tenantId, fileId.ToString());
+            await context.DeleteTagLinksByFileIdsAsync(tenantId, fileIdsStrings);
 
-            var toDeleteFiles = await context.DbFilesAsync(tenantId, fileId).ToListAsync();
-            var toDeleteFile = toDeleteFiles.FirstOrDefault(r => r.CurrentVersion);
-
-            foreach (var d in toDeleteFiles)
+            // vectorization rows are marked deleted (not removed): the vector store cleanup is
+            // asynchronous, the background service purges the vectors and then the rows themselves
+            vectorizedFileIds = await context.VectorizedFileIdsAsync(tenantId, fileIds).ToListAsync();
+            if (vectorizedFileIds.Count > 0)
             {
-                await factoryIndexer.DeleteAsync(d);
+                await context.MarkVectorizationDeletedByFileIdsAsync(tenantId, vectorizedFileIds);
             }
 
-            await context.DeleteVectorizationStatusAsync(tenantId, fileId);
-            await DeleteVectorsAsync(tenantId, fileId);
-
-            context.RemoveRange(toDeleteFiles);
-
+            await context.DeleteDbFilesByIdsAsync(tenantId, fileIds);
             await context.DeleteTagsAsync(tenantId);
+            await context.DeleteSecurityByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteOrderByFileIdsAsync(tenantId, fileIds);
 
-            await context.DeleteSecurityAsync(tenantId, fileId);
-
-            await DeleteCustomOrder(filesDbContext, fileId);
-
-            await context.DeleteMessageAttachmentsByFileIdAsync(tenantId, fileId);
-
-            var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
+            var entryEventsIds = await context.AuditEventsIdsByFileIdsAsync(fileIds).ToListAsync();
             await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
-            await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
-            await context.DeleteFileKeysAsync(tenantId, fileId);
+            await context.DeleteAuditReferencesByFileIdsAsync(fileIds);
+            await context.DeleteFileKeysByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteFileLinksByIdsAsync(tenantId, fileIdsStrings);
+            await context.DeleteFilesPropertiesByIdsAsync(tenantId, fileIdsStrings);
+            await context.DeleteFormRoleMappingsByFileIdsAsync(tenantId, fileIds);
 
-            await context.SaveChangesAsync();
             await tx.CommitAsync();
-
-            foreach (var folderId in fromFolders)
-            {
-                await DecrementCountAsync(context, folderId, tenantId, FileEntryType.File);
-            }
-
-            if (deleteFolder)
-            {
-                tenantQuotaController.Init(tenantId, ThumbnailTitle);
-                var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
-                await store.DeleteDirectoryAsync(ownerId, GetUniqFileDirectory(fileId));
-            }
-
-            if (toDeleteFile != null)
-            {
-                await factoryIndexer.DeleteAsync(toDeleteFile);
-                await factoryIndexerFormData.DeleteAsync(r => r.Where(a => a.Id, toDeleteFile.Id));
-            }
         });
+
+        // ids missing from the read (already deleted by a concurrent flow) get no follow-ups
+        // and are excluded from the returned set, so the caller does not report them again
+        var deletedIds = toDeleteFiles.Select(f => f.Id).Distinct().ToHashSet();
+
+        if (deletedIds.Count == 0)
+        {
+            return deletedIds;
+        }
+
+        // the rows are already deleted at this point: every follow-up step below is
+        // best-effort on its own, so one failure must not skip the others or make the
+        // caller believe the deletion itself failed and retry it
+        foreach (var folderGroup in toDeleteFiles.GroupBy(f => f.ParentId))
+        {
+            try
+            {
+                var filesCount = folderGroup.Select(f => f.Id).Distinct().Count();
+                await filesDbContext.ChangeFilesCountAsync(tenantId, folderGroup.Key, -filesCount);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        foreach (var fileId in vectorizedFileIds)
+        {
+            try
+            {
+                await eventBus.PublishAsync(new VectorsDeletionIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = fileId
+                });
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        try
+        {
+            tenantQuotaController.Init(tenantId, ThumbnailTitle);
+            var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
+
+            var deletedIdsSet = deletedIds.ToHashSet();
+
+            // warm up the quota running total on this thread so the concurrent quota decrements
+            // below only contend on the controller's in-memory arithmetic, not the blocking DB seed
+            tenantQuotaController.PreloadCurrentSize();
+
+            // file directories are independent of each other, so they are removed concurrently;
+            // each removal stays best-effort on its own (the quota accounting inside only
+            // decrements counters, no limit checks happen on the delete path)
+            await Parallel.ForEachAsync(
+                files.Where(f => deletedIdsSet.Contains(f.Key)),
+                new ParallelOptions { MaxDegreeOfParallelism = StorageDeleteParallelism },
+                async (file, _) =>
+                {
+                    try
+                    {
+                        await store.DeleteDirectoryAsync(file.Value, GetUniqFileDirectory(file.Key));
+                    }
+                    catch (Exception e)
+                    {
+                        logger.ErrorWithException(e);
+                    }
+                });
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+
+        foreach (var deletedId in deletedIds)
+        {
+            try
+            {
+                await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = deletedId,
+                    Action = FileIndexAction.Delete
+                });
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        return deletedIds;
     }
 
     public async Task<bool> IsExistAsync(string title, int folderId)
@@ -1202,8 +1347,6 @@ internal class FileDao(
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
-                await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
-
                 if (trashId.Equals(toFolderId))
                 {
                     await q.ExecuteUpdateAsync(f => f
@@ -1230,11 +1373,21 @@ internal class FileDao(
                     };
 
                     await context.FileVectorization.AddOrUpdateAsync(vectorization);
+                    await context.SaveChangesAsync();
                 }
 
-                var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
-                var (toFolderRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
-                var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                // reuse the values already resolved before the transaction: toFolder has not
+                // changed, and oldFolder differs from fromFolder only on a concurrent move
+                var toFolderRoomId = toRoomId;
+                var oldFolder = fromFolder;
+                var roomId = fromRoomId;
+
+                if (oldParentId.HasValue && oldParentId.Value != fromFolder.Id)
+                {
+                    oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
+                    (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                }
+
                 var archiveId = await folderDao.GetFolderIDArchive(false);
 
                 if (toFolderId == trashId && oldParentId.HasValue)
@@ -1306,7 +1459,7 @@ internal class FileDao(
 
                 if (needDeleteVectors)
                 {
-                    await context.DeleteVectorizationStatusAsync(tenantId, fileId);
+                    needDeleteVectors = await context.MarkVectorizationDeletedAsync(tenantId, fileId) > 0;
                 }
 
                 await tx.CommitAsync();
@@ -1329,18 +1482,18 @@ internal class FileDao(
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
             }
 
-            var toUpdateFile = await q.FirstOrDefaultAsync(r => r.CurrentVersion);
-
-            if (toUpdateFile != null)
+            await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
             {
-                toUpdateFile.Folders = await context.DbFolderTreesAsync(toFolderId).ToListAsync();
-
-                _ = factoryIndexer.UpdateAsync(toUpdateFile, UpdateAction.Replace, w => w.Folders);
-            }
+                FileId = fileId,
+                Action = FileIndexAction.UpdateFolders
+            });
 
             if (needDeleteVectors)
             {
-                await DeleteVectorsAsync(tenantId, fileId);
+                await eventBus.PublishAsync(new VectorsDeletionIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = fileId
+                });
             }
 
             if (needVectorization)
@@ -1353,6 +1506,121 @@ internal class FileDao(
         });
 
         return fileId;
+    }
+
+    // Plain batched move: parents, owner and room stay compatible (checked by the caller),
+    // so counters and sizes are aggregated and no quota/tag/link work is needed.
+    // Only files whose parent still matches the caller's snapshot are moved; the rest
+    // (moved concurrently) are excluded from the returned set.
+    public async Task<IEnumerable<int>> MoveFilesAsync(IEnumerable<int> fileIds, int toFolderId, IEnumerable<int> fromParentIds = null)
+    {
+        var ids = fileIds.Where(id => id != 0).Distinct().ToList();
+        if (ids.Count == 0 || toFolderId == 0)
+        {
+            return [];
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        List<DbFile> movedFiles = null;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var rows = await context.DbFilesByIdsAsync(tenantId, ids).ToListAsync();
+            var parents = (fromParentIds ?? rows.Select(r => r.ParentId)).Distinct().ToList();
+
+            movedFiles = rows.Where(r => parents.Contains(r.ParentId)).ToList();
+
+            await context.UpdateFilesFolderIdAsync(tenantId, ids, parents, toFolderId);
+
+            await tx.CommitAsync();
+        });
+
+        var movedIds = movedFiles.Select(f => f.Id).Distinct().ToList();
+
+        if (movedIds.Count == 0)
+        {
+            return movedIds;
+        }
+
+        // the rows are already moved: the follow-ups below are best-effort each,
+        // and a failed source update must not distort the destination totals
+        var currentVersions = movedFiles.Where(f => f.CurrentVersion).ToList();
+
+        foreach (var parentGroup in movedFiles.GroupBy(f => f.ParentId).Where(g => g.Key != toFolderId))
+        {
+            var count = parentGroup.Select(f => f.Id).Distinct().Count();
+            var size = parentGroup.Where(f => f.CurrentVersion).Sum(f => f.ContentLength);
+
+            try
+            {
+                await filesDbContext.ChangeFilesCountAsync(tenantId, parentGroup.Key, -count);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+
+            try
+            {
+                await folderDao.ChangeTreeFolderSizeAsync(parentGroup.Key, -size);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        try
+        {
+            await filesDbContext.ChangeFilesCountAsync(tenantId, toFolderId, movedIds.Count);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+
+        try
+        {
+            await folderDao.ChangeTreeFolderSizeAsync(toFolderId, currentVersions.Sum(f => f.ContentLength));
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
+
+        foreach (var movedId in movedIds)
+        {
+            try
+            {
+                await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = movedId,
+                    Action = FileIndexAction.UpdateFolders
+                });
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+
+        return movedIds;
+    }
+
+    public async Task<IEnumerable<string>> GetExistingTitlesAsync(int parentId, IEnumerable<string> titles)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.ConflictTitlesAsync(tenantId, parentId, titles.Distinct().ToList()).ToListAsync();
     }
 
     public async Task<string> MoveFileAsync(int fileId, string toFolderId, bool deleteLinks = false)
@@ -1382,7 +1650,7 @@ internal class FileDao(
         throw new NotImplementedException();
     }
 
-    private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId, Guid chatId = default)
+    private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId)
     {
         var fileState = await fileHelper.GetFileState(file);
 
@@ -1404,7 +1672,7 @@ internal class FileDao(
         await using (var stream = await GetFileStreamAsync(file))
         {
             copy.ContentLength = stream.CanSeek ? stream.Length : file.ContentLength;
-            copy = await SaveFileAsync(copy, stream, true, true, null, chatId);
+            copy = await SaveFileAsync(copy, stream, true, true, null);
         }
 
         if (file.ThumbnailStatus != Thumbnail.Created)
@@ -1430,17 +1698,12 @@ internal class FileDao(
         return copy;
     }
 
-    public Task<File<int>> CopyFileAsync(int fileId, int toFolderId)
-    {
-        return CopyFileAsync(fileId, toFolderId, Guid.Empty);
-    }
-
-    public async Task<File<int>> CopyFileAsync(int fileId, int toFolderId, Guid chatId)
+    public async Task<File<int>> CopyFileAsync(int fileId, int toFolderId)
     {
         var file = await GetFileAsync(fileId);
         if (file != null)
         {
-            return await CopyFileAsync(file, toFolderId, chatId);
+            return await CopyFileAsync(file, toFolderId);
         }
 
         return null;
@@ -1473,7 +1736,11 @@ internal class FileDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        await factoryIndexer.UpdateAsync(toUpdate, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
+        await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FileId = file.Id,
+            Action = FileIndexAction.UpdateInfo
+        });
 
         if (!Path.HasExtension(file.Title))
         {
@@ -2033,6 +2300,22 @@ internal class FileDao(
         });
     }
 
+    public async Task<bool> IsVectorizationDeletedAsync(int fileId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.IsVectorizationDeletedAsync(tenantId, fileId);
+    }
+
+    public async Task DeleteVectorizationIfDeletedAsync(int fileId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.DeleteVectorizationIfDeletedAsync(tenantId, fileId);
+    }
+
     public async Task SetFileKey(int fileId, IEnumerable<FileKeyData> keys)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -2120,7 +2403,6 @@ internal class FileDao(
         bool excludeSubject,
         Location? location,
         int trashId,
-        int parentId,
         List<FolderType> folderType,
         OrderBy orderBy,
         int offset,
@@ -2133,7 +2415,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId, folderType);
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, folderType);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -2469,7 +2751,7 @@ internal class FileDao(
                 ).FirstOrDefault(),
                 VectorizationStatus = attachVectorizationStatus
                     ? filesDbContext.FileVectorization
-                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
+                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id && x.DeletedOn == null).Status
                     : null
             });
     }
@@ -2539,7 +2821,7 @@ internal class FileDao(
                 ).FirstOrDefault(),
                 VectorizationStatus = attachVectorizationStatus
                     ? filesDbContext.FileVectorization
-                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
+                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id && x.DeletedOn == null).Status
                     : null
             });
     }
@@ -2594,12 +2876,12 @@ internal class FileDao(
                 return dbFile;
             }
 
-            using var ms = new MemoryStream();
+            var capacity = stream.CanSeek ? stream.Length : file.ContentLength;
+            using var ms = new MemoryStream(capacity > 0 ? (int)capacity : 0);
             await stream.CopyToAsync(ms);
-            var buffer = ms.GetBuffer();
             dbFile.Document = new Document
             {
-                Data = Convert.ToBase64String(buffer, 0, (int)ms.Length)
+                Data = Convert.ToBase64String(ms.GetBuffer(), 0, (int)ms.Length)
             };
         }
         catch (FileNotFoundException)
@@ -2845,7 +3127,7 @@ internal class FileDao(
         return q;
     }
 
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId, List<FolderType> folderType)
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, List<FolderType> folderType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -2862,11 +3144,6 @@ internal class FileDao(
         if (trashId != 0)
         {
             initQuery = initQuery.Where(r => !filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == trashId));
-        }
-
-        if (parentId != 0)
-        {
-            initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == parentId));
         }
 
         if (folderType is { Count: > 0 })
@@ -2958,14 +3235,6 @@ internal class FileDao(
         return q;
     }
 
-    private async ValueTask DeleteVectorsAsync(int tenantId, int fileId)
-    {
-        var collection = vectorStore.GetCollection<VectorChunk>(VectorChunk.IndexName, null);
-        await collection.DeleteAsync(new VectorSearchOptions<VectorChunk>
-        {
-            Filter = x => x.TenantId == tenantId && x.FileId == fileId
-        });
-    }
 }
 
 public class DbFileQuery
@@ -3045,7 +3314,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         FilesMessageService filesMessageService,
         QuotaSocketManager quotaSocketManager,
         CustomQuota customQuota,
-        VectorStore vectorStore,
         IEventBus eventBus,
         VectorizationGlobalSettings vectorizationGlobalSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -3088,7 +3356,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         filesMessageService,
         quotaSocketManager,
         customQuota,
-        vectorStore,
         eventBus,
         vectorizationGlobalSettings,
         displayUserSettingsHelper), ICacheFileDao<int>

@@ -38,7 +38,10 @@ namespace ASC.Files.Core.Core.History;
 [Scope]
 public class HistoryService(
     IDbContextFactory<MessagesContext> dbContextFactory,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    IDaoFactory daoFactory,
+    UserManager userManager,
+    AuditEventMapper auditEventMapper)
 {
     public static HashSet<MessageAction> TrackedActions => [
         MessageAction.FileCreated,
@@ -177,5 +180,47 @@ public class HistoryService(
         }
 
         return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, fromDate, toDate);
+    }
+
+    public async Task<List<AuditEvent>> GetFolderAuditEventsAsync(int folderId, DateTime? fromDate, DateTime? toDate)
+    {
+        var entry = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId)
+            ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+
+        var result = new List<AuditEvent>();
+
+        await foreach (var (dbEvent, _) in GetHistoryAsync(entry, 0, int.MaxValue, false, [], [], fromDate, toDate))
+        {
+            result.Add(await ToAuditEventAsync(dbEvent));
+        }
+
+        return result;
+    }
+
+    private async Task<AuditEvent> ToAuditEventAsync(DbAuditEvent dbEvent)
+    {
+        var query = new AuditEventQuery
+        {
+            Event = dbEvent,
+            UserData = await GetUserDataAsync(dbEvent.UserId)
+        };
+
+        return auditEventMapper.ToAuditEvent(query);
+    }
+
+    private async Task<UserData> GetUserDataAsync(Guid? userId)
+    {
+        if (!userId.HasValue || userId.Value == Guid.Empty)
+        {
+            return new UserData();
+        }
+
+        var user = await userManager.GetUsersAsync(userId.Value);
+
+        return new UserData
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName
+        };
     }
 }

@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Integration.WebSearch;
-
 namespace ASC.AI.Service;
 
 [Scope]
@@ -49,7 +47,7 @@ public class WebSearchStorageService(
     private readonly AiGateway _gateway = gateway;
 
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
-    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
+    private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async Task<WebSearchConfig?> ReadAsync()
     {

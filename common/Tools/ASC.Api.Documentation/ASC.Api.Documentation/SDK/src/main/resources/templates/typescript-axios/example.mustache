@@ -1,0 +1,59 @@
+{{>licenseInfo}}
+import axios from "axios";
+import { Configuration, RoomsApi, AuthenticationApi, FoldersApi } from "../dist/index";
+
+const baseURL = "https://your-docspace.onlyoffice.com";
+const expectedOrigin = "http://myclient.example.com";
+
+async function main() {
+
+    // ---------- AUTH ----------
+
+    const config = new Configuration({
+        basePath: baseURL,
+        origin: expectedOrigin
+    });
+
+    const axiosInstance = axios.create();
+
+    // ---------- VERIFY ORIGIN ----------
+    axiosInstance.interceptors.request.use((request) => {
+        const sentOrigin = request.headers?.["Origin"];
+        if (sentOrigin !== expectedOrigin) {
+            throw new Error(`Origin mismatch: expected "${expectedOrigin}", got "${sentOrigin}"`);
+        }
+        console.log(`Origin header verified: ${sentOrigin}`);
+        return request;
+    });
+
+    const authApi = new AuthenticationApi(config, undefined, axiosInstance);
+
+    const auth = await authApi.authenticateMe({
+        authRequestsDto: {userName: "example@onlyoffice.com", password: "11111111"}
+    });
+
+    const token = auth.data.response.token;
+
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+    // ---------- ROOMS API ----------
+
+    const roomsApi = new RoomsApi(config, undefined, axiosInstance);
+
+    const res = await roomsApi.getRoomsFolder({ type: [6,5]});
+    console.log(res.data.response.count);
+    console.log(res.config.headers);
+
+    const resCreateRoom = await roomsApi.createRoom({createRoomRequestDto: {title: "example", roomType: 6 }});
+    console.log(resCreateRoom.data.statusCode)
+
+    // ---------- FOLDERS API ----------
+
+    const foldersApi = new FoldersApi(config, undefined, axiosInstance);
+    const resFolderMy = await foldersApi.getMyFolder();
+
+    const folderMyId = resFolderMy.data.response.current.id;
+    console.log(folderMyId);
+}
+
+main();

@@ -168,4 +168,10 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>Huoneet</value>
   </data>
+  <data name="Files" xml:space="preserve">
+    <value>Asiakirjat</value>
+  </data>
+  <data name="Forms" xml:space="preserve">
+    <value>Lomakkeet</value>
+  </data>
 </root>

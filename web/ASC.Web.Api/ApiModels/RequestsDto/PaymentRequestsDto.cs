@@ -66,7 +66,9 @@ public class PaymentUrlRequestDto
     /// <summary>
     /// The payment quantity.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{ "admin": 1 }</example>
+    [Length(1, 1)]
+    [Required]
     public Dictionary<string, int> Quantity { get; set; }
 }
 
@@ -126,7 +128,9 @@ public class QuantityRequestDto
     /// <summary>
     /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{ "admin": 1 }</example>
+    [Length(1, 1)]
+    [Required]
     public Dictionary<string, int> Quantity { get; set; }
 }
 
@@ -138,7 +142,9 @@ public class WalletQuantityRequestDto
     /// <summary>
     /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{ "admin": 1 }</example>
+    [Length(1, 1)]
+    [Required]
     public Dictionary<string, int?> Quantity { get; set; }
 
     /// <summary>
@@ -225,26 +231,6 @@ public class ChangeWalletServiceStateRequestDto
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }
-}
-
-/// <summary>
-/// The request parameters for crediting AI quota to the customer AI subaccount.
-/// </summary>
-public class CreditAiBalanceRequestDto
-{
-    /// <summary>
-    /// The amount to transfer from the main balance to the AI subaccount.
-    /// </summary>
-    /// <example>100.00</example>
-    [Range(0.01, 999999)]
-    public decimal Amount { get; set; }
-
-    /// <summary>
-    /// The three-character ISO 4217 currency symbol.
-    /// </summary>
-    /// <example>USD</example>
-    [StringLength(3)]
-    public string Currency { get; set; }
 }
 
 /// <summary>

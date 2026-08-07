@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -53,7 +53,8 @@ internal class FolderDao(
     GlobalFolder globalFolder,
     Global global,
     IDistributedLockProvider distributedLockProvider,
-    StorageFactory storageFactory)
+    StorageFactory storageFactory,
+    IEventBus eventBus)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -520,6 +521,13 @@ internal class FolderDao(
             await tx.CommitAsync();
         });
 
+        await PublishFolderIndexEventAsync(folder);
+
+        foreach (var child in children)
+        {
+            await PublishFolderIndexEventAsync(child);
+        }
+
         return folderId;
     }
 
@@ -550,11 +558,27 @@ internal class FolderDao(
         }
         else
         {
-            folderId = await InternalSaveFolderToDbAsync(dbContext, folder);
+            // A live transaction was passed in: the caller owns the commit, so we must not
+            // publish the index event here — the surrounding transaction is not committed yet.
+            // The caller publishes it after tx.CommitAsync().
+            return await InternalSaveFolderToDbAsync(dbContext, folder);
         }
 
-        //FactoryIndexer.IndexAsync(FoldersWrapper.GetFolderWrapper(ServiceProvider, folder));
+        await PublishFolderIndexEventAsync(folder);
+
         return folderId;
+    }
+
+    private async Task PublishFolderIndexEventAsync(Folder<int> folder)
+    {
+        if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || folder.IsRoom)
+        {
+            await eventBus.PublishAsync(new FolderIndexIntegrationEvent(folder.CreateBy, _tenantManager.GetCurrentTenantId())
+            {
+                FolderId = folder.Id,
+                Action = FolderIndexAction.Index
+            });
+        }
     }
 
     private async Task<int> InternalSaveFolderToDbAsync(FilesDbContext filesDbContext, Folder<int> folder)
@@ -623,11 +647,6 @@ internal class FolderDao(
             filesDbContext.Update(toUpdate);
 
             await filesDbContext.SaveChangesAsync();
-
-            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || folder.IsRoom)
-            {
-                _ = factoryIndexer.IndexAsync(toUpdate);
-            }
         }
         else
         {
@@ -683,11 +702,6 @@ internal class FolderDao(
             var entityEntry = await filesDbContext.Folders.AddAsync(newFolder);
             newFolder = entityEntry.Entity;
             await filesDbContext.SaveChangesAsync();
-
-            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || folder.IsRoom)
-            {
-                _ = factoryIndexer.IndexAsync(newFolder);
-            }
 
             folder.Id = newFolder.Id;
 
@@ -770,7 +784,7 @@ internal class FolderDao(
         return room;
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, int parentId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
+    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -779,7 +793,7 @@ internal class FolderDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, parentId, folderType);
+        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, folderType);
 
         q = await GetFoldersQueryWithFilters(q, subjectGroup, subjectId, searchText, excludeSubject);
 
@@ -818,7 +832,7 @@ internal class FolderDao(
         }
     }
 
-    private IQueryable<FolderByTagQuery> GetFoldersByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, int? parentId, List<FolderType> folderType)
+    private IQueryable<FolderByTagQuery> GetFoldersByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, List<FolderType> folderType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -830,11 +844,6 @@ internal class FolderDao(
         if (trashId != 0)
         {
             initQuery = initQuery.Where(r => !filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == trashId));
-        }
-
-        if (parentId != 0)
-        {
-            initQuery = initQuery.Where(r => filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == parentId));
         }
 
         if (folderType is { Count: > 0 })
@@ -941,6 +950,7 @@ internal class FolderDao(
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
+        List<int> deletedFolderIds = null;
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -960,10 +970,7 @@ internal class FolderDao(
 
             var folderToDelete = await filesDbContext.DbFoldersForDeleteAsync(tenantId, subfolders).ToListAsync();
 
-            foreach (var f in folderToDelete)
-            {
-                await factoryIndexer.DeleteAsync(f);
-            }
+            deletedFolderIds = folderToDelete.Select(f => f.Id).ToList();
 
             context.Folders.RemoveRange(folderToDelete);
 
@@ -981,25 +988,34 @@ internal class FolderDao(
 
             await filesDbContext.DeleteFilesSecurityAsync(tenantId, subfolders.Select(r => r));
 
-            await filesDbContext.DeleteBunchObjectsAsync(tenantId, folderId.ToString());
+            // subtree-wide cleanups: the cascade removes every subfolder row,
+            // so the related records of subfolders must go too, not only the root ones
+            await filesDbContext.DeleteBunchObjectsByIdsAsync(tenantId, subfoldersStrings);
 
-            await DeleteCustomOrder(filesDbContext, folderId);
+            await filesDbContext.DeleteOrderByFolderIdsAsync(tenantId, subfolders);
 
-            await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
-            await filesDbContext.DeleteChatsAsync(folderId);
-            await filesDbContext.DeleteAttachmentsAsync(tenantId, folderId);
-            await filesDbContext.DeleteThreadsAsync(tenantId, folderId);
-            await filesDbContext.DeleteAssignmentsAsync(tenantId, folderId);
-            await filesDbContext.DeleteMcpServerToolPrefsAsync(tenantId, folderId);
-            await filesDbContext.DeleteMcpServersAsync(tenantId, folderId);
+            await filesDbContext.DeleteAuditReferencesByFolderIdsAsync(subfolders);
+            await filesDbContext.DeleteAttachmentsByFolderIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteThreadsByFolderIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteAssignmentsByFolderIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteMcpServerToolPrefsByFolderIdsAsync(tenantId, subfolders);
+            await filesDbContext.DeleteMcpServersByFolderIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteRoomGroupRefByFolderIdsAsync(tenantId, subfolders);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
             await RecalculateFoldersCountAsync(parent, tenantId);
+
         });
 
-        //FactoryIndexer.DeleteAsync(new FoldersWrapper { Id = id });
+        if (deletedFolderIds is { Count: > 0 })
+        {
+            await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+            {
+                FolderIds = deletedFolderIds,
+                Action = FolderIndexAction.Delete
+            });
+        }
     }
 
     public async Task<TTo> MoveFolderAsync<TTo>(int folderId, TTo toFolderId, CancellationToken? cancellationToken)
@@ -1332,7 +1348,11 @@ internal class FolderDao(
         filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();
 
-        _ = factoryIndexer.IndexAsync(toUpdate);
+        await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FolderId = folder.Id,
+            Action = FolderIndexAction.Index
+        });
 
         return folder.Id;
     }
@@ -1411,7 +1431,11 @@ internal class FolderDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        _ = factoryIndexer.IndexAsync(toUpdate);
+        await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FolderId = folder.Id,
+            Action = FolderIndexAction.Index
+        });
 
         return folder.Id;
     }
@@ -1429,7 +1453,11 @@ internal class FolderDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        _ = factoryIndexer.IndexAsync(toUpdate);
+        await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FolderId = folder.Id,
+            Action = FolderIndexAction.Index
+        });
 
         return folder.Id;
     }
@@ -1448,7 +1476,11 @@ internal class FolderDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        _ = factoryIndexer.IndexAsync(toUpdate);
+        await eventBus.PublishAsync(new FolderIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FolderId = folder.Id,
+            Action = FolderIndexAction.Index
+        });
 
         return folder.Id;
     }
@@ -1738,6 +1770,8 @@ internal class FolderDao(
 
                     await tx.CommitAsync(); //Commit changes
                 });
+
+                await PublishFolderIndexEventAsync(folder); //Publish only after the transaction has committed
             }
 
             yield return newFolderId;
@@ -1866,6 +1900,8 @@ internal class FolderDao(
 
                 await tx.CommitAsync(); //Commit changes
             });
+
+            await PublishFolderIndexEventAsync(folder); //Publish only after the transaction has committed
         }
 
         return newFolderId;
@@ -2579,7 +2615,8 @@ internal class CacheFolderDao(
     GlobalFolder globalFolder,
     Global global,
     IDistributedLockProvider distributedLockProvider,
-    StorageFactory storageFactory)
+    StorageFactory storageFactory,
+    IEventBus eventBus)
     : FolderDao(
         factoryIndexer,
         userManager,
@@ -2599,7 +2636,8 @@ internal class CacheFolderDao(
         globalFolder,
         global,
         distributedLockProvider,
-        storageFactory), ICacheFolderDao<int>
+        storageFactory,
+        eventBus), ICacheFolderDao<int>
 {
     private readonly ConcurrentDictionary<int, Folder<int>> _cache = new();
     public override async Task<Folder<int>> GetFolderAsync(int folderId)

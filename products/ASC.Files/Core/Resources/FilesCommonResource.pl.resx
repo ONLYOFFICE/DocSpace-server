@@ -595,4 +595,10 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Nie udało się zsynchronizować danych formularza z zewnętrzną bazą danych.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Formularz został zmieniony. Ten szkic jest nieaktualny i nie można go przesłać.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Instrukcja agenta AI nie może być dłuższa niż {0} znaków</value>
+  </data>
 </root>

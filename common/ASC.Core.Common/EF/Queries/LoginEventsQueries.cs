@@ -111,11 +111,10 @@ static file class Queries
                     .AsQueryable());
 
     public static readonly Func<MessagesContext, int, int, Task<int>> DeleteLoginEventsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (MessagesContext ctx, int tenantId, int loginEventId) =>
-                ctx.LoginEvents
-                    .Where(r => r.TenantId == tenantId && r.Id == loginEventId)
-                    .ExecuteUpdate(r => r.SetProperty(p => p.Active, false)));
+        (MessagesContext ctx, int tenantId, int loginEventId) =>
+            ctx.LoginEvents
+                .Where(r => r.TenantId == tenantId && r.Id == loginEventId)
+                .ExecuteUpdateAsync(r => r.SetProperty(p => p.Active, false));
 
     public static readonly Func<MessagesContext, int, Guid, IAsyncEnumerable<DbLoginEvent>> LoginEventsByUserIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

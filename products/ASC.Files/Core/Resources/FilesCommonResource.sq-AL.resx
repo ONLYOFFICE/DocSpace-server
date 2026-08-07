@@ -595,4 +595,10 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Dështoi sinkronizimi i të dhënave të formularit me bazën e të dhënave të jashtme.</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Udhëzimi i një agjenti AI nuk mund të jetë më i gjatë se {0} karaktere</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Formulari është ndryshuar. Ky draft është i vjetëruar dhe nuk mund të dorëzohet.</value>
+  </data>
 </root>

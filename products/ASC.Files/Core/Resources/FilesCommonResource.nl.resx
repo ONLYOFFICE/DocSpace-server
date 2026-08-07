@@ -595,4 +595,10 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Synchronisatie van formuliergegevens met externe database mislukt.</value>
   </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Het formulier is gewijzigd. Dit concept is verouderd en kan niet worden ingediend.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>De instructie van een AI-agent mag niet langer zijn dan {0} tekens</value>
+  </data>
 </root>

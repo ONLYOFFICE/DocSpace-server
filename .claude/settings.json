@@ -1,5 +1,17 @@
 {
   "enabledPlugins": {
-    "aspire@aspire-skills": true
+    "csharp-lsp@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(dotnet test *)",
+      "Bash(dotnet format *)",
+      "Bash(openspec *)"
+    ],
+    "additionalDirectories": [
+      "../buildtools/config",
+      "../Logs"
+    ]
   }
 }

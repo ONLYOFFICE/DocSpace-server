@@ -31,11 +31,9 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Core;
-global using ASC.AI.Core.Chat.Data;
-global using ASC.AI.Core.Chat.Deletion;
 global using ASC.Api.Core.Extensions;
-global using ASC.AI.Core.Export;
 global using ASC.AI.Worker;
 global using ASC.AI.Worker.BackgroundServices;
 global using ASC.AI.Worker.Extensions;
@@ -47,8 +45,12 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Hosting;
 global using ASC.Common;
 global using ASC.Common.DependencyInjection;
+global using ASC.Common.Log;
 
 global using ASC.Common.Threading;
+global using ASC.Common.Threading.HeartBeat.Abstractions;
+
+global using ASC.ElasticSearch.VectorData;
 
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
@@ -64,8 +66,11 @@ global using Autofac;
 
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
+global using Microsoft.EntityFrameworkCore;
+
 global using NLog;
 
 global using System.Text;
+global using System.Threading.Channels;
 
 global using ASC.Web.Files.Utils;

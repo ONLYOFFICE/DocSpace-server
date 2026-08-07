@@ -247,7 +247,7 @@
     <value>Abonamentrul clientului a fost actualizat: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate</value>
+    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Portofelul clientului a fost alimentat: {0}</value>
@@ -1202,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Conexiunile active ale utilizatorului au fost deconectate: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Configurația Docs Connect a fost actualizată</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Raportul de cotă Docs Connect a fost descărcat</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Setările AI ale utilizatorului au fost actualizate</value>
   </data>
 </root>

@@ -40,32 +40,38 @@ using SettingsApi = DocSpace.API.SDK.Api.Files.SettingsApi;
 
 namespace ASC.Files.Tests.Tests;
 
-[Collection("Test Collection")]
 public class BaseTest(
     AspireAppFixture fixture
-    ) : IAsyncLifetime
+) : IAsyncLifetime
 {
-    protected readonly HttpClient _filesClient = fixture.FilesHttpClient;
-    protected readonly HttpClient _peopleClient = fixture.PeopleHttpClient;
-    protected readonly FoldersApi _foldersApi = fixture.FoldersApi;
-    protected readonly FilesApi _filesApi = fixture.FilesApi;
-    protected readonly OperationsApi _filesOperationsApi = fixture.OperationsApi;
-    protected readonly RoomsApi _roomsApi = fixture.RoomsApi;
-    protected readonly SettingsApi _filesSettingsApi = fixture.SettingsApi;
-    protected readonly QuotaApi _quotaApi = fixture.QuotaApi;
-    protected readonly SharingApi _sharingApi = fixture.SharingApi;
-    protected readonly PrivacyroomApi _privacyRoomApi = fixture.PrivacyroomApi;
+    private PortalClients _clients = null!;
 
-    protected readonly GroupApi _groupApi = fixture.GroupApi;
-    protected readonly UserStatusApi _userStatusApi = fixture.UserStatusApi;
-    protected readonly PhotosApi _photosApi = fixture.PhotosApi;
+    // The portal and its owner created for this test. Both live on the per-portal client bundle,
+    // so the owner Id is always the one belonging to this test's own portal — never shared.
+    protected User Owner => _clients.Owner;
 
-    protected readonly CommonSettingsApi _commonSettingsApi = fixture.CommonSettingsApi;
-    protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = fixture.WebApiSettingsQuotaApi;
-    protected readonly HttpClient _webApiClient = fixture.WebApiHttpClient;
-    protected readonly AuthenticationApi _authenticationApi = fixture.AuthenticationApi;
+    protected HttpClient _filesClient = null!;
+    protected HttpClient _peopleClient = null!;
+    protected HttpClient _webApiClient = null!;
 
-    private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
+    protected FoldersApi _foldersApi = null!;
+    protected FilesApi _filesApi = null!;
+    protected OperationsApi _filesOperationsApi = null!;
+    protected RoomsApi _roomsApi = null!;
+    protected SettingsApi _filesSettingsApi = null!;
+    protected QuotaApi _quotaApi = null!;
+    protected PaymentApi _paymentApi = null!;
+    protected SharingApi _sharingApi = null!;
+    protected PrivacyroomApi _privacyRoomApi = null!;
+
+    protected GroupApi _groupApi = null!;
+    protected UserStatusApi _userStatusApi = null!;
+    protected PhotosApi _photosApi = null!;
+    protected ProfilesApi _profilesApi = null!;
+
+    protected CommonSettingsApi _commonSettingsApi = null!;
+    protected DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = null!;
+    protected AuthenticationApi _authenticationApi = null!;
 
     //   FileShare.None
     public static TheoryData<FileShare> ValidFileShare =>
@@ -75,12 +81,12 @@ public class BaseTest(
 
     public static TheoryData<FileShare> InvalidFileShare =>
     [
-       FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
+        FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
     ];
 
     public static TheoryData<FileShare> InvalidFileShareFillingForms =>
     [
-        FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator,  FileShare.Editing, FileShare.Review, FileShare.Comment //, FileShare.Read
+        FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Review, FileShare.Comment //, FileShare.Read
     ];
 
     public static TheoryData<RoomType> ValidRoomTypesForShare =>
@@ -95,12 +101,115 @@ public class BaseTest(
 
     public async ValueTask InitializeAsync()
     {
-        await Initializer.InitializeAsync(fixture);
+        var setupSw = Stopwatch.StartNew();
+
+        // Register a brand-new portal for this test and bind a fresh set of clients to it.
+        _clients = await fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
+
+        _filesClient = _clients.FilesHttpClient;
+        _peopleClient = _clients.PeopleHttpClient;
+        _webApiClient = _clients.WebApiHttpClient;
+
+        _foldersApi = _clients.FoldersApi;
+        _filesApi = _clients.FilesApi;
+        _filesOperationsApi = _clients.OperationsApi;
+        _roomsApi = _clients.RoomsApi;
+        _filesSettingsApi = _clients.SettingsApi;
+        _quotaApi = _clients.QuotaApi;
+        _paymentApi = _clients.PaymentApi;
+        _sharingApi = _clients.SharingApi;
+        _privacyRoomApi = _clients.PrivacyroomApi;
+
+        _groupApi = _clients.GroupApi;
+        _userStatusApi = _clients.UserStatusApi;
+        _photosApi = _clients.PhotosApi;
+        _profilesApi = _clients.ProfilesApi;
+
+        _commonSettingsApi = _clients.CommonSettingsApi;
+        _settingsQuotaApi = _clients.SettingsQuotaApi;
+        _authenticationApi = _clients.AuthenticationApi;
+
+        await _filesClient.Authenticate(Owner);
+
+        // NOTE: the owner's root folder tree is provisioned lazily on first access. We intentionally
+        // do NOT warm it up here — tests that never touch the owner's folders should not pay for it.
+        Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        await _resetDatabase();
+        // Each test owns its portal and clients; nothing is shared, so just dispose the clients.
+        _clients.Dispose();
+        return ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Invites and registers a new member of the given type into the current test's portal.
+    /// </summary>
+    protected async Task<User> InviteContact(EmployeeType employeeType, User? user = null)
+    {
+        user ??= Owner;
+        await _peopleClient.Authenticate(user);
+
+        var fakeMember = Initializer.FakerMember.Generate();
+
+        var memberSw = Stopwatch.StartNew();
+        var createMemberResponse = await _clients.ProfilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
+        {
+            CultureName = "en-US",
+            Spam = false,
+            Email = fakeMember.Email,
+            Password = fakeMember.Password,
+            FirstName = fakeMember.FirstName,
+            LastName = fakeMember.LastName,
+            Type = employeeType,
+        }, TestContext.Current.CancellationToken);
+        Timing.Write($"invite.addMember({employeeType})", memberSw.ElapsedMilliseconds);
+
+        if (createMemberResponse.StatusCode != HttpStatusCode.OK)
+        {
+            throw new HttpRequestException($"Unable to invite user {employeeType}");
+        }
+
+        return new User(fakeMember.Email, fakeMember.Password) { Id = createMemberResponse.Data.Response.Id };
+    }
+
+
+    protected async Task<User> InviteGuest(User? user = null)
+    {
+        user ??= Owner;
+        await _peopleClient.Authenticate(user);
+
+        var fakeGuest = Initializer.FakerMember.Generate();
+
+        var payload = JsonSerializer.Serialize(new
+        {
+            firstName = fakeGuest.FirstName,
+            lastName = fakeGuest.LastName,
+            email = fakeGuest.Email,
+            password = fakeGuest.Password,
+            type = nameof(EmployeeType.Guest),
+            cultureName = "en-US",
+            spam = false
+        });
+
+        using var content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+        var guestSw = Stopwatch.StartNew();
+        using var response = await _peopleClient.PostAsync("api/2.0/people/active", content, TestContext.Current.CancellationToken);
+        Timing.Write($"invite.guest({user.Email})", guestSw.ElapsedMilliseconds);
+
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Unable to create a guest ({(int)response.StatusCode}): {body}");
+        }
+
+        using var json = JsonDocument.Parse(body);
+        var guestId = json.RootElement.GetProperty("response").GetProperty("id").GetGuid();
+
+        return new User(fakeGuest.Email, fakeGuest.Password) { Id = guestId };
     }
 
     protected async Task<FileDtoInteger> GetFile(int fileId)
@@ -134,14 +243,17 @@ public class BaseTest(
 
     protected async Task<FileDtoInteger> CreateFileInMy(string fileName, User user)
     {
-        var folderId = await GetUserFolderIdAsync( user);
+        var folderId = await GetUserFolderIdAsync(user);
 
         return await CreateFile(fileName, folderId);
     }
 
     protected async Task<FileDtoInteger> CreateFile(string fileName, int folderId)
     {
-        return (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        var sw = Stopwatch.StartNew();
+        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
+        return result;
     }
 
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, FolderType folderType, User user)
@@ -153,7 +265,7 @@ public class BaseTest(
 
     protected async Task<FolderDtoInteger> CreateFolderInMy(string folderName, User user)
     {
-        var folderId = await GetUserFolderIdAsync( user);
+        var folderId = await GetUserFolderIdAsync(user);
 
         return await CreateFolder(folderName, folderId);
     }
@@ -220,9 +332,9 @@ public class BaseTest(
 
     protected async Task<(string, int)> CreateFileAndShare(FileShare fileShare, bool primary = true, bool varInternal = false, DateTime? expirationDate = null)
     {
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
-        var file = await CreateFileInMy("file_update_link.docx", Initializer.Owner);
+        var file = await CreateFileInMy("file_update_link.docx", Owner);
 
         // Create initial external link
         var initialLinkParams = new FileLinkRequest(
@@ -266,11 +378,49 @@ public class BaseTest(
         return openEditResult.File;
     }
 
-    public async Task<int> GetFolderIdAsync(FolderType folderType, User user)
+    protected async Task<int> GetFolderIdAsync(FolderType folderType, User user)
     {
         await _filesClient.Authenticate(user);
 
+        var rootSw = Stopwatch.StartNew();
+
+        switch (folderType)
+        {
+            case FolderType.USER:
+                {
+                    var myFolder = await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getMy({user.Email})", rootSw.ElapsedMilliseconds);
+                    return myFolder.Response.Current.Id;
+                }
+            case FolderType.Favorites:
+                {
+                    var favoritesFolder = await _foldersApi.GetFavoritesFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getFavorites({user.Email})", rootSw.ElapsedMilliseconds);
+                    return favoritesFolder.Response.Current.Id;
+                }
+            case FolderType.Recent:
+                {
+                    var recentFolder = await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getRecent({user.Email})", rootSw.ElapsedMilliseconds);
+                    return recentFolder.Response.Current.Id;
+                }
+            case FolderType.TRASH:
+                {
+                    var recentFolder = await _foldersApi.GetTrashFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getTrash({user.Email})", rootSw.ElapsedMilliseconds);
+                    return recentFolder.Response.Current.Id;
+                }
+            case FolderType.Forms:
+                {
+                    var recentFolder = await _foldersApi.GetFormsFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getForms({user.Email})", rootSw.ElapsedMilliseconds);
+                    return recentFolder.Response.Current.Id;
+                }
+        }
+
         var rootFolder = (await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"getRoot({user.Email})", rootSw.ElapsedMilliseconds);
+
         var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
 
         return folderId;

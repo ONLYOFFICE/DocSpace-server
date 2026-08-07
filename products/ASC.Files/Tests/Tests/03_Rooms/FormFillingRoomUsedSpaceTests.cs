@@ -43,7 +43,6 @@ namespace ASC.Files.Tests.Tests._03_Rooms;
 /// crossing the root boundary is redirected to the Forms root folder, so the "Rooms" section
 /// statistics no longer include their content while the "Forms" section reflects it.
 /// </summary>
-[Collection("Test Collection")]
 [Trait("Category", "Rooms")]
 public class FormFillingRoomUsedSpaceTests(
     AspireAppFixture fixture)
@@ -53,7 +52,7 @@ public class FormFillingRoomUsedSpaceTests(
     public async Task UploadFileToFillingFormsRoom_IncreasesFormsUsedSpace_NotRoomsUsedSpace()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
 
         var before = await GetUsedSpaceAsync();
@@ -75,7 +74,7 @@ public class FormFillingRoomUsedSpaceTests(
     public async Task UploadFileToCustomRoom_IncreasesRoomsUsedSpace_NotFormsUsedSpace()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var customRoom = await CreateCustomRoom("Custom Room " + Guid.NewGuid().ToString()[..8]);
 
         var before = await GetUsedSpaceAsync();
@@ -97,7 +96,7 @@ public class FormFillingRoomUsedSpaceTests(
     public async Task ArchiveAndUnarchiveFillingFormsRoom_MovesUsedSpaceBetweenFormsAndArchive()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
 
         var before = await GetUsedSpaceAsync();
@@ -140,7 +139,7 @@ public class FormFillingRoomUsedSpaceTests(
     public async Task DeleteFillingFormsRoom_DecreasesFormsUsedSpace()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
 
         var before = await GetUsedSpaceAsync();

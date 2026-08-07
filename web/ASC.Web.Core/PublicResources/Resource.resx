@@ -198,6 +198,21 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Transaction history</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Report</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Period</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Date generated</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Total</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Type</value>
   </data>
@@ -1416,6 +1431,24 @@
   <data name="Tariffs_adminwallet" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Embed ONLYOFFICE Docs editors into your app with cloud-hosted tenants and your own API keys.</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Docs Connect Dev Pack</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Users</value>
+  </data>
   <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
     <value>AI search</value>
   </data>
@@ -1433,5 +1466,47 @@
   </data>
   <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
     <value>Image</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>DocsCloud Quota Report ({0})</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>User quota</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>User ID</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Access expires</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>User type</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Internal</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>External</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editors</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Live Viewer</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Document editors with full permissions</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Read-only document viewers</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Subscription limit</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Remaining</value>
   </data>
 </root>

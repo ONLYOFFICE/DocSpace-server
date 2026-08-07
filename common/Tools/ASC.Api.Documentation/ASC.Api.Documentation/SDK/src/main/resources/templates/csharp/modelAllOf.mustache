@@ -108,6 +108,8 @@
     {{#vendorExtensions.x-has-localVars}}
     {{#hasRequired}}
     {{^hasOnlyReadOnly}}
+    {{#vendorExtensions.x-localVars}}
+    {{#-first}}
         /// <summary>
         /// Initializes a new instance of the <see cref="{{classname}}" /> class.
         /// </summary>
@@ -121,6 +123,8 @@
             this.AdditionalProperties = new Dictionary<string, object>();
         }
         {{/isAdditionalPropertiesTrue}}
+    {{/-first}}
+    {{/vendorExtensions.x-localVars}}
     {{/hasOnlyReadOnly}}
     {{/hasRequired}}
     {{/vendorExtensions.x-has-localVars}}

@@ -83,8 +83,6 @@ public interface JpaAuthorizationRepository
    * <ul>
    *   <li>State
    *   <li>Authorization code value
-   *   <li>Access token value
-   *   <li>Refresh token value
    *   <li>Access token hash
    *   <li>Refresh token hash
    * </ul>
@@ -94,12 +92,10 @@ public interface JpaAuthorizationRepository
    *     otherwise empty.
    */
   @Query(
-      "SELECT a FROM AuthorizationEntity a WHERE a.state = :token"
+      "SELECT a FROM AuthorizationEntity a WHERE a.accessTokenHash = :token"
+          + " OR a.refreshTokenHash = :token"
           + " OR a.authorizationCodeValue = :token"
-          + " OR a.accessTokenValue = :token"
-          + " OR a.refreshTokenValue = :token"
-          + " OR a.accessTokenHash = :token"
-          + " OR a.refreshTokenHash = :token")
+          + " OR a.state = :token")
   Optional<AuthorizationEntity>
       findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(
           @Param("token") String token);

@@ -32,7 +32,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using System.ComponentModel.DataAnnotations;
-global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Http.Headers;
@@ -45,13 +44,13 @@ global using System.Text.RegularExpressions;
 global using System.Threading.Channels;
 global using System.Web.Http.Filters;
 
+global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Core.Auth;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using DisableResponseWrapperAttribute = ASC.Api.Core.Middleware.DisableResponseWrapperAttribute;
 global using ASC.ApiSystem;
 global using ASC.ApiSystem.Classes;
-global using ASC.ApiSystem.Controllers;
 global using ASC.ApiSystem.Extensions;
 global using ASC.ApiSystem.Interfaces;
 global using ASC.ApiSystem.Log;
@@ -65,12 +64,10 @@ global using ASC.Core.Common;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
-global using ASC.Core.Common.Hosting;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
-global using ASC.EventBus.Extensions.Logger;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;
@@ -79,7 +76,6 @@ global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Utils;
 global using ASC.MessagingSystem.EF.Context;
-global using ASC.Notify.Engine;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Api.Core;
 global using ASC.Web.Core;

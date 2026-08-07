@@ -33,12 +33,14 @@
 
 import { randomUUID } from "crypto";
 import { aiService } from "../storage/httpClient.js";
+import { storage } from "../storage/index.js";
+import { getResolvedFormId, setResolvedFormId } from "../requestContext.js";
 import { getArray, getString, isObject, parseInt10 } from "../narrow.js";
 import logger from "../log.js";
 import type { ToolsAdapter, TMCPItem } from "@onlyoffice/ai-chat/core";
 
-const LIST_PATH = "/integration/tools/list";
-const CALL_PATH = "/integration/tools/call";
+const LIST_PATH = "/tools/list";
+const CALL_PATH = "/tools/call";
 
 // Group key for the disabled / allow-always filters in `storage.toolPrefs`.
 // DocSpace tools are a single logical source, so they share one serverType.
@@ -73,11 +75,104 @@ type ToolContextDto = {
     formId: number;
 };
 
-function toContext(entityId: string | undefined): ToolContextDto {
-    return {
-        folderId: parseInt10(entityId, 0) ?? 0,
-        formId: 0,
-    };
+// A ref-carrying content part encodes `{ref, title, kind}` as JSON in
+// `mimeType` (file parts) or `image` (image parts) — mirrors
+// `@onlyoffice/ai-chat/core`'s internal (unexported) `extractRefIdsFromMessage`.
+function parseRef(value: unknown): string | null {
+    if (typeof value !== "string" || value.length === 0 || value[0] !== "{") {
+        return null;
+    }
+    try {
+        const parsed: unknown = JSON.parse(value);
+        return isObject(parsed) && typeof parsed["ref"] === "string" ? parsed["ref"] : null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Extract attachment ref ids from a single `ThreadMessageLike`-shaped
+ * message (loosely typed — only the fields read here matter). Used to give
+ * `getPrompt` (called outside the engine, before `getTools` sees the
+ * message) the same attachment context.
+ */
+export function extractAttachmentRefIds(message: unknown): string[] {
+    if (!isObject(message)) {
+        return [];
+    }
+    const content = message["content"];
+    if (!Array.isArray(content)) {
+        return [];
+    }
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    for (const part of content) {
+        if (!isObject(part)) {
+            continue;
+        }
+        const ref =
+            part["type"] === "file" ? parseRef(part["mimeType"]) :
+            part["type"] === "image" ? parseRef(part["image"]) :
+            null;
+        if (ref && !seen.has(ref)) {
+            seen.add(ref);
+            ids.push(ref);
+        }
+    }
+    return ids;
+}
+
+// Resolve an attachment ref id to the DocSpace numeric file id the C# side
+// expects as `formId`. `HttpAttachmentsStorage` composes `path` as
+// `${entryId}/${title}` (see `dtoToAttachment`) — the leading segment is the
+// DocSpace entry id, echoed back verbatim from `/attachments`.
+// Whether the file actually is a started form is validated on the C# side
+// (`FormDataToolsFactory.TryInitAsync`); a non-form id resolves to an empty
+// tool bundle.
+async function resolveFormId(attachmentId: string[] | undefined): Promise<number> {
+    if (!attachmentId || attachmentId.length === 0) {
+        return 0;
+    }
+    try {
+        const records = await storage.attachments.readManyByIds(attachmentId);
+        for (const record of records) {
+            const entryId = record?.path?.split("/", 1)[0];
+            const numeric = parseInt10(entryId, 0) ?? 0;
+            if (numeric > 0) {
+                return numeric;
+            }
+        }
+    } catch (err) {
+        logger.warn(
+            `resolveFormId: failed to resolve attachment(s) [${attachmentId.join(",")}]: ${
+                err instanceof Error ? err.message : String(err)
+            }`,
+        );
+    }
+    return 0;
+}
+
+// Form features are scoped to the CURRENT user message only: the controller
+// (`withToolsPrompt`) extracts the message's attachment refs and resolves
+// them here before the stream starts; the resolved formId is kept in the
+// per-request context so the engine's later `getTools` and same-turn
+// `callTool` (whose signatures carry no current-message refs) see the same
+// value. A form that only lives in the thread history must NOT re-activate
+// the form tools, which is why the engine-supplied `config.attachmentId`
+// (collected across the whole history) is deliberately ignored.
+async function toContext(
+    entityId: string | undefined,
+    attachmentId?: string[],
+): Promise<ToolContextDto> {
+    const folderId = parseInt10(entityId, 0) ?? 0;
+    if (attachmentId && attachmentId.length > 0) {
+        const formId = await resolveFormId(attachmentId);
+        if (formId > 0) {
+            setResolvedFormId(formId);
+        }
+        return { folderId, formId };
+    }
+    return { folderId, formId: getResolvedFormId() ?? 0 };
 }
 
 // `ToolDescriptor` on the C# side — `{ name, description, parameters }`,
@@ -119,13 +214,15 @@ function parseList(raw: unknown): ToolsList {
 
 /**
  * {@link ToolsAdapter} backed by the DocSpace AI integration endpoints
- * (`integration/tools/list` / `integration/tools/call`). Most tools served
+ * (`tools/list` / `tools/call`). Most tools served
  * by this adapter are executed in-engine and the chat resumes automatically
  * with no approval round-trip; the tools in `APPROVAL_TOOL_NAMES` are
  * emitted under a separate serverType so the engine surfaces an approval
  * dialog before running them.
  */
 export class HttpToolsAdapter implements ToolsAdapter {
+    // `_config.attachmentId` (the engine's ref collection over the whole
+    // thread) is intentionally unused — see `toContext`.
     async getTools(
         entityId?: string,
         _config?: { attachmentId: string[] },
@@ -157,7 +254,7 @@ export class HttpToolsAdapter implements ToolsAdapter {
         entityId?: string,
     ): Promise<unknown> {
         const body = {
-            ...toContext(entityId),
+            ...(await toContext(entityId)),
             calls: [{ id: randomUUID(), name: toolName, arguments: args }],
         };
         // Verbose lifecycle logging: DocSpace integration tools run silently
@@ -204,31 +301,37 @@ export class HttpToolsAdapter implements ToolsAdapter {
             return `Tool "${toolName}" failed: ${error}`;
         }
         const value = "result" in result ? result["result"] : result["Result"];
+        // Contract: a tool result must reach the engine as a string — the
+        // same shape MCP tools produce. An object here would be spliced
+        // verbatim into the tool message's `content` and break providers
+        // that expect text (or text-part arrays).
+        const text = typeof value === "string" ? value : JSON.stringify(value ?? null);
         logger.info(
             `docspaceTools.callTool name=${toolName} ok in ${
                 Date.now() - started
-            }ms (resultLength=${
-                typeof value === "string" ? value.length : "n/a"
-            })`,
+            }ms (resultLength=${text.length})`,
         );
-        return value;
+        return text;
     }
 
     /**
      * System-prompt fragment that accompanies the tool list. Consumed by
-     * the controller to append to the chat's system prompt.
+     * the controller to append to the chat's system prompt. `attachmentId`
+     * lets the caller (which runs before the engine's own `getTools` call)
+     * pass the current message's attachment refs so the fragment reflects
+     * the form actually attached to this turn.
      */
-    async getPrompt(entityId?: string): Promise<string> {
-        const { prompt } = await this.list(entityId);
+    async getPrompt(entityId?: string, attachmentId?: string[]): Promise<string> {
+        const { prompt } = await this.list(entityId, attachmentId);
         return prompt;
     }
 
-    private async list(entityId: string | undefined): Promise<ToolsList> {
+    private async list(entityId: string | undefined, attachmentId?: string[]): Promise<ToolsList> {
         // Runs on every stream (tool list + prompt fragment) before the
         // assistant reply starts; a stalled list here delays the whole chat,
         // so time it and report the tool count.
         const started = Date.now();
-        const context = toContext(entityId);
+        const context = await toContext(entityId, attachmentId);
         logger.info(
             `docspaceTools.list entityId=${entityId ?? "-"} -> ${LIST_PATH} context=${JSON.stringify(context)}`,
         );
@@ -260,9 +363,10 @@ export class HttpToolsAdapter implements ToolsAdapter {
 export async function safeGetToolsPrompt(
     adapter: HttpToolsAdapter,
     entityId: string | undefined,
+    attachmentId?: string[],
 ): Promise<string> {
     try {
-        return await adapter.getPrompt(entityId);
+        return await adapter.getPrompt(entityId, attachmentId);
     } catch (err) {
         logger.warn(
             `tools/list prompt fetch failed: ${

@@ -247,7 +247,7 @@
     <value>Kundenabonnement aktualisiert: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Vom Kunden-Wallet aktivierte Serviceeinstellungen aktualisiert</value>
+    <value>Vom Kunden-Wallet aktivierte Serviceeinstellungen aktualisiert: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Kunden-Wallet aufgeladen: {0}</value>
@@ -1202,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Aktive Verbindungen für Benutzer abgemeldet: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect-Konfiguration aktualisiert</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect-Kontingentbericht</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>KI-Einstellungen des Benutzers wurden aktualisiert</value>
   </data>
 </root>

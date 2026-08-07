@@ -37,7 +37,7 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 IResourceBuilder<JavaScriptAppResource>? playwright = null;
-var basePath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", ".."));
+var basePath = AppPaths.GetBasePath(builder.AppHostDirectory);
 var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var storybook = string.Compare(builder.Configuration["STORYBOOK"], "true", StringComparison.OrdinalIgnoreCase) == 0;
@@ -55,22 +55,27 @@ if (otelFileLogging)
     connectionManager.AddOpenTelemetryCollector();
 }
 
-var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
+var isIntegrationTest = launchProfile == "integration-test";
+var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker, isIntegrationTest);
+
 switch (launchProfile)
 {
     case "integration-test":
         connectionManager
-            .AddMySql(withDataVolume: false)
+            .AddMySql(withDataVolume: false, withTmpfs: true)
             .AddRabbitMq()
             .AddRedis()
-            .AddOpensearch(withDashboard: false, fixedPort: false, withDataVolume: false);
+            .AddOpensearch(withDashboard: false, isProxied: false)
+            .AllowPortalRegistration();
 
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
             .AddProject<ASC_People>(Constants.PeoplePort)
             .AddProject<ASC_Web_Api>(Constants.WebApiPort)
-            .AddProject<ASC_AI>(Constants.AiPort);
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddSocketIO();
 
         break;
     case "preview":

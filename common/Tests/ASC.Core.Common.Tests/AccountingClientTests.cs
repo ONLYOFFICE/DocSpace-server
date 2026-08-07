@@ -51,7 +51,7 @@ public class AccountingClientTests
 
         var filter = new OperationFilter
         {
-            ServiceName = "backup",
+            ServiceName = ["backup"],
             UtcStartDate = new DateTime(2024, 1, 15, 10, 30, 0, DateTimeKind.Utc),
             UtcEndDate = new DateTime(2024, 2, 20, 8, 0, 0, DateTimeKind.Utc),
             ParticipantName = "  participant  ",
@@ -86,30 +86,6 @@ public class AccountingClientTests
     }
 
     [Fact]
-    public async Task GetCustomerOperations_AiService_UsesAiPathAndOmitsDefaults()
-    {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));
-
-        var filter = new OperationFilter
-        {
-
-            Limit = 10,
-            OrderType = OperationOrderType.Descending // default direction → must be omitted
-        };
-
-        await client.GetCustomerAiOperationsAsync("portal-9", filter);
-
-        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-9/operations/ai");
-
-        var query = ParseQuery(handler.LastUri);
-        query.Should().ContainKey("limit");
-        query.Should().NotContainKey("orderType");
-        query.Should().NotContainKey("startDate");
-        query.Should().NotContainKey("credit");
-        query.Should().NotContainKey("serviceName");
-    }
-
-    [Fact]
     public async Task GetCustomerBalance_BuildsBalancePathAndDeserializesResponse()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK,
@@ -138,17 +114,6 @@ public class AccountingClientTests
     }
 
     [Fact]
-    public async Task GetCustomerAiBalance_UsesAiBalancePath()
-    {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));
-
-        await client.GetCustomerAiBalanceAsync("portal-1");
-
-        handler.LastMethod.Should().Be(HttpMethod.Get);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-1/balance/ai");
-    }
-
-    [Fact]
     public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));
@@ -172,23 +137,11 @@ public class AccountingClientTests
     }
 
     [Fact]
-    public async Task MakeAiCredit_SendsAmountAsExactDecimal()
-    {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));
-
-        // A value that cannot be represented exactly in IEEE-754 double - must survive intact (no decimal->double cast).
-        await client.MakeAiCreditAsync("portal-1", 1234567890.123456789m, "USD", "participant");
-
-        handler.LastRequestBody.Should().NotBeNull();
-        handler.LastRequestBody.Should().Contain("\"sum\":1234567890.123456789");
-    }
-
-    [Fact]
     public async Task PaymentRequiredResponse_ThrowsAccountingPaymentRequiredException()
     {
         var (client, _) = CreateClient(_ => Json(HttpStatusCode.PaymentRequired, ""));
 
-        var act = async () => await client.MakeAiCreditAsync("portal-1", 10m, "USD", "participant");
+        var act = async () => await client.OpenCustomerSessionAsync("portal-1", "backup", "ref", 1, 10);
 
         await act.Should().ThrowExactlyAsync<AccountingPaymentRequiredException>();
     }
@@ -198,7 +151,7 @@ public class AccountingClientTests
     {
         var (client, _) = CreateClient(_ => Json(HttpStatusCode.BadRequest, "Customer not found"));
 
-        var act = async () => await client.MakeAiCreditAsync("portal-1", 10m, "USD", "participant");
+        var act = async () => await client.OpenCustomerSessionAsync("portal-1", "backup", "ref", 1, 10);
 
         await act.Should().ThrowExactlyAsync<AccountingCustomerNotFoundException>();
     }
@@ -208,7 +161,7 @@ public class AccountingClientTests
     {
         var (client, _) = CreateClient(_ => Json(HttpStatusCode.InternalServerError, "boom"));
 
-        var act = async () => await client.MakeAiCreditAsync("portal-1", 10m, "USD", "participant");
+        var act = async () => await client.OpenCustomerSessionAsync("portal-1", "backup", "ref", 1, 10);
 
         (await act.Should().ThrowExactlyAsync<AccountingException>())
             .Which.Message.Should().Contain("InternalServerError").And.Contain("boom");
@@ -247,10 +200,10 @@ public class AccountingClientTests
     [Fact]
     public async Task PostRequest_IsNotRetried_OnTransientError()
     {
-        // POST must never be retried, otherwise a money operation could be executed twice.
+        // POST must never be retried, otherwise a non-idempotent operation could be executed twice.
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.ServiceUnavailable, "unavailable"));
 
-        var act = async () => await client.MakeAiCreditAsync("portal-1", 10m, "USD", "participant");
+        var act = async () => await client.OpenCustomerSessionAsync("portal-1", "backup", "ref", 1, 10);
 
         await act.Should().ThrowAsync<AccountingException>();
         handler.CallCount.Should().Be(1);

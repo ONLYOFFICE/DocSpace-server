@@ -241,7 +241,7 @@
     <value>Předplatné zákazníka aktualizováno: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Nastavení služeb s povolenou peněženkou zákazníka bylo aktualizováno</value>
+    <value>Nastavení služeb s povolenou peněženkou zákazníka bylo aktualizováno: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Peněženka zákazníka dobita: {0}</value>
@@ -1202,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Aktivní připojení pro uživatele byla odhlášena: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Konfigurace Docs Connect byla aktualizována</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Zpráva o kvótě Docs Connect byla stažena</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Nastavení AI uživatele bylo aktualizováno</value>
   </data>
 </root>

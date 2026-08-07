@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -33,8 +33,6 @@
 
 using ASC.AI.Core.MdTextToDocx;
 
-using AiDbContext = ASC.AI.Core.Database.AiDbContext;
-
 namespace ASC.AI.Worker.Extensions;
 
 public static class AiWorkerServiceExtensions
@@ -43,20 +41,26 @@ public static class AiWorkerServiceExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddBaseDbContextPool<AiDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddAiIntegrationServices();
         services.RegisterQuotaFeature();
 
         services.RegisterQueue<VectorizationTask>(20);
-        services.RegisterQueue<ChatDeletionTask>(10);
-        services.RegisterQueue<MessageExportTask>();
-        services.RegisterQueue<ChatExportTask>();
         services.RegisterQueue<MdTextToDocxTask>(10);
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
 
-        services.AddActivePassiveHostedService<OrphanAttachmentCleanerService>(configuration);
-        services.AddActivePassiveHostedService<DeletedChatCleanerService>(configuration);
+        services.AddActivePassiveHostedService<OrphanVectorsCleanerService>(configuration);
+
+        services.AddSingleton(Channel.CreateBounded<VectorsDeletionIntegrationEvent>(new BoundedChannelOptions(1000)
+        {
+            FullMode = BoundedChannelFullMode.Wait,
+            SingleReader = true,
+            SingleWriter = false
+        }));
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<VectorsDeletionIntegrationEvent>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<VectorsDeletionIntegrationEvent>>().Writer);
+        services.AddHostedService<VectorsDeletionProcessingService>();
 
         return services;
     }
@@ -66,13 +70,9 @@ public static class AiWorkerServiceExtensions
         await Task.WhenAll(
             eventBus.SubscribeAsync<VectorizationIntegrationEvent,
                 VectorizationIntegrationEventHandler>(),
-            eventBus.SubscribeAsync<MessageExportIntegrationEvent,
-                MessageExportIntegrationEventHandler>(),
-            eventBus.SubscribeAsync<ChatExportIntegrationEvent,
-                ChatExportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<VectorsDeletionIntegrationEvent,
+                VectorsDeletionIntegrationEventHandler>(),
             eventBus.SubscribeAsync<MdTextToDocxIntegrationEvent,
-                TextToDocxIntegrationHandler>(),
-            eventBus.SubscribeAsync<ChatDeletionIntegrationEvent,
-                ChatDeletionIntegrationEventHandler>());
+                TextToDocxIntegrationHandler>());
     }
 }

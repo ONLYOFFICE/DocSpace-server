@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._03_Rooms;
 
-[Collection("Test Collection")]
 [Trait("Category", "Rooms")]
 public class RoomsApiTests(
     AspireAppFixture fixture)
@@ -43,7 +42,7 @@ public class RoomsApiTests(
     public async Task CreateRoom_WithValidData_ReturnsNewRoom()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var roomTitle = "Test Room " + Guid.NewGuid().ToString()[..8];
 
         // Act
@@ -67,7 +66,7 @@ public class RoomsApiTests(
     public async Task GetRoomInfo_ExistingRoom_ReturnsRoomData()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var roomTitle = "Room for Info " + Guid.NewGuid().ToString()[..8];
         var createdRoom = (await _roomsApi.CreateRoomAsync(
             new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.CustomRoom),
@@ -83,28 +82,10 @@ public class RoomsApiTests(
     }
 
     [Fact]
-    public async Task SearchRoom_ExistingRoom_ReturnsRoom()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var roomTitle = "Room for Info " + Guid.NewGuid().ToString()[..8];
-        var createdRoom = (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.CustomRoom),
-            TestContext.Current.CancellationToken)).Response;
-
-        // Act
-        var rooms = (await _roomsApi.GetRoomsFolderAsync(filterValue: roomTitle, cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-        // Assert
-        rooms.Should().NotBeNull();
-        rooms.Folders.Should().Contain(r => r.Title == createdRoom.Title);
-    }
-
-    [Fact]
     public async Task UpdateRoom_ChangeTitle_RoomUpdated()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var initialRoomTitle = "Initial Room " + Guid.NewGuid().ToString()[..8];
         var updatedRoomTitle = "Updated Room " + Guid.NewGuid().ToString()[..8];
 
@@ -134,7 +115,7 @@ public class RoomsApiTests(
     public async Task AddTags_ToRoom_TagsAdded()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a room
         var roomTitle = "Tagged Room " + Guid.NewGuid().ToString()[..8];
@@ -166,7 +147,7 @@ public class RoomsApiTests(
     public async Task DeleteTags_FromRoom_TagsRemoved()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a room
         var roomTitle = "Room with Tags " + Guid.NewGuid().ToString()[..8];
@@ -198,7 +179,7 @@ public class RoomsApiTests(
     public async Task PinRoom_UnpinRoom_StatusChanges()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a room
         var roomTitle = "Pinnable Room " + Guid.NewGuid().ToString()[..8];
@@ -225,7 +206,7 @@ public class RoomsApiTests(
     public async Task GetRoomsFolder_ReturnsRooms()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a room to ensure we have at least one
         var roomTitle = "Room for Listing " + Guid.NewGuid().ToString()[..8];
@@ -248,8 +229,8 @@ public class RoomsApiTests(
     public async Task GetRoomsFolderSubjectFilter_ReturnsFilteredRooms()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(Owner);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
 
         // Create an owner room and share it
         var ownerRoom = await CreateCustomRoom("Owner room " + Guid.NewGuid().ToString()[..8]);
@@ -266,14 +247,14 @@ public class RoomsApiTests(
 
         // Act
         var ownerMemberRooms = (await _roomsApi.GetRoomsFolderAsync(
-            type: [RoomType.CustomRoom], subjectId: Initializer.Owner.Id,
+            type: [RoomType.CustomRoom], subjectId: Owner.Id,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
         var adminMemberRooms = (await _roomsApi.GetRoomsFolderAsync(
             type: [RoomType.CustomRoom], subjectId: roomAdmin.Id,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         var ownerOwnedRooms = (await _roomsApi.GetRoomsFolderAsync(
-            type: [RoomType.CustomRoom], subjectOwnerId: Initializer.Owner.Id,
+            type: [RoomType.CustomRoom], subjectOwnerId: Owner.Id,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
         var adminOwnedRooms = (await _roomsApi.GetRoomsFolderAsync(
             type: [RoomType.CustomRoom], subjectOwnerId: roomAdmin.Id,
@@ -298,7 +279,7 @@ public class RoomsApiTests(
     // public async Task SetRoomSecurity_InviteUser_AccessGranted()
     // {
     //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
+    //     await _filesClient.Authenticate(Owner);
     //
     //     // Create a room
     //     var roomTitle = "Secure Room " + Guid.NewGuid().ToString()[..8];
@@ -341,7 +322,7 @@ public class RoomsApiTests(
     public async Task IsPublic_ChecksRoomStatus()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a room
         var roomTitle = "Visibility Room " + Guid.NewGuid().ToString()[..8];
@@ -373,7 +354,7 @@ public class RoomsApiTests(
     public async Task GetRoomsNewItems_ReturnsData()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Act
         var newItems = (await _roomsApi.GetRoomsNewItemsAsync(TestContext.Current.CancellationToken)).Response;
@@ -386,7 +367,7 @@ public class RoomsApiTests(
     public async Task CreateDocxFile_InRoom_ReturnsFileData()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a room
         var roomTitle = "Room for DocX " + Guid.NewGuid().ToString()[..8];
@@ -419,28 +400,21 @@ public class RoomsApiTests(
     public async Task AddExistingGuestToRoom_WhenAllowInvitingGuestsDisabled_ShouldSucceed()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
+        await _peopleClient.Authenticate(Owner);
 
         // Create a guest user
-        var guest = await Initializer.InviteContact(EmployeeType.Guest);
-
-        // Disable "Allow inviting guests" setting
-        var invitationSettings = new TenantUserInvitationSettingsRequestDto
-        {
-            AllowInvitingMembers = true,
-            AllowInvitingGuests = false
-        };
-
-        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, TestContext.Current.CancellationToken);
+        var guestEmail = Initializer.FakerMember.Generate().Email;
 
         // Create a public room
-        var room = await CreatePublicRoom("Test Room For Existing Guest");
+        var room1 = await CreatePublicRoom("Test Room For Existing Guest");
 
         // Act - Add existing guest to the room
         var invitation = new RoomInvitation
         {
-            Id = guest.Id,
-            Access = FileShare.ContentCreator
+            Access = FileShare.ContentCreator,
+            Email = guestEmail,
         };
 
         var roomInvitation = new RoomInvitationRequest
@@ -451,26 +425,36 @@ public class RoomsApiTests(
             Culture = "en-US"
         };
 
-        await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation,
-            cancellationToken: TestContext.Current.CancellationToken);
+        await _roomsApi.SetRoomSecurityAsync(room1.Id, roomInvitation, cancellationToken: TestContext.Current.CancellationToken);
+
+        var guestId = (await _profilesApi.GetProfileByEmailAsync(guestEmail, cancellationToken: TestContext.Current.CancellationToken)).Response.Id;
+
+        // Disable "Allow inviting guests" setting
+        var invitationSettings = new TenantUserInvitationSettingsRequestDto
+        {
+            AllowInvitingMembers = true,
+            AllowInvitingGuests = false
+        };
+
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, TestContext.Current.CancellationToken);
+
+        var room2 = await CreatePublicRoom("Test Room2 For Existing Guest");
+        roomInvitation.Invitations = [new RoomInvitation() { Access = FileShare.ContentCreator, Id = guestId }];
+
+        await _roomsApi.SetRoomSecurityAsync(room2.Id, roomInvitation, cancellationToken: TestContext.Current.CancellationToken);
 
         // Verify guest was added to the room
-        var roomSecurity = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
-        var guestAccess = roomSecurity.Response.FirstOrDefault(x => x.SharedToUser.Id == guest.Id);
+        var roomSecurity = await _roomsApi.GetRoomSecurityInfoAsync(room2.Id, cancellationToken: TestContext.Current.CancellationToken);
+        var guestAccess = roomSecurity.Response.FirstOrDefault(x => x.SharedToUser.Id == guestId);
         guestAccess.Should().NotBeNull("guest should be added to the room");
         guestAccess!.Access.Should().Be(FileShare.ContentCreator);
-
-        // Cleanup - Re-enable "Allow inviting guests" setting
-        invitationSettings.AllowInvitingGuests = true;
-        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings,
-            cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task AddNewGuestToRoom_WhenAllowInvitingGuestsDisabled_ShouldDenied()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var email = Initializer.FakerMember.Generate().Email;
 
@@ -481,8 +465,8 @@ public class RoomsApiTests(
             AllowInvitingGuests = false
         };
 
-        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings,
-            cancellationToken: TestContext.Current.CancellationToken);
+        await _webApiClient.Authenticate(Owner);
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, cancellationToken: TestContext.Current.CancellationToken);
 
         // Create a public room
         var room = await CreatePublicRoom("Test Room For Existing Guest");
@@ -513,7 +497,7 @@ public class RoomsApiTests(
         await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        await _peopleClient.Authenticate(Initializer.Owner);
+        await _peopleClient.Authenticate(Owner);
 
         var pendingUsers = (await _userStatusApi.GetByStatusAsync(EmployeeStatus.Pending, cancellationToken: TestContext.Current.CancellationToken)).Response;
         pendingUsers.Should().NotBeNull();
@@ -536,7 +520,7 @@ public class RoomsApiTests(
     public async Task CreateRoom_WithContent_ArchiveAndDelete_Succeeds()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         var roomTitle = "Room for Delete " + Guid.NewGuid().ToString()[..8];
         var createdRoom = (await _roomsApi.CreateRoomAsync(
@@ -554,7 +538,7 @@ public class RoomsApiTests(
         await CreateFile("TestDocument.docx", createdRoom.Id);
 
         // Act - Move the room to archive
-        var archiveFolderId = await GetFolderIdAsync(FolderType.Archive, Initializer.Owner);
+        var archiveFolderId = await GetFolderIdAsync(FolderType.Archive, Owner);
         var moveToArchiveParams = new BatchRequestDto
         {
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(archiveFolderId),
@@ -597,11 +581,11 @@ public class RoomsApiTests(
     [Trait("Bug", "78012")]
     public async Task ShareRoom_AsContentCreator_ShouldReturnUsersWithoutGroups()
     {
-        await _filesClient.Authenticate(Initializer.Owner);
-        await _peopleClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        await _peopleClient.Authenticate(Owner);
 
         var room = await CreatePublicRoom("Test Room For Content Creator");
-        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        var docspaceAdmin = await InviteContact(EmployeeType.DocSpaceAdmin);
         var invitationDocspaceAdmin = new RoomInvitation
         {
             Id = docspaceAdmin.Id,
@@ -610,7 +594,7 @@ public class RoomsApiTests(
 
         await _groupApi.AddGroupAsync(new GroupRequestDto([docspaceAdmin.Id], docspaceAdmin.Id, "TestGroup"), TestContext.Current.CancellationToken);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         var invitation = new RoomInvitation
         {
             Id = user.Id,

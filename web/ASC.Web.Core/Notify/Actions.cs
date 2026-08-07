@@ -2835,7 +2835,8 @@ public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUti
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_top_up_wallet_error, () => WebstudioNotifyPatternResource.pattern_top_up_wallet_error)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_top_up_wallet_error, () => WebstudioNotifyPatternResource.pattern_top_up_wallet_error),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_top_up_wallet_error)
         ];
     }
 
@@ -2843,6 +2844,36 @@ public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUti
     {
         var culture = GetCulture(user);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", GetCulture(user));
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, culture.Name),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/wallet")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
+        ];
+    }
+}
+
+[Scope]
+public sealed class LowWalletBalanceNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "low_wallet_balance";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_low_wallet_balance, () => WebstudioNotifyPatternResource.pattern_low_wallet_balance),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_low_wallet_balance)
+        ];
+    }
+
+    public void Init(UserInfo user)
+    {
+        var culture = GetCulture(user);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         Tags =
@@ -2864,7 +2895,8 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_renew_subscription_error, () => WebstudioNotifyPatternResource.pattern_renew_subscription_error)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_renew_subscription_error, () => WebstudioNotifyPatternResource.pattern_renew_subscription_error),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_renew_subscription_error)
         ];
     }
 
