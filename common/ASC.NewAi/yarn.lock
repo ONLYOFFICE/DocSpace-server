@@ -476,9 +476,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.22.tgz::locator=asc-new-ai%40workspace%3A.":
-  version: 0.5.22
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.22.tgz#onlyoffice-ai-chat-0.5.22.tgz::hash=16ef35&locator=asc-new-ai%40workspace%3A."
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.38.tgz::locator=asc-new-ai%40workspace%3A.":
+  version: 0.5.38
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.38.tgz#onlyoffice-ai-chat-0.5.38.tgz::hash=20788e&locator=asc-new-ai%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -571,7 +571,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/6bc72052ae073289031ac134e9d4e7b1cfcfc6b91757caa071783e8f93c8150de361e4256afd295c2b10e4f96ead33ecdfd20ac63188b4703225ba1ee3e28530
+  checksum: 10/0b40f0cd15f5b1c214b13e9729670dda7affeddee4e3d56aab3b0358d1a4548832b2fb2c9053a235352ffce6f89550995aee11068ab9c72febf22b432ffcb390
   languageName: node
   linkType: hard
 
@@ -942,7 +942,7 @@ __metadata:
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
     "@google/genai": "npm:^1.30.0"
     "@mistralai/mistralai": "npm:^1.11.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.5.22.tgz"
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.5.38.tgz"
     "@types/body-parser": "npm:^1.19.5"
     "@types/cookie-parser": "npm:^1.4.7"
     "@types/cors": "npm:^2.8.17"
@@ -958,12 +958,14 @@ __metadata:
     morgan: "npm:1.10.0"
     nconf: "npm:^0.10.0"
     openai: "npm:^5.22.0"
+    prettier: "npm:^3.4.2"
     ts-json-schema-generator: "npm:^2.9.0"
     tsx: "npm:^4.19.0"
     typescript: "npm:^5.6.0"
     winston: "npm:^3.8.2"
     winston-cloudwatch: "npm:^6.1.1"
     winston-daily-rotate-file: "npm:^4.5.5"
+    xss: "npm:^1.0.15"
   languageName: unknown
   linkType: soft
 
@@ -1159,6 +1161,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:^2.20.3":
+  version: 2.20.3
+  resolution: "commander@npm:2.20.3"
+  checksum: 10/90c5b6898610cd075984c58c4f88418a4fb44af08c1b1415e9854c03171bec31b336b7f3e4cefe33de994b3f12b03c5e2d638da4316df83593b9e82554e7e95b
+  languageName: node
+  linkType: hard
+
 "content-disposition@npm:0.5.3":
   version: 0.5.3
   resolution: "content-disposition@npm:0.5.3"
@@ -1206,6 +1215,13 @@ __metadata:
     object-assign: "npm:^4"
     vary: "npm:^1"
   checksum: 10/aa7174305b21ceb90f9c84f4eaa32f04432d333addbfdc0d1eb7310393c48902e5364aada5ac2f5d054528d63b3179238444475426fcb74e1e345077de485727
+  languageName: node
+  linkType: hard
+
+"cssfilter@npm:0.0.10":
+  version: 0.0.10
+  resolution: "cssfilter@npm:0.0.10"
+  checksum: 10/1e45182f42de848f092f50a313113c28a88e4ac98333bf1603ee1c3b200384a3bc83c12e35cd61135e3b0f218295f600d51120ca1f926b7958b2d3262d711214
   languageName: node
   linkType: hard
 
@@ -2169,6 +2185,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prettier@npm:^3.4.2":
+  version: 3.9.6
+  resolution: "prettier@npm:3.9.6"
+  bin:
+    prettier: bin/prettier.cjs
+  checksum: 10/1dd1a1e0e40ec3b91cda9d294c4a95022aef61880ca3f441aad99b1252279f58a766c4cece81132c01550dcff1fd445efbd8812ea4a2374313e7fc6c8136f11f
+  languageName: node
+  linkType: hard
+
 "proc-log@npm:^7.0.0":
   version: 7.0.0
   resolution: "proc-log@npm:7.0.0"
@@ -2659,6 +2684,18 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10/088411956432c8f876158409d5a285cb9ad1382f593391f51d3a599bd0a5b277f876609ebd00fc3596321c4a4c9064d6fffe1ebad960e8ea7fd9ae25324f35c2
+  languageName: node
+  linkType: hard
+
+"xss@npm:^1.0.15":
+  version: 1.0.15
+  resolution: "xss@npm:1.0.15"
+  dependencies:
+    commander: "npm:^2.20.3"
+    cssfilter: "npm:0.0.10"
+  bin:
+    xss: bin/xss
+  checksum: 10/074ad54babac9dd5107466dbf30d3b871dbedae1f8e7b8f4e3b76d60da8b92bd0f66f18ccd26b8524545444ef784b78c526cee089a907aa904f83c8b8d7958f6
   languageName: node
   linkType: hard
 

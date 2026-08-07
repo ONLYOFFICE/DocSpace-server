@@ -35,6 +35,7 @@ import { proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { isObject, getNumber, getObject, getString } from "../narrow.js";
 import logger from "../log.js";
+import { sanitizeInstruction } from "../sanitizeInstruction.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
@@ -57,11 +58,13 @@ const ROOM_TYPE_AI_ROOM = 9;
 
 export class DocspaceApiHttpError extends Error {
   public readonly status: number;
+  public readonly statusText: string;
   public readonly url: string;
 
   constructor(status: number, statusText: string, url: string) {
     super(`DocSpace API ${status} ${statusText} for ${url}`);
     this.status = status;
+    this.statusText = statusText;
     this.url = url;
   }
 }
@@ -130,7 +133,9 @@ export async function safeGetAgentInstruction(
   }
   try {
     const info = await getFolderInfo(entityId);
-    return info?.prompt ?? "";
+    // Untrusted: strip markup before the instruction reaches the model prompt
+    // so stored HTML can't round-trip into another user's reply (Bug 82726).
+    return sanitizeInstruction(info?.prompt ?? "");
   } catch (err) {
     logger.warn(
       `agent instruction fetch failed: ${
@@ -196,4 +201,38 @@ export async function resolveAgentEntityId(
   }
   const folderInfo = await getFolderInfo(entityId);
   return folderInfo?.isAgent ? entityId : undefined;
+}
+
+/**
+ * Gate a client-supplied `entityId` on *accessibility* (not agent-ness). When
+ * an entityId is present it must reference a folder the caller can actually
+ * reach; a missing folder (404) or a no-access response (403) both surface as
+ * a 404 so the endpoint never reveals whether the entity exists. An absent
+ * entityId is the legitimate global scope and passes. Unlike
+ * {@link resolveAgentEntityId} this does NOT require an agent room — an
+ * accessible non-agent folder is a valid scope that degrades to global
+ * downstream. Used to gate thread creation and entity-scoped reads.
+ */
+export async function assertEntityAccessible(
+  entityId: string | undefined,
+): Promise<void> {
+  if (typeof entityId !== "string" || entityId.length === 0) {
+    return;
+  }
+  let accessible: boolean;
+  try {
+    accessible = (await getFolderInfo(entityId)) !== undefined;
+  } catch (err) {
+    if (err instanceof DocspaceApiHttpError && err.status === 403) {
+      accessible = false; // no access → treat as not found (don't reveal it)
+    } else {
+      throw err; // genuine upstream failure (5xx) → propagate as-is
+    }
+  }
+  if (!accessible) {
+    throw Object.assign(new Error(`Entity "${entityId}" not found`), {
+      status: 404,
+      expose: true,
+    });
+  }
 }
