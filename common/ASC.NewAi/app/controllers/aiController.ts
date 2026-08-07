@@ -45,6 +45,7 @@ import logger from "../log.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse } from "./_helpers.js";
+import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
   HttpToolsAdapter,
@@ -410,6 +411,12 @@ export const aiController = {
         error: "userMessage must contain non-empty text content",
       });
       return;
+    }
+    // A new thread (no threadId) is created implicitly here, so gate it like
+    // threads/create: a supplied entityId must be accessible and a profile
+    // must resolve, otherwise 404 (review #6).
+    if (!req.body.threadId) {
+      await assertThreadCreatable(req.body.entityId, req.body.profileId);
     }
     // When the request omits profileId, the engine resolves the Chat
     // assignment (or the Default slot) and persists it onto the thread,

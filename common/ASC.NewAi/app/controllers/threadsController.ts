@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ThreadsEngine } from "@onlyoffice/ai-chat/core";
+import { ThreadsEngine, AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
 import type {
   Profile,
   OpenOrCreateInput,
@@ -41,7 +41,7 @@ import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
-import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
+import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -70,24 +70,35 @@ interface CreateBody {
   entityId?: string;
 }
 
-// A `entityId` on thread creation is the id of the AI agent room the thread
-// belongs to; it must reference a real agent room. `resolveAgentEntityId`
-// silently degrades a nonexistent or non-agent id to the global (unscoped)
-// space — correct for best-effort reads, but on *create* it would persist an
-// orphaned thread that no agent owns yet still surfaces in every unscoped
-// `list` (Bug 82719). Reject such a create with 404 before it reaches storage.
-// An absent/empty entityId stays the legitimate global scope. (A no-access
-// entityId makes resolveAgentEntityId throw a DocspaceApiHttpError → 403.)
-async function assertAgentExists(entityId: string | undefined): Promise<void> {
-  if (typeof entityId !== "string" || entityId.length === 0) {
+const assignmentsEngine = new AssignmentsEngine({ storage });
+
+// Gate for creating a thread (review #6, Bug 82719). Two requirements:
+//  1. If an `entityId` is supplied it must reference a folder the caller can
+//     access — a missing folder or a no-access response both surface as 404
+//     (see `assertEntityAccessible`). A non-agent folder is allowed (it scopes
+//     to global downstream); an absent entityId is the legitimate global scope.
+//  2. A live profile must be resolvable — an explicit `profileId` that exists,
+//     or the `Chat` assignment for the scope — otherwise there is no model to
+//     run the thread against, so reject with 404.
+export async function assertThreadCreatable(
+  entityId: string | undefined,
+  profileId: string | undefined,
+): Promise<void> {
+  await assertEntityAccessible(entityId);
+  if (profileId && (await storage.profiles.readById(profileId))) {
     return;
   }
-  if ((await resolveAgentEntityId(entityId)) === undefined) {
-    throw Object.assign(new Error(`AI agent "${entityId}" does not exist`), {
-      status: 404,
-      expose: true,
-    });
+  const resolved = await assignmentsEngine.tryResolveForAction(
+    ActionType.Chat,
+    entityId,
+  );
+  if (resolved?.profile) {
+    return;
   }
+  throw Object.assign(new Error("no AI profile is available for this thread"), {
+    status: 404,
+    expose: true,
+  });
 }
 
 type ThreadMessageInput = Omit<ThreadMessageLike, "id" | "createdAt">;
@@ -120,21 +131,26 @@ interface UpdateMessageBody {
 
 export const threadsController = {
   create: asyncHandler<CreateBody>(async (req, res) => {
-    await assertAgentExists(req.body?.entityId);
+    await assertThreadCreatable(req.body?.entityId, req.body?.profileId);
     const thread = await engine.create(req.body);
     res.json(thread);
   }),
 
   openOrCreate: asyncHandler<OpenOrCreateInput>(async (req, res) => {
-    // `profile` is required by OpenOrCreateInput; when the caller omits it the
-    // engine dereferences it while creating a thread from the first message and
-    // throws a TypeError that collapses to a generic 500 (Bug 82826). Reject a
-    // missing/non-object profile with a clean 400 first.
+    // Thread creation requires a profile and, when scoped, an accessible entity
+    // (review #6, Bug 82826). openOrCreate carries the resolved `profile`
+    // object directly, so a missing/non-object profile means there is no model
+    // to run the thread against → 404 (this also avoids the engine TypeError
+    // that previously collapsed to a 500). A supplied entityId must be
+    // reachable.
     const body = req.body;
     if (!isObject(body) || !isObject(body.profile)) {
-      res.status(400).json({ error: "profile is required and must be an object" });
+      res.status(404).json({
+        error: "an AI profile is required to open or create a thread",
+      });
       return;
     }
+    await assertEntityAccessible(getString(body, "entityId"));
     const result = await engine.openOrCreate(body);
     res.json(result);
   }),
