@@ -115,6 +115,14 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeToAsync(passwordChangedNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
     }
 
+    public async Task SendSuspiciousLoginAsync(UserInfo userInfo, BaseEvent loginEvent)
+    {
+        var suspiciousLoginNotifyAction = serviceProvider.GetService<SuspiciousLoginNotifyAction>();
+        suspiciousLoginNotifyAction.Init(userInfo, loginEvent);
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(suspiciousLoginNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
+    }
+
     #endregion
 
     #region User Email

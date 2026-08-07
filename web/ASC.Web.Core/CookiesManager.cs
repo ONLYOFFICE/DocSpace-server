@@ -57,7 +57,8 @@ public class CookiesManager(
     MessageService messageService,
     IPSecurity.IPSecurity ipSecurity,
     IConfiguration configuration,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    SuspiciousLoginNotifier suspiciousLoginNotifier)
 {
     public const string AuthCookiesName = "asc_auth_key";
     private const string SocketIOCookiesName = "socketio.sid";
@@ -338,6 +339,8 @@ public class CookiesManager(
                 await SetCookiesAsync(CookiesType.AuthKey, cookies, session);
             }
         }
+
+        await suspiciousLoginNotifier.CheckAsync(userId);
 
         return cookies;
 
