@@ -31,11 +31,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AuditTrail.Models;
-using ASC.Geolocation;
-using ASC.MessagingSystem.EF.Context;
-
 namespace ASC.Web.Studio.Core.Notify;
+
+[Singleton]
+public class SuspiciousLoginNotifierConfiguration(IConfiguration configuration)
+{
+    public int HistoryLimit =>
+        field != default ? field : field = configuration.GetValue<int?>("web:suspiciousLogin:historyLimit") ?? 30;
+
+    public int FailThreshold =>
+        field != default ? field : field = configuration.GetValue<int?>("web:suspiciousLogin:failThreshold") ?? 3;
+
+    public int SuspiciousScore =>
+        field != default ? field : field = configuration.GetValue<int?>("web:suspiciousLogin:suspiciousScore") ?? 2;
+
+    public TimeSpan FailWindow =>
+        field != default ? field : field = TimeSpan.FromHours(configuration.GetValue<double?>("web:suspiciousLogin:failWindowHours") ?? 24);
+
+    public TimeSpan FreshLoginWindow =>
+        field != default ? field : field = TimeSpan.FromMinutes(configuration.GetValue<double?>("web:suspiciousLogin:freshLoginWindowMinutes") ?? 5);
+}
 
 [Scope]
 public partial class SuspiciousLoginNotifier(
@@ -44,15 +59,9 @@ public partial class SuspiciousLoginNotifier(
     UserManager userManager,
     GeolocationHelper geolocationHelper,
     StudioNotifyService studioNotifyService,
-    IConfiguration configuration,
+    SuspiciousLoginNotifierConfiguration configuration,
     ILogger<SuspiciousLoginNotifier> logger)
 {
-    private readonly int _historyLimit = configuration.GetValue<int?>("web:suspiciousLogin:historyLimit") ?? 30;
-    private readonly int _failThreshold = configuration.GetValue<int?>("web:suspiciousLogin:failThreshold") ?? 3;
-    private readonly int _suspiciousScore = configuration.GetValue<int?>("web:suspiciousLogin:suspiciousScore") ?? 2;
-    private readonly TimeSpan _failWindow = TimeSpan.FromHours(configuration.GetValue<double?>("web:suspiciousLogin:failWindowHours") ?? 24);
-    private readonly TimeSpan _freshLoginWindow = TimeSpan.FromMinutes(configuration.GetValue<double?>("web:suspiciousLogin:freshLoginWindowMinutes") ?? 5);
-
     private static readonly int[] _successActions =
     [
         (int)MessageAction.LoginSuccess,
@@ -116,7 +125,7 @@ public partial class SuspiciousLoginNotifier(
                     && e.Action.HasValue
                     && _successActions.Contains(e.Action.Value))
                 .OrderByDescending(e => e.Id)
-                .Take(_historyLimit)
+                .Take(configuration.HistoryLimit)
                 .ToListAsync();
 
             if (recentSuccess.Count == 0)
@@ -126,7 +135,7 @@ public partial class SuspiciousLoginNotifier(
 
             var current = recentSuccess[0];
 
-            if (DateTime.UtcNow - current.Date > _freshLoginWindow)
+            if (DateTime.UtcNow - current.Date > configuration.FreshLoginWindow)
             {
                 return;
             }
@@ -168,7 +177,7 @@ public partial class SuspiciousLoginNotifier(
             }
 
             // Signal 3: several failed login attempts recently
-            var failSince = DateTime.UtcNow - _failWindow;
+            var failSince = DateTime.UtcNow - configuration.FailWindow;
             var failCount = await messagesContext.LoginEvents
                 .Where(e => e.TenantId == tenantId
                     && e.Date >= failSince
@@ -176,14 +185,14 @@ public partial class SuspiciousLoginNotifier(
                     && e.Action.HasValue
                     && _failActions.Contains(e.Action.Value))
                 .CountAsync();
-            var manyFails = failCount >= _failThreshold;
+            var manyFails = failCount >= configuration.FailThreshold;
 
             var score =
                 (newDevice ? 1 : 0) +
                 (newCountry ? 1 : 0) +
                 (manyFails ? 1 : 0);
 
-            if (score < _suspiciousScore)
+            if (score < configuration.SuspiciousScore)
             {
                 return;
             }

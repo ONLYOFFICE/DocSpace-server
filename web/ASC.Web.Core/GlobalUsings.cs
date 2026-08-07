@@ -51,6 +51,7 @@ global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
 
+global using ASC.AuditTrail.Models;
 global using ASC.AuditTrail.Repositories;
 global using ASC.Common;
 global using ASC.Common.Caching;
@@ -82,8 +83,10 @@ global using ASC.Data.Storage;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
 global using ASC.FederatedLogin.LoginProviders;
+global using ASC.Geolocation;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
+global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.Notify;
 global using ASC.Notify.Engine;

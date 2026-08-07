@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AuditTrail.Models;
-
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
