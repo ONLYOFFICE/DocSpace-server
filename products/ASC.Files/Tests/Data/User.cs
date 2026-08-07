@@ -37,4 +37,11 @@ public record User(string Email, string Password)
 {
     public Guid Id { get; init; }
     public string? PasswordHash { get; set; }
+
+    /// <summary>
+    /// The bearer token issued for this user, cached after the first successful sign-in.
+    /// A <see cref="User"/> instance never outlives the portal it belongs to, so the token stays
+    /// valid for every client of that portal and re-authenticating the same identity costs nothing.
+    /// </summary>
+    public string? Token { get; set; }
 }

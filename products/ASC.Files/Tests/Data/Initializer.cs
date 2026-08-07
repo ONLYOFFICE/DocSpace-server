@@ -73,7 +73,13 @@ public static class Initializer
         _authApis.Remove(client);
     }
 
-    public static async ValueTask Authenticate(this HttpClient client, User? user)
+    /// <summary>
+    /// Signs the client in as <paramref name="user"/>, or clears the authorization header when it is null.
+    /// The bearer token is cached on the <see cref="User"/> instance, so switching back and forth between
+    /// identities inside a single test issues only one <c>authenticate</c> request per user.
+    /// </summary>
+    /// <param name="forceRefresh">Discards the cached token and signs in again.</param>
+    public static async ValueTask Authenticate(this HttpClient client, User? user, bool forceRefresh = false)
     {
         if (user == null)
         {
@@ -81,28 +87,38 @@ public static class Initializer
             return;
         }
 
-        if (!_authApis.TryGetValue(client, out var authApi))
+        if (forceRefresh)
         {
-            throw new InvalidOperationException(
-                "The HttpClient is not associated with a portal. Create clients via AspireAppFixture.CreatePortalClients.");
+            user.Token = null;
         }
 
-        if (user.PasswordHash == null)
+        if (user.Token == null)
         {
-            var hashSw = Stopwatch.StartNew();
-            user.PasswordHash = GetClientPassword(user.Password);
-            Timing.Write($"hash({user.Email})", hashSw.ElapsedMilliseconds);
+            if (!_authApis.TryGetValue(client, out var authApi))
+            {
+                throw new InvalidOperationException(
+                    "The HttpClient is not associated with a portal. Create clients via AspireAppFixture.CreatePortalClients.");
+            }
+
+            if (user.PasswordHash == null)
+            {
+                var hashSw = Stopwatch.StartNew();
+                user.PasswordHash = GetClientPassword(user.Password);
+                Timing.Write($"hash({user.Email})", hashSw.ElapsedMilliseconds);
+            }
+
+            var authSw = Stopwatch.StartNew();
+            var authMe = await authApi.AuthenticateMeAsync(new AuthRequestsDto
+            {
+                UserName = user.Email,
+                PasswordHash = user.PasswordHash
+            }, TestContext.Current.CancellationToken);
+            Timing.Write($"auth({user.Email})", authSw.ElapsedMilliseconds);
+
+            user.Token = authMe.Response.Token;
         }
 
-        var authSw = Stopwatch.StartNew();
-        var authMe = await authApi.AuthenticateMeAsync(new AuthRequestsDto
-        {
-            UserName = user.Email,
-            PasswordHash = user.PasswordHash
-        }, TestContext.Current.CancellationToken);
-        Timing.Write($"auth({user.Email})", authSw.ElapsedMilliseconds);
-
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", user.Token);
     }
 
     public static string GetClientPassword(string password)
