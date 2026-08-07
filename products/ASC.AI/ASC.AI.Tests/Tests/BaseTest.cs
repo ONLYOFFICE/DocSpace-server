@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests;
 
-[Collection("Test Collection")]
 public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 {
     protected const string ProfilesPath = "/internal/ai/profiles";
@@ -53,21 +52,68 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         PropertyNameCaseInsensitive = true
     };
 
-    protected readonly AspireAppFixture Fixture = fixture;
-    protected readonly HttpClient AiClient = fixture.AiHttpClient;
-    protected readonly AiApiClient Ai = fixture.AiApi;
+    private PortalClients _clients = null!;
 
-    private readonly Func<Task> _resetDatabase = fixture.ResetDatabaseAsync;
+    // The portal and its owner created for this test. Both live on the per-portal client bundle,
+    // so the owner Id is always the one belonging to this test's own portal — never shared.
+    protected User Owner => _clients.Owner;
+
+    protected HttpClient _aiClient = null!;
+    protected AiApiClient _ai = null!;
 
     public async ValueTask InitializeAsync()
     {
-        await Initializer.InitializeAsync(Fixture);
-        await AiClient.Authenticate(Initializer.Owner);
+        var setupSw = Stopwatch.StartNew();
+
+        // Register a brand-new portal for this test and bind a fresh set of clients to it.
+        _clients = await fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
+
+        _aiClient = _clients.AiHttpClient;
+        _ai = _clients.Ai;
+
+        await _aiClient.Authenticate(Owner);
+
+        Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        await _resetDatabase();
+        // Each test owns its portal and clients; nothing is shared, so just dispose the clients.
+        _clients.Dispose();
+        return ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Creates and registers a new member of the given type in the current test's portal.
+    /// </summary>
+    protected async Task<User> InviteContact(EmployeeType employeeType, CancellationToken cancellationToken)
+    {
+        await _clients.PeopleHttpClient.Authenticate(Owner);
+
+        var email = Initializer.Faker.Person.Email;
+        var firstName = Initializer.Faker.Person.FirstName;
+        var lastName = Initializer.Faker.Person.LastName;
+        var password = Initializer.Faker.Internet.Password(10, false);
+
+        var memberSw = Stopwatch.StartNew();
+        using var createResponse = await _clients.PeopleApi.PostAsync(
+            "/api/2.0/people",
+            new
+            {
+                cultureName = "en-US",
+                spam = false,
+                email,
+                password,
+                firstName,
+                lastName,
+                type = (int)employeeType
+            },
+            cancellationToken);
+
+        var created = await _clients.PeopleApi.ReadAsync<CreatedUserDto>(createResponse, cancellationToken);
+        Timing.Write($"invite.addMember({employeeType})", memberSw.ElapsedMilliseconds);
+
+        return new User(email, password) { Id = created.Id };
     }
 
     protected static CreateProfileRequestDto BuildCreateDto(string? name = null) =>
@@ -101,13 +147,13 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected async Task<ProfileDto> CreateProfileAsync(CreateProfileRequestDto? dto = null)
     {
         dto ??= BuildCreateDto();
-        using var response = await Ai.PostAsync(ProfilesPath, dto, TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<ProfileDto>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.PostAsync(ProfilesPath, dto, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<ProfileDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task CreateAssignmentAsync(string actionType, Guid profileId, string? entityId = null)
     {
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             AssignmentsPath,
             new { actionType, profileId, entityId },
             TestContext.Current.CancellationToken);
@@ -117,7 +163,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected async Task<Guid?> ReadAssignmentAsync(string actionType, string? entityId = null)
     {
         var path = BuildScopedAssignmentPath(actionType, entityId);
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
         var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<Guid?>>(
@@ -132,23 +178,23 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             ? AssignmentsPath
             : $"{AssignmentsPath}?entityId={entityId}";
 
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<Dictionary<string, Guid>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<Dictionary<string, Guid>>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<ThreadDto> CreateThreadAsync(string? title = null, Guid? profileId = null, string? entityId = null)
     {
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             ThreadsPath,
             new { title = title ?? $"thread-{Guid.NewGuid():N}", profileId, entityId },
             TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<ThreadDto>(response, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<ThreadDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<ThreadDto> ReadThreadAsync(Guid id)
     {
-        using var response = await Ai.GetAsync($"{ThreadsPath}/{id}", TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<ThreadDto>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync($"{ThreadsPath}/{id}", TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<ThreadDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<List<ThreadDto>> ReadAllThreadsAsync(string? entityId = null)
@@ -157,8 +203,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             ? ThreadsPath
             : $"{ThreadsPath}?entityId={entityId}";
 
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<List<ThreadDto>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<List<ThreadDto>>(response, TestContext.Current.CancellationToken);
     }
 
     protected static string BuildMessageContents(string? text = null) =>
@@ -178,17 +224,17 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
     protected async Task<MessageDto> CreateMessageAsync(Guid threadId, string? contents = null)
     {
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             $"{ThreadsPath}/{threadId}/messages",
             new { contents = contents ?? BuildMessageContents() },
             TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<MessageDto> ReadMessageAsync(Guid id)
     {
-        using var response = await Ai.GetAsync($"{MessagesPath}/{id}", TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync($"{MessagesPath}/{id}", TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<List<MessageDto>> ReadMessagesByThreadAsync(Guid threadId, int? limit = null, int? startIndex = null)
@@ -209,13 +255,13 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             path += "?" + string.Join("&", query);
         }
 
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<List<MessageDto>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<List<MessageDto>>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<int> CreateRoomAsync(string? title = null)
     {
-        await Fixture.FilesHttpClient.Authenticate(Initializer.Owner);
+        await _clients.FilesHttpClient.Authenticate(Owner);
 
         var body = new
         {
@@ -223,11 +269,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             roomType = "AiRoom"
         };
 
-        using var response = await Fixture.FilesApi.PostAsync(
+        using var response = await _clients.FilesApi.PostAsync(
             "/api/2.0/files/rooms",
             body,
             TestContext.Current.CancellationToken);
-        var room = await Fixture.FilesApi.ReadAsync<RoomFolderDto>(response, TestContext.Current.CancellationToken);
+        var room = await _clients.FilesApi.ReadAsync<RoomFolderDto>(response, TestContext.Current.CancellationToken);
         return room.Id;
     }
 
@@ -237,7 +283,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             ? PreferencesPath
             : $"{PreferencesPath}?entityId={entityId}";
 
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
         var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<PreferencesDto>>(
@@ -248,7 +294,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
     protected async Task UpsertPreferencesAsync(bool? deepMode, string? entityId = null)
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             PreferencesPath,
             new { deepMode, entityId },
             TestContext.Current.CancellationToken);
@@ -261,15 +307,15 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             ? ToolPrefsPath
             : $"{ToolPrefsPath}?entityId={entityId}";
 
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<Dictionary<string, ToolPreference>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<Dictionary<string, ToolPreference>>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task UpsertDisabledToolPrefsAsync(
         IReadOnlyDictionary<string, HashSet<string>> disabled,
         string? entityId = null)
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/disabled",
             new { disabled, entityId },
             TestContext.Current.CancellationToken);
@@ -280,7 +326,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         IReadOnlyDictionary<string, HashSet<string>> allowAlways,
         string? entityId = null)
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/allow-always",
             new { allowAlways, entityId },
             TestContext.Current.CancellationToken);
@@ -297,7 +343,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
     protected async Task CreateMcpServerAsync(string name, string? config = null, string? entityId = null)
     {
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             McpServersPath,
             new { name, config = config ?? BuildMcpConfig(), entityId },
             TestContext.Current.CancellationToken);
@@ -310,8 +356,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             ? $"{McpServersPath}/{name}"
             : $"{McpServersPath}/{name}?entityId={entityId}";
 
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<McpServerDto>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<McpServerDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<List<McpServerDto>> ReadAllMcpServersAsync(string? entityId = null)
@@ -320,9 +366,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             ? McpServersPath
             : $"{McpServersPath}?entityId={entityId}";
 
-        using var response = await Ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await Ai.ReadAsync<List<McpServerDto>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<List<McpServerDto>>(response, TestContext.Current.CancellationToken);
     }
 
     private sealed record RoomFolderDto(int Id);
+
+    private sealed record CreatedUserDto(Guid Id);
 }

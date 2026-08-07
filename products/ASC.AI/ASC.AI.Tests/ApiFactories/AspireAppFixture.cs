@@ -31,44 +31,46 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Aspire.Hosting.ApplicationModel;
-
-using Microsoft.Extensions.DependencyInjection;
-
 namespace ASC.AI.Tests.ApiFactories;
 
+/// <summary>
+/// Owns the shared Aspire application for the whole test assembly. It does NOT hold any
+/// tenant-scoped HTTP clients: every test creates its own portal and its own
+/// <see cref="PortalClients"/> through <see cref="CreatePortalAsync"/>, so test classes can run
+/// in parallel without sharing tenant state.
+/// </summary>
 public class AspireAppFixture : IAsyncLifetime
 {
+    private const string OnlyofficeAi = "onlyoffice-ai";
+    private const string OnlyofficeFiles = "onlyoffice-files";
+    private const string OnlyofficePeople = "onlyoffice-people";
+    private const string OnlyofficeWebApi = "onlyoffice-web-api";
+    private const string OnlyofficeApiSystem = "onlyoffice-apisystem";
+
+    private static readonly JsonSerializerOptions _apiSystemJsonOptions = new(JsonSerializerDefaults.Web);
+
     private DistributedApplication _app = null!;
-    private DbConnection _dbconnection = null!;
-    private Respawner _respawner = null!;
-    private Provider _provider;
+    private HttpClient _apiSystemClient = null!;
 
-    private readonly List<string> _tablesToBackup = ["files_folder", "files_folder_tree", "core_user", "core_usersecurity", "files_bunch_objects"];
-    private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings"];
+    // A single connection pool shared by every per-test HttpClient. The clients stay per-test (so
+    // their Origin/Authorization default headers never collide across parallel tests), but they all
+    // reuse this one handler, which avoids creating a short-lived connection pool per test and the
+    // socket churn / TIME_WAIT exhaustion that comes with it.
+    private readonly SocketsHttpHandler _sharedHandler = new() { UseCookies = false };
 
-    public HttpClient AiHttpClient { get; private set; } = null!;
-    public HttpClient PeopleHttpClient { get; private set; } = null!;
-    public HttpClient WebApiHttpClient { get; private set; } = null!;
-    public HttpClient FilesHttpClient { get; private set; } = null!;
-
-    public AiApiClient AiApi { get; private set; } = null!;
-    public AiApiClient PeopleApi { get; private set; } = null!;
-    public AiApiClient WebApi { get; private set; } = null!;
-    public AiApiClient FilesApi { get; private set; } = null!;
+    private Uri AiBaseAddress { get; set; } = null!;
+    private Uri FilesBaseAddress { get; set; } = null!;
+    private Uri PeopleBaseAddress { get; set; } = null!;
+    private Uri WebApiBaseAddress { get; set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .AddEnvironmentVariables()
-            .Build();
-
-        _provider = config.GetValue<Provider>("dbProviderType");
-
+        // Start Aspire AppHost with integration-test profile.
+        // APP_HOSTING_STANDALONE=true makes the platform resolve the current tenant from the
+        // Origin header first (see TenantManager.SetCurrentTenantAsync), which is how every test
+        // is scoped to its own freshly registered portal.
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            ["DOTNET_LAUNCH_PROFILE=integration-test", "SKIP_CLIENT=true"]);
+            ["DOTNET_LAUNCH_PROFILE=integration-test", "SKIP_CLIENT=true", "APP_HOSTING_STANDALONE=true"]);
 
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
@@ -76,116 +78,163 @@ public class AspireAppFixture : IAsyncLifetime
         _app = await appHost.BuildAsync();
         await _app.StartAsync();
 
-        const string onlyofficeAi = "onlyoffice-ai";
-        const string onlyofficePeople = "onlyoffice-people";
-        const string onlyofficeWebApi = "onlyoffice-web-api";
-        const string onlyofficeFiles = "onlyoffice-files";
-
+        // Wait for services to be healthy
         var resourceNotifications = _app.ResourceNotifications;
-        var waitForAi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeAi);
-        var waitForPeople = resourceNotifications.WaitForResourceHealthyAsync(onlyofficePeople);
-        var waitForApi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeWebApi);
-        var waitForFiles = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeFiles);
 
-        await Task.WhenAll(waitForAi, waitForPeople, waitForApi, waitForFiles);
+        await Task.WhenAll(
+            resourceNotifications.WaitForResourceHealthyAsync(OnlyofficeAi),
+            resourceNotifications.WaitForResourceHealthyAsync(OnlyofficeFiles),
+            resourceNotifications.WaitForResourceHealthyAsync(OnlyofficePeople),
+            resourceNotifications.WaitForResourceHealthyAsync(OnlyofficeWebApi),
+            resourceNotifications.WaitForResourceHealthyAsync(OnlyofficeApiSystem));
 
-        var dbConnectionString = await _app.GetConnectionStringAsync("docspace");
+        AiBaseAddress = ResolveBaseAddress(OnlyofficeAi);
+        FilesBaseAddress = ResolveBaseAddress(OnlyofficeFiles);
+        PeopleBaseAddress = ResolveBaseAddress(OnlyofficePeople);
+        WebApiBaseAddress = ResolveBaseAddress(OnlyofficeWebApi);
 
-        _dbconnection = _provider == Provider.MySql
-            ? new MySqlConnection(dbConnectionString)
-            : new NpgsqlConnection(dbConnectionString);
-        await _dbconnection.OpenAsync();
+        // A single ApiSystem client is enough: portal registration is tenant-agnostic and only
+        // issues stateless POSTs, so it is safe to share across parallel tests.
+        _apiSystemClient = CreateRawClient(ResolveBaseAddress(OnlyofficeApiSystem), origin: null);
 
-        AiHttpClient = CreateHttpClientNoCookies(onlyofficeAi);
-        PeopleHttpClient = CreateHttpClientNoCookies(onlyofficePeople);
-        WebApiHttpClient = CreateHttpClientNoCookies(onlyofficeWebApi);
-        FilesHttpClient = CreateHttpClientNoCookies(onlyofficeFiles);
+        await InitializePasswordSaltAsync();
 
-        AiApi = new AiApiClient(AiHttpClient);
-        PeopleApi = new AiApiClient(PeopleHttpClient);
-        WebApi = new AiApiClient(WebApiHttpClient);
-        FilesApi = new AiApiClient(FilesHttpClient);
-
-        var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
-        tablesToIgnore.AddRange(_tablesToBackup.Select(r => new Table(MakeCopyTableName(r))));
-
-        _respawner = await Respawner.CreateAsync(_dbconnection, new RespawnerOptions
-        {
-            DbAdapter = _provider == Provider.MySql ? DbAdapter.MySql : DbAdapter.Postgres,
-            TablesToIgnore = tablesToIgnore.ToArray(),
-        });
+        // Warm up the full portal flow ONCE, serially, before any test runs. Without this, the moment
+        // the host goes healthy every parallel test class fires portal/register simultaneously against
+        // a completely cold system (JIT of the large registration flow, EF model init, first DB pool
+        // open, cache population). That thundering herd of cold registrations contends heavily and can
+        // stall. Paying those one-time costs once here keeps the parallel flood hitting warm code paths.
+        await WarmUpAsync();
     }
 
-    internal async Task ResetDatabaseAsync()
+    /// <summary>
+    /// Exercises the same end-to-end path a test does (register a throwaway portal, authenticate its
+    /// owner, touch the AI and Files services) so all the cold, one-time code paths are warm before
+    /// the parallel test run begins. Failures are non-fatal: warmup is an optimization, not a gate.
+    /// </summary>
+    private async Task WarmUpAsync()
     {
-        await _respawner.ResetAsync(_dbconnection);
-
-        var script = _provider switch
+        try
         {
-            Provider.MySql => "INSERT INTO {0} SELECT * FROM {1};",
-            Provider.PostgreSql => "INSERT INTO {0} SELECT * FROM {1};SELECT setval('{0}_id_seq', (SELECT MAX(id) FROM {0})+1);",
-            _ => ""
+            await Timing.Measure("warmup.total", async () =>
+            {
+                using var clients = await CreatePortalAsync();
+
+                await clients.AiHttpClient.Authenticate(clients.Owner);
+                await clients.FilesHttpClient.Authenticate(clients.Owner);
+
+                using var profiles = await clients.Ai.GetAsync("/internal/ai/profiles", TestContext.Current.CancellationToken);
+
+                // The owner's root folder tree is provisioned lazily on first access — warm that too,
+                // it is what every test creating a room hits right after registration.
+                using var rootFolders = await clients.FilesApi.GetAsync("/api/2.0/files/@root", TestContext.Current.CancellationToken);
+            });
+        }
+        catch (Exception e)
+        {
+            Timing.Write($"warmup.failed({e.GetType().Name}: {e.Message})", 0);
+        }
+    }
+
+    /// <summary>
+    /// Registers a brand-new portal and returns a fresh, self-contained <see cref="PortalClients"/>
+    /// bundle bound to it (clients scoped via the <c>Origin</c> header, plus the portal's own owner).
+    /// Each test owns its own bundle, which is what makes the tests safe to run in parallel.
+    /// </summary>
+    public async Task<PortalClients> CreatePortalAsync(CancellationToken cancellationToken = default)
+    {
+        // Lowercase, starts with a letter, 13 chars (> 6) — a valid portal alias and Origin host.
+        var portalName = "t" + Guid.NewGuid().ToString("N")[..12];
+
+        var registration = await Timing.Measure("portal.register", () => RegisterPortalAsync(new RegisterPortalModel
+        {
+            PortalName = portalName,
+            FirstName = "Portal",
+            LastName = "Owner",
+            Email = Initializer.OwnerEmail,
+            Password = Initializer.OwnerPassword,
+            Language = "en-US",
+            TimeZoneName = "UTC",
+            SkipWelcome = true
+        }, cancellationToken));
+
+        // The owner Id is unique to this portal and comes straight from the registration response.
+        var owner = new User(Initializer.OwnerEmail, Initializer.OwnerPassword)
+        {
+            Id = registration.Tenant.OwnerId,
+            PasswordHash = Initializer.GetClientPassword(Initializer.OwnerPassword)
         };
 
-        await ExecuteScriptAsync(script);
-        await ClearCacheAsync();
+        return new PortalClients(AiBaseAddress, FilesBaseAddress, PeopleBaseAddress, WebApiBaseAddress, portalName, owner, CreateRawClient);
     }
 
-    internal async Task BackupTables()
+    /// <summary>
+    /// Registers a new portal through the ASC.ApiSystem <c>portal/register</c> endpoint.
+    /// </summary>
+    public async Task<PortalRegistrationResult> RegisterPortalAsync(RegisterPortalModel model, CancellationToken cancellationToken = default)
     {
-        var script = _provider switch
-        {
-            Provider.MySql => "CREATE TABLE IF NOT EXISTS {1} LIKE {0}; \nREPLACE INTO {1} SELECT * FROM {0};",
-            Provider.PostgreSql => "CREATE TABLE IF NOT EXISTS {1} (LIKE {0} INCLUDING ALL);\n DELETE FROM {1}; \nINSERT INTO {1} SELECT * FROM {0};",
-            _ => ""
-        };
+        var json = JsonSerializer.Serialize(model, _apiSystemJsonOptions);
 
-        if (!string.IsNullOrEmpty(script))
-        {
-            await ExecuteScriptAsync(script);
-        }
-    }
+        using var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var response = await _apiSystemClient.PostAsync("portal/register", content, cancellationToken);
 
-    private async Task ExecuteScriptAsync(string scriptTemplate)
-    {
-        var backupScript = new StringBuilder();
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        foreach (var table in _tablesToBackup)
+        if (!response.IsSuccessStatusCode)
         {
-            backupScript.AppendFormat(scriptTemplate, table, MakeCopyTableName(table));
+            throw new HttpRequestException($"Portal registration failed ({(int)response.StatusCode}): {body}");
         }
 
-        await using var cmd = _dbconnection.CreateCommand();
-        cmd.CommandText = backupScript.ToString();
-        await cmd.ExecuteNonQueryAsync();
+        return JsonSerializer.Deserialize<PortalRegistrationResult>(body, _apiSystemJsonOptions)!;
     }
 
-    private async Task ClearCacheAsync()
+    private async Task InitializePasswordSaltAsync()
     {
-        var commandService = _app.Services.GetRequiredService<ResourceCommandService>();
-        await commandService.ExecuteCommandAsync("cache", "clear-cache", CancellationToken.None);
+        // The password-hash salt is derived from the machine key and is identical for every portal,
+        // so it is fetched once from the default tenant (no Origin header) and shared by all tests.
+        using var defaultClient = CreateRawClient(WebApiBaseAddress, origin: null);
+        var api = new AiApiClient(defaultClient);
+
+        using var response = await api.GetAsync("/api/2.0/settings?withPassword=true", TestContext.Current.CancellationToken);
+        var settings = await api.ReadAsync<WizardSettingsResponse>(response, TestContext.Current.CancellationToken);
+
+        Initializer.InitializePasswordHasher(settings.PasswordHash!);
     }
 
-    private HttpClient CreateHttpClientNoCookies(string resourceName)
+    private Uri ResolveBaseAddress(string resourceName)
     {
-        Uri? baseAddress;
-        using (var baseClient = _app.CreateHttpClient(resourceName))
+        using var baseClient = _app.CreateHttpClient(resourceName);
+        return baseClient.BaseAddress!;
+    }
+
+    private HttpClient CreateRawClient(Uri baseAddress, string? origin)
+    {
+        // disposeHandler: false — the shared connection pool outlives individual clients and is
+        // disposed once with the fixture. Disposing a per-test client must NOT tear down the pool.
+        var client = new HttpClient(_sharedHandler, disposeHandler: false) { BaseAddress = baseAddress };
+
+        if (!string.IsNullOrEmpty(origin))
         {
-            baseAddress = baseClient.BaseAddress;
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Origin", origin);
         }
-        var handler = new HttpClientHandler { UseCookies = false };
-        return new HttpClient(handler) { BaseAddress = baseAddress };
-    }
 
-    private static string MakeCopyTableName(string tableName)
-    {
-        return $"{tableName}_copy";
+        return client;
     }
 
     public async ValueTask DisposeAsync()
     {
+        _apiSystemClient.Dispose();
         await _app.StopAsync();
-        await _dbconnection.DisposeAsync();
         await _app.DisposeAsync();
+        _sharedHandler.Dispose();
+
+        // Only after the services are gone: while they run they hold handles inside the folder.
+        // For the AppHost itself Aspire generates ProjectPath as the project *directory*.
+        var cleanupFailure = await TestArtifacts.DeleteStorageAsync(Projects.ASC_AppHost.ProjectPath);
+
+        if (cleanupFailure is not null)
+        {
+            Timing.Write($"cleanup.failed({cleanupFailure.GetType().Name}: {cleanupFailure.Message})", 0);
+        }
     }
 }

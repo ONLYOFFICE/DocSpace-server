@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,11 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AuditTrail;
-using ASC.AuditTrail.Models;
-using ASC.AuditTrail.Models.Mappings;
-using ASC.Files.Core.Utils;
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -54,10 +49,12 @@ public class FoldersControllerInternal(
     HistoryApiHelper historyApiHelper,
     FormFillingReportCreator formFillingReportCreator,
     ApiContext apiContext,
-    CsvFileHelper csvFileHelper,
-    CsvFileUploader csvFileUploader,
     TenantManager tenantManager,
-    CoreBaseSettings coreBaseSettings
+    DocumentBuilderTaskManager<AuditReportTask, int, AuditReportTaskData> documentBuilderTaskManager,
+    IEventBus eventBus,
+    IServiceProvider serviceProvider,
+    CommonLinkUtility commonLinkUtility,
+    AuthContext authContext
     )
     : FoldersController<int>(
         daoFactory,
@@ -93,33 +90,88 @@ public class FoldersControllerInternal(
     }
 
     /// <remarks>
-    /// Generates the activity history of a folder.
+    /// Starts generating the activity history report of a folder (XLSX by default, or CSV) and saves it to "My documents".
     /// </remarks>
     /// <summary>
-    /// Generates folder history
+    /// Start the folder history report generation
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/log/report</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "URL to the report file", typeof(string))]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpPost("folder/{folderId:int}/log/report")]
-    public async Task<string> CreateReportFolderHistoryAsync(int folderId)
+    public async Task<DocumentBuilderTaskDto> CreateReportFolderHistoryAsync(FolderHistoryReportRequestDto inDto)
     {
-        if (!coreBaseSettings.Standalone
-            && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
-        || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
-        {
-            throw new BillingException(Resource.ErrorNotAllowedOption);
-        }
+        await historyApiHelper.DemandFolderHistoryReportPermissionAsync(inDto.FolderId);
 
-        var history = await historyApiHelper.GetFolderEventsAsync(folderId);
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
 
-        await using var stream = csvFileHelper.CreateFile(history, new BaseEventMap<AuditEvent>());
-        var reportName = string.Format(AuditReportResource.AuditTrailReportName + ".csv", "room", folderId);
-        var result = await csvFileUploader.UploadFile(stream, reportName);
+        var task = serviceProvider.GetRequiredService<AuditReportTask>();
 
-        return result;
+        var baseUri = commonLinkUtility.ServerRootPath;
+
+        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, AuditReportTask.GetTaskDiscriminator(AuditReportKind.FolderHistory, inDto.FolderId)));
+
+        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
+
+        var headers = MessageSettings.GetHttpHeaders(Request)?
+            .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
+
+        var evt = new AuditReportIntegrationEvent(userId, tenantId, baseUri, AuditReportKind.FolderHistory, inDto.Format, inDto.From, inDto.To, headers, folderId: inDto.FolderId);
+
+        await eventBus.PublishAsync(evt);
+
+        return DocumentBuilderTaskDto.Get(taskProgress);
+    }
+
+    /// <remarks>
+    /// Returns the status of generating the folder history report.
+    /// </remarks>
+    /// <summary>
+    /// Get the folder history report generation status
+    /// </summary>
+    /// <path>api/2.0/files/folder/{folderId}/log/report</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "The required folder was not found")]
+    [HttpGet("folder/{folderId:int}/log/report")]
+    public async Task<DocumentBuilderTaskDto> GetReportFolderHistoryAsync(int folderId)
+    {
+        await historyApiHelper.DemandFolderHistoryReportPermissionAsync(folderId);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        var task = await documentBuilderTaskManager.GetTask(tenantId, userId, AuditReportTask.GetTaskDiscriminator(AuditReportKind.FolderHistory, folderId));
+
+        return DocumentBuilderTaskDto.Get(task);
+    }
+
+    /// <remarks>
+    /// Terminates generating the folder history report.
+    /// </remarks>
+    /// <summary>
+    /// Terminate the folder history report generation
+    /// </summary>
+    /// <path>api/2.0/files/folder/{folderId}/log/report</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "The required folder was not found")]
+    [HttpDelete("folder/{folderId:int}/log/report")]
+    public async Task TerminateReportFolderHistoryAsync(int folderId)
+    {
+        await historyApiHelper.DemandFolderHistoryReportPermissionAsync(folderId);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        var evt = new AuditReportIntegrationEvent(userId, tenantId, null, AuditReportKind.FolderHistory, AuditReportFormat.Xlsx, null, null, terminate: true, folderId: folderId);
+
+        await eventBus.PublishAsync(evt);
     }
 
     /// <remarks>

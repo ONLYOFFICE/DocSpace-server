@@ -253,7 +253,7 @@
     <value>Подписка клиента обновлена: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Обновлены настройки сервисов, подключенных через кошелек клиента</value>
+    <value>Обновлены настройки сервисов, подключенных через кошелек клиента: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Кошелек клиента пополнен: {0}</value>

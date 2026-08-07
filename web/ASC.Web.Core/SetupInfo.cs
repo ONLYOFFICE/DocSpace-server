@@ -103,7 +103,7 @@ public class SetupInfo
         TagManagerId = GetAppSettings("web:tagmanager-id", string.Empty);
 
         MaxImageUploadSize = GetAppSettings("web:max-upload-size", 1024L * 1024L);
-        AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
+        AvailableFileSize = GetAppSettings("web:available-file-size", ASC.Data.Storage.Constants.DefaultAvailableFileSize);
         MaxUploadThreadCount = GetAppSettings("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests", 15);
         ChunkUploadSize = GetAppSettings("files:uploader:chunk-size", 10 * 1024 * 1024);
         ProviderMaxUploadSize = GetAppSettings("files:provider:max-upload-size", 1024L * 1024L * 1024L);

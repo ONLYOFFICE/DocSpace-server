@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
 public class AssignmentsCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -67,7 +66,7 @@ public class AssignmentsCreateTests(AspireAppFixture fixture) : BaseTest(fixture
         var profile = await CreateProfileAsync();
         await CreateAssignmentAsync("Chat", profile.Id);
 
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             AssignmentsPath,
             new { actionType = "Chat", profileId = profile.Id },
             TestContext.Current.CancellationToken);
@@ -80,7 +79,7 @@ public class AssignmentsCreateTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var profile = await CreateProfileAsync();
 
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             AssignmentsPath,
             new { actionType = "Chat", profileId = profile.Id, entityId = "999999999" },
             TestContext.Current.CancellationToken);
@@ -93,7 +92,7 @@ public class AssignmentsCreateTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         const string invalidJson = """{ "actionType": "Chat" }""";
 
-        using var response = await Ai.PostRawAsync(AssignmentsPath, invalidJson, TestContext.Current.CancellationToken);
+        using var response = await _ai.PostRawAsync(AssignmentsPath, invalidJson, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
