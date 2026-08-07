@@ -5,7 +5,7 @@
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
 //
-// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
 //
@@ -31,8 +31,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests;
+package com.asc.authorization.application.exception.client;
 
-[CollectionDefinition("Test Collection")]
-public class SharedTestCollection :
-    ICollectionFixture<AspireAppFixture>;
+import io.grpc.StatusRuntimeException;
+
+/**
+ * Wraps gRPC failures that should not be retried (for example {@code DEADLINE_EXCEEDED} or {@code
+ * NOT_FOUND}).
+ */
+public class NonRetryableGrpcException extends RuntimeException {
+  public NonRetryableGrpcException(StatusRuntimeException cause) {
+    super(cause.getStatus().getCode() + ": " + cause.getStatus().getDescription(), cause);
+  }
+}

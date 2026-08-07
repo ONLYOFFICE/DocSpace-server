@@ -33,7 +33,6 @@
 
 namespace ASC.People.Tests.PeopleController;
 
-[Collection("Test Collection")]
 public class InvitationLimitTest(
     AspireAppFixture fixture)
     : BaseTest(fixture)
@@ -42,8 +41,8 @@ public class InvitationLimitTest(
     [Fact]
     public async Task InviteUsers_ShouldChangeInvitationLimit()
     {
-        await _apiClient.Authenticate(Initializer.Owner);
-        await _peopleClient.Authenticate(Initializer.Owner);
+        await _apiClient.Authenticate(Owner);
+        await _peopleClient.Authenticate(Owner);
 
         var settings = (await _commonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 

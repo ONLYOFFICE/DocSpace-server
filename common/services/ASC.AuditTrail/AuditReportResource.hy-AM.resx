@@ -247,7 +247,7 @@
     <value>Հաճախորդի բաժանորդագրությունը թարմացվել է՝ {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են</value>
+    <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են՝ {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Հաճախորդի դրամապանակը լիցքավորվել է՝ {0}</value>

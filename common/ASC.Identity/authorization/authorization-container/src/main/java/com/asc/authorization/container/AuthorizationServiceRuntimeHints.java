@@ -27,7 +27,10 @@
 
 package com.asc.authorization.container;
 
+import com.asc.authorization.application.exception.client.NonRetryableGrpcException;
+import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
+import com.asc.authorization.data.client.cache.CachedRegisteredClient;
 import com.asc.authorization.data.consent.entity.ConsentEntity;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
@@ -48,7 +51,10 @@ public class AuthorizationServiceRuntimeHints implements RuntimeHintsRegistrar {
         .registerType(AuthorizationEntity.class, MemberCategory.values())
         .registerType(AuthorizationEntity.AuthorizationId.class, MemberCategory.values())
         .registerType(ConsentEntity.class, MemberCategory.values())
-        .registerType(ConsentEntity.ConsentId.class, MemberCategory.values());
+        .registerType(ConsentEntity.ConsentId.class, MemberCategory.values())
+        .registerType(NonRetryableGrpcException.class, MemberCategory.values())
+        .registerType(RegisteredClientPermissionException.class, MemberCategory.values())
+        .registerType(CachedRegisteredClient.class, MemberCategory.values());
 
     hints
         .resources()

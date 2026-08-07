@@ -241,7 +241,7 @@
     <value>Müştəri abunəliyi yeniləndi: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Müştəri pulqabı aktivləşdirilmiş xidmətlər parametrləri yeniləndi</value>
+    <value>Müştəri pulqabı aktivləşdirilmiş xidmətlər parametrləri yeniləndi: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Müştəri pul kisəsinə pul yükləndi: {0}</value>

@@ -39,7 +39,6 @@ using WebhookTrigger = DocSpace.API.SDK.Model.WebhookTrigger;
 
 namespace ASC.People.Tests.PeopleController;
 
-[Collection("Test Collection")]
 public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
     public static TheoryData<InternalWebhookTrigger> AdminOnlyTriggers =>
@@ -133,9 +132,9 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Trait("Bug", "73741")]
     public async Task GetTriggers_CheckUserRestrictions()
     {
-        await _peopleClient.Authenticate(Initializer.Owner);
+        await _peopleClient.Authenticate(Owner);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
 
         await _peopleClient.Authenticate(user);
 
@@ -170,7 +169,7 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Trait("Bug", "80980")]
     public async Task WebhookCreation_CheckBlacklist()
     {
-        await _peopleClient.Authenticate(Initializer.Owner);
+        await _peopleClient.Authenticate(Owner);
 
         var createWebhooksConfigRequestsDto = new CreateWebhooksConfigRequestsDto(
             "test",

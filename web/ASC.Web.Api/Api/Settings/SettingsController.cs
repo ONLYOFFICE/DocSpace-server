@@ -150,6 +150,11 @@ public partial class SettingsController(
             settings.DisplayBanners = coreBaseSettings.Standalone ? !(await settingsManager.LoadAsync<TenantBannerSettings>()).Hidden : true;
             settings.AiEnabled = (await settingsManager.LoadAsync<TenantAiAccessSettings>()).Enabled;
 
+            if (await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+            {
+                settings.WalletLowBalance = (await settingsManager.LoadAsync<TenantWalletSettings>()).LowBalanceNotified;
+            }
+
             settings.Firebase = new FirebaseDto
             {
                 ApiKey = configuration["firebase:apiKey"] ?? "",

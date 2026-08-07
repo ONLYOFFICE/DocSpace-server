@@ -1,4 +1,8 @@
 spring:
+  cloud:
+    messaging:
+      rabbitmq:
+        rpcTimeoutMs: ${RABBIT_RPC_TIMEOUT_MS:1500}
   rabbitmq:
     addresses: ${RABBIT_URI:amqp://guest:guest@localhost/}
     host: ${RABBIT_HOST:localhost}

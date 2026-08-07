@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
 public class AssignmentsUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -45,7 +44,7 @@ public class AssignmentsUpdateTests(AspireAppFixture fixture) : BaseTest(fixture
         var secondProfile = await CreateProfileAsync();
         await CreateAssignmentAsync("Chat", firstProfile.Id);
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{AssignmentsPath}/Chat",
             new { profileId = secondProfile.Id },
             TestContext.Current.CancellationToken);
@@ -59,7 +58,7 @@ public class AssignmentsUpdateTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var profile = await CreateProfileAsync();
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{AssignmentsPath}/Chat",
             new { profileId = profile.Id },
             TestContext.Current.CancellationToken);
@@ -78,7 +77,7 @@ public class AssignmentsUpdateTests(AspireAppFixture fixture) : BaseTest(fixture
         await CreateAssignmentAsync("Chat", globalProfile.Id);
         await CreateAssignmentAsync("Chat", scopedProfile.Id, roomId.ToString());
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{AssignmentsPath}/Chat",
             new { profileId = replacementProfile.Id, entityId = roomId.ToString() },
             TestContext.Current.CancellationToken);
@@ -93,7 +92,7 @@ public class AssignmentsUpdateTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var profile = await CreateProfileAsync();
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{AssignmentsPath}/Chat",
             new { profileId = profile.Id, entityId = "999999999" },
             TestContext.Current.CancellationToken);
