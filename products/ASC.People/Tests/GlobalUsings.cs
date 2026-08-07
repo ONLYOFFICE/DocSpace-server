@@ -62,6 +62,8 @@ global using FluentAssertions;
 
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
+global using MySqlConnector;
+
 global using Xunit;
 
 // Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.

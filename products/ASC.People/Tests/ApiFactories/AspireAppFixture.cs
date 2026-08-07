@@ -46,6 +46,11 @@ public class AspireAppFixture : IAsyncLifetime
     private const string OnlyofficeWebApi = "onlyoffice-web-api";
     private const string OnlyofficeApiSystem = "onlyoffice-apisystem";
 
+    private const string DocSpaceDatabase = "docspace";
+
+    // Tenant.DefaultTenant — the tenant portal-independent settings are stored under.
+    private const int DefaultTenantId = -1;
+
     private static readonly JsonSerializerOptions _apiSystemJsonOptions = new(JsonSerializerDefaults.Web);
 
     private DistributedApplication _app = null!;
@@ -93,6 +98,9 @@ public class AspireAppFixture : IAsyncLifetime
         // issues stateless POSTs, so it is safe to share across parallel tests.
         _apiSystemClient = CreateRawClient(ResolveBaseAddress(OnlyofficeApiSystem), origin: null);
 
+        // Before the first request of the run — see the method for why the order matters.
+        await DisableStartDocsAsync();
+
         await InitializePasswordSaltAsync();
 
         // Warm up the full portal flow ONCE, serially, before any test runs. Without this, the moment
@@ -124,6 +132,74 @@ public class AspireAppFixture : IAsyncLifetime
         catch (Exception e)
         {
             Timing.Write($"warmup.failed({e.GetType().Name}: {e.Message})", 0);
+        }
+    }
+
+    /// <summary>
+    /// Turns the sample documents ("start docs") off for every portal of the run.
+    /// </summary>
+    /// <remarks>
+    /// On the first access to a My or Common folder, <c>Global.GetFolderIdAndProcessFirstVisitAsync</c>
+    /// starts an unawaited task that copies ~2 MB of sample documents out of DocStore into the portal.
+    /// The request does not wait for it, but every test registers its own portal, so that copying
+    /// (storage writes, file rows, new-item marks, socket notifications) runs concurrently with the
+    /// suite. Nothing here depends on those documents.
+    ///
+    /// Written straight to the database rather than through <c>POST settings/rebranding/additional</c>:
+    /// that endpoint demands the white-label permission, which a test portal — with no paid quota —
+    /// does not have, so it answers 402. The row belongs to the DEFAULT tenant, which is where
+    /// <c>SettingsManager.LoadForDefaultTenantAsync</c> reads it from, hence one row for the whole run.
+    ///
+    /// It has to happen before the first HTTP request: settings are cached for five minutes, and the
+    /// cache is populated by the first reader (<c>GetPortalSettings</c>, called right after this).
+    ///
+    /// The payload is what <c>AdditionalWhiteLabelSettings.GetDefault()</c> produces for the shipped
+    /// <c>externalresources.json</c> — every domain there is non-empty, so every flag is true — with
+    /// <c>StartDocsEnabled</c> flipped, so nothing but the sample documents changes.
+    ///
+    /// A failure is reported and left non-fatal: the suite still passes, just slower.
+    /// </remarks>
+    private async Task DisableStartDocsAsync()
+    {
+        // AdditionalWhiteLabelSettings.ID, as EF stores it in the varchar(64) key column.
+        const string settingsId = "0108422f-c05d-488e-b271-30c4032494da";
+        const string settingsData =
+            """
+            {"StartDocsEnabled":false,"HelpCenterEnabled":true,"FeedbackAndSupportEnabled":true,"UserForumEnabled":true,"VideoGuidesEnabled":true,"LicenseAgreementsEnabled":true}
+            """;
+
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        try
+        {
+            await Timing.Measure("startdocs.disable", async () =>
+            {
+                var connectionString = await _app.GetConnectionStringAsync(DocSpaceDatabase, cancellationToken)
+                    ?? throw new InvalidOperationException($"No connection string for the '{DocSpaceDatabase}' resource.");
+
+                await using var connection = new MySqlConnection(connectionString);
+                await connection.OpenAsync(cancellationToken);
+
+                await using var command = connection.CreateCommand();
+
+                command.CommandText =
+                    """
+                    INSERT INTO webstudio_settings (TenantID, ID, UserID, Data, last_modified)
+                    VALUES (@tenantId, @id, @userId, @data, UTC_TIMESTAMP())
+                    ON DUPLICATE KEY UPDATE Data = @data, last_modified = UTC_TIMESTAMP();
+                    """;
+
+                command.Parameters.AddWithValue("@tenantId", DefaultTenantId);
+                command.Parameters.AddWithValue("@id", settingsId);
+                command.Parameters.AddWithValue("@userId", Guid.Empty.ToString());
+                command.Parameters.AddWithValue("@data", settingsData);
+
+                await command.ExecuteNonQueryAsync(cancellationToken);
+            });
+        }
+        catch (Exception e)
+        {
+            Timing.Write($"startdocs.disable.failed({e.GetType().Name}: {e.Message})", 0);
         }
     }
 

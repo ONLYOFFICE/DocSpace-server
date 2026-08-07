@@ -66,6 +66,8 @@ global using FluentAssertions;
 
 global using Microsoft.Extensions.DependencyInjection;
 
+global using MySqlConnector;
+
 global using Xunit;
 
 global using ASC.Files.Core.Text;
