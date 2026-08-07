@@ -344,7 +344,11 @@ public class CookiesManager(
         var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookies);
         if (loginEventId != 0)
         {
-            await eventBus.PublishAsync(new SuspiciousLoginIntegrationEvent(userId, tenantManager.GetCurrentTenantId(), loginEventId));
+            try
+            {
+                await eventBus.PublishAsync(new SuspiciousLoginIntegrationEvent(userId, tenantManager.GetCurrentTenantId(), loginEventId));
+            }
+            catch { }
         }
 
         return cookies;
