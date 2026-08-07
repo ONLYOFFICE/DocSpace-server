@@ -109,6 +109,8 @@ public static class WebStudioServiceExtensions
             eventBus.SubscribeAsync<MigrationClearIntegrationEvent,
                 MigrationIntegrationEventHandler>(),
             eventBus.SubscribeAsync<EventDataIntegrationEvent,
-                EventDataIntegrationEventHandler>());
+                EventDataIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<SuspiciousLoginIntegrationEvent,
+                SuspiciousLoginIntegrationEventHandler>());
     }
 }

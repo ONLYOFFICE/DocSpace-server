@@ -58,7 +58,8 @@ public class CookiesManager(
     IPSecurity.IPSecurity ipSecurity,
     IConfiguration configuration,
     SettingsManager settingsManager,
-    SuspiciousLoginNotifier suspiciousLoginNotifier)
+    CookieStorage cookieStorage,
+    IEventBus eventBus)
 {
     public const string AuthCookiesName = "asc_auth_key";
     private const string SocketIOCookiesName = "socketio.sid";
@@ -340,7 +341,11 @@ public class CookiesManager(
             }
         }
 
-        await suspiciousLoginNotifier.CheckAsync(userId, cookies);
+        var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookies);
+        if (loginEventId != 0)
+        {
+            await eventBus.PublishAsync(new SuspiciousLoginIntegrationEvent(userId, tenantManager.GetCurrentTenantId(), loginEventId));
+        }
 
         return cookies;
 

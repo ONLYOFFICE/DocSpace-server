@@ -61,7 +61,6 @@ public partial class SuspiciousLoginNotifier(
     UserManager userManager,
     GeolocationHelper geolocationHelper,
     StudioNotifyService studioNotifyService,
-    CookieStorage cookieStorage,
     SuspiciousLoginNotifierConfiguration configuration,
     ILogger<SuspiciousLoginNotifier> logger)
 {
@@ -103,17 +102,11 @@ public partial class SuspiciousLoginNotifier(
     private static readonly Regex _versionToken = VersionRegex();
     private static readonly Regex _whitespace = WhitespaceRegex();
 
-    public async Task CheckAsync(Guid userId, string authCookie)
+    public async Task CheckAsync(Guid userId, int loginEventId)
     {
         try
         {
-            if (userId == Guid.Empty)
-            {
-                return;
-            }
-
-            var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(authCookie);
-            if (loginEventId == 0)
+            if (userId == Guid.Empty || loginEventId == 0)
             {
                 return;
             }
