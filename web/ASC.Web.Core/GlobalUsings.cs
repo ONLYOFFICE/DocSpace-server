@@ -77,6 +77,7 @@ global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Data;
 global using ASC.Core.Notify;
+global using ASC.Core.Security.Authentication;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Storage;

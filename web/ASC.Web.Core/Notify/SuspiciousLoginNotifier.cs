@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using UserConstants = ASC.Core.Users.Constants;
+
 namespace ASC.Web.Studio.Core.Notify;
 
 [Singleton]
@@ -59,6 +61,7 @@ public partial class SuspiciousLoginNotifier(
     UserManager userManager,
     GeolocationHelper geolocationHelper,
     StudioNotifyService studioNotifyService,
+    CookieStorage cookieStorage,
     SuspiciousLoginNotifierConfiguration configuration,
     ILogger<SuspiciousLoginNotifier> logger)
 {
@@ -100,7 +103,7 @@ public partial class SuspiciousLoginNotifier(
     private static readonly Regex _versionToken = VersionRegex();
     private static readonly Regex _whitespace = WhitespaceRegex();
 
-    public async Task CheckAsync(Guid userId)
+    public async Task CheckAsync(Guid userId, string authCookie)
     {
         try
         {
@@ -109,8 +112,14 @@ public partial class SuspiciousLoginNotifier(
                 return;
             }
 
+            var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(authCookie);
+            if (loginEventId == 0)
+            {
+                return;
+            }
+
             var user = await userManager.GetUsersAsync(userId);
-            if (user == null || user.Id == Guid.Empty || string.IsNullOrEmpty(user.Email))
+            if (user.Id == Guid.Empty || user.Id == UserConstants.LostUser.Id || string.IsNullOrEmpty(user.Email))
             {
                 return;
             }
@@ -119,28 +128,28 @@ public partial class SuspiciousLoginNotifier(
 
             await using var messagesContext = await messagesContextFactory.CreateDbContextAsync();
 
-            var recentSuccess = await messagesContext.LoginEvents
-                .Where(e => e.TenantId == tenantId
-                    && e.UserId == userId
-                    && e.Action.HasValue
-                    && _successActions.Contains(e.Action.Value))
-                .OrderByDescending(e => e.Id)
-                .Take(configuration.HistoryLimit)
-                .ToListAsync();
+            var current = await messagesContext.LoginEvents
+                .FirstOrDefaultAsync(e => e.Id == loginEventId && e.TenantId == tenantId && e.UserId == userId);
 
-            if (recentSuccess.Count == 0)
+            if (current is not { Action: not null } || !_successActions.Contains(current.Action.Value))
             {
                 return;
             }
-
-            var current = recentSuccess[0];
 
             if (DateTime.UtcNow - current.Date > configuration.FreshLoginWindow)
             {
                 return;
             }
 
-            var baseline = recentSuccess.Skip(1).ToList();
+            var baseline = await messagesContext.LoginEvents
+                .Where(e => e.TenantId == tenantId
+                    && e.UserId == userId
+                    && e.Id < current.Id
+                    && e.Action.HasValue
+                    && _successActions.Contains(e.Action.Value))
+                .OrderByDescending(e => e.Id)
+                .Take(configuration.HistoryLimit)
+                .ToListAsync();
 
             if (baseline.Count == 0)
             {
@@ -181,6 +190,7 @@ public partial class SuspiciousLoginNotifier(
             var failCount = await messagesContext.LoginEvents
                 .Where(e => e.TenantId == tenantId
                     && e.Date >= failSince
+                    && e.Id < current.Id
                     && (e.UserId == userId || e.Login == user.Email)
                     && e.Action.HasValue
                     && _failActions.Contains(e.Action.Value))

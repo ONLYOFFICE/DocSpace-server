@@ -340,7 +340,7 @@ public class CookiesManager(
             }
         }
 
-        await suspiciousLoginNotifier.CheckAsync(userId);
+        await suspiciousLoginNotifier.CheckAsync(userId, cookies);
 
         return cookies;
 
