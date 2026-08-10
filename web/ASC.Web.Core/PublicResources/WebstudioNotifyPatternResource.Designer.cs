@@ -376,7 +376,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Collaborate in ONLYOFFICE.
+        ///   Looks up a localized string similar to Collaborate in ${LetterLogoText}.
         /// </summary>
         public static string ButtonCollaborate {
             get {
@@ -403,7 +403,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirm ONLYOFFICE Invite.
+        ///   Looks up a localized string similar to Confirm ${LetterLogoText} Invite.
         /// </summary>
         public static string ButtonConfirmInvite {
             get {
@@ -538,7 +538,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Open ONLYOFFICE.
+        ///   Looks up a localized string similar to Open ${LetterLogoText}.
         /// </summary>
         public static string ButtonOpenDocSpace {
             get {
@@ -3149,7 +3149,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} account will be deleted.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Docs will be deleted.
         /// </summary>
         public static string subject_saas_admin_startup_warning_after_year_v1 {
             get {
@@ -3158,7 +3158,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} account will be deleted.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Docs will be deleted.
         /// </summary>
         public static string subject_saas_admin_trial_warning_after_half_year_v1 {
             get {

@@ -1259,7 +1259,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ONLYOFFICE Administrator.
+        ///   Looks up a localized string similar to Administrator.
         /// </summary>
         public static string RoleEnum_DocSpaceAdmin {
             get {

@@ -211,7 +211,7 @@
     <value>Quota d'espace de l'agent IA dépassé</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Échec de la définition du quota par agent IA. La valeur saisie est supérieure au stockage total DocSpace.</value>
+    <value>Échec de la définition du quota par agent IA. La valeur saisie est supérieure au stockage total.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Renouvellement automatique</value>
@@ -1120,7 +1120,7 @@
     <value>Le quota de stockage pour la salle est dépassé</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Échec de la définition du quota par salle. La valeur saisie est supérieure à la capacité totale de stockage de DocSpace.</value>
+    <value>Échec de la définition du quota par salle. La valeur saisie est supérieure à la capacité totale de stockage.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asie-Pacifique (Singapour)</value>
@@ -1285,7 +1285,7 @@
     <value>Une erreur inattendue s'est produite. Veuillez réessayer.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Vous avez été connecté avec succès à Telegram pour recevoir les notifications de votre DocSpace.</value>
+    <value>Vous avez été connecté avec succès à Telegram pour recevoir les notifications de votre espace de travail.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Code incorrect</value>
@@ -1300,7 +1300,7 @@
     <value>Le quota de stockage pour l'utilisateur est dépassé</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Échec de la définition du quota par utilisateur. La valeur saisie est supérieure à la capacité totale de stockage de DocSpace.</value>
+    <value>Échec de la définition du quota par utilisateur. La valeur saisie est supérieure à la capacité totale de stockage.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Région US West (Oregon)</value>
@@ -1454,5 +1454,50 @@
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
     <value>Rapport de quota DocsCloud ({0})</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Срок действия доступа истекает</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Активен</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Société</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Дата создания</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Éditeurs de documents disposant de toutes les autorisations</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Éditeurs</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Externe</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Interne</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Visionneuse en direct</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Période</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Visionneuses de documents en lecture seule</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID de l'utilisateur</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Le quota utilisateur</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Type d'utilisateur</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Total</value>
   </data>
 </root>

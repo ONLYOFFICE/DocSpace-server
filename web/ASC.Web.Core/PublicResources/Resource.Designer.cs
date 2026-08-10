@@ -565,7 +565,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to set quota per AI agent. The entered value is greater than the total storage..
+        ///   Looks up a localized string similar to Échec de la définition du quota par agent IA. La valeur saisie est supérieure au stockage total..
         /// </summary>
         public static string AiAgentQuotaGreaterPortalError {
             get {
@@ -4156,7 +4156,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You have been successfully connected Telegram to receive notifications from ONLYOFFICE..
+        ///   Looks up a localized string similar to You have been successfully connected Telegram to receive notifications from workspace..
         /// </summary>
         public static string TelegramOnSuccessfulLink {
             get {

@@ -931,7 +931,7 @@
     <value>Send</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>User {0} sent an invitation to {1} to join ONLYOFFICE</value>
+    <value>User {0} sent an invitation to {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Invite Instructions Sent: {0}</value>

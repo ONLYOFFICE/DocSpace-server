@@ -2617,7 +2617,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User {0} sent an invitation to {1} to join ONLYOFFICE.
+        ///   Looks up a localized string similar to User {0} sent an invitation to {1}.
         /// </summary>
         public static string SendJoinInvite {
             get {

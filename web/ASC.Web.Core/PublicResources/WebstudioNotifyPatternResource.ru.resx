@@ -211,7 +211,7 @@
     <value>Настроить приложение для аутентификации</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Работайте совместно в ONLYOFFICE</value>
+    <value>Работайте совместно в ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Настроить прямо сейчас</value>
@@ -220,7 +220,7 @@
     <value>Подтвердить</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Подтвердите приглашение в ONLYOFFICE</value>
+    <value>Подтвердите приглашение в ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Подтвердить смену владельца портала</value>
@@ -265,7 +265,7 @@
     <value>Оставить отзыв</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Открыть ONLYOFFICE</value>
+    <value>Открыть ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Купить сейчас</value>
@@ -2089,10 +2089,10 @@ $TrulyYours</value>
     <value>Настройте ваше рабочее пространство ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
-    <value>Ваша учетная запись ${LetterLogoText} будет удалена</value>
+    <value>${LetterLogoText} Docs будет удален</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>Ваша учетная запись ${LetterLogoText} будет удалена</value>
+    <value>${LetterLogoText} Docs будет удален</value>
   </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Скачайте бесплатные приложения ${LetterLogoText}</value>
@@ -2197,7 +2197,7 @@ $TrulyYours</value>
     <value>Ваш тип пользователя изменился</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>С уважением, команда ${LetterLogoText}</value>

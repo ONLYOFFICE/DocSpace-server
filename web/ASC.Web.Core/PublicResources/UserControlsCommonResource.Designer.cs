@@ -88,7 +88,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to License Conflict. Please ensure that you have installed the correct edition of {0} ONLYOFFICE Docs (Enterprise or Developer). If you have any questions, feel free to contact your sales manager..
+        ///   Looks up a localized string similar to License Conflict. Please ensure that you have installed the correct edition of {0} Docs (Enterprise or Developer). If you have any questions, feel free to contact your sales manager..
         /// </summary>
         public static string LicenseTypeNotCorrect {
             get {

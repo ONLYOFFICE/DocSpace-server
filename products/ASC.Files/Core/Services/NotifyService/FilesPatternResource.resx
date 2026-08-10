@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>ONLYOFFICE notification. AI agent deleted</value>
+    <value>${LetterLogoText} notification. AI agent deleted</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Documents. All signers completed $DocumentTitle</value>
@@ -262,19 +262,19 @@ $Message</value>
     <value>Sign status changed</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>ONLYOFFICE notification. Mentioned in document</value>
+    <value>${LetterLogoText} notification. Mentioned in document</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>ONLYOFFICE notification. The form is filled out</value>
+    <value>${LetterLogoText} notification. The form is filled out</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>ONLYOFFICE notification.</value>
+    <value>${LetterLogoText} notification.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>ONLYOFFICE notification. The form is filled out</value>
+    <value>${LetterLogoText} notification. The form is filled out</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>ONLYOFFICE notification.</value>
+    <value>${LetterLogoText} notification.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Documents. Mailing is complete.</value>
@@ -283,7 +283,7 @@ $Message</value>
     <value>Mailing is complete.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>ONLYOFFICE notification. Room deleted</value>
+    <value>${LetterLogoText} notification. Room deleted</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Documents. Access granted to document: $DocumentTitle</value>
@@ -307,9 +307,9 @@ $Message</value>
     <value>Documents. Access granted to folder: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>ONLYOFFICE notification.</value>
+    <value>${LetterLogoText} notification.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>ONLYOFFICE notification.</value>
+    <value>${LetterLogoText} notification.</value>
   </data>
 </root>
