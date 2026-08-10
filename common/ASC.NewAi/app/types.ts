@@ -48,6 +48,7 @@ export interface RequestContext {
 }
 
 export interface AppConfig {
+  hostname?: string;
   name: string;
   port: number;
   appsettings: string;
