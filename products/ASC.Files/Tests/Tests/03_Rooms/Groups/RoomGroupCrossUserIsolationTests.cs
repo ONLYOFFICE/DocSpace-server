@@ -123,8 +123,8 @@ public class RoomGroupCrossUserIsolationTests(
         var member = await InviteMember(role);
         await _filesClient.Authenticate(member);
 
-        // Act
-        using var response = await RoomGroupRaw(HttpMethod.Delete, path: $"/{created.Id}");
+        // Act — correct contract: the cross-user delete is refused with 403.
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.DeleteRoomGroupAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert — the owner's group must survive regardless (holds under both the current
         // no-op and the correct 403 behaviour).
@@ -132,7 +132,6 @@ public class RoomGroupCrossUserIsolationTests(
         var survive = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         survive.Name.Should().Be($"Owner Del Group vs {role}");
 
-        // Correct contract: the cross-user delete is refused with 403.
-        response.StatusCode.Should().Be((HttpStatusCode)403);
+        exception.ErrorCode.Should().Be(403);
     }
 }

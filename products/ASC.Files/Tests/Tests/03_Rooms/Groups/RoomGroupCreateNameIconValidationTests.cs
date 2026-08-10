@@ -39,17 +39,18 @@ public class RoomGroupCreateNameIconValidationTests(
     AspireAppFixture fixture)
     : RoomGroupsTestBase(fixture)
 {
-    public static TheoryData<string, string?> BadNames => new()
+    // "missing" and "null" cannot be expressed through the typed DTO: its constructor requires a
+    // non-null `name` and throws client-side (ArgumentNullException) before any request is made,
+    // so those two stay raw. "empty" and "whitespace-only" are plain strings the DTO accepts fine.
+    public static TheoryData<string, string?> RawBadNames => new()
     {
         { "missing", null },
-        { "null", null },
-        { "empty", "" },
-        { "whitespace-only", "   " }
+        { "null", null }
     };
 
     [Theory]
-    [MemberData(nameof(BadNames))]
-    public async Task Create_BadName_Returns400(string label, string? name)
+    [MemberData(nameof(RawBadNames))]
+    public async Task Create_MissingOrNullName_Returns400(string label, string? name)
     {
         // Arrange
         var roomId = await CreateGroupRoomId("Nm");
@@ -64,6 +65,28 @@ public class RoomGroupCreateNameIconValidationTests(
         response.StatusCode.Should().Be((HttpStatusCode)400);
     }
 
+    public static TheoryData<string, string> BadNames => new()
+    {
+        { "empty", "" },
+        { "whitespace-only", "   " }
+    };
+
+    [Theory]
+    [MemberData(nameof(BadNames))]
+    public async Task Create_EmptyOrWhitespaceName_Returns400(string label, string name)
+    {
+        // Arrange
+        var roomId = await CreateGroupRoomId($"Nm {label}");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto(name, "star", [new DuplicateRequestDtoAllOfFileIds(roomId)]),
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
     [Fact]
     public async Task Create_TooLongName_Returns400NotInternalError()
     {
@@ -71,24 +94,25 @@ public class RoomGroupCreateNameIconValidationTests(
         var roomId = await CreateGroupRoomId("TooLong");
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { name = new string('n', 300), icon = "star", rooms = new[] { roomId } });
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto(new string('n', 300), "star", [new DuplicateRequestDtoAllOfFileIds(roomId)]),
+            cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
-    public static TheoryData<string, string?> BadIcons => new()
+    // Same reasoning as RawBadNames: `icon` is also a required, non-nullable DTO constructor
+    // argument, so "missing" and "null" stay raw.
+    public static TheoryData<string, string?> RawBadIcons => new()
     {
         { "missing", null },
-        { "null", null },
-        { "empty", "" },
-        { "whitespace-only", "   " },
-        { "unknown", "invalid-icon-name" }
+        { "null", null }
     };
 
     [Theory]
-    [MemberData(nameof(BadIcons))]
-    public async Task Create_BadIcon_Returns400(string label, string? icon)
+    [MemberData(nameof(RawBadIcons))]
+    public async Task Create_MissingOrNullIcon_Returns400(string label, string? icon)
     {
         // Arrange
         var roomId = await CreateGroupRoomId("Ic");
@@ -101,6 +125,29 @@ public class RoomGroupCreateNameIconValidationTests(
 
         // Assert
         response.StatusCode.Should().Be((HttpStatusCode)400);
+    }
+
+    public static TheoryData<string, string> BadIcons => new()
+    {
+        { "empty", "" },
+        { "whitespace-only", "   " },
+        { "unknown", "invalid-icon-name" }
+    };
+
+    [Theory]
+    [MemberData(nameof(BadIcons))]
+    public async Task Create_EmptyWhitespaceOrUnknownIcon_Returns400(string label, string icon)
+    {
+        // Arrange
+        var roomId = await CreateGroupRoomId($"Ic {label}");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto("Icon Val", icon, [new DuplicateRequestDtoAllOfFileIds(roomId)]),
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]

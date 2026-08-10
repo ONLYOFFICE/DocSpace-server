@@ -52,15 +52,19 @@ public class RoomGroupCreateRoomsValidationTests(
     public async Task Create_EmptyRoomsArray_RejectedAndCreatesNothing()
     {
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { name = "Empty Rooms", icon = "star", rooms = Array.Empty<int>() });
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto("Empty Rooms", "star", []),
+            cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)403);
+        exception.ErrorCode.Should().Be(403);
 
         var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Select(g => g.Name).Should().NotContain("Empty Rooms");
     }
 
+    // `rooms` is a required constructor argument on the typed DTO — there is no way to omit it,
+    // so this stays raw.
     [Fact]
     [Trait("Bug", "82575")]
     public async Task Create_MissingRoomsField_ShouldBe400BodyValidationError()
@@ -73,6 +77,8 @@ public class RoomGroupCreateRoomsValidationTests(
         response.StatusCode.Should().Be((HttpStatusCode)400);
     }
 
+    // `rooms: null` throws client-side (ArgumentNullException) if constructed through the typed
+    // DTO, so it never reaches the server — this stays raw to exercise the actual wire contract.
     [Fact]
     public async Task Create_RoomsNull_Returns400()
     {
@@ -148,10 +154,12 @@ public class RoomGroupCreateRoomsValidationTests(
     public async Task Create_NonExistentRoomId_ShouldBe404()
     {
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { name = "Room non-existent", icon = "star", rooms = new[] { 999999 } });
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto("Room non-existent", "star", [new DuplicateRequestDtoAllOfFileIds(999999)]),
+            cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)404);
+        exception.ErrorCode.Should().Be(404);
     }
 
     public static TheoryData<string, int> InvalidValueIds => new()
@@ -167,10 +175,12 @@ public class RoomGroupCreateRoomsValidationTests(
     public async Task Create_InvalidValueRoomId_ShouldBe400InvalidValueError(string label, int id)
     {
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { name = $"Room {label}", icon = "star", rooms = new[] { id } });
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto($"Room {label}", "star", [new DuplicateRequestDtoAllOfFileIds(id)]),
+            cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     /// <summary>
@@ -184,12 +194,14 @@ public class RoomGroupCreateRoomsValidationTests(
         var validId = await CreateGroupRoomId("Atomic Valid");
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { name = "Atomic Create", icon = "star", rooms = new[] { validId, 999999 } });
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto("Atomic Create", "star", [new DuplicateRequestDtoAllOfFileIds(validId), new DuplicateRequestDtoAllOfFileIds(999999)]),
+            cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
         var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Select(g => g.Name).Should().Contain("Atomic Create");
-        response.StatusCode.Should().Be((HttpStatusCode)403);
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]
@@ -199,10 +211,10 @@ public class RoomGroupCreateRoomsValidationTests(
         // Arrange
         var roomId = await CreateGroupRoomId("Dup Room");
 
-        // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { name = "Dup Rooms", icon = "star", rooms = new[] { roomId, roomId } });
-
-        // Assert — the server currently returns 500 instead of deduplicating.
-        response.StatusCode.Should().Be((HttpStatusCode)200);
+        // Act & Assert — the server currently returns 500 instead of deduplicating; the correct
+        // contract is a plain successful create (no ApiException).
+        await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto("Dup Rooms", "star", [new DuplicateRequestDtoAllOfFileIds(roomId), new DuplicateRequestDtoAllOfFileIds(roomId)]),
+            cancellationToken: TestContext.Current.CancellationToken);
     }
 }

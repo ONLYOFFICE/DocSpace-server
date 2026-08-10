@@ -101,14 +101,16 @@ public class RoomGroupUpdateRoomsTests(
         var roomId = await CreateGroupRoomId("NullAdd");
         var created = await CreateRoomGroup("NullAdd Group", [roomId]);
 
-        // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { roomsToAdd = (object?)null }, path: $"/{created.Id}");
+        // Act — `roomsToAdd` is nullable on the DTO (unlike create's required `rooms`), so the
+        // null value itself is directly expressible.
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            created.Id, new UpdateRoomGroupRequest(roomsToAdd: null!), TestContext.Current.CancellationToken));
 
         // Assert — no data corruption either way (null is a no-op), so the room set stays 1; the
         // bug is purely the accepted-instead-of-rejected status.
         var after = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         after.TotalRooms.Should().Be(1);
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -119,7 +121,17 @@ public class RoomGroupUpdateRoomsTests(
         var created = await CreateRoomGroup("AddMissing Group", [roomId]);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { roomsToAdd = new[] { 999999 } }, path: $"/{created.Id}");
+        try
+        {
+            await _roomGroupsApi.UpdateRoomGroupAsync(
+                created.Id,
+                new UpdateRoomGroupRequest(roomsToAdd: [new DuplicateRequestDtoAllOfFileIds(999999)]),
+                TestContext.Current.CancellationToken);
+        }
+        catch (ApiException)
+        {
+            // Expected: the non-existent room is currently refused (see the BUG 82592 test below).
+        }
 
         // Assert — no-side-effect invariant: the rejected room is not added.
         var info = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -135,10 +147,13 @@ public class RoomGroupUpdateRoomsTests(
         var created = await CreateRoomGroup("AddMissing404 Group", [roomId]);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { roomsToAdd = new[] { 999999 } }, path: $"/{created.Id}");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            created.Id,
+            new UpdateRoomGroupRequest(roomsToAdd: [new DuplicateRequestDtoAllOfFileIds(999999)]),
+            TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)404);
+        exception.ErrorCode.Should().Be(404);
     }
 
     /// <summary>
@@ -154,12 +169,15 @@ public class RoomGroupUpdateRoomsTests(
         var created = await CreateRoomGroup("Atomic Add Group", [seed]);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { roomsToAdd = new[] { valid, 999999 } }, path: $"/{created.Id}");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            created.Id,
+            new UpdateRoomGroupRequest(roomsToAdd: [new DuplicateRequestDtoAllOfFileIds(valid), new DuplicateRequestDtoAllOfFileIds(999999)]),
+            TestContext.Current.CancellationToken));
 
         // Assert
         var info = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         info.Rooms.Select(r => r.Title).Should().Contain("AtomicValidAdd");
-        response.StatusCode.Should().Be((HttpStatusCode)403);
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]
@@ -171,11 +189,12 @@ public class RoomGroupUpdateRoomsTests(
         var dup = await CreateGroupRoomId("DupAddRoom");
         var created = await CreateRoomGroup("Dup Add Group", [seed]);
 
-        // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { roomsToAdd = new[] { dup, dup } }, path: $"/{created.Id}");
-
-        // Assert — the server currently returns 500 instead of deduplicating.
-        response.StatusCode.Should().Be((HttpStatusCode)200);
+        // Act & Assert — the server currently returns 500 instead of deduplicating; the correct
+        // contract is a plain successful update (no ApiException).
+        await _roomGroupsApi.UpdateRoomGroupAsync(
+            created.Id,
+            new UpdateRoomGroupRequest(roomsToAdd: [new DuplicateRequestDtoAllOfFileIds(dup), new DuplicateRequestDtoAllOfFileIds(dup)]),
+            TestContext.Current.CancellationToken);
     }
 
     #endregion
@@ -227,10 +246,13 @@ public class RoomGroupUpdateRoomsTests(
         var created = await CreateRoomGroup("RemoveMissing Group", [roomId]);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { roomsToRemove = new[] { 999999 } }, path: $"/{created.Id}");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            created.Id,
+            new UpdateRoomGroupRequest(roomsToRemove: [new DuplicateRequestDtoAllOfFileIds(999999)]),
+            TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)404);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]

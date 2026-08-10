@@ -93,12 +93,26 @@ public class RoomGroupReadTests(
         withMembers.TotalRooms.Should().Be(without.TotalRooms);
     }
 
-    public static TheoryData<string> NotFoundIds =>
-        ["0", "-1", "999999", "1.5", "not-a-number", "99999999999999999999"];
+    public static TheoryData<int> NotFoundIntegerIds => [0, -1, 999999];
 
     [Theory]
-    [MemberData(nameof(NotFoundIds))]
-    public async Task GetInfo_BadId_Returns404(string id)
+    [MemberData(nameof(NotFoundIntegerIds))]
+    public async Task GetInfo_BadIntegerId_Returns404(int id)
+    {
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.GetRoomGroupInfoAsync(id, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    // None of these route to a valid `int id`, so there is no typed call to make — the SDK method
+    // signature itself rejects them at compile time.
+    public static TheoryData<string> NotFoundNonIntegerIds => ["1.5", "not-a-number", "99999999999999999999"];
+
+    [Theory]
+    [MemberData(nameof(NotFoundNonIntegerIds))]
+    public async Task GetInfo_NonIntegerId_Returns404(string id)
     {
         // Act
         using var response = await RoomGroupRaw(HttpMethod.Get, path: $"/{id}");
@@ -122,6 +136,7 @@ public class RoomGroupReadTests(
         exception.ErrorCode.Should().Be(404);
     }
 
+    // The typed `includeMembers` parameter is a `bool?` — a non-boolean value can only be sent raw.
     [Fact]
     public async Task GetInfo_InvalidIncludeMembers_Returns400()
     {
@@ -250,6 +265,9 @@ public class RoomGroupReadTests(
         oneTwoThree.Select(g => g.Name).Order().Should().Equal(zero.Select(g => g.Name).Order());
     }
 
+    // `id` is a required parameter on the typed method (GetRoomGroupsAsync(int id, ...)), so there
+    // is no way to omit it through the SDK — this stays raw to exercise the server accepting the
+    // query string without it at all.
     [Fact]
     public async Task GetList_RawRequestWithoutIdParameter_StillReturns200()
     {

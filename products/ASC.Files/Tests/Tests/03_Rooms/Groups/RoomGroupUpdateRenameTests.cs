@@ -115,14 +115,16 @@ public class RoomGroupUpdateRenameTests(
         var roomId = await CreateGroupRoomId("NullName Room");
         var created = await CreateRoomGroup("Keep Me", [roomId]);
 
-        // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { groupName = (string?)null }, path: $"/{created.Id}");
+        // Act — `groupName` is nullable on the DTO (unlike create's required `name`), so the null
+        // value itself is directly expressible.
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            created.Id, new UpdateRoomGroupRequest(groupName: null!), TestContext.Current.CancellationToken));
 
         // Assert — no data corruption either way (null is a no-op), so the name stays "Keep Me";
         // the bug is purely the accepted-instead-of-rejected status.
         var after = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         after.Name.Should().Be("Keep Me");
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -133,10 +135,11 @@ public class RoomGroupUpdateRenameTests(
         var created = await CreateRoomGroup("Short", [roomId]);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { groupName = new string('n', 300) }, path: $"/{created.Id}");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            created.Id, new UpdateRoomGroupRequest(groupName: new string('n', 300)), TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
         var info = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         info.Name.Should().Be("Short");
     }
@@ -150,13 +153,14 @@ public class RoomGroupUpdateRenameTests(
         var created = await CreateRoomGroup("Named", [roomId]);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { groupName = "" }, path: $"/{created.Id}");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            created.Id, new UpdateRoomGroupRequest(groupName: ""), TestContext.Current.CancellationToken));
 
         // Assert — data-corruption half of the bug first: an empty name must not overwrite the
         // stored name.
         var after = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         after.Name.Should().Be("Named");
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -168,11 +172,12 @@ public class RoomGroupUpdateRenameTests(
         var created = await CreateRoomGroup("Named", [roomId]);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { groupName = "   " }, path: $"/{created.Id}");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            created.Id, new UpdateRoomGroupRequest(groupName: "   "), TestContext.Current.CancellationToken));
 
         // Assert
         var after = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         after.Name.Should().Be("Named");
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 }

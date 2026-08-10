@@ -39,21 +39,45 @@ public class RoomGroupIconValidationTests(
     AspireAppFixture fixture)
     : RoomGroupsTestBase(fixture)
 {
-    public static TheoryData<string, object> BadIcons => new()
+    // These are all well-formed strings the typed DTO accepts fine — the server rejects them for
+    // business reasons (unknown/blank/too long icon value), not a wire-format problem.
+    public static TheoryData<string, string> BadIcons => new()
     {
         { "whitespace-only", "   " },
         { "none", "none" },
         { "unknown", "invalid-icon-name" },
-        { "number", 5 },
-        { "boolean", true },
-        { "array", new[] { 1 } },
-        { "object", new { a = 1 } },
         { "too-long", new string('x', 300) }
     };
 
     [Theory]
     [MemberData(nameof(BadIcons))]
-    public async Task ChangeIcon_BadIcon_Returns400(string label, object icon)
+    public async Task ChangeIcon_BadIcon_Returns400(string label, string icon)
+    {
+        // Arrange
+        var roomId = await CreateGroupRoomId($"IconBad {label}");
+        var created = await CreateRoomGroup($"IconBad {label}", [roomId]);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.ChangeRoomGroupIconAsync(
+            created.Id, new IconRequest(icon), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    // `icon` typed as anything other than a string (number, boolean, array, object) cannot be
+    // expressed through `IconRequest.Icon` (a `string`), so these stay raw.
+    public static TheoryData<string, object> WrongTypedIcons => new()
+    {
+        { "number", 5 },
+        { "boolean", true },
+        { "array", new[] { 1 } },
+        { "object", new { a = 1 } }
+    };
+
+    [Theory]
+    [MemberData(nameof(WrongTypedIcons))]
+    public async Task ChangeIcon_WrongTypedIcon_Returns400(string label, object icon)
     {
         // Arrange
         var roomId = await CreateGroupRoomId($"IconBad {label}");
@@ -78,10 +102,10 @@ public class RoomGroupIconValidationTests(
         var created = await CreateRoomGroup("EmptyIcon Group", [roomId], "heart");
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { icon = "" }, path: $"/{created.Id}/icon");
+        var updated = (await _roomGroupsApi.ChangeRoomGroupIconAsync(created.Id, new IconRequest(""), TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)200);
+        updated.Should().NotBeNull();
         var after = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         (after.Icon?.Id).Should().BeNullOrEmpty();
     }
@@ -119,14 +143,26 @@ public class RoomGroupIconValidationTests(
     }
 
     // 999999 (non-existent) is covered by the BUG 80922 regression test below.
-    public static TheoryData<string> NonAddressableIds => ["0", "-1", "not-a-number"];
+    public static TheoryData<int> NonAddressableIntegerIds => [0, -1];
 
     [Theory]
-    [MemberData(nameof(NonAddressableIds))]
-    public async Task ChangeIcon_NonAddressableGroup_Returns404(string id)
+    [MemberData(nameof(NonAddressableIntegerIds))]
+    public async Task ChangeIcon_NonAddressableIntegerGroup_Returns404(int id)
     {
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { icon = "heart" }, path: $"/{id}/icon");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.ChangeRoomGroupIconAsync(
+            id, new IconRequest("heart"), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    // Does not route to a valid `int id`, so there is no typed call to make.
+    [Fact]
+    public async Task ChangeIcon_NonIntegerGroupId_Returns404()
+    {
+        // Act
+        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { icon = "heart" }, path: "/not-a-number/icon");
 
         // Assert
         response.StatusCode.Should().Be((HttpStatusCode)404);

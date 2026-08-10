@@ -39,6 +39,10 @@ public class RoomGroupUpdateContractTests(
     AspireAppFixture fixture)
     : RoomGroupsTestBase(fixture)
 {
+    // All three UpdateRoomGroupRequest members (`roomsToAdd`, `roomsToRemove`, `groupName`) are
+    // `[DataMember(..., EmitDefaultValue = true)]`, so a default-constructed instance serialises
+    // to `{"roomsToAdd":null,"roomsToRemove":null,"groupName":null}`, not `{}` — an actually-empty
+    // body can only be sent raw.
     [Fact]
     public async Task Update_EmptyObjectBody_IsNoOp()
     {
@@ -102,14 +106,26 @@ public class RoomGroupUpdateContractTests(
         response.StatusCode.Should().Be((HttpStatusCode)415);
     }
 
-    public static TheoryData<string> BadIds => ["0", "-1", "999999", "not-a-number"];
+    public static TheoryData<int> BadIntegerIds => [0, -1, 999999];
 
     [Theory]
-    [MemberData(nameof(BadIds))]
-    public async Task Update_NonAddressableGroup_Returns404(string id)
+    [MemberData(nameof(BadIntegerIds))]
+    public async Task Update_NonAddressableIntegerGroup_Returns404(int id)
     {
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { groupName = "X" }, path: $"/{id}");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            id, new UpdateRoomGroupRequest(groupName: "X"), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    // Does not route to a valid `int id`, so there is no typed call to make.
+    [Fact]
+    public async Task Update_NonIntegerGroupId_Returns404()
+    {
+        // Act
+        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { groupName = "X" }, path: "/not-a-number");
 
         // Assert
         response.StatusCode.Should().Be((HttpStatusCode)404);

@@ -128,6 +128,9 @@ public class RoomGroupIconTests(
         info.Icon.Id.Should().Be(icon);
     }
 
+    // `IconRequest.Icon` is `[DataMember(Name = "icon", EmitDefaultValue = true)]`, so a
+    // default-constructed instance serialises to `{"icon":null}`, not `{}` — the two payloads are
+    // not the same request, so an actually-empty body can only be sent raw.
     [Fact]
     public async Task ChangeIcon_EmptyObjectBody_IsNoOp()
     {
@@ -152,10 +155,10 @@ public class RoomGroupIconTests(
         var created = await CreateRoomGroup("NoopNull Group", [roomId], "heart");
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { icon = (string?)null }, path: $"/{created.Id}/icon");
+        var updated = (await _roomGroupsApi.ChangeRoomGroupIconAsync(created.Id, new IconRequest(icon: null!), TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)200);
+        updated.Should().NotBeNull();
         var info = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         info.Icon.Id.Should().Be("heart");
     }

@@ -149,7 +149,16 @@ public class RoomGroupOwnCapabilityTests(
         await _filesClient.Authenticate(member);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { name = $"{role} No Access", icon = "star", rooms = new[] { roomId } });
+        try
+        {
+            await _roomGroupsApi.AddRoomGroupAsync(
+                new RoomGroupRequestDto($"{role} No Access", "star", [new DuplicateRequestDtoAllOfFileIds(roomId)]),
+                cancellationToken: TestContext.Current.CancellationToken);
+        }
+        catch (ApiException)
+        {
+            // Expected: the room is inaccessible to this caller (see the gate test above).
+        }
 
         // Assert — nothing is created in the caller's listing.
         var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;

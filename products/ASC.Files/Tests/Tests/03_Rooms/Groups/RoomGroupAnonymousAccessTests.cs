@@ -48,10 +48,12 @@ public class RoomGroupAnonymousAccessTests(
         await _filesClient.Authenticate(null);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { name = "Anon", icon = "star", rooms = new[] { 1 } });
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto("Anon", "star", [new DuplicateRequestDtoAllOfFileIds(1)]),
+            cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -61,10 +63,10 @@ public class RoomGroupAnonymousAccessTests(
         await _filesClient.Authenticate(null);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Get, path: "/1");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.GetRoomGroupInfoAsync(1, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -74,10 +76,10 @@ public class RoomGroupAnonymousAccessTests(
         await _filesClient.Authenticate(null);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Get);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -87,10 +89,11 @@ public class RoomGroupAnonymousAccessTests(
         await _filesClient.Authenticate(null);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { groupName = "Hacked" }, path: "/1");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            1, new UpdateRoomGroupRequest(groupName: "Hacked"), TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -100,10 +103,11 @@ public class RoomGroupAnonymousAccessTests(
         await _filesClient.Authenticate(null);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { icon = "heart" }, path: "/1/icon");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.ChangeRoomGroupIconAsync(
+            1, new IconRequest("heart"), TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -113,10 +117,10 @@ public class RoomGroupAnonymousAccessTests(
         await _filesClient.Authenticate(null);
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Delete, path: "/1");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.DeleteRoomGroupAsync(1, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     #endregion
@@ -135,10 +139,12 @@ public class RoomGroupAnonymousAccessTests(
         UseInvalidToken();
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { name = "Bad Token", icon = "star", rooms = new[] { 1 } });
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.AddRoomGroupAsync(
+            new RoomGroupRequestDto("Bad Token", "star", [new DuplicateRequestDtoAllOfFileIds(1)]),
+            cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -148,10 +154,10 @@ public class RoomGroupAnonymousAccessTests(
         UseInvalidToken();
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Get, path: "/1");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.GetRoomGroupInfoAsync(1, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -161,10 +167,10 @@ public class RoomGroupAnonymousAccessTests(
         UseInvalidToken();
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Get);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -174,10 +180,11 @@ public class RoomGroupAnonymousAccessTests(
         UseInvalidToken();
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Put, body: new { groupName = "X" }, path: "/1");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+            1, new UpdateRoomGroupRequest(groupName: "X"), TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -187,10 +194,11 @@ public class RoomGroupAnonymousAccessTests(
         UseInvalidToken();
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Post, body: new { icon = "heart" }, path: "/1/icon");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.ChangeRoomGroupIconAsync(
+            1, new IconRequest("heart"), TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -200,10 +208,10 @@ public class RoomGroupAnonymousAccessTests(
         UseInvalidToken();
 
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Delete, path: "/1");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.DeleteRoomGroupAsync(1, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)401);
+        exception.ErrorCode.Should().Be(401);
     }
 
     #endregion

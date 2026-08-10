@@ -39,33 +39,8 @@ namespace ASC.Files.Tests.Tests._08_Privacy;
 /// helpers this feature needs (<see cref="InviteMember"/>, <see cref="InviteToRoom"/>) are lifted here
 /// instead, keeping this feature folder self-contained per the "one feature, one folder" rule.
 /// </summary>
-public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : BaseTest(fixture)
+public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermissionsTestBase(fixture)
 {
-    /// <summary>
-    /// Adds a member of the given type to the portal. Guests cannot be created through
-    /// <see cref="BaseTest.InviteContact"/> — they only come into existence by being invited into a
-    /// room by e-mail, which is what <see cref="BaseTest.InviteGuest"/> does.
-    /// </summary>
-    protected async Task<User> InviteMember(EmployeeType employeeType)
-    {
-        return employeeType == EmployeeType.Guest
-            ? await InviteGuest()
-            : await InviteContact(employeeType);
-    }
-
-    /// <summary>Invites an existing portal member into a room with the given access level.</summary>
-    protected async Task InviteToRoom(int roomId, User user, FileShare access)
-    {
-        await _roomsApi.SetRoomSecurityAsync(
-            roomId,
-            new RoomInvitationRequest
-            {
-                Invitations = [new RoomInvitation { Id = user.Id, Access = access }],
-                Notify = false
-            },
-            cancellationToken: TestContext.Current.CancellationToken);
-    }
-
     /// <summary>
     /// Sets a fresh fake encryption key pair for the currently authenticated user, mirroring the
     /// TypeScript suite's fake <c>pk-...</c> / <c>prv-...</c> helper. Real cryptography for this

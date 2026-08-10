@@ -39,6 +39,10 @@ public class RoomGroupCreateContractTests(
     AspireAppFixture fixture)
     : RoomGroupsTestBase(fixture)
 {
+    // RoomGroupRequestDto has no reachable parameterless constructor for a test to call — the only
+    // one is `protected RoomGroupRequestDto()` (deserialization-only, see the [JsonConstructor] in
+    // RoomGroupRequestDto.cs), and the public constructor requires non-null name/icon/rooms and
+    // throws ArgumentNullException otherwise. An actually-empty body has no typed equivalent.
     [Fact]
     public async Task Create_EmptyBody_Returns400()
     {

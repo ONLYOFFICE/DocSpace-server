@@ -137,30 +137,31 @@ public class RoomGroupDeleteTests(
         var created = await CreateRoomGroup("Repeat Del Group", [roomId]);
         await _roomGroupsApi.DeleteRoomGroupAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken);
 
-        // Act
-        using var response = await RoomGroupRaw(HttpMethod.Delete, path: $"/{created.Id}");
+        // Act — the group no longer exists, so a second delete must be 404 (idempotent does not
+        // imply 200 for a missing resource).
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.DeleteRoomGroupAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken));
 
-        // Assert — the group no longer exists, so a second delete must be 404 (idempotent does
-        // not imply 200 for a missing resource).
-        response.StatusCode.Should().Be((HttpStatusCode)404);
+        // Assert
+        exception.ErrorCode.Should().Be(404);
     }
 
     // A missing group must be 404 (as GET/PUT already are). The endpoint currently returns 200
     // for any addressable integer id.
-    public static TheoryData<string> MissingIds => ["0", "-1", "999999"];
+    public static TheoryData<int> MissingIds => [0, -1, 999999];
 
     [Theory]
     [MemberData(nameof(MissingIds))]
     [Trait("Bug", "82596")]
-    public async Task Delete_NonExistentId_ShouldBe404(string id)
+    public async Task Delete_NonExistentId_ShouldBe404(int id)
     {
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Delete, path: $"/{id}");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.DeleteRoomGroupAsync(id, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)404);
+        exception.ErrorCode.Should().Be(404);
     }
 
+    // Neither value routes to a valid `int id`, so there is no typed call to make.
     public static TheoryData<string> RoutingFailIds => ["1.5", "not-a-number"];
 
     [Theory]
@@ -174,6 +175,7 @@ public class RoomGroupDeleteTests(
         response.StatusCode.Should().Be((HttpStatusCode)404);
     }
 
+    // The typed `includeMembers` parameter is a `bool?` — a non-boolean value can only be sent raw.
     [Fact]
     public async Task Delete_InvalidIncludeMembers_Returns400()
     {

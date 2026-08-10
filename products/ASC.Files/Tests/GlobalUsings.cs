@@ -49,6 +49,7 @@ global using System.Web;
 global using ASC.Files.Core.Text;
 global using ASC.Files.Tests.ApiFactories;
 global using ASC.Files.Tests.Data;
+global using ASC.Files.Tests.Tests._03_Rooms;
 
 global using Aspire.Hosting;
 global using Aspire.Hosting.Testing;

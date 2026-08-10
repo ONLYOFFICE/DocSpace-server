@@ -95,23 +95,11 @@ public class RoomAccessKeysPermissionsTests(AspireAppFixture fixture) : PrivacyR
         exception.ErrorCode.Should().Be(401);
     }
 
-    /// <summary>
-    /// The access levels a CustomRoom accepts for a User-type subject, minus RoomManager (which a
-    /// User-type member can never hold — see <see cref="GetUserKeysForRoom_RoomAdminInvitedAsRoomManager_ReadsTheRoomsKeySet"/>).
-    /// Mirrors <c>RoomAccessData.NonManagerAccesses</c> in <c>ASC.Files.Tests.Tests._03_Rooms</c>;
-    /// duplicated locally rather than referenced across the namespace boundary, per the
-    /// one-feature-one-folder rule.
-    /// </summary>
-    public static TheoryData<FileShare> NonManagerAccesses =>
-    [
-        FileShare.Read, FileShare.Comment, FileShare.Review, FileShare.Editing, FileShare.ContentCreator
-    ];
-
     // Every access level a User-type member can hold in a private room grants the room's key set —
     // a Viewer sees exactly what a ContentCreator sees. RoomManager cannot be granted to a
     // User-type member at all (the invite is 403), so it is covered by the RoomAdmin test below.
     [Theory]
-    [MemberData(nameof(NonManagerAccesses))]
+    [MemberData(nameof(RoomAccessData.NonManagerAccesses), MemberType = typeof(RoomAccessData))]
     public async Task GetUserKeysForRoom_MemberWithAccess_ReadsTheRoomsKeySet(FileShare access)
     {
         var (room, ownerKey) = await CreatePrivateRoomAsOwner();
