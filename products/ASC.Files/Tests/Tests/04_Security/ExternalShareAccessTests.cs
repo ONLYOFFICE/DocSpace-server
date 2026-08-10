@@ -203,4 +203,71 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         // Assert — authenticated users bypass the global block
         result.Status.Should().Be(Status.Ok);
     }
+
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "82051")]
+    public async Task CreatePublicRoom_WhenRestrictedForRooms_ReturnsForbiddenAndCreatesNothing()
+    {
+        // Arrange — restrict external sharing for Rooms
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true);
+
+        await _filesClient.Authenticate(Owner);
+
+        // Act — a public room always carries a public primary link, so creation must be rejected
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreatePublicRoom("restricted-public-room"));
+
+        // Assert — the room must not be persisted before the restriction is enforced
+        var rooms = (await _roomsApi.GetRoomsFolderAsync(
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        exception.ErrorCode.Should().Be(403);
+        rooms.Folders.Should().NotContain(f => f.Title == "restricted-public-room");
+    }
+
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "82051")]
+    public async Task CreatePublicRoom_WhenRestrictedForDocumentsOnly_Succeeds()
+    {
+        // Arrange — restrict only My Documents, leave Rooms unrestricted
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: true, applyToRooms: false);
+
+        await _filesClient.Authenticate(Owner);
+
+        // Act — the restriction is out of scope for Rooms, so creation must go through
+        var room = await CreatePublicRoom("allowed-public-room");
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert
+        room.Should().NotBeNull();
+        room.RoomType.Should().Be(RoomType.PublicRoom);
+    }
+
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "82051")]
+    public async Task CreateCustomRoom_WhenRestrictedForRooms_Succeeds()
+    {
+        // Arrange — restrict external sharing for Rooms
+        await SetExternalSharingAsync(externalShare: false, applyToDocuments: false, applyToRooms: true);
+
+        await _filesClient.Authenticate(Owner);
+
+        // Act — only public rooms are blocked; other room types stay creatable
+        var room = await CreateCustomRoom("restricted-custom-room");
+
+        // Reset external sharing changes
+        await SetExternalSharingAsync(externalShare: true);
+
+        // Assert
+        room.Should().NotBeNull();
+        room.RoomType.Should().Be(RoomType.CustomRoom);
+    }
 }
