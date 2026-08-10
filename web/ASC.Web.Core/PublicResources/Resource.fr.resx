@@ -1456,16 +1456,16 @@
     <value>Rapport de quota DocsCloud ({0})</value>
   </data>
   <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
-    <value>Срок действия доступа истекает</value>
+    <value>L'accès expire</value>
   </data>
   <data name="DocsCloudQuotaReportActive" xml:space="preserve">
-    <value>Активен</value>
+    <value>Actif</value>
   </data>
   <data name="AccountingReportCompany" xml:space="preserve">
     <value>Société</value>
   </data>
   <data name="AccountingReportDateGenerated" xml:space="preserve">
-    <value>Дата создания</value>
+    <value>Date généré</value>
   </data>
   <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
     <value>Éditeurs de documents disposant de toutes les autorisations</value>

@@ -1456,16 +1456,16 @@
     <value>Встройте редакторы ONLYOFFICE Docs в свое приложение с облачными арендаторами и собственными API-ключами.</value>
   </data>
   <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
-    <value>L'accès expire</value>
+    <value>Срок действия доступа истекает</value>
   </data>
   <data name="DocsCloudQuotaReportActive" xml:space="preserve">
-    <value>Actif</value>
+    <value>Активен</value>
   </data>
   <data name="AccountingReportCompany" xml:space="preserve">
     <value>Компания</value>
   </data>
   <data name="AccountingReportDateGenerated" xml:space="preserve">
-    <value>Date générée</value>
+    <value>Дата создания</value>
   </data>
   <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
     <value>Редакторы документов с полными правами доступа</value>
