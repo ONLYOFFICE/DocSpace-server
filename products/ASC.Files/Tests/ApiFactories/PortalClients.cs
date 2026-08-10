@@ -60,6 +60,7 @@ public sealed class PortalClients : IDisposable
     public FilesApi FilesApi { get; }
     public OperationsApi OperationsApi { get; }
     public RoomsApi RoomsApi { get; }
+    public GroupsApi RoomGroupsApi { get; }
     public SettingsApi SettingsApi { get; }
     public QuotaApi QuotaApi { get; }
     public PaymentApi PaymentApi { get; }
@@ -95,6 +96,7 @@ public sealed class PortalClients : IDisposable
         FilesApi = new FilesApi(FilesHttpClient, filesConfig);
         OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
         RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
+        RoomGroupsApi = new GroupsApi(FilesHttpClient, filesConfig);
         SettingsApi = new SettingsApi(FilesHttpClient, filesConfig);
         QuotaApi = new QuotaApi(FilesHttpClient, filesConfig);
         SharingApi = new SharingApi(FilesHttpClient, filesConfig);

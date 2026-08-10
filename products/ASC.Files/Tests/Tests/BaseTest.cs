@@ -58,6 +58,7 @@ public class BaseTest(
     protected FilesApi _filesApi = null!;
     protected OperationsApi _filesOperationsApi = null!;
     protected RoomsApi _roomsApi = null!;
+    protected GroupsApi _roomGroupsApi = null!;
     protected SettingsApi _filesSettingsApi = null!;
     protected QuotaApi _quotaApi = null!;
     protected PaymentApi _paymentApi = null!;
@@ -114,6 +115,7 @@ public class BaseTest(
         _filesApi = _clients.FilesApi;
         _filesOperationsApi = _clients.OperationsApi;
         _roomsApi = _clients.RoomsApi;
+        _roomGroupsApi = _clients.RoomGroupsApi;
         _filesSettingsApi = _clients.SettingsApi;
         _quotaApi = _clients.QuotaApi;
         _paymentApi = _clients.PaymentApi;
