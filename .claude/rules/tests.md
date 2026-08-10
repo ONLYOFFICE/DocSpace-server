@@ -81,6 +81,34 @@ OpenAPI document and therefore from the SDK. Call them over raw HTTP through the
 `HttpClient` (`_peopleClient`, `_filesClient`, …). Same for deliberately malformed bodies,
 which a typed DTO cannot express — see `RoomsPermissionsTestBase.SendRawTagsDelete`.
 
+## Anything written asynchronously has to be polled
+
+"New item" badges, background file operations, template creation and index updates are all
+written after the request that triggered them returns. A bare read right after the change races
+with the write and fails intermittently — or, worse, passes until the machine is busy.
+
+Poll on a **deadline**, and let the loop end by returning the last observed state:
+
+```csharp
+var deadline = DateTime.UtcNow.AddSeconds(10);
+
+while (true)
+{
+    var titles = TitlesOf((await _roomsApi.GetNewRoomItemsAsync(roomId, TestContext.Current.CancellationToken)).Response);
+
+    if (until(titles) || DateTime.UtcNow >= deadline)
+    {
+        return titles;
+    }
+
+    await Task.Delay(500, TestContext.Current.CancellationToken);
+}
+```
+
+Do **not** pass a timeout `CancellationToken` to the API call inside the loop. When it fires, the
+test dies with `TaskCanceledException : A task was canceled` instead of an assertion that shows
+what was actually there — which turns a two-minute diagnosis into a twenty-minute one.
+
 ## Access-level matrices must match the product
 
 `FileSecurity.AvailableRoomAccesses`
@@ -101,7 +129,8 @@ Plus one rule that is not in that table: **`RoomManager` can only be granted to 
 `RoomAdmin`** — the API rejects it for a `User` or a `Guest`.
 
 Shared matrices live in `RoomAccessData`; check the table before adding a new one, and read
-it again when a matrix is reused against a different room type.
+it again when a matrix is reused against a different room type. Read it from the source file
+every time — it changes, and a copy of it kept anywhere else goes stale silently.
 
 ## One feature, one folder
 
