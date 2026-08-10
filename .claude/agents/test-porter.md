@@ -31,6 +31,14 @@ generated SDK** — it calls a hand-rolled `AiApiClient` with string paths; matc
 If the feature folder already exists, extend it rather than inventing a parallel one, and reuse
 the helpers already in its base class.
 
+**Reuse before you copy.** Before writing any helper, matrix or request, look for it in the base
+classes of the target project, in the shared data classes next to them, and in the SDK. Copying
+something that already exists — a `TheoryData`, an invitation helper, a hand-rolled request that
+duplicates an SDK call — creates a second copy that goes stale silently, and staleness in a test
+helper is invisible until it lies to you. If reuse needs a `using`, add it to `GlobalUsings.cs`;
+that is cheaper than a duplicate. List in your report everything you copied and why nothing
+existing fit.
+
 ## 2. Translate
 
 Read the whole source file before writing anything. Then, for each test, ask what it actually

@@ -81,6 +81,24 @@ OpenAPI document and therefore from the SDK. Call them over raw HTTP through the
 `HttpClient` (`_peopleClient`, `_filesClient`, …). Same for deliberately malformed bodies,
 which a typed DTO cannot express — see `RoomsPermissionsTestBase.SendRawTagsDelete`.
 
+**Raw HTTP is the exception, never the convenient alternative.** Anything the SDK can express
+goes through the SDK, including every negative case: a raw request bypasses the generated
+client that real callers use, so it keeps passing after the OpenAPI contract breaks — which is
+one of the things these tests exist to catch. Once a raw helper exists in a suite it is tempting
+to route everything through it; don't. The carve-outs are narrow:
+
+- a body the DTO cannot carry — malformed JSON, a missing body, a wrong-typed value
+  (`"rooms":["1"]`, a null array element, a float where an int is required);
+- a value a required non-nullable constructor parameter rejects client-side, so no request is
+  ever sent;
+- a route or query the typed signature cannot produce — a non-integer id where the parameter is
+  `int`, `?includeMembers=abc` where it is `bool?`;
+- transport-level cases: an unsupported verb, a wrong `Content-Type`.
+
+Note what is *not* on that list: string length, blank or unknown string values, and null on a
+nullable property. The DTO accepts all of those and the server does the rejecting, so they are
+ordinary typed calls.
+
 ## Anything written asynchronously has to be polled
 
 "New item" badges, background file operations, template creation and index updates are all
