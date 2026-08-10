@@ -31,11 +31,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-extern alias ASCWebApi;
 extern alias ASCFiles;
-extern alias ASCPeople;
 extern alias ASCFilesService;
+extern alias ASCPeople;
+extern alias ASCWebApi;
+
 global using System.Diagnostics;
+global using System.IO.Compression;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Runtime.CompilerServices;
@@ -44,10 +46,11 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Web;
 
+global using ASC.Files.Core.Text;
+global using ASC.Files.Tests.ApiFactories;
 global using ASC.Files.Tests.Data;
 
 global using Aspire.Hosting;
-global using Aspire.Hosting.ApplicationModel;
 global using Aspire.Hosting.Testing;
 
 global using Bogus;
@@ -64,19 +67,12 @@ global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 global using Microsoft.Extensions.DependencyInjection;
 
 global using MySqlConnector;
 
 global using Xunit;
-
-global using ASC.Files.Core.Text;
-global using ASC.Files.Tests.ApiFactories;
-
-global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-
-// Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
-global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;
 
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
 global using CreateFolder = DocSpace.API.SDK.Model.CreateFolder;
@@ -86,7 +82,9 @@ global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;
 global using FileOperationDto = DocSpace.API.SDK.Model.FileOperationDto;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FolderType = DocSpace.API.SDK.Model.FolderType;
-global using RoomType = DocSpace.API.SDK.Model.RoomType;
-global using User = ASC.Files.Tests.Data.User;
 global using LinkType = DocSpace.API.SDK.Model.LinkType;
+global using RoomType = DocSpace.API.SDK.Model.RoomType;
 global using Task = System.Threading.Tasks.Task;
+// Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
+global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;
+global using User = ASC.Files.Tests.Data.User;
