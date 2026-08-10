@@ -2062,7 +2062,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Не удалось выполнить удаление данных пользователя</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Необходимое действие: невозможно автоматически продлить тарифный план в ${LetterLogoText}</value>
+    <value>Требуется действие: невозможно автоматически продлить тарифный план в ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Запрос лицензии на версию Enterprise</value>
@@ -2179,7 +2179,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Процесс шифрования завершен</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Необходимое действие: Невозможно автоматически пополнить баланс кошелька в ${LetterLogoText}</value>
+    <value>Требуется действие: Невозможно автоматически пополнить баланс кошелька в ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Ваша роль в ИИ-агенте изменилась</value>
@@ -2215,6 +2215,6 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; добавил(а) новый комментарий к версии документа: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="subject_low_wallet_balance" xml:space="preserve">
-    <value>Необходимое действие: баланс вашего кошелька ${LetterLogoText} заканчивается</value>
+    <value>Требуется действие: баланс вашего кошелька ${LetterLogoText} заканчивается</value>
   </data>
 </root>
