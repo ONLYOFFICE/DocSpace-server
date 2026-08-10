@@ -99,6 +99,18 @@ Note what is *not* on that list: string length, blank or unknown string values, 
 nullable property. The DTO accepts all of those and the server does the rejecting, so they are
 ordinary typed calls.
 
+One more carve-out, on the response side: a generated model can be too narrow to carry what the
+endpoint returns. `FolderContentDtoInteger.Folders` is typed `List<FileEntryBaseDto>`, which has
+`Title` but neither `Id` nor `Logo`, so a room read through a folder listing loses both. When the
+assertion needs a field the model drops, read the raw JSON — and say so in a comment, because
+that is an SDK defect worth reporting, not a preference.
+
+Decide these by evidence, not by feel: read the `[DataMember(..., EmitDefaultValue = ...)]`
+attributes on the generated model and the constructor, which together determine what an
+all-default instance actually puts on the wire. `EmitDefaultValue = true` means a default
+instance serialises to `{"icon":null}`, not `{}` — so those two requests are genuinely different
+and only the raw one can send the second.
+
 ## Anything written asynchronously has to be polled
 
 "New item" badges, background file operations, template creation and index updates are all
