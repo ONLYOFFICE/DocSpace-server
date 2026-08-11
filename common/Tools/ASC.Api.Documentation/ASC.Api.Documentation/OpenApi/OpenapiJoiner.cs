@@ -98,6 +98,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         FixMultipartFormData(result);
         RemoveFormCollectionSchema(result);
         ApplyDeepObjectStyle(result);
+        NormalizeNullableTypes(result);
 
         var options = new JsonSerializerOptions
         {
@@ -590,6 +591,85 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
 
         schemas.Remove("KeyValuePairStringStringValues");
+    }
+
+    /// <summary>
+    /// Works around openapi-generator defects in openapi 3.1 documents. The rewrites are applied to the SDK input
+    /// only - the published openapi files stay untouched.
+    /// </summary>
+    private static void NormalizeNullableTypes(JsonNode? node)
+    {
+        switch (node)
+        {
+            case JsonArray array:
+                foreach (var item in array)
+                {
+                    NormalizeNullableTypes(item);
+                }
+
+                return;
+
+            case JsonObject obj:
+                NormalizeNullableType(obj);
+                RemoveClosedObjectMarker(obj);
+
+                foreach (var property in obj.ToArray())
+                {
+                    // Sample payloads are data, not schemas - never rewrite them.
+                    if (property.Key is "example" or "examples" or "default")
+                    {
+                        continue;
+                    }
+
+                    NormalizeNullableTypes(property.Value);
+                }
+
+                return;
+        }
+    }
+
+    /// <summary>
+    /// In an openapi 3.1 document openapi-generator randomly loses <c>"additionalProperties": false</c> and generates
+    /// a public <c>[JsonExtensionData]</c> bag on the model. Dropping the keyword yields exactly the same - closed -
+    /// models, because the generator disallows undeclared properties when the keyword is absent.
+    /// </summary>
+    private static void RemoveClosedObjectMarker(JsonObject schema)
+    {
+        if (schema["additionalProperties"] is JsonValue value && value.TryGetValue<bool>(out var allowed) && !allowed)
+        {
+            schema.Remove("additionalProperties");
+        }
+    }
+
+    private static void NormalizeNullableType(JsonObject schema)
+    {
+        if (!schema.TryGetPropertyValue("type", out var typeNode))
+        {
+            return;
+        }
+
+        if (typeNode is JsonValue value)
+        {
+            if (value.TryGetValue<string>(out var singleType) && singleType == "null")
+            {
+                schema.Remove("type");
+            }
+
+            return;
+        }
+
+        if (typeNode is not JsonArray types || !SchemaTypeIncludes(types, "null") || !SchemaTypeIncludes(types, "object"))
+        {
+            return;
+        }
+
+        // Only map schemas are affected: inline object schemas with properties are resolved correctly since 7.24.0.
+        if (schema["additionalProperties"] is not JsonObject)
+        {
+            return;
+        }
+
+        schema["type"] = "object";
     }
 
     private static bool IsObjectSchema(JsonNode schemaNode, JsonObject? components)
