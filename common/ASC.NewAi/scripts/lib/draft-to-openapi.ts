@@ -36,7 +36,6 @@
 // keywords that openapi 3.1 takes verbatim, so they now pass through untouched.
 // Handled differences:
 //   • `#/definitions/X`      → `#/components/schemas/X`
-//   • `type: [T, "null"]`    → `type: T, nullable: true`
 //   • strips `$schema` / `$id` / `$comment`
 // Everything else (properties, `$ref`, `enum`, `additionalProperties`,
 // `oneOf`/`anyOf`/`allOf`, `items`, `required`, `description`) passes through
@@ -74,10 +73,12 @@ function convertSchemaMap(node: Json): Json {
   return out;
 }
 
-// OpenAPI 3.0 has no `null` type: a union member `{ "type": "null" }`
-// (emitted by the generator for `X | null`) must become `nullable: true` on
-// the union itself. A single surviving member is collapsed into the parent —
-// via `allOf` when it is a `$ref`, since 3.0 ignores siblings of `$ref`.
+// A `{ "type": "null" }` union member (emitted by the generator for `X | null`)
+// is valid openapi 3.1 and stays as it is — except for the one shape the union
+// only exists to express: a single non-null member carrying a plain `type`.
+// That collapses into the parent with "null" added to its type, which reads far
+// better than a two-member union. A lone `$ref` member cannot be collapsed the
+// same way (a `$ref` has no `type` to extend), so its union is left intact.
 function normalizeNullableUnion(node: JsonObject): JsonObject {
   for (const keyword of ["anyOf", "oneOf"] as const) {
     const members = node[keyword];
@@ -87,23 +88,17 @@ function normalizeNullableUnion(node: JsonObject): JsonObject {
     const kept = members.filter(
       (m) => !(isObject(m) && m["type"] === "null" && Object.keys(m).length === 1),
     );
-    if (kept.length === members.length) {
+    if (kept.length !== members.length - 1 || kept.length !== 1) {
       continue;
     }
 
-    const out: JsonObject = { ...node, nullable: true };
-    delete out[keyword];
-
-    if (kept.length === 1) {
-      const only = kept[0];
-      if (isObject(only) && typeof only["$ref"] === "string") {
-        out["allOf"] = [only];
-      } else if (isObject(only)) {
-        Object.assign(out, only);
-      }
-    } else if (kept.length > 1) {
-      out[keyword] = kept;
+    const only = kept[0];
+    if (!isObject(only) || typeof only["type"] !== "string") {
+      continue;
     }
+
+    const out: JsonObject = { ...node, ...only, type: [only["type"], "null"] };
+    delete out[keyword];
     return out;
   }
   return node;
@@ -250,20 +245,8 @@ function convertNode(node: Json): Json {
           : value;
         break;
       case "type":
-        if (Array.isArray(value)) {
-          const nonNull = value.filter((t) => t !== "null");
-          if (value.includes("null")) {
-            out["nullable"] = true;
-          }
-          if (nonNull.length === 1) {
-            out["type"] = nonNull[0];
-          } else if (nonNull.length > 1) {
-            out["oneOf"] = nonNull.map((t) => ({ type: t }));
-          }
-          // Only "null" → leave `type` unset, `nullable: true` already set.
-        } else {
-          out["type"] = value;
-        }
+        // A type array, "null" included, is how openapi 3.1 spells nullability.
+        out["type"] = value;
         break;
       default:
         out[key] = convertNode(value);
