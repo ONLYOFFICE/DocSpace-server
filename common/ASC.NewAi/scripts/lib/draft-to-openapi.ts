@@ -32,15 +32,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // Convert the JSON-Schema draft-07 output of `ts-json-schema-generator` into
-// the subset OpenAPI 3.0 accepts. Handled differences:
+// the subset OpenAPI accepts. `const` and the `examples` array are JSON Schema
+// keywords that openapi 3.1 takes verbatim, so they now pass through untouched.
+// Handled differences:
 //   • `#/definitions/X`      → `#/components/schemas/X`
-//   • `const: v`             → `enum: [v]`            (3.0 has no `const`)
 //   • `type: [T, "null"]`    → `type: T, nullable: true`
-//   • array `examples`       → single `example`
 //   • strips `$schema` / `$id` / `$comment`
 // Everything else (properties, `$ref`, `enum`, `additionalProperties`,
-// `oneOf`/`anyOf`/`allOf`, `items`, `required`, `description`) is valid in
-// 3.0 and passes through unchanged.
+// `oneOf`/`anyOf`/`allOf`, `items`, `required`, `description`) passes through
+// unchanged.
 
 type Json = unknown;
 type JsonObject = Record<string, Json>;
@@ -119,27 +119,38 @@ function normalizeNullableUnion(node: JsonObject): JsonObject {
 // (e.g. every `ChatEvent.type`) while still collapsing to one SDK-friendly
 // object. Non-string discriminators (booleans) keep the widen-to-`type`
 // behaviour.
+// The allowed string values of a discriminator, however it is spelled: a
+// single literal arrives as `const`, a closed set as `enum`.
+function stringValues(node: JsonObject): string[] | null {
+  const values = node["enum"];
+  if (Array.isArray(values) && values.length > 0 && values.every((v) => typeof v === "string")) {
+    return values as string[];
+  }
+  if (typeof node["const"] === "string") {
+    return [node["const"]];
+  }
+  return null;
+}
+
 function widen(a: Json, b: Json): Json {
   if (JSON.stringify(a) === JSON.stringify(b)) {
     return a;
   }
   if (isObject(a) && isObject(b)) {
-    const aEnum = a["enum"];
-    const bEnum = b["enum"];
-    if (
-      Array.isArray(aEnum) && Array.isArray(bEnum)
-      && aEnum.every((v) => typeof v === "string")
-      && bEnum.every((v) => typeof v === "string")
-    ) {
+    const aEnum = stringValues(a);
+    const bEnum = stringValues(b);
+    if (aEnum !== null && bEnum !== null) {
       const seen = new Set<string>();
       const values = [...aEnum, ...bEnum].filter((v) => {
-        if (seen.has(v as string)) {
+        if (seen.has(v)) {
           return false;
         }
-        seen.add(v as string);
+        seen.add(v);
         return true;
       });
-      const merged: JsonObject = { enum: values };
+      const merged: JsonObject = values.length === 1
+        ? { const: values[0] }
+        : { enum: values };
       if (a["type"] === b["type"] && a["type"] !== undefined) {
         merged["type"] = a["type"];
       }
@@ -237,16 +248,6 @@ function convertNode(node: Json): Json {
         out["$ref"] = typeof value === "string"
           ? value.replace(DEFINITIONS_REF, COMPONENTS_REF)
           : value;
-        break;
-      case "const":
-        // OpenAPI 3.0 has no `const`; a single-value `enum` is equivalent.
-        out["enum"] = [value];
-        break;
-      case "examples":
-        // Schema-level `examples` (array, draft) → singular `example` (3.0).
-        if (Array.isArray(value) && value.length > 0) {
-          out["example"] = convertNode(value[0]);
-        }
         break;
       case "type":
         if (Array.isArray(value)) {

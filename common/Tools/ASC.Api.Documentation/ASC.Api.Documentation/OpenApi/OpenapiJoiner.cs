@@ -612,6 +612,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
             case JsonObject obj:
                 NormalizeNullableType(obj);
                 RemoveClosedObjectMarker(obj);
+                DowngradeSchemaExamples(obj);
 
                 foreach (var property in obj.ToArray())
                 {
@@ -639,6 +640,26 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         {
             schema.Remove("additionalProperties");
         }
+    }
+
+    /// <summary>
+    /// Openapi 3.1 keeps the examples of a schema in the JSON Schema <c>examples</c> array, which openapi-generator
+    /// does not read - it still looks for the deprecated singular <c>example</c>, and without it the generated SDKs
+    /// carry no examples at all. The other 3.1 keywords need no help: <c>const</c> becomes an enum and
+    /// <c>contentMediaType</c> becomes a file parameter on their own.
+    /// </summary>
+    private static void DowngradeSchemaExamples(JsonObject schema)
+    {
+        // A schema keeps its examples in an array; on a media type or a parameter `examples` is a map of
+        // Example Objects, which is a different - and still valid - construct.
+        if (schema["examples"] is not JsonArray { Count: > 0 } examples)
+        {
+            return;
+        }
+
+        var first = examples[0]?.DeepClone();
+        schema.Remove("examples");
+        schema["example"] = first;
     }
 
     private static void NormalizeNullableType(JsonObject schema)
