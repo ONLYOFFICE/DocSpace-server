@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.1",
   "info": {
     "title": "Api",
     "contact": {
@@ -160,6 +160,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The backup schedule parameters.",
                 "$ref": "#/components/schemas/BackupScheduleDto"
               }
             }
@@ -385,6 +386,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The backup parameters.",
                 "$ref": "#/components/schemas/BackupDto"
               }
             }
@@ -1034,6 +1036,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The backup restoring parameters.",
                 "$ref": "#/components/schemas/BackupRestoreDto"
               }
             }
@@ -1581,15 +1584,18 @@
         "type": "object",
         "properties": {
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true,
             "example": [
               {
                 "key": "path",
@@ -1623,12 +1629,15 @@
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "fileName": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The backup file name.",
-            "nullable": true,
             "example": "tenant-backup"
           },
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "createdOn": {
@@ -1736,21 +1745,27 @@
             "example": 50
           },
           "error": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The backup error message.",
-            "nullable": true,
             "example": null
           },
           "warning": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The backup warning message.",
-            "nullable": true,
             "example": null
           },
           "link": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The backup link.",
-            "nullable": true,
             "example": "https://example.com/backup/task_123"
           },
           "tenantId": {
@@ -1760,15 +1775,19 @@
             "example": 1
           },
           "backupProgressEnum": {
+            "description": "The backup progress type.",
             "$ref": "#/components/schemas/BackupProgressEnum"
           },
           "status": {
+            "description": "The backup progress status.",
             "$ref": "#/components/schemas/DistributedTaskStatus"
           },
           "taskId": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The task ID.",
-            "nullable": true,
             "example": "task_123"
           }
         },
@@ -1853,21 +1872,26 @@
         "type": "object",
         "properties": {
           "backupId": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The backup ID.",
-            "nullable": true,
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true,
             "example": [
               {
                 "key": "path",
@@ -1893,15 +1917,18 @@
         "type": "object",
         "properties": {
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true,
             "example": [
               {
                 "key": "path",
@@ -1910,13 +1937,16 @@
             ]
           },
           "backupsStored": {
-            "type": "integer",
+            "type": [
+              "null",
+              "integer"
+            ],
             "description": "The maximum number of the stored backup copies.",
             "format": "int32",
-            "nullable": true,
             "example": 5
           },
           "cronParams": {
+            "description": "The backup cron parameters.",
             "$ref": "#/components/schemas/Cron"
           },
           "dump": {
@@ -2123,6 +2153,7 @@
         "type": "object",
         "properties": {
           "period": {
+            "description": "The backup period type.",
             "$ref": "#/components/schemas/BackupPeriod"
           },
           "hour": {
@@ -2132,10 +2163,12 @@
             "example": 0
           },
           "day": {
-            "type": "integer",
+            "type": [
+              "null",
+              "integer"
+            ],
             "description": "The day of the week to start the backup process.",
             "format": "int32",
-            "nullable": true,
             "example": 0
           }
         },
@@ -2146,6 +2179,7 @@
         "type": "object",
         "properties": {
           "period": {
+            "description": "The backup period type.",
             "$ref": "#/components/schemas/BackupPeriod"
           },
           "hour": {
@@ -2244,10 +2278,10 @@
         "type": "object",
         "properties": {
           "key": {
-            "nullable": true
+            "type": "null"
           },
           "value": {
-            "nullable": true
+            "type": "null"
           }
         },
         "additionalProperties": false
@@ -2263,25 +2297,33 @@
         "type": "object",
         "properties": {
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
-            "type": "object",
+            "type": [
+              "null",
+              "object"
+            ],
             "additionalProperties": {
-              "type": "string",
-              "nullable": true
+              "type": [
+                "null",
+                "string"
+              ]
             },
-            "description": "The backup storage parameters.",
-            "nullable": true
+            "description": "The backup storage parameters."
           },
           "cronParams": {
+            "description": "The backup cron parameters.",
             "$ref": "#/components/schemas/CronParams"
           },
           "backupsStored": {
-            "type": "integer",
+            "type": [
+              "null",
+              "integer"
+            ],
             "description": "The maximum number of the stored backup copies.",
             "format": "int32",
-            "nullable": true,
             "example": 5
           },
           "lastBackupTime": {

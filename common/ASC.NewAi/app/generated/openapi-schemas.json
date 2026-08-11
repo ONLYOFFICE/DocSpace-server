@@ -1406,6 +1406,7 @@
       "type": "object",
       "properties": {
         "type": {
+          "description": "The type of embedding provider configured for document vectorization.",
           "$ref": "#/components/schemas/AiEmbeddingProviderType"
         },
         "needReset": {
@@ -1512,9 +1513,11 @@
           "example": true
         },
         "embeddingModel": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The name of the embedding model used for document vectorization.",
-          "nullable": true,
           "example": "text-embedding-3-small"
         },
         "systemAiEnabled": {
@@ -1523,9 +1526,11 @@
           "example": true
         },
         "recommendedModelForForms": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The identifier of the model recommended for form generation.",
-          "nullable": true,
           "example": "gpt-5.4"
         }
       },
@@ -1602,9 +1607,11 @@
               "example": 7
             },
             "isShareable": {
-              "type": "boolean",
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Specifies if the folder can be shared or not.",
-              "nullable": true,
               "example": true
             },
             "new": {
@@ -1619,18 +1626,21 @@
               "example": false
             },
             "tags": {
-              "type": "array",
+              "type": [
+                "null",
+                "array"
+              ],
               "items": {
                 "type": "string"
               },
               "description": "The list of tags of the folder.",
-              "nullable": true,
               "example": [
                 "tag1",
                 "tag2"
               ]
             },
             "logo": {
+              "description": "The folder logo.",
               "$ref": "#/components/schemas/AiLogo"
             },
             "pinned": {
@@ -1639,6 +1649,7 @@
               "example": false
             },
             "roomType": {
+              "description": "The room type of the folder.",
               "$ref": "#/components/schemas/AiRoomType"
             },
             "private": {
@@ -1657,76 +1668,99 @@
               "example": false
             },
             "lifetime": {
+              "description": "The room data lifetime settings of the folder.",
               "$ref": "#/components/schemas/AiRoomDataLifetimeDto"
             },
             "watermark": {
+              "description": "The watermark settings of the folder.",
               "$ref": "#/components/schemas/AiWatermarkDto"
             },
             "type": {
+              "description": "The folder type.",
               "$ref": "#/components/schemas/AiFolderType"
             },
             "inRoom": {
-              "type": "boolean",
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Specifies if the folder is placed in the room or not.",
-              "nullable": true,
               "example": false
             },
             "quotaLimit": {
-              "type": "integer",
+              "type": [
+                "null",
+                "integer"
+              ],
               "description": "The folder quota limit.",
               "format": "int64",
-              "nullable": true,
               "example": 1073741824
             },
             "isCustomQuota": {
-              "type": "boolean",
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Specifies if the folder room has a custom quota or not.",
-              "nullable": true,
               "example": false
             },
             "usedSpace": {
-              "type": "integer",
+              "type": [
+                "null",
+                "integer"
+              ],
               "description": "How much folder space is used (counter).",
               "format": "int64",
-              "nullable": true,
               "example": 524288000
             },
             "passwordProtected": {
-              "type": "boolean",
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Specifies if the folder is password protected or not.",
-              "nullable": true,
               "example": false
             },
             "expired": {
-              "type": "boolean",
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Specifies if an external link to the folder is expired or not.",
-              "nullable": true,
               "example": false,
               "deprecated": true
             },
             "chatSettings": {
+              "description": "The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.\r\nOnly applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured.",
               "$ref": "#/components/schemas/AiChatSettingsDto"
             },
             "rootRoomType": {
+              "description": "The room type of the root folder. Indicates the type of the parent room if the current folder is nested within a room hierarchy.\r\nThis property helps identify the context in which a nested folder exists.",
               "$ref": "#/components/schemas/AiRoomType"
             },
             "saveFormAsXLSX": {
-              "type": "boolean",
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Specifies whether to save form data as XLSX file.",
-              "nullable": true,
               "example": false
             },
             "sendFormToExternalDB": {
-              "type": "boolean",
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Specifies whether to send form data to external database.",
-              "nullable": true,
               "example": false
             },
             "originalFormId": {
-              "type": "integer",
+              "type": [
+                "null",
+                "integer"
+              ],
               "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
               "format": "int32",
-              "nullable": true,
               "example": 42
             }
           }
@@ -1739,9 +1773,11 @@
       "type": "object",
       "properties": {
         "prompt": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The system prompt for the chat.",
-          "nullable": true,
           "example": "You are a helpful assistant."
         }
       },
@@ -1871,12 +1907,15 @@
       "type": "object",
       "properties": {
         "additions": {
+          "description": "Specifies whether to display in the watermark: username, user email, user ip-adress, current date, and room name.",
           "$ref": "#/components/schemas/AiWatermarkAdditions"
         },
         "text": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The watermark text.",
-          "nullable": true,
           "example": "Confidential"
         },
         "rotate": {
@@ -1892,9 +1931,11 @@
           "example": 100
         },
         "imageUrl": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The watermark image url.",
-          "nullable": true,
           "example": "http://localhost/watermark.png"
         },
         "imageHeight": {
@@ -1959,21 +2000,26 @@
           "example": true
         },
         "period": {
+          "description": "Specifies the time period type of the room data lifetime.",
           "$ref": "#/components/schemas/AiRoomDataLifetimePeriod"
         },
         "value": {
           "maximum": 999,
           "minimum": 1,
-          "type": "integer",
+          "type": [
+            "null",
+            "integer"
+          ],
           "description": "Specifies the time period value of the room data lifetime.",
           "format": "int32",
-          "nullable": true,
           "example": 33
         },
         "enabled": {
-          "type": "boolean",
+          "type": [
+            "null",
+            "boolean"
+          ],
           "description": "Specifies whether the room data lifetime setting is enabled or not.",
-          "nullable": true,
           "example": true
         }
       },
@@ -2061,36 +2107,47 @@
       "type": "object",
       "properties": {
         "original": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The original logo.",
-          "nullable": true,
           "example": "https://portal.example.com/logo/original.png"
         },
         "large": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The large logo.",
-          "nullable": true,
           "example": "https://portal.example.com/logo/large.png"
         },
         "medium": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The medium logo.",
-          "nullable": true,
           "example": "https://portal.example.com/logo/medium.png"
         },
         "small": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The small logo.",
-          "nullable": true,
           "example": "https://portal.example.com/logo/small.png"
         },
         "color": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The logo color.",
-          "nullable": true,
           "example": "#4781D1"
         },
         "cover": {
+          "description": "The logo cover.",
           "$ref": "#/components/schemas/AiLogoCover"
         }
       },
@@ -2105,15 +2162,19 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The logo cover ID.",
-          "nullable": true,
           "example": "default_cover"
         },
         "data": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The logo cover data.",
-          "nullable": true,
           "example": "base64-image-data..."
         }
       },
@@ -2153,15 +2214,19 @@
               "example": 22
             },
             "originTitle": {
-              "type": "string",
+              "type": [
+                "null",
+                "string"
+              ],
               "description": "The origin title of the file entry.",
-              "nullable": true,
               "example": "Original Title"
             },
             "originRoomTitle": {
-              "type": "string",
+              "type": [
+                "null",
+                "string"
+              ],
               "description": "The origin room title of the file entry.",
-              "nullable": true,
               "example": "Original Room"
             },
             "canShare": {
@@ -2170,7 +2235,10 @@
               "example": true
             },
             "shareSettings": {
-              "type": "object",
+              "type": [
+                "null",
+                "object"
+              ],
               "properties": {
                 "User": {
                   "type": "integer",
@@ -2195,14 +2263,16 @@
               },
               "additionalProperties": false,
               "description": "A dictionary representing the sharing settings for the file entry.",
-              "nullable": true,
               "example": {
                 "ExternalLink": 1,
                 "InvitationLink": 2
               }
             },
             "security": {
-              "type": "object",
+              "type": [
+                "null",
+                "object"
+              ],
               "properties": {
                 "Read": {
                   "type": "boolean"
@@ -2341,11 +2411,13 @@
                 },
                 "CanUseAi": {
                   "type": "boolean"
+                },
+                "HistoryExport": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false,
               "description": "The actions that can be performed with the file entry.",
-              "nullable": true,
               "example": {
                 "Read": true,
                 "Edit": false,
@@ -2353,7 +2425,10 @@
               }
             },
             "availableShareRights": {
-              "type": "object",
+              "type": [
+                "null",
+                "object"
+              ],
               "properties": {
                 "User": {
                   "type": "array",
@@ -2388,7 +2463,6 @@
               },
               "additionalProperties": false,
               "description": "The available external rights of the file entry.",
-              "nullable": true,
               "example": {
                 "ExternalLink": [
                   "Read",
@@ -2397,24 +2471,31 @@
               }
             },
             "requestToken": {
-              "type": "string",
+              "type": [
+                "null",
+                "string"
+              ],
               "description": "The request token of the file entry.",
-              "nullable": true,
               "example": "token-abc-123"
             },
             "external": {
-              "type": "boolean",
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Specifies if the folder can be accessed via an external link or not.",
-              "nullable": true,
               "example": false
             },
             "expirationDate": {
+              "description": "Represents the expiration date of the file entry.",
               "$ref": "#/components/schemas/AiApiDateTime"
             },
             "isLinkExpired": {
-              "type": "boolean",
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Indicates whether the shareable link associated with the file or folder has expired.",
-              "nullable": true,
               "example": false
             }
           }
@@ -2448,18 +2529,23 @@
       "type": "object",
       "properties": {
         "title": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The file entry title.",
-          "nullable": true,
           "example": "Some title.txt"
         },
         "access": {
+          "description": "The access rights to the file entry.",
           "$ref": "#/components/schemas/AiFileShare"
         },
         "sharedBy": {
+          "description": "Provides information about the employee who shared the file or folder.",
           "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "ownedBy": {
+          "description": "The information about the employee who owns the file entry.",
           "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "shared": {
@@ -2483,65 +2569,85 @@
           "example": false
         },
         "shortWebUrl": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The short Web URL.",
           "format": "uri",
-          "nullable": true,
           "example": "http://localhost/s/abc123"
         },
         "created": {
+          "description": "The creation date and time of the file entry.",
           "$ref": "#/components/schemas/AiApiDateTime"
         },
         "createdBy": {
+          "description": "The file entry author.",
           "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "updated": {
+          "description": "The last date and time when the file entry was updated.",
           "$ref": "#/components/schemas/AiApiDateTime"
         },
         "autoDelete": {
+          "description": "The date and time when the file entry will be automatically deleted.",
           "$ref": "#/components/schemas/AiApiDateTime"
         },
         "rootFolderType": {
+          "description": "The root folder type of the file entry.",
           "$ref": "#/components/schemas/AiFolderType"
         },
         "parentRoomType": {
+          "description": "The parent room type of the file entry.",
           "$ref": "#/components/schemas/AiFolderType"
         },
         "updatedBy": {
+          "description": "The user who updated the file entry.",
           "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "providerItem": {
-          "type": "boolean",
+          "type": [
+            "null",
+            "boolean"
+          ],
           "description": "Specifies if the file entry provider is specified or not.",
-          "nullable": true,
           "example": false
         },
         "providerKey": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The provider key of the file entry.",
-          "nullable": true,
           "example": "google-drive"
         },
         "providerId": {
-          "type": "integer",
+          "type": [
+            "null",
+            "integer"
+          ],
           "description": "The provider ID of the file entry.",
           "format": "int32",
-          "nullable": true,
           "example": 1
         },
         "order": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The order of the file entry.",
-          "nullable": true,
           "example": "1"
         },
         "isFavorite": {
-          "type": "boolean",
+          "type": [
+            "null",
+            "boolean"
+          ],
           "description": "Specifies if the file is a favorite or not.",
-          "nullable": true,
           "example": false
         },
         "fileEntryType": {
+          "description": "The file entry type.",
           "$ref": "#/components/schemas/AiFileEntryType"
         }
       },
@@ -2593,45 +2699,59 @@
           "example": "00000000-0000-0000-0000-000000000000"
         },
         "displayName": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
-          "nullable": true,
           "example": "Mike Zanyatski"
         },
         "avatar": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The user avatar.",
-          "nullable": true,
           "example": "https://example.com/avatar.jpg"
         },
         "avatarOriginal": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The user original size avatar.",
-          "nullable": true,
           "example": "https://example.com/avatar_original.jpg"
         },
         "avatarMax": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The user maximum size avatar.",
-          "nullable": true,
           "example": "https://example.com/avatar_max.jpg"
         },
         "avatarMedium": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The user medium size avatar.",
-          "nullable": true,
           "example": "https://example.com/avatar_medium.jpg"
         },
         "avatarSmall": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The user small size avatar.",
-          "nullable": true,
           "example": "https://example.com/avatar_small.jpg"
         },
         "profileUrl": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The user profile URL.",
-          "nullable": true,
           "example": "https://example.com/profile/user123"
         },
         "hasAvatar": {
@@ -2758,12 +2878,15 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The file operation ID.",
-          "nullable": true,
           "example": "00000000-0000-0000-0000-000000000000"
         },
         "Operation": {
+          "description": "The file operation type.",
           "$ref": "#/components/schemas/AiFileOperationType"
         },
         "progress": {
@@ -2773,15 +2896,19 @@
           "example": 100
         },
         "error": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The file operation error message.",
-          "nullable": true,
           "example": "File not found."
         },
         "processed": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The file operation processing status.",
-          "nullable": true,
           "example": "1"
         },
         "finished": {
@@ -2790,19 +2917,24 @@
           "example": true
         },
         "url": {
-          "type": "string",
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The file operation URL.",
           "format": "uri",
-          "nullable": true,
           "example": "http://localhost/download"
         },
         "files": {
-          "type": "array",
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
+            "description": "The file entry information.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of files of the file operation.",
-          "nullable": true,
           "example": [
             {
               "id": 10,
@@ -2811,12 +2943,15 @@
           ]
         },
         "folders": {
-          "type": "array",
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
+            "description": "The file entry information.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of folders of the file operation.",
-          "nullable": true,
           "example": [
             {
               "id": 20,
@@ -2825,6 +2960,7 @@
           ]
         },
         "status": {
+          "description": "The status of the distributed task related to the file operation.",
           "$ref": "#/components/schemas/AiDistributedTaskStatus"
         }
       },
@@ -2964,15 +3100,19 @@
       "type": "object",
       "properties": {
         "date": {
+          "description": "The date and time when the new item was created.",
           "$ref": "#/components/schemas/AiApiDateTime"
         },
         "items": {
-          "type": "array",
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
+            "description": "The agent new item's information.",
             "$ref": "#/components/schemas/AiAgentNewItemsDto"
           },
-          "description": "The list of items.",
-          "nullable": true
+          "description": "The list of items."
         }
       },
       "additionalProperties": false,
@@ -2986,15 +3126,19 @@
       "type": "object",
       "properties": {
         "agent": {
+          "description": "The file entry information.",
           "$ref": "#/components/schemas/AiFileEntryBaseDto"
         },
         "items": {
-          "type": "array",
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
+            "description": "The file entry information.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of file entry items.",
-          "nullable": true
+          "description": "The list of file entry items."
         }
       },
       "additionalProperties": false,
@@ -3088,12 +3232,15 @@
       "type": "object",
       "properties": {
         "files": {
-          "type": "array",
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
+            "description": "The file entry information.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of files in the folder.",
-          "nullable": true,
           "example": [
             {
               "id": 10,
@@ -3102,12 +3249,15 @@
           ]
         },
         "folders": {
-          "type": "array",
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
+            "description": "The file entry information.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of folders in the folder.",
-          "nullable": true,
           "example": [
             {
               "id": 20,
@@ -3116,11 +3266,12 @@
           ]
         },
         "current": {
+          "description": "The current folder information.",
           "$ref": "#/components/schemas/AiFolderDtoInteger"
         },
         "pathParts": {
+          "type": "null",
           "description": "The folder path.",
-          "nullable": true,
           "example": "{key = \"Key\", path = \"//path//to//folder\"}"
         },
         "startIndex": {

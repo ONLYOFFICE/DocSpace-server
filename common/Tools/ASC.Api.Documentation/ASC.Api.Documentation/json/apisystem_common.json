@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.1",
   "info": {
     "title": "Api",
     "contact": {
@@ -51,21 +51,25 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "text/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/*+xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             }
@@ -135,21 +139,25 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "text/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/*+xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             }
@@ -219,21 +227,25 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "text/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/*+xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             }
@@ -303,21 +315,25 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for provisioning a portal with an OAuth provider.",
                 "$ref": "#/components/schemas/ProvisionPortalRequestDto"
               }
             },
             "application/xml": {
               "schema": {
+                "description": "The request parameters for provisioning a portal with an OAuth provider.",
                 "$ref": "#/components/schemas/ProvisionPortalRequestDto"
               }
             },
             "text/xml": {
               "schema": {
+                "description": "The request parameters for provisioning a portal with an OAuth provider.",
                 "$ref": "#/components/schemas/ProvisionPortalRequestDto"
               }
             },
             "application/*+xml": {
               "schema": {
+                "description": "The request parameters for provisioning a portal with an OAuth provider.",
                 "$ref": "#/components/schemas/ProvisionPortalRequestDto"
               }
             }
@@ -736,21 +752,25 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "text/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/*+xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             }
@@ -820,21 +840,25 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "text/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/*+xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             }
@@ -1227,21 +1251,25 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "text/xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             },
             "application/*+xml": {
               "schema": {
+                "description": "The request parameters for managing a portal.",
                 "$ref": "#/components/schemas/TenantModel"
               }
             }
@@ -1522,21 +1550,25 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for managing portal settings.",
                 "$ref": "#/components/schemas/SettingsModel"
               }
             },
             "application/xml": {
               "schema": {
+                "description": "The request parameters for managing portal settings.",
                 "$ref": "#/components/schemas/SettingsModel"
               }
             },
             "text/xml": {
               "schema": {
+                "description": "The request parameters for managing portal settings.",
                 "$ref": "#/components/schemas/SettingsModel"
               }
             },
             "application/*+xml": {
               "schema": {
+                "description": "The request parameters for managing portal settings.",
                 "$ref": "#/components/schemas/SettingsModel"
               }
             }
@@ -1606,21 +1638,25 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for checking domain names.",
                 "$ref": "#/components/schemas/DomainModel"
               }
             },
             "application/xml": {
               "schema": {
+                "description": "The request parameters for checking domain names.",
                 "$ref": "#/components/schemas/DomainModel"
               }
             },
             "text/xml": {
               "schema": {
+                "description": "The request parameters for checking domain names.",
                 "$ref": "#/components/schemas/DomainModel"
               }
             },
             "application/*+xml": {
               "schema": {
+                "description": "The request parameters for checking domain names.",
                 "$ref": "#/components/schemas/DomainModel"
               }
             }
@@ -1687,9 +1723,11 @@
           "hostName": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The host name.",
-            "nullable": true,
             "example": "example.com"
           }
         },
@@ -1752,6 +1790,7 @@
             "type": "object",
             "properties": {
               "provisionProvider": {
+                "description": "The OAuth provider configuration.",
                 "$ref": "#/components/schemas/ProvisionProviderDto"
               }
             }
@@ -1788,21 +1827,27 @@
             "example": "secret"
           },
           "baseUrl": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The base URL of the provider instance.",
-            "nullable": true,
             "example": "https://provider.example.com"
           },
           "redirectUri": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The OAuth redirect URI registered on the provider side.",
-            "nullable": true,
             "example": "https://provider.example.com/oauth"
           },
           "cspDomain": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The domain to add to the portal's Content Security Policy whitelist.",
-            "nullable": true,
             "example": "https://provider.example.com"
           }
         },
@@ -1849,30 +1894,38 @@
           "portalName": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The portal name.",
-            "nullable": true,
             "example": "myportal"
           },
           "tenantId": {
-            "type": "integer",
+            "type": [
+              "null",
+              "integer"
+            ],
             "description": "The tenant ID.",
             "format": "int32",
-            "nullable": true,
             "example": 1
           },
           "key": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The settings parameter key.",
-            "nullable": true,
             "example": "SmtpSettings"
           },
           "value": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The settings parameter value.",
-            "nullable": true,
             "example": "sample value"
           }
         },
@@ -1883,55 +1936,69 @@
         "type": "object",
         "properties": {
           "portalName": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The portal name.",
-            "nullable": true,
             "example": "myportal"
           },
           "tenantId": {
-            "type": "integer",
+            "type": [
+              "null",
+              "integer"
+            ],
             "description": "The tenant ID.",
             "format": "int32",
-            "nullable": true,
             "example": 1
           },
           "affiliateId": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The affiliate ID.",
-            "nullable": true,
             "example": "af123456"
           },
           "partnerId": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The partner ID.",
-            "nullable": true,
             "example": "partner123"
           },
           "campaign": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The portal campaign.",
-            "nullable": true,
             "example": "personal"
           },
           "firstName": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The first name of the portal owner.",
-            "nullable": true,
             "example": "John"
           },
           "email": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The email address of the portal owner.",
             "format": "email",
-            "nullable": true,
             "example": "john.doe@example.com"
           },
           "industry": {
@@ -1943,73 +2010,93 @@
           "language": {
             "maxLength": 7,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The portal language.",
-            "nullable": true,
             "example": "en-US"
           },
           "lastName": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The last name of the portal owner.",
-            "nullable": true,
             "example": "Doe"
           },
           "module": {
             "maxLength": 38,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The name for the storage module to be configured.",
-            "nullable": true,
             "example": "files"
           },
           "password": {
             "maxLength": 30,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The password of the portal owner.",
-            "nullable": true,
             "example": "yourPassword1!"
           },
           "passwordHash": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The password hash.",
-            "nullable": true,
             "example": "VGhpcyBpcyBhIHRlc3Q="
           },
           "phone": {
             "maxLength": 32,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The phone numberr of the portal owner.",
-            "nullable": true,
             "example": "+15551234567"
           },
           "recaptchaResponse": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user's response to the CAPTCHA challenge.",
-            "nullable": true,
             "example": "03AGdBq24rvY..."
           },
           "recaptchaType": {
+            "description": "The type of CAPTCHA validation used.",
             "$ref": "#/components/schemas/RecaptchaType"
           },
           "region": {
             "maxLength": 20,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The portal region.",
-            "nullable": true,
             "example": "us-east"
           },
           "awsRegion": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The portal AWS region.",
-            "nullable": true,
             "example": "us-east-1"
           },
           "status": {
+            "description": "The tenant status.",
             "$ref": "#/components/schemas/TenantStatus"
           },
           "skipWelcome": {
@@ -2020,9 +2107,11 @@
           "timeZoneName": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The portal time zone name.",
-            "nullable": true,
             "example": "UTC"
           },
           "spam": {
@@ -2036,9 +2125,11 @@
             "example": true
           },
           "appKey": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The application key.",
-            "nullable": true,
             "example": "app-key-123"
           },
           "limitedAccessSpace": {
@@ -2047,27 +2138,35 @@
             "example": false
           },
           "thirdPartyProfile": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The serialized third party profile.",
-            "nullable": true,
             "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
           },
           "provider": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The type of authentication provider (e.g., internal, Google, Azure).",
-            "nullable": true,
             "example": "google"
           },
           "accessToken": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The access token used for authentication with external providers.",
-            "nullable": true,
             "example": "ya29.a0AfH6SMBx..."
           },
           "codeOAuth": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The authorization code used for obtaining OAuth tokens.",
-            "nullable": true,
             "example": "4/0AY0e-g7..."
           }
         },

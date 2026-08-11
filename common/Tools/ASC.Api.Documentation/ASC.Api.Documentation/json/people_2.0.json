@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.1",
   "info": {
     "title": "Api",
     "contact": {
@@ -51,6 +51,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for creating a new API key.",
                 "$ref": "#/components/schemas/CreateApiKeyRequestDto"
               }
             }
@@ -452,6 +453,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating an existing API key.",
                 "$ref": "#/components/schemas/UpdateApiKeyRequest"
               }
             }
@@ -826,6 +828,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The group request parameters.",
                 "$ref": "#/components/schemas/GroupRequestDto"
               }
             }
@@ -1062,6 +1065,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request for updating a group.",
                 "$ref": "#/components/schemas/UpdateGroupRequest"
               }
             }
@@ -1523,6 +1527,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The member request.",
                 "$ref": "#/components/schemas/MembersRequest"
               }
             }
@@ -1640,6 +1645,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The member request.",
                 "$ref": "#/components/schemas/MembersRequest"
               }
             }
@@ -1760,6 +1766,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The member request.",
                 "$ref": "#/components/schemas/MembersRequest"
               }
             }
@@ -1882,6 +1889,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request for setting a group manager.",
                 "$ref": "#/components/schemas/SetManagerRequest"
               }
             }
@@ -2457,6 +2465,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating a user email.",
                 "$ref": "#/components/schemas/ChangeEmailRequest"
               }
             }
@@ -2571,6 +2580,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating the user information.",
                 "$ref": "#/components/schemas/UpdateMemberRequestDto"
               }
             }
@@ -2818,6 +2828,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating the user information.",
                 "$ref": "#/components/schemas/UpdateMembersRequestDto"
               }
             }
@@ -2918,6 +2929,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for the user email.",
                 "$ref": "#/components/schemas/EmailMemberRequestDto"
               }
             }
@@ -3042,6 +3054,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating a user password.",
                 "$ref": "#/components/schemas/ChangePasswordRequest"
               }
             }
@@ -3156,6 +3169,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for the user email.",
                 "$ref": "#/components/schemas/EmailMemberRequestDto"
               }
             }
@@ -3244,6 +3258,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The thumbnail request.",
                 "$ref": "#/components/schemas/ThumbnailsRequest"
               }
             }
@@ -3590,6 +3605,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating a photo.",
                 "$ref": "#/components/schemas/UpdatePhotoMemberRequest"
               }
             }
@@ -3946,6 +3962,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The user request parameters.",
                 "$ref": "#/components/schemas/MemberRequestDto"
               }
             }
@@ -4215,6 +4232,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for inviting users.",
                 "$ref": "#/components/schemas/InviteUsersRequestDto"
               }
             }
@@ -4291,6 +4309,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating the user information.",
                 "$ref": "#/components/schemas/UpdateMembersRequestDto"
               }
             }
@@ -4633,6 +4652,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating the user information.",
                 "$ref": "#/components/schemas/UpdateMemberRequestDto"
               }
             }
@@ -5071,6 +5091,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating the user information.",
                 "$ref": "#/components/schemas/UpdateMembersRequestDto"
               }
             }
@@ -5197,6 +5218,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The culture name parameters.",
                 "$ref": "#/components/schemas/Culture"
               }
             }
@@ -5310,6 +5332,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating a user quota.",
                 "$ref": "#/components/schemas/UpdateMembersQuotaRequestDto"
               }
             }
@@ -5420,6 +5443,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating a user quota.",
                 "$ref": "#/components/schemas/UpdateMembersQuotaRequestDto"
               }
             }
@@ -5612,6 +5636,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "description": "The user type.",
                 "$ref": "#/components/schemas/EmployeeType"
               },
               "example": [
@@ -5842,6 +5867,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "description": "The user type.",
                 "$ref": "#/components/schemas/EmployeeType"
               },
               "example": [
@@ -6072,6 +6098,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "description": "The user type.",
                 "$ref": "#/components/schemas/EmployeeType"
               },
               "example": [
@@ -7321,6 +7348,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "description": "The user type.",
                 "$ref": "#/components/schemas/EmployeeType"
               },
               "example": [
@@ -7551,6 +7579,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "description": "The user type.",
                 "$ref": "#/components/schemas/EmployeeType"
               },
               "example": [
@@ -7781,6 +7810,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "description": "The user type.",
                 "$ref": "#/components/schemas/EmployeeType"
               },
               "example": [
@@ -8025,6 +8055,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The theme settings request parameters.",
                 "$ref": "#/components/schemas/DarkThemeSettingsRequestDto"
               }
             }
@@ -8230,6 +8261,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for linking accounts.",
                 "$ref": "#/components/schemas/LinkAccountRequestDto"
               }
             }
@@ -8330,6 +8362,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for creating a third-party account.",
                 "$ref": "#/components/schemas/SignupAccountRequestDto"
               }
             }
@@ -8615,6 +8648,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for starting the reassignment process.",
                 "$ref": "#/components/schemas/StartReassignRequestDto"
               }
             }
@@ -8722,6 +8756,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for terminating the reassignment/deletion process.",
                 "$ref": "#/components/schemas/TerminateRequestDto"
               }
             }
@@ -9148,6 +9183,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for terminating the reassignment/deletion process.",
                 "$ref": "#/components/schemas/TerminateRequestDto"
               }
             }
@@ -9261,6 +9297,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for terminating the reassignment/deletion process.",
                 "$ref": "#/components/schemas/TerminateRequestDto"
               }
             }
@@ -9736,6 +9773,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating the user information.",
                 "$ref": "#/components/schemas/UpdateMembersRequestDto"
               }
             }
@@ -9860,6 +9898,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating the user information.",
                 "$ref": "#/components/schemas/UpdateMembersRequestDto"
               }
             }
@@ -9978,6 +10017,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for updating the user information.",
                 "$ref": "#/components/schemas/UpdateMembersRequestDto"
               }
             }
@@ -10086,6 +10126,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The parameters for updating the type of the user or guest when reassigning rooms and shared files.",
                 "$ref": "#/components/schemas/StartUpdateUserTypeDto"
               }
             }
@@ -10304,6 +10345,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The request parameters for terminating the reassignment/deletion process.",
                 "$ref": "#/components/schemas/TerminateRequestDto"
               }
             }
@@ -10565,16 +10607,20 @@
         "type": "object",
         "properties": {
           "provider": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The account provider.",
-            "nullable": true,
             "example": "Google"
           },
           "url": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The account URL.",
             "format": "uri",
-            "nullable": true,
             "example": "https://example.com/account"
           },
           "linked": {
@@ -10698,30 +10744,38 @@
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The API key name.",
-            "nullable": true,
             "example": "My API Key"
           },
           "key": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The full API key value (only returned when creating a new key).",
-            "nullable": true,
             "example": "api_key_1234567890abcdef"
           },
           "keyPostfix": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The API key postfix (used for identification).",
-            "nullable": true,
             "example": "...cdef"
           },
           "permissions": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string"
             },
             "description": "The list of permissions granted to the API key.",
-            "nullable": true,
             "example": [
               "read",
               "write",
@@ -10729,15 +10783,19 @@
             ]
           },
           "lastUsed": {
+            "description": "The API date and time parameters.",
             "$ref": "#/components/schemas/ApiDateTime"
           },
           "createOn": {
+            "description": "The API date and time parameters.",
             "$ref": "#/components/schemas/ApiDateTime"
           },
           "createBy": {
+            "description": "The user parameters.",
             "$ref": "#/components/schemas/EmployeeDto"
           },
           "expiresAt": {
+            "description": "The API date and time parameters.",
             "$ref": "#/components/schemas/ApiDateTime"
           },
           "isActive": {
@@ -10866,16 +10924,20 @@
           "email": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user email address.",
             "format": "email",
-            "nullable": true,
             "example": "john.doe@example.com"
           },
           "encEmail": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user encrypted email address.",
-            "nullable": true,
             "example": "encrypted_email_string"
           }
         },
@@ -10886,15 +10948,19 @@
         "type": "object",
         "properties": {
           "password": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user password.",
-            "nullable": true,
             "example": "P@ssw0rd"
           },
           "passwordHash": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user password hash.",
-            "nullable": true,
             "example": "5f4dcc3b5aa765d61d8327deb882cf99"
           }
         },
@@ -10905,15 +10971,19 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The contact type.",
-            "nullable": true,
             "example": "GTalk"
           },
           "value": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The contact value.",
-            "nullable": true,
             "example": "my@gmail.com"
           }
         },
@@ -10934,12 +11004,14 @@
             "example": "My API Key"
           },
           "permissions": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string"
             },
             "description": "The list of permissions granted to the API key.",
-            "nullable": true,
             "example": [
               "read",
               "write"
@@ -10948,10 +11020,12 @@
           "expiresInDays": {
             "maximum": 365,
             "minimum": 1,
-            "type": "integer",
+            "type": [
+              "null",
+              "integer"
+            ],
             "description": "The number of days until the API key expires (null for no expiration).",
             "format": "int32",
-            "nullable": true,
             "example": 30
           }
         },
@@ -10979,6 +11053,7 @@
         "type": "object",
         "properties": {
           "theme": {
+            "description": "The theme type.",
             "$ref": "#/components/schemas/DarkThemeSettingsType"
           },
           "lastModified": {
@@ -10998,6 +11073,7 @@
         "type": "object",
         "properties": {
           "theme": {
+            "description": "The theme type.",
             "$ref": "#/components/schemas/DarkThemeSettingsType"
           }
         },
@@ -11116,10 +11192,12 @@
         "properties": {
           "email": {
             "maxLength": 255,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The email address.",
             "format": "email",
-            "nullable": true,
             "example": "user@example.com"
           }
         },
@@ -11141,12 +11219,15 @@
             "example": "john.doe@example.com"
           },
           "recaptchaType": {
+            "description": "The type of CAPTCHA validation used.",
             "$ref": "#/components/schemas/RecaptchaType"
           },
           "recaptchaResponse": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user's response to the CAPTCHA challenge.",
-            "nullable": true,
             "example": "03AGdBq27..."
           }
         },
@@ -11240,45 +11321,59 @@
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "displayName": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
-            "nullable": true,
             "example": "Mike Zanyatski"
           },
           "avatar": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user avatar.",
-            "nullable": true,
             "example": "https://example.com/avatar.jpg"
           },
           "avatarOriginal": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user original size avatar.",
-            "nullable": true,
             "example": "https://example.com/avatar_original.jpg"
           },
           "avatarMax": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user maximum size avatar.",
-            "nullable": true,
             "example": "https://example.com/avatar_max.jpg"
           },
           "avatarMedium": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user medium size avatar.",
-            "nullable": true,
             "example": "https://example.com/avatar_medium.jpg"
           },
           "avatarSmall": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user small size avatar.",
-            "nullable": true,
             "example": "https://example.com/avatar_small.jpg"
           },
           "profileUrl": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user profile URL.",
-            "nullable": true,
             "example": "https://example.com/profile/user123"
           },
           "hasAvatar": {
@@ -11347,37 +11442,48 @@
             "type": "object",
             "properties": {
               "firstName": {
-                "type": "string",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "The user first name.",
-                "nullable": true,
                 "example": "Mike"
               },
               "lastName": {
-                "type": "string",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "The user last name.",
-                "nullable": true,
                 "example": "Zanyatski"
               },
               "userName": {
-                "type": "string",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "The user username.",
-                "nullable": true,
                 "example": "Mike.Zanyatski"
               },
               "email": {
-                "type": "string",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "The user email.",
                 "format": "email",
-                "nullable": true,
                 "example": "my@gmail.com"
               },
               "contacts": {
-                "type": "array",
+                "type": [
+                  "null",
+                  "array"
+                ],
                 "items": {
+                  "description": "The contact information.",
                   "$ref": "#/components/schemas/Contact"
                 },
                 "description": "The list of user contacts.",
-                "nullable": true,
                 "example": [
                   {
                     "type": "email",
@@ -11386,27 +11492,35 @@
                 ]
               },
               "status": {
+                "description": "The user status.",
                 "$ref": "#/components/schemas/EmployeeStatus"
               },
               "activationStatus": {
+                "description": "The user activation status.",
                 "$ref": "#/components/schemas/EmployeeActivationStatus"
               },
               "terminated": {
+                "description": "The date when the user account was terminated.",
                 "$ref": "#/components/schemas/ApiDateTime"
               },
               "department": {
-                "type": "string",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "The user department.",
-                "nullable": true,
                 "example": "Marketing"
               },
               "groups": {
-                "type": "array",
+                "type": [
+                  "null",
+                  "array"
+                ],
                 "items": {
+                  "description": "The group summary parameters.",
                   "$ref": "#/components/schemas/GroupSummaryDto"
                 },
                 "description": "The list of user groups.",
-                "nullable": true,
                 "example": [
                   {
                     "id": "00000000-0000-0000-0000-000000000000",
@@ -11415,15 +11529,19 @@
                 ]
               },
               "location": {
-                "type": "string",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "The user location.",
-                "nullable": true,
                 "example": "Palo Alto"
               },
               "notes": {
-                "type": "string",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "The user notes.",
-                "nullable": true,
                 "example": "Notes to worker"
               },
               "isAdmin": {
@@ -11442,12 +11560,14 @@
                 "example": false
               },
               "listAdminModules": {
-                "type": "array",
+                "type": [
+                  "null",
+                  "array"
+                ],
                 "items": {
                   "type": "string"
                 },
                 "description": "The list of the administrator modules.",
-                "nullable": true,
                 "example": [
                   "projects",
                   "crm"
@@ -11469,18 +11589,23 @@
                 "example": false
               },
               "cultureName": {
-                "type": "string",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "The user culture code.",
-                "nullable": true,
                 "example": "en-EN"
               },
               "mobilePhone": {
-                "type": "string",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "The user mobile phone number.",
-                "nullable": true,
                 "example": "+1 (555) 123-4567"
               },
               "mobilePhoneActivationStatus": {
+                "description": "The user mobile phone activation status.",
                 "$ref": "#/components/schemas/MobilePhoneActivationStatus"
               },
               "isSSO": {
@@ -11489,64 +11614,83 @@
                 "example": false
               },
               "theme": {
+                "description": "The user theme settings.",
                 "$ref": "#/components/schemas/DarkThemeSettingsType"
               },
               "quotaLimit": {
-                "type": "integer",
+                "type": [
+                  "null",
+                  "integer"
+                ],
                 "description": "The user quota limit.",
                 "format": "int64",
-                "nullable": true,
                 "example": 1073741824
               },
               "usedSpace": {
-                "type": "number",
+                "type": [
+                  "null",
+                  "number"
+                ],
                 "description": "The portal used space of the user.",
                 "format": "double",
-                "nullable": true,
                 "example": 12345
               },
               "shared": {
-                "type": "boolean",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
                 "description": "Specifies if the user has access rights.",
-                "nullable": true,
                 "example": false
               },
               "isCustomQuota": {
-                "type": "boolean",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
                 "description": "Specifies if the user has a custom quota or not.",
-                "nullable": true,
                 "example": false
               },
               "loginEventId": {
-                "type": "integer",
+                "type": [
+                  "null",
+                  "integer"
+                ],
                 "description": "The current login event ID.",
                 "format": "int32",
-                "nullable": true,
                 "example": 123
               },
               "authCookieLifetime": {
-                "type": "number",
+                "type": [
+                  "null",
+                  "number"
+                ],
                 "description": "The auth cookie lifetime in seconds.",
                 "format": "double",
-                "nullable": true,
                 "example": 3600
               },
               "createdBy": {
+                "description": "The user who created the current user.",
                 "$ref": "#/components/schemas/EmployeeDto"
               },
               "registrationDate": {
+                "description": "The user registration date.",
                 "$ref": "#/components/schemas/ApiDateTime"
               },
               "hasPersonalFolder": {
-                "type": "boolean",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
                 "description": "Specifies if the user has a personal folder or not.",
-                "nullable": true,
                 "example": true
               },
               "tfaAppEnabled": {
-                "type": "boolean",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
                 "description": "Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app.",
-                "nullable": true,
                 "example": false
               }
             }
@@ -11718,17 +11862,19 @@
             "example": true
           },
           "data": {
+            "type": "null",
             "description": "The file upload result data.",
-            "nullable": true,
             "example": {
               "fileId": "123",
               "fileName": "photo.jpg"
             }
           },
           "message": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The file upload result message.",
-            "nullable": true,
             "example": "File uploaded successfully"
           }
         },
@@ -11828,16 +11974,20 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The group name.",
-            "nullable": true,
             "example": "Marketing Team"
           },
           "parent": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The parent group ID.",
             "format": "uuid",
-            "nullable": true,
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "category": {
@@ -11858,21 +12008,27 @@
             "example": false
           },
           "isSystem": {
-            "type": "boolean",
+            "type": [
+              "null",
+              "boolean"
+            ],
             "description": "Indicates whether the group is a system group.",
-            "nullable": true,
             "example": false
           },
           "manager": {
+            "description": "The group manager full information.",
             "$ref": "#/components/schemas/EmployeeFullDto"
           },
           "members": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
+              "description": "The full list of user parameters.",
               "$ref": "#/components/schemas/EmployeeFullDto"
             },
             "description": "The list of group members.",
-            "nullable": true,
             "example": [
               {
                 "displayName": "John Doe"
@@ -11880,9 +12036,11 @@
             ]
           },
           "shared": {
-            "type": "boolean",
+            "type": [
+              "null",
+              "boolean"
+            ],
             "description": "Specifies whether the group can be shared or not.",
-            "nullable": true,
             "example": false
           },
           "membersCount": {
@@ -11902,13 +12060,15 @@
         "type": "object",
         "properties": {
           "members": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "description": "The list of group member IDs.",
-            "nullable": true,
             "example": [
               "00000000-0000-0000-0000-000000000000",
               "11111111-1111-1111-1111-111111111111"
@@ -11923,9 +12083,11 @@
           "groupName": {
             "maxLength": 128,
             "minLength": 1,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The group name.",
-            "nullable": true,
             "example": "Marketing Team"
           }
         },
@@ -11989,21 +12151,27 @@
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The group name.",
-            "nullable": true,
             "example": "Group Name"
           },
           "manager": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The group manager.",
-            "nullable": true,
             "example": "Jake.Zazhitski"
           },
           "isSystem": {
-            "type": "boolean",
+            "type": [
+              "null",
+              "boolean"
+            ],
             "description": "Indicates whether the group is a system group.",
-            "nullable": true,
             "example": false
           }
         },
@@ -12059,6 +12227,7 @@
           "invitations": {
             "type": "array",
             "items": {
+              "description": "The user invitation parameters.",
               "$ref": "#/components/schemas/UserInvitationRequestDto"
             },
             "description": "The list of user invitations.",
@@ -12070,9 +12239,11 @@
             ]
           },
           "culture": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The culture code of invitations.",
-            "nullable": true,
             "example": "en-US"
           }
         },
@@ -12083,9 +12254,11 @@
         "type": "object",
         "properties": {
           "serializedProfile": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The third-party profile in the serialized format.",
-            "nullable": true,
             "example": "{\"provider\":\"Google\",\"id\":\"123456\"}"
           }
         },
@@ -12096,82 +12269,104 @@
         "type": "object",
         "properties": {
           "password": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user password.",
-            "nullable": true,
             "example": "P@ssw0rd"
           },
           "passwordHash": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user password hash.",
-            "nullable": true,
             "example": "5f4dcc3b5aa765d61d8327deb882cf99"
           },
           "email": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user email address.",
             "format": "email",
-            "nullable": true,
             "example": "john.doe@example.com"
           },
           "type": {
+            "description": "The user type.",
             "$ref": "#/components/schemas/EmployeeType"
           },
           "isUser": {
-            "type": "boolean",
+            "type": [
+              "null",
+              "boolean"
+            ],
             "description": "Specifies if this is a guest or a user.",
-            "nullable": true,
             "example": true
           },
           "firstName": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user first name.",
-            "nullable": true,
             "example": "John"
           },
           "lastName": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user last name.",
-            "nullable": true,
             "example": "Doe"
           },
           "department": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "description": "The list of the user departments IDs.",
-            "nullable": true,
             "example": [
               "00000000-0000-0000-0000-000000000000"
             ]
           },
           "location": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user location.",
-            "nullable": true,
             "example": "New York"
           },
           "comment": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user comment.",
-            "nullable": true,
             "example": "User comment"
           },
           "contacts": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
+              "description": "The contact information.",
               "$ref": "#/components/schemas/Contact"
             },
             "description": "The list of the user contacts.",
-            "nullable": true,
             "example": [
               {
                 "type": "email",
@@ -12180,9 +12375,11 @@
             ]
           },
           "files": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The avatar photo URL.",
-            "nullable": true,
             "example": "https://example.com/avatar.jpg"
           },
           "fromInviteLink": {
@@ -12191,15 +12388,19 @@
             "example": false
           },
           "key": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user key.",
-            "nullable": true,
             "example": "user_key_string"
           },
           "cultureName": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user culture code.",
-            "nullable": true,
             "example": "en-US"
           },
           "target": {
@@ -12209,9 +12410,11 @@
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "spam": {
-            "type": "boolean",
+            "type": [
+              "null",
+              "boolean"
+            ],
             "description": "Specifies if tips, updates and offers are allowed to be sent to the user or not.",
-            "nullable": true,
             "example": false
           }
         },
@@ -12222,13 +12425,15 @@
         "type": "object",
         "properties": {
           "members": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "description": "The list of group member IDs.",
-            "nullable": true,
             "example": [
               "00000000-0000-0000-0000-000000000000",
               "11111111-1111-1111-1111-111111111111"
@@ -12559,24 +12764,31 @@
         "type": "object",
         "properties": {
           "employeeType": {
+            "description": "The user type.",
             "$ref": "#/components/schemas/EmployeeType"
           },
           "key": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user link key.",
-            "nullable": true,
             "example": "invite_key_123456"
           },
           "culture": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user culture code.",
-            "nullable": true,
             "example": "en-US"
           },
           "serializedProfile": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The third-party profile in the serialized format",
-            "nullable": true,
             "example": "{\"provider\":\"Google\",\"id\":\"123456\"}"
           }
         },
@@ -12643,6 +12855,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "description": "The user type.",
             "$ref": "#/components/schemas/EmployeeType"
           },
           "userId": {
@@ -12652,10 +12865,12 @@
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "reassignUserId": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user ID to reassign.",
             "format": "uuid",
-            "nullable": true,
             "example": "11111111-1111-1111-1111-111111111111"
           }
         },
@@ -12712,15 +12927,19 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The task progress ID.",
-            "nullable": true,
             "example": "task-123456"
           },
           "error": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The task progress error message.",
-            "nullable": true,
             "example": "An error occurred during processing"
           },
           "percentage": {
@@ -12735,6 +12954,7 @@
             "example": false
           },
           "status": {
+            "description": "The status of the distributed task.",
             "$ref": "#/components/schemas/DistributedTaskStatus"
           }
         },
@@ -12801,39 +13021,51 @@
         "type": "object",
         "properties": {
           "original": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The thumbnail original photo.",
-            "nullable": true,
             "example": "default_user_photo_size_1280-1280.png"
           },
           "retina": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The thumbnail retina.",
-            "nullable": true,
             "example": "default_user_photo_size_360-360.png"
           },
           "max": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The thumbnail maximum size photo.",
-            "nullable": true,
             "example": "default_user_photo_size_200-200.png"
           },
           "big": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The thumbnail big size photo.",
-            "nullable": true,
             "example": "default_user_photo_size_82-82.png"
           },
           "medium": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The thumbnail medium size photo.",
-            "nullable": true,
             "example": "default_user_photo_size_48-48.png"
           },
           "small": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The thumbnail small size photo.",
-            "nullable": true,
             "example": "default_user_photo_size_32-32.png"
           }
         },
@@ -12884,9 +13116,11 @@
         "type": "object",
         "properties": {
           "tmpFile": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The path to the temporary thumbnail file.",
-            "nullable": true,
             "example": "/tmp/photo_temp_123.jpg"
           },
           "x": {
@@ -12923,18 +13157,22 @@
           "name": {
             "maxLength": 30,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The new name for the API key.",
-            "nullable": true,
             "example": "Updated API Key"
           },
           "permissions": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string"
             },
             "description": "The new list of permissions for the API key.",
-            "nullable": true,
             "example": [
               "read",
               "write",
@@ -12942,9 +13180,11 @@
             ]
           },
           "isActive": {
-            "type": "boolean",
+            "type": [
+              "null",
+              "boolean"
+            ],
             "description": "Indicates whether the API key should be active or not.",
-            "nullable": true,
             "example": true
           }
         },
@@ -12955,25 +13195,29 @@
         "type": "object",
         "properties": {
           "membersToAdd": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "description": "The list of user IDs to add to the group.",
-            "nullable": true,
             "example": [
               "00000000-0000-0000-0000-000000000000"
             ]
           },
           "membersToRemove": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "description": "The list of user IDs to remove from the group.",
-            "nullable": true,
             "example": [
               "11111111-1111-1111-1111-111111111111"
             ]
@@ -12987,9 +13231,11 @@
           "groupName": {
             "maxLength": 128,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The group name.",
-            "nullable": true,
             "example": "Sales Team"
           }
         },
@@ -13000,79 +13246,100 @@
         "type": "object",
         "properties": {
           "userId": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user ID.",
-            "nullable": true,
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "disable": {
-            "type": "boolean",
+            "type": [
+              "null",
+              "boolean"
+            ],
             "description": "Specifies whether to disable a user or not.",
-            "nullable": true,
             "example": false
           },
           "email": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user email address.",
             "format": "email",
-            "nullable": true,
             "example": "john.doe@example.com"
           },
           "isUser": {
-            "type": "boolean",
+            "type": [
+              "null",
+              "boolean"
+            ],
             "description": "Specifies if this is a guest or a user.",
-            "nullable": true,
             "example": true
           },
           "firstName": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user first name.",
-            "nullable": true,
             "example": "John"
           },
           "lastName": {
             "maxLength": 255,
             "minLength": 0,
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user last name.",
-            "nullable": true,
             "example": "Doe"
           },
           "department": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "description": "The list of the user departments.",
-            "nullable": true,
             "example": [
               "00000000-0000-0000-0000-000000000000"
             ]
           },
           "location": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user location.",
-            "nullable": true,
             "example": "New York"
           },
           "comment": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user comment.",
-            "nullable": true,
             "example": "User comment"
           },
           "contacts": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
+              "description": "The contact information.",
               "$ref": "#/components/schemas/Contact"
             },
             "description": "The list of the user contacts.",
-            "nullable": true,
             "example": [
               {
                 "type": "email",
@@ -13081,15 +13348,19 @@
             ]
           },
           "files": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The user avatar photo URL.",
-            "nullable": true,
             "example": "https://example.com/avatar.jpg"
           },
           "spam": {
-            "type": "boolean",
+            "type": [
+              "null",
+              "boolean"
+            ],
             "description": "Specifies if tips, updates and offers are allowed to be sent to the user or not.",
-            "nullable": true,
             "example": false
           }
         },
@@ -13100,13 +13371,15 @@
         "type": "object",
         "properties": {
           "userIds": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "description": "The list of user IDs.",
-            "nullable": true,
             "example": [
               "00000000-0000-0000-0000-000000000000",
               "11111111-1111-1111-1111-111111111111"
@@ -13136,13 +13409,15 @@
         "type": "object",
         "properties": {
           "userIds": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "description": "The list of user IDs.",
-            "nullable": true,
             "example": [
               "00000000-0000-0000-0000-000000000000",
               "11111111-1111-1111-1111-111111111111"
@@ -13161,9 +13436,11 @@
         "type": "object",
         "properties": {
           "files": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The avatar photo URL.",
-            "nullable": true,
             "example": "https://example.com/avatar.jpg"
           }
         },
@@ -13182,6 +13459,7 @@
             "example": true
           },
           "status": {
+            "description": "The user status, if the user exists.",
             "$ref": "#/components/schemas/EmployeeStatus"
           }
         },
@@ -13237,6 +13515,7 @@
             "type": "object",
             "properties": {
               "type": {
+                "description": "The user type.",
                 "$ref": "#/components/schemas/EmployeeType"
               }
             }
