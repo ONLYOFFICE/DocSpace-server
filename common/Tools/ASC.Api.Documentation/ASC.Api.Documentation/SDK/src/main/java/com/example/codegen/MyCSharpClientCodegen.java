@@ -19,6 +19,9 @@ package com.example.codegen;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.headers.*;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.core.util.Json;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.languages.CSharpClientCodegen;
@@ -29,6 +32,9 @@ import org.openapitools.codegen.templating.mustache.ReplaceAllLambda;
 
 import com.google.common.collect.ImmutableMap;
 import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
+import java.io.IOException;
+import java.io.Writer;
 
 import java.io.File;
 import java.util.stream.Collectors;
@@ -283,7 +289,24 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
     @Override
     protected ImmutableMap.Builder<String, Mustache.Lambda> addMustacheLambdas() {
         return super.addMustacheLambdas()
-            .put("unescape_param", new ReplaceAllLambda("^@", ""));
+            .put("unescape_param", new ReplaceAllLambda("^@", ""))
+            .put("xml_doc_text", new XmlDocTextLambda());
+    }
+
+    // Makes a free-form value safe to place inside an XML documentation comment: escapes only the
+    // three characters XML requires (so JSON quotes stay readable) and folds line breaks, which
+    // would otherwise spill out of the `///` comment.
+    private static class XmlDocTextLambda implements Mustache.Lambda {
+        @Override
+        public void execute(Template.Fragment fragment, Writer writer) throws IOException {
+            String text = fragment.execute()
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replaceAll("\\R+", " ");
+
+            writer.write(text);
+        }
     }
 
 
@@ -335,6 +358,36 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         return input.replaceAll("([a-z])([A-Z])", "$1-$2")
                     .replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2")
                     .toLowerCase();
+    }
+
+    // In an openapi 3.1 document the parser hands structured `example` values over as plain Java
+    // collections instead of Jackson nodes, so the default String.valueOf() rendering produces
+    // `[{id=conn1, ip=192.168.1.1}]` instead of JSON. Re-serialize them so the <example> tags stay
+    // copy-pasteable.
+    @Override
+    public CodegenProperty fromProperty(String name, Schema p, boolean required, boolean schemaIsFromAdditionalProperties) {
+        CodegenProperty property = super.fromProperty(name, p, required, schemaIsFromAdditionalProperties);
+
+        if (p != null) {
+            String json = toJsonExample(p.getExample());
+            if (json != null) {
+                property.example = json;
+            }
+        }
+
+        return property;
+    }
+
+    private static String toJsonExample(Object example) {
+        if (!(example instanceof Map) && !(example instanceof List)) {
+            return null;
+        }
+
+        try {
+            return Json.mapper().writeValueAsString(example);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
     }
     
     @Override
