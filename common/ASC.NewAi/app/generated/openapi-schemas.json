@@ -280,9 +280,7 @@
         },
         "object": {
           "type": "string",
-          "enum": [
-            "chat.completion.chunk"
-          ]
+          "const": "chat.completion.chunk"
         },
         "created": {
           "type": "number"
@@ -331,13 +329,13 @@
       "properties": {
         "role": {
           "type": "string",
-          "enum": [
-            "assistant"
-          ]
+          "const": "assistant"
         },
         "content": {
-          "nullable": true,
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "tool_calls": {
           "type": "array",
@@ -359,9 +357,7 @@
         },
         "type": {
           "type": "string",
-          "enum": [
-            "function"
-          ]
+          "const": "function"
         },
         "function": {
           "type": "object",
@@ -382,8 +378,10 @@
       "additionalProperties": false
     },
     "AiOpenAIFinishReason": {
-      "nullable": true,
-      "type": "string",
+      "type": [
+        "string",
+        "null"
+      ],
       "enum": [
         "stop",
         "length",
@@ -406,12 +404,16 @@
               "type": "string"
             },
             "code": {
-              "nullable": true,
-              "type": "string"
+              "type": [
+                "string",
+                "null"
+              ]
             },
             "param": {
-              "nullable": true,
-              "type": "string"
+              "type": [
+                "string",
+                "null"
+              ]
             }
           },
           "required": [
@@ -882,8 +884,10 @@
           "type": "string"
         },
         "folderId": {
-          "nullable": true,
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
@@ -1001,9 +1005,7 @@
       "properties": {
         "version": {
           "type": "number",
-          "enum": [
-            1
-          ]
+          "const": 1
         },
         "folders": {
           "type": "array",
@@ -3473,10 +3475,12 @@
     },
     "aiAssignmentsTryResolveForAction": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/AiResolvedAssignment"
+          },
+          {
+            "type": "null"
           }
         ]
       }
@@ -3522,8 +3526,10 @@
     },
     "aiAssignmentsGetAssignment": {
       "response": {
-        "nullable": true,
-        "type": "string"
+        "type": [
+          "string",
+          "null"
+        ]
       }
     },
     "aiAssignmentsGetAllAssignments": {
@@ -3727,10 +3733,12 @@
         "type": "string"
       },
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/AiAttachment"
+          },
+          {
+            "type": "null"
           }
         ]
       }
@@ -3745,10 +3753,12 @@
       "response": {
         "type": "array",
         "items": {
-          "nullable": true,
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/AiAttachment"
+            },
+            {
+              "type": "null"
             }
           ]
         }
@@ -3896,9 +3906,7 @@
         "anyOf": [
           {
             "type": "boolean",
-            "enum": [
-              true
-            ]
+            "const": true
           },
           {
             "type": "object",
@@ -3951,8 +3959,10 @@
                 "type": "string"
               },
               "folderId": {
-                "nullable": true,
-                "type": "string"
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             },
             "additionalProperties": false,
@@ -3978,8 +3988,10 @@
             "description": "Prompt id to move."
           },
           "folderId": {
-            "nullable": true,
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Target folder id, or `null` for root."
           }
         },
@@ -4085,20 +4097,24 @@
     },
     "aiPromptsGetById": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/AiPrompt"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
     "aiPromptsGetFolderById": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/AiPromptFolder"
+          },
+          {
+            "type": "null"
           }
         ]
       }
@@ -4248,20 +4264,24 @@
     },
     "aiThreadsGetById": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/AiThread"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
     "aiThreadsGetMessageById": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/AiThreadMessageLike"
+          },
+          {
+            "type": "null"
           }
         ]
       }
@@ -4359,10 +4379,12 @@
     },
     "aiToolsGetCustomServer": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/AiMcpServerConfig"
+          },
+          {
+            "type": "null"
           }
         ]
       }
@@ -4492,10 +4514,12 @@
     },
     "aiWebSearchGetActiveConfig": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/AiWebSearchConfig"
+          },
+          {
+            "type": "null"
           }
         ]
       }
@@ -4513,9 +4537,7 @@
         "anyOf": [
           {
             "type": "boolean",
-            "enum": [
-              true
-            ]
+            "const": true
           },
           {
             "type": "object",
@@ -4584,13 +4606,9 @@
             "description": "Markdown content to convert."
           },
           "folderId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
+            "type": [
+              "string",
+              "number"
             ],
             "description": "Target folder id (int or string)."
           }
@@ -4789,13 +4807,9 @@
           "roomIds": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string"
-                }
+              "type": [
+                "number",
+                "string"
               ],
               "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
             },
@@ -4823,13 +4837,9 @@
           "roomIds": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string"
-                }
+              "type": [
+                "number",
+                "string"
               ],
               "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
             },

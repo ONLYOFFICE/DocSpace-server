@@ -406,8 +406,10 @@
             "in": "query",
             "description": "The portal name.",
             "schema": {
-              "type": "string",
-              "example": "myportal"
+              "examples": [
+                "myportal"
+              ],
+              "type": "string"
             }
           },
           {
@@ -415,9 +417,11 @@
             "in": "query",
             "description": "The tenant ID.",
             "schema": {
+              "examples": [
+                1
+              ],
               "type": "integer",
-              "format": "int32",
-              "example": 1
+              "format": "int32"
             }
           },
           {
@@ -425,10 +429,12 @@
             "in": "query",
             "description": "The affiliate ID.",
             "schema": {
+              "examples": [
+                "af123456"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "af123456"
+              "type": "string"
             }
           },
           {
@@ -436,10 +442,12 @@
             "in": "query",
             "description": "The partner ID.",
             "schema": {
+              "examples": [
+                "partner123"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "partner123"
+              "type": "string"
             }
           },
           {
@@ -447,8 +455,10 @@
             "in": "query",
             "description": "The portal campaign.",
             "schema": {
-              "type": "string",
-              "example": "personal"
+              "examples": [
+                "personal"
+              ],
+              "type": "string"
             }
           },
           {
@@ -456,10 +466,12 @@
             "in": "query",
             "description": "The first name of the portal owner.",
             "schema": {
+              "examples": [
+                "John"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "John"
+              "type": "string"
             }
           },
           {
@@ -467,11 +479,13 @@
             "in": "query",
             "description": "The email address of the portal owner.",
             "schema": {
+              "examples": [
+                "john.doe@example.com"
+              ],
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "format": "email",
-              "example": "john.doe@example.com"
+              "format": "email"
             }
           },
           {
@@ -479,9 +493,11 @@
             "in": "query",
             "description": "The tenant industry.",
             "schema": {
+              "examples": [
+                0
+              ],
               "type": "integer",
-              "format": "int32",
-              "example": 0
+              "format": "int32"
             }
           },
           {
@@ -489,10 +505,12 @@
             "in": "query",
             "description": "The portal language.",
             "schema": {
+              "examples": [
+                "en-US"
+              ],
               "maxLength": 7,
               "minLength": 0,
-              "type": "string",
-              "example": "en-US"
+              "type": "string"
             }
           },
           {
@@ -500,10 +518,12 @@
             "in": "query",
             "description": "The last name of the portal owner.",
             "schema": {
+              "examples": [
+                "Doe"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "Doe"
+              "type": "string"
             }
           },
           {
@@ -511,10 +531,12 @@
             "in": "query",
             "description": "The name for the storage module to be configured.",
             "schema": {
+              "examples": [
+                "files"
+              ],
               "maxLength": 38,
               "minLength": 0,
-              "type": "string",
-              "example": "files"
+              "type": "string"
             }
           },
           {
@@ -522,10 +544,12 @@
             "in": "query",
             "description": "The password of the portal owner.",
             "schema": {
+              "examples": [
+                "yourPassword1!"
+              ],
               "maxLength": 30,
               "minLength": 0,
-              "type": "string",
-              "example": "yourPassword1!"
+              "type": "string"
             }
           },
           {
@@ -533,8 +557,10 @@
             "in": "query",
             "description": "The password hash.",
             "schema": {
-              "type": "string",
-              "example": "VGhpcyBpcyBhIHRlc3Q="
+              "examples": [
+                "VGhpcyBpcyBhIHRlc3Q="
+              ],
+              "type": "string"
             }
           },
           {
@@ -542,10 +568,12 @@
             "in": "query",
             "description": "The phone numberr of the portal owner.",
             "schema": {
+              "examples": [
+                "+15551234567"
+              ],
               "maxLength": 32,
               "minLength": 0,
-              "type": "string",
-              "example": "+15551234567"
+              "type": "string"
             }
           },
           {
@@ -553,8 +581,10 @@
             "in": "query",
             "description": "The user's response to the CAPTCHA challenge.",
             "schema": {
-              "type": "string",
-              "example": "03AGdBq24rvY..."
+              "examples": [
+                "03AGdBq24rvY..."
+              ],
+              "type": "string"
             }
           },
           {
@@ -571,10 +601,12 @@
             "in": "query",
             "description": "The portal region.",
             "schema": {
+              "examples": [
+                "us-east"
+              ],
               "maxLength": 20,
               "minLength": 0,
-              "type": "string",
-              "example": "us-east"
+              "type": "string"
             }
           },
           {
@@ -582,8 +614,10 @@
             "in": "query",
             "description": "The portal AWS region.",
             "schema": {
-              "type": "string",
-              "example": "us-east-1"
+              "examples": [
+                "us-east-1"
+              ],
+              "type": "string"
             }
           },
           {
@@ -600,8 +634,10 @@
             "in": "query",
             "description": "Specifies whether to send the welcome email to the user or not.",
             "schema": {
-              "type": "boolean",
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": "boolean"
             }
           },
           {
@@ -609,10 +645,12 @@
             "in": "query",
             "description": "The portal time zone name.",
             "schema": {
+              "examples": [
+                "UTC"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "UTC"
+              "type": "string"
             }
           },
           {
@@ -620,8 +658,10 @@
             "in": "query",
             "description": "Specifies if the ONLYOFFICE newsletter is allowed or not.",
             "schema": {
-              "type": "boolean",
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": "boolean"
             }
           },
           {
@@ -629,8 +669,10 @@
             "in": "query",
             "description": "Specifies if the calls are available for the current tenant or not.",
             "schema": {
-              "type": "boolean",
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": "boolean"
             }
           },
           {
@@ -638,8 +680,10 @@
             "in": "query",
             "description": "The application key.",
             "schema": {
-              "type": "string",
-              "example": "app-key-123"
+              "examples": [
+                "app-key-123"
+              ],
+              "type": "string"
             }
           },
           {
@@ -647,8 +691,10 @@
             "in": "query",
             "description": "Specifies whether the access to the space management is limited or not.",
             "schema": {
-              "type": "boolean",
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": "boolean"
             }
           },
           {
@@ -656,8 +702,10 @@
             "in": "query",
             "description": "The serialized third party profile.",
             "schema": {
-              "type": "string",
-              "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
+              "examples": [
+                "{\"id\":\"12345\",\"provider\":\"google\"}"
+              ],
+              "type": "string"
             }
           },
           {
@@ -665,8 +713,10 @@
             "in": "query",
             "description": "The type of authentication provider (e.g., internal, Google, Azure).",
             "schema": {
-              "type": "string",
-              "example": "google"
+              "examples": [
+                "google"
+              ],
+              "type": "string"
             }
           },
           {
@@ -674,8 +724,10 @@
             "in": "query",
             "description": "The access token used for authentication with external providers.",
             "schema": {
-              "type": "string",
-              "example": "ya29.a0AfH6SMBx..."
+              "examples": [
+                "ya29.a0AfH6SMBx..."
+              ],
+              "type": "string"
             }
           },
           {
@@ -683,8 +735,10 @@
             "in": "query",
             "description": "The authorization code used for obtaining OAuth tokens.",
             "schema": {
-              "type": "string",
-              "example": "4/0AY0e-g7..."
+              "examples": [
+                "4/0AY0e-g7..."
+              ],
+              "type": "string"
             }
           }
         ],
@@ -898,8 +952,10 @@
             "in": "query",
             "description": "The portal name.",
             "schema": {
-              "type": "string",
-              "example": "myportal"
+              "examples": [
+                "myportal"
+              ],
+              "type": "string"
             }
           },
           {
@@ -907,9 +963,11 @@
             "in": "query",
             "description": "The tenant ID.",
             "schema": {
+              "examples": [
+                1
+              ],
               "type": "integer",
-              "format": "int32",
-              "example": 1
+              "format": "int32"
             }
           },
           {
@@ -917,10 +975,12 @@
             "in": "query",
             "description": "The affiliate ID.",
             "schema": {
+              "examples": [
+                "af123456"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "af123456"
+              "type": "string"
             }
           },
           {
@@ -928,10 +988,12 @@
             "in": "query",
             "description": "The partner ID.",
             "schema": {
+              "examples": [
+                "partner123"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "partner123"
+              "type": "string"
             }
           },
           {
@@ -939,8 +1001,10 @@
             "in": "query",
             "description": "The portal campaign.",
             "schema": {
-              "type": "string",
-              "example": "personal"
+              "examples": [
+                "personal"
+              ],
+              "type": "string"
             }
           },
           {
@@ -948,10 +1012,12 @@
             "in": "query",
             "description": "The first name of the portal owner.",
             "schema": {
+              "examples": [
+                "John"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "John"
+              "type": "string"
             }
           },
           {
@@ -959,11 +1025,13 @@
             "in": "query",
             "description": "The email address of the portal owner.",
             "schema": {
+              "examples": [
+                "john.doe@example.com"
+              ],
               "maxLength": 255,
               "minLength": 0,
               "type": "string",
-              "format": "email",
-              "example": "john.doe@example.com"
+              "format": "email"
             }
           },
           {
@@ -971,9 +1039,11 @@
             "in": "query",
             "description": "The tenant industry.",
             "schema": {
+              "examples": [
+                0
+              ],
               "type": "integer",
-              "format": "int32",
-              "example": 0
+              "format": "int32"
             }
           },
           {
@@ -981,10 +1051,12 @@
             "in": "query",
             "description": "The portal language.",
             "schema": {
+              "examples": [
+                "en-US"
+              ],
               "maxLength": 7,
               "minLength": 0,
-              "type": "string",
-              "example": "en-US"
+              "type": "string"
             }
           },
           {
@@ -992,10 +1064,12 @@
             "in": "query",
             "description": "The last name of the portal owner.",
             "schema": {
+              "examples": [
+                "Doe"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "Doe"
+              "type": "string"
             }
           },
           {
@@ -1003,10 +1077,12 @@
             "in": "query",
             "description": "The name for the storage module to be configured.",
             "schema": {
+              "examples": [
+                "files"
+              ],
               "maxLength": 38,
               "minLength": 0,
-              "type": "string",
-              "example": "files"
+              "type": "string"
             }
           },
           {
@@ -1014,10 +1090,12 @@
             "in": "query",
             "description": "The password of the portal owner.",
             "schema": {
+              "examples": [
+                "yourPassword1!"
+              ],
               "maxLength": 30,
               "minLength": 0,
-              "type": "string",
-              "example": "yourPassword1!"
+              "type": "string"
             }
           },
           {
@@ -1025,8 +1103,10 @@
             "in": "query",
             "description": "The password hash.",
             "schema": {
-              "type": "string",
-              "example": "VGhpcyBpcyBhIHRlc3Q="
+              "examples": [
+                "VGhpcyBpcyBhIHRlc3Q="
+              ],
+              "type": "string"
             }
           },
           {
@@ -1034,10 +1114,12 @@
             "in": "query",
             "description": "The phone numberr of the portal owner.",
             "schema": {
+              "examples": [
+                "+15551234567"
+              ],
               "maxLength": 32,
               "minLength": 0,
-              "type": "string",
-              "example": "+15551234567"
+              "type": "string"
             }
           },
           {
@@ -1045,8 +1127,10 @@
             "in": "query",
             "description": "The user's response to the CAPTCHA challenge.",
             "schema": {
-              "type": "string",
-              "example": "03AGdBq24rvY..."
+              "examples": [
+                "03AGdBq24rvY..."
+              ],
+              "type": "string"
             }
           },
           {
@@ -1063,10 +1147,12 @@
             "in": "query",
             "description": "The portal region.",
             "schema": {
+              "examples": [
+                "us-east"
+              ],
               "maxLength": 20,
               "minLength": 0,
-              "type": "string",
-              "example": "us-east"
+              "type": "string"
             }
           },
           {
@@ -1074,8 +1160,10 @@
             "in": "query",
             "description": "The portal AWS region.",
             "schema": {
-              "type": "string",
-              "example": "us-east-1"
+              "examples": [
+                "us-east-1"
+              ],
+              "type": "string"
             }
           },
           {
@@ -1092,8 +1180,10 @@
             "in": "query",
             "description": "Specifies whether to send the welcome email to the user or not.",
             "schema": {
-              "type": "boolean",
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": "boolean"
             }
           },
           {
@@ -1101,10 +1191,12 @@
             "in": "query",
             "description": "The portal time zone name.",
             "schema": {
+              "examples": [
+                "UTC"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "UTC"
+              "type": "string"
             }
           },
           {
@@ -1112,8 +1204,10 @@
             "in": "query",
             "description": "Specifies if the ONLYOFFICE newsletter is allowed or not.",
             "schema": {
-              "type": "boolean",
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": "boolean"
             }
           },
           {
@@ -1121,8 +1215,10 @@
             "in": "query",
             "description": "Specifies if the calls are available for the current tenant or not.",
             "schema": {
-              "type": "boolean",
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": "boolean"
             }
           },
           {
@@ -1130,8 +1226,10 @@
             "in": "query",
             "description": "The application key.",
             "schema": {
-              "type": "string",
-              "example": "app-key-123"
+              "examples": [
+                "app-key-123"
+              ],
+              "type": "string"
             }
           },
           {
@@ -1139,8 +1237,10 @@
             "in": "query",
             "description": "Specifies whether the access to the space management is limited or not.",
             "schema": {
-              "type": "boolean",
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": "boolean"
             }
           },
           {
@@ -1148,8 +1248,10 @@
             "in": "query",
             "description": "The serialized third party profile.",
             "schema": {
-              "type": "string",
-              "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
+              "examples": [
+                "{\"id\":\"12345\",\"provider\":\"google\"}"
+              ],
+              "type": "string"
             }
           },
           {
@@ -1157,8 +1259,10 @@
             "in": "query",
             "description": "The type of authentication provider (e.g., internal, Google, Azure).",
             "schema": {
-              "type": "string",
-              "example": "google"
+              "examples": [
+                "google"
+              ],
+              "type": "string"
             }
           },
           {
@@ -1166,8 +1270,10 @@
             "in": "query",
             "description": "The access token used for authentication with external providers.",
             "schema": {
-              "type": "string",
-              "example": "ya29.a0AfH6SMBx..."
+              "examples": [
+                "ya29.a0AfH6SMBx..."
+              ],
+              "type": "string"
             }
           },
           {
@@ -1175,8 +1281,10 @@
             "in": "query",
             "description": "The authorization code used for obtaining OAuth tokens.",
             "schema": {
-              "type": "string",
-              "example": "4/0AY0e-g7..."
+              "examples": [
+                "4/0AY0e-g7..."
+              ],
+              "type": "string"
             }
           },
           {
@@ -1449,10 +1557,12 @@
             "in": "query",
             "description": "The portal name.",
             "schema": {
+              "examples": [
+                "myportal"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "myportal"
+              "type": "string"
             }
           },
           {
@@ -1460,9 +1570,11 @@
             "in": "query",
             "description": "The tenant ID.",
             "schema": {
+              "examples": [
+                1
+              ],
               "type": "integer",
-              "format": "int32",
-              "example": 1
+              "format": "int32"
             }
           },
           {
@@ -1470,10 +1582,12 @@
             "in": "query",
             "description": "The settings parameter key.",
             "schema": {
+              "examples": [
+                "SmtpSettings"
+              ],
               "maxLength": 255,
               "minLength": 0,
-              "type": "string",
-              "example": "SmtpSettings"
+              "type": "string"
             }
           },
           {
@@ -1481,8 +1595,10 @@
             "in": "query",
             "description": "The settings parameter value.",
             "schema": {
-              "type": "string",
-              "example": "sample value"
+              "examples": [
+                "sample value"
+              ],
+              "type": "string"
             }
           }
         ],
@@ -1721,14 +1837,16 @@
         "type": "object",
         "properties": {
           "hostName": {
+            "examples": [
+              "example.com"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The host name.",
-            "example": "example.com"
+            "description": "The host name."
           }
         },
         "additionalProperties": false,
@@ -1808,47 +1926,59 @@
         "type": "object",
         "properties": {
           "name": {
+            "examples": [
+              "provider_name"
+            ],
             "maxLength": 64,
             "minLength": 0,
             "type": "string",
-            "description": "The provider name.",
-            "example": "provider_name"
+            "description": "The provider name."
           },
           "clientId": {
+            "examples": [
+              "abc123"
+            ],
             "minLength": 1,
             "type": "string",
-            "description": "The OAuth client ID.",
-            "example": "abc123"
+            "description": "The OAuth client ID."
           },
           "clientSecret": {
+            "examples": [
+              "secret"
+            ],
             "minLength": 1,
             "type": "string",
-            "description": "The OAuth client secret.",
-            "example": "secret"
+            "description": "The OAuth client secret."
           },
           "baseUrl": {
+            "examples": [
+              "https://provider.example.com"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The base URL of the provider instance.",
-            "example": "https://provider.example.com"
+            "description": "The base URL of the provider instance."
           },
           "redirectUri": {
+            "examples": [
+              "https://provider.example.com/oauth"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The OAuth redirect URI registered on the provider side.",
-            "example": "https://provider.example.com/oauth"
+            "description": "The OAuth redirect URI registered on the provider side."
           },
           "cspDomain": {
+            "examples": [
+              "https://provider.example.com"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The domain to add to the portal's Content Security Policy whitelist.",
-            "example": "https://provider.example.com"
+            "description": "The domain to add to the portal's Content Security Policy whitelist."
           }
         },
         "additionalProperties": false,
@@ -1857,6 +1987,9 @@
       "RecaptchaType": {
         "oneOf": [
           {
+            "examples": [
+              "Default"
+            ],
             "enum": [
               "Default",
               "AndroidV2",
@@ -1864,10 +1997,12 @@
               "hCaptcha"
             ],
             "type": "string",
-            "description": "[Default - Default, AndroidV2 - AndroidV2, iOSV2 - iOSV2, hCaptcha - hCaptcha]",
-            "example": "Default"
+            "description": "[Default - Default, AndroidV2 - AndroidV2, iOSV2 - iOSV2, hCaptcha - hCaptcha]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -1876,7 +2011,6 @@
             ],
             "type": "integer",
             "description": "[0 - Default, 1 - AndroidV2, 2 - iOSV2, 3 - hCaptcha]",
-            "example": 0,
             "x-enum-varnames": [
               "Default",
               "AndroidV2",
@@ -1892,41 +2026,49 @@
         "type": "object",
         "properties": {
           "portalName": {
+            "examples": [
+              "myportal"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The portal name.",
-            "example": "myportal"
+            "description": "The portal name."
           },
           "tenantId": {
+            "examples": [
+              1
+            ],
             "type": [
               "null",
               "integer"
             ],
             "description": "The tenant ID.",
-            "format": "int32",
-            "example": 1
+            "format": "int32"
           },
           "key": {
+            "examples": [
+              "SmtpSettings"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The settings parameter key.",
-            "example": "SmtpSettings"
+            "description": "The settings parameter key."
           },
           "value": {
+            "examples": [
+              "sample value"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The settings parameter value.",
-            "example": "sample value"
+            "description": "The settings parameter value."
           }
         },
         "additionalProperties": false,
@@ -1936,61 +2078,76 @@
         "type": "object",
         "properties": {
           "portalName": {
+            "examples": [
+              "myportal"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The portal name.",
-            "example": "myportal"
+            "description": "The portal name."
           },
           "tenantId": {
+            "examples": [
+              1
+            ],
             "type": [
               "null",
               "integer"
             ],
             "description": "The tenant ID.",
-            "format": "int32",
-            "example": 1
+            "format": "int32"
           },
           "affiliateId": {
+            "examples": [
+              "af123456"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The affiliate ID.",
-            "example": "af123456"
+            "description": "The affiliate ID."
           },
           "partnerId": {
+            "examples": [
+              "partner123"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The partner ID.",
-            "example": "partner123"
+            "description": "The partner ID."
           },
           "campaign": {
+            "examples": [
+              "personal"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The portal campaign.",
-            "example": "personal"
+            "description": "The portal campaign."
           },
           "firstName": {
+            "examples": [
+              "John"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The first name of the portal owner.",
-            "example": "John"
+            "description": "The first name of the portal owner."
           },
           "email": {
+            "examples": [
+              "john.doe@example.com"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
@@ -1998,176 +2155,215 @@
               "string"
             ],
             "description": "The email address of the portal owner.",
-            "format": "email",
-            "example": "john.doe@example.com"
+            "format": "email"
           },
           "industry": {
+            "examples": [
+              0
+            ],
             "type": "integer",
             "description": "The tenant industry.",
-            "format": "int32",
-            "example": 0
+            "format": "int32"
           },
           "language": {
+            "examples": [
+              "en-US"
+            ],
             "maxLength": 7,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The portal language.",
-            "example": "en-US"
+            "description": "The portal language."
           },
           "lastName": {
+            "examples": [
+              "Doe"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The last name of the portal owner.",
-            "example": "Doe"
+            "description": "The last name of the portal owner."
           },
           "module": {
+            "examples": [
+              "files"
+            ],
             "maxLength": 38,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The name for the storage module to be configured.",
-            "example": "files"
+            "description": "The name for the storage module to be configured."
           },
           "password": {
+            "examples": [
+              "yourPassword1!"
+            ],
             "maxLength": 30,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The password of the portal owner.",
-            "example": "yourPassword1!"
+            "description": "The password of the portal owner."
           },
           "passwordHash": {
+            "examples": [
+              "VGhpcyBpcyBhIHRlc3Q="
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The password hash.",
-            "example": "VGhpcyBpcyBhIHRlc3Q="
+            "description": "The password hash."
           },
           "phone": {
+            "examples": [
+              "+15551234567"
+            ],
             "maxLength": 32,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The phone numberr of the portal owner.",
-            "example": "+15551234567"
+            "description": "The phone numberr of the portal owner."
           },
           "recaptchaResponse": {
+            "examples": [
+              "03AGdBq24rvY..."
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The user's response to the CAPTCHA challenge.",
-            "example": "03AGdBq24rvY..."
+            "description": "The user's response to the CAPTCHA challenge."
           },
           "recaptchaType": {
             "description": "The type of CAPTCHA validation used.",
             "$ref": "#/components/schemas/RecaptchaType"
           },
           "region": {
+            "examples": [
+              "us-east"
+            ],
             "maxLength": 20,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The portal region.",
-            "example": "us-east"
+            "description": "The portal region."
           },
           "awsRegion": {
+            "examples": [
+              "us-east-1"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The portal AWS region.",
-            "example": "us-east-1"
+            "description": "The portal AWS region."
           },
           "status": {
             "description": "The tenant status.",
             "$ref": "#/components/schemas/TenantStatus"
           },
           "skipWelcome": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies whether to send the welcome email to the user or not.",
-            "example": false
+            "description": "Specifies whether to send the welcome email to the user or not."
           },
           "timeZoneName": {
+            "examples": [
+              "UTC"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The portal time zone name.",
-            "example": "UTC"
+            "description": "The portal time zone name."
           },
           "spam": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Specifies if the ONLYOFFICE newsletter is allowed or not.",
-            "example": true
+            "description": "Specifies if the ONLYOFFICE newsletter is allowed or not."
           },
           "calls": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Specifies if the calls are available for the current tenant or not.",
-            "example": true
+            "description": "Specifies if the calls are available for the current tenant or not."
           },
           "appKey": {
+            "examples": [
+              "app-key-123"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The application key.",
-            "example": "app-key-123"
+            "description": "The application key."
           },
           "limitedAccessSpace": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies whether the access to the space management is limited or not.",
-            "example": false
+            "description": "Specifies whether the access to the space management is limited or not."
           },
           "thirdPartyProfile": {
+            "examples": [
+              "{\"id\":\"12345\",\"provider\":\"google\"}"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The serialized third party profile.",
-            "example": "{\"id\":\"12345\",\"provider\":\"google\"}"
+            "description": "The serialized third party profile."
           },
           "provider": {
+            "examples": [
+              "google"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The type of authentication provider (e.g., internal, Google, Azure).",
-            "example": "google"
+            "description": "The type of authentication provider (e.g., internal, Google, Azure)."
           },
           "accessToken": {
+            "examples": [
+              "ya29.a0AfH6SMBx..."
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The access token used for authentication with external providers.",
-            "example": "ya29.a0AfH6SMBx..."
+            "description": "The access token used for authentication with external providers."
           },
           "codeOAuth": {
+            "examples": [
+              "4/0AY0e-g7..."
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The authorization code used for obtaining OAuth tokens.",
-            "example": "4/0AY0e-g7..."
+            "description": "The authorization code used for obtaining OAuth tokens."
           }
         },
         "additionalProperties": false,
@@ -2176,6 +2372,9 @@
       "TenantStatus": {
         "oneOf": [
           {
+            "examples": [
+              "Active"
+            ],
             "enum": [
               "Active",
               "Suspended",
@@ -2186,10 +2385,12 @@
               "Encryption"
             ],
             "type": "string",
-            "description": "[Active - Active, Suspended - Suspended, RemovePending - Remove pending, Transfering - Transfering, Restoring - Restoring, Migrating - Migrating, Encryption - Encryption]",
-            "example": "Active"
+            "description": "[Active - Active, Suspended - Suspended, RemovePending - Remove pending, Transfering - Transfering, Restoring - Restoring, Migrating - Migrating, Encryption - Encryption]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -2201,7 +2402,6 @@
             ],
             "type": "integer",
             "description": "[0 - Active, 1 - Suspended, 2 - Remove pending, 3 - Transfering, 4 - Restoring, 5 - Migrating, 6 - Encryption]",
-            "example": 0,
             "x-enum-varnames": [
               "Active",
               "Suspended",
