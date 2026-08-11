@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Files.Core.Core.Thirdparty;
@@ -70,7 +70,9 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 DateColumns = new Dictionary<string, bool> {{"create_on", false}}
             },
             new("files_thirdparty_id_mapping", "tenant_id"),
-            new("files_room_settings", "tenant_id")
+            new("files_room_settings", "tenant_id"),
+            new("files_group", "tenant_id", "id") { UserIDColumns = ["user_id"] },
+            new("files_roomgroup", "tenant_id", "id")
     ];
 
     private readonly RelationInfo[] _tableRelations =
@@ -102,8 +104,74 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 x => !_regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
 
             new("files_thirdparty_account", "id", "files_thirdparty_id_mapping", "id"),
-            new("files_thirdparty_account", "id", "files_thirdparty_id_mapping", "hash_id")
+            new("files_thirdparty_account", "id", "files_thirdparty_id_mapping", "hash_id"),
+
+            new("files_group", "id", "files_roomgroup", "group_id"),
+
+            // A room-group link points at either an internal folder or a third-party room, never both,
+            // so each id column gets its own relation guarded by the column that is actually filled in.
+            new("files_folder", "id", "files_roomgroup", "internal_room_id", HasInternalRoom),
+
+            // thirdparty_room_id holds the same shape as files_thirdparty_id_mapping.id and
+            // files_thirdparty_account.folder_id — "{selector}-{providerId}" — and neither of those has a
+            // ColumnMapper entry of its own. The only thing that can be remapped is the provider id
+            // embedded in the string, so the account is the parent here.
+            new("files_thirdparty_account", "id", "files_roomgroup", "thirdparty_room_id", HasThirdPartyRoom)
     ];
+
+    private static readonly Regex _regexThirdPartyProviderId = new(
+        "(?<=(?:" + string.Join("-|", Selectors.All.Select(s => s.Id)) + "-))\\d+", RegexOptions.Compiled);
+
+    private static bool HasInternalRoom(DataRowInfo row)
+    {
+        // A third-party link leaves this column NULL, which arrives as DBNull or as an empty string
+        // depending on how the archive was written.
+        var value = Convert.ToString(row["internal_room_id"]);
+
+        return !string.IsNullOrEmpty(value) && value != "0";
+    }
+
+    private static bool HasThirdPartyRoom(DataRowInfo row)
+    {
+        return !string.IsNullOrEmpty(Convert.ToString(row["thirdparty_room_id"]));
+    }
+
+    /// <summary>
+    /// Rewrites the provider id embedded in a third-party room id, the same way the
+    /// <c>files_thirdparty_id_mapping</c> rows and <c>files_thirdparty_account.folder_id</c> are rewritten.
+    /// </summary>
+    private static bool TryRemapThirdPartyRoomId(ColumnMapper columnMapper, ref object value)
+    {
+        var strValue = Convert.ToString(value);
+        if (string.IsNullOrEmpty(strValue))
+        {
+            return true;
+        }
+
+        var remapped = false;
+
+        var result = _regexThirdPartyProviderId.Replace(strValue, match =>
+        {
+            var providerId = columnMapper.GetMapping("files_thirdparty_account", "id", match.Value);
+            if (providerId == null)
+            {
+                return match.Value;
+            }
+
+            remapped = true;
+
+            return Convert.ToString(providerId);
+        });
+
+        if (!remapped)
+        {
+            return false;
+        }
+
+        value = result;
+
+        return true;
+    }
 
     public override bool TryAdjustFilePath(bool dump, ColumnMapper columnMapper, ref string filePath)
     {
@@ -283,6 +351,11 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {
+        if (relation.ChildTable == "files_roomgroup" && relation.ChildColumn == "thirdparty_room_id")
+        {
+            return TryRemapThirdPartyRoomId(columnMapper, ref value);
+        }
+
         if (relation.ChildTable == "files_bunch_objects" && relation.ChildColumn == "right_node")
         {
             var strValue = Convert.ToString(value);

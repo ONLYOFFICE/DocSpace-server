@@ -154,6 +154,117 @@ public class FilesModuleSpecificsTests
         Convert.ToInt32(preparedRow["internal_entry_id"]).Should().Be(0);
     }
 
+    [Fact]
+    public async Task TryPrepareRow_FilesGroup_RemapsTenantAndOwner()
+    {
+        // Arrange — a room group belongs to the user who created it
+        var specifics = CreateSpecifics();
+        var table = DeclaredTable(specifics, "files_group");
+
+        var row = new DataRowInfo("files_group");
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("name", "My rooms");
+        row.SetValue("icon", "folder");
+        row.SetValue("user_id", _oldOwner);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), table, row);
+
+        // Assert — the id column is left to the autoincrement, so only tenant and owner are rewritten
+        prepared.Should().BeTrue();
+        preparedRow.Should().NotBeNull();
+        Convert.ToInt32(preparedRow!["tenant_id"]).Should().Be(NewTenantId);
+        preparedRow["user_id"].Should().Be(_newOwner);
+        preparedRow.Should().NotContainKey("id");
+    }
+
+    [Fact]
+    public async Task TryPrepareRow_FilesRoomGroup_InternalRoom_RemapsGroupAndRoom()
+    {
+        // Arrange — a link between a room group and an internal room
+        const int oldGroupId = 11;
+        const int newGroupId = 42;
+
+        var specifics = CreateSpecifics();
+        var columnMapper = CreateColumnMapper();
+        columnMapper.SetMapping("files_group", "id", oldGroupId, newGroupId);
+        columnMapper.Commit();
+
+        var row = CreateRoomGroupRow(oldGroupId, internalRoomId: OldFolderId, thirdPartyRoomId: null);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(columnMapper, DeclaredTable(specifics, "files_roomgroup"), row);
+
+        // Assert — both the group and the room must follow their new ids
+        prepared.Should().BeTrue();
+        preparedRow.Should().NotBeNull();
+        Convert.ToInt32(preparedRow!["group_id"]).Should().Be(newGroupId);
+        Convert.ToInt32(preparedRow["internal_room_id"]).Should().Be(NewFolderId);
+    }
+
+    /// <summary>
+    /// The internal id of a third-party link is unset, and the archive can present that as a missing
+    /// value, an empty string or <see cref="DBNull"/> — all three must be treated the same.
+    /// </summary>
+    public static TheoryData<object?> UnsetInternalRoomIds => [null, "", DBNull.Value];
+
+    [Theory]
+    [MemberData(nameof(UnsetInternalRoomIds))]
+    public async Task TryPrepareRow_FilesRoomGroup_ThirdPartyRoom_RemapsProviderId(object? unsetInternalRoomId)
+    {
+        // Arrange — a third-party room is addressed as "{selector}-{providerId}", the shape stored by
+        // RoomGroupDao and seen in a real archive as "drive-1"
+        const int oldGroupId = 11;
+        const int newGroupId = 42;
+        const int oldProviderId = 1;
+        const int newProviderId = 9;
+
+        var specifics = CreateSpecifics();
+        var columnMapper = CreateColumnMapper();
+        columnMapper.SetMapping("files_group", "id", oldGroupId, newGroupId);
+        columnMapper.SetMapping("files_thirdparty_account", "id", oldProviderId, newProviderId);
+        columnMapper.Commit();
+
+        var row = new DataRowInfo("files_roomgroup");
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("group_id", oldGroupId);
+        row.SetValue("internal_room_id", unsetInternalRoomId);
+        row.SetValue("thirdparty_room_id", $"drive-{oldProviderId}");
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(columnMapper, DeclaredTable(specifics, "files_roomgroup"), row);
+
+        // Assert — the provider id inside the string follows the restored account
+        prepared.Should().BeTrue();
+        preparedRow.Should().NotBeNull();
+        Convert.ToInt32(preparedRow!["group_id"]).Should().Be(newGroupId);
+        preparedRow["thirdparty_room_id"].Should().Be($"drive-{newProviderId}");
+    }
+
+    /// <summary>
+    /// Takes the table definition from the module instead of restating it, so these tests also fail when
+    /// the declaration itself is missing rather than only when the id relations are.
+    /// </summary>
+    private static TableInfo DeclaredTable(TestableFilesModuleSpecifics specifics, string name)
+    {
+        var table = specifics.Tables.SingleOrDefault(t => t.Name == name);
+
+        table.Should().NotBeNull($"{name} has to be declared in FilesModuleSpecifics to be backed up at all");
+
+        return table!;
+    }
+
+    private static DataRowInfo CreateRoomGroupRow(int groupId, int? internalRoomId, string? thirdPartyRoomId)
+    {
+        var row = new DataRowInfo("files_roomgroup");
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("group_id", groupId);
+        row.SetValue("internal_room_id", internalRoomId);
+        row.SetValue("thirdparty_room_id", thirdPartyRoomId);
+
+        return row;
+    }
+
     /// <summary>
     /// Exposes the protected row-preparation hook. The restore path never touches the connection for
     /// <c>files_security</c> columns, so it is safe to leave it unset here.

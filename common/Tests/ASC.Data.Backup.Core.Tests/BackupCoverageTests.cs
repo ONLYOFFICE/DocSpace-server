@@ -86,8 +86,6 @@ public class BackupCoverageTests
     /// </summary>
     private static readonly Dictionary<string, string> _knownGaps = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["files_group"] = "T1 — room groups",
-        ["files_roomgroup"] = "T1 — room groups",
         ["files_order"] = "T2 — manual ordering",
         ["files_properties"] = "T2 — file properties",
         ["files_form_role_mapping"] = "T3 — form filling roles",
