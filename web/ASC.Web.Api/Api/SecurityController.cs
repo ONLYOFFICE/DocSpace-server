@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -33,6 +33,9 @@
 
 using ASC.Api.Core.Cors.Enums;
 using ASC.Core.Common.Identity;
+using ASC.Files.Core.ApiModels.ResponseDto;
+using ASC.Files.Core.IntegrationEvents.Events;
+using ASC.Files.Core.Services.DocumentBuilderService;
 
 using Microsoft.AspNetCore.Cors;
 
@@ -50,14 +53,17 @@ public class SecurityController(
         MessageService messageService,
         LoginEventsRepository loginEventsRepository,
         AuditEventsRepository auditEventsRepository,
-        CsvFileHelper csvFileHelper,
-        CsvFileUploader csvFileUploader,
         SettingsManager settingsManager,
         AuditActionMapper auditActionMapper,
         CoreBaseSettings coreBaseSettings,
         CspSettingsHelper cspSettingsHelper,
         ApiDateTimeHelper apiDateTimeHelper,
-        IdentityClient identityClient)
+        IdentityClient identityClient,
+        SecurityContext securityContext,
+        CommonLinkUtility commonLinkUtility,
+        IEventBus eventBus,
+        DocumentBuilderTaskManager<AuditReportTask, int, AuditReportTaskData> documentBuilderTaskManager,
+        IServiceProvider serviceProvider)
     : ControllerBase
 {
     /// <remarks>
@@ -230,18 +236,18 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Generates the login history report.
+    /// Starts generating the login history report (XLSX by default, or CSV) and saves it to "My documents".
     /// </remarks>
     /// <summary>
-    /// Generate the login history report
+    /// Start the login history report generation
     /// </summary>
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
-    [SwaggerResponse(200, "URL to the xlsx report file", typeof(string))]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("audit/login/report")]
-    public async Task<string> CreateLoginHistoryReport()
+    public async Task<DocumentBuilderTaskDto> CreateLoginHistoryReport(AuditReportRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -252,50 +258,157 @@ public class SecurityController(
         var to = DateTime.UtcNow;
         var from = to.Subtract(TimeSpan.FromDays(settings.LoginHistoryLifeTime));
 
-        var reportName = string.Format(AuditReportResource.LoginHistoryReportName + ".csv", from.ToShortDateString(), to.ToShortDateString());
-        var events = await loginEventsRepository.GetByFilterAsync(fromDate: from, to: to);
-
-        await using var stream = csvFileHelper.CreateFile(events, new BaseEventMap<LoginEvent>());
-        var result = await csvFileUploader.UploadFile(stream, reportName);
-
-        messageService.Send(MessageAction.LoginHistoryReportDownloaded);
-        return result;
+        return await StartAuditReportAsync(AuditReportKind.LoginHistory, (inDto ?? new AuditReportRequestDto()).Format, from, to);
     }
 
     /// <remarks>
-    /// Generates the audit trail report.
+    /// Returns the status of generating the login history report.
     /// </remarks>
     /// <summary>
-    /// Generate the audit trail report
+    /// Get the login history report generation status
     /// </summary>
-    /// <path>api/2.0/security/audit/events/report</path>
-    [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "URL to the xlsx report file", typeof(string))]
+    /// <path>api/2.0/security/audit/login/report</path>
+    [Tags("Security / Login history")]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpPost("audit/events/report")]
-    public async Task<string> CreateAuditTrailReport()
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("audit/login/report")]
+    public async Task<DocumentBuilderTaskDto> GetLoginHistoryReport()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandAuditPermissionAsync();
 
-        var tenantId = tenantManager.GetCurrentTenantId();
+        return await GetAuditReportStatusAsync(AuditReportKind.LoginHistory);
+    }
 
-        var settings = await settingsManager.LoadAsync<TenantAuditSettings>(tenantId);
+    /// <remarks>
+    /// Terminates generating the login history report.
+    /// </remarks>
+    /// <summary>
+    /// Terminate the login history report generation
+    /// </summary>
+    /// <path>api/2.0/security/audit/login/report</path>
+    [Tags("Security / Login history")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpDelete("audit/login/report")]
+    public async Task TerminateLoginHistoryReport()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        await DemandAuditPermissionAsync();
+
+        await TerminateAuditReportAsync(AuditReportKind.LoginHistory);
+    }
+
+    /// <remarks>
+    /// Starts generating the audit trail report (XLSX by default, or CSV) and saves it to "My documents".
+    /// </remarks>
+    /// <summary>
+    /// Start the audit trail report generation
+    /// </summary>
+    /// <path>api/2.0/security/audit/events/report</path>
+    [Tags("Security / Audit trail data")]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [HttpPost("audit/events/report")]
+    public async Task<DocumentBuilderTaskDto> CreateAuditTrailReport(AuditReportRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        await DemandAuditPermissionAsync();
+
+        var settings = await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId());
 
         var to = DateTime.UtcNow;
         var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
 
-        var reportName = string.Format(AuditReportResource.AuditTrailReportName + ".csv", from.ToShortDateString(), to.ToShortDateString());
+        return await StartAuditReportAsync(AuditReportKind.AuditTrail, (inDto ?? new AuditReportRequestDto()).Format, from, to);
+    }
 
-        var events = await auditEventsRepository.GetByFilterAsync(from: from, to: to);
+    /// <remarks>
+    /// Returns the status of generating the audit trail report.
+    /// </remarks>
+    /// <summary>
+    /// Get the audit trail report generation status
+    /// </summary>
+    /// <path>api/2.0/security/audit/events/report</path>
+    [Tags("Security / Audit trail data")]
+    [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("audit/events/report")]
+    public async Task<DocumentBuilderTaskDto> GetAuditTrailReport()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await using var stream = csvFileHelper.CreateFile(events, new BaseEventMap<AuditEvent>());
-        var result = await csvFileUploader.UploadFile(stream, reportName);
+        await DemandAuditPermissionAsync();
 
-        messageService.Send(MessageAction.AuditTrailReportDownloaded);
-        return result;
+        return await GetAuditReportStatusAsync(AuditReportKind.AuditTrail);
+    }
+
+    /// <remarks>
+    /// Terminates generating the audit trail report.
+    /// </remarks>
+    /// <summary>
+    /// Terminate the audit trail report generation
+    /// </summary>
+    /// <path>api/2.0/security/audit/events/report</path>
+    [Tags("Security / Audit trail data")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpDelete("audit/events/report")]
+    public async Task TerminateAuditTrailReport()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        await DemandAuditPermissionAsync();
+
+        await TerminateAuditReportAsync(AuditReportKind.AuditTrail);
+    }
+
+    private async Task<DocumentBuilderTaskDto> StartAuditReportAsync(AuditReportKind kind, AuditReportFormat format, DateTime from, DateTime to)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = securityContext.CurrentAccount.ID;
+
+        var task = serviceProvider.GetRequiredService<AuditReportTask>();
+
+        var baseUri = commonLinkUtility.ServerRootPath;
+
+        task.Init(baseUri, tenantId, userId, null, DocumentBuilderTaskManager.GetTaskId(tenantId, userId, AuditReportTask.GetTaskDiscriminator(kind)));
+
+        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
+
+        var headers = MessageSettings.GetHttpHeaders(Request)?
+            .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
+
+        var evt = new AuditReportIntegrationEvent(userId, tenantId, baseUri, kind, format, from, to, headers);
+
+        await eventBus.PublishAsync(evt);
+
+        return DocumentBuilderTaskDto.Get(taskProgress);
+    }
+
+    private async Task<DocumentBuilderTaskDto> GetAuditReportStatusAsync(AuditReportKind kind)
+    {
+        var task = await documentBuilderTaskManager.GetTask(tenantManager.GetCurrentTenantId(), securityContext.CurrentAccount.ID, AuditReportTask.GetTaskDiscriminator(kind));
+
+        return DocumentBuilderTaskDto.Get(task);
+    }
+
+    private async Task TerminateAuditReportAsync(AuditReportKind kind)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = securityContext.CurrentAccount.ID;
+
+        var evt = new AuditReportIntegrationEvent(userId, tenantId, null, kind, AuditReportFormat.Xlsx, default, default, terminate: true);
+
+        await eventBus.PublishAsync(evt);
     }
 
     /// <remarks>

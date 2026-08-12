@@ -131,7 +131,6 @@ global using Medallion.Threading.Redis;
 global using Medallion.Threading.ZooKeeper;
 
 global using Microsoft.AspNetCore.Authentication;
-global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;
@@ -146,6 +145,7 @@ global using Microsoft.AspNetCore.Mvc.Authorization;
 global using Microsoft.AspNetCore.Mvc.Controllers;
 global using Microsoft.AspNetCore.Mvc.Filters;
 global using Microsoft.AspNetCore.Mvc.Routing;
+global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.AspNetCore.Routing;
 global using Microsoft.AspNetCore.Routing.Constraints;
 global using Microsoft.AspNetCore.Routing.Patterns;
@@ -159,12 +159,10 @@ global using Microsoft.Extensions.Diagnostics.HealthChecks;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
-global using Microsoft.OpenApi;
-
-global using Swashbuckle.AspNetCore.SwaggerGen;
 global using Microsoft.Extensions.Primitives;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.Net.Http.Headers;
+global using Microsoft.OpenApi;
 
 global using NLog;
 global using NLog.AWS.Logger;
@@ -178,4 +176,9 @@ global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
 global using StackExchange.Redis.Extensions.Core.Configuration;
 
+global using Swashbuckle.AspNetCore.SwaggerGen;
+
+global using ZiggyCreatures.Caching.Fusion;
+
+global using ILogger = Microsoft.Extensions.Logging.ILogger;
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;

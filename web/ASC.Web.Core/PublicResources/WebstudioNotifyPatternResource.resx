@@ -1048,6 +1048,17 @@ $OrangeButton
 
 *Note*: this link is valid for 48 hours only. Please complete the operation within that period.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Hello, $UserName!
+
+We’re reaching out to let you know that your DocSpace Wallet balance is running low.
+
+We kindly ask you to top up your wallet balance to avoid any interruption of paid services.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Dear $UserName,
 
@@ -2532,6 +2543,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Invitation to join ${__VirtualRootHost} portal</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Action required: Your ${LetterLogoText} DocSpace Wallet balance is running low</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Mailbox creation</value>

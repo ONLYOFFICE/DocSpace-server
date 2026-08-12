@@ -35,131 +35,35 @@ namespace ASC.AI.Tests.Data;
 
 public static class Initializer
 {
-    public static readonly User Owner = new("test@example.com", "11111111")
-    {
-        Id = Guid.Parse("66faa6e4-f133-11ea-b126-00ffeec8b4ef")
-    };
+    public const string OwnerEmail = "test@example.com";
+    public const string OwnerPassword = "11111111";
 
-    private static bool _initialized;
     private static PasswordHasherSettings _passwordHasherSettings = null!;
-    private static AspireAppFixture _fixture = null!;
 
-    private static readonly SemaphoreSlim _initLock = new(1, 1);
+    // Maps each per-test HttpClient to the WebApi client of the portal it belongs to, so the
+    // HttpClient.Authenticate(user) extension can sign in without any shared/ambient state. Entries
+    // are weakly held and removed when a test disposes its PortalClients.
+    private static readonly ConditionalWeakTable<HttpClient, AiApiClient> _authApis = new();
 
-    private static readonly Faker _faker = new("en");
+    public static readonly Faker Faker = new("en");
 
-    public static async Task InitializeAsync(AspireAppFixture fixture)
+    /// <summary>
+    /// Stores the (machine-key-derived, portal-independent) password-hash settings used to compute
+    /// client-side password hashes. Called once by the fixture before any test runs.
+    /// </summary>
+    internal static void InitializePasswordHasher(PasswordHasherSettings settings)
     {
-        _fixture = fixture;
-
-        await _initLock.WaitAsync();
-        try
-        {
-            if (_initialized)
-            {
-                return;
-            }
-
-            var settings = await GetPortalSettingsAsync(TestContext.Current.CancellationToken);
-
-            if (!string.IsNullOrEmpty(settings.WizardToken))
-            {
-                _passwordHasherSettings = settings.PasswordHash!;
-
-                fixture.WebApiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", settings.WizardToken);
-
-                using var wizardResponse = await fixture.WebApi.PutAsync(
-                    "/api/2.0/settings/wizard/complete",
-                    new
-                    {
-                        email = Owner.Email,
-                        passwordHash = GetClientPassword(Owner.Password)
-                    },
-                    TestContext.Current.CancellationToken);
-
-                fixture.WebApiHttpClient.DefaultRequestHeaders.Remove("confirm");
-
-                wizardResponse.EnsureSuccessStatusCode();
-            }
-            else if (_passwordHasherSettings is null)
-            {
-                _passwordHasherSettings = settings.PasswordHash!;
-            }
-
-            await fixture.AiHttpClient.Authenticate(Owner);
-
-            await fixture.FilesHttpClient.Authenticate(Owner);
-            using (var rootFoldersResponse = await fixture.FilesApi.GetAsync(
-                "/api/2.0/files/@root",
-                TestContext.Current.CancellationToken))
-            {
-                rootFoldersResponse.EnsureSuccessStatusCode();
-            }
-
-            await fixture.BackupTables();
-
-            _initialized = true;
-        }
-        finally
-        {
-            _initLock.Release();
-        }
+        _passwordHasherSettings = settings;
     }
 
-    public static async Task<User> InviteContactAsync(EmployeeType employeeType, CancellationToken cancellationToken)
+    internal static void RegisterAuthApi(HttpClient client, AiApiClient webApi)
     {
-        await _fixture.WebApiHttpClient.Authenticate(Owner);
+        _authApis.AddOrUpdate(client, webApi);
+    }
 
-        using var shortLinkResponse = await _fixture.WebApi.GetAsync(
-            $"/api/2.0/portal/users/invite/{employeeType}",
-            cancellationToken);
-        var shortLink = await _fixture.WebApi.ReadAsync<string>(shortLinkResponse, cancellationToken);
-
-        using var fullLinkResponse = await _fixture.WebApiHttpClient.GetAsync(shortLink, cancellationToken);
-        var confirmHeader = fullLinkResponse.RequestMessage?.RequestUri?.Query.TrimStart('?');
-        if (string.IsNullOrEmpty(confirmHeader))
-        {
-            throw new HttpRequestException($"Unable to get confirmation link for {employeeType}");
-        }
-
-        var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
-        if (!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
-        {
-            parsedEmployeeType = EmployeeType.Guest;
-        }
-
-        var email = _faker.Person.Email;
-        var firstName = _faker.Person.FirstName;
-        var lastName = _faker.Person.LastName;
-        var password = _faker.Internet.Password(10, false);
-
-        await _fixture.PeopleHttpClient.Authenticate(Owner);
-        _fixture.PeopleHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
-
-        using var createResponse = await _fixture.PeopleApi.PostAsync(
-            "/api/2.0/people",
-            new
-            {
-                fromInviteLink = true,
-                cultureName = "en-US",
-                spam = false,
-                email,
-                password,
-                firstName,
-                lastName,
-                type = (int)parsedEmployeeType,
-                key = parsedQuery["key"] ?? string.Empty
-            },
-            cancellationToken);
-
-        _fixture.PeopleHttpClient.DefaultRequestHeaders.Remove("confirm");
-
-        var created = await _fixture.PeopleApi.ReadAsync<CreatedUserDto>(createResponse, cancellationToken);
-
-        return new User(email, password)
-        {
-            Id = created.Id
-        };
+    internal static void UnregisterAuthApi(HttpClient client)
+    {
+        _authApis.Remove(client);
     }
 
     public static async ValueTask Authenticate(this HttpClient client, User? user)
@@ -170,9 +74,21 @@ public static class Initializer
             return;
         }
 
-        user.PasswordHash ??= GetClientPassword(user.Password);
+        if (!_authApis.TryGetValue(client, out var webApi))
+        {
+            throw new InvalidOperationException(
+                "The HttpClient is not associated with a portal. Create clients via AspireAppFixture.CreatePortalAsync.");
+        }
 
-        using var response = await _fixture.WebApi.PostAsync(
+        if (user.PasswordHash is null)
+        {
+            var hashSw = Stopwatch.StartNew();
+            user.PasswordHash = GetClientPassword(user.Password);
+            Timing.Write($"hash({user.Email})", hashSw.ElapsedMilliseconds);
+        }
+
+        var authSw = Stopwatch.StartNew();
+        using var response = await webApi.PostAsync(
             "/api/2.0/authentication",
             new
             {
@@ -181,20 +97,13 @@ public static class Initializer
             },
             TestContext.Current.CancellationToken);
 
-        var token = await _fixture.WebApi.ReadAsync<AuthTokenResponse>(response, TestContext.Current.CancellationToken);
+        var token = await webApi.ReadAsync<AuthTokenResponse>(response, TestContext.Current.CancellationToken);
+        Timing.Write($"auth({user.Email})", authSw.ElapsedMilliseconds);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
     }
 
-    private static async Task<WizardSettingsResponse> GetPortalSettingsAsync(CancellationToken cancellationToken)
-    {
-        using var response = await _fixture.WebApi.GetAsync(
-            "/api/2.0/settings?withPassword=true",
-            cancellationToken);
-        return await _fixture.WebApi.ReadAsync<WizardSettingsResponse>(response, cancellationToken);
-    }
-
-    private static string GetClientPassword(string password)
+    public static string GetClientPassword(string password)
     {
         if (string.IsNullOrWhiteSpace(password))
         {
@@ -211,10 +120,5 @@ public static class Initializer
             _passwordHasherSettings.Size / 8);
 
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
-    }
-
-    private class CreatedUserDto
-    {
-        public Guid Id { get; init; }
     }
 }

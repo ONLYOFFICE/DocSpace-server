@@ -47,4 +47,9 @@ public class RateLimiterSettings
     public int PaymentsApiWindowMinutes { get; init; } = 1;
 
     public int? MaxEmailInvitationsPerDay { get; init; }
+
+    public List<string> KnownNetworks { get; init; } = [];
+    public List<string> KnownIPAddresses { get; init; } = [];
+    public string KnownIPAddressesUrl { get; init; }
+    public int KnownIPAddressesRefreshMinutes { get; init; } = 15;
 }

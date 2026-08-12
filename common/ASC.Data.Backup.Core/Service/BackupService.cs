@@ -55,7 +55,8 @@ public class BackupService(
         PermissionContext permissionContext,
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
-        StorageFactory storageFactory)
+        StorageFactory storageFactory,
+        MessageService messageService)
 {
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
@@ -581,6 +582,24 @@ public class BackupService(
     {
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.Backup);
+    }
+
+    public async Task EnsureBackupServiceEnabledAsync(int tenantId)
+    {
+        const TenantWalletService service = TenantWalletService.Backup;
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+        var enabledServices = settings.EnabledServices ?? [];
+
+        if (enabledServices.Contains(service))
+        {
+            return;
+        }
+
+        enabledServices.Add(service);
+        settings.EnabledServices = enabledServices;
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, service.ToStringFast());
     }
 
     private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)

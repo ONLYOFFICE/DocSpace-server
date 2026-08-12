@@ -533,6 +533,11 @@ public class PortalController(
 
         foreach (var quota in source.Quotas)
         {
+            if (quota.State == QuotaState.Overdue)
+            {
+                continue;
+            }
+
             // when a switch to a different quota is scheduled, the upcoming payment is for that quota, not the current one
             var quotaId = quota.NextQuota ?? quota.Id;
 

@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
 public class AssignmentsUpsertTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -44,7 +43,7 @@ public class AssignmentsUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
         var chatProfile = await CreateProfileAsync();
         var codeProfile = await CreateProfileAsync();
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             AssignmentsPath,
             new
             {
@@ -71,7 +70,7 @@ public class AssignmentsUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
         var newCode = await CreateProfileAsync();
         await CreateAssignmentAsync("Chat", initialChat.Id);
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             AssignmentsPath,
             new
             {
@@ -98,7 +97,7 @@ public class AssignmentsUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
 
         await CreateAssignmentAsync("Chat", globalProfile.Id);
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             AssignmentsPath,
             new
             {
@@ -118,7 +117,7 @@ public class AssignmentsUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
     [Fact]
     public async Task UpsertMany_EmptyDict_NoOp()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             AssignmentsPath,
             new { assignments = new Dictionary<string, Guid>() },
             TestContext.Current.CancellationToken);
@@ -132,7 +131,7 @@ public class AssignmentsUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var profile = await CreateProfileAsync();
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             AssignmentsPath,
             new
             {

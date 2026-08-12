@@ -45,7 +45,10 @@ public class PaymentHelper(
     QuotaSocketManager quotaSocketManager,
     AiGateway aiGateway,
     DocsCloudClient docsCloudClient,
-    WalletStaticProvider walletStaticProvider)
+    WalletStaticProvider walletStaticProvider,
+    CoreSettings coreSettings,
+    ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> maxTotalSizeStatistic,
+    TenantWalletSettingsConfig walletSettingsConfig)
 {
     public void DemandConfigured()
     {
@@ -122,7 +125,7 @@ public class PaymentHelper(
     /// Ensures that the tariff service is configured, the current user has administrator rights and the customer exists.
     /// </summary>
     /// <returns>The tenant ID of the validated customer.</returns>
-    public async Task<int> EnsureCustomerAndAdminRightsAsync()
+    public async Task<int> EnsureCustomerAndAdminRightsAsync(bool refresh = false)
     {
         DemandConfigured();
 
@@ -130,7 +133,7 @@ public class PaymentHelper(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        await GetCustomerInfoRequiredAsync(tenantId);
+        await GetCustomerInfoRequiredAsync(tenantId, refresh);
 
         return tenantId;
     }
@@ -224,9 +227,54 @@ public class PaymentHelper(
         return correctedList;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName)
+    /// <summary>
+    /// Returns all the active wallet services (quotas) of the current tenant: the active additional quotas
+    /// from the tariff (e.g. disk-storage, docscloud), plus the services enabled manually via the wallet
+    /// service settings (e.g. backup, ai-tools, ai-search).
+    /// </summary>
+    public async Task<List<ActiveServiceDto>> GetActiveServicesAsync(int tenantId)
     {
-        var result = await tariffService.PaymentChangeAsync(tenantId, quantity, productQuantityType, currency, checkQuota, customerParticipantName);
+        var tariff = await tariffService.GetTariffAsync(tenantId);
+        var quotaDefinitions = (await quotaService.GetTenantQuotasAsync()).ToDictionary(q => q.TenantId);
+        var enabledServices = (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices ?? [];
+
+        var result = new List<ActiveServiceDto>();
+        var addedIds = new HashSet<int>();
+
+        foreach (var quota in tariff.Quotas.Where(q => q.Additional && q.State == QuotaState.Active))
+        {
+            if (!addedIds.Add(quota.Id) || !quotaDefinitions.TryGetValue(quota.Id, out var definition))
+            {
+                continue;
+            }
+
+            // DocsCloudTrial is not a wallet service, but it must be displayed.
+            if (!quota.Wallet && definition.DocsCloud == 0)
+            {
+                continue;
+            }
+
+            result.Add(await ToActiveServiceDtoAsync(definition, quota.Quantity, tenantId));
+        }
+
+        foreach (var service in enabledServices)
+        {
+            var id = (int)service;
+
+            if (!addedIds.Add(id) || !quotaDefinitions.TryGetValue(id, out var definition))
+            {
+                continue;
+            }
+
+            result.Add(await ToActiveServiceDtoAsync(definition, null, tenantId));
+        }
+
+        return result;
+    }
+
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, bool throwIfFailure = false)
+    {
+        var result = await tariffService.PaymentChangeAsync(tenantId, quantity, productQuantityType, currency, checkQuota, customerParticipantName, null, throwIfFailure);
 
         if (result)
         {
@@ -257,9 +305,35 @@ public class PaymentHelper(
             messageService.Send(MessageAction.CustomerWalletToppedUp, $"{amount} {currency}");
 
             await quotaSocketManager.TopUpWallet(false);
+
+            await EnsureLowBalanceThresholdAsync();
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The wallet balance below which a low-balance notification is sent, sourced from config (not user-configurable).
+    /// </summary>
+    public int GetDefaultLowBalanceThreshold()
+    {
+        return walletSettingsConfig.LowBalanceThreshold;
+    }
+
+    // stamps a non-default TenantWalletSettings row for tenants without auto top-up configured, so the low-balance
+    // poller (which only scans persisted wallet-settings rows) can discover them without scanning every active tenant
+    private async Task EnsureLowBalanceThresholdAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantWalletSettings>();
+        if (settings.Enabled)
+        {
+            return;
+        }
+
+        settings.LowBalanceThreshold = GetDefaultLowBalanceThreshold();
+        settings.LowBalanceNotified = false;
+
+        await settingsManager.SaveAsync(settings);
     }
 
     public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId)
@@ -301,19 +375,6 @@ public class PaymentHelper(
         return result;
     }
 
-    public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string serviceName)
-    {
-        var result = await tariffService.MakeAiCreditAsync(tenantId, amount, currency, customerParticipantName, metadata: null);
-
-        if (result != null)
-        {
-            messageService.Send(MessageAction.CustomerOperationPerformed, null, $"{serviceName} {amount} {currency}");
-
-            await EnableAiToolsServiceAsync();
-        }
-
-        return result;
-    }
 
     public async Task<TenantWalletServiceSettings> ChangeWalletServiceStateAsync(TenantWalletService service, bool enabled)
     {
@@ -353,7 +414,7 @@ public class PaymentHelper(
             throw new InvalidOperationException("Failed to save tenant wallet service settings");
         }
 
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, service.ToStringFast());
 
         if (service == TenantWalletService.AITools)
         {
@@ -440,7 +501,7 @@ public class PaymentHelper(
     {
         var result = await aiGateway.SetRestrictedModelsAsync(models);
 
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, string.Join(", ", models));
 
         return result;
     }
@@ -454,25 +515,69 @@ public class PaymentHelper(
         return result;
     }
 
+    private async Task<ActiveServiceDto> ToActiveServiceDtoAsync(TenantQuota definition, int? quantity, int tenantId)
+    {
+        var isDocsCloud = definition.DocsCloud > 0;
+
+        var service = string.IsNullOrEmpty(definition.ServiceName)
+            ? (isDocsCloud ? "docscloud" : definition.Name)
+            : definition.ServiceName;
+
+        var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(service, []);
+
+        var dto = new ActiveServiceDto
+        {
+            Service = serviceName,
+            ServiceUnit = serviceUnit,
+            Title = title,
+            Subscription = !string.IsNullOrEmpty(definition.ProductId)
+        };
+
+        if (!dto.Subscription)
+        {
+            return dto;
+        }
+
+        if (isDocsCloud)
+        {
+            if (!docsCloudClient.Configured)
+            {
+                return dto;
+            }
+
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+            var info = await docsCloudClient.GetTenantInfoAsync(portalId);
+
+            dto.Limit = info?.UsersLimit?.Edit;
+            dto.Used = info?.Stats?.Editor?.Active;
+        }
+        else if (definition.TenantId == (int)TenantWalletService.Storage && quantity.HasValue)
+        {
+            // definition.MaxTotalSize is the storage granted by a single purchased unit (e.g. 1 GB in bytes);
+            // multiplying it by the purchased quantity gives the number of bytes the disk-storage add-on
+            // contributes to the tenant's combined MaxTotalSize (see also MaxTotalSizeChecker).
+            var perUnitBytes = definition.MaxTotalSize;
+
+            if (perUnitBytes > 0)
+            {
+                var limitBytes = perUnitBytes * quantity.Value;
+                var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
+                var usedBytes = await maxTotalSizeStatistic.GetValueAsync();
+                var usedBytesForStorage = Math.Max(usedBytes - (currentQuota.MaxTotalSize - limitBytes), 0);
+
+                dto.Limit = quantity;
+                dto.Used = (int)(usedBytesForStorage / perUnitBytes);
+            }
+        }
+
+        return dto;
+    }
+
     private async Task<bool> IsPayerAsync(CustomerInfo customerInfo)
     {
         var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
         return payer.Id != ASC.Core.Users.Constants.LostUser.Id && securityContext.CurrentAccount.ID == payer.Id;
-    }
-
-    private async Task EnableAiToolsServiceAsync()
-    {
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
-
-        if (settings.EnabledServices?.Contains(TenantWalletService.AITools) == true)
-        {
-            return;
-        }
-
-        // Delegate to the canonical enable path so the save-failure guard, list normalization,
-        // audit message and AI-config socket signal stay in a single place.
-        await ChangeWalletServiceStateAsync(TenantWalletService.AITools, true);
     }
 
     /// <summary>

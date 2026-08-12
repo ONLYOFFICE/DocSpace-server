@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
 public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -44,7 +43,7 @@ public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
         var profile = await CreateProfileAsync();
         await CreateAssignmentAsync("Chat", profile.Id);
 
-        using var response = await Ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await ReadAssignmentAsync("Chat")).Should().BeNull();
@@ -53,7 +52,7 @@ public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     [Fact]
     public async Task Delete_NonExisting_Succeeds()
     {
-        using var response = await Ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -69,7 +68,7 @@ public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
         await CreateAssignmentAsync("Code", codeProfile.Id);
         await CreateAssignmentAsync("Summarization", summarizationProfile.Id);
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             AssignmentsPath,
             new { actionTypes = new[] { "Chat", "Code" } },
             TestContext.Current.CancellationToken);
@@ -83,7 +82,7 @@ public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     [Fact]
     public async Task DeleteMany_EmptyList_Succeeds()
     {
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             AssignmentsPath,
             new { actionTypes = Array.Empty<string>() },
             TestContext.Current.CancellationToken);

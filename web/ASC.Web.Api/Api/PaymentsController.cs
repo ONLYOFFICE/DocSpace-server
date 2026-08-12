@@ -186,7 +186,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(400, "Invalid request parameters")]
-    [SwaggerResponse(402, "Tariff is not paid")]
+    [SwaggerResponse(402, "Payment required")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "Customer could not be found")]
     [HttpPut("updatewallet")]
@@ -200,16 +200,14 @@ public class PaymentController(
             throw new ArgumentException("Invalid product quantity type");
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id, refresh: true);
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync(refresh: true);
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
         var productQty = product.Value;
         var quota = await paymentHelper.GetQuotaByProductNameAsync(productName, wallet: true);
 
-        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+        var tariff = await tariffService.GetTariffAsync(tenantId);
 
         if (tariff.State > TariffState.Paid && quota.Additional)
         {
@@ -222,6 +220,16 @@ public class PaymentController(
             (int)TenantWalletService.DocsCloudDevPack => configuration.GetValue<int?>("core:docscloud:minDevPackQuantity") ?? 10,
             _ => 1
         };
+
+        // requesting DocsCloudDevPack while DocsCloud is active is never valid here, in either flow -
+        // that upgrade goes through DocsCloudController.SwitchToDevPack instead. Only the reverse
+        // direction (DocsCloud while DevPack is active) is allowed here, and only to schedule a
+        // reversion via the Set branch below
+        if (quota.TenantId == (int)TenantWalletService.DocsCloudDevPack &&
+            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloud))
+        {
+            throw new ArgumentException("Quota is already set");
+        }
 
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
@@ -250,19 +258,13 @@ public class PaymentController(
             }
 
             // saving null value is equivalent to resetting to default
-            return await paymentHelper.UpdateNextQuantityAsync(tenant.Id, tariff, targetQuota, productQty, productName, nextQuota);
+            return await paymentHelper.UpdateNextQuantityAsync(tenantId, tariff, targetQuota, productQty, productName, nextQuota);
         }
 
         // inDto.ProductQuantityType === ProductQuantityType.Add
 
         if (quota.TenantId == (int)TenantWalletService.DocsCloud &&
             tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloudDevPack))
-        {
-            throw new ArgumentException("Quota is already set");
-        }
-
-        if (quota.TenantId == (int)TenantWalletService.DocsCloudDevPack &&
-            tariff.Quotas.Any(q => q.Id == (int)TenantWalletService.DocsCloud))
         {
             throw new ArgumentException("Quota is already set");
         }
@@ -286,11 +288,11 @@ public class PaymentController(
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-        await paymentHelper.GetSubAccountRequiredAsync(tenant.Id, defaultCurrency, refresh: true);
+        await paymentHelper.GetSubAccountRequiredAsync(tenantId, defaultCurrency, refresh: true);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        return await paymentHelper.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString());
+        return await paymentHelper.PaymentChangeAsync(tenantId, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString(), true);
     }
 
     /// <remarks>
@@ -315,9 +317,7 @@ public class PaymentController(
             throw new ArgumentException("Invalid product quantity type");
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         var product = inDto.Quantity.First();
         var productName = product.Key;
@@ -333,11 +333,11 @@ public class PaymentController(
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-        await paymentHelper.GetSubAccountRequiredAsync(tenant.Id, defaultCurrency);
+        await paymentHelper.GetSubAccountRequiredAsync(tenantId, defaultCurrency);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentCalculateAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency);
+        var result = await tariffService.PaymentCalculateAsync(tenantId, quantity, inDto.ProductQuantityType, defaultCurrency);
 
         return result;
     }
@@ -808,34 +808,6 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the AI quota balance of a customer from the accounting service.
-    /// </remarks>
-    /// <summary>
-    /// Get the customer AI balance
-    /// </summary>
-    /// <path>api/2.0/portal/payment/customer/aibalance</path>
-    [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer AI balance", typeof(Balance))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("customer/aibalance")]
-    public async Task<Balance> GetCustomerAiBalance(PaymentInformationRequestDto inDto)
-    {
-        paymentHelper.DemandConfigured();
-
-        await paymentHelper.DemandAdminAsync();
-
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            return null;
-        }
-
-        return await tariffService.GetCustomerAiBalanceAsync(tenant.Id, inDto.Refresh);
-    }
-
-    /// <remarks>
     /// Returns the report of customer operations from the accounting service.
     /// </remarks>
     /// <summary>
@@ -981,15 +953,42 @@ public class PaymentController(
             return null;
         }
 
+        var tenantQuotas = (await quotaService.GetTenantQuotasAsync()).ToList();
+        var walletQuotas = tenantQuotas.Where(x => x.Wallet)
+            .ToDictionary(x => x.ServiceName, x => x);
+
         var customUom = new Dictionary<string, string>();
-        var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+        var aiQuota = tenantQuotas.SingleOrDefault(q => q.TenantId == (int)TenantWalletService.AITools);
         if (aiQuota != null)
         {
             // For ai-tools, usage is displayed in Tokens instead of AI Credits.
             customUom.Add(aiQuota.ServiceName, "chat");
         }
 
-        return new CustomerServiceUsageReportDto(report, customUom);
+        return new CustomerServiceUsageReportDto(report, walletQuotas, customUom);
+    }
+
+    /// <remarks>
+    /// Returns all the active wallet services (quotas) of the current portal: the active additional quotas
+    /// from the tariff, plus the services enabled manually via the wallet service settings.
+    /// </remarks>
+    /// <summary>
+    /// Get the active wallet services
+    /// </summary>
+    /// <path>api/2.0/portal/payment/activeservices</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The list of active wallet services", typeof(IEnumerable<ActiveServiceDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("activeservices")]
+    public async Task<List<ActiveServiceDto>> GetActiveServices()
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        return await paymentHelper.GetActiveServicesAsync(tenant.Id);
     }
 
     /// <remarks>
@@ -1331,6 +1330,24 @@ public class PaymentController(
 
         var settings = inDto?.Settings ?? new TenantWalletSettings();
 
+        // LowBalanceThreshold/LowBalanceNotified are internal-only: never trust them from client input,
+        // always recompute from what was previously persisted so a stale GET->POST round-trip can't
+        // resurrect an old value (e.g. permanently suppressing the low-balance notification)
+        var existing = await settingsManager.LoadAsync<TenantWalletSettings>();
+        settings.LowBalanceThreshold = existing.LowBalanceThreshold;
+        settings.LowBalanceNotified = existing.LowBalanceNotified;
+
+        if (settings.Enabled)
+        {
+            settings.LowBalanceNotified = false;
+        }
+        else
+        {
+            // keep the settings row persisted (not equal to GetDefault()) even when auto top-up is
+            // turned off, so the low-balance poller can still discover this tenant
+            settings.LowBalanceThreshold = paymentHelper.GetDefaultLowBalanceThreshold();
+        }
+
         var result = await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.CustomerWalletTopUpSettingsUpdated);
@@ -1378,72 +1395,9 @@ public class PaymentController(
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
+        await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         return await paymentHelper.ChangeWalletServiceStateAsync(inDto.Service, inDto.Enabled);
-    }
-
-    /// <summary>
-    /// Credit AI balance
-    /// </summary>
-    /// <remarks>
-    /// Credits AI quota to the customer AI sub-account from their main balance.
-    /// Requires the customer to have a configured payment method.
-    /// </remarks>
-    /// <path>api/2.0/portal/payment/creditaibalance</path>
-    [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The AI credit operation result", typeof(ServicePayment))]
-    [SwaggerResponse(400, "Unsupported currency or insufficient balance")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "Customer or AiTools quota could not be found")]
-    [HttpPost("creditaibalance")]
-    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    public async Task<ServicePayment> CreditAiBalance(CreditAiBalanceRequestDto inDto)
-    {
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
-
-        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
-        if (balance == null)
-        {
-            throw new ItemNotFoundException("Balance could not be found");
-        }
-
-        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
-
-        if (string.IsNullOrEmpty(inDto.Currency))
-        {
-            inDto.Currency = supportedCurrencies.FirstOrDefault();
-        }
-
-        if (!supportedCurrencies.Contains(inDto.Currency))
-        {
-            throw new ArgumentException("Unsupported currency");
-        }
-
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == inDto.Currency);
-        if (subAccount == null)
-        {
-            throw new ItemNotFoundException("Subaccount could not be found");
-        }
-
-        if (subAccount.Amount < inDto.Amount)
-        {
-            throw new ArgumentException("Insufficient balance");
-        }
-
-        // The method must throw an exception if the AiTools quota is hidden or not found in the database!
-        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
-        var aiToolsQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.AITools);
-        if (aiToolsQuota == null)
-        {
-            throw new ItemNotFoundException("AiTools quota not found");
-        }
-
-        return await paymentHelper.MakeAiCreditAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), aiToolsQuota.ServiceName);
     }
 
     /// <summary>
@@ -1499,7 +1453,7 @@ public class PaymentController(
     /// <remarks>
     /// Overwrites the entire set of restricted AI model IDs for the current tenant.
     /// The request body must contain the complete desired set — to add a restriction, include the new model alongside existing ones;
-    /// to remove one, omit it. An empty set lifts all restrictions. Only the portal payer can perform this action.
+    /// to remove one, omit it. An empty set lifts all restrictions. Only portal administrators can perform this action.
     /// </remarks>
     /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
     [Tags("Portal / Payment")]
@@ -1513,9 +1467,7 @@ public class PaymentController(
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = tenantManager.GetCurrentTenant();
-
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
+        await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         return await paymentHelper.SetRestrictedAiModelsAsync(inDto.Models);
     }

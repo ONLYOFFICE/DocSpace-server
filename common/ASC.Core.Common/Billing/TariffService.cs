@@ -346,7 +346,7 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null, bool throwIfFailure = false)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -355,29 +355,39 @@ public class TariffService(
 
         var productIds = checkQuota ? await CheckQuotaAndGetProductIds(tenantId, quantity) : await GetProductIds(quantity);
 
+        bool changed;
+
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            var changed = await billingClient.ChangePaymentAsync(portalId, productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
+            changed = await billingClient.ChangePaymentAsync(portalId, productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
 
-            if (!changed)
+            if (changed)
             {
-                return false;
+                await ClearCacheAsync(tenantId);
+
+                await docsCloudClient.ClearCacheAsync(portalId);
             }
-
-            await ClearCacheAsync(tenantId);
-
-            await docsCloudClient.ClearCacheAsync(portalId);
         }
         catch (Exception error)
         {
             logger.ErrorWithException(error);
 
+            if (throwIfFailure)
+            {
+                throw;
+            }
+
             return false;
         }
 
-        return true;
+        if (!changed && throwIfFailure)
+        {
+            throw new BillingException("Payment change was declined");
+        }
+
+        return changed;
     }
 
     public async Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
@@ -554,11 +564,6 @@ public class TariffService(
     internal static string GetAccountingBalanceCacheKey(int tenantId)
     {
         return $"{tenantId}:accounting:balance";
-    }
-
-    internal static string GetAccountingAiBalanceCacheKey(int tenantId)
-    {
-        return $"{tenantId}:accounting:ai:balance";
     }
 
     private async Task ClearCacheAsync(int tenantId)
@@ -802,13 +807,15 @@ public class TariffService(
 
         var tariff = await CreateDefaultAsync(true);
         tariff.Id = r.Id;
-        tariff.DueDate = r.Stamp.Year < 9999 ? r.Stamp : DateTime.MaxValue;
+        tariff.DueDate = RestoreMaxValueSentinel(r.Stamp);
         tariff.CustomerId = r.CustomerId;
 
         var quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
 
         foreach (var q in quotas)
         {
+            RestoreMaxValueSentinel(q);
+
             if (q is { Additional: true, State: QuotaState.Overdue })
             {
                 tariff.OverdueQuotas ??= [];
@@ -838,17 +845,11 @@ public class TariffService(
             {
                 await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
 
-                var stamp = tariffInfo.DueDate;
-                if (stamp.Equals(DateTime.MaxValue))
-                {
-                    stamp = stamp.Date.Add(new TimeSpan(tariffInfo.DueDate.Hour, tariffInfo.DueDate.Minute, tariffInfo.DueDate.Second));
-                }
-
                 var efTariff = new DbTariff
                 {
                     Id = tariffInfo.Id,
                     TenantId = tenant,
-                    Stamp = stamp,
+                    Stamp = TruncateToWholeSeconds(tariffInfo.DueDate),
                     CustomerId = tariffInfo.CustomerId,
                     CreateOn = DateTime.UtcNow
                 };
@@ -869,7 +870,7 @@ public class TariffService(
                         TariffId = efTariff.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = q.NextQuantity,
                         NextQuota = q.NextQuota,
                         TenantId = tenant
@@ -906,6 +907,30 @@ public class TariffService(
         return inserted;
     }
 
+    // MySQL "datetime" columns have no fractional-second precision; DateTime.MaxValue's sub-second ticks
+    // round up to the next (invalid, year 10000) day and get silently stored as a zero-date otherwise.
+    private static DateTime TruncateToWholeSeconds(DateTime value)
+    {
+        return value.Equals(DateTime.MaxValue)
+            ? value.Date.Add(new TimeSpan(value.Hour, value.Minute, value.Second))
+            : value;
+    }
+
+    // Reverses TruncateToWholeSeconds on read, so a due date persisted as the "no expiration" sentinel
+    // compares equal (via Quota.Equals) to the in-memory DateTime.MaxValue it originated from.
+    private static DateTime RestoreMaxValueSentinel(DateTime value)
+    {
+        return value.Year < 9999 ? value : DateTime.MaxValue;
+    }
+
+    private static void RestoreMaxValueSentinel(Quota q)
+    {
+        if (q.DueDate.HasValue)
+        {
+            q.DueDate = RestoreMaxValueSentinel(q.DueDate.Value);
+        }
+    }
+
     public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity, int? nextQuota = null)
     {
         try
@@ -939,7 +964,7 @@ public class TariffService(
                         TariffId = tariffInfo.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = nextQuantity,
                         NextQuota = nextQuota,
                         TenantId = tenant
@@ -1094,6 +1119,7 @@ public class TariffService(
 
         if (toAdd != null)
         {
+            RestoreMaxValueSentinel(toAdd);
             tariff.Quotas.Insert(0, toAdd);
         }
         else
@@ -1449,61 +1475,6 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<Balance> GetCustomerAiBalanceAsync(int tenantId, bool refresh = false)
-    {
-        if (!accountingClient.Configured)
-        {
-            return null;
-        }
-
-        if (!accountingClient.SubAccountsEnabled)
-        {
-            throw new InvalidOperationException("Accounting client does not support sub-accounts");
-        }
-
-        var cacheKey = GetAccountingAiBalanceCacheKey(tenantId);
-
-        if (refresh)
-        {
-            await hybridCache.RemoveAsync(cacheKey);
-        }
-
-        var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
-
-        if (balance != null)
-        {
-            return balance.IsDefault() ? null : balance;
-        }
-
-        await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
-        {
-            balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
-
-            if (balance != null)
-            {
-                return balance.IsDefault() ? null : balance;
-            }
-
-            try
-            {
-                var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerAiBalanceAsync(portalId);
-            }
-            catch (AccountingCustomerNotFoundException exception)
-            {
-                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
-                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
-            }
-            catch (Exception error)
-            {
-                LogError(error, tenantId.ToString());
-                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
-            }
-        }
-
-        return balance;
-    }
-
     public async Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
@@ -1532,38 +1503,11 @@ public class TariffService(
         return true;
     }
 
-    public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
-    {
-        if (!accountingClient.SubAccountsEnabled)
-        {
-            throw new InvalidOperationException("Accounting client does not support sub-accounts");
-        }
-
-        var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency, customerParticipantName, metadata);
-        await hybridCache.RemoveAsync(GetAccountingAiBalanceCacheKey(tenantId));
-        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
-        return result;
-    }
-
     public async Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter)
     {
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
-
-            if (accountingClient.SubAccountsEnabled && filter.ServiceName is { Count: 1 })
-            {
-                var filterServiceName = filter.ServiceName.First();
-                if (!string.IsNullOrEmpty(filterServiceName))
-                {
-                    var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-                    if (aiQuota != null && aiQuota.ServiceName == filterServiceName)
-                    {
-                        return await accountingClient.GetCustomerAiOperationsAsync(portalId, filter);
-                    }
-                }
-            }
 
             return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
         }

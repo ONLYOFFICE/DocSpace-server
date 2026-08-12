@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ToolPreferenceStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "Concurrency")]
 [Trait("Feature", "AI/ToolPreferences")]
 public class ToolPreferenceConcurrencyTests(AspireAppFixture fixture) : BaseTest(fixture)

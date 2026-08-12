@@ -34,6 +34,7 @@
 import type { Request, Response, NextFunction, RequestHandler } from "express";
 import logger from "../log.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
+import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 
 export type TypedRequest<ReqBody = unknown, ReqQuery = Record<string, unknown>> = Request<
   Record<string, string>,
@@ -57,6 +58,15 @@ type AsyncHandler<ReqBody, ReqQuery> = (
 // else collapses to a generic 500.
 function clientError(err: unknown): { status: number; message: string } {
   if (err instanceof AiServiceHttpError) {
+    return { status: err.status, message: err.statusText || "Upstream error" };
+  }
+  // A failure relayed from the DocSpace Files API with the caller's own
+  // credentials — e.g. a 403 when resolving an agent room the caller cannot
+  // access, or a 404 for a room that does not exist (Bugs 82715, 82816, and
+  // every /ai/* route that resolves an agent entityId). Forward its real
+  // status instead of masking it as a generic 500. `message` embeds the
+  // internal proxy URL, so relay only the status/reason phrase.
+  if (err instanceof DocspaceApiHttpError) {
     return { status: err.status, message: err.statusText || "Upstream error" };
   }
   const status = (err as { status?: unknown })?.status;
