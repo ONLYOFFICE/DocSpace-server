@@ -6468,9 +6468,11 @@
         "type": "object",
         "properties": {
           "chatRecommendedModelVisible": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user.",
-            "example": true
+            "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user."
           }
         },
         "additionalProperties": false,
@@ -6524,9 +6526,11 @@
             "$ref": "#/components/schemas/AiEmbeddingProviderType"
           },
           "needReset": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
-            "example": false
+            "description": "Indicates whether the embedding provider API key needs to be reconfigured."
           }
         },
         "additionalProperties": false,
@@ -6535,6 +6539,9 @@
       "AiEmbeddingProviderType": {
         "oneOf": [
           {
+            "examples": [
+              "None"
+            ],
             "enum": [
               "None",
               "OpenAi",
@@ -6542,10 +6549,12 @@
               "PortalAi"
             ],
             "type": "string",
-            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]",
-            "example": "None"
+            "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -6554,7 +6563,6 @@
             ],
             "type": "integer",
             "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]",
-            "example": 0,
             "x-enum-varnames": [
               "None",
               "OpenAi",
@@ -6612,40 +6620,52 @@
         "type": "object",
         "properties": {
           "vectorizationEnabled": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Indicates whether document vectorization is enabled.",
-            "example": true
+            "description": "Indicates whether document vectorization is enabled."
           },
           "vectorizationNeedReset": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
-            "example": false
+            "description": "Indicates whether the embedding provider API key needs to be reconfigured."
           },
           "aiReady": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Indicates whether the AI subsystem is fully configured and operational.",
-            "example": true
+            "description": "Indicates whether the AI subsystem is fully configured and operational."
           },
           "embeddingModel": {
+            "examples": [
+              "text-embedding-3-small"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The name of the embedding model used for document vectorization.",
-            "example": "text-embedding-3-small"
+            "description": "The name of the embedding model used for document vectorization."
           },
           "systemAiEnabled": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Indicates whether the system-level AI provider is enabled.",
-            "example": true
+            "description": "Indicates whether the system-level AI provider is enabled."
           },
           "recommendedModelForForms": {
+            "examples": [
+              "gpt-5.4"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The identifier of the model recommended for form generation.",
-            "example": "gpt-5.4"
+            "description": "The identifier of the model recommended for form generation."
           }
         },
         "additionalProperties": false,
@@ -6703,43 +6723,61 @@
             "type": "object",
             "properties": {
               "parentId": {
+                "examples": [
+                  10
+                ],
                 "type": "integer",
                 "description": "The parent folder ID of the folder.",
-                "format": "int32",
-                "example": 10
+                "format": "int32"
               },
               "filesCount": {
+                "examples": [
+                  5
+                ],
                 "type": "integer",
                 "description": "The number of files that the folder contains.",
-                "format": "int32",
-                "example": 5
+                "format": "int32"
               },
               "foldersCount": {
+                "examples": [
+                  7
+                ],
                 "type": "integer",
                 "description": "The number of folders that the folder contains.",
-                "format": "int32",
-                "example": 7
+                "format": "int32"
               },
               "isShareable": {
+                "examples": [
+                  true
+                ],
                 "type": [
                   "null",
                   "boolean"
                 ],
-                "description": "Specifies if the folder can be shared or not.",
-                "example": true
+                "description": "Specifies if the folder can be shared or not."
               },
               "new": {
+                "examples": [
+                  0
+                ],
                 "type": "integer",
                 "description": "The new element index in the folder.",
-                "format": "int32",
-                "example": 0
+                "format": "int32"
               },
               "mute": {
+                "examples": [
+                  false
+                ],
                 "type": "boolean",
-                "description": "Specifies if the folder notifications are enabled or not.",
-                "example": false
+                "description": "Specifies if the folder notifications are enabled or not."
               },
               "tags": {
+                "examples": [
+                  [
+                    "tag1",
+                    "tag2"
+                  ]
+                ],
                 "type": [
                   "null",
                   "array"
@@ -6747,39 +6785,43 @@
                 "items": {
                   "type": "string"
                 },
-                "description": "The list of tags of the folder.",
-                "example": [
-                  "tag1",
-                  "tag2"
-                ]
+                "description": "The list of tags of the folder."
               },
               "logo": {
                 "description": "The folder logo.",
                 "$ref": "#/components/schemas/AiLogo"
               },
               "pinned": {
+                "examples": [
+                  false
+                ],
                 "type": "boolean",
-                "description": "Specifies if the folder is pinned or not.",
-                "example": false
+                "description": "Specifies if the folder is pinned or not."
               },
               "roomType": {
                 "description": "The room type of the folder.",
                 "$ref": "#/components/schemas/AiRoomType"
               },
               "private": {
+                "examples": [
+                  false
+                ],
                 "type": "boolean",
-                "description": "Specifies if the folder is private or not.",
-                "example": false
+                "description": "Specifies if the folder is private or not."
               },
               "indexing": {
+                "examples": [
+                  true
+                ],
                 "type": "boolean",
-                "description": "Specifies if the folder is indexed or not.",
-                "example": true
+                "description": "Specifies if the folder is indexed or not."
               },
               "denyDownload": {
+                "examples": [
+                  false
+                ],
                 "type": "boolean",
-                "description": "Specifies if the folder can be downloaded or not.",
-                "example": false
+                "description": "Specifies if the folder can be downloaded or not."
               },
               "lifetime": {
                 "description": "The room data lifetime settings of the folder.",
@@ -6794,54 +6836,66 @@
                 "$ref": "#/components/schemas/AiFolderType"
               },
               "inRoom": {
+                "examples": [
+                  false
+                ],
                 "type": [
                   "null",
                   "boolean"
                 ],
-                "description": "Specifies if the folder is placed in the room or not.",
-                "example": false
+                "description": "Specifies if the folder is placed in the room or not."
               },
               "quotaLimit": {
+                "examples": [
+                  1073741824
+                ],
                 "type": [
                   "null",
                   "integer"
                 ],
                 "description": "The folder quota limit.",
-                "format": "int64",
-                "example": 1073741824
+                "format": "int64"
               },
               "isCustomQuota": {
+                "examples": [
+                  false
+                ],
                 "type": [
                   "null",
                   "boolean"
                 ],
-                "description": "Specifies if the folder room has a custom quota or not.",
-                "example": false
+                "description": "Specifies if the folder room has a custom quota or not."
               },
               "usedSpace": {
+                "examples": [
+                  524288000
+                ],
                 "type": [
                   "null",
                   "integer"
                 ],
                 "description": "How much folder space is used (counter).",
-                "format": "int64",
-                "example": 524288000
+                "format": "int64"
               },
               "passwordProtected": {
+                "examples": [
+                  false
+                ],
                 "type": [
                   "null",
                   "boolean"
                 ],
-                "description": "Specifies if the folder is password protected or not.",
-                "example": false
+                "description": "Specifies if the folder is password protected or not."
               },
               "expired": {
+                "examples": [
+                  false
+                ],
                 "type": [
                   "null",
                   "boolean"
                 ],
                 "description": "Specifies if an external link to the folder is expired or not.",
-                "example": false,
                 "deprecated": true
               },
               "chatSettings": {
@@ -6853,29 +6907,35 @@
                 "$ref": "#/components/schemas/AiRoomType"
               },
               "saveFormAsXLSX": {
+                "examples": [
+                  false
+                ],
                 "type": [
                   "null",
                   "boolean"
                 ],
-                "description": "Specifies whether to save form data as XLSX file.",
-                "example": false
+                "description": "Specifies whether to save form data as XLSX file."
               },
               "sendFormToExternalDB": {
+                "examples": [
+                  false
+                ],
                 "type": [
                   "null",
                   "boolean"
                 ],
-                "description": "Specifies whether to send form data to external database.",
-                "example": false
+                "description": "Specifies whether to send form data to external database."
               },
               "originalFormId": {
+                "examples": [
+                  42
+                ],
                 "type": [
                   "null",
                   "integer"
                 ],
                 "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
-                "format": "int32",
-                "example": 42
+                "format": "int32"
               }
             }
           }
@@ -6887,12 +6947,14 @@
         "type": "object",
         "properties": {
           "prompt": {
+            "examples": [
+              "You are a helpful assistant."
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The system prompt for the chat.",
-            "example": "You are a helpful assistant."
+            "description": "The system prompt for the chat."
           }
         },
         "additionalProperties": false,
@@ -6901,6 +6963,9 @@
       "AiFolderType": {
         "oneOf": [
           {
+            "examples": [
+              "DEFAULT"
+            ],
             "enum": [
               "DEFAULT",
               "COMMON",
@@ -6934,10 +6999,12 @@
               "Forms"
             ],
             "type": "string",
-            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]",
-            "example": "DEFAULT"
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -6972,7 +7039,6 @@
             ],
             "type": "integer",
             "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
-            "example": 0,
             "x-enum-varnames": [
               "DEFAULT",
               "COMMON",
@@ -7025,44 +7091,56 @@
             "$ref": "#/components/schemas/AiWatermarkAdditions"
           },
           "text": {
+            "examples": [
+              "Confidential"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The watermark text.",
-            "example": "Confidential"
+            "description": "The watermark text."
           },
           "rotate": {
+            "examples": [
+              45
+            ],
             "type": "integer",
             "description": "The watermark text and image rotate.",
-            "format": "int32",
-            "example": 45
+            "format": "int32"
           },
           "imageScale": {
+            "examples": [
+              100
+            ],
             "type": "integer",
             "description": "The watermark image scale.",
-            "format": "int32",
-            "example": 100
+            "format": "int32"
           },
           "imageUrl": {
+            "examples": [
+              "http://localhost/watermark.png"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The watermark image url.",
-            "example": "http://localhost/watermark.png"
+            "description": "The watermark image url."
           },
           "imageHeight": {
+            "examples": [
+              100
+            ],
             "type": "number",
             "description": "The watermark image height.",
-            "format": "double",
-            "example": 100
+            "format": "double"
           },
           "imageWidth": {
+            "examples": [
+              200
+            ],
             "type": "number",
             "description": "The watermark image width.",
-            "format": "double",
-            "example": 200
+            "format": "double"
           }
         },
         "additionalProperties": false,
@@ -7071,6 +7149,9 @@
       "AiWatermarkAdditions": {
         "oneOf": [
           {
+            "examples": [
+              "UserName"
+            ],
             "enum": [
               "UserName",
               "UserEmail",
@@ -7079,10 +7160,12 @@
               "RoomName"
             ],
             "type": "string",
-            "description": "[UserName - User name, UserEmail - User email, UserIpAdress - User ip adress, CurrentDate - Current date, RoomName - Room name]",
-            "example": "UserName"
+            "description": "[UserName - User name, UserEmail - User email, UserIpAdress - User ip adress, CurrentDate - Current date, RoomName - Room name]"
           },
           {
+            "examples": [
+              1
+            ],
             "enum": [
               1,
               2,
@@ -7092,7 +7175,6 @@
             ],
             "type": "integer",
             "description": "[1 - User name, 2 - User email, 4 - User ip adress, 8 - Current date, 16 - Room name]",
-            "example": 1,
             "x-enum-varnames": [
               "UserName",
               "UserEmail",
@@ -7109,15 +7191,20 @@
         "type": "object",
         "properties": {
           "deletePermanently": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Specifies whether to permanently delete the room data or not.",
-            "example": true
+            "description": "Specifies whether to permanently delete the room data or not."
           },
           "period": {
             "description": "Specifies the time period type of the room data lifetime.",
             "$ref": "#/components/schemas/AiRoomDataLifetimePeriod"
           },
           "value": {
+            "examples": [
+              33
+            ],
             "maximum": 999,
             "minimum": 1,
             "type": [
@@ -7125,16 +7212,17 @@
               "integer"
             ],
             "description": "Specifies the time period value of the room data lifetime.",
-            "format": "int32",
-            "example": 33
+            "format": "int32"
           },
           "enabled": {
+            "examples": [
+              true
+            ],
             "type": [
               "null",
               "boolean"
             ],
-            "description": "Specifies whether the room data lifetime setting is enabled or not.",
-            "example": true
+            "description": "Specifies whether the room data lifetime setting is enabled or not."
           }
         },
         "additionalProperties": false,
@@ -7143,16 +7231,21 @@
       "AiRoomDataLifetimePeriod": {
         "oneOf": [
           {
+            "examples": [
+              "Day"
+            ],
             "enum": [
               "Day",
               "Month",
               "Year"
             ],
             "type": "string",
-            "description": "[Day - Day, Month - Month, Year - Year]",
-            "example": "Day"
+            "description": "[Day - Day, Month - Month, Year - Year]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -7160,7 +7253,6 @@
             ],
             "type": "integer",
             "description": "[0 - Day, 1 - Month, 2 - Year]",
-            "example": 0,
             "x-enum-varnames": [
               "Day",
               "Month",
@@ -7174,6 +7266,9 @@
       "AiRoomType": {
         "oneOf": [
           {
+            "examples": [
+              "FillingFormsRoom"
+            ],
             "enum": [
               "FillingFormsRoom",
               "EditingRoom",
@@ -7183,10 +7278,12 @@
               "AiRoom"
             ],
             "type": "string",
-            "description": "[FillingFormsRoom - Form filling room, EditingRoom - Collaboration room, CustomRoom - Custom room, PublicRoom - Public room, VirtualDataRoom - Virtual data room, AiRoom - AI Room]",
-            "example": "FillingFormsRoom"
+            "description": "[FillingFormsRoom - Form filling room, EditingRoom - Collaboration room, CustomRoom - Custom room, PublicRoom - Public room, VirtualDataRoom - Virtual data room, AiRoom - AI Room]"
           },
           {
+            "examples": [
+              1
+            ],
             "enum": [
               1,
               2,
@@ -7197,7 +7294,6 @@
             ],
             "type": "integer",
             "description": "[1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]",
-            "example": 1,
             "x-enum-varnames": [
               "FillingFormsRoom",
               "EditingRoom",
@@ -7221,44 +7317,54 @@
         "type": "object",
         "properties": {
           "original": {
+            "examples": [
+              "https://portal.example.com/logo/original.png"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The original logo.",
-            "example": "https://portal.example.com/logo/original.png"
+            "description": "The original logo."
           },
           "large": {
+            "examples": [
+              "https://portal.example.com/logo/large.png"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The large logo.",
-            "example": "https://portal.example.com/logo/large.png"
+            "description": "The large logo."
           },
           "medium": {
+            "examples": [
+              "https://portal.example.com/logo/medium.png"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The medium logo.",
-            "example": "https://portal.example.com/logo/medium.png"
+            "description": "The medium logo."
           },
           "small": {
+            "examples": [
+              "https://portal.example.com/logo/small.png"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The small logo.",
-            "example": "https://portal.example.com/logo/small.png"
+            "description": "The small logo."
           },
           "color": {
+            "examples": [
+              "#4781D1"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The logo color.",
-            "example": "#4781D1"
+            "description": "The logo color."
           },
           "cover": {
             "description": "The logo cover.",
@@ -7276,20 +7382,24 @@
         "type": "object",
         "properties": {
           "id": {
+            "examples": [
+              "default_cover"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The logo cover ID.",
-            "example": "default_cover"
+            "description": "The logo cover ID."
           },
           "data": {
+            "examples": [
+              "base64-image-data..."
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The logo cover data.",
-            "example": "base64-image-data..."
+            "description": "The logo cover data."
           }
         },
         "additionalProperties": false,
@@ -7304,51 +7414,71 @@
             "type": "object",
             "properties": {
               "id": {
+                "examples": [
+                  10
+                ],
                 "type": "integer",
                 "description": "The file entry ID.",
-                "format": "int32",
-                "example": 10
+                "format": "int32"
               },
               "rootFolderId": {
+                "examples": [
+                  1
+                ],
                 "type": "integer",
                 "description": "The root folder ID of the file entry.",
-                "format": "int32",
-                "example": 1
+                "format": "int32"
               },
               "originId": {
+                "examples": [
+                  12
+                ],
                 "type": "integer",
                 "description": "The origin ID of the file entry.",
-                "format": "int32",
-                "example": 12
+                "format": "int32"
               },
               "originRoomId": {
+                "examples": [
+                  22
+                ],
                 "type": "integer",
                 "description": "The origin room ID of the file entry.",
-                "format": "int32",
-                "example": 22
+                "format": "int32"
               },
               "originTitle": {
+                "examples": [
+                  "Original Title"
+                ],
                 "type": [
                   "null",
                   "string"
                 ],
-                "description": "The origin title of the file entry.",
-                "example": "Original Title"
+                "description": "The origin title of the file entry."
               },
               "originRoomTitle": {
+                "examples": [
+                  "Original Room"
+                ],
                 "type": [
                   "null",
                   "string"
                 ],
-                "description": "The origin room title of the file entry.",
-                "example": "Original Room"
+                "description": "The origin room title of the file entry."
               },
               "canShare": {
+                "examples": [
+                  true
+                ],
                 "type": "boolean",
-                "description": "Specifies if the file entry can be shared or not.",
-                "example": true
+                "description": "Specifies if the file entry can be shared or not."
               },
               "shareSettings": {
+                "examples": [
+                  {
+                    "ExternalLink": 1,
+                    "InvitationLink": 2
+                  }
+                ],
                 "type": [
                   "null",
                   "object"
@@ -7376,13 +7506,16 @@
                   }
                 },
                 "additionalProperties": false,
-                "description": "A dictionary representing the sharing settings for the file entry.",
-                "example": {
-                  "ExternalLink": 1,
-                  "InvitationLink": 2
-                }
+                "description": "A dictionary representing the sharing settings for the file entry."
               },
               "security": {
+                "examples": [
+                  {
+                    "Read": true,
+                    "Edit": false,
+                    "Delete": false
+                  }
+                ],
                 "type": [
                   "null",
                   "object"
@@ -7531,14 +7664,17 @@
                   }
                 },
                 "additionalProperties": false,
-                "description": "The actions that can be performed with the file entry.",
-                "example": {
-                  "Read": true,
-                  "Edit": false,
-                  "Delete": false
-                }
+                "description": "The actions that can be performed with the file entry."
               },
               "availableShareRights": {
+                "examples": [
+                  {
+                    "ExternalLink": [
+                      "Read",
+                      "Edit"
+                    ]
+                  }
+                ],
                 "type": [
                   "null",
                   "object"
@@ -7576,41 +7712,41 @@
                   }
                 },
                 "additionalProperties": false,
-                "description": "The available external rights of the file entry.",
-                "example": {
-                  "ExternalLink": [
-                    "Read",
-                    "Edit"
-                  ]
-                }
+                "description": "The available external rights of the file entry."
               },
               "requestToken": {
+                "examples": [
+                  "token-abc-123"
+                ],
                 "type": [
                   "null",
                   "string"
                 ],
-                "description": "The request token of the file entry.",
-                "example": "token-abc-123"
+                "description": "The request token of the file entry."
               },
               "external": {
+                "examples": [
+                  false
+                ],
                 "type": [
                   "null",
                   "boolean"
                 ],
-                "description": "Specifies if the folder can be accessed via an external link or not.",
-                "example": false
+                "description": "Specifies if the folder can be accessed via an external link or not."
               },
               "expirationDate": {
                 "description": "Represents the expiration date of the file entry.",
                 "$ref": "#/components/schemas/AiApiDateTime"
               },
               "isLinkExpired": {
+                "examples": [
+                  false
+                ],
                 "type": [
                   "null",
                   "boolean"
                 ],
-                "description": "Indicates whether the shareable link associated with the file or folder has expired.",
-                "example": false
+                "description": "Indicates whether the shareable link associated with the file or folder has expired."
               }
             }
           }
@@ -7622,18 +7758,22 @@
         "type": "object",
         "properties": {
           "utcTime": {
+            "examples": [
+              "2018-01-01T00:00:00.0000000Z"
+            ],
             "type": "string",
             "description": "The time in UTC format.",
             "format": "date-time",
-            "readOnly": true,
-            "example": "2018-01-01T00:00:00.0000000Z"
+            "readOnly": true
           },
           "timeZoneOffset": {
+            "examples": [
+              "00:00:00"
+            ],
             "type": "string",
             "description": "The time zone offset.",
             "format": "date-span",
-            "readOnly": true,
-            "example": "00:00:00"
+            "readOnly": true
           }
         },
         "additionalProperties": false,
@@ -7643,12 +7783,14 @@
         "type": "object",
         "properties": {
           "title": {
+            "examples": [
+              "Some title.txt"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The file entry title.",
-            "example": "Some title.txt"
+            "description": "The file entry title."
           },
           "access": {
             "description": "The access rights to the file entry.",
@@ -7663,33 +7805,43 @@
             "$ref": "#/components/schemas/AiEmployeeDto"
           },
           "shared": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies if the file entry is shared via link or not.",
-            "example": false
+            "description": "Specifies if the file entry is shared via link or not."
           },
           "sharedForUser": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies if the file entry is shared for user or not.",
-            "example": false
+            "description": "Specifies if the file entry is shared for user or not."
           },
           "sharedExternal": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies if the file entry is shared via a public (non-internal) external link.",
-            "example": false
+            "description": "Specifies if the file entry is shared via a public (non-internal) external link."
           },
           "parentShared": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Indicates whether the parent entity is shared.",
-            "example": false
+            "description": "Indicates whether the parent entity is shared."
           },
           "shortWebUrl": {
+            "examples": [
+              "http://localhost/s/abc123"
+            ],
             "type": [
               "null",
               "string"
             ],
             "description": "The short Web URL.",
-            "format": "uri",
-            "example": "http://localhost/s/abc123"
+            "format": "uri"
           },
           "created": {
             "description": "The creation date and time of the file entry.",
@@ -7720,45 +7872,55 @@
             "$ref": "#/components/schemas/AiEmployeeDto"
           },
           "providerItem": {
+            "examples": [
+              false
+            ],
             "type": [
               "null",
               "boolean"
             ],
-            "description": "Specifies if the file entry provider is specified or not.",
-            "example": false
+            "description": "Specifies if the file entry provider is specified or not."
           },
           "providerKey": {
+            "examples": [
+              "google-drive"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The provider key of the file entry.",
-            "example": "google-drive"
+            "description": "The provider key of the file entry."
           },
           "providerId": {
+            "examples": [
+              1
+            ],
             "type": [
               "null",
               "integer"
             ],
             "description": "The provider ID of the file entry.",
-            "format": "int32",
-            "example": 1
+            "format": "int32"
           },
           "order": {
+            "examples": [
+              "1"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The order of the file entry.",
-            "example": "1"
+            "description": "The order of the file entry."
           },
           "isFavorite": {
+            "examples": [
+              false
+            ],
             "type": [
               "null",
               "boolean"
             ],
-            "description": "Specifies if the file is a favorite or not.",
-            "example": false
+            "description": "Specifies if the file is a favorite or not."
           },
           "fileEntryType": {
             "description": "The file entry type.",
@@ -7778,22 +7940,26 @@
       "AiFileEntryType": {
         "oneOf": [
           {
+            "examples": [
+              "Folder"
+            ],
             "enum": [
               "Folder",
               "File"
             ],
             "type": "string",
-            "description": "[Folder - Folder, File - File]",
-            "example": "Folder"
+            "description": "[Folder - Folder, File - File]"
           },
           {
+            "examples": [
+              1
+            ],
             "enum": [
               1,
               2
             ],
             "type": "integer",
             "description": "[1 - Folder, 2 - File]",
-            "example": 1,
             "x-enum-varnames": [
               "Folder",
               "File"
@@ -7807,76 +7973,96 @@
         "type": "object",
         "properties": {
           "id": {
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ],
             "type": "string",
             "description": "The user ID.",
-            "format": "uuid",
-            "example": "00000000-0000-0000-0000-000000000000"
+            "format": "uuid"
           },
           "displayName": {
+            "examples": [
+              "Mike Zanyatski"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
-            "example": "Mike Zanyatski"
+            "description": "The HTML-encoded user's display name formatted according to the default format for the current culture."
           },
           "avatar": {
+            "examples": [
+              "https://example.com/avatar.jpg"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The user avatar.",
-            "example": "https://example.com/avatar.jpg"
+            "description": "The user avatar."
           },
           "avatarOriginal": {
+            "examples": [
+              "https://example.com/avatar_original.jpg"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The user original size avatar.",
-            "example": "https://example.com/avatar_original.jpg"
+            "description": "The user original size avatar."
           },
           "avatarMax": {
+            "examples": [
+              "https://example.com/avatar_max.jpg"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The user maximum size avatar.",
-            "example": "https://example.com/avatar_max.jpg"
+            "description": "The user maximum size avatar."
           },
           "avatarMedium": {
+            "examples": [
+              "https://example.com/avatar_medium.jpg"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The user medium size avatar.",
-            "example": "https://example.com/avatar_medium.jpg"
+            "description": "The user medium size avatar."
           },
           "avatarSmall": {
+            "examples": [
+              "https://example.com/avatar_small.jpg"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The user small size avatar.",
-            "example": "https://example.com/avatar_small.jpg"
+            "description": "The user small size avatar."
           },
           "profileUrl": {
+            "examples": [
+              "https://example.com/profile/user123"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The user profile URL.",
-            "example": "https://example.com/profile/user123"
+            "description": "The user profile URL."
           },
           "hasAvatar": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Specifies if the user has an avatar or not.",
-            "example": true
+            "description": "Specifies if the user has an avatar or not."
           },
           "isAnonim": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies if the user is anonymous or not.",
-            "example": false
+            "description": "Specifies if the user is anonymous or not."
           }
         },
         "additionalProperties": false,
@@ -7885,6 +8071,9 @@
       "AiFileShare": {
         "oneOf": [
           {
+            "examples": [
+              "None"
+            ],
             "enum": [
               "None",
               "ReadWrite",
@@ -7900,10 +8089,12 @@
               "ContentCreator"
             ],
             "type": "string",
-            "description": "[None - None, ReadWrite - Read and write, Read - Read, Restrict - Restrict, Varies - Varies, Review - Review, Comment - Comment, FillForms - Fill forms, CustomFilter - Custom filter, RoomManager - Room manager, Editing - Editing, ContentCreator - Content creator]",
-            "example": "None"
+            "description": "[None - None, ReadWrite - Read and write, Read - Read, Restrict - Restrict, Varies - Varies, Review - Review, Comment - Comment, FillForms - Fill forms, CustomFilter - Custom filter, RoomManager - Room manager, Editing - Editing, ContentCreator - Content creator]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -7920,7 +8111,6 @@
             ],
             "type": "integer",
             "description": "[0 - None, 1 - Read and write, 2 - Read, 3 - Restrict, 4 - Varies, 5 - Review, 6 - Comment, 7 - Fill forms, 8 - Custom filter, 9 - Room manager, 10 - Editing, 11 - Content creator]",
-            "example": 0,
             "x-enum-varnames": [
               "None",
               "ReadWrite",
@@ -7992,54 +8182,74 @@
         "type": "object",
         "properties": {
           "id": {
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The file operation ID.",
-            "example": "00000000-0000-0000-0000-000000000000"
+            "description": "The file operation ID."
           },
           "Operation": {
             "description": "The file operation type.",
             "$ref": "#/components/schemas/AiFileOperationType"
           },
           "progress": {
+            "examples": [
+              100
+            ],
             "type": "integer",
             "description": "The file operation progress in percentage.",
-            "format": "int32",
-            "example": 100
+            "format": "int32"
           },
           "error": {
+            "examples": [
+              "File not found."
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The file operation error message.",
-            "example": "File not found."
+            "description": "The file operation error message."
           },
           "processed": {
+            "examples": [
+              "1"
+            ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The file operation processing status.",
-            "example": "1"
+            "description": "The file operation processing status."
           },
           "finished": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Specifies if the file operation is finished or not.",
-            "example": true
+            "description": "Specifies if the file operation is finished or not."
           },
           "url": {
+            "examples": [
+              "http://localhost/download"
+            ],
             "type": [
               "null",
               "string"
             ],
             "description": "The file operation URL.",
-            "format": "uri",
-            "example": "http://localhost/download"
+            "format": "uri"
           },
           "files": {
+            "examples": [
+              [
+                {
+                  "id": 10,
+                  "title": "document.docx"
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -8048,15 +8258,17 @@
               "description": "The file entry information.",
               "$ref": "#/components/schemas/AiFileEntryBaseDto"
             },
-            "description": "The list of files of the file operation.",
-            "example": [
-              {
-                "id": 10,
-                "title": "document.docx"
-              }
-            ]
+            "description": "The list of files of the file operation."
           },
           "folders": {
+            "examples": [
+              [
+                {
+                  "id": 20,
+                  "title": "My Folder"
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -8065,13 +8277,7 @@
               "description": "The file entry information.",
               "$ref": "#/components/schemas/AiFileEntryBaseDto"
             },
-            "description": "The list of folders of the file operation.",
-            "example": [
-              {
-                "id": 20,
-                "title": "My Folder"
-              }
-            ]
+            "description": "The list of folders of the file operation."
           },
           "status": {
             "description": "The status of the distributed task related to the file operation.",
@@ -8084,6 +8290,9 @@
       "AiDistributedTaskStatus": {
         "oneOf": [
           {
+            "examples": [
+              "Created"
+            ],
             "enum": [
               "Created",
               "Running",
@@ -8092,10 +8301,12 @@
               "Failted"
             ],
             "type": "string",
-            "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]",
-            "example": "Created"
+            "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -8105,7 +8316,6 @@
             ],
             "type": "integer",
             "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]",
-            "example": 0,
             "x-enum-varnames": [
               "Created",
               "Running",
@@ -8120,6 +8330,9 @@
       "AiFileOperationType": {
         "oneOf": [
           {
+            "examples": [
+              "Move"
+            ],
             "enum": [
               "Move",
               "Copy",
@@ -8131,10 +8344,12 @@
               "Duplicate"
             ],
             "type": "string",
-            "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate]",
-            "example": "Move"
+            "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -8147,7 +8362,6 @@
             ],
             "type": "integer",
             "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
-            "example": 0,
             "x-enum-varnames": [
               "Move",
               "Copy",
@@ -8346,6 +8560,14 @@
         "type": "object",
         "properties": {
           "files": {
+            "examples": [
+              [
+                {
+                  "id": 10,
+                  "title": "document.docx"
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -8354,15 +8576,17 @@
               "description": "The file entry information.",
               "$ref": "#/components/schemas/AiFileEntryBaseDto"
             },
-            "description": "The list of files in the folder.",
-            "example": [
-              {
-                "id": 10,
-                "title": "document.docx"
-              }
-            ]
+            "description": "The list of files in the folder."
           },
           "folders": {
+            "examples": [
+              [
+                {
+                  "id": 20,
+                  "title": "My Folder"
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -8371,46 +8595,50 @@
               "description": "The file entry information.",
               "$ref": "#/components/schemas/AiFileEntryBaseDto"
             },
-            "description": "The list of folders in the folder.",
-            "example": [
-              {
-                "id": 20,
-                "title": "My Folder"
-              }
-            ]
+            "description": "The list of folders in the folder."
           },
           "current": {
             "description": "The current folder information.",
             "$ref": "#/components/schemas/AiFolderDtoInteger"
           },
           "pathParts": {
+            "examples": [
+              "{key = \"Key\", path = \"//path//to//folder\"}"
+            ],
             "type": "null",
-            "description": "The folder path.",
-            "example": "{key = \"Key\", path = \"//path//to//folder\"}"
+            "description": "The folder path."
           },
           "startIndex": {
+            "examples": [
+              0
+            ],
             "type": "integer",
             "description": "The folder start index.",
-            "format": "int32",
-            "example": 0
+            "format": "int32"
           },
           "count": {
+            "examples": [
+              4
+            ],
             "type": "integer",
             "description": "The number of folder elements.",
-            "format": "int32",
-            "example": 4
+            "format": "int32"
           },
           "total": {
+            "examples": [
+              4
+            ],
             "type": "integer",
             "description": "The total number of elements in the folder.",
-            "format": "int32",
-            "example": 4
+            "format": "int32"
           },
           "new": {
+            "examples": [
+              0
+            ],
             "type": "integer",
             "description": "The new element index in the folder.",
-            "format": "int32",
-            "example": 0
+            "format": "int32"
           }
         },
         "additionalProperties": false,

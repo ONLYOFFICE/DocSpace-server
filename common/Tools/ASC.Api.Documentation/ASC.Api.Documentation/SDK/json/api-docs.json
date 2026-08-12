@@ -1619,9 +1619,8 @@
                     "example": ".txt"
                   },
                   "File": {
-                    "type": "string",
                     "description": "The edited file to be saved, uploaded as part of the multipart/form-data request.\r\nThis property represents the modified file content from the HTTP request form after editing operations.\r\nThe file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream.",
-                    "format": "binary",
+                    "contentMediaType": "application/octet-stream",
                     "example": "\r\n             Example of saving an edited file using curl:\r\n             \r\n             curl -X PUT \"https://api.example.com/api/2.0/files/file/123/saveediting\" \\\r\n               -H \"Authorization: Bearer your_token\" \\\r\n               -F \"File=@/path/to/edited_document.docx\" \\\r\n               -F \"FileExtension=.docx\" \\\r\n               -F \"Forcesave=false\"\r\n             \r\n            \r\n             Example of saving an edited file using C# HttpClient:\r\n             \r\n             using var content = new MultipartFormDataContent();\r\n             using var fileStream = File.OpenRead(\"edited_document.docx\");\r\n             content.Add(new StreamContent(fileStream), \"File\", \"edited_document.docx\");\r\n             content.Add(new StringContent(\".docx\"), \"FileExtension\");\r\n             content.Add(new StringContent(\"false\"), \"Forcesave\");\r\n            \r\n             var response = await httpClient.PutAsync(url, content);\r\n             "
                   },
                   "Forcesave": {
@@ -8891,7 +8890,6 @@
                   36
                 ],
                 "type": "integer",
-                "example": 0,
                 "x-enum-varnames": [
                   "DEFAULT",
                   "COMMON",
@@ -11026,9 +11024,8 @@
                 "type": "object",
                 "properties": {
                   "InsertFile.File": {
-                    "type": "string",
                     "description": "The file to be inserted.",
-                    "format": "binary",
+                    "contentMediaType": "application/octet-stream",
                     "example": "binary file data"
                   },
                   "InsertFile.Title": {
@@ -11265,9 +11262,8 @@
                 "type": "object",
                 "properties": {
                   "File": {
-                    "type": "string",
                     "description": "The file to be uploaded.",
-                    "format": "binary",
+                    "contentMediaType": "application/octet-stream",
                     "example": "binary file data"
                   }
                 }
@@ -11388,9 +11384,8 @@
                 "type": "object",
                 "properties": {
                   "File": {
-                    "type": "string",
                     "description": "The file to be inserted.",
-                    "format": "binary",
+                    "contentMediaType": "application/octet-stream",
                     "example": "binary file data"
                   },
                   "Title": {
@@ -11616,9 +11611,8 @@
                 "type": "object",
                 "properties": {
                   "File": {
-                    "type": "string",
                     "description": "The file to be uploaded.",
-                    "format": "binary",
+                    "contentMediaType": "application/octet-stream",
                     "example": "binary file data"
                   }
                 }
@@ -13953,9 +13947,8 @@
                 "type": "object",
                 "properties": {
                   "File": {
-                    "type": "string",
                     "description": "The file to be uploaded as part of the multipart/form-data request.\r\nThis property represents the uploaded file content from the HTTP request form.\r\nThe file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream.",
-                    "format": "binary",
+                    "contentMediaType": "application/octet-stream",
                     "example": "\r\n             Example of sending a file using curl:\r\n             \r\n             curl -X POST \"https://api.example.com/api/2.0/files/folder/1/upload/session_abc123\" \\\r\n               -H \"Authorization: Bearer your_token\" \\\r\n               -F \"file=@/path/to/document.pdf\"\r\n             \r\n            \r\n             Example of sending a file using C# HttpClient:\r\n             \r\n             using var content = new MultipartFormDataContent();\r\n             using var fileStream = File.OpenRead(\"document.pdf\");\r\n             content.Add(new StreamContent(fileStream), \"file\", \"document.pdf\");\r\n            \r\n             var response = await httpClient.PostAsync(url, content);\r\n             "
                   }
                 }
@@ -14103,9 +14096,8 @@
                 "type": "object",
                 "properties": {
                   "File": {
-                    "type": "string",
                     "description": "The file chunk to be uploaded as part of the multipart/form-data request.\r\nThis property represents the uploaded file chunk content from the HTTP request form for chunked upload operations.\r\nThe file chunk is accessed via the IFormFile interface which provides access to the chunk content and length.",
-                    "format": "binary",
+                    "contentMediaType": "application/octet-stream",
                     "example": "\r\n             Example of sending a file chunk using curl:\r\n             \r\n             curl -X POST \"https://api.example.com/api/2.0/files/folder/1/upload/session_abc123?chunkNumber=1\" \\\r\n               -H \"Authorization: Bearer your_token\" \\\r\n               -F \"file=@/path/to/chunk1.part\"\r\n             \r\n            \r\n             Example of sending a file chunk using C# HttpClient:\r\n             \r\n             using var content = new MultipartFormDataContent();\r\n             var chunkStream = new MemoryStream(chunkBytes);\r\n             content.Add(new StreamContent(chunkStream), \"file\", \"document.pdf\");\r\n            \r\n             var response = await httpClient.PostAsync($\"{url}?chunkNumber=1\", content);\r\n             "
                   }
                 }
@@ -16961,7 +16953,6 @@
                     11
                   ],
                   "type": "integer",
-                  "example": 0,
                   "x-enum-varnames": [
                     "None",
                     "ReadWrite",
@@ -17519,9 +17510,8 @@
                 "type": "object",
                 "properties": {
                   "File": {
-                    "type": "string",
                     "description": "File to replace template with",
-                    "format": "binary",
+                    "contentMediaType": "application/octet-stream",
                     "example": "binary file data"
                   }
                 }
@@ -26473,10 +26463,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "allOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/AiResolvedAssignment"
+                    },
+                    {
+                      "type": "null"
                     }
                   ]
                 }
@@ -26667,8 +26659,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               }
             }
@@ -27101,10 +27095,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "allOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/AiAttachment"
+                    },
+                    {
+                      "type": "null"
                     }
                   ]
                 }
@@ -27149,10 +27145,12 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "nullable": true,
-                    "allOf": [
+                    "anyOf": [
                       {
                         "$ref": "#/components/schemas/AiAttachment"
+                      },
+                      {
+                        "type": "null"
                       }
                     ]
                   }
@@ -27756,9 +27754,7 @@
                   "anyOf": [
                     {
                       "type": "boolean",
-                      "enum": [
-                        true
-                      ]
+                      "const": true
                     },
                     {
                       "type": "object",
@@ -27962,8 +27958,10 @@
                         "type": "string"
                       },
                       "folderId": {
-                        "nullable": true,
-                        "type": "string"
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       }
                     },
                     "description": "Fields to change."
@@ -28020,8 +28018,10 @@
                     "description": "Prompt id to move."
                   },
                   "folderId": {
-                    "nullable": true,
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "description": "Target folder id, or `null` for root."
                   }
                 },
@@ -28394,10 +28394,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "allOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/AiPrompt"
+                    },
+                    {
+                      "type": "null"
                     }
                   ]
                 }
@@ -28440,10 +28442,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "allOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/AiPromptFolder"
+                    },
+                    {
+                      "type": "null"
                     }
                   ]
                 }
@@ -29012,10 +29016,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "allOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/AiThread"
+                    },
+                    {
+                      "type": "null"
                     }
                   ]
                 }
@@ -29058,10 +29064,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "allOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/AiThreadMessageLike"
+                    },
+                    {
+                      "type": "null"
                     }
                   ]
                 }
@@ -29365,10 +29373,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "allOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/AiMcpServerConfig"
+                    },
+                    {
+                      "type": "null"
                     }
                   ]
                 }
@@ -29892,10 +29902,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "allOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/AiWebSearchConfig"
+                    },
+                    {
+                      "type": "null"
                     }
                   ]
                 }
@@ -29982,9 +29994,7 @@
                   "anyOf": [
                     {
                       "type": "boolean",
-                      "enum": [
-                        true
-                      ]
+                      "const": true
                     },
                     {
                       "type": "object",
@@ -30221,13 +30231,9 @@
                     "description": "Markdown content to convert."
                   },
                   "folderId": {
-                    "oneOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "number"
-                      }
+                    "type": [
+                      "string",
+                      "number"
                     ],
                     "description": "Target folder id (int or string)."
                   }
@@ -30661,13 +30667,9 @@
                   "roomIds": {
                     "type": "array",
                     "items": {
-                      "oneOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "string"
-                        }
+                      "type": [
+                        "number",
+                        "string"
                       ],
                       "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
                     },
@@ -30727,13 +30729,9 @@
                   "roomIds": {
                     "type": "array",
                     "items": {
-                      "oneOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "string"
-                        }
+                      "type": [
+                        "number",
+                        "string"
                       ],
                       "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
                     },
@@ -36258,10 +36256,11 @@
                 "type": "object",
                 "properties": {
                   "File": {
-                    "type": "string",
                     "description": "The image data.",
-                    "format": "binary",
-                    "example": "{\"file\": \"photo.jpg\"}"
+                    "contentMediaType": "application/octet-stream",
+                    "example": {
+                      "file": "photo.jpg"
+                    }
                   },
                   "Autosave": {
                     "type": "boolean",
@@ -38961,7 +38960,6 @@
                   4
                 ],
                 "type": "integer",
-                "example": 0,
                 "x-enum-varnames": [
                   "All",
                   "RoomAdmin",
@@ -39503,7 +39501,6 @@
                   4
                 ],
                 "type": "integer",
-                "example": 0,
                 "x-enum-varnames": [
                   "All",
                   "RoomAdmin",
@@ -60097,8 +60094,7 @@
                   "Files": {
                     "type": "array",
                     "items": {
-                      "type": "string",
-                      "format": "binary"
+                      "contentMediaType": "application/octet-stream"
                     },
                     "description": "The list of license files to be uploaded.",
                     "example": "license.lic"
@@ -69291,7 +69287,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "EveryDay",
           "EveryWeek",
@@ -69369,7 +69364,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Backup",
           "Restore",
@@ -69569,7 +69563,6 @@
           5
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Documents",
           "ThridpartyDocuments",
@@ -69733,7 +69726,6 @@
           4
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Created",
           "Running",
@@ -69812,7 +69804,8 @@
                 "string"
               ]
             },
-            "description": "The backup storage parameters."
+            "description": "The backup storage parameters.",
+            "example": {}
           },
           "cronParams": {
             "description": "The backup cron parameters.",
@@ -70054,7 +70047,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "All",
           "Files",
@@ -70125,7 +70117,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Xlsx",
           "Csv"
@@ -70643,7 +70634,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "AllAllowed",
           "PartAllowed",
@@ -70981,7 +70971,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Fast",
           "Strict"
@@ -71967,8 +71956,7 @@
           "Dark",
           "System"
         ],
-        "type": "string",
-        "example": "Base"
+        "type": "string"
       },
       "DateToAutoCleanUp": {
         "description": "[1 - One week, 2 - Two weeks, 3 - One month, 4 - Thirty days, 5 - Two months, 6 - Three months]",
@@ -71981,7 +71969,6 @@
           6
         ],
         "type": "integer",
-        "example": 1,
         "x-enum-varnames": [
           "OneWeek",
           "TwoWeeks",
@@ -73303,7 +73290,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Desktop",
           "Mobile",
@@ -73383,7 +73369,6 @@
           4
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "NotActivated",
           "Activated",
@@ -73744,7 +73729,6 @@
           7
         ],
         "type": "integer",
-        "example": 1,
         "x-enum-varnames": [
           "Active",
           "Terminated",
@@ -74263,8 +74247,7 @@
           "Overwrite",
           "Duplicate"
         ],
-        "type": "string",
-        "example": "Skip"
+        "type": "string"
       },
       "FileDtoInteger": {
         "allOf": [
@@ -75538,7 +75521,6 @@
           2
         ],
         "type": "integer",
-        "example": 1,
         "x-enum-varnames": [
           "Folder",
           "File"
@@ -75955,7 +75937,6 @@
           7
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Move",
           "Copy",
@@ -76166,7 +76147,6 @@
           11
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "ReadWrite",
@@ -76244,10 +76224,10 @@
           },
           "sharedTo": {
             "description": "The user who has the access to the specified file.",
+            "deprecated": true,
             "example": {
               "displayName": "John Doe"
-            },
-            "deprecated": true
+            }
           },
           "sharedToUser": {
             "description": "The full list of user parameters.",
@@ -76480,7 +76460,6 @@
           256
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "IsEditing",
@@ -76509,7 +76488,6 @@
           11
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Unknown",
           "Archive",
@@ -77097,7 +77075,6 @@
                 11
               ],
               "type": "integer",
-              "example": 0,
               "x-enum-varnames": [
                 "None",
                 "ReadWrite",
@@ -77421,7 +77398,6 @@
           26
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "FilesOnly",
@@ -77752,8 +77728,8 @@
                   "boolean"
                 ],
                 "description": "Specifies if an external link to the folder is expired or not.",
-                "example": false,
-                "deprecated": true
+                "deprecated": true,
+                "example": false
               },
               "chatSettings": {
                 "description": "The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.\r\nOnly applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured.",
@@ -77942,8 +77918,8 @@
                   "boolean"
                 ],
                 "description": "Specifies if an external link to the folder is expired or not.",
-                "example": false,
-                "deprecated": true
+                "deprecated": true,
+                "example": false
               },
               "chatSettings": {
                 "description": "The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.\r\nOnly applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured.",
@@ -78239,7 +78215,6 @@
           36
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "DEFAULT",
           "COMMON",
@@ -78282,7 +78257,6 @@
           3
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Stop",
           "Resume",
@@ -78301,7 +78275,6 @@
           5
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "Draft",
@@ -79223,7 +79196,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Invitation",
           "External"
@@ -79237,7 +79209,6 @@
           3
         ],
         "type": "integer",
-        "example": 1,
         "x-enum-varnames": [
           "Room",
           "Documents",
@@ -79926,7 +79897,6 @@
           -1
         ],
         "type": "integer",
-        "example": 1000,
         "x-enum-varnames": [
           "LoginSuccess",
           "LoginSuccessViaSocialAccount",
@@ -80274,7 +80244,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "NotActivated",
           "Activated"
@@ -81016,7 +80985,6 @@
           9
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "Box",
@@ -81039,7 +81007,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "All",
           "Default",
@@ -81054,7 +81021,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "User",
           "Room",
@@ -81149,7 +81115,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Day",
           "Month",
@@ -81591,7 +81556,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "Private",
@@ -81640,7 +81604,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "FormRoleBlockingDeletion"
@@ -81881,7 +81844,6 @@
           9
         ],
         "type": "integer",
-        "example": 1,
         "x-enum-varnames": [
           "FillingFormsRoom",
           "EditingRoom",
@@ -82044,7 +82006,6 @@
           9
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Active",
           "Archive",
@@ -82271,7 +82232,6 @@
           32
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "UserOrGroup",
           "InvitationLink",
@@ -82308,7 +82268,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Ascending",
           "Descending"
@@ -82332,7 +82291,6 @@
           12
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "DateAndTime",
           "AZ",
@@ -82383,7 +82341,6 @@
           3
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "ShareToFillOut",
@@ -82402,7 +82359,6 @@
           5
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Ok",
           "Invalid",
@@ -82419,7 +82375,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "Internal",
@@ -82477,7 +82432,6 @@
           4
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "User",
           "ExternalLink",
@@ -82777,7 +82731,6 @@
           4
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Waiting",
           "Created",
@@ -83572,7 +83525,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "InProgress",
           "Completed",
@@ -83590,7 +83542,6 @@
           16
         ],
         "type": "integer",
-        "example": 1,
         "x-enum-varnames": [
           "UserName",
           "UserEmail",
@@ -84130,9 +84081,7 @@
           },
           "object": {
             "type": "string",
-            "enum": [
-              "chat.completion.chunk"
-            ]
+            "const": "chat.completion.chunk"
           },
           "created": {
             "type": "number"
@@ -84179,13 +84128,13 @@
         "properties": {
           "role": {
             "type": "string",
-            "enum": [
-              "assistant"
-            ]
+            "const": "assistant"
           },
           "content": {
-            "nullable": true,
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "tool_calls": {
             "type": "array",
@@ -84206,9 +84155,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "function"
-            ]
+            "const": "function"
           },
           "function": {
             "type": "object",
@@ -84227,8 +84174,10 @@
         ]
       },
       "AiOpenAIFinishReason": {
-        "nullable": true,
-        "type": "string",
+        "type": [
+          "string",
+          "null"
+        ],
         "enum": [
           "stop",
           "length",
@@ -84251,12 +84200,16 @@
                 "type": "string"
               },
               "code": {
-                "nullable": true,
-                "type": "string"
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "param": {
-                "nullable": true,
-                "type": "string"
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             },
             "required": [
@@ -84716,8 +84669,10 @@
             "type": "string"
           },
           "folderId": {
-            "nullable": true,
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -84832,9 +84787,7 @@
         "properties": {
           "version": {
             "type": "number",
-            "enum": [
-              1
-            ]
+            "const": 1
           },
           "folders": {
             "type": "array",
@@ -87490,7 +87443,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "SSO",
           "LDAP",
@@ -87667,7 +87619,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "All",
           "People",
@@ -88011,8 +87962,7 @@
           "DocSpaceAdmin",
           "User"
         ],
-        "type": "string",
-        "example": "All"
+        "type": "string"
       },
       "EmployeeWrapper": {
         "type": "object",
@@ -88642,7 +88592,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Paid",
           "Free"
@@ -88657,7 +88606,6 @@
           3
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Default",
           "AndroidV2",
@@ -89389,7 +89337,6 @@
           19
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "Create",
@@ -91389,8 +91336,7 @@
           "Wizard",
           "GuestShareLink"
         ],
-        "type": "string",
-        "example": "EmpInvite"
+        "type": "string"
       },
       "ConfirmWrapper": {
         "type": "object",
@@ -92807,7 +92753,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "ProvideChoice",
           "Web",
@@ -93757,7 +93702,6 @@
           3
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Decrypted",
           "EncryptionStarted",
@@ -93841,7 +93785,6 @@
           27
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "File",
@@ -93911,7 +93854,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "MySql",
           "Sqlite"
@@ -93925,7 +93867,8 @@
         "type": "object",
         "properties": {
           "value": {
-            "description": "The used space value."
+            "description": "The used space value.",
+            "example": {}
           },
           "title": {
             "type": [
@@ -94869,7 +94812,6 @@
           31
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "Files",
@@ -95042,7 +94984,6 @@
           14
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Facebook",
           "Google",
@@ -95680,7 +95621,6 @@
           3
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Badges",
           "RoomsActivity",
@@ -95799,7 +95739,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Descending",
           "Ascending"
@@ -95814,7 +95753,6 @@
           3
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Pending",
           "Completed",
@@ -95847,7 +95785,6 @@
           19
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Unknown",
           "ServicePayment",
@@ -96187,7 +96124,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "Set",
@@ -96455,7 +96391,6 @@
           3
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Set",
           "Add",
@@ -96471,7 +96406,6 @@
           8
         ],
         "type": "integer",
-        "example": 2,
         "x-enum-varnames": [
           "Documents",
           "Login",
@@ -96728,7 +96662,6 @@
           1
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Active",
           "Overdue"
@@ -96782,7 +96715,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "unlinked",
           "linked",
@@ -97004,7 +96936,8 @@
         "type": "object",
         "properties": {
           "roomsId": {
-            "description": "The target room identifier."
+            "description": "The target room identifier.",
+            "example": {}
           },
           "mute": {
             "type": "boolean",
@@ -98714,7 +98647,6 @@
           3
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Trial",
           "Paid",
@@ -99428,7 +99360,6 @@
           16
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Other",
           "Accounting",
@@ -99749,7 +99680,8 @@
             "example": "/images/premium-storage.png"
           },
           "value": {
-            "description": "The value of the tenant quota feature."
+            "description": "The value of the tenant quota feature.",
+            "example": {}
           },
           "type": {
             "type": [
@@ -99978,7 +99910,6 @@
           6
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Active",
           "Suspended",
@@ -99997,7 +99928,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "Custom",
@@ -100151,7 +100081,6 @@
           -11
         ],
         "type": "integer",
-        "example": -18,
         "x-enum-varnames": [
           "AISearch",
           "DocsCloudDevPack",
@@ -100181,7 +100110,6 @@
                 -11
               ],
               "type": "integer",
-              "example": -18,
               "x-enum-varnames": [
                 "AISearch",
                 "DocsCloudDevPack",
@@ -100548,7 +100476,6 @@
           2
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "Sms",
@@ -101090,7 +101017,6 @@
           6
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "Ok",
           "Invalid",
@@ -101504,7 +101430,8 @@
                 "string"
               ]
             },
-            "description": "The web plugin localized name."
+            "description": "The web plugin localized name.",
+            "example": {}
           },
           "descriptionLocale": {
             "type": "object",
@@ -101514,7 +101441,8 @@
                 "string"
               ]
             },
-            "description": "The web plugin localized description."
+            "description": "The web plugin localized description.",
+            "example": {}
           },
           "runtime": {
             "type": [
@@ -101602,7 +101530,6 @@
           16
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "None",
           "NotSent",
@@ -101671,7 +101598,6 @@
           1073741824
         ],
         "type": "integer",
-        "example": 0,
         "x-enum-varnames": [
           "All",
           "UserCreated",
@@ -102274,7 +102200,6 @@
           16
         ],
         "type": "integer",
-        "example": 1,
         "x-enum-varnames": [
           "LightSmall",
           "LoginPage",

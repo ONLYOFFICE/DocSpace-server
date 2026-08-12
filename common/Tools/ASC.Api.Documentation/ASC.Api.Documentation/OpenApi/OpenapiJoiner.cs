@@ -597,35 +597,56 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
     /// Works around openapi-generator defects in openapi 3.1 documents. The rewrites are applied to the SDK input
     /// only - the published openapi files stay untouched.
     /// </summary>
-    private static void NormalizeNullableTypes(JsonNode? node)
+    private static void NormalizeNullableTypes(JsonNode? node, bool unionMember = false)
     {
         switch (node)
         {
             case JsonArray array:
                 foreach (var item in array)
                 {
-                    NormalizeNullableTypes(item);
+                    NormalizeNullableTypes(item, unionMember);
                 }
 
                 return;
 
             case JsonObject obj:
-                NormalizeNullableType(obj);
+                NormalizeNullableType(obj, unionMember);
                 RemoveClosedObjectMarker(obj);
                 DowngradeSchemaExamples(obj);
 
                 foreach (var property in obj.ToArray())
                 {
+                    // Under these the keys are property names, so a property called `example` or `default`
+                    // still holds a schema and has to be walked into.
+                    if (property.Key is "properties" or "patternProperties" or "definitions" or "$defs")
+                    {
+                        NormalizeSchemaMap(property.Value);
+                        continue;
+                    }
+
                     // Sample payloads are data, not schemas - never rewrite them.
                     if (property.Key is "example" or "examples" or "default")
                     {
                         continue;
                     }
 
-                    NormalizeNullableTypes(property.Value);
+                    NormalizeNullableTypes(property.Value, property.Key is "anyOf" or "oneOf");
                 }
 
                 return;
+        }
+    }
+
+    private static void NormalizeSchemaMap(JsonNode? node)
+    {
+        if (node is not JsonObject map)
+        {
+            return;
+        }
+
+        foreach (var entry in map.ToArray())
+        {
+            NormalizeNullableTypes(entry.Value);
         }
     }
 
@@ -662,7 +683,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         schema["example"] = first;
     }
 
-    private static void NormalizeNullableType(JsonObject schema)
+    private static void NormalizeNullableType(JsonObject schema, bool unionMember)
     {
         if (!schema.TryGetPropertyValue("type", out var typeNode))
         {
@@ -671,7 +692,10 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
 
         if (typeNode is JsonValue value)
         {
-            if (value.TryGetValue<string>(out var singleType) && singleType == "null")
+            // Inside `anyOf`/`oneOf`, `"type": "null"` is the null branch of the union and must stay intact.
+            // On a property it means the value has to be null, which is never what the emitter meant - it is what
+            // an untyped `object` turns into - so the keyword is dropped and the property stays untyped.
+            if (!unionMember && value.TryGetValue<string>(out var singleType) && singleType == "null")
             {
                 schema.Remove("type");
             }
