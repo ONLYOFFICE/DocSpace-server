@@ -50,7 +50,9 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -298,7 +300,7 @@ public class AuthorizationServerConfiguration {
    * auto-registration keeps each filter active only where it's explicitly added via {@code
    * addFilterBefore}.
    */
-  @Bean
+  @Bean("authorizationDisableBasicSignatureAuthFilterAutoRegistration")
   FilterRegistrationBean<BasicSignatureAuthenticationFilter>
       disableBasicSignatureAuthFilterAutoRegistration() {
     var registration = new FilterRegistrationBean<>(authenticationFilter);
@@ -306,10 +308,11 @@ public class AuthorizationServerConfiguration {
     return registration;
   }
 
-  @Bean
-  FilterRegistrationBean<RateLimiterFilter> disableRateLimiterFilterAutoRegistration() {
-    var registration = new FilterRegistrationBean<RateLimiterFilter>();
-    rateLimiterFilter.ifPresent(registration::setFilter);
+  @Bean("authorizationDisableRateLimiterFilterAutoRegistration")
+  @ConditionalOnProperty(prefix = "bucket4j", name = "enabled", havingValue = "true")
+  FilterRegistrationBean<RateLimiterFilter> disableRateLimiterFilterAutoRegistration(
+      @Qualifier("authorizationRateLimiterFilter") RateLimiterFilter filter) {
+    var registration = new FilterRegistrationBean<>(filter);
     registration.setEnabled(false);
     return registration;
   }

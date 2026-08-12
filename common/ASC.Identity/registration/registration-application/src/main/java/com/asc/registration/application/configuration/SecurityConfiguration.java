@@ -40,6 +40,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -148,19 +149,21 @@ public class SecurityConfiguration {
    * auto-registration keeps each filter active only where it's explicitly added via {@code
    * addFilterAt}/{@code addFilterAfter}.
    */
-  @Bean
+  @Bean("registrationDisableBasicSignatureAuthFilterAutoRegistration")
   FilterRegistrationBean<BasicSignatureAuthenticationFilter>
-      disableBasicSignatureAuthFilterAutoRegistration(BasicSignatureAuthenticationFilter filter) {
+      disableBasicSignatureAuthFilterAutoRegistration(
+          @Qualifier("registrationBasicSignatureAuthenticationFilter")
+              BasicSignatureAuthenticationFilter filter) {
     var registration = new FilterRegistrationBean<>(filter);
     registration.setEnabled(false);
     return registration;
   }
 
-  @Bean
+  @Bean("registrationDisableRateLimiterFilterAutoRegistration")
+  @ConditionalOnProperty(prefix = "bucket4j", name = "enabled", havingValue = "true")
   FilterRegistrationBean<RateLimiterFilter> disableRateLimiterFilterAutoRegistration(
-      Optional<RateLimiterFilter> filter) {
-    var registration = new FilterRegistrationBean<RateLimiterFilter>();
-    filter.ifPresent(registration::setFilter);
+      @Qualifier("registrationRateLimiterFilter") RateLimiterFilter filter) {
+    var registration = new FilterRegistrationBean<>(filter);
     registration.setEnabled(false);
     return registration;
   }
