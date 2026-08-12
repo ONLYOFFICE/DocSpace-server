@@ -8890,6 +8890,7 @@
                   36
                 ],
                 "type": "integer",
+                "example": 0,
                 "x-enum-varnames": [
                   "DEFAULT",
                   "COMMON",
@@ -16953,6 +16954,7 @@
                     11
                   ],
                   "type": "integer",
+                  "example": 0,
                   "x-enum-varnames": [
                     "None",
                     "ReadWrite",
@@ -38960,6 +38962,7 @@
                   4
                 ],
                 "type": "integer",
+                "example": 0,
                 "x-enum-varnames": [
                   "All",
                   "RoomAdmin",
@@ -39501,6 +39504,7 @@
                   4
                 ],
                 "type": "integer",
+                "example": 0,
                 "x-enum-varnames": [
                   "All",
                   "RoomAdmin",
@@ -69287,6 +69291,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "EveryDay",
           "EveryWeek",
@@ -69364,6 +69369,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Backup",
           "Restore",
@@ -69563,6 +69569,7 @@
           5
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Documents",
           "ThridpartyDocuments",
@@ -69726,6 +69733,7 @@
           4
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Created",
           "Running",
@@ -70047,6 +70055,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "All",
           "Files",
@@ -70117,6 +70126,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Xlsx",
           "Csv"
@@ -70634,6 +70644,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "AllAllowed",
           "PartAllowed",
@@ -70971,6 +70982,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Fast",
           "Strict"
@@ -71956,7 +71968,8 @@
           "Dark",
           "System"
         ],
-        "type": "string"
+        "type": "string",
+        "example": "Base"
       },
       "DateToAutoCleanUp": {
         "description": "[1 - One week, 2 - Two weeks, 3 - One month, 4 - Thirty days, 5 - Two months, 6 - Three months]",
@@ -71969,6 +71982,7 @@
           6
         ],
         "type": "integer",
+        "example": 1,
         "x-enum-varnames": [
           "OneWeek",
           "TwoWeeks",
@@ -73290,6 +73304,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Desktop",
           "Mobile",
@@ -73369,6 +73384,7 @@
           4
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "NotActivated",
           "Activated",
@@ -73729,6 +73745,7 @@
           7
         ],
         "type": "integer",
+        "example": 1,
         "x-enum-varnames": [
           "Active",
           "Terminated",
@@ -74247,7 +74264,8 @@
           "Overwrite",
           "Duplicate"
         ],
-        "type": "string"
+        "type": "string",
+        "example": "Skip"
       },
       "FileDtoInteger": {
         "allOf": [
@@ -75521,6 +75539,7 @@
           2
         ],
         "type": "integer",
+        "example": 1,
         "x-enum-varnames": [
           "Folder",
           "File"
@@ -75937,6 +75956,7 @@
           7
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Move",
           "Copy",
@@ -76147,6 +76167,7 @@
           11
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "ReadWrite",
@@ -76460,6 +76481,7 @@
           256
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "IsEditing",
@@ -76488,6 +76510,7 @@
           11
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Unknown",
           "Archive",
@@ -77075,6 +77098,7 @@
                 11
               ],
               "type": "integer",
+              "example": 0,
               "x-enum-varnames": [
                 "None",
                 "ReadWrite",
@@ -77398,6 +77422,7 @@
           26
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "FilesOnly",
@@ -78215,6 +78240,7 @@
           36
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "DEFAULT",
           "COMMON",
@@ -78257,6 +78283,7 @@
           3
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Stop",
           "Resume",
@@ -78275,6 +78302,7 @@
           5
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "Draft",
@@ -79196,6 +79224,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Invitation",
           "External"
@@ -79209,6 +79238,7 @@
           3
         ],
         "type": "integer",
+        "example": 1,
         "x-enum-varnames": [
           "Room",
           "Documents",
@@ -79897,6 +79927,7 @@
           -1
         ],
         "type": "integer",
+        "example": 1000,
         "x-enum-varnames": [
           "LoginSuccess",
           "LoginSuccessViaSocialAccount",
@@ -80244,6 +80275,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "NotActivated",
           "Activated"
@@ -80985,6 +81017,7 @@
           9
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "Box",
@@ -81007,6 +81040,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "All",
           "Default",
@@ -81021,6 +81055,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "User",
           "Room",
@@ -81115,6 +81150,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Day",
           "Month",
@@ -81556,6 +81592,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "Private",
@@ -81604,6 +81641,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "FormRoleBlockingDeletion"
@@ -81844,6 +81882,7 @@
           9
         ],
         "type": "integer",
+        "example": 1,
         "x-enum-varnames": [
           "FillingFormsRoom",
           "EditingRoom",
@@ -82006,6 +82045,7 @@
           9
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Active",
           "Archive",
@@ -82232,6 +82272,7 @@
           32
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "UserOrGroup",
           "InvitationLink",
@@ -82268,6 +82309,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Ascending",
           "Descending"
@@ -82291,6 +82333,7 @@
           12
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "DateAndTime",
           "AZ",
@@ -82341,6 +82384,7 @@
           3
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "ShareToFillOut",
@@ -82359,6 +82403,7 @@
           5
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Ok",
           "Invalid",
@@ -82375,6 +82420,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "Internal",
@@ -82432,6 +82478,7 @@
           4
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "User",
           "ExternalLink",
@@ -82731,6 +82778,7 @@
           4
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Waiting",
           "Created",
@@ -83525,6 +83573,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "InProgress",
           "Completed",
@@ -83542,6 +83591,7 @@
           16
         ],
         "type": "integer",
+        "example": 1,
         "x-enum-varnames": [
           "UserName",
           "UserEmail",
@@ -85483,8 +85533,8 @@
                   "boolean"
                 ],
                 "description": "Specifies if an external link to the folder is expired or not.",
-                "example": false,
-                "deprecated": true
+                "deprecated": true,
+                "example": false
               },
               "chatSettings": {
                 "description": "The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.\r\nOnly applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured.",
@@ -87443,6 +87493,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "SSO",
           "LDAP",
@@ -87619,6 +87670,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "All",
           "People",
@@ -87962,7 +88014,8 @@
           "DocSpaceAdmin",
           "User"
         ],
-        "type": "string"
+        "type": "string",
+        "example": "All"
       },
       "EmployeeWrapper": {
         "type": "object",
@@ -88592,6 +88645,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Paid",
           "Free"
@@ -88606,6 +88660,7 @@
           3
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Default",
           "AndroidV2",
@@ -89337,6 +89392,7 @@
           19
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "Create",
@@ -91336,7 +91392,8 @@
           "Wizard",
           "GuestShareLink"
         ],
-        "type": "string"
+        "type": "string",
+        "example": "EmpInvite"
       },
       "ConfirmWrapper": {
         "type": "object",
@@ -92753,6 +92810,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "ProvideChoice",
           "Web",
@@ -93702,6 +93760,7 @@
           3
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Decrypted",
           "EncryptionStarted",
@@ -93785,6 +93844,7 @@
           27
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "File",
@@ -93854,6 +93914,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "MySql",
           "Sqlite"
@@ -94812,6 +94873,7 @@
           31
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "Files",
@@ -94984,6 +95046,7 @@
           14
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Facebook",
           "Google",
@@ -95621,6 +95684,7 @@
           3
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Badges",
           "RoomsActivity",
@@ -95739,6 +95803,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Descending",
           "Ascending"
@@ -95753,6 +95818,7 @@
           3
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Pending",
           "Completed",
@@ -95785,6 +95851,7 @@
           19
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Unknown",
           "ServicePayment",
@@ -96124,6 +96191,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "Set",
@@ -96391,6 +96459,7 @@
           3
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Set",
           "Add",
@@ -96406,6 +96475,7 @@
           8
         ],
         "type": "integer",
+        "example": 2,
         "x-enum-varnames": [
           "Documents",
           "Login",
@@ -96662,6 +96732,7 @@
           1
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Active",
           "Overdue"
@@ -96715,6 +96786,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "unlinked",
           "linked",
@@ -98647,6 +98719,7 @@
           3
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Trial",
           "Paid",
@@ -99360,6 +99433,7 @@
           16
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Other",
           "Accounting",
@@ -99910,6 +99984,7 @@
           6
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Active",
           "Suspended",
@@ -99928,6 +100003,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "Custom",
@@ -100081,6 +100157,7 @@
           -11
         ],
         "type": "integer",
+        "example": -18,
         "x-enum-varnames": [
           "AISearch",
           "DocsCloudDevPack",
@@ -100110,6 +100187,7 @@
                 -11
               ],
               "type": "integer",
+              "example": -18,
               "x-enum-varnames": [
                 "AISearch",
                 "DocsCloudDevPack",
@@ -100476,6 +100554,7 @@
           2
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "Sms",
@@ -101017,6 +101096,7 @@
           6
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "Ok",
           "Invalid",
@@ -101530,6 +101610,7 @@
           16
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "None",
           "NotSent",
@@ -101598,6 +101679,7 @@
           1073741824
         ],
         "type": "integer",
+        "example": 0,
         "x-enum-varnames": [
           "All",
           "UserCreated",
@@ -102200,6 +102282,7 @@
           16
         ],
         "type": "integer",
+        "example": 1,
         "x-enum-varnames": [
           "LightSmall",
           "LoginPage",

@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -119,6 +119,24 @@ public class EnumCleaner
 
     private static string? GetScalarType(JsonNode? typeNode)
     {
-        return typeNode is JsonValue v && v.TryGetValue<string>(out var s) ? s : null;
+        if (typeNode is JsonValue value)
+        {
+            return value.TryGetValue<string>(out var single) ? single : null;
+        }
+
+        // Openapi 3.1 spells a nullable enum as `"type": ["string", "null"]`. The null branch says nothing about
+        // the value type, so the union is matched by the one type left next to it.
+        if (typeNode is JsonArray types)
+        {
+            var named = types
+                .OfType<JsonValue>()
+                .Select(t => t.TryGetValue<string>(out var name) ? name : null)
+                .Where(name => name is not null and not "null")
+                .ToArray();
+
+            return named.Length == 1 ? named[0] : null;
+        }
+
+        return null;
     }
 }

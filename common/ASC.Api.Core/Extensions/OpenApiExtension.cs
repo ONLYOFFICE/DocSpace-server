@@ -46,6 +46,8 @@ public static class OpenApiExtension
 
     public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration, string docVersion = "2.0")
     {
+        // Drives the documents written at build time, which read SwaggerOptions from DI and never touch the
+        // middleware. Not a duplicate of the version set in UseOpenApi: that one only serves the http endpoint.
         services.Configure<SwaggerOptions>(o => o.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1);
 
         return services.AddSwaggerGen(c =>

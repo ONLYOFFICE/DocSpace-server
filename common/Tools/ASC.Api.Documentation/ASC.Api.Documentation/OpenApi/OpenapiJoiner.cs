@@ -94,11 +94,13 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
 
         SortTagGroups(result);
+        // Runs first so that everything below sees the keyword spellings openapi-generator understands - collapsing
+        // an enum union, for one, carries the example over and would drop a 3.1 `examples` array.
+        NormalizeNullableTypes(result);
         EnumCleaner.Clean(result);
         FixMultipartFormData(result);
         RemoveFormCollectionSchema(result);
         ApplyDeepObjectStyle(result);
-        NormalizeNullableTypes(result);
 
         var options = new JsonSerializerOptions
         {
