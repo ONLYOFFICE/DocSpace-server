@@ -40,6 +40,16 @@ public class DocumentBuilderScriptHelper
         return $"temp{DateTime.UtcNow.Ticks}{ext}";
     }
 
+    // The script of a DocumentBuilderInputData is either a path to a temp file or the script itself;
+    // File.Exists tells the two apart and never throws on a non-path value.
+    public static void DeleteScriptFile(string script)
+    {
+        if (!string.IsNullOrEmpty(script) && System.IO.File.Exists(script))
+        {
+            System.IO.File.Delete(script);
+        }
+    }
+
     public static async Task<string> ReadTemplateFromEmbeddedResource(string templateFileName)
     {
         var templateNamespace = typeof(DocumentBuilderScriptHelper).Namespace;
