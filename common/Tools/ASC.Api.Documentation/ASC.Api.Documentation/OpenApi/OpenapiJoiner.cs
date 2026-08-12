@@ -94,6 +94,9 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
 
         SortTagGroups(result);
+        // Runs first so that everything below sees the keyword spellings openapi-generator understands - collapsing
+        // an enum union, for one, carries the example over and would drop a 3.1 `examples` array.
+        NormalizeNullableTypes(result);
         EnumCleaner.Clean(result);
         FixMultipartFormData(result);
         RemoveFormCollectionSchema(result);
@@ -592,6 +595,130 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         schemas.Remove("KeyValuePairStringStringValues");
     }
 
+    /// <summary>
+    /// Works around openapi-generator defects in openapi 3.1 documents. The rewrites are applied to the SDK input
+    /// only - the published openapi files stay untouched.
+    /// </summary>
+    private static void NormalizeNullableTypes(JsonNode? node, bool unionMember = false)
+    {
+        switch (node)
+        {
+            case JsonArray array:
+                foreach (var item in array)
+                {
+                    NormalizeNullableTypes(item, unionMember);
+                }
+
+                return;
+
+            case JsonObject obj:
+                NormalizeNullableType(obj, unionMember);
+                RemoveClosedObjectMarker(obj);
+                DowngradeSchemaExamples(obj);
+
+                foreach (var property in obj.ToArray())
+                {
+                    // Under these the keys are property names, so a property called `example` or `default`
+                    // still holds a schema and has to be walked into.
+                    if (property.Key is "properties" or "patternProperties" or "definitions" or "$defs")
+                    {
+                        NormalizeSchemaMap(property.Value);
+                        continue;
+                    }
+
+                    // Sample payloads are data, not schemas - never rewrite them.
+                    if (property.Key is "example" or "examples" or "default")
+                    {
+                        continue;
+                    }
+
+                    NormalizeNullableTypes(property.Value, property.Key is "anyOf" or "oneOf");
+                }
+
+                return;
+        }
+    }
+
+    private static void NormalizeSchemaMap(JsonNode? node)
+    {
+        if (node is not JsonObject map)
+        {
+            return;
+        }
+
+        foreach (var entry in map.ToArray())
+        {
+            NormalizeNullableTypes(entry.Value);
+        }
+    }
+
+    /// <summary>
+    /// In an openapi 3.1 document openapi-generator randomly loses <c>"additionalProperties": false</c> and generates
+    /// a public <c>[JsonExtensionData]</c> bag on the model. Dropping the keyword yields exactly the same - closed -
+    /// models, because the generator disallows undeclared properties when the keyword is absent.
+    /// </summary>
+    private static void RemoveClosedObjectMarker(JsonObject schema)
+    {
+        if (schema["additionalProperties"] is JsonValue value && value.TryGetValue<bool>(out var allowed) && !allowed)
+        {
+            schema.Remove("additionalProperties");
+        }
+    }
+
+    /// <summary>
+    /// Openapi 3.1 keeps the examples of a schema in the JSON Schema <c>examples</c> array, which openapi-generator
+    /// does not read - it still looks for the deprecated singular <c>example</c>, and without it the generated SDKs
+    /// carry no examples at all. The other 3.1 keywords need no help: <c>const</c> becomes an enum and
+    /// <c>contentMediaType</c> becomes a file parameter on their own.
+    /// </summary>
+    private static void DowngradeSchemaExamples(JsonObject schema)
+    {
+        // A schema keeps its examples in an array; on a media type or a parameter `examples` is a map of
+        // Example Objects, which is a different - and still valid - construct.
+        if (schema["examples"] is not JsonArray { Count: > 0 } examples)
+        {
+            return;
+        }
+
+        var first = examples[0]?.DeepClone();
+        schema.Remove("examples");
+        schema["example"] = first;
+    }
+
+    private static void NormalizeNullableType(JsonObject schema, bool unionMember)
+    {
+        if (!schema.TryGetPropertyValue("type", out var typeNode))
+        {
+            return;
+        }
+
+        if (typeNode is JsonValue value)
+        {
+            // Inside `anyOf`/`oneOf`, `"type": "null"` is the null branch of the union and must stay intact.
+            // On a property it means the value has to be null, which is never what the emitter meant - it is what
+            // an untyped `object` turns into - so the keyword is dropped and the property stays untyped.
+            if (!unionMember && value.TryGetValue<string>(out var singleType) && singleType == "null")
+            {
+                schema.Remove("type");
+            }
+
+            return;
+        }
+
+        if (typeNode is not JsonArray types || !SchemaTypeIncludes(types, "null") || !SchemaTypeIncludes(types, "object"))
+        {
+            return;
+        }
+
+        // Only map schemas are affected: inline object schemas with properties are resolved correctly since 7.24.0.
+        if (schema["additionalProperties"] is not JsonObject)
+        {
+            return;
+        }
+
+        schema["type"] = "object";
+    }
+
     private static bool IsObjectSchema(JsonNode schemaNode, JsonObject? components)
     {
         if (schemaNode is not JsonObject schemaObj)
@@ -611,7 +738,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
                 if (components.TryGetPropertyValue(name, out var compSchema))
                 {
                     var compObj = compSchema as JsonObject;
-                    if (compObj?["type"]?.ToString() == "object")
+                    if (SchemaTypeIncludes(compObj?["type"], "object"))
                     {
                         return true;
                     }
@@ -620,6 +747,16 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
 
         return false;
+    }
+
+    private static bool SchemaTypeIncludes(JsonNode? typeNode, string wanted)
+    {
+        return typeNode switch
+        {
+            JsonValue v => v.TryGetValue<string>(out var s) && s == wanted,
+            JsonArray a => a.Any(n => n is JsonValue nv && nv.TryGetValue<string>(out var s) && s == wanted),
+            _ => false
+        };
     }
 
     private static bool JsonDeepEquals(JsonNode a, JsonNode b)
