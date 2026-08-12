@@ -242,6 +242,7 @@ public record AiImageModelPricing : AiModelPricing<AiImagePrice>;
 public record AiImagePrice
 {
     public decimal Prompt { get; init; }
+    public decimal Completion { get; init; }
     public decimal Image { get; init; }
 }
 
