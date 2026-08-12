@@ -31,14 +31,12 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Site.Core.Classes;
+global using ASC.Data.Backup.Tasks;
+global using ASC.Data.Backup.Tasks.Data;
+global using ASC.Data.Backup.Tasks.Modules;
+global using ASC.Security.Cryptography;
 
-public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IExceptionHandler
-{
-    public ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
-    {
-        logger.LogCritical(exception, "error during executing {RequestMethod}: {PathValue}", context.Request.Method, context.Request.Path.Value);
+global using FluentAssertions;
 
-        return ValueTask.FromResult(true);
-    }
-}
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.Logging.Abstractions;
