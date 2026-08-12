@@ -31,46 +31,18 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.registration.application.configuration.serialization;
+package com.asc.registration.application.transfer;
 
-import com.asc.registration.application.transfer.CachedClient;
 import com.asc.registration.core.domain.entity.Client;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.SerializationException;
-import org.springframework.lang.NonNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Custom serializer that uses a configured ObjectMapper with Client deserializer.
- *
- * <p>This serializer handles {@link CachedClient} entries and uses the custom {@link
- * ClientDeserializer} for the {@link Client} they wrap.
- */
-public class ClientSerializer implements RedisSerializer<Object> {
-  private final ObjectMapper objectMapper;
-
-  public ClientSerializer(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
-  }
-
-  @NonNull
-  public byte[] serialize(Object value) throws SerializationException {
-    if (value == null) return new byte[0];
-
-    try {
-      return objectMapper.writeValueAsBytes(value);
-    } catch (Exception e) {
-      throw new SerializationException("Could not serialize: " + e.getMessage(), e);
-    }
-  }
-
-  public Object deserialize(byte[] bytes) throws SerializationException {
-    if (bytes == null || bytes.length == 0) return null;
-
-    try {
-      return objectMapper.readValue(bytes, CachedClient.class);
-    } catch (Exception e) {
-      throw new SerializationException("Could not deserialize: " + e.getMessage(), e);
-    }
-  }
+/** A cached client together with the namespace it was written under. */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CachedClient {
+  private String cacheNamespace;
+  private Client client;
 }

@@ -31,46 +31,50 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.registration.application.configuration.serialization;
+package com.asc.registration.application.service;
 
-import com.asc.registration.application.transfer.CachedClient;
-import com.asc.registration.core.domain.entity.Client;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.SerializationException;
-import org.springframework.lang.NonNull;
+import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
+import java.time.Duration;
+import java.util.List;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
- * Custom serializer that uses a configured ObjectMapper with Client deserializer.
+ * Redis-backed {@link CacheNamespaceCounterStore} backing this service's {@link
+ * com.asc.common.utilities.cache.CacheNamespaceRegistry}.
  *
- * <p>This serializer handles {@link CachedClient} entries and uses the custom {@link
- * ClientDeserializer} for the {@link Client} they wrap.
+ * <p>A thin adapter: it holds no policy of its own, only translating the store's contract onto
+ * {@link RedisTemplate} calls.
  */
-public class ClientSerializer implements RedisSerializer<Object> {
-  private final ObjectMapper objectMapper;
+public class RedisCacheNamespaceCounterStore implements CacheNamespaceCounterStore {
+  private final RedisTemplate<String, String> redisTemplate;
 
-  public ClientSerializer(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
+  public RedisCacheNamespaceCounterStore(RedisTemplate<String, String> redisTemplate) {
+    this.redisTemplate = redisTemplate;
   }
 
-  @NonNull
-  public byte[] serialize(Object value) throws SerializationException {
-    if (value == null) return new byte[0];
-
-    try {
-      return objectMapper.writeValueAsBytes(value);
-    } catch (Exception e) {
-      throw new SerializationException("Could not serialize: " + e.getMessage(), e);
-    }
+  @Override
+  public List<String> multiGet(List<String> keys) {
+    return redisTemplate.opsForValue().multiGet(keys);
   }
 
-  public Object deserialize(byte[] bytes) throws SerializationException {
-    if (bytes == null || bytes.length == 0) return null;
+  @Override
+  public String get(String key) {
+    return redisTemplate.opsForValue().get(key);
+  }
 
-    try {
-      return objectMapper.readValue(bytes, CachedClient.class);
-    } catch (Exception e) {
-      throw new SerializationException("Could not deserialize: " + e.getMessage(), e);
-    }
+  @Override
+  public boolean setIfAbsent(String key, String value, Duration ttl) {
+    return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, ttl));
+  }
+
+  @Override
+  public void increment(String key, Duration ttl) {
+    redisTemplate.opsForValue().increment(key);
+    redisTemplate.expire(key, ttl);
+  }
+
+  @Override
+  public void refreshTtl(String key, Duration ttl) {
+    redisTemplate.expire(key, ttl);
   }
 }
