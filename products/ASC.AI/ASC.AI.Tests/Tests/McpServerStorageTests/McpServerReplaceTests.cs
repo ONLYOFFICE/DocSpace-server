@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
 public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -44,7 +43,7 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
         var firstConfig = BuildMcpConfig("https://example.com/first");
         var secondConfig = BuildMcpConfig("https://example.com/second");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             McpServersPath,
             new
             {
@@ -72,7 +71,7 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         await CreateMcpServerAsync("server-1", initialConfig);
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             McpServersPath,
             new
             {
@@ -100,7 +99,7 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         await CreateMcpServerAsync("server-1", globalConfig);
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             McpServersPath,
             new
             {
@@ -125,7 +124,7 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         await CreateMcpServerAsync("server-1");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             McpServersPath,
             new { servers = new Dictionary<string, string>() },
             TestContext.Current.CancellationToken);
@@ -142,7 +141,7 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
         await CreateMcpServerAsync("server-1");
         await CreateMcpServerAsync("server-2");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             McpServersPath,
             new
             {
@@ -162,7 +161,7 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReplaceAll_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             McpServersPath,
             new
             {

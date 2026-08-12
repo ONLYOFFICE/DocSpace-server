@@ -69,7 +69,6 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -109,7 +108,6 @@ public class AuthorizationService
   private final JpaConsentRepository jpaConsentRepository;
   private final JpaAuthorizationRepository jpaAuthorizationRepository;
   private final RegisteredClientAccessibilityService registeredClientAccessibilityRepository;
-  private final RegisteredClientRepository registeredClientRepository;
 
   @Autowired
   public AuthorizationService(
@@ -123,8 +121,7 @@ public class AuthorizationService
       HashingService hashingService,
       JpaConsentRepository jpaConsentRepository,
       JpaAuthorizationRepository jpaAuthorizationRepository,
-      RegisteredClientAccessibilityService registeredClientAccessibilityRepository,
-      RegisteredClientRepository registeredClientRepository) {
+      RegisteredClientAccessibilityService registeredClientAccessibilityRepository) {
     this.environment = environment;
     this.securityConfigurationProperties = securityConfigurationProperties;
     this.transactionManager = transactionManager;
@@ -136,7 +133,43 @@ public class AuthorizationService
     this.jpaConsentRepository = jpaConsentRepository;
     this.jpaAuthorizationRepository = jpaAuthorizationRepository;
     this.registeredClientAccessibilityRepository = registeredClientAccessibilityRepository;
-    this.registeredClientRepository = registeredClientRepository;
+  }
+
+  /**
+   * Sets the client state cookie for the authorization.
+   *
+   * @param authorization the OAuth2 authorization containing the state.
+   */
+  private void setClientStateCookie(OAuth2Authorization authorization) {
+    var ctx = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    var state = authorization.<String>getAttribute(OAuth2ParameterNames.STATE);
+    if (state != null && !state.isBlank()) {
+      if (ctx == null || ctx.getResponse() == null)
+        throw new IllegalStateException("Request context holder or response is null");
+
+      log.debug("Setting authorization state cookie: {}", state);
+
+      var cookie = new Cookie(CLIENT_STATE_COOKIE, state);
+      cookie.setPath("/");
+      cookie.setMaxAge(60 * 60 * 24 * 365 * 10); // 10 years
+      ctx.getResponse().addCookie(cookie);
+    }
+  }
+
+  /**
+   * Retrieves the tenant signature information from the current request.
+   *
+   * @return the {@link BasicSignature}, or {@code null} if not found.
+   */
+  private BasicSignature getRequestSignature() {
+    var ctx = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    if (ctx == null) return null;
+
+    var signature =
+        ctx.getRequest().getAttribute(securityConfigurationProperties.getSignatureCookie());
+    if (signature == null) return null;
+
+    return (BasicSignature) signature;
   }
 
   private void saveRemote(SaveAuthorizationMessage authorizationMessage, String targetRegion) {
@@ -175,6 +208,30 @@ public class AuthorizationService
     } finally {
       MDC.clear();
     }
+  }
+
+  /**
+   * Maps an authorization entity to an OAuth2 authorization after a single accessible-client
+   * lookup.
+   *
+   * @param entity the persisted authorization entity
+   * @return the mapped authorization, or {@code null} if the client is inaccessible
+   */
+  private OAuth2Authorization mapAccessibleAuthorization(AuthorizationEntity entity) {
+    var client =
+        registeredClientAccessibilityRepository.findAccessibleClient(
+            entity.getRegisteredClientId());
+    if (client.isEmpty()) return null;
+
+    var accessToken = entity.getAccessTokenValue();
+    var refreshToken = entity.getRefreshTokenValue();
+    if (accessToken != null && !accessToken.isBlank())
+      entity.setAccessTokenValue(encryptionService.decrypt(accessToken));
+
+    if (refreshToken != null && !refreshToken.isBlank())
+      entity.setRefreshTokenValue(encryptionService.decrypt(refreshToken));
+
+    return authorizationMapper.fromEntity(entity, client.get());
   }
 
   /**
@@ -340,31 +397,17 @@ public class AuthorizationService
    * @param id the ID of the authorization.
    * @return the OAuth2 authorization, or {@code null} if not found.
    */
-  @Transactional(readOnly = true, timeout = 2)
   public OAuth2Authorization findById(String id) {
     MDC.put("id", id);
     log.info("Retrieving authorization by id");
 
     try {
-      return jpaAuthorizationRepository
-          .findByAuthorizationId(id)
-          .filter(
-              e ->
-                  registeredClientAccessibilityRepository.validateClientAccessibility(
-                      e.getRegisteredClientId()))
-          .map(
-              entity -> {
-                var accessToken = entity.getAccessTokenValue();
-                var refreshToken = entity.getRefreshTokenValue();
-                if (accessToken != null && !accessToken.isBlank())
-                  entity.setAccessTokenValue(encryptionService.decrypt(accessToken));
-                if (refreshToken != null && !refreshToken.isBlank())
-                  entity.setRefreshTokenValue(encryptionService.decrypt(refreshToken));
-                return authorizationMapper.fromEntity(
-                    entity,
-                    registeredClientRepository.findByClientId(entity.getRegisteredClientId()));
-              })
-          .orElse(null);
+      var template = new TransactionTemplate(transactionManager);
+      template.setReadOnly(true);
+      template.setTimeout(2);
+      var entity =
+          template.execute(_ -> jpaAuthorizationRepository.findByAuthorizationId(id).orElse(null));
+      return entity == null ? null : mapAccessibleAuthorization(entity);
     } catch (Exception e) {
       log.error("Could not find authorization by id", e);
       return null;
@@ -452,91 +495,24 @@ public class AuthorizationService
     try {
       if (targetRegion.isPresent() && !targetRegion.get().equalsIgnoreCase(region) && isSaaS)
         return fetchFromRemoteRegion(hashedToken, targetRegion.get())
-            .filter(
-                e ->
-                    registeredClientAccessibilityRepository.validateClientAccessibility(
-                        e.getRegisteredClientId()))
-            .map(
-                (entity) -> {
-                  var accessToken = entity.getAccessTokenValue();
-                  var refreshToken = entity.getRefreshTokenValue();
-                  if (accessToken != null && !accessToken.isBlank())
-                    entity.setAccessTokenValue(encryptionService.decrypt(accessToken));
-                  if (refreshToken != null && !refreshToken.isBlank())
-                    entity.setRefreshTokenValue(encryptionService.decrypt(refreshToken));
-                  return authorizationMapper.fromEntity(
-                      entity,
-                      registeredClientRepository.findByClientId(entity.getRegisteredClientId()));
-                })
+            .flatMap(entity -> Optional.ofNullable(mapAccessibleAuthorization(entity)))
             .orElse(null);
 
       var template = new TransactionTemplate(transactionManager);
       template.setTimeout(2);
-      return template
-          .execute(
-              status ->
+      var entity =
+          template.execute(
+              _ ->
                   jpaAuthorizationRepository
                       .findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(
-                          hashedToken))
-          .filter(
-              e ->
-                  registeredClientAccessibilityRepository.validateClientAccessibility(
-                      e.getRegisteredClientId()))
-          .map(
-              (entity) -> {
-                var accessToken = entity.getAccessTokenValue();
-                var refreshToken = entity.getRefreshTokenValue();
-                if (accessToken != null && !accessToken.isBlank())
-                  entity.setAccessTokenValue(encryptionService.decrypt(accessToken));
-                if (refreshToken != null && !refreshToken.isBlank())
-                  entity.setRefreshTokenValue(encryptionService.decrypt(refreshToken));
-                return authorizationMapper.fromEntity(
-                    entity,
-                    registeredClientRepository.findByClientId(entity.getRegisteredClientId()));
-              })
-          .orElse(null);
+                          hashedToken)
+                      .orElse(null));
+      return entity == null ? null : mapAccessibleAuthorization(entity);
     } catch (Exception e) {
       log.error("Could not find authorization by token", e);
       return null;
     } finally {
       MDC.clear();
     }
-  }
-
-  /**
-   * Sets the client state cookie for the authorization.
-   *
-   * @param authorization the OAuth2 authorization containing the state.
-   */
-  private void setClientStateCookie(OAuth2Authorization authorization) {
-    var ctx = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-    var state = authorization.<String>getAttribute(OAuth2ParameterNames.STATE);
-    if (state != null && !state.isBlank()) {
-      if (ctx == null || ctx.getResponse() == null)
-        throw new IllegalStateException("Request context holder or response is null");
-
-      log.debug("Setting authorization state cookie: {}", state);
-
-      var cookie = new Cookie(CLIENT_STATE_COOKIE, state);
-      cookie.setPath("/");
-      cookie.setMaxAge(60 * 60 * 24 * 365 * 10); // 10 years
-      ctx.getResponse().addCookie(cookie);
-    }
-  }
-
-  /**
-   * Retrieves the tenant signature information from the current request.
-   *
-   * @return the {@link BasicSignature}, or {@code null} if not found.
-   */
-  private BasicSignature getRequestSignature() {
-    var ctx = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-    if (ctx == null) return null;
-
-    var signature =
-        ctx.getRequest().getAttribute(securityConfigurationProperties.getSignatureCookie());
-    if (signature == null) return null;
-
-    return (BasicSignature) signature;
   }
 }

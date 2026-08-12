@@ -595,4 +595,10 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Synchronizace dat formuláře s externí databází se nezdařila.</value>
   </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Instrukce AI agenta nemůže být delší než {0} znaků</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Formulář byl změněn. Tento koncept je zastaralý a nelze jej odeslat.</value>
+  </data>
 </root>

@@ -84,22 +84,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Archive", typeof(ICompress))]
     [HttpPut("settings/downloadtargz")]
-    public async Task<ICompress> ChangeDownloadZipFromBody([FromBody] DisplayRequestDto inDto)
-    {
-        await filesSettingsHelper.SetDownloadTarGz(inDto.Set);
-        return compressToArchive;
-    }
-
-    /// <remarks>
-    /// Changes the format of the downloaded archive from .zip to .tar.gz. This method uses the form parameters.
-    /// </remarks>
-    /// <summary>Change the archive format (using form parameters)</summary>
-    /// <path>api/2.0/files/settings/downloadtargz</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Files / Settings")]
-    [SwaggerResponse(200, "Archive", typeof(ICompress))]
-    [HttpPut("settings/downloadtargz")]
-    public async Task<ICompress> ChangeDownloadZipFromForm([FromForm] DisplayRequestDto inDto)
+    public async Task<ICompress> ChangeDownloadZip(DisplayRequestDto inDto)
     {
         await filesSettingsHelper.SetDownloadTarGz(inDto.Set);
         return compressToArchive;

@@ -247,7 +247,7 @@
     <value>Abbonamento cliente aggiornato: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Impostazioni dei servizi abilitati per il portafoglio clienti aggiornate</value>
+    <value>Impostazioni dei servizi abilitati per il portafoglio clienti aggiornate: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Portafoglio cliente ricaricato: {0}</value>
@@ -1202,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Connessioni attive disconnesse per l'utente: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Configurazione di Docs Connect aggiornata</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Report quota di Docs Connect scaricato</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Impostazioni IA dell'utente aggiornate</value>
   </data>
 </root>

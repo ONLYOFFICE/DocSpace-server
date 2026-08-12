@@ -247,7 +247,7 @@
     <value>Predplatné zákazníka bolo aktualizované: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Nastavenia služieb s povolenou peňaženkou zákazníka boli aktualizované</value>
+    <value>Nastavenia služieb s povolenou peňaženkou zákazníka boli aktualizované: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Peňaženka zákazníka bola dobitá: {0}</value>
@@ -738,9 +738,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portál bol premenovaný</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Súkromná miestnosť je vypnutá</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Produkty [{0}]. Prístup bol otvorený</value>
   </data>
@@ -1205,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Aktívne pripojenia používateľa boli odhlásené: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Konfigurácia Docs Connect bola aktualizovaná</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Správa o kvóte Docs Connect bola stiahnutá</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Nastavenia AI používateľa boli aktualizované</value>
   </data>
 </root>

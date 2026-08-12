@@ -45,6 +45,7 @@ import logger from "../log.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse } from "./_helpers.js";
+import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
   HttpToolsAdapter,
@@ -53,6 +54,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
+import { safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -112,14 +114,30 @@ function appendActionPrompt<T>(body: T, fragment: string): T {
   } as T;
 }
 
+// The round's context scope: `contextEntityId` (agent workspace picked from
+// outside its room — the thread stays under `entityId`) wins over `entityId`.
+// Mirrors the engine's own `contextEntityId ?? entityId` resolution.
+function contextScopeOf(body: unknown): string | undefined {
+  if (!isObject(body)) {
+    return undefined;
+  }
+  const context = body["contextEntityId"];
+  if (typeof context === "string") {
+    return context;
+  }
+  return typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+}
+
 async function withToolsPrompt<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
   }
-  const entityId =
-    typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+  // The tools fragment describes the tool set the engine actually wires up
+  // for the round, so it follows the round's context scope (the agent when
+  // one is picked), unlike the location fragment below.
+  const contextScope = contextScopeOf(body);
   const attachmentId = extractAttachmentRefIds(body["userMessage"]);
-  const fragment = await safeGetToolsPrompt(toolsAdapter, entityId, attachmentId);
+  const fragment = await safeGetToolsPrompt(toolsAdapter, contextScope, attachmentId);
   return fragment ? appendActionPrompt(body, fragment) : body;
 }
 
@@ -149,9 +167,27 @@ function withContextPrompt<T>(body: T): T {
   if (!isObject(body)) {
     return body;
   }
+  // Always the folder/room the chat is invoked from (`entityId`), even when
+  // the round runs against an agent's context (`contextEntityId`): the
+  // location line must tell the model where the USER is — picking agent 10
+  // while browsing folder 2 keeps the location at 2. The agent's own scope
+  // reaches the model through the tools fragment and tool execution.
   const entityId =
     typeof body["entityId"] === "string" ? body["entityId"] : undefined;
   return appendActionPrompt(body, buildContextFragment(entityId));
+}
+
+// Fold the picked agent's stored instruction (`chatSettings.prompt`, set on
+// the agent room) into the action's prompt override. Scoped to the round's
+// context (the agent room when one is picked, like the tools fragment) so a
+// plain chat in a regular folder gets nothing. Applied innermost so the
+// instruction leads the system prompt, ahead of the tools/context fragments.
+async function withAgentInstruction<T>(body: T): Promise<T> {
+  if (!isObject(body)) {
+    return body;
+  }
+  const instruction = await safeGetAgentInstruction(contextScopeOf(body));
+  return instruction ? appendActionPrompt(body, instruction) : body;
 }
 
 const toolsAdapter = new HttpToolsAdapter();
@@ -297,13 +333,57 @@ async function* logStreamErrors<T>(
   }
 }
 
+// A user message must carry some non-whitespace text before a stream is
+// opened. `content` is either a plain string or an array of parts; text
+// lives on `{ type: "text", text }` parts (and bare string parts), mirroring
+// the engine's own text extraction. Attachment-only parts (file/image) do
+// not count — an empty prompt otherwise reaches the provider and streams
+// back nothing (Bug 82720).
+function hasNonEmptyText(userMessage: unknown): boolean {
+  if (!isObject(userMessage)) {
+    return false;
+  }
+  const content = userMessage["content"];
+  if (typeof content === "string") {
+    return content.trim().length > 0;
+  }
+  if (!Array.isArray(content)) {
+    return false;
+  }
+  for (const part of content) {
+    if (typeof part === "string") {
+      if (part.trim().length > 0) {
+        return true;
+      }
+      continue;
+    }
+    if (
+      isObject(part)
+      && part["type"] === "text"
+      && typeof part["text"] === "string"
+      && part["text"].trim().length > 0
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
+    // Without this the provider request runs without the forwarded auth /
+    // request headers, so a correct call comes back with an empty message
+    // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
+    // Mirrors sendWithStream.
+    markForwardHeadersToProvider();
     const result = await engine.send(req.body);
     res.json(result);
   }),
 
   sendCustom: asyncHandler<SendCustomInput>(async (req, res) => {
+    // As with `send`, the forwarded headers must be marked before the
+    // provider call or a correct request fails with a 500 (Bug 82836).
+    markForwardHeadersToProvider();
     const body = withRequestSignal(res, req.body);
     const result = engine.sendCustom(body);
     if (body.isStream) {
@@ -323,7 +403,37 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
+    // Reject an empty prompt before opening the stream: a user message with
+    // no non-whitespace text otherwise reaches the provider and streams back
+    // nothing (Bug 82720).
+    if (!hasNonEmptyText(req.body.userMessage)) {
+      res.status(400).json({
+        error: "userMessage must contain non-empty text content",
+      });
+      return;
+    }
+    // A new thread (no threadId) is created implicitly here, so gate it like
+    // threads/create: a supplied entityId must be accessible and a profile
+    // must resolve, otherwise 404 (review #6).
+    if (!req.body.threadId) {
+      await assertThreadCreatable(req.body.entityId, req.body.profileId);
+    }
+    // When the request omits profileId, the engine resolves the Chat
+    // assignment (or the Default slot) and persists it onto the thread,
+    // silently overwriting the model the thread was created with (Bug 82860).
+    // Pre-fill profileId from the thread's stored value: a session-level
+    // profileId is honored for the request without mutating persisted state,
+    // so the thread keeps its own model. The proper fix lives in the engine's
+    // profile resolution; this is a proxy-side guard.
+    if (!req.body.profileId && req.body.threadId) {
+      const thread = await storage.threads.readById(req.body.threadId);
+      if (thread?.profileId) {
+        req.body.profileId = thread.profileId;
+      }
+    }
+    const body = withContextPrompt(
+      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+    );
     await streamNdjson(
       res,
       logStreamErrors("ai/send-with-stream", engine.sendWithStream(body)),
@@ -335,7 +445,9 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withContextPrompt(await withToolsPrompt(withRequestSignal(res, req.body)));
+    const body = withContextPrompt(
+      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+    );
     await streamOpenAiSse(
       res,
       logStreamErrors("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body)),
@@ -344,7 +456,11 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = await withToolsPrompt(withRequestSignal(res, req.body));
+    // Same prompt envelope as sendWithStream: the regenerated round must
+    // see the identical workspace-context fragment the original reply had.
+    const body = withContextPrompt(
+      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+    );
     await streamNdjson(
       res,
       logStreamErrors("ai/regenerate-stream", engine.regenerateStream(body)),

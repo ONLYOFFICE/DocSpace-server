@@ -219,5 +219,14 @@ public class AspireAppFixture : IAsyncLifetime
         await _app.StopAsync();
         await _app.DisposeAsync();
         _sharedHandler.Dispose();
+
+        // Only after the services are gone: while they run they hold handles inside the folder.
+        // For the AppHost itself Aspire generates ProjectPath as the project *directory*.
+        var cleanupFailure = await TestArtifacts.DeleteStorageAsync(Projects.ASC_AppHost.ProjectPath);
+
+        if (cleanupFailure is not null)
+        {
+            Timing.Write($"cleanup.failed({cleanupFailure.GetType().Name}: {cleanupFailure.Message})", 0);
+        }
     }
 }

@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ILogger = Microsoft.Extensions.Logging.ILogger;
-
 namespace ASC.Api.Core.Log;
 
 internal static partial class HostExtensionLogger

@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -251,12 +251,12 @@ internal class ProviderFileDao(
 
         return streamUri;
     }
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    public async Task<File<string>> SaveFormFileAsync(File<string> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -276,14 +276,14 @@ internal class ProviderFileDao(
             }
 
             var fileDao = selector.GetFileDao(fileId);
-            fileSaved = await fileDao.SaveFileAsync(file, fileStream);
+            fileSaved = await fileDao.SaveFileAsync(file, fileStream, allowQuotaGrace: allowQuotaGrace);
         }
         else if (folderId != null)
         {
             selector = _selectorFactory.GetSelector(folderId);
             file.ParentId = selector.ConvertId(folderId);
             var fileDao = selector.GetFileDao(folderId);
-            fileSaved = await fileDao.SaveFileAsync(file, fileStream);
+            fileSaved = await fileDao.SaveFileAsync(file, fileStream, allowQuotaGrace: allowQuotaGrace);
         }
 
         if (fileSaved != null)
@@ -294,7 +294,7 @@ internal class ProviderFileDao(
         throw new ArgumentException("No file id or folder id toFolderId determine provider");
     }
 
-    public async Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
+    public async Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -317,7 +317,7 @@ internal class ProviderFileDao(
 
         var fileDao = selector.GetFileDao(fileId);
 
-        return await fileDao.ReplaceFileVersionAsync(file, fileStream);
+        return await fileDao.ReplaceFileVersionAsync(file, fileStream, allowQuotaGrace);
     }
 
     public async Task DeleteFileAsync(string fileId)
@@ -419,7 +419,7 @@ internal class ProviderFileDao(
     {
         if (toFolderId is int tId)
         {
-            return await CopyFileAsync(fileId, tId, Guid.Empty) as File<TTo>;
+            return await PerformCrossDaoFileCopyAsync(fileId, tId, false) as File<TTo>;
         }
 
         if (toFolderId is string tsId)
@@ -428,11 +428,6 @@ internal class ProviderFileDao(
         }
 
         throw new NotImplementedException();
-    }
-
-    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
-    {
-        return await PerformCrossDaoFileCopyAsync(fileId, toFolderId, false, chatId);
     }
 
     public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)

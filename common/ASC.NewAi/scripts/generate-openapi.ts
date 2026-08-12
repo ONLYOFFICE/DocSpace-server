@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// Build-time OpenAPI emitter. Writes the New AI service's OpenAPI document
+// Build-time OpenAPI emitter. Writes this AI service's OpenAPI document
 // as `newai_2.0.json` into the shared documentation folder, so it can be
 // merged with the .NET services' documents by ASC.Api.Documentation.
 //
@@ -42,7 +42,7 @@
 // into the ASC.Api.Documentation build via an MSBuild `<Exec>` target.
 //
 // The document is emitted in "merge" shape: absolute path keys prefixed with
-// the service's route (`/api/2.0/new-ai/...`) and the shared `{baseUrl}`
+// the service's route (`/api/2.0/ai/...`) and the shared `{baseUrl}`
 // server template — matching the .NET service documents so `OpenapiJoiner`
 // can combine them without rewriting paths.
 
@@ -52,7 +52,7 @@ import { fileURLToPath } from "url";
 import { buildOpenApiDocument } from "../app/openapi.js";
 import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS } from "../app/apiCatalog.js";
 import { generateOpenApiSchemas } from "./lib/generate-schemas.js";
-import { extractDotnetAgentSchemas } from "./lib/dotnet-schemas.js";
+import { extractDotnetProxySchemas } from "./lib/dotnet-schemas.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -94,23 +94,23 @@ const output = parseOutput(process.argv.slice(2));
 // 1. Generate concrete request/response schemas from the TypeScript types.
 const schemas = generateOpenApiSchemas();
 
-// 1a. Enrich the agent proxy routes with the concrete response schemas the
-// .NET AI service already emits (the DocSpace envelope `*Wrapper`s), so they
-// stop falling back to the opaque generic object. The descriptions ultimately
-// come from the C# DTOs' XML docs — this reuses the .NET OpenAPI document
-// rather than re-deriving them, and fails loudly if it is absent/incomplete.
-const agentSchemas = extractDotnetAgentSchemas();
-for (const [name, schema] of Object.entries(agentSchemas.components)) {
+// 1a. Enrich the proxy routes with the concrete response schemas the .NET AI
+// service already emits (the DocSpace envelope `*Wrapper`s), so they stop
+// falling back to the opaque generic object. The descriptions ultimately come
+// from the C# DTOs' XML docs — this reuses the .NET OpenAPI document rather
+// than re-deriving them, and fails loudly if it is absent/incomplete.
+const proxySchemas = extractDotnetProxySchemas();
+for (const [name, schema] of Object.entries(proxySchemas.components)) {
   const existing = schemas.components[name];
   if (existing !== undefined && JSON.stringify(existing) !== JSON.stringify(schema)) {
     throw new Error(
-      `Schema name collision while merging .NET agent schemas: "${name}" `
+      `Schema name collision while merging .NET proxy schemas: "${name}" `
       + "already exists with different content.",
     );
   }
   schemas.components[name] = schema;
 }
-for (const [operationId, response] of Object.entries(agentSchemas.responses)) {
+for (const [operationId, response] of Object.entries(proxySchemas.responses)) {
   schemas.operations[operationId] = { ...schemas.operations[operationId], response };
 }
 

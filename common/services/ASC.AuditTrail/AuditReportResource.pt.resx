@@ -247,7 +247,7 @@
     <value>Assinatura do cliente atualizada: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Configurações de serviços habilitados para carteira de cliente atualizadas</value>
+    <value>Configurações de serviços habilitados para carteira de cliente atualizadas: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Carteira do cliente recarregada: {0}</value>
@@ -1202,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Ligações ativas terminadas para o utilizador: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Configuração do Docs Connect atualizada</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Relatório de quota do Docs Connect transferido</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Definições de IA do utilizador atualizadas</value>
   </data>
 </root>

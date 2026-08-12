@@ -11,6 +11,8 @@
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
 
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
+
+    <None Remove="Services\DocumentBuilderService\ScriptTemplates\AuditReport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AnyAscii" />
@@ -22,7 +24,6 @@
     <PackageReference Include="HtmlAgilityPack" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" />
     <PackageReference Include="Magick.NET-Q8-AnyCPU" />
-    <PackageReference Include="Microsoft.Bcl.Memory" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
     <PackageReference Include="Microsoft.ML.Tokenizers.Data.Cl100kBase" />
@@ -165,8 +166,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\CustomerOperationsReport.docbuilder" />
+    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\DocsCloudUserQuotaReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
+    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\AuditReport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\FilesCommonResource.de.resx">

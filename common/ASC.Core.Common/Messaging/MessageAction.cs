@@ -648,6 +648,12 @@ public enum MessageAction
     [Description("File not saved due to room quota exceeded")]
     FileNotSavedDueToRoomQuota = 5204,
 
+    [Description("File saved, tenant quota exceeded")]
+    FileSavedButTenantQuotaExceeded = 5205,
+
+    [Description("File not saved due to tenant quota exceeded")]
+    FileNotSavedDueToTenantQuota = 5206,
+
     #endregion
 
     #region Settings

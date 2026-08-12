@@ -247,7 +247,7 @@
     <value>Müşteri aboneliği güncellendi: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi</value>
+    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Müşteri cüzdanına para yüklendi: {0}</value>
@@ -1202,5 +1202,14 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Kullanıcının aktif bağlantılarının oturumu kapatıldı: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect yapılandırması güncellendi</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect kota raporu indirildi</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Kullanıcı AI ayarları güncellendi</value>
   </data>
 </root>

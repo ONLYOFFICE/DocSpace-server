@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -37,11 +37,6 @@ global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Utils;
 
-global using ASC.AI.Core.Chat;
-global using ASC.AI.Core.Chat.Data;
-global using ASC.AI.Core.Chat.Completion;
-global using ASC.AI.Core.Provider;
-global using ASC.AI.Core.Provider.Data;
 global using ASC.AI.Integration.Assignments;
 global using ASC.AI.Integration.Attachments;
 global using ASC.AI.Integration.Preferences;
@@ -50,16 +45,27 @@ global using ASC.AI.Integration.Prompts;
 global using ASC.AI.Integration.ToolPrefs;
 global using ASC.AI.Models.ResponseDto;
 global using ASC.AI.Models.RequestDto;
-global using ASC.AI.Models.RequestDto.Integration;
-global using ASC.AI.Core.MCP;
-global using ASC.AI.Core.MCP.Data;
-global using ASC.AI.Core.MCP.Transport;
+global using ASC.AI.Models.RequestDto.Agents;
+global using ASC.AI.Models.RequestDto.Assignments;
+global using ASC.AI.Models.RequestDto.Attachments;
+global using ASC.AI.Models.RequestDto.McpServers;
+global using ASC.AI.Models.RequestDto.Messages;
+global using ASC.AI.Models.RequestDto.Preferences;
+global using ASC.AI.Models.RequestDto.Profiles;
+global using ASC.AI.Models.RequestDto.PromptFolders;
+global using ASC.AI.Models.RequestDto.Prompts;
+global using ASC.AI.Models.RequestDto.Settings;
+global using ASC.AI.Models.RequestDto.TextToDocx;
+global using ASC.AI.Models.RequestDto.Threads;
+global using ASC.AI.Models.RequestDto.ToolPreferences;
+global using ASC.AI.Models.RequestDto.Tools;
+global using ASC.AI.Models.RequestDto.Vectorization;
+global using ASC.AI.Models.RequestDto.WebSearch;
 global using ASC.AI.Core.Settings;
-global using ASC.AI.Core.Retrieval.Web;
-global using ASC.AI.Core.Retrieval.Knowledge;
+global using ASC.AI.Integration.McpServers;
+global using ASC.AI.Integration.WebSearch;
 global using ASC.AI.Service;
 global using ASC.AI.Tools.Core;
-global using ASC.AI.Core.Tools.Editor;
 global using ASC.Core;
 global using ASC.Core.Common.AI;
 

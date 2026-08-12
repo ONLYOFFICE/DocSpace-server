@@ -36,7 +36,7 @@ import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getString } from "../narrow.js";
 import type { McpServersStorage, McpServerConfig } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/mcp-servers";
+const PATH = "/mcp-servers";
 
 function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
   return entityId ? { entityId } : undefined;
@@ -59,16 +59,20 @@ function parseConfig(raw: unknown): McpServerConfig | null {
 
 export class HttpMcpServersStorage implements McpServersStorage {
   async create(name: string, config: McpServerConfig, entityId?: string): Promise<void> {
+    // Resolve the scope the same way readAll does: a server written under a
+    // non-agent folder must land in the (global) scope the listing reads back
+    // from — otherwise it is saved yet invisible in every list (Bug 82863).
+    const scopedEntityId = await resolveAgentEntityId(entityId);
     await aiService.post(PATH, {
       name,
       config: JSON.stringify(config),
-      entityId: entityId ?? null,
+      entityId: scopedEntityId ?? null,
     });
   }
 
   async readByName(name: string, entityId?: string): Promise<McpServerConfig | null> {
     try {
-      const query = entityIdQuery(entityId);
+      const query = entityIdQuery(await resolveAgentEntityId(entityId));
       const raw = await aiService.get(
         `${PATH}/${encodeURIComponent(name)}`,
         query ? { query } : undefined,
@@ -113,9 +117,10 @@ export class HttpMcpServersStorage implements McpServersStorage {
   }
 
   async update(name: string, config: McpServerConfig, entityId?: string): Promise<void> {
+    const scopedEntityId = await resolveAgentEntityId(entityId);
     await aiService.put(`${PATH}/${encodeURIComponent(name)}`, {
       config: JSON.stringify(config),
-      entityId: entityId ?? null,
+      entityId: scopedEntityId ?? null,
     });
   }
 
@@ -123,16 +128,17 @@ export class HttpMcpServersStorage implements McpServersStorage {
     servers: Record<string, McpServerConfig>,
     entityId?: string,
   ): Promise<void> {
+    const scopedEntityId = await resolveAgentEntityId(entityId);
     const payload: Record<string, string> = {};
     for (const [n, c] of Object.entries(servers)) {
       payload[n] = JSON.stringify(c);
     }
-    await aiService.put(PATH, { servers: payload, entityId: entityId ?? null });
+    await aiService.put(PATH, { servers: payload, entityId: scopedEntityId ?? null });
   }
 
   async delete(name: string, entityId?: string): Promise<void> {
     try {
-      const query = entityIdQuery(entityId);
+      const query = entityIdQuery(await resolveAgentEntityId(entityId));
       await aiService.delete(
         `${PATH}/${encodeURIComponent(name)}`,
         query ? { query } : undefined,

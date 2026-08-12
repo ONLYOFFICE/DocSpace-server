@@ -538,24 +538,13 @@ public class QuotaUsedSpaceTests(
     /// </remarks>
     private async Task<long> GetTotalUsedSpaceAsync()
     {
-        using var response = await _webApiClient.GetAsync("api/2.0/portal/payment/quota", TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
+        var response = (await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        await using var content = await response.Content.ReadAsStreamAsync(TestContext.Current.CancellationToken);
-        using var json = await JsonDocument.ParseAsync(content, cancellationToken: TestContext.Current.CancellationToken);
+        var feature = response.Features.FirstOrDefault(r=> r.Id == TotalSizeFeature);
 
-        var feature = json.RootElement
-            .GetProperty("response")
-            .GetProperty("features")
-            .EnumerateArray()
-            .FirstOrDefault(f => f.TryGetProperty("id", out var id) && id.GetString() == TotalSizeFeature);
+        feature.Should().NotBeNull();
 
-        feature.ValueKind.Should().NotBe(JsonValueKind.Undefined,
-            $"the portal quota must expose the \"{TotalSizeFeature}\" feature");
-
-        var used = feature.GetProperty("used").GetProperty("value");
-
-        return used.TryGetInt64(out var usedSpace) ? usedSpace : (long)used.GetDouble();
+        return Convert.ToInt64(feature!.Used.Value);
     }
 
     /// <summary>
