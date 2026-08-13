@@ -33,8 +33,11 @@
 
 package com.asc.registration.application.configuration;
 
+import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
+import com.asc.common.utilities.cache.CacheNamespaceRegistry;
 import com.asc.registration.application.configuration.serialization.ClientDeserializer;
 import com.asc.registration.application.configuration.serialization.ClientSerializer;
+import com.asc.registration.application.service.RedisCacheNamespaceCounterStore;
 import com.asc.registration.core.domain.entity.Client;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -159,5 +162,53 @@ public class ClientCacheConfiguration {
 
     log.info("clientCacheRedisTemplate created successfully");
     return template;
+  }
+
+  /**
+   * Creates a string-only RedisTemplate for the client cache bookkeeping keys.
+   *
+   * @param clientCacheRedisConnectionFactory The Redis connection factory for client cache.
+   * @return The configured {@link RedisTemplate} for String keys and values.
+   */
+  @Bean
+  public RedisTemplate<String, String> clientCacheStringRedisTemplate(
+      @Qualifier("clientCacheRedisConnectionFactory")
+          RedisConnectionFactory clientCacheRedisConnectionFactory) {
+    var template = new RedisTemplate<String, String>();
+    template.setConnectionFactory(clientCacheRedisConnectionFactory);
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setValueSerializer(new StringRedisSerializer());
+    template.setHashKeySerializer(new StringRedisSerializer());
+    template.setHashValueSerializer(new StringRedisSerializer());
+    template.afterPropertiesSet();
+    return template;
+  }
+
+  /**
+   * Creates the Redis-backed counter store the client cache's namespace registry reads and advances
+   * its version counters through.
+   *
+   * @param stringRedisTemplate the string-only Redis template for namespace version counters
+   * @return a {@link RedisCacheNamespaceCounterStore} wrapping {@code stringRedisTemplate}
+   */
+  @Bean
+  public CacheNamespaceCounterStore clientCacheNamespaceCounterStore(
+      @Qualifier("clientCacheStringRedisTemplate")
+          RedisTemplate<String, String> stringRedisTemplate) {
+    return new RedisCacheNamespaceCounterStore(stringRedisTemplate);
+  }
+
+  /**
+   * Creates the namespace registry {@link
+   * com.asc.registration.application.service.RedisClientCacheService} uses to invalidate cached
+   * clients without scanning the keyspace.
+   *
+   * @param counterStore the counter store backing this registry
+   * @return a {@link CacheNamespaceRegistry} scoped to the client cache's own key prefix
+   */
+  @Bean
+  public CacheNamespaceRegistry clientCacheNamespaceRegistry(
+      CacheNamespaceCounterStore counterStore) {
+    return new CacheNamespaceRegistry(counterStore, "identity:registration:client:ver");
   }
 }
