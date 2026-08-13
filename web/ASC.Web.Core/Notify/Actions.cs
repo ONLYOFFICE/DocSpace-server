@@ -2348,20 +2348,6 @@ public abstract class BasePeriodicNotifyAction(UserManager userManager, StudioNo
 
 
 [Scope]
-public sealed class SaasAdminModulesV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
-{
-    public override string ID => "saas_admin_modules_v1";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_modules_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_modules_v1)
-        ];
-    }
-}
-
-[Scope]
 public sealed class SaasAdminConfigureV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
 {
     public override string ID => "saas_admin_configure_v1";
