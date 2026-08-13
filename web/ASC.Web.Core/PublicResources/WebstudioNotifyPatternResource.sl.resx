@@ -343,7 +343,7 @@ ${LetterLogoText} Ekipa za podporo
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Pozdravljeni, $UserName,
 
-Postopek varnostnega kopiranja za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ni uspelo.
+Postopek varnostnega kopiranja za vaš ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" ni uspelo.
 
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko "${__SupportLink}":"${__SupportLink}"
 
@@ -352,7 +352,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Pozdravljeni, $UserName,
 
-Postopek varnostnega kopiranja za vaš DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ni uspelo.
+Postopek varnostnega kopiranja za vaš ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) ni uspelo.
 
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko [${__SupportLink}](${__SupportLink})
 
@@ -1279,9 +1279,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Pozdravljeni, $UserName,
  
-Načrtovani postopek varnostnega kopiranja za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ni uspelo.
+Načrtovani postopek varnostnega kopiranja za vaš ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" ni uspelo.
 
-Priporočamo, da preverite nastavitve "Varnostna kopija":"${__VirtualRootPath}/portal-settings/backup/data-backup" in "Storitve":"${__VirtualRootPath}/portal-settings/payments/services".
+Priporočamo, da preverite nastavitve "Varnostna kopija":"${__VirtualRootPath}/portal-settings/backup/data-backup" in "Storitve":"${__VirtualRootPath}/billing/addons".
 
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko "${__SupportLink}":"${__SupportLink}"
  
@@ -1290,9 +1290,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Pozdravljeni, $UserName,
 
-Načrtovani postopek varnostnega kopiranja za vaš DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ni uspelo.
+Načrtovani postopek varnostnega kopiranja za vaš ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) ni uspelo.
 
-Priporočamo, da preverite nastavitve [Varnostna kopija](${__VirtualRootPath}/portal-settings/backup/data-backup) in [Storitve](${__VirtualRootPath}/portal-settings/payments/services).
+Priporočamo, da preverite nastavitve [Varnostna kopija](${__VirtualRootPath}/portal-settings/backup/data-backup) in [Storitve](${__VirtualRootPath}/billing/addons).
 
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko [${__SupportLink}](${__SupportLink})
  
@@ -1465,7 +1465,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} ustvarjena varnostna kopija portala</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Varnostno kopiranje vašega DocSpace ni uspelo</value>
+    <value>Varnostno kopiranje vašega ${LetterLogoText} ni uspelo</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Potrdite spremembo emaila</value>
@@ -1657,7 +1657,7 @@ $TrulyYours</value>
     <value>Povabljeni ste v sobo ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Samodejno varnostno kopiranje za vaš DocSpace ni uspelo</value>
+    <value>Samodejno varnostno kopiranje za vaš ${LetterLogoText} ni uspelo</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} obvestilo o spremembi profila portala</value>

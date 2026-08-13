@@ -107,6 +107,12 @@ public abstract class LetterTestBase
     /// </summary>
     protected virtual bool HasSignature => true;
 
+    /// <summary>
+    /// Which resource the sending code signs off with. Almost every letter uses
+    /// <c>TrulyYoursText</c>; the backup ones pass <c>BestRegardsText</c> instead.
+    /// </summary>
+    protected virtual string SignatureKey => "TrulyYoursText";
+
     [Theory]
     [MemberData(nameof(LetterCultures.All), MemberType = typeof(LetterCultures))]
     public async Task Letter_Renders(string cultureName)
@@ -194,7 +200,7 @@ public abstract class LetterTestBase
         {
             new TagValue(CommonTags.Culture, culture.Name),
             new TagValue(CommonTags.UserName, RecipientName),
-            TagValues.TrulyYours(LetterEnvironment.SiteUrl, Resource("TrulyYoursText", culture), TrulyYoursAsTableRow),
+            TagValues.TrulyYours(LetterEnvironment.SiteUrl, Resource(SignatureKey, culture), TrulyYoursAsTableRow),
 
             new TagValue(CommonTags.TopGif, TopGif ?? string.Empty),
             new TagValue(CommonTags.ImagePath, LetterEnvironment.NotificationImagePath),
@@ -270,7 +276,7 @@ public abstract class LetterTestBase
             return;
         }
 
-        var signature = Resource("TrulyYoursText", culture)
+        var signature = Resource(SignatureKey, culture)
             .Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText);
 
         letter.Body.Should().Contain(signature).And.Contain(LetterEnvironment.SiteUrl);

@@ -343,7 +343,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
-Процес резервного копіювання вашого простору DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" не вдався.
+Процес резервного копіювання вашого простору ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" не вдався.
 
 Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці "${__SupportLink}":"${__SupportLink}"
 
@@ -352,7 +352,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
-Процес резервного копіювання вашого простору DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) не вдався.
+Процес резервного копіювання вашого простору ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) не вдався.
 
 Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці [${__SupportLink}](${__SupportLink})
 
@@ -1279,9 +1279,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
-Запланований процес резервного копіювання вашого простору DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" не вдався.
+Запланований процес резервного копіювання вашого простору ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" не вдався.
 
-Рекомендуємо перевірити налаштування "Резервне копіювання":"${__VirtualRootPath}/portal-settings/backup/data-backup" та "Служби":"${__VirtualRootPath}/portal-settings/payments/services".
+Рекомендуємо перевірити налаштування "Резервне копіювання":"${__VirtualRootPath}/portal-settings/backup/data-backup" та "Служби":"${__VirtualRootPath}/billing/addons".
 
 Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці "${__SupportLink}":"${__SupportLink}"
 
@@ -1290,9 +1290,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
-Запланований процес резервного копіювання вашого простору DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) не вдався.
+Запланований процес резервного копіювання вашого простору ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) не вдався.
 
-Рекомендуємо перевірити налаштування [Резервне копіювання](${__VirtualRootPath}/portal-settings/backup/data-backup) та [Служби](${__VirtualRootPath}/portal-settings/payments/services).
+Рекомендуємо перевірити налаштування [Резервне копіювання](${__VirtualRootPath}/portal-settings/backup/data-backup) та [Служби](${__VirtualRootPath}/billing/addons).
 
 Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці [${__SupportLink}](${__SupportLink})
 
@@ -1466,7 +1466,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} створення резервної копії порталу</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Резервне копіювання вашого простору DocSpace не вдалося</value>
+    <value>Резервне копіювання вашого простору ${LetterLogoText} не вдалося</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Підтвердьте зміну адреси електронної пошти</value>
@@ -1658,7 +1658,7 @@ $TrulyYours</value>
     <value>Вас запрошено до кімнати ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Автоматичне резервне копіювання вашого простору DocSpace не вдалося</value>
+    <value>Автоматичне резервне копіювання вашого простору ${LetterLogoText} не вдалося</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} повідомлення про зміну профілю порталу</value>

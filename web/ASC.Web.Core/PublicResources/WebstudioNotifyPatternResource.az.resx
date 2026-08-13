@@ -330,7 +330,7 @@ ${LetterLogoText} komandası
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Salam $UserName,
 
-DocSpace üçün "${__VirtualRootPath}":"${__VirtualRootPath}" yedəkləmə uğursuz oldu.
+${LetterLogoText} üçün "${__VirtualRootPath}":"${__VirtualRootPath}" yedəkləmə uğursuz oldu.
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, lütfən, "${__SupportLink}":"${__SupportLink}" vasitəsilə bizimlə əlaqə saxlamaqdan çəkinməyin.
 
@@ -339,7 +339,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Salam $UserName,
 
-DocSpace üçün [${__VirtualRootPath}](${__VirtualRootPath}) yedəkləmə uğursuz oldu.
+${LetterLogoText} üçün [${__VirtualRootPath}](${__VirtualRootPath}) yedəkləmə uğursuz oldu.
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, lütfən, [${__SupportLink}](${__SupportLink}) vasitəsilə bizimlə əlaqə saxlamaqdan çəkinməyin.
 
@@ -1258,9 +1258,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Salam $UserName,
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" üçün planlaşdırılmış ehtiyat nüsxələmə prosesi uğursuz olub.
+${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" üçün planlaşdırılmış ehtiyat nüsxələmə prosesi uğursuz olub.
 
-Biz "Ehtiyat nüsxə":"${__VirtualRootPath}/portal-settings/backup/data-backup" və "Xidmətlər":"${__VirtualRootPath}/portal-settings/payments/services" parametrlərini yoxlamağı tövsiyə edirik.
+Biz "Ehtiyat nüsxə":"${__VirtualRootPath}/portal-settings/backup/data-backup" və "Xidmətlər":"${__VirtualRootPath}/billing/addons" parametrlərini yoxlamağı tövsiyə edirik.
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, lütfən, "${__SupportLink}":"${__SupportLink}" vasitəsilə bizimlə əlaqə saxlamaqdan çəkinməyin.
 
@@ -1269,9 +1269,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Salam $UserName,
 
-DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) üçün planlaşdırılmış ehtiyat nüsxələmə prosesi uğursuz olub.
+${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) üçün planlaşdırılmış ehtiyat nüsxələmə prosesi uğursuz olub.
 
-Biz [Ehtiyat nüsxə](${__VirtualRootPath}/portal-settings/backup/data-backup) və [Xidmətlər](${__VirtualRootPath}/portal-settings/payments/services) parametrlərini yoxlamağı tövsiyə edirik.
+Biz [Ehtiyat nüsxə](${__VirtualRootPath}/portal-settings/backup/data-backup) və [Xidmətlər](${__VirtualRootPath}/billing/addons) parametrlərini yoxlamağı tövsiyə edirik.
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, lütfən, [${__SupportLink}](${__SupportLink}) vasitəsilə bizimlə əlaqə saxlamaqdan çəkinməyin.
 
@@ -1431,7 +1431,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} portal yedəkləməsi yaradıldı</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>DocSpace üçün yedəkləmə uğursuz oldu</value>
+    <value>${LetterLogoText} üçün yedəkləmə uğursuz oldu</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>E-poçtunuzun dəyişdirilməsini təsdiq edin</value>
@@ -1620,7 +1620,7 @@ $TrulyYours</value>
     <value>Siz ${LetterLogoText} otağına dəvətlisiniz</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>DocSpace üçün avtomatik yedəkləmə uğursuz oldu</value>
+    <value>${LetterLogoText} üçün avtomatik yedəkləmə uğursuz oldu</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} portalının profilinin dəyişdirilməsi ilə bağlı bildiriş</value>

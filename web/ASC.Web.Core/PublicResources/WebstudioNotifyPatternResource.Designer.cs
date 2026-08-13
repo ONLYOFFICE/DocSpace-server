@@ -742,7 +742,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName,
         ///
-        ///The backup process for your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
+        ///The backup process for your ${LetterLogoText} &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
         ///
@@ -757,7 +757,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName,
         ///
-        ///The backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
+        ///The backup process for your ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
         ///
@@ -1987,11 +1987,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello, $UserName,
+        ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The scheduled backup process for your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
+        ///The scheduled backup process for your ${LetterLogoText} &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
         ///
-        ///We recommend checking the &quot;Backup&quot;:&quot;${__VirtualRootPath}/portal-settings/backup/data-backup&quot; and &quot;Services&quot;:&quot;${__VirtualRootPath}/portal-settings/payments/services&quot; settings.
+        ///We recommend checking the &quot;Backup&quot;:&quot;${__VirtualRootPath}/portal-settings/backup/data-backup&quot; and &quot;Addons&quot;:&quot;${__VirtualRootPath}/billing/addons&quot; settings.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
         ///
@@ -2004,11 +2004,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello, $UserName,
+        ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The scheduled backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
+        ///The scheduled backup process for your ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
         ///
-        ///We recommend checking the [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) and [Services](${__VirtualRootPath}/portal-settings/payments/services) settings.
+        ///We recommend checking the [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) and [Addons](${__VirtualRootPath}/billing/addons) settings.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
         ///
@@ -2362,7 +2362,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Backup for your DocSpace failed.
+        ///   Looks up a localized string similar to Backup for your ${LetterLogoText} failed.
         /// </summary>
         public static string subject_backup_failed {
             get {
@@ -3010,7 +3010,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Auto backup for your DocSpace failed.
+        ///   Looks up a localized string similar to Auto backup for your ${LetterLogoText} failed.
         /// </summary>
         public static string subject_scheduled_backup_failed {
             get {

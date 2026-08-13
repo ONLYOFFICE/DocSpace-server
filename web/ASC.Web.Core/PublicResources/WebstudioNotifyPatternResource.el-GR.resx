@@ -343,7 +343,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Γεια σας, $UserName,
 
-Η διαδικασία δημιουργίας αντιγράφων ασφαλείας για το DocSpace σας "${__VirtualRootPath}":"${__VirtualRootPath}" απέτυχε.
+Η διαδικασία δημιουργίας αντιγράφων ασφαλείας για το ${LetterLogoText} σας "${__VirtualRootPath}":"${__VirtualRootPath}" απέτυχε.
 
 Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω "${__SupportLink}":"${__SupportLink}"
 
@@ -352,7 +352,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Γεια σας, $UserName,
 
-Η διαδικασία δημιουργίας αντιγράφων ασφαλείας για το DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) απέτυχε.
+Η διαδικασία δημιουργίας αντιγράφων ασφαλείας για το ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) απέτυχε.
 
 Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω του [${__SupportLink}](${__SupportLink})
 
@@ -1279,9 +1279,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Γεια σας, $UserName,
 
-Η προγραμματισμένη διαδικασία δημιουργίας αντιγράφου ασφαλείας για το DocSpace σας "${__VirtualRootPath}":"${__VirtualRootPath}" απέτυχε.
+Η προγραμματισμένη διαδικασία δημιουργίας αντιγράφου ασφαλείας για το ${LetterLogoText} σας "${__VirtualRootPath}":"${__VirtualRootPath}" απέτυχε.
 
-Συνιστούμε να ελέγξετε τις ρυθμίσεις "Αντίγραφο Ασφαλείας":"${__VirtualRootPath}/portal-settings/backup/data-backup" και "Υπηρεσίες":"${__VirtualRootPath}/portal-settings/payments/services".
+Συνιστούμε να ελέγξετε τις ρυθμίσεις "Αντίγραφο Ασφαλείας":"${__VirtualRootPath}/portal-settings/backup/data-backup" και "Υπηρεσίες":"${__VirtualRootPath}/billing/addons".
 
 Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω "${__SupportLink}":"${__SupportLink}"
 
@@ -1290,9 +1290,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Γεια σας, $UserName,
 
-Η προγραμματισμένη διαδικασία δημιουργίας αντιγράφου ασφαλείας για το DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) απέτυχε.
+Η προγραμματισμένη διαδικασία δημιουργίας αντιγράφου ασφαλείας για το ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) απέτυχε.
 
-Συνιστούμε να ελέγξετε τις ρυθμίσεις [Αντίγραφο Ασφαλείας](${__VirtualRootPath}/portal-settings/backup/data-backup) και [Υπηρεσίες](${__VirtualRootPath}/portal-settings/payments/services).
+Συνιστούμε να ελέγξετε τις ρυθμίσεις [Αντίγραφο Ασφαλείας](${__VirtualRootPath}/portal-settings/backup/data-backup) και [Υπηρεσίες](${__VirtualRootPath}/billing/addons).
 
 Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω του [${__SupportLink}](${__SupportLink})
 
@@ -1465,7 +1465,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} δημιουργία αντιγράφου ασφαλείας πύλης</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Αποτυχία δημιουργίας αντιγράφου ασφαλείας για το DocSpace</value>
+    <value>Αποτυχία δημιουργίας αντιγράφου ασφαλείας για το ${LetterLogoText}</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Επιβεβαιώστε την αλλαγή του email σας</value>
@@ -1657,7 +1657,7 @@ $TrulyYours</value>
     <value>Είστε προσκεκλημένοι στην δωμάτιο του ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Αποτυχία αυτόματης δημιουργίας αντιγράφου ασφαλείας για το DocSpace σας</value>
+    <value>Αποτυχία αυτόματης δημιουργίας αντιγράφου ασφαλείας για το ${LetterLogoText} σας</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Ειδοποίησης αλλαγής προφίλ πύλης ${__VirtualRootHost}</value>

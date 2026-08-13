@@ -331,7 +331,7 @@ ${LetterLogoText} Equipe de suporte
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Olá, $UserName,
 
-O processo de backup para o seu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" falhou.
+O processo de backup para o seu ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" falhou.
 
 Se você tiver alguma dúvida ou precisar de ajuda, não hesite em nos contatar através de "${__SupportLink}":"${__SupportLink}"
 
@@ -340,7 +340,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Olá, $UserName,
 
-O processo de backup do seu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) falhou.
+O processo de backup do seu ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) falhou.
 
 Se você tiver alguma dúvida ou precisar de ajuda, não hesite em nos contatar através de [${__SupportLink}](${__SupportLink}).
 
@@ -1272,9 +1272,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Olá, $UserName,
 
-O processo de backup agendado para o seu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" falhou.
+O processo de backup agendado para o seu ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" falhou.
 
-Recomendamos verificar as configurações de "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" e "Serviços":"${__VirtualRootPath}/portal-settings/payments/services".
+Recomendamos verificar as configurações de "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" e "Serviços":"${__VirtualRootPath}/billing/addons".
 
 Se tiver alguma dúvida ou precisar de ajuda, entre em contato conosco pelo "${__SupportLink}":"${__SupportLink}"
 
@@ -1283,9 +1283,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Olá, $UserName,
 
-O processo de backup agendado para o seu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) falhou.
+O processo de backup agendado para o seu ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) falhou.
 
-Recomendamos verificar as configurações de [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) e [Serviços](${__VirtualRootPath}/portal-settings/payments/services).
+Recomendamos verificar as configurações de [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) e [Serviços](${__VirtualRootPath}/billing/addons).
 
 Caso tenha alguma dúvida ou precise de ajuda, entre em contato conosco pelo [${__SupportLink}](${__SupportLink})
 
@@ -1446,7 +1446,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Backup do portal ${__VirtualRootHost} criado</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Cópia de segurança para o seu DocSpace falhou</value>
+    <value>Cópia de segurança para o seu ${LetterLogoText} falhou</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Confirme a mudança de seu e-mail</value>
@@ -1638,7 +1638,7 @@ $TrulyYours</value>
     <value>Você está convidado para a sala ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Falha no backup automático do seu DocSpace</value>
+    <value>Falha no backup automático do seu ${LetterLogoText}</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Notificação para alterar perfil do portal ${__VirtualRootHost}</value>

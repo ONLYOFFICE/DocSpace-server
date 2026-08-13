@@ -331,7 +331,7 @@ ${LetterLogoText}™ Тим за подршку
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Здраво, $UserName,
 
-Процес израде резервне копије за ваш DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" није успео.
+Процес израде резервне копије за ваш ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" није успео.
 
 Ако имате било каква питања или вам је потребна помоћ, слободно нас контактирајте путем "${__SupportLink}":"${__SupportLink}"
 
@@ -340,7 +340,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Здраво, $UserName,
 
-Процес израде резервне копије за ваш DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) није успео.
+Процес израде резервне копије за ваш ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) није успео.
 
 Ако имате било каква питања или вам је потребна помоћ, слободно нас контактирајте путем [${__SupportLink}](${__SupportLink})
 
@@ -1266,9 +1266,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Здраво, $UserName,
 
-Планирани процес прављења резервне копије за ваш DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" није успео.
+Планирани процес прављења резервне копије за ваш ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" није успео.
 
-Препоручујемо да проверите подешавања "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Services":"${__VirtualRootPath}/portal-settings/payments/services".
+Препоручујемо да проверите подешавања "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Services":"${__VirtualRootPath}/billing/addons".
 
 Ако имате било каква питања или вам је потребна помоћ, слободно нас контактирајте путем "${__SupportLink}":"${__SupportLink}"
 
@@ -1277,9 +1277,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Здраво, $UserName,
 
-Планирани процес прављења резервне копије за ваш DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) није успео.
+Планирани процес прављења резервне копије за ваш ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) није успео.
 
-Препоручујемо да проверите [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Services](${__VirtualRootPath}/portal-settings/payments/services) подешавања.
+Препоручујемо да проверите [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Services](${__VirtualRootPath}/billing/addons) подешавања.
 
 Ако имате било каква питања или вам је потребна помоћ, слободно нас контактирајте путем [${__SupportLink}](${__SupportLink})
 
@@ -1439,7 +1439,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} портал резервна копија направљена</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Резервна копија за ваш DocSpace није успела</value>
+    <value>Резервна копија за ваш ${LetterLogoText} није успела</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Потврдите промену вашег емаил-а</value>
@@ -1631,7 +1631,7 @@ $TrulyYours</value>
     <value>Позвани сте у ${LetterLogoText} просторију</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Аутоматска резервна копија за ваш DocSpace није успела</value>
+    <value>Аутоматска резервна копија за ваш ${LetterLogoText} није успела</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Обавештење о промени профила портала ${__VirtualRootHost}</value>

@@ -330,7 +330,7 @@ Equipe ${LetterLogoText}
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Bonjour $UserName,
 
-Le processus de sauvegarde de votre DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a échoué. 
+Le processus de sauvegarde de votre ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" a échoué. 
 
 Si vous avez des questions ou besoin d'assistance, n'hésitez pas à nous contacter via "${__SupportLink}":"${__SupportLink}" 
 
@@ -339,7 +339,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Bonjour $UserName,
 
-Le processus de sauvegarde de votre DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a échoué.
+Le processus de sauvegarde de votre ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) a échoué.
 
 Si vous avez des questions ou besoin d'assistance, n'hésitez pas à nous contacter via [${__SupportLink}](${__SupportLink})
 
@@ -1266,9 +1266,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Bonjour $UserName,
 
-La sauvegarde planifiée de votre espace de travail DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a échoué.
+La sauvegarde planifiée de votre espace de travail ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" a échoué.
 
-Nous vous recommandons de vérifier les paramètres "Sauvegarde":"${__VirtualRootPath}/portal-settings/backup/data-backup" et "Services":"${__VirtualRootPath}/portal-settings/payments/services".
+Nous vous recommandons de vérifier les paramètres "Sauvegarde":"${__VirtualRootPath}/portal-settings/backup/data-backup" et "Services":"${__VirtualRootPath}/billing/addons".
 
 Pour toute question ou assistance, n'hésitez pas à nous contacter via "${__SupportLink}":"${__SupportLink}".
 
@@ -1277,9 +1277,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Bonjour $UserName,
 
-La sauvegarde planifiée de votre espace de travail DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a échoué.
+La sauvegarde planifiée de votre espace de travail ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) a échoué.
 
-Nous vous recommandons de vérifier les paramètres [Sauvegarde](${__VirtualRootPath}/portal-settings/backup/data-backup) et [Services](${__VirtualRootPath}/portal-settings/payments/services).
+Nous vous recommandons de vérifier les paramètres [Sauvegarde](${__VirtualRootPath}/portal-settings/backup/data-backup) et [Services](${__VirtualRootPath}/billing/addons).
 
 Pour toute question ou assistance, n'hésitez pas à nous contacter via [${__SupportLink}](${__SupportLink}).
 
@@ -1440,7 +1440,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Sauvegarde du poirtail ${__VirtualRootHost} créée</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>La sauvegarde de votre DocSpace a échoué</value>
+    <value>La sauvegarde de votre ${LetterLogoText} a échoué</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Confirmez le changement de votre mail</value>
@@ -1632,7 +1632,7 @@ $TrulyYours</value>
     <value>Vous êtes invité à la salle d'${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>La sauvegarde automatique de votre DocSpace a échoué</value>
+    <value>La sauvegarde automatique de votre ${LetterLogoText} a échoué</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Notification sur la modification du profil sur le portail ${__VirtualRootHost}</value>

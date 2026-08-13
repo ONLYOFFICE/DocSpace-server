@@ -331,7 +331,7 @@ ${LetterLogoText} サポートチーム
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>$UserName 様、
 
- お客様のDocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" のバックアップ処理が失敗しました。
+ お客様の${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" のバックアップ処理が失敗しました。
 
 ご質問やサポートが必要な場合は、お気軽に "${__SupportLink}":"${__SupportLink}" よりお問い合わせください。
 
@@ -340,7 +340,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>$UserName 様、
 
-お客様のDocSpace [${__VirtualRootPath}](${__VirtualRootPath}) のバックアップ処理が失敗しました。
+お客様の${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) のバックアップ処理が失敗しました。
 
 ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) よりお気軽にお問い合わせください。
 
@@ -1422,7 +1422,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} ポータルのバックアップが作成されました</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>DocSpaceのバックアップに失敗しました</value>
+    <value>${LetterLogoText}のバックアップに失敗しました</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>メールアドレス変更をご確認ください</value>
@@ -1692,7 +1692,7 @@ ${LetterLogoText} AIエージェント "${RoomTitle}":"${RoomUrl}" に新しい�
 $TrulyYours</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>DocSpaceの自動バックアップに失敗しました</value>
+    <value>${LetterLogoText}の自動バックアップに失敗しました</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceが削除されました。
@@ -1706,9 +1706,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>こんにちは、$UserName、
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" のスケジュールされたバックアッププロセスに失敗しました。
+${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" のスケジュールされたバックアッププロセスに失敗しました。
 
-"バックアップ":"${__VirtualRootPath}/portal-settings/backup/data-backup" および "サービス":"{__VirtualRootPath}/portal-settings/payments/services" の設定を確認することをお勧めします。
+"バックアップ":"${__VirtualRootPath}/portal-settings/backup/data-backup" および "サービス":"{__VirtualRootPath}/billing/addons" の設定を確認することをお勧めします。
 
 ご質問やサポートが必要な場合は、"${__SupportLink}":"${__SupportLink}" よりお気軽にお問い合わせください。
 
@@ -1717,9 +1717,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>こんにちは、$UserName、
 
-DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) のスケジュールされたバックアッププロセスに失敗しました。
+${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) のスケジュールされたバックアッププロセスに失敗しました。
 
-[バックアップ](${__VirtualRootPath}/portal-settings/backup/data-backup) および [サービス](${__VirtualRootPath}/portal-settings/payments/services) の設定を確認することをお勧めします。
+[バックアップ](${__VirtualRootPath}/portal-settings/backup/data-backup) および [サービス](${__VirtualRootPath}/billing/addons) の設定を確認することをお勧めします。
 
 ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) よりお気軽にお問い合わせください。
 

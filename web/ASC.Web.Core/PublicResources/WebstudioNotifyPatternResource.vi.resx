@@ -343,7 +343,7 @@ Nhóm hỗ trợ ${LetterLogoText}
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Xin chào $UserName,
 
-Quá trình sao lưu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn đã không thành công.
+Quá trình sao lưu ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn đã không thành công.
 
 Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên lạc  với chúng tôi qua "${__SupportLink}":"${__SupportLink}"
 
@@ -352,7 +352,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Xin chào $UserName,
 
-Quá trình sao lưu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) của bạn đã không thành công.
+Quá trình sao lưu ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) của bạn đã không thành công.
 
 Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên hệ với chúng tôi qua [${__SupportLink}](${__SupportLink})
 
@@ -1280,9 +1280,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Xin chào $UserName,
 
-Quá trình sao lưu theo lịch cho DocSpace của bạn "${__VirtualRootPath}":"${__VirtualRootPath}" đã thất bại.
+Quá trình sao lưu theo lịch cho ${LetterLogoText} của bạn "${__VirtualRootPath}":"${__VirtualRootPath}" đã thất bại.
 
-Chúng tôi khuyên bạn nên kiểm tra cài đặt "Sao lưu":"${__VirtualRootPath}/portal-settings/backup/data-backup" và "Dịch vụ":"${__VirtualRootPath}/portal-settings/payments/services".
+Chúng tôi khuyên bạn nên kiểm tra cài đặt "Sao lưu":"${__VirtualRootPath}/portal-settings/backup/data-backup" và "Dịch vụ":"${__VirtualRootPath}/billing/addons".
 
 Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên lạc với chúng tôi qua "${__SupportLink}":"${__SupportLink}"
 
@@ -1291,9 +1291,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Xin chào $UserName,
 
-Quá trình sao lưu theo lịch cho DocSpace của bạn [${__VirtualRootPath}](${__VirtualRootPath}) đã thất bạig.
+Quá trình sao lưu theo lịch cho ${LetterLogoText} của bạn [${__VirtualRootPath}](${__VirtualRootPath}) đã thất bạig.
 
-Chúng tôi khuyên bạn nên kiểm tra cài đặt [Sao lưu](${__VirtualRootPath}/portal-settings/backup/data-backup) và [Dịch vụ](${__VirtualRootPath}/portal-settings/payments/services).
+Chúng tôi khuyên bạn nên kiểm tra cài đặt [Sao lưu](${__VirtualRootPath}/portal-settings/backup/data-backup) và [Dịch vụ](${__VirtualRootPath}/billing/addons).
 
 Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên hệ với chúng tôi qua [${__SupportLink}](${__SupportLink})
 
@@ -1466,7 +1466,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} đã tạo bản sao lưu của cổng</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Sao lưu DocSpace của bạn không thành công</value>
+    <value>Sao lưu ${LetterLogoText} của bạn không thành công</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Xác nhận thay đổi email của bạn</value>
@@ -1658,7 +1658,7 @@ $TrulyYours</value>
     <value>Bạn được mời vào phòng ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Sao lưu DocSpace tự động của bạn không thành công</value>
+    <value>Sao lưu ${LetterLogoText} tự động của bạn không thành công</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} thông báo thay đổi hồ sơ cổng thông tin</value>

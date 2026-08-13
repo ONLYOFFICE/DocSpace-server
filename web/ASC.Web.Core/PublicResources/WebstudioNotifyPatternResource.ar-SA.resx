@@ -332,7 +332,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>مرحباً، $UserName،
 
-لقد فشلت عملية النسخ الاحتياطي لـ DocSpace الخاص بكم "${__VirtualRootPath}":"${__VirtualRootPath}".
+لقد فشلت عملية النسخ الاحتياطي لـ ${LetterLogoText} الخاص بكم "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 إذا كان لديكم أي أسئلة أو كنتم بحاجة إلى مساعدة، يرجى عدم التردد في الاتصال بنا عبر "${__SupportLink}":"${__SupportLink}"
 
@@ -341,7 +341,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>مرحباً، $UserName،
 
-لقد فشلت عملية النسخ الاحتياطي لـ DocSpace الخاص بكم [${__VirtualRootPath}](${__VirtualRootPath}).
+لقد فشلت عملية النسخ الاحتياطي لـ ${LetterLogoText} الخاص بكم [${__VirtualRootPath}](${__VirtualRootPath}).
 
 إذا كان لديكم أي أسئلة أو كنتم بحاجة إلى مساعدة، يرجى عدم التردد في الاتصال بنا عبر [${__SupportLink}](${__SupportLink})
 
@@ -1308,9 +1308,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>مرحبًا، $UserName،
 
-فشلت عملية النسخ الاحتياطي المجدولة لمساحة عملك DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+فشلت عملية النسخ الاحتياطي المجدولة لمساحة عملك ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-نوصي بالتحقق من إعدادات "النسخ الاحتياطي":"${__VirtualRootPath}/portal-settings/backup/data-backup" و "الخدمات":"${__VirtualRootPath}/portal-settings/payments/services".
+نوصي بالتحقق من إعدادات "النسخ الاحتياطي":"${__VirtualRootPath}/portal-settings/backup/data-backup" و "الخدمات":"${__VirtualRootPath}/billing/addons".
 
 إذا كانت لديكم أي أسئلة أو كنتم بحاجة إلى مساعدة، لا تترددوا في التواصل معنا عبر الرابط "${__SupportLink}":"${__SupportLink}".
 
@@ -1320,9 +1320,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>مرحباً، $UserName،
 
-فشلت عملية النسخ الاحتياطي المجدولة لمساحة عملك DocSpace [${__VirtualRootPath}](${__VirtualRootPath}).
+فشلت عملية النسخ الاحتياطي المجدولة لمساحة عملك ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}).
 
-نوصي بالتحقق من إعدادات [النسخ الاحتياطي](${__VirtualRootPath}/portal-settings/backup/data-backup) و[الخدمات](${__VirtualRootPath}/portal-settings/payments/services).
+نوصي بالتحقق من إعدادات [النسخ الاحتياطي](${__VirtualRootPath}/portal-settings/backup/data-backup) و[الخدمات](${__VirtualRootPath}/billing/addons).
 
 إذا كانت لديكم أي أسئلة أو كنتم بحاجة إلى مساعدة، لا تترددوا في التواصل معنا عبر [${__SupportLink}](${__SupportLink}).
 
@@ -1483,7 +1483,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} تم إنشاء النسخ الاحتياطي للبوابة الإلكترونية</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>فشل النسخ الاحتياطي لـ DocSpace الخاص بكم</value>
+    <value>فشل النسخ الاحتياطي لـ ${LetterLogoText} الخاص بكم</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>تأكيد تغيير بريدك الإلكتروني</value>
@@ -1675,7 +1675,7 @@ $TrulyYours</value>
     <value>أنت مدعو إلى غرفة ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>فشل النسخ الاحتياطي التلقائي لـ DocSpace الخاص بكم</value>
+    <value>فشل النسخ الاحتياطي التلقائي لـ ${LetterLogoText} الخاص بكم</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} إشعار تغيير ملف تعريف البوابة الإلكترونية</value>

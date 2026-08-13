@@ -326,7 +326,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Здравейте, $UserName,
 
-Процесът по архивиране на вашия DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" не беше неуспешен.
+Процесът по архивиране на вашия ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" не беше неуспешен.
 
 Ако имате въпроси или се нуждаете от помощ, моля, не се колебайте да се свържете с нас чрез "${__SupportLink}":"${__SupportLink}"
 
@@ -335,7 +335,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Здравейте, $UserName,
 
-Процесът по архивиране на вашия DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) не беше неуспешен.
+Процесът по архивиране на вашия ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) не беше неуспешен.
 
 Ако имате въпроси или се нуждаете от помощ, моля, не се колебайте да се свържете с нас чрез [${__SupportLink}](${__SupportLink})
 
@@ -1253,9 +1253,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Здравейте, $UserName,
 
-Планираният процесът по архивиране на вашия DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" не беше неуспешен.
+Планираният процесът по архивиране на вашия ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" не беше неуспешен.
 
-Препоръчваме да проверите настройките "Резервно копие":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Услуги":"${__VirtualRootPath}/portal-settings/payments/services".
+Препоръчваме да проверите настройките "Резервно копие":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Услуги":"${__VirtualRootPath}/billing/addons".
 
 Ако имате въпроси или се нуждаете от помощ, моля, не се колебайте да се свържете с нас чрез "${__SupportLink}":"${__SupportLink}"
 
@@ -1264,9 +1264,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Здравейте, $UserName,
 
-Планираният процесът по архивиране на вашия DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) не беше неуспешен.
+Планираният процесът по архивиране на вашия ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) не беше неуспешен.
 
-Препоръчваме да проверите настройките [Резервно копие](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Услуги](${__VirtualRootPath}/portal-settings/payments/services).
+Препоръчваме да проверите настройките [Резервно копие](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Услуги](${__VirtualRootPath}/billing/addons).
 
 Ако имате въпроси или се нуждаете от помощ, моля, не се колебайте да се свържете с нас чрез [${__SupportLink}](${__SupportLink})
 
@@ -1427,7 +1427,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} архивът на портала е създаден</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Неуспешно архивиране на вашия DocSpace</value>
+    <value>Неуспешно архивиране на вашия ${LetterLogoText}</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Потвърдете промяната на вашия имейл</value>
@@ -1619,7 +1619,7 @@ $TrulyYours</value>
     <value>Поканен/а сте в стаята на ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Неуспешно автоматично резервно копие на вашия DocSpace</value>
+    <value>Неуспешно автоматично резервно копие на вашия ${LetterLogoText}</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} известие за промяна на профила на портала</value>

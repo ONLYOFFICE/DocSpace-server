@@ -343,7 +343,7 @@ Tím podpory ${LetterLogoText}
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Dobrý deň, $UserName,
 
-Proces zálohovania vášho DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" zlyhal.
+Proces zálohovania vášho ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" zlyhal.
 
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom "${__SupportLink}":"${__SupportLink}"
 
@@ -352,7 +352,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Dobrý deň, $UserName,
 
-Proces zálohovania vášho DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) zlyhal.
+Proces zálohovania vášho ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) zlyhal.
 
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom [${__SupportLink}](${__SupportLink})
 
@@ -1279,9 +1279,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Dobrý deň, $UserName,
 
-Plánovaný process zálohovania vášho DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" zlyhal.
+Plánovaný process zálohovania vášho ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" zlyhal.
 
-Odporúčame skontrolovať nastavenia "Záloha":"${__VirtualRootPath}/portal-settings/backup/data-backup" a "Služby":"${__VirtualRootPath}/portal-settings/payments/services".
+Odporúčame skontrolovať nastavenia "Záloha":"${__VirtualRootPath}/portal-settings/backup/data-backup" a "Služby":"${__VirtualRootPath}/billing/addons".
 
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom "${__SupportLink}":"${__SupportLink}"
  
@@ -1290,9 +1290,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Dobrý deň, $UserName,
 
-Plánovaný process zálohovania vášho DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) zlyhal.
+Plánovaný process zálohovania vášho ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) zlyhal.
 
-Odporúčame skontrolovať nastavenia [Záloha](${__VirtualRootPath}/portal-settings/backup/data-backup) a [Služby](${__VirtualRootPath}/portal-settings/payments/services).
+Odporúčame skontrolovať nastavenia [Záloha](${__VirtualRootPath}/portal-settings/backup/data-backup) a [Služby](${__VirtualRootPath}/billing/addons).
 
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom [${__SupportLink}](${__SupportLink})
 
@@ -1465,7 +1465,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Záloha portálu ${__VirtualRootHost} bola vytvorená</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Nepodarilo sa vytvoriť zálohu pre váš DocSpace</value>
+    <value>Nepodarilo sa vytvoriť zálohu pre váš ${LetterLogoText}</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Potvrďte zmenu svojho e-mailu</value>
@@ -1657,7 +1657,7 @@ $TrulyYours</value>
     <value>Ste pozvaní do miestnosti ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Automatické zálohovanie vášho DocSpace zlyhalo</value>
+    <value>Automatické zálohovanie vášho ${LetterLogoText} zlyhalo</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Oznámenie o zmene profilu ${__VirtualRootHost} portálu</value>

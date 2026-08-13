@@ -343,7 +343,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Не удалось выполнить резервное копирование вашего DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Не удалось выполнить резервное копирование вашего ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Если у вас есть вопросы или нужна помощь, свяжитесь с нами по ссылке "${__SupportLink}":"${__SupportLink}".
 
@@ -352,7 +352,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Не удалось выполнить резервное копирование вашего DocSpace [${__VirtualRootPath}](${__VirtualRootPath}).
+Не удалось выполнить резервное копирование вашего ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}).
 
 Если у вас есть вопросы или нужна помощь, свяжитесь с нами через [${__SupportLink}](${__SupportLink}).
 
@@ -1279,9 +1279,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Не удалось выполнить запланированное резервное копирование для вашего DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Не удалось выполнить запланированное резервное копирование для вашего ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Рекомендуем проверить настройки "Резервного копирования":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Сервисов":"${__VirtualRootPath}/portal-settings/payments/services".
+Рекомендуем проверить настройки "Резервного копирования":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Сервисов":"${__VirtualRootPath}/billing/addons".
 
 Если у вас есть какие-либо вопросы или требуется помощь, свяжитесь с нами: "${__SupportLink}":"${__SupportLink}"
 
@@ -1290,9 +1290,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Не удалось выполнить запланированное резервное копирование для вашего DocSpace [${__VirtualRootPath}](${__VirtualRootPath}).
+Не удалось выполнить запланированное резервное копирование для вашего ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}).
 
-Рекомендуем проверить настройки [Резервного копирования](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Сервисов](${__VirtualRootPath}/portal-settings/payments/services).
+Рекомендуем проверить настройки [Резервного копирования](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Сервисов](${__VirtualRootPath}/billing/addons).
 
 Если у вас есть какие-либо вопросы или требуется помощь, свяжитесь с нами: [${__SupportLink}](${__SupportLink})
 
@@ -1465,7 +1465,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Создана резервная копия портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Не удалось выполнить резервное копирование вашего DocSpace</value>
+    <value>Не удалось выполнить резервное копирование вашего ${LetterLogoText}</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Подтвердите изменение адреса электронной почты</value>
@@ -1657,7 +1657,7 @@ $TrulyYours</value>
     <value>Вас пригласили в комнату ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Не удалось выполнить автоматическое резервное копирование для вашего DocSpace</value>
+    <value>Не удалось выполнить автоматическое резервное копирование для вашего ${LetterLogoText}</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Оповещение об изменении профиля на портале ${__VirtualRootHost}</value>

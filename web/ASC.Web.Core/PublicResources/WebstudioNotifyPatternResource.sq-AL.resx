@@ -332,7 +332,7 @@ Ekipi suportit i ${LetterLogoText}
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Përshëndetje, $UserName,
 
-Procesi i kopjimit rezervë për DocSpace-in tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" ka dështuar.
+Procesi i kopjimit rezervë për ${LetterLogoText}-in tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" ka dështuar.
 
 Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutemi mos hezitoni të na kontaktoni nëpërmjet "${__SupportLink}":"${__SupportLink}"
 
@@ -341,7 +341,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Përshëndetje, $UserName,
 
-Procesi i kopjimit rezervë për DocSpace-in tuaj [${__VirtualRootPath}](${__VirtualRootPath}) ka dështuar.
+Procesi i kopjimit rezervë për ${LetterLogoText}-in tuaj [${__VirtualRootPath}](${__VirtualRootPath}) ka dështuar.
 
 Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutemi mos hezitoni të na kontaktoni nëpërmjet [${__SupportLink}](${__SupportLink})
 
@@ -1262,9 +1262,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Përshëndetje, $UserName,
 
-Procesi i planifikuar i kopjes rezervë për DocSpace-in tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" ka dështuar.
+Procesi i planifikuar i kopjes rezervë për ${LetterLogoText}-in tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" ka dështuar.
 
-Ju rekomandojmë të kontrolloni cilësimet e "Ruajtjes automatike të të dhënave":"${__VirtualRootPath}/portal-settings/backup/data-backup" dhe "Shërbimeve":"${__VirtualRootPath}/portal-settings/payments/services" settings.
+Ju rekomandojmë të kontrolloni cilësimet e "Ruajtjes automatike të të dhënave":"${__VirtualRootPath}/portal-settings/backup/data-backup" dhe "Shërbimeve":"${__VirtualRootPath}/billing/addons" settings.
 
 Në qoftë se keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos hezitoni të na kontaktoni "${__SupportLink}":"${__SupportLink}"
 
@@ -1273,9 +1273,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Përshëndetje, $UserName,
 
-Procesi i planifikuar i kopjes rezervë për DocSpace-in tuaj [${__VirtualRootPath}](${__VirtualRootPath}) ka dështuar.
+Procesi i planifikuar i kopjes rezervë për ${LetterLogoText}-in tuaj [${__VirtualRootPath}](${__VirtualRootPath}) ka dështuar.
 
-Ju rekomandojmë të kontrolloni cilësimet e [Ruajtjes automatike të të dhënave](${__VirtualRootPath}/portal-settings/backup/data-backup) dhe [Shërbimeve](${__VirtualRootPath}/portal-settings/payments/services) settings.
+Ju rekomandojmë të kontrolloni cilësimet e [Ruajtjes automatike të të dhënave](${__VirtualRootPath}/portal-settings/backup/data-backup) dhe [Shërbimeve](${__VirtualRootPath}/billing/addons) settings.
 
 Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos hezitoni të na kontaktoni përmes [${__SupportLink}](${__SupportLink})
 
@@ -1434,7 +1434,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. U krijua një kopje rezervë e portalit ${__VirtualRootHost}</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Backup-i i DocSpace tuaj dështoi</value>
+    <value>Backup-i i ${LetterLogoText} tuaj dështoi</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Konfirmoni ndryshimin e emailit tuaj</value>
@@ -1623,7 +1623,7 @@ $TrulyYours</value>
     <value>Jeni i ftuar në dhomën e ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Kopja rezervë automatike për DocSpace-in tuaj dështoi</value>
+    <value>Kopja rezervë automatike për ${LetterLogoText}-in tuaj dështoi</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Njoftim për ndryshimin e profilit të portalit ${__VirtualRootHost}</value>

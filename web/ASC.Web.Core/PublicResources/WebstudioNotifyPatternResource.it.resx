@@ -330,7 +330,7 @@ Il team di supporto ${LetterLogoText}
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Ciao, $UserName,
 
-Il processo di backup del tuo DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" non è riuscito.
+Il processo di backup del tuo ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" non è riuscito.
 
 Se hai domande o hai bisogno di assistenza, non esitare a contattarci tramite "${__SupportLink}":"${__SupportLink}"
 
@@ -339,7 +339,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Ciao, $UserName,
 
-Il processo di backup del tuo DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) non è riuscito.
+Il processo di backup del tuo ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) non è riuscito.
 
 Se hai domande o hai bisogno di assistenza, non esitare a contattarci tramite [${__SupportLink}](${__SupportLink})
 
@@ -1266,9 +1266,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Ciao, $UserName,
 
-Il processo di backup pianificato per il tuo DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" non è riuscito.
+Il processo di backup pianificato per il tuo ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" non è riuscito.
 
-Ti consigliamo di controllare le impostazioni di "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" e "Servizi":"${__VirtualRootPath}/portal-settings/payments/services".
+Ti consigliamo di controllare le impostazioni di "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" e "Servizi":"${__VirtualRootPath}/billing/addons".
 
 Se hai domande o hai bisogno di assistenza, non esitare a contattarci tramite "${__SupportLink}":"${__SupportLink}"
 
@@ -1279,7 +1279,7 @@ $TrulyYours</value>
 
 Il processo di backup pianificato per il tuo [${__VirtualRootPath}](${__VirtualRootPath}) non è riuscito.
 
-Ti consigliamo di controllare le impostazioni di [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) e [Services](${__VirtualRootPath}/portal-settings/payments/services).
+Ti consigliamo di controllare le impostazioni di [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) e [Services](${__VirtualRootPath}/billing/addons).
 
 Se hai domande o hai bisogno di assistenza, non esitare a contattarci tramite [${__SupportLink}](${__SupportLink})
 
@@ -1440,7 +1440,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} Backup del portale eseguito</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Backup per il tuo DocSpace non riuscito</value>
+    <value>Backup per il tuo ${LetterLogoText} non riuscito</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>‎Confermare la modifica della dell'indirizzo di posta elettronica‎</value>
@@ -1632,7 +1632,7 @@ $TrulyYours</value>
     <value>Sei invitato nella stanza di ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Backup automatico del tuo DocSpace non riuscito</value>
+    <value>Backup automatico del tuo ${LetterLogoText} non riuscito</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} Notifica per il cambio profilo del portale</value>

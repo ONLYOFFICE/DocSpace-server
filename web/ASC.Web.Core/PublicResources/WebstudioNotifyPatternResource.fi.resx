@@ -342,7 +342,7 @@ ${LetterLogoText}-tukitiimi
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Hei, $UserName,
 
-DocSpacesi "${__VirtualRootPath}":"${__VirtualRootPath}" varmuuskopiointi on epäonnistunut.
+${LetterLogoText}si "${__VirtualRootPath}":"${__VirtualRootPath}" varmuuskopiointi on epäonnistunut.
 
 Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yhteyttä "${__SupportLink}":"${__SupportLink}" kautta. 
 
@@ -351,7 +351,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Hei, $UserName,
 
-DocSpacesi  [${__VirtualRootPath}](${__VirtualRootPath}) varmuuskopiointi on epäonnistunut.
+${LetterLogoText}si  [${__VirtualRootPath}](${__VirtualRootPath}) varmuuskopiointi on epäonnistunut.
 
 Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yheyttä [${__SupportLink}](${__SupportLink}) kautta.
 Ystävällisin terveisin,
@@ -1278,9 +1278,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Hei, $UserName,
 
-DocSpacesi "${__VirtualRootPath}":"${__VirtualRootPath}" ajoitettu varmuuskopiointi on epäonnistunut.
+${LetterLogoText}si "${__VirtualRootPath}":"${__VirtualRootPath}" ajoitettu varmuuskopiointi on epäonnistunut.
 
-Suosittelemme tarkistamaan asetukset "Varmuuskopio":"${__VirtualRootPath}/portal-settings/backup/data-backup" ja "Palvelut":"${__VirtualRootPath}/portal-settings/payments/services".
+Suosittelemme tarkistamaan asetukset "Varmuuskopio":"${__VirtualRootPath}/portal-settings/backup/data-backup" ja "Palvelut":"${__VirtualRootPath}/billing/addons".
 
 Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yhteyttä "${__SupportLink}":"${__SupportLink}" kautta.
 
@@ -1289,9 +1289,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Hei, $UserName,
 
-DocSpacesi [${__VirtualRootPath}](${__VirtualRootPath}) ajoitettu varmuuskopiointi on epäonnistunut.
+${LetterLogoText}si [${__VirtualRootPath}](${__VirtualRootPath}) ajoitettu varmuuskopiointi on epäonnistunut.
 
-Suosittelemme tarkistamaan asetukset [Varmuuskopio](${__VirtualRootPath}/portal-settings/backup/data-backup) ja [Palvelut](${__VirtualRootPath}/portal-settings/payments/services).
+Suosittelemme tarkistamaan asetukset [Varmuuskopio](${__VirtualRootPath}/portal-settings/backup/data-backup) ja [Palvelut](${__VirtualRootPath}/billing/addons).
 
 Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yheyttä [${__SupportLink}](${__SupportLink}) kautta.
 Ystävällisin terveisin,
@@ -1463,7 +1463,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} portaalin turvavarmenne luotu</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>DocSpacesi varmuuskopiointi epäonnistui</value>
+    <value>${LetterLogoText}si varmuuskopiointi epäonnistui</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Vahvista sähköpostisi vaihtaminen</value>
@@ -1655,7 +1655,7 @@ $TrulyYours</value>
     <value>Sinut on kutsuttu ${LetterLogoText}-huoneeseen</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>DocSpacesi automaattinen varmuuskopiointi epäonnistui</value>
+    <value>${LetterLogoText}si automaattinen varmuuskopiointi epäonnistui</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} portaalin profiilin muutoksen tiedonanto</value>

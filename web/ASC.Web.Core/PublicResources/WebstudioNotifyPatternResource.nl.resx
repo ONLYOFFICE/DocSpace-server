@@ -331,7 +331,7 @@ ${LetterLogoText} Ondersteuningsteam
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Hallo, $UserName,
 
-Het back-up proces voor uw DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" is mislukt.
+Het back-up proces voor uw ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" is mislukt.
 
 Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via "${__SupportLink}":"${__SupportLink}".
 
@@ -340,7 +340,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Hallo, $UserName,
 
-Het back-up proces voor uw DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) is mislukt.
+Het back-up proces voor uw ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) is mislukt.
 
 Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via [${__SupportLink}](${__SupportLink})
 
@@ -1258,9 +1258,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Hallo, $UserName,
 
-Het geplande back-up proces voor uw DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" is mislukt.
+Het geplande back-up proces voor uw ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" is mislukt.
 
-We raden aan de instellingen voor "Back-up":"${__VirtualRootPath}/portal-settings/backup/data-backup" en "Services":"${__VirtualRootPath}/portal-settings/payments/services" te controleren.
+We raden aan de instellingen voor "Back-up":"${__VirtualRootPath}/portal-settings/backup/data-backup" en "Services":"${__VirtualRootPath}/billing/addons" te controleren.
 
 Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via "${__SupportLink}":"${__SupportLink}".
 
@@ -1269,9 +1269,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Hallo, $UserName,
 
-Het geplande back-up proces voor uw DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) is mislukt.
+Het geplande back-up proces voor uw ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) is mislukt.
 
-We raden aan de instellingen voor [Back-up](${__VirtualRootPath}/portal-settings/backup/data-backup) en [Services](${__VirtualRootPath}/portal-settings/payments/services) te controleren.
+We raden aan de instellingen voor [Back-up](${__VirtualRootPath}/portal-settings/backup/data-backup) en [Services](${__VirtualRootPath}/billing/addons) te controleren.
 
 Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via [${__SupportLink}](${__SupportLink})
 
@@ -1432,7 +1432,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} Portaal Backup gecreërd</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Back-up voor uw DocSpace is mislukt</value>
+    <value>Back-up voor uw ${LetterLogoText} is mislukt</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Bevestig de wijziging van uw e-mailadres</value>
@@ -1624,7 +1624,7 @@ $TrulyYours</value>
     <value>U bent uitgenodigd voor de ${LetterLogoText} kamer</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Automatische back-up voor uw DocSpace is mislukt</value>
+    <value>Automatische back-up voor uw ${LetterLogoText} is mislukt</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} portaal profiel wijzigings notificatie</value>

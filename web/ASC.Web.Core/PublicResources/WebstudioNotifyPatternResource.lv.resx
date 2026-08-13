@@ -343,7 +343,7 @@ ${LetterLogoText} atbalsta komanda
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" dublēšanas process nav izdevies.
+Jūsu ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" dublēšanas process nav izdevies.
 
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot "${__SupportLink}":"${__SupportLink}"
 
@@ -352,7 +352,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) dublēšanas process nav izdevies.
+Jūsu ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) dublēšanas process nav izdevies.
 
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot [${__SupportLink}](${__SupportLink})
 
@@ -1279,9 +1279,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ieplānotais dublēšanas process nav izdevies.
+Jūsu ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" ieplānotais dublēšanas process nav izdevies.
 
-Mēs iesakām pārbaudīt iestatījumus "Dublējums":"${__VirtualRootPath}/portal-settings/backup/data-backup" un "Pakalpojumi":"${__VirtualRootPath}/portal-settings/payments/services".
+Mēs iesakām pārbaudīt iestatījumus "Dublējums":"${__VirtualRootPath}/portal-settings/backup/data-backup" un "Pakalpojumi":"${__VirtualRootPath}/billing/addons".
 
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot "${__SupportLink}":"${__SupportLink}"
 
@@ -1290,9 +1290,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ieplānotais dublēšanas process nav izdevies.
+Jūsu ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) ieplānotais dublēšanas process nav izdevies.
 
-Mēs iesakām pārbaudīt iestatījumus [Dublējums](${__VirtualRootPath}/portal-settings/backup/data-backup) un [Pakalpojumi](${__VirtualRootPath}/portal-settings/payments/services).
+Mēs iesakām pārbaudīt iestatījumus [Dublējums](${__VirtualRootPath}/portal-settings/backup/data-backup) un [Pakalpojumi](${__VirtualRootPath}/billing/addons).
 
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot [${__SupportLink}](${__SupportLink})
 
@@ -1465,7 +1465,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} izveidota portāla ${__VirtualRootHost} rezerves kopija</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Neizdevās izveidot DocSpace dublējumkopiju</value>
+    <value>Neizdevās izveidot ${LetterLogoText} dublējumkopiju</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Apstipriniet e-pasta adreses maiņu</value>
@@ -1657,7 +1657,7 @@ $TrulyYours</value>
     <value>Laipni aicināti pievienoties ${LetterLogoText} telpai</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Neizdevās automātiski izveidot DocSpace dublējumkopiju</value>
+    <value>Neizdevās automātiski izveidot ${LetterLogoText} dublējumkopiju</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} portāla profila izmaiņu paziņojums</value>

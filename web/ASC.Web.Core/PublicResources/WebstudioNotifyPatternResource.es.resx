@@ -330,7 +330,7 @@ Equipo de soporte ${LetterLogoText}
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Hola, $UserName,
 
-El proceso de copia de seguridad de su DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}" ha fallado.
+El proceso de copia de seguridad de su ${LetterLogoText}  "${__VirtualRootPath}":"${__VirtualRootPath}" ha fallado.
 
 Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de "${__SupportLink}":"${__SupportLink}"
 
@@ -339,7 +339,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Hola, $UserName,
 
-El proceso de copia de seguridad de su DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ha fallado.
+El proceso de copia de seguridad de su ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) ha fallado.
 
 Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de [${__SupportLink}](${__SupportLink})
 
@@ -1266,9 +1266,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Hola, $NombreUsuario,
 
-El proceso de copia de seguridad programado para su DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ha fallado.
+El proceso de copia de seguridad programado para su ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" ha fallado.
 
-Le recomendamos que compruebe los ajustes "Copia de seguridad":"${__VirtualRootPath}/portal-settings/backup/data-backup" y "Servicios":"${__VirtualRootPath}/portal-settings/payments/services".
+Le recomendamos que compruebe los ajustes "Copia de seguridad":"${__VirtualRootPath}/portal-settings/backup/data-backup" y "Servicios":"${__VirtualRootPath}/billing/addons".
 
 Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de "${__SupportLink}":"${__SupportLink}"
 
@@ -1277,9 +1277,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Hola, $NombreUsuario,
 
-El proceso de copia de seguridad programado para su DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ha fallado.
+El proceso de copia de seguridad programado para su ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) ha fallado.
 
-Le recomendamos que compruebe los ajustes [Copia de seguridad](${__VirtualRootPath}/portal-settings/backup/data-backup) y [Servicios](${__VirtualRootPath}/portal-settings/payments/services).
+Le recomendamos que compruebe los ajustes [Copia de seguridad](${__VirtualRootPath}/portal-settings/backup/data-backup) y [Servicios](${__VirtualRootPath}/billing/addons).
 
 Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de [${__SupportLink}](${__SupportLink})
 
@@ -1440,7 +1440,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}.${__VirtualRootHost} Copia de seguridad de portal creado</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Ha fallado la copia de seguridad de su DocSpace</value>
+    <value>Ha fallado la copia de seguridad de su ${LetterLogoText}</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Confirme el cambio de su correo electrónico</value>
@@ -1629,7 +1629,7 @@ $TrulyYours</value>
     <value>Le invitan a la sala de ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Error en la copia de seguridad automática de DocSpace</value>
+    <value>Error en la copia de seguridad automática de ${LetterLogoText}</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Notificación de cambio de perfil en el portal ${__VirtualRootHost}</value>

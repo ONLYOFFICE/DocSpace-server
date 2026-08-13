@@ -331,7 +331,7 @@ Echipă de Asistență ${LetterLogoText}
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Stimate, $UserName,
 
-Copierea de rezervă a spațiului dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" nu a reușit.
+Copierea de rezervă a spațiului dvs ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" nu a reușit.
 
 Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
 
@@ -340,7 +340,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Stimate, $UserName,
 
-Copierea de rezervă a spațiului dvs DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) nu a reușit.
+Copierea de rezervă a spațiului dvs ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) nu a reușit.
 
 Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
 
@@ -1267,9 +1267,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Stimate, $UserName,
 
-Copierea de rezervă programată a spațiului DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a eșuat.
+Copierea de rezervă programată a spațiului ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" a eșuat.
 
-Vă recomandăm să verificați setările pentru "Copiere de rezervă":"${__VirtualRootPath}/portal-settings/backup/data-backup" și "Servicii":"${__VirtualRootPath}/portal-settings/payments/services".
+Vă recomandăm să verificați setările pentru "Copiere de rezervă":"${__VirtualRootPath}/portal-settings/backup/data-backup" și "Servicii":"${__VirtualRootPath}/billing/addons".
 
 Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
 
@@ -1278,9 +1278,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Stimate, $UserName,
 
-Copierea de rezervă programată a spațiului DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a eșuat.
+Copierea de rezervă programată a spațiului ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) a eșuat.
 
-Vă recomandăm să verificați setările pentru [Copiere de rezervă](${__VirtualRootPath}/portal-settings/backup/data-backup) și [Servicii](${__VirtualRootPath}/portal-settings/payments/services).
+Vă recomandăm să verificați setările pentru [Copiere de rezervă](${__VirtualRootPath}/portal-settings/backup/data-backup) și [Servicii](${__VirtualRootPath}/billing/addons).
 
 Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
 
@@ -1441,7 +1441,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} copia de rezervă a portalului a fost creată</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Copierea de rezervă a spațiului dvs DocSpace nu a reușit</value>
+    <value>Copierea de rezervă a spațiului dvs ${LetterLogoText} nu a reușit</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Confirmare schimbare e-mail</value>
@@ -1630,7 +1630,7 @@ $TrulyYours</value>
     <value>Sunteți invitat la sala ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Copierea de rezervă automată a spațiului DocSpace a eșuat</value>
+    <value>Copierea de rezervă automată a spațiului ${LetterLogoText} a eșuat</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} notificarea privind modificarea profilului de portal</value>

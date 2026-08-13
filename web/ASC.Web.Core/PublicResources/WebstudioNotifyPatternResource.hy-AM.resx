@@ -331,7 +331,7 @@ ${LetterLogoText} աջակցման թիմ
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Ողջույն, $UserName,
 
-Ձեր DocSpace-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պահուստավորման գործընթացը ձախողվել է։
+Ձեր ${LetterLogoText}-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պահուստավորման գործընթացը ձախողվել է։
 
 Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}"-ի միջոցով՝
 
@@ -340,7 +340,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Ողջուն, $UserName,
 
-Ձեր DocSpace [${__VirtualRootPath}](${__VirtualRootPath})-ի պահուստավորման գործընթացը ձախողվել է։
+Ձեր ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath})-ի պահուստավորման գործընթացը ձախողվել է։
 
 Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) միջոցով։
 
@@ -1266,7 +1266,7 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Ողջուն, $UserName,
 
-Ձեր DocSpace-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պլանավորված պահուստավորման գործընթացը ձախողվել է։ Խորհուրդ ենք տալիս ստուգել "Պահուստավորում":"${__VirtualRootPath}/portal-settings/backup/data-backup" և "Services":"${__VirtualRootPath}/portal-settings/payments/services" կարգավորումները։ 
+Ձեր ${LetterLogoText}-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պլանավորված պահուստավորման գործընթացը ձախողվել է։ Խորհուրդ ենք տալիս ստուգել "Պահուստավորում":"${__VirtualRootPath}/portal-settings/backup/data-backup" և "Services":"${__VirtualRootPath}/billing/addons" կարգավորումները։ 
 
 Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}" միջոցով։
 
@@ -1275,9 +1275,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Ողջույն, $UserName,
 
-Ձեր DocSpace [${__VirtualRootPath}](${__VirtualRootPath})-ի համար նախատեսված պահուստավորման գործընթացը ձախողվել է։
+Ձեր ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath})-ի համար նախատեսված պահուստավորման գործընթացը ձախողվել է։
 
-Խորհուրդ ենք տալիս ստուգել [Պահուստավորում](${__VirtualRootPath}/portal-settings/backup/data-backup) և [Services](${__VirtualRootPath}/portal-settings/payments/services) կարգավորումները։
+Խորհուրդ ենք տալիս ստուգել [Պահուստավորում](${__VirtualRootPath}/portal-settings/backup/data-backup) և [Services](${__VirtualRootPath}/billing/addons) կարգավորումները։
 
 Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) միջոցով։
 
@@ -1437,7 +1437,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}: Ստեղծվել է ${__VirtualRootHost} պորտալի կրկնօրինակում</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>Ձեր DocSpace-ի պահուստավորումը ձախողվեց</value>
+    <value>Ձեր ${LetterLogoText}-ի պահուստավորումը ձախողվեց</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Հաստատեք ձեր էլ.փոստի փոփոխությունը</value>
@@ -1626,7 +1626,7 @@ $TrulyYours</value>
     <value>Դուք հրավիրված եք ${LetterLogoText} սենյակ</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>Ձեր DocSpace-ի ավտոմատ պահուստավորումը ձախողվեց։</value>
+    <value>Ձեր ${LetterLogoText}-ի ավտոմատ պահուստավորումը ձախողվեց։</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} պորտալի պրոֆիլի փոփոխության ծանուցում</value>

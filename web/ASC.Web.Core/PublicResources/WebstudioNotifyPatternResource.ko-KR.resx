@@ -343,7 +343,7 @@ ${LetterLogoText} 지원팀
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>$UserName님, 안녕하세요.
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 의 백업 프로세스가 실패했습니다. 
+${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" 의 백업 프로세스가 실패했습니다. 
 
 궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: "${__SupportLink}":"${__SupportLink}"
 
@@ -352,7 +352,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>$UserName님, 안녕하세요.
 
-DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) 의 백업 프로세스가 실패했습니다. 
+${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) 의 백업 프로세스가 실패했습니다. 
 
 궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: [${__SupportLink}](${__SupportLink})
 
@@ -1279,9 +1279,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>$UserName님, 안녕하세요.
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 의 예정된 백업 프로세스가 실패했습니다.
+${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" 의 예정된 백업 프로세스가 실패했습니다.
 
-다음 설정을 확인하는 것을 권장합니다: "백업":"${__VirtualRootPath}/portal-settings/backup/data-backup" 및 "서비스":"${__VirtualRootPath}/portal-settings/payments/services".
+다음 설정을 확인하는 것을 권장합니다: "백업":"${__VirtualRootPath}/portal-settings/backup/data-backup" 및 "서비스":"${__VirtualRootPath}/billing/addons".
 
 궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: "${__SupportLink}":"${__SupportLink}"
 
@@ -1290,9 +1290,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>$UserName님, 안녕하세요.
 
-DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) 의 예정된 백업 프로세스가 실패했습니다.
+${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) 의 예정된 백업 프로세스가 실패했습니다.
 
-다음 설정을 확인하는 것을 권장합니다: [백업](${__VirtualRootPath}/portal-settings/backup/data-backup) 및 [서비스](${__VirtualRootPath}/portal-settings/payments/services)
+다음 설정을 확인하는 것을 권장합니다: [백업](${__VirtualRootPath}/portal-settings/backup/data-backup) 및 [서비스](${__VirtualRootPath}/billing/addons)
 
 궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: [${__SupportLink}](${__SupportLink})
  
@@ -1460,7 +1460,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} 포털 백업이 생성되었습니다</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>DocSpace 백업에 실패했습니다</value>
+    <value>${LetterLogoText} 백업에 실패했습니다</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>이메일 변경 확인</value>
@@ -1652,7 +1652,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} 룸에 초대받으셨습니다</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>DocSpace 자동 백업에 실패했습니다</value>
+    <value>${LetterLogoText} 자동 백업에 실패했습니다</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} 포털 프로필 변경 알림</value>

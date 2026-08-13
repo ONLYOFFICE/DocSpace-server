@@ -342,7 +342,7 @@ ${LetterLogoText} Destek Ekibi
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Merhaba, $UserName,
 
-DocSpace’iniz "${__VirtualRootPath}":"${__VirtualRootPath}" için yapılan yedekleme işlemi başarısız oldu.
+${LetterLogoText}’iniz "${__VirtualRootPath}":"${__VirtualRootPath}" için yapılan yedekleme işlemi başarısız oldu.
 
 Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen "${__SupportLink}":"${__SupportLink}" adresi üzerinden bizimle iletişime geçmekten çekinmeyin.
 
@@ -351,7 +351,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Merhaba, $UserName,
 
-DocSpace’iniz [${__VirtualRootPath}](${__VirtualRootPath}) için yapılan yedekleme işlemi başarısız oldu.
+${LetterLogoText}’iniz [${__VirtualRootPath}](${__VirtualRootPath}) için yapılan yedekleme işlemi başarısız oldu.
 
 Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen [${__SupportLink}](${__SupportLink}) üzerinden bizimle iletişime geçmekten çekinmeyin.
 
@@ -1272,9 +1272,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Merhaba, $UserName,
 
-DocSpace’iniz "${__VirtualRootPath}":"${__VirtualRootPath}" için planlanan yapılan yedekleme işlemi başarısız oldu.
+${LetterLogoText}’iniz "${__VirtualRootPath}":"${__VirtualRootPath}" için planlanan yapılan yedekleme işlemi başarısız oldu.
 
-"Yedekleme":"${__VirtualRootPath}/portal-settings/backup/data-backup" ve "Hizmetler":"${__VirtualRootPath}/portal-settings/payments/services" ayarlarını kontrol etmenizi öneririz.
+"Yedekleme":"${__VirtualRootPath}/portal-settings/backup/data-backup" ve "Hizmetler":"${__VirtualRootPath}/billing/addons" ayarlarını kontrol etmenizi öneririz.
 
 Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen "${__SupportLink}":"${__SupportLink}" adresi üzerinden bizimle iletişime geçmekten çekinmeyin.
 
@@ -1283,9 +1283,9 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Merhaba, $UserName,
 
-DocSpace’iniz [${__VirtualRootPath}](${__VirtualRootPath}) için planlanan yapılan yedekleme işlemi başarısız oldu.
+${LetterLogoText}’iniz [${__VirtualRootPath}](${__VirtualRootPath}) için planlanan yapılan yedekleme işlemi başarısız oldu.
 
-[Yedekleme](${__VirtualRootPath}/portal-settings/backup/data-backup) ve [Hizmetler](${__VirtualRootPath}/portal-settings/payments/services) ayarlarını kontrol etmenizi öneririz.
+[Yedekleme](${__VirtualRootPath}/portal-settings/backup/data-backup) ve [Hizmetler](${__VirtualRootPath}/billing/addons) ayarlarını kontrol etmenizi öneririz.
 
 Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen [${__SupportLink}](${__SupportLink}) üzerinden bizimle iletişime geçmekten çekinmeyin.
 
@@ -1459,7 +1459,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} portal yedeklemesi oluşturuldu</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>DocSpace’iniz için yedekleme başarısız oldu</value>
+    <value>${LetterLogoText}’iniz için yedekleme başarısız oldu</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>E-postanızı değiştirmeyi onaylayın</value>
@@ -1651,7 +1651,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} odasına davetlisiniz</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>DocSpace’iniz için otomatik yedekleme başarısız oldu</value>
+    <value>${LetterLogoText}’iniz için otomatik yedekleme başarısız oldu</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} portal profili değişiklik bildirimi</value>
