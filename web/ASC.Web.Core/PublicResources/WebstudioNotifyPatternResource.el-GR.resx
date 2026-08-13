@@ -1310,7 +1310,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Γεια σας!
 
-Σας προσκαλούμε να συμμετάσχετε στο δωμάτιο DocSpace στο "${__VirtualRootPath}":"${__VirtualRootPath}". Αποδεχτείτε την πρόσκληση κάνοντας κλικ στον σύνδεσμο:
+Σας προσκαλούμε να συμμετάσχετε στο δωμάτιο στο "${__VirtualRootPath}":"${__VirtualRootPath}". Αποδεχτείτε την πρόσκληση κάνοντας κλικ στον σύνδεσμο:
 
 $OrangeButton
 
@@ -1711,7 +1711,7 @@ $TrulyYours</value>
     <value>Η περίοδος χάριτος για το ${LetterLogoText} DocSpace λήγει αύριο</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Εγγραφείτε στο ${LetterLogoText} DocSpace</value>
+    <value>Εγγραφείτε στο ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Είστε προσκεκλημένοι στην δωμάτιο DocSpace του ${LetterLogoText}</value>

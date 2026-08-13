@@ -1310,7 +1310,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Sveiki!
 
-Jūs esat uzaicināts (-a) pievienoties DocSpace telpai šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
+Jūs esat uzaicināts (-a) pievienoties telpai šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
 $OrangeButton
 
@@ -1711,7 +1711,7 @@ $TrulyYours</value>
     <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace beidzas rīt</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Pievienojieties ${LetterLogoText} DocSpace</value>
+    <value>Pievienojieties ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Laipni aicināti pievienoties ${LetterLogoText} DocSpace telpai</value>

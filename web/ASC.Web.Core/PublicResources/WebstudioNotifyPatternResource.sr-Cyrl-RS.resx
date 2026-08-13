@@ -1685,7 +1685,7 @@ $TrulyYours</value>
     <value>Грејс период за ваш ${LetterLogoText} DocSpace истиче сутра</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Придружите се ${LetterLogoText} DocSpace-у</value>
+    <value>Придружите се ${LetterLogoText}-у</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Позвани сте у ${LetterLogoText} DocSpace просторију</value>

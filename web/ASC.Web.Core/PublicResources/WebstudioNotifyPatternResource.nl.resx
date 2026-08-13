@@ -1289,7 +1289,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hallo!
 
-U bent uitgenodigd om deel te nemen aan een DocSpace-kamer op "${__VirtualRootPath}":"${__VirtualRootPath}". Accepteer de uitnodiging door op de link te klikken:
+U bent uitgenodigd om deel te nemen aan een kamer op "${__VirtualRootPath}":"${__VirtualRootPath}". Accepteer de uitnodiging door op de link te klikken:
 
 $OrangeButton
 
@@ -1678,7 +1678,7 @@ $TrulyYours</value>
     <value>Wachtperiode voor uw ${LetterLogoText} DocSpace verloopt morgen</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Aanmelden bij ${LetterLogoText} DocSpace</value>
+    <value>Aanmelden bij ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>U bent uitgenodigd voor de ${LetterLogoText} DocSpace kamer</value>

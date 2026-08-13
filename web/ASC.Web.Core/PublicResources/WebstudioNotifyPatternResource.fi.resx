@@ -1309,7 +1309,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hei!
 
-Sinut on kutsuttu liittymään DocSpace-huoneeseen "${__VirtualRootPath}":"${__VirtualRootPath}". Hyväksy kutsu klikkaamalla linkkiä:
+Sinut on kutsuttu liittymään huoneeseen "${__VirtualRootPath}":"${__VirtualRootPath}". Hyväksy kutsu klikkaamalla linkkiä:
 
 $OrangeButton
 
@@ -1709,7 +1709,7 @@ $TrulyYours</value>
     <value>Armonaika ${LetterLogoText} DocSpaceesi päättyy huomenna</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Liity ${LetterLogoText} DocSpaceen</value>
+    <value>Liity ${LetterLogoText}en</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Sinut on kutsuttu ${LetterLogoText} DocSpace-huoneeseen</value>

@@ -1990,11 +1990,11 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are invited to join a DocSpace room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
+        ///You are invited to join the room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
         ///
         ///$OrangeButton
         ///
-        ///After clicking on the invitation link, please set a new password for your account.
+        ///After clicking on the invitation link, please set a new password.
         ///
         ///$TrulyYours.
         /// </summary>
@@ -3043,7 +3043,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to ${LetterLogoText}: You are invited to the room.
         /// </summary>
         public static string subject_saas_room_invite {
             get {

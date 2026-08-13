@@ -1298,7 +1298,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Bună!
 
-Sunteţi invitat să vă asociaţi la sala DocSpace la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+Sunteţi invitat să vă asociaţi la sala la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
 
 $OrangeButton
 
@@ -1684,7 +1684,7 @@ $TrulyYours</value>
     <value>Perioadă de grație pentru ${LetterLogoText} DocSpace va expira mâine</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Asociați-vă spaţiului ${LetterLogoText} DocSpace</value>
+    <value>Asociați-vă spaţiului ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Sunteți invitat la sala ${LetterLogoText} DocSpace</value>

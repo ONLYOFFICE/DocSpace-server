@@ -1837,11 +1837,11 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hello!
 
-You are invited to join a DocSpace room at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
+You are invited to join the room at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
 
 $OrangeButton
 
-After clicking on the invitation link, please set a new password for your account.
+After clicking on the invitation link, please set a new password.
 
 $TrulyYours</value>
   </data>
@@ -2310,7 +2310,7 @@ $TrulyYours</value>
     <value>Grace period for your ${LetterLogoText} DocSpace expires tomorrow</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Join ${LetterLogoText} DocSpace</value>
+    <value>${LetterLogoText}: You are invited to the room</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>You're invited to the ${LetterLogoText} DocSpace room</value>

@@ -1301,7 +1301,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>こんにちは！
 
-"${__VirtualRootPath}":"${__VirtualRootPath}" のDocSpaceルームに招待されています。リンクをクリックして招待を承諾してください：
+"${__VirtualRootPath}":"${__VirtualRootPath}" のルームに招待されています。リンクをクリックして招待を承諾してください：
 
 $OrangeButton
 
@@ -1665,7 +1665,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpaceの猶予期限は明日終了します</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceに参加しましょう</value>
+    <value>${LetterLogoText}に参加しましょう</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceのルームに招待されました</value>

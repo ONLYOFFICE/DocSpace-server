@@ -1311,7 +1311,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Xin chào!
 
-Bạn được mời tham gia phòng DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+Bạn được mời tham gia phòng tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
 $OrangeButton
 
@@ -1712,7 +1712,7 @@ $TrulyYours</value>
     <value>Thời gian ân hạn cho ${LetterLogoText} DocSpace của bạn sẽ hết hạn vào ngày mai</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Tham gia ${LetterLogoText} DocSpace</value>
+    <value>Tham gia ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Bạn được mời vào phòng ${LetterLogoText} DocSpace</value>

@@ -86,6 +86,12 @@ public abstract class LetterTestBase
     protected virtual string RecipientName => "FirstName";
 
     /// <summary>
+    /// Who triggered the notification, i.e. the value of the <c>__AuthorName</c> tag — the inviter in
+    /// the room and agent letters. Filled for every letter by <c>NotifyConfiguration</c> in production.
+    /// </summary>
+    protected virtual string AuthorName => "AuthorName";
+
+    /// <summary>
     /// Footer flavour, as chosen in <c>BasePeriodicNotifyAction.Init</c>: <c>common</c> for an
     /// owner/admin recipient, <c>social</c> for everybody else.
     /// </summary>
@@ -190,6 +196,7 @@ public abstract class LetterTestBase
             new TagValue(CommonTags.VirtualRootHost, LetterEnvironment.PortalHost),
             new TagValue(CommonTags.RecipientSubscriptionConfigURL, LetterEnvironment.PortalLink("unsubscribe")),
 
+            new TagValue(CommonTags.AuthorName, AuthorName),
             new TagValue(CommonTags.HelpLink, LetterEnvironment.HelpUrl),
             new TagValue(CommonTags.SupportLink, LetterEnvironment.SupportUrl),
             new TagValue(CommonTags.SiteLink, LetterEnvironment.SiteUrl),
