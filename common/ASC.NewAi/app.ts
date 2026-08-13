@@ -84,7 +84,7 @@ registerRoutes(app);
 
 const httpServer = http.createServer(app);
 
-httpServer.listen(config.port, () => {
+httpServer.listen(config.port, config.hostname, () => {
   logger.info(
     `Start NewAi Service listening on port ${config.port} `
       + `appsettings path='${config.appsettings}'`,
