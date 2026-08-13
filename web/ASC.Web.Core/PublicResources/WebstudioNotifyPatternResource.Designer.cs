@@ -924,17 +924,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_docs_tips {
-            get {
-                return ResourceManager.GetString("pattern_docs_tips", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
@@ -2654,15 +2643,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_developer_admin_payment_warning_grace_period_expiration {
             get {
                 return ResourceManager.GetString("subject_developer_admin_payment_warning_grace_period_expiration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 5 tips for effective work on your docs.
-        /// </summary>
-        public static string subject_docs_tips {
-            get {
-                return ResourceManager.GetString("subject_docs_tips", resourceCulture);
             }
         }
         

@@ -40,9 +40,6 @@ internal static partial class StudioPeriodicNotifyLogger
     [LoggerMessage(LogLevel.Error, "SendEnterpriseLetters")]
     public static partial void ErrorSendEnterpriseLetters(this ILogger logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Error, "SendOpensourceLetters")]
-    public static partial void ErrorSendOpensourceLetters(this ILogger logger, Exception exception);
-
     [LoggerMessage(LogLevel.Error, "SendMsgWhatsNew")]
     public static partial void ErrorSendMsgWhatsNew(this ILogger logger, Exception exception);
 
@@ -57,12 +54,6 @@ internal static partial class StudioPeriodicNotifyLogger
 
     [LoggerMessage(LogLevel.Information, "End SendTariffEnterpriseLetters")]
     public static partial void InformationEndSendTariffEnterpriseLetters(this ILogger logger);
-
-    [LoggerMessage(LogLevel.Information, "Start SendOpensourceTariffLetters")]
-    public static partial void InformationStartSendOpensourceTariffLetters(this ILogger logger);
-
-    [LoggerMessage(LogLevel.Information, "End SendOpensourceTariffLetters")]
-    public static partial void InformationEndSendOpensourceTariffLetters(this ILogger logger);
 
     [LoggerMessage(LogLevel.Information, "Current tenant: {tenantId}")]
     public static partial void InformationCurrentTenant(this ILogger logger, int tenantId);

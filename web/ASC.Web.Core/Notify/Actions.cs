@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -1733,62 +1733,6 @@ public sealed class OpensourceAdminWelcomeV1NotifyAction(TenantManager tenantMan
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_admin_welcome_v1, () => WebstudioNotifyPatternResource.pattern_opensource_admin_welcome_v1)
-        ];
-    }
-}
-
-[Scope]
-public sealed class DocsTipsNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, DisplayUserSettingsHelper displayUserSettingsHelper, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
-{
-    private readonly StudioNotifyHelper _studioNotifyHelper = studioNotifyHelper;
-    public override string ID => "docs_tips";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_docs_tips, () => WebstudioNotifyPatternResource.pattern_docs_tips)
-        ];
-    }
-
-    public void Init(
-        CultureInfo culture,
-        UserInfo u,
-        Func<CultureInfo, string> orangeButtonText,
-        string orangeButtonUrl,
-        Func<CultureInfo, string> txtTrulyYours,
-        string img1,
-        string img2,
-        string img3,
-        string img4,
-        string img5,
-        Func<CultureInfo, string> url1,
-        Func<CultureInfo, string> url2,
-        Func<CultureInfo, string> url3,
-        Func<CultureInfo, string> url4,
-        Func<CultureInfo, string> url5,
-        Func<CultureInfo, string> url6,
-        string topGif)
-    {
-        Tags =
-        [
-            new TagValue(CommonTags.Culture, culture.Name),
-            new TagValue(CommonTags.UserName, u.DisplayUserName(displayUserSettingsHelper)),
-            new TagValue(CommonTags.Footer, "opensource"),
-            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
-            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours(culture), true),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("IMG5", img5),
-            new TagValue("URL1", url1(culture)),
-            new TagValue("URL2", url2(culture)),
-            new TagValue("URL3", url3(culture)),
-            new TagValue("URL4", url4(culture)),
-            new TagValue("URL5", url5(culture)),
-            new TagValue("URL6", url6(culture)),
-            new TagValue(CommonTags.TopGif, topGif)
         ];
     }
 }

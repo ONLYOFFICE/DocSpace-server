@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -572,41 +572,9 @@ public class StudioPeriodicNotify(
                 {
                     #region After registration letters
 
-                    #region 7 days after registration to admins and users ENTERPRISE TRIAL + defaultRebranding
-
-                    if (createdDate.AddDays(7) == nowDate)
-                    {
-                        action = serviceProvider.GetService<DocsTipsNotifyAction>();
-                        paymentMessage = false;
-                        toadmins = true;
-                        tousers = true;
-
-                        img1 = studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
-                        img2 = studioNotifyHelper.GetNotificationImageUrl("docs_tips2.png");
-                        img3 = studioNotifyHelper.GetNotificationImageUrl("docs_tips3.png");
-                        img4 = studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
-                        img5 = studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
-
-                        url1 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("collaborationrooms", c);
-                        url2 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("publicrooms", c);
-                        url3 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("customrooms", c);
-                        url4 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("formfillingrooms", c);
-                        url5 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("seamlesscollaboration", c);
-                        url6 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("openai", c);
-
-                        topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
-
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", c);
-                        orangeButtonUrl = c => commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
-
-                        trulyYoursAsTableRow = true;
-                    }
-
-                    #endregion
-
                     #region 14 days after registration to admins and users ENTERPRISE TRIAL + defaultRebranding
 
-                    else if (createdDate.AddDays(14) == nowDate)
+                    if (createdDate.AddDays(14) == nowDate)
                     {
                         action = serviceProvider.GetService<EnterpriseAdminUserAppsTipsV1NotifyAction>();
                         paymentMessage = false;
@@ -739,82 +707,5 @@ public class StudioPeriodicNotify(
         }
 
         _log.InformationEndSendTariffEnterpriseLetters();
-    }
-
-    public async Task SendOpensourceLettersAsync(string senderName, DateTime scheduleDate)
-    {
-        var nowDate = scheduleDate.Date;
-
-        _log.InformationStartSendOpensourceTariffLetters();
-
-        var activeTenants = await tenantManager.GetTenantsAsync();
-
-        if (activeTenants.Count <= 0)
-        {
-            _log.InformationEndSendOpensourceTariffLetters();
-            return;
-        }
-
-        foreach (var tenant in activeTenants)
-        {
-            try
-            {
-                await tenantManager.SetCurrentTenantAsync(tenant.Id);
-                var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
-
-                var createdDate = tenant.CreationDateTime.Date;
-
-
-                #region After registration letters
-
-                #region 7 days after registration to admins
-
-                if (createdDate.AddDays(7) == nowDate)
-                {
-                    var users = await studioNotifyHelper.GetRecipientsAsync(true, true, false);
-
-                    var orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
-
-                    Func<CultureInfo, string> orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", c);
-                    Func<CultureInfo, string> txtTrulyYours = c => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
-
-                    var img1 = studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
-                    var img2 = studioNotifyHelper.GetNotificationImageUrl("docs_tips2.png");
-                    var img3 = studioNotifyHelper.GetNotificationImageUrl("docs_tips3.png");
-                    var img4 = studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
-                    var img5 = studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
-
-                    Func<CultureInfo, string> url1 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("collaborationrooms", c);
-                    Func<CultureInfo, string> url2 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("publicrooms", c);
-                    Func<CultureInfo, string> url3 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("customrooms", c);
-                    Func<CultureInfo, string> url4 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("formfillingrooms", c);
-                    Func<CultureInfo, string> url5 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("seamlesscollaboration", c);
-                    Func<CultureInfo, string> url6 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("openai", c);
-
-                    var topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
-
-                    await foreach (var u in users.ToAsyncEnumerable().Where(async (u, _) => await studioNotifyHelper.IsSubscribedToNotifyAsync(u, serviceProvider.GetService<PeriodicNotifyAction>())))
-                    {
-                        var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
-                        Thread.CurrentThread.CurrentCulture = culture;
-                        Thread.CurrentThread.CurrentUICulture = culture;
-
-                        var action = serviceProvider.GetService<DocsTipsNotifyAction>();
-                        action.Init(culture, u, orangeButtonText, orangeButtonUrl, txtTrulyYours, img1, img2, img3, img4, img5, url1, url2, url3, url4, url5, url6, topGif);
-
-                        await client.SendNoticeToAsync(action, u, senderName);
-                    }
-                }
-                #endregion
-
-                #endregion
-            }
-            catch (Exception err)
-            {
-                _log.ErrorSendOpensourceLetters(err);
-            }
-        }
-
-        _log.InformationEndSendOpensourceTariffLetters();
     }
 }
