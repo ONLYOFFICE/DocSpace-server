@@ -625,17 +625,6 @@ Linkki on voimassa vain 7 päivää.
 
 Saat enemmän vinkkejä verkkotoimistosi käyttöön. Voit perua tilaukset tai tilata ne uudelleen profiilisivullasi milloin tahansa.</value>
   </data>
-  <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Liity &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;en&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hei!&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sinut on kutsuttu liittymään ${LetterLogoText}en &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Hyväksy kutsu klikkaamalla linkkiä:&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Tervetuloa &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpaceen!&lt;/td&gt;&lt;/tr&gt;
 
@@ -685,17 +674,6 @@ $OrangeButton
 Linkki on voimassa 7 päivää.
 
 Saat enemmän vinkkejä verkkotoimistosi käyttöön. Voit perua tilaukset tai tilata ne uudelleen profiilisivullasi milloin tahansa.</value>
-  </data>
-  <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Liity &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;en&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hei!&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sinut on kutsuttu liittymään ${LetterLogoText}en &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Hyväksy kutsu klikkaamalla linkkiä:&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Viesti "${__VirtualRootPath}":"${__VirtualRootPath}" -portaalista
@@ -884,17 +862,6 @@ Sinut on kutsuttu liittymään "${__VirtualRootPath}":"${__VirtualRootPath}" por
 Linkki on voimassa vain 7 päivää.
 
 Saat lisää vinkkejä verkkotoimistosi käyttöön. Voit perua tilaukset ja ottaa ne uudelleen käyttöön profiilisivullasi milloin tahansa.</value>
-  </data>
-  <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Liity &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;en&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hei!&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sinut on kutsuttu liittymään ${LetterLogoText}en &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Hyväksy kutsu klikkaamalla linkkiä:&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
   </data>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Salasanan vaihto onnistui
@@ -1415,17 +1382,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_user_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Liity &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;en&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hei!&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sinut on kutsuttu liittymään ${LetterLogoText}en &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Hyväksy kutsu klikkaamalla linkkiä:&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Hei, $UserName,
 
@@ -1676,9 +1632,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Liity ${__VirtualRootHost}</value>
   </data>
-  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
-    <value>Liity ${LetterLogoText}en</value>
-  </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Tervetuloa ${LetterLogoText} DocSpaceen!</value>
   </data>
@@ -1687,9 +1640,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Liity ${__VirtualRootHost}</value>
-  </data>
-  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>Liity ${LetterLogoText}en</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Käyttäjän viesti pääkäyttäjille</value>
@@ -1726,9 +1676,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>Liity ${__VirtualRootHost}</value>
-  </data>
-  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
-    <value>Liity ${LetterLogoText}en</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Salasanasi vaihdettiin onnistuneesti</value>
@@ -1834,9 +1781,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Sinut on kutsuttu ${LetterLogoText} DocSpace-huoneeseen</value>
-  </data>
-  <data name="subject_saas_user_activation_v1" xml:space="preserve">
-    <value>Liity ${LetterLogoText}en</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>DocSpacesi automaattinen varmuuskopiointi epäonnistui</value>

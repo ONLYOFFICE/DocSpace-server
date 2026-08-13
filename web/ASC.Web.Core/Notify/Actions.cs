@@ -1867,7 +1867,7 @@ public sealed class SaasUserActivationV1NotifyAction(StudioNotifyHelper studioNo
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_saas_user_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -1878,12 +1878,11 @@ public sealed class SaasUserActivationV1NotifyAction(StudioNotifyHelper studioNo
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, "social")
         ];
     }
@@ -1905,7 +1904,7 @@ public sealed class EnterpriseUserActivationV1NotifyAction(StudioNotifyHelper st
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_user_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -1916,16 +1915,14 @@ public sealed class EnterpriseUserActivationV1NotifyAction(StudioNotifyHelper st
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, null)
         ];
     }
-
 
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
@@ -1944,7 +1941,7 @@ public sealed class EnterpriseWhitelabelUserActivationV1NotifyAction(StudioNotif
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_user_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -1955,12 +1952,11 @@ public sealed class EnterpriseWhitelabelUserActivationV1NotifyAction(StudioNotif
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, null)
         ];
     }
@@ -1982,7 +1978,7 @@ public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper st
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_opensource_user_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -1993,12 +1989,11 @@ public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper st
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, "opensource")
         ];
     }

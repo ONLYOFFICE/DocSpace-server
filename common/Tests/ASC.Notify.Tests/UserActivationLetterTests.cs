@@ -34,45 +34,34 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The invitation a new user gets (<c>saas_user_activation_v1</c>). The three other editions send the
-/// very same letter from their own actions, so this class renders the SaaS one and pins the rest to it
-/// — see <see cref="Letters_AreIdentical"/>.
+/// The invitation a new user gets (<c>user_activation_v1</c>). One textile template serves all four
+/// editions — SaaS, Enterprise, Enterprise whitelabel and Opensource — which differ only in the footer
+/// flavour they pass in; this class renders the SaaS one.
 /// </summary>
 public class UserActivationLetterTests : LetterTestBase
 {
     /// <summary>The confirmation link, built by the sending code from <c>ConfirmType.Activation</c>.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Activation");
 
-    private static readonly (string Subject, string Pattern)[] _otherEditions =
-    [
-        (WebstudioNotifyPatternResource.subject_enterprise_user_activation_v1,
-         WebstudioNotifyPatternResource.pattern_enterprise_user_activation_v1),
-        (WebstudioNotifyPatternResource.subject_enterprise_whitelabel_user_activation_v1,
-         WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_user_activation_v1),
-        (WebstudioNotifyPatternResource.subject_opensource_user_activation_v1,
-         WebstudioNotifyPatternResource.pattern_opensource_user_activation_v1)
-    ];
-
-    protected override string LetterId => "saas_user_activation_v1";
+    protected override string LetterId => "user_activation_v1";
 
     protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_user_activation_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_user_activation_v1);
+        () => WebstudioNotifyPatternResource.subject_user_activation_v1,
+        () => WebstudioNotifyPatternResource.pattern_user_activation_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("join_docspace.gif");
 
-    /// <summary>The recipient is a plain user, so the signature carries the social footer.</summary>
+    /// <summary>The SaaS footer; Enterprise passes <c>null</c> and Opensource <c>opensource</c>.</summary>
     protected override string Footer => "social";
 
-    /// <summary>Mirrors <c>SaasUserActivationV1NotifyAction.Init</c>.</summary>
+    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
+    protected override bool TrulyYoursAsTableRow => false;
+
+    /// <summary>Mirrors <c>Init</c>, which is now the same in all four activation actions.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
-        return
-        [
-            OrangeButton("ButtonAccept", culture, ConfirmUrl),
-            new TagValue(CommonTags.ActivateUrl, ConfirmUrl)
-        ];
+        return [OrangeButton("ButtonAccept", culture, ConfirmUrl)];
     }
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
@@ -90,21 +79,7 @@ public class UserActivationLetterTests : LetterTestBase
 
         letter.Body.Should().Contain("Hello!")
             .And.Contain($"You are invited to join {logoText} at")
-            .And.Contain("Accept the invitation by clicking the link:");
-    }
-
-    /// <summary>
-    /// SaaS, Enterprise, Enterprise whitelabel and Opensource send one and the same invitation from four
-    /// separate actions, so the four resource pairs must stay word for word identical — a change to one
-    /// is a change to all.
-    /// </summary>
-    [Fact]
-    public void Letters_AreIdentical()
-    {
-        foreach (var (subject, pattern) in _otherEditions)
-        {
-            subject.Should().Be(WebstudioNotifyPatternResource.subject_saas_user_activation_v1);
-            pattern.Should().Be(WebstudioNotifyPatternResource.pattern_saas_user_activation_v1);
-        }
+            .And.Contain("Accept the invitation by clicking the link:")
+            .And.Contain("After clicking on the invitation link, please set a new password.");
     }
 }
