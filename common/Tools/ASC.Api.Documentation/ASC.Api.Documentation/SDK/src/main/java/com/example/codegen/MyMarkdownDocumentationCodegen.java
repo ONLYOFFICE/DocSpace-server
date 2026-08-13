@@ -52,6 +52,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     private static final String TITLE = "x-title";
     private static final String MODEL_ANCHOR = "x-model-anchor";
     private static final String HAS_PROPERTIES = "x-has-properties";
+    private static final String ENUM_DOC = "x-enum-doc";
     private static final String RETURN_MODEL_ANCHOR = "x-return-model-anchor";
 
     /**
@@ -409,6 +410,8 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                 // rather than as a model that has no properties to list.
                 model.vendorExtensions.put(HAS_PROPERTIES, hasProperties(model));
 
+                markEnumValues(model);
+
                 markProperties(model.name, model.vars);
                 markProperties(model.parent, model.parentVars);
                 markProperties(model.name, model.allVars);
@@ -518,6 +521,124 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         }
 
         return model.parent != null && model.parentVars != null && !model.parentVars.isEmpty();
+    }
+
+    /**
+     * Turns an enum model into a list the page can print: the wire value, what it means, and the
+     * constant name the SDKs expose for it.
+     * <p>
+     * Without this an enum shows nothing but its raw description, because an enum has no
+     * properties and the properties table is all the section otherwise contains.
+     */
+    private void markEnumValues(CodegenModel model) {
+        if (model.allowableValues == null
+                || !(model.allowableValues.get("values") instanceof List)
+                || ((List<?>) model.allowableValues.get("values")).isEmpty()) {
+            return;
+        }
+
+        List<?> values = (List<?>) model.allowableValues.get("values");
+        List<String> names = enumVarNames(model, values.size());
+        List<String> labels = parseEnumLabels(model.description, values);
+
+        List<Map<String, String>> entries = new ArrayList<>();
+
+        for (int i = 0; i < values.size(); i++) {
+            Map<String, String> entry = new HashMap<>();
+            entry.put("enumValue", String.valueOf(values.get(i)));
+
+            if (labels != null) {
+                entry.put("enumLabel", labels.get(i));
+            }
+
+            String name = names == null ? null : names.get(i);
+            if (name != null && !name.isEmpty()) {
+                entry.put("enumConstant", name);
+            }
+
+            entries.add(entry);
+        }
+
+        Map<String, Object> enumDoc = new HashMap<>();
+        enumDoc.put("values", entries);
+        model.vendorExtensions.put(ENUM_DOC, enumDoc);
+
+        // The bracketed description is the same list written as prose. Once the list is rendered
+        // in full, repeating it above it is noise - but only then. A few schemas state "[]", a
+        // label list with nothing in it, which is noise either way.
+        if (labels != null || "[]".equals(model.description == null ? null : model.description.trim())) {
+            model.description = null;
+        }
+    }
+
+    /**
+     * The constant names the document states in `x-enum-varnames`, read straight from the schema.
+     * <p>
+     * Neither `enumVars` nor the model's own copy of the extension can be used: this generator
+     * inherits `toEnumVarName` from the Markdown codegen, which names every member after the
+     * model, and the generator writes that back - so both would label all six members of RoomType
+     * "RoomType", and would invent names for enums that state none at all.
+     */
+    private List<String> enumVarNames(CodegenModel model, int expected) {
+        if (openAPI == null || openAPI.getComponents() == null || openAPI.getComponents().getSchemas() == null) {
+            return null;
+        }
+
+        Schema<?> schema = openAPI.getComponents().getSchemas().get(model.name);
+        if (schema == null || schema.getExtensions() == null
+                || !(schema.getExtensions().get("x-enum-varnames") instanceof List)) {
+            return null;
+        }
+
+        List<?> varNames = (List<?>) schema.getExtensions().get("x-enum-varnames");
+        if (varNames.size() != expected) {
+            return null;
+        }
+
+        List<String> names = new ArrayList<>();
+
+        for (Object varName : varNames) {
+            names.add(varName == null ? null : String.valueOf(varName));
+        }
+
+        return names;
+    }
+
+    /**
+     * The labels the document hides in the description: `[1 - Form filling room, 2 - ...]`.
+     * <p>
+     * Deliberately all-or-nothing. The format is not a contract - a label containing ", " splits
+     * into the wrong number of entries, and some descriptions are ordinary prose - so the parse is
+     * accepted only when every entry lines up with the value it claims to describe. Anything else
+     * falls back to printing the values alone, which is worse but never wrong.
+     */
+    private static List<String> parseEnumLabels(String description, List<?> values) {
+        if (description == null) {
+            return null;
+        }
+
+        String text = description.trim();
+        if (text.length() < 2 || text.charAt(0) != '[' || text.charAt(text.length() - 1) != ']') {
+            return null;
+        }
+
+        String[] parts = text.substring(1, text.length() - 1).split(", ");
+        if (parts.length != values.size()) {
+            return null;
+        }
+
+        List<String> labels = new ArrayList<>();
+
+        for (int i = 0; i < parts.length; i++) {
+            int separator = parts[i].indexOf(" - ");
+            if (separator < 0 || !parts[i].substring(0, separator).equals(String.valueOf(values.get(i)))) {
+                return null;
+            }
+
+            labels.add(parts[i].substring(separator + 3));
+        }
+
+        return labels;
     }
 
     private void markProperties(String modelName, List<CodegenProperty> properties) {

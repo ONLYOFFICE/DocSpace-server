@@ -640,7 +640,12 @@ The backup history parameters.
 
 
 ### Model BackupPeriod
-[0 - Every day, 1 - Every week, 2 - Every month]
+
+Possible values:
+
+- `0` — Every day (`EveryDay`)
+- `1` — Every week (`EveryWeek`)
+- `2` — Every month (`EveryMonth`)
 
 
 ### Model BackupProgress
@@ -660,7 +665,12 @@ The backup progress parameters.
 
 
 ### Model BackupProgressEnum
-[0 - Backup, 1 - Restore, 2 - Transfer]
+
+Possible values:
+
+- `0` — Backup (`Backup`)
+- `1` — Restore (`Restore`)
+- `2` — Transfer (`Transfer`)
 
 
 ### Model BackupProgressWrapper
@@ -718,7 +728,15 @@ Backup service state.
 
 
 ### Model BackupStorageType
-[0 - Documents, 1 - Thridparty documents, 2 - Custom cloud, 3 - Local, 4 - Data store, 5 - Thirdparty consumer]
+
+Possible values:
+
+- `0` — Documents (`Documents`)
+- `1` — Thridparty documents (`ThridpartyDocuments`)
+- `2` — Custom cloud (`CustomCloud`)
+- `3` — Local (`Local`)
+- `4` — Data store (`DataStore`)
+- `5` — Thirdparty consumer (`ThirdPartyConsumer`)
 
 
 ### Model BackupsCountResultDto
@@ -773,7 +791,14 @@ The backup cron parameters.
 
 
 ### Model DistributedTaskStatus
-[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]
+
+Possible values:
+
+- `0` — Created (`Created`)
+- `1` — Running (`Running`)
+- `2` — Completed (`Completed`)
+- `3` — Canceled (`Canceled`)
+- `4` — Failted (`Failted`)
 
 
 ### Model Int32Wrapper

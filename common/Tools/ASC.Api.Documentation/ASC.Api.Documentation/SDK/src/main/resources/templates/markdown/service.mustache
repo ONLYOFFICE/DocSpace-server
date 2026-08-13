@@ -66,6 +66,14 @@ This endpoint does not need any parameter.
 {{#description}}
 {{.}}
 {{/description}}
+{{#vendorExtensions.x-enum-doc}}
+
+Possible values:
+
+{{#values}}
+- `{{enumValue}}`{{#enumLabel}} — {{.}}{{/enumLabel}}{{#enumConstant}} (`{{.}}`){{/enumConstant}}
+{{/values}}
+{{/vendorExtensions.x-enum-doc}}
 {{#vendorExtensions.x-has-properties}}
 
 | Name | Type | Description | Notes |
