@@ -158,7 +158,24 @@ public class StudioPeriodicNotify(
 
                 var trulyYoursAsTebleRow = false;
 
-                if (quota.Free)
+                #region 2 days after registration to owner and admins SAAS (any tariff)
+
+                if (createdDate.AddDays(2) == nowDate)
+                {
+                    action = serviceProvider.GetService<SaasAdminHandyAppsV1NotifyAction>();
+                    paymentMessage = false;
+                    toowner = true;
+                    toadmins = true;
+
+                    orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToDocSpace", c);
+                    orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+
+                    trulyYoursAsTebleRow = true;
+                }
+
+                #endregion
+
+                else if (quota.Free)
                 {
                     #region After registration letters
 
@@ -488,9 +505,12 @@ public class StudioPeriodicNotify(
                     continue;
                 }
 
-                var users = toowner
-                                    ? new List<UserInfo> { await userManager.GetUsersAsync(tenant.OwnerId) }
-                                    : await studioNotifyHelper.GetRecipientsAsync(toadmins, tousers, false);
+                var users = await studioNotifyHelper.GetRecipientsAsync(toadmins, tousers, false);
+
+                if (toowner)
+                {
+                    users = users.Append(await userManager.GetUsersAsync(tenant.OwnerId)).DistinctBy(u => u.Id);
+                }
 
                 if (topayer)
                 {

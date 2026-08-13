@@ -255,6 +255,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Get started</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Go to your ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToServices" xml:space="preserve">
     <value>Go to Services</value>
   </data>
@@ -1717,6 +1720,74 @@ Enjoy a new way of document collaboration!
 
 $TrulyYours</comment>
   </data>
+  <data name="pattern_saas_admin_handy_apps_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Discover &lt;span style="color: #FF6F3D;"&gt;4 handy apps&lt;/span&gt; inside your ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;We hope you're enjoying ${LetterLogoText} for editing your office documents. Did you know it comes with even more? Let's take a quick tour of four handy apps that can make your everyday work simpler and more effective.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;1. ${LetterLogoText} Files &#8211; everything in one place&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;Keep all your documents in a single, tidy space. It's perfect for working on your own, and it's easy to stay organized:&lt;br /&gt;&lt;br /&gt;&#8226; &lt;b&gt;File management:&lt;/b&gt; Store and handle all your files in one spot.&lt;br /&gt;&#8226; &lt;b&gt;Quick search and filtering:&lt;/b&gt; Find what you need in seconds.&lt;br /&gt;&#8226; &lt;b&gt;Folder hierarchy and tagging:&lt;/b&gt; Arrange files exactly how you like.&lt;br /&gt;&#8226; &lt;b&gt;Access control:&lt;/b&gt; Decide who can see what.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;2. ${LetterLogoText} Rooms &#8211; built for teamwork&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;When you're working with others, Rooms keeps everything organized by purpose. It's made for smooth, secure collaboration:&lt;br /&gt;&lt;br /&gt;&#8226; &lt;b&gt;Document co-authoring:&lt;/b&gt; Work together in real time.&lt;br /&gt;&#8226; &lt;b&gt;Virtual Data Rooms (VDR):&lt;/b&gt; Share sensitive files safely.&lt;br /&gt;&#8226; &lt;b&gt;Granular permissions:&lt;/b&gt; Set the right level of access for each person.&lt;br /&gt;&#8226; &lt;b&gt;Guest &amp;amp; external user access:&lt;/b&gt; Invite people from outside your team with ease.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;3. ${LetterLogoText} Forms &#8211; collect and understand your data&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;Create smart forms, gather responses, and turn them into clear insights:&lt;br /&gt;&lt;br /&gt;&#8226; &lt;b&gt;Auto-generated forms&lt;/b&gt; and ready-to-use templates to get started fast.&lt;br /&gt;&#8226; &lt;b&gt;Data collection&lt;/b&gt; through easy-to-share forms.&lt;br /&gt;&#8226; &lt;b&gt;Data analysis and insights&lt;/b&gt; to help you make sense of every response.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;4. ${LetterLogoText} AI Agents &#8211; your helpful assistant&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;Let AI take care of the busy work, so you can focus on what matters most:&lt;br /&gt;&lt;br /&gt;&#8226; &lt;b&gt;AI writing &amp;amp; content generation:&lt;/b&gt; Draft and polish text in seconds.&lt;br /&gt;&#8226; &lt;b&gt;Summarization:&lt;/b&gt; Get the key points from long documents instantly.&lt;br /&gt;&#8226; &lt;b&gt;Intelligent content search:&lt;/b&gt; Find exactly what you're looking for.&lt;br /&gt;&#8226; &lt;b&gt;AI-powered team collaboration:&lt;/b&gt; Work smarter, together.&lt;br /&gt;&#8226; &lt;b&gt;MCP server integration:&lt;/b&gt; Connect with your favorite tools.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ready to explore? Open your ${LetterLogoText} and try each app for yourself. It only takes a few clicks to see how much easier your work can be.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+    <comment>Discover 4 handy apps inside your ${LetterLogoText}
+
+Hello, $UserName!
+
+We hope you're enjoying ${LetterLogoText} for editing your office documents. Did you know it comes with even more? Let's take a quick tour of four handy apps that can make your everyday work simpler and more effective.
+
+1. ${LetterLogoText} Files &#8211; everything in one place
+
+Keep all your documents in a single, tidy space. It's perfect for working on your own, and it's easy to stay organized:
+
+&#8226; File management: Store and handle all your files in one spot.
+&#8226; Quick search and filtering: Find what you need in seconds.
+&#8226; Folder hierarchy and tagging: Arrange files exactly how you like.
+&#8226; Access control: Decide who can see what.
+
+2. ${LetterLogoText} Rooms &#8211; built for teamwork
+
+When you're working with others, Rooms keeps everything organized by purpose. It's made for smooth, secure collaboration:
+
+&#8226; Document co-authoring: Work together in real time.
+&#8226; Virtual Data Rooms (VDR): Share sensitive files safely.
+&#8226; Granular permissions: Set the right level of access for each person.
+&#8226; Guest &amp; external user access: Invite people from outside your team with ease.
+
+3. ${LetterLogoText} Forms &#8211; collect and understand your data
+
+Create smart forms, gather responses, and turn them into clear insights:
+
+&#8226; Auto-generated forms and ready-to-use templates to get started fast.
+&#8226; Data collection through easy-to-share forms.
+&#8226; Data analysis and insights to help you make sense of every response.
+
+4. ${LetterLogoText} AI Agents &#8211; your helpful assistant
+
+Let AI take care of the busy work, so you can focus on what matters most:
+
+&#8226; AI writing &amp; content generation: Draft and polish text in seconds.
+&#8226; Summarization: Get the key points from long documents instantly.
+&#8226; Intelligent content search: Find exactly what you're looking for.
+&#8226; AI-powered team collaboration: Work smarter, together.
+&#8226; MCP server integration: Connect with your favorite tools.
+
+Ready to explore? Open your ${LetterLogoText} and try each app for yourself. It only takes a few clicks to see how much easier your work can be.
+
+$OrangeButton
+
+$TrulyYours</comment>
+  </data>
   <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace: Explore useful &lt;span style="color: #FF6F3D;"&gt;integrations&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -2642,6 +2713,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_admin_activation_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
+    <value>Discover 4 handy apps inside your ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Explore useful integrations for ${LetterLogoText} DocSpace</value>
