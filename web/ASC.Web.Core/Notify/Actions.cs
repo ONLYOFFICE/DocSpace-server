@@ -2729,6 +2729,37 @@ public sealed class LowWalletBalanceNotifyAction(CommonLinkUtility commonLinkUti
 }
 
 [Scope]
+public sealed class UpcomingSubscriptionPaymentNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "upcoming_subscription_payment";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_upcoming_subscription_payment, () => WebstudioNotifyPatternResource.pattern_upcoming_subscription_payment)
+        ];
+    }
+
+    // subscriptionName gives the subscriptions the upcoming payment covers, joined with a comma and
+    // localized for the recipient - e.g. "Additional disk storage, Docs Connect". It lands in the
+    // subject as well, so it must stay plain text.
+    public void Init(UserInfo user, Func<CultureInfo, string> subscriptionName)
+    {
+        var culture = GetCulture(user);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, culture.Name),
+            new TagValue("SubscriptionName", subscriptionName(culture)),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
+        ];
+    }
+}
+
+[Scope]
 public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "renew_subscription_error";

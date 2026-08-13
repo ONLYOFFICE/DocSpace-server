@@ -2184,6 +2184,17 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///We’re reaching out to inform you that the subscription payment for “$SubscriptionName” will be automatically debited from your &quot;${LetterLogoText} Wallet&quot;:&quot;${__VirtualRootPath}/billing/w [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_upcoming_subscription_payment {
+            get {
+                return ResourceManager.GetString("pattern_upcoming_subscription_payment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.You are invited to ${LetterLogoText}
         ///
         ///Hello!
@@ -3114,6 +3125,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_top_up_wallet_error {
             get {
                 return ResourceManager.GetString("subject_top_up_wallet_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upcoming subscription payment for &quot;$SubscriptionName&quot; in your ${LetterLogoText}.
+        /// </summary>
+        public static string subject_upcoming_subscription_payment {
+            get {
+                return ResourceManager.GetString("subject_upcoming_subscription_payment", resourceCulture);
             }
         }
         

@@ -92,6 +92,10 @@ public class StudioPeriodicNotify(
 
         var startDateToRemoveUnusedPortals = startDateToNotifyUnusedPortals.AddDays(7);
 
+        // The paid add-ons the wallet is charged for, by quota id: their titles are what the upcoming
+        // payment letter lists. Global and cached, so they are read once for all tenants.
+        var walletQuotas = (await tenantManager.GetTenantQuotasAsync(all: true, wallet: true)).ToDictionary(q => q.TenantId);
+
         foreach (var tenant in activeTenants)
         {
             try
@@ -108,6 +112,14 @@ public class StudioPeriodicNotify(
 
                 var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
                 var delayDueDate = tariff.DelayDueDate.Date;
+
+                #region 3 days before the wallet is charged for an add-on subscription
+
+                // Every add-on renews on its own due date, whatever the tariff state is, so this reminder
+                // is sent on its own and takes no part in the one-letter-per-run chain below.
+                await SendUpcomingSubscriptionPaymentAsync(tenant, tariff, nowDate, walletQuotas);
+
+                #endregion
 
                 BasePeriodicNotifyAction action = null;
                 var paymentMessage = true;
@@ -527,6 +539,45 @@ public class StudioPeriodicNotify(
 
         _log.InformationEndSendSaasTariffLetters();
     }
+
+    /// <summary>
+    /// Warns the owner and the payer three days before the wallet is charged for the add-ons that renew
+    /// then - one letter per portal, listing every add-on due on that day.
+    /// </summary>
+    private async Task SendUpcomingSubscriptionPaymentAsync(Tenant tenant, Tariff tariff, DateTime nowDate, Dictionary<int, TenantQuota> walletQuotas)
+    {
+        var features = tariff.Quotas
+            // NextQuantity 0 means the subscription was cancelled: it is neither renewed nor charged for.
+            .Where(q => q.Wallet && q.Additional && q.NextQuantity is not <= 0
+                        && q.DueDate.HasValue && q.DueDate.Value.Date.AddDays(-3) == nowDate)
+            // a scheduled switch to another add-on is bought outright instead of renewing the current one
+            .Select(q => walletQuotas.GetValueOrDefault(q.NextQuota ?? q.Id))
+            .Where(q => q != null)
+            .Select(q => q.Features.Split(':')[0]) // a wallet add-on carries exactly one feature
+            // an add-on with no title of its own would show up as a blank in the letter
+            .Where(f => Resource.ResourceManager.GetString(FeatureTitleKey(f)) != null)
+            .ToList();
+
+        if (features.Count == 0)
+        {
+            return;
+        }
+
+        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
+
+        // The add-on titles are the ones the billing page shows, resolved in the recipient's culture.
+        Func<CultureInfo, string> subscriptionName = c =>
+            string.Join(", ", features.Select(f => Resource.ResourceManager.GetString(FeatureTitleKey(f), c)));
+
+        await serviceProvider.GetService<StudioNotifyService>()
+            .SendUpcomingSubscriptionPaymentAsync(payer.Id == Constants.LostUser.Id ? null : payer, owner, subscriptionName);
+    }
+
+    /// <summary>The title of a wallet add-on, the same key <c>QuotaHelper.GetFeatures</c> resolves.</summary>
+    private static string FeatureTitleKey(string featureName) => $"TariffsFeature_{featureName}_wallet";
 
     public async Task SendEnterpriseLettersAsync(string senderName, DateTime scheduleDate)
     {

@@ -1924,6 +1924,17 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_upcoming_subscription_payment" xml:space="preserve">
+    <value>Hello, $UserName!
+
+We’re reaching out to inform you that the subscription payment for “$SubscriptionName” will be automatically debited from your "${LetterLogoText} Wallet":"${__VirtualRootPath}/billing/wallet" in 3 days.
+
+To ensure a smooth transaction, please confirm that sufficient funds are available in your "${LetterLogoText} Wallet":"${__VirtualRootPath}/billing/wallet".
+
+If you have any questions or need assistance, feel free to reach out to our "support team":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_activation_v1" xml:space="preserve">
     <value>h1.You are invited to ${LetterLogoText}
 
@@ -2301,6 +2312,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText}</value>
+  </data>
+  <data name="subject_upcoming_subscription_payment" xml:space="preserve">
+    <value>Upcoming subscription payment for "$SubscriptionName" in your ${LetterLogoText}</value>
   </data>
   <data name="subject_user_activation_v1" xml:space="preserve">
     <value>You are invited to ${LetterLogoText}</value>

@@ -889,6 +889,28 @@ public class StudioNotifyService(
         }
     }
 
+    /// <summary>
+    /// Warns that the wallet is about to be charged for the listed subscriptions in three days.
+    /// <paramref name="subscriptionName"/> gives them joined with a comma, localized for the recipient -
+    /// e.g. "Additional disk storage, Docs Connect".
+    /// </summary>
+    public async Task SendUpcomingSubscriptionPaymentAsync(UserInfo payer, UserInfo owner, Func<CultureInfo, string> subscriptionName)
+    {
+        var users = new[] { payer, owner }
+            .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
+            .DistinctBy(user => user.Email);
+
+        var upcomingSubscriptionPaymentNotifyAction = serviceProvider.GetService<UpcomingSubscriptionPaymentNotifyAction>();
+
+        foreach (var user in users)
+        {
+            upcomingSubscriptionPaymentNotifyAction.Init(user, subscriptionName);
+
+            var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
+            await studioNotifyServiceHelper.SendNoticeToAsync(upcomingSubscriptionPaymentNotifyAction, [recipient], [EMailSenderName]);
+        }
+    }
+
     public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner)
     {
         var users = new[] { payer, owner }
