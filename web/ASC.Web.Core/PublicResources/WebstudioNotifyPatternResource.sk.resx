@@ -1384,7 +1384,7 @@ Váš portál je opäť k dispozícii.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Dobrý deň, $UserName!
 
-Kontaktujeme vás, aby sme vás informovali, že automatické dobitie zostatku peňaženky DocSpace bolo neúspešné.
+Kontaktujeme vás, aby sme vás informovali, že automatické dobitie zostatku peňaženky ${LetterLogoText} bolo neúspešné.
 
 Láskavo vás žiadame, aby ste manuálne skontrolovali a aktualizovali zostatok vo vašej peňaženke.
 
@@ -1693,7 +1693,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Proces šifrovania ukončený</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Je potrebná akcia: Nie je možné automaticky dobiť zostatok peňaženky vo vašom ${LetterLogoText} DocSpace</value>
+    <value>Je potrebná akcia: Nie je možné automaticky dobiť zostatok peňaženky vo vašom ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Vaša rola v AI agente ${LetterLogoText} bola zmenená</value>

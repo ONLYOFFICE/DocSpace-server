@@ -1362,7 +1362,7 @@ Váš portál je opět k dispozici.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Dobrý den, $UserName!
 
-Oznamujeme vám, že automatické dobití zůstatku peněženky DocSpace se nezdařilo.
+Oznamujeme vám, že automatické dobití zůstatku peněženky ${LetterLogoText} se nezdařilo.
 
 Žádáme vás, abyste si ručně zkontrolovali a aktualizovali zůstatek ve své peněžence.
 
@@ -1656,7 +1656,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Proces šifrování dokončen</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Vyžadovaná akce: Nelze automaticky dobít zůstatek v Peněžence ve vašem DocSpace ${LetterLogoText}</value>
+    <value>Vyžadovaná akce: Nelze automaticky dobít zůstatek v Peněžence ve vašem ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Nový uživatel byl přidán ${LetterLogoText} do portálu</value>

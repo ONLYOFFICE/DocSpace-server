@@ -1351,7 +1351,7 @@ $TrulyYours</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>$UserName 様！
 
-DocSpaceウォレット残高の自動チャージが正常に完了できなかったことをお知らせいたします。
+${LetterLogoText}ウォレット残高の自動チャージが正常に完了できなかったことをお知らせいたします。
 
 お手数ですが、ウォレット残高をご確認の上、手動での更新をお願い申し上げます。
 
@@ -1644,7 +1644,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}.暗号化処理完了</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>対応必要：${LetterLogoText} DocSpaceのウォレット残高を自動チャージできません</value>
+    <value>対応必要：${LetterLogoText}のウォレット残高を自動チャージできません</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>新しいユーザが ${LetterLogoText} ポータルに追加されました</value>

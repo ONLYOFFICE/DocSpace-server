@@ -1371,7 +1371,7 @@ Su portal está disponible de nuevo.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Nos ponemos en contacto con usted para informarle de que la recarga automática del saldo de su monedero en DocSpace no se ha realizado correctamente.
+Nos ponemos en contacto con usted para informarle de que la recarga automática del saldo de su monedero en ${LetterLogoText} no se ha realizado correctamente.
 
 Le rogamos que compruebe y actualice manualmente el saldo de su monedero.
 
@@ -1665,7 +1665,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. El proceso de cifrado se ha completado</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Acción requerida: No se puede recargar automáticamente el saldo del Monedero en su ${LetterLogoText} DocSpace</value>
+    <value>Acción requerida: No se puede recargar automáticamente el saldo del Monedero en su ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Usuario nuevo añadido a portal ${LetterLogoText}</value>

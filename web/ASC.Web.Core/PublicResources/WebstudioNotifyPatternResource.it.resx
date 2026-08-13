@@ -1371,7 +1371,7 @@ Il tuo portale è di nuovo disponibile.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Ciao, $UserName!
 
-Ti informiamo che la ricarica automatica del saldo del DocSpace Wallet non è andata a buon fine.
+Ti informiamo che la ricarica automatica del saldo del ${LetterLogoText} Wallet non è andata a buon fine.
 
 Ti chiediamo gentilmente di controllare e aggiornare manualmente il saldo del tuo portafoglio.
 
@@ -1668,7 +1668,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Processo di crittografia completato</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Azione richiesta: impossibile ricaricare automaticamente il saldo del Portafoglio nel tuo DocSpace di ${LetterLogoText}</value>
+    <value>Azione richiesta: impossibile ricaricare automaticamente il saldo del Portafoglio nel tuo ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Nuovo utente aggiunto al portale ${LetterLogoText}</value>

@@ -1358,7 +1358,7 @@ $TrulyYours</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Здравейте, $UserName!
 
-Свързваме се с вас, за да ви информираме, че автоматичното попълване на баланса на портфейла на DocSpace не беше успешно.
+Свързваме се с вас, за да ви информираме, че автоматичното попълване на баланса на портфейла на ${LetterLogoText} не беше успешно.
 
 Молим ви ръчно да проверите и актуализирате баланса на портфейла си.
 
@@ -1655,7 +1655,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Процесът на криптиране е завършен</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Изисква се действие: Не може да се зареди автоматично балансът на портфейла във вашия ${LetterLogoText} DocSpace</value>
+    <value>Изисква се действие: Не може да се зареди автоматично балансът на портфейла във вашия ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Нов потребител е добавен към портала ${LetterLogoText}</value>

@@ -1133,7 +1133,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///We’re reaching out to let you know that your DocSpace Wallet balance is running low.
+        ///We’re reaching out to let you know that your ${LetterLogoText} Wallet balance is running low.
         ///
         ///We kindly ask you to top up your wallet balance to avoid any interruption of paid services.
         ///
@@ -2180,7 +2180,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///We’re reaching out to inform you that the automatic top-up of the DocSpace Wallet balance was unsuccessful.
+        ///We’re reaching out to inform you that the automatic top-up of the ${LetterLogoText} Wallet balance was unsuccessful.
         ///
         ///We kindly ask you to manually check and update your wallet balance.
         ///
@@ -2580,7 +2580,7 @@ namespace ASC.Web.Core.PublicResources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Action required: Your ${LetterLogoText} DocSpace Wallet balance is running low.
+        ///   Looks up a localized string similar to Action required: Your ${LetterLogoText} Wallet balance is running low.
         /// </summary>
         public static string subject_low_wallet_balance {
             get {
@@ -3120,7 +3120,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText}.
         /// </summary>
         public static string subject_top_up_wallet_error {
             get {

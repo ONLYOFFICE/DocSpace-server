@@ -1382,7 +1382,7 @@ Portaalisi on taas käytettävissä.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Hei, $UserName!
 
-Otamme sinuun yhteyttä ilmoittaaksemme, että DocSpace-lompakon saldon automaattinen lataus epäonnistui.
+Otamme sinuun yhteyttä ilmoittaaksemme, että ${LetterLogoText}-lompakon saldon automaattinen lataus epäonnistui.
 
 Pyydämme sinua ystävällisesti tarkistamaan ja päivittämään lompakkosi saldon manuaalisesti.
 
@@ -1691,7 +1691,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Salaus suoritettu</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Vaadittu toimenpide: ${LetterLogoText} DocSpace -lompakkosi saldon automaattinen täydentäminen ei onnistu</value>
+    <value>Vaadittu toimenpide: ${LetterLogoText} -lompakkosi saldon automaattinen täydentäminen ei onnistu</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Roolisi ${LetterLogoText} tekoälyagentissa on muuttunut</value>

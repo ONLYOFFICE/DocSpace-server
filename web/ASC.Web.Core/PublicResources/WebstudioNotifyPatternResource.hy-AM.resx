@@ -1369,7 +1369,7 @@ $TrulyYours</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Ողջույն, $UserName!
 
-Տեղեկացնում ենք, որ DocSpace Wallet-ի մնացորդի ավտոմատ լիցքավորումը չի հաջողվել։ 
+Տեղեկացնում ենք, որ ${LetterLogoText} Wallet-ի մնացորդի ավտոմատ լիցքավորումը չի հաջողվել։ 
 
 Խնդրում ենք ստուգել և թարմացնել ձեր դրամապանակի մնացորդը։
 
@@ -1662,7 +1662,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}: Կոդավորման գործընթացն ավարտված է</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով լիցքավորել դրամապանակի մնացորդը ձեր ${LetterLogoText} DocSpace-ում։</value>
+    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով լիցքավորել դրամապանակի մնացորդը ձեր ${LetterLogoText}-ում։</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>որ օգտվող է ավելացվել ${LetterLogoText} պորտալում</value>

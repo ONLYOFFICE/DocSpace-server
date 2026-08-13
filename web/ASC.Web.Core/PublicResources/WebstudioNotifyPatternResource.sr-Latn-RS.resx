@@ -1373,7 +1373,7 @@ Vaš portal je ponovo dostupan.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Obaveštavamo vas da automatska dopuna stanja u vašem DocSpace novčaniku nije uspela.
+Obaveštavamo vas da automatska dopuna stanja u vašem ${LetterLogoText} novčaniku nije uspela.
 
 Ljubazno vas molimo da ručno proverite i ažurirate stanje u novčaniku.
 
@@ -1670,7 +1670,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Proces šifrovanja je završen</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Potrebna akcija: Nije moguće automatski dopuniti stanje novčanika u vašem ${LetterLogoText} DocSpace</value>
+    <value>Potrebna akcija: Nije moguće automatski dopuniti stanje novčanika u vašem ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Novi korisnik je dodat na portal ${LetterLogoText}</value>

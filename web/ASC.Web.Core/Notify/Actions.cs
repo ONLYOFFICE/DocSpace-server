@@ -2692,7 +2692,7 @@ public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUti
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/wallet")),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];
     }
@@ -2722,7 +2722,7 @@ public sealed class LowWalletBalanceNotifyAction(CommonLinkUtility commonLinkUti
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/wallet")),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];
     }

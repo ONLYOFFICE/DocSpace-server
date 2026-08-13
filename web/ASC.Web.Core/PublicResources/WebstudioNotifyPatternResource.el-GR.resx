@@ -1384,7 +1384,7 @@ $TrulyYours</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Γεια σου, $UserName!
 
-Επικοινωνούμε μαζί σας για να σας ενημερώσουμε ότι η αυτόματη ανανέωση του υπολοίπου ττου Πορτοφολιού στο DocSpace δεν ήταν επιτυχής.
+Επικοινωνούμε μαζί σας για να σας ενημερώσουμε ότι η αυτόματη ανανέωση του υπολοίπου ττου Πορτοφολιού στο ${LetterLogoText} δεν ήταν επιτυχής.
 
 Σας παρακαλούμε να ελέγξετε και να ενημερώσετε χειροκίνητα το υπόλοιπο του πορτοφολιού σας.
 
@@ -1693,7 +1693,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Η διαδικασία κρυπτογράφησης ολοκληρώθηκε</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του υπολοίπου του Πορτοφολιού στο DocSpace ${LetterLogoText}</value>
+    <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του υπολοίπου του Πορτοφολιού στο ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Ο ρόλος σας σε έναν πράκτορα τεχνητής νοημοσύνης του ${LetterLogoText} έχει αλλάξει</value>

@@ -1384,7 +1384,7 @@ Jūsu portāls atkal ir pieejams.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Ar šo sazināmies, lai informētu jūs, ka DocSpace maka atlikuma automātiskā papildināšana neizdevās.
+Ar šo sazināmies, lai informētu jūs, ka ${LetterLogoText} maka atlikuma automātiskā papildināšana neizdevās.
 
 Lūdzam jūs manuāli pārbaudīt un atjaunināt maka atlikumu.
 
@@ -1693,7 +1693,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Šifrēšanas process ir pabeigts</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Nepieciešama darbība: Neizdevās automātiski papildināt Maka atlikumu Jūsu ${LetterLogoText} DocSpace</value>
+    <value>Nepieciešama darbība: Neizdevās automātiski papildināt Maka atlikumu Jūsu ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Jūsu loma ${LetterLogoText} MI aģentā ir mainīta</value>

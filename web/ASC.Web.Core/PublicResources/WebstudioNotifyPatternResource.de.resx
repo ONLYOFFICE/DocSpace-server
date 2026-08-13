@@ -1371,7 +1371,7 @@ Ihr Portal steht wieder zur Verfügung.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Wir möchten Sie darüber informieren, dass die automatische Aufladung des DocSpace Wallet-Guthabens nicht erfolgreich war.
+Wir möchten Sie darüber informieren, dass die automatische Aufladung des ${LetterLogoText} Wallet-Guthabens nicht erfolgreich war.
 
 Wir bitten Sie, Ihr Wallet-Guthaben manuell zu überprüfen und zu aktualisieren.
 
@@ -1665,7 +1665,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Verschlüsselung abgeschlossen</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Erforderliche Aktion: Das Wallet-Guthaben in Ihrem ${LetterLogoText} DocSpace kann nicht automatisch aufgeladen werden</value>
+    <value>Erforderliche Aktion: Das Wallet-Guthaben in Ihrem ${LetterLogoText} kann nicht automatisch aufgeladen werden</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Neuer Benutzer ist zum Portal ${LetterLogoText} hinzugefügt</value>

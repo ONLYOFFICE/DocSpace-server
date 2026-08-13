@@ -1363,7 +1363,7 @@ Uw portaal is weer beschikbaar.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Hallo, $UserName!
 
-We nemen contact met u op om u te laten weten dat het automatisch opwaarderen van het DocSpace Wallet-saldo niet is gelukt.
+We nemen contact met u op om u te laten weten dat het automatisch opwaarderen van het ${LetterLogoText} Wallet-saldo niet is gelukt.
 
 We verzoeken u vriendelijk om uw wallet-saldo handmatig te controleren en bij te werken.
 
@@ -1660,7 +1660,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Encryptieproces is afgerond</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Actie vereist: het is niet mogelijk om het saldo van uw Wallet automatisch op te laden in uw ${LetterLogoText} DocSpace</value>
+    <value>Actie vereist: het is niet mogelijk om het saldo van uw Wallet automatisch op te laden in uw ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Nieuwe gebruiker toegevoegd aan ${LetterLogoText} portaal</value>

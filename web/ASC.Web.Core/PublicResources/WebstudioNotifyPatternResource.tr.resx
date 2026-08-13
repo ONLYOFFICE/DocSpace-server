@@ -1377,7 +1377,7 @@ Portalınız yeniden kullanılabilir.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-DocSpace Cüzdan bakiyesinin otomatik olarak yüklenmesinin başarısız olduğunu bildirmek için size ulaşıyoruz.
+${LetterLogoText} Cüzdan bakiyesinin otomatik olarak yüklenmesinin başarısız olduğunu bildirmek için size ulaşıyoruz.
 
 Cüzdan bakiyenizi manuel olarak kontrol etmenizi ve güncellemenizi rica ediyoruz.
 
@@ -1687,7 +1687,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Şifreleme işlemi tamamlandı</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace cüzdan bakiyeniz otomatik olarak yüklenemedi</value>
+    <value>Eylem Gerekiyor: ${LetterLogoText} cüzdan bakiyeniz otomatik olarak yüklenemedi</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>${LetterLogoText} Yapay Zekâ Ajanındaki rolünüz değişti</value>

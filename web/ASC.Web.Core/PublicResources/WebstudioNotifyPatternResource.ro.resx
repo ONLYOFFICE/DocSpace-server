@@ -1372,7 +1372,7 @@ Portalul dvs este din nou disponibil.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Stimate, $UserName!
 
-Vă informăm că alimentarea automată a contului dvs de Portofel DocSpace nu a fost finalizată cu succes.
+Vă informăm că alimentarea automată a contului dvs de Portofel ${LetterLogoText} nu a fost finalizată cu succes.
 
 Vă rugăm să verificați și să alimentați contul de portofel dvs manual.
 
@@ -1666,7 +1666,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Proces de criptare finalizat</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Acțiune necesară: Problema de alimentare automată a contului de Portofel dvs din DocSpace ${LetterLogoText}</value>
+    <value>Acțiune necesară: Problema de alimentare automată a contului de Portofel dvs din ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Un utilizator nou a fost adăugat pe portalul ${LetterLogoText} portal</value>

@@ -1362,7 +1362,7 @@ Twój portal jest ponownie dostępny.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Informujemy, że automatyczne doładowanie salda portfela DocSpace nie powiodło się.
+Informujemy, że automatyczne doładowanie salda portfela ${LetterLogoText} nie powiodło się.
 
 Uprzejmie prosimy o ręczne sprawdzenie i aktualizację salda portfela.
 
@@ -1659,7 +1659,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Zakończono proces szyfrowania</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Wymagane działanie: Nie udało się automatycznie zasilić portfela w ${LetterLogoText} DocSpace</value>
+    <value>Wymagane działanie: Nie udało się automatycznie zasilić portfela w ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Nowy użytkownik dodany do portalu ${LetterLogoText}</value>

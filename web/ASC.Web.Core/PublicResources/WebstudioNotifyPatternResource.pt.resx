@@ -1377,7 +1377,7 @@ O seu portal está novamente disponível.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Olá, $UserName!
 
-Estamos a contactá-lo para informar que a recarga automática do saldo da DocSpace Wallet não foi bem-sucedida.
+Estamos a contactá-lo para informar que a recarga automática do saldo da ${LetterLogoText} Wallet não foi bem-sucedida.
 
 Solicitamos que verifique manualmente e atualize o saldo da sua carteira.
 
@@ -1686,7 +1686,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Processo de encriptação conclúído</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Ação necessária: Não é possível recarregar automaticamente o saldo da Carteira no seu ${LetterLogoText} DocSpace</value>
+    <value>Ação necessária: Não é possível recarregar automaticamente o saldo da Carteira no seu ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>A sua função no agente de IA do ${LetterLogoText} foi alterada</value>

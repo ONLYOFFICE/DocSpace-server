@@ -765,7 +765,7 @@ $OrangeButton
   <data name="pattern_low_wallet_balance" xml:space="preserve">
     <value>Hello, $UserName!
 
-We’re reaching out to let you know that your DocSpace Wallet balance is running low.
+We’re reaching out to let you know that your ${LetterLogoText} Wallet balance is running low.
 
 We kindly ask you to top up your wallet balance to avoid any interruption of paid services.
 
@@ -1921,7 +1921,7 @@ Your portal is available again.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Hello, $UserName!
 
-We’re reaching out to inform you that the automatic top-up of the DocSpace Wallet balance was unsuccessful.
+We’re reaching out to inform you that the automatic top-up of the ${LetterLogoText} Wallet balance was unsuccessful.
 
 We kindly ask you to manually check and update your wallet balance.
 
@@ -2125,7 +2125,7 @@ $TrulyYours</value>
     <value>Invitation to join ${__VirtualRootHost} portal</value>
   </data>
   <data name="subject_low_wallet_balance" xml:space="preserve">
-    <value>Action required: Your ${LetterLogoText} DocSpace Wallet balance is running low</value>
+    <value>Action required: Your ${LetterLogoText} Wallet balance is running low</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Mailbox creation</value>
@@ -2305,7 +2305,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Encryption process completed</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText} DocSpace</value>
+    <value>Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText}</value>
   </data>
   <data name="subject_user_activation_v1" xml:space="preserve">
     <value>You are invited to ${LetterLogoText}</value>

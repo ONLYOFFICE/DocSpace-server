@@ -1384,7 +1384,7 @@ $TrulyYours</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Сообщаем вам, что не удалось произвести автоматическое пополнение кошелька DocSpace.
+Сообщаем вам, что не удалось произвести автоматическое пополнение кошелька ${LetterLogoText}.
 
 Просим вручную проверить и обновить баланс вашего кошелька.
 
@@ -1693,7 +1693,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Процесс шифрования завершен</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Необходимое действие: Невозможно автоматически пополнить баланс кошелька в вашем ${LetterLogoText} DocSpace</value>
+    <value>Необходимое действие: Невозможно автоматически пополнить баланс кошелька в вашем ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Ваша роль в ИИ-агенте ${LetterLogoText} изменилась</value>

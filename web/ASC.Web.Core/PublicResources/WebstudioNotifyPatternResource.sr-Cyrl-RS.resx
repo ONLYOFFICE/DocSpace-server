@@ -1370,7 +1370,7 @@ $TrulyYours</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Здраво, $UserName!
 
-Обавештавамо вас да автоматска допуна стања у вашем DocSpace новчанику није успела.
+Обавештавамо вас да автоматска допуна стања у вашем ${LetterLogoText} новчанику није успела.
 
 Љубазно вас молимо да ручно проверите и ажурирате стање у новчанику.
 
@@ -1667,7 +1667,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Процес шифровања је завршен</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Потребна акција: Није могуће automatski допунити стање новчаника у вашем ${LetterLogoText} DocSpace</value>
+    <value>Потребна акција: Није могуће automatski допунити стање новчаника у вашем ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Нови корисник је додат на портал ${LetterLogoText}</value>

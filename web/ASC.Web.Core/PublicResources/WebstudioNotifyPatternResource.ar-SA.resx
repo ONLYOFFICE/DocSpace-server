@@ -1414,7 +1414,7 @@ $TrulyYours</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>مرحباً، $UserName!
 
-نتواصل معكم لإبلاغكم بأن التعبئة التلقائية لرصيد DocSpace Wallet لم تتم بنجاح.
+نتواصل معكم لإبلاغكم بأن التعبئة التلقائية لرصيد ${LetterLogoText} Wallet لم تتم بنجاح.
 
 نرجو منكم التحقق يدوياً من رصيد محفظتكم وتحديثه.
 
@@ -1711,7 +1711,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. اكتملت عملية التشفير</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>الإجراء المطلوب: غير قادر على تعبئة رصيد المحفظة تلقائيًا في ${LetterLogoText} DocSpace</value>
+    <value>الإجراء المطلوب: غير قادر على تعبئة رصيد المحفظة تلقائيًا في ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>تمت إضافة مستخدم جديد إلى بوابة ${LetterLogoText}</value>

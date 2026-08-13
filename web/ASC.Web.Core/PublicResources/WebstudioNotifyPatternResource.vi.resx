@@ -1385,7 +1385,7 @@ Cổng thông tin của bạn đã hoạt động trở lại.</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Xin chào $UserName!
 
-Chúng tôi đang liên hệ để thông báo với bạn rằng việc nạp tiền tự động vào số dư Ví DocSpace đã không thành công.
+Chúng tôi đang liên hệ để thông báo với bạn rằng việc nạp tiền tự động vào số dư Ví ${LetterLogoText} đã không thành công.
 
 Chúng tôi vui lòng yêu cầu bạn kiểm tra và cập nhật số dư ví của mình theo cách thủ công.
 
@@ -1694,7 +1694,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Quá trình mã hóa đã hoàn tất</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Cần hành động: Không thể tự động nạp tiền vào số dư Ví trong DocSpace ${LetterLogoText} của bạn</value>
+    <value>Cần hành động: Không thể tự động nạp tiền vào số dư Ví trong ${LetterLogoText} của bạn</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Vai trò của bạn trong tác nhân AI ${LetterLogoText} đã thay đổi</value>
