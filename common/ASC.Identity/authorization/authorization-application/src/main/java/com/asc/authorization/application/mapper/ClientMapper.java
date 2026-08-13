@@ -160,6 +160,7 @@ public class ClientMapper {
             Instant.ofEpochSecond(
                 clientResponse.getCreatedOn().getSeconds(),
                 clientResponse.getCreatedOn().getNanos()))
+        .createdBy(clientResponse.getCreatedBy())
         .tenantId(clientResponse.getTenant())
         .enabled(clientResponse.getEnabled())
         .publicClient(clientResponse.getIsPublic())
