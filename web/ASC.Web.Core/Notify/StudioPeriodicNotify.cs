@@ -233,52 +233,33 @@ public class StudioPeriodicNotify(
 
                 #endregion
 
+                #region 10 days after registration to owner and admins SAAS (any tariff)
+
+                else if (createdDate.AddDays(10) == nowDate)
+                {
+                    action = serviceProvider.GetService<SaasAdminDeveloperToolsV1NotifyAction>();
+                    paymentMessage = false;
+                    toowner = true;
+                    toadmins = true;
+
+                    orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", c);
+                    orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~/developer-tools/overview");
+
+                    url1 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("allconnectors", c);
+                    url2 = c => externalResourceSettingsHelper.Api.GetRegionalDomain(c);
+
+                    trulyYoursAsTebleRow = true;
+                }
+
+                #endregion
+
                 else if (quota.Free)
                 {
                     #region After registration letters
 
-                    #region 10 days after registration to admins SAAS Free
-
-                    if (createdDate.AddDays(10) == nowDate)
-                    {
-                        action = serviceProvider.GetService<SaasAdminIntegrationsNotifyAction>();
-                        paymentMessage = false;
-                        toadmins = true;
-
-                        img1 = studioNotifyHelper.GetNotificationImageUrl("onlyoffice.png");
-                        img2 = studioNotifyHelper.GetNotificationImageUrl("connect.png");
-                        img3 = studioNotifyHelper.GetNotificationImageUrl("zoom.png");
-                        img4 = studioNotifyHelper.GetNotificationImageUrl("zapier.png");
-                        img5 = studioNotifyHelper.GetNotificationImageUrl("wordpress.png");
-                        img6 = studioNotifyHelper.GetNotificationImageUrl("drupal.png");
-                        img7 = studioNotifyHelper.GetNotificationImageUrl("pipedrive.png");
-
-                        orangeButtonText1 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl1 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("zoom", c);
-                        orangeButtonText2 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", c);
-                        orangeButtonUrl2 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("zapier", c);
-                        orangeButtonText3 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl3 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("wordpress", c);
-                        orangeButtonText4 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl4 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("drupal", c);
-                        orangeButtonText5 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl5 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("pipedrive", c);
-
-                        url1 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("officeforzoom", c);
-                        url2 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("officeforzapier", c);
-                        url3 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("officeforwordpress", c);
-                        url4 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("officefordrupal", c);
-
-                        topGif = studioNotifyHelper.GetNotificationImageUrl("integration.gif");
-
-                        trulyYoursAsTebleRow = true;
-                    }
-
-                    #endregion
-
                     #region 14 days after registration to admins and users SAAS Free
 
-                    else if (createdDate.AddDays(14) == nowDate)
+                    if (createdDate.AddDays(14) == nowDate)
                     {
                         action = serviceProvider.GetService<SaasAdminUserAppsTipsV1NotifyAction>();
                         paymentMessage = false;

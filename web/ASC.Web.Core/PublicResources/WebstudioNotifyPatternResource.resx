@@ -1822,6 +1822,38 @@ Visit our Help Center to learn more about configuring and managing ${LetterLogoT
 
 $TrulyYours</comment>
   </data>
+  <data name="pattern_saas_admin_developer_tools_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Connect, integrate, and build with &lt;span style="color: #FF6F3D; white-space: nowrap;"&gt;${LetterLogoText} Docs&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Want to bring powerful document editing into your own platform? ${LetterLogoText} gives you three simple ways to make it happen.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&#8226; &lt;b&gt;Connect&lt;/b&gt;: Plug ${LetterLogoText} Docs into your platform using &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;50+ ready connectors&lt;/a&gt; for popular tools.&lt;br /&gt;&#8226; &lt;b&gt;Integrate&lt;/b&gt;: Embed Docs into your ecosystem with standard protocols or our &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL2"&gt;API&lt;/a&gt;.&lt;br /&gt;&#8226; &lt;b&gt;Build&lt;/b&gt;: Create your own document workspace with flexible, modular apps.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;Explore Developer Tools&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;Whatever you're building, we've got a tool to help you integrate, extend, and automate ${LetterLogoText} Docs, including Embed and Plugin SDK, webhooks, OAuth 2.0, and more.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+    <comment>Connect, integrate, and build with ${LetterLogoText} Docs
+
+Hello, $UserName!
+
+Want to bring powerful document editing into your own platform? ${LetterLogoText} gives you three simple ways to make it happen.
+
+&#8226; Connect: Plug ${LetterLogoText} Docs into your platform using 50+ ready connectors for popular tools.
+&#8226; Integrate: Embed Docs into your ecosystem with standard protocols or our API.
+&#8226; Build: Create your own document workspace with flexible, modular apps.
+
+Explore Developer Tools
+
+Whatever you're building, we've got a tool to help you integrate, extend, and automate ${LetterLogoText} Docs, including Embed and Plugin SDK, webhooks, OAuth 2.0, and more.
+
+$OrangeButton
+
+$TrulyYours</comment>
+  </data>
   <data name="pattern_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Discover &lt;span style="color: #FF6F3D;"&gt;4 handy apps&lt;/span&gt; inside your ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
 
@@ -2714,6 +2746,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_admin_configure_v1" xml:space="preserve">
     <value>Configure your ${LetterLogoText}</value>
+  </data>
+  <data name="subject_saas_admin_developer_tools_v1" xml:space="preserve">
+    <value>Connect, integrate, and build with ${LetterLogoText} Docs</value>
   </data>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>Discover 4 handy apps inside your ${LetterLogoText}</value>

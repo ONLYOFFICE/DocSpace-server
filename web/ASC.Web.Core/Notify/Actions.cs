@@ -2334,6 +2334,20 @@ public sealed class SaasAdminConfigureV1NotifyAction(UserManager userManager, St
 }
 
 [Scope]
+public sealed class SaasAdminDeveloperToolsV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+{
+    public override string ID => "saas_admin_developer_tools_v1";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_developer_tools_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_developer_tools_v1)
+        ];
+    }
+}
+
+[Scope]
 public sealed class SaasAdminHandyAppsV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
 {
     public override string ID => "saas_admin_handy_apps_v1";
