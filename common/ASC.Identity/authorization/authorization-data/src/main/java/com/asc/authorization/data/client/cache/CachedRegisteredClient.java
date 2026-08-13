@@ -61,4 +61,5 @@ public class CachedRegisteredClient implements Serializable {
   private long tenantId;
   private boolean enabled;
   private boolean publicClient;
+  private String cacheNamespace;
 }

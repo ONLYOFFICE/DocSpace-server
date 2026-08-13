@@ -37,9 +37,7 @@ namespace ASC.Api.Migration;
 /// Migration API.
 /// </remarks>
 /// <name>migration</name>
-[DefaultRoute]
-[ApiController]
-[ControllerName("migration")]
+[ApiEndpoint("migration")]
 public class MigrationController(
     TenantManager tenantManager,
     UserManager userManager,

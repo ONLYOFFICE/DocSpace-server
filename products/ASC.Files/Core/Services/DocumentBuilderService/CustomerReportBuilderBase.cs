@@ -205,8 +205,9 @@ public abstract class CustomerReportBuilderBase(
             .Replace("${inputData}", JsonSerializer.Serialize(inputData, context.Options))
             .Replace("${tempFileName}", tempFileName);
 
-        await using (var writer = new StreamWriter(scriptFilePath))
+        try
         {
+            await using var writer = new StreamWriter(scriptFilePath);
             if (writeValues != null)
             {
                 var scriptParts = script.Split("${dataValues}");
@@ -218,6 +219,12 @@ public abstract class CustomerReportBuilderBase(
             {
                 await writer.WriteAsync(script);
             }
+        }
+        catch (Exception)
+        {
+            // Nothing owns the file until it is handed over as input data, so clean it up here.
+            DocumentBuilderScriptHelper.DeleteScriptFile(scriptFilePath);
+            throw;
         }
 
         return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);

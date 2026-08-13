@@ -75,11 +75,6 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         await filesMessageService.SendAsync(MessageAction.RoomIndexExportSaved, room, headers: headers);
 
-        if (System.IO.File.Exists(inputData.Script))
-        {
-            System.IO.File.Delete(inputData.Script);
-        }
-
         return file;
     }
 }

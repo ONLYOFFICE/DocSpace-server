@@ -123,55 +123,57 @@ public class AuditXlsxReportWriter(
 
         var scriptParts = script.Split("${dataValues}");
 
-        await using (var writer = new StreamWriter(scriptFilePath))
+        try
         {
-            await writer.WriteAsync(scriptParts[0]);
-
-            foreach (var @event in events)
+            await using (var writer = new StreamWriter(scriptFilePath))
             {
-                var cells = new List<Cell>(props.Count);
+                await writer.WriteAsync(scriptParts[0]);
 
-                foreach (var prop in props)
+                foreach (var @event in events)
                 {
-                    var value = prop.GetValue(@event);
+                    var cells = new List<Cell>(props.Count);
 
-                    if (prop.PropertyType == typeof(DateTime))
+                    foreach (var prop in props)
                     {
-                        cells.Add(new Cell(((DateTime)value).ConvertNumerals("G"), dateFormat));
+                        var value = prop.GetValue(@event);
+
+                        if (prop.PropertyType == typeof(DateTime))
+                        {
+                            cells.Add(new Cell(((DateTime)value).ConvertNumerals("G"), dateFormat));
+                        }
+                        else
+                        {
+                            // force text format to stop formulas from executing in user-controlled values
+                            cells.Add(new Cell(value?.ToString(), "@"));
+                        }
                     }
-                    else
-                    {
-                        // force text format to stop formulas from executing in user-controlled values
-                        cells.Add(new Cell(value?.ToString(), "@"));
-                    }
+
+                    await writer.WriteAsync(JsonSerializer.Serialize(cells, _jsonOptions) + ",");
                 }
 
-                await writer.WriteAsync(JsonSerializer.Serialize(cells, _jsonOptions) + ",");
+                await writer.WriteAsync(scriptParts[1]);
             }
 
-            await writer.WriteAsync(scriptParts[1]);
+            var inputData = new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
+
+            await onProgressAsync(30);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var fileUri = await documentBuilderTask.BuildFileAsync(inputData, cancellationToken);
+
+            await onProgressAsync(60);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var file = await fileSaver.SaveToMyDocumentsAsync(userId, outputFileName, new Uri(fileUri));
+
+            return new AuditReportResult(file.Id, file.Title, filesLinkUtility.GetFileWebEditorUrl(file.Id));
         }
-
-        var inputData = new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
-
-        await onProgressAsync(30);
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var fileUri = await documentBuilderTask.BuildFileAsync(inputData, cancellationToken);
-
-        await onProgressAsync(60);
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var file = await fileSaver.SaveToMyDocumentsAsync(userId, outputFileName, new Uri(fileUri));
-
-        if (System.IO.File.Exists(scriptFilePath))
+        finally
         {
-            System.IO.File.Delete(scriptFilePath);
+            DocumentBuilderScriptHelper.DeleteScriptFile(scriptFilePath);
         }
-
-        return new AuditReportResult(file.Id, file.Title, filesLinkUtility.GetFileWebEditorUrl(file.Id));
     }
 
     private static (List<string> Headers, List<PropertyInfo> Props) GetColumns<T>() where T : BaseEvent

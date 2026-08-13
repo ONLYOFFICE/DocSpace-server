@@ -38,9 +38,7 @@ namespace ASC.Files.Api;
 /// </summary>
 /// <name>files</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("files")]
+[ApiEndpoint("files")]
 public abstract class ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDtoHelper fileDtoHelper)
     : ControllerBase
 {
