@@ -1395,7 +1395,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Sveiki!
 
-Jums ir piešķirta jauna loma DocSpace MI aģentā "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Jums ir piešķirta jauna loma ${LetterLogoText} MI aģentā "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Uzziniet vairāk par telpas lomām un atļaujām sadaļā "Palīdzības centrs":"${HelpCenterUrl}".
 
@@ -1427,7 +1427,7 @@ Saite ir derīga tikai septiņas dienas.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Sveicināti!
 
-Jums ir piešķirta jauna loma DocSpace telpā "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Jums ir piešķirta jauna loma ${LetterLogoText} telpā "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Uzziniet vairāk par telpas lomām un atļaujām sadaļā "Palīdzības centrs":"${HelpCenterUrl}".
 
@@ -1436,7 +1436,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Sveicināti!
 
-Jums ir piešķirts jauns lietotāja tips DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Jums ir piešķirts jauns lietotāja tips ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Uzziniet vairāk par lietotāju tipiem un atļaujām sadaļā "Palīdzības centrs":"${HelpCenterUrl}".
 
@@ -1696,7 +1696,7 @@ $TrulyYours</value>
     <value>Nepieciešama darbība: Neizdevās automātiski papildināt Maka atlikumu Jūsu ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Jūsu loma DocSpace MI aģentā ir mainīta</value>
+    <value>Jūsu loma ${LetterLogoText} MI aģentā ir mainīta</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Jauns lietotājs pievienots portālam ${LetterLogoText}</value>
@@ -1705,10 +1705,10 @@ $TrulyYours</value>
     <value>Jūs esat uzaicināts (-a) pievienoties ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Jūsu loma DocSpace telpā ir mainīta</value>
+    <value>Jūsu loma ${LetterLogoText} telpā ir mainīta</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Jūsu DocSpace lietotāja tips ir mainīts</value>
+    <value>Jūsu ${LetterLogoText} lietotāja tips ir mainīts</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Laipni lūdzam ${LetterLogoText} DocSpace!</value>

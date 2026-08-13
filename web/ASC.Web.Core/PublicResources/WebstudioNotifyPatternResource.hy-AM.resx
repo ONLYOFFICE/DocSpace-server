@@ -1412,7 +1412,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Բարև!
 
-Դուք նշանակվել եք նոր օգտատիրոջ տեսակ "${__VirtualRootPath}":"${__VirtualRootPath}" DocSpace-ում՝ ${UserType}:
+Դուք նշանակվել եք նոր օգտատիրոջ տեսակ "${__VirtualRootPath}":"${__VirtualRootPath}" ${LetterLogoText}-ում՝ ${UserType}:
 
 Կարդացեք օգտատիրոջ տեսակների և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}"-ում՝
 
@@ -1671,10 +1671,10 @@ $TrulyYours</value>
     <value>Դուք հրավիրված եք միանալու ${__VirtualRootHost}-ին</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Ձեր դերը DocSpace սենյակում փոխվել է</value>
+    <value>Ձեր դերը ${LetterLogoText} սենյակում փոխվել է</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Ձեր օգտատիրոջ տեսակը DocSpace-ում փոխվել է</value>
+    <value>Ձեր օգտատիրոջ տեսակը ${LetterLogoText}-ում փոխվել է</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Բարի գալուստ ${LetterLogoText} DocSpace:</value>
@@ -1692,7 +1692,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace-ը ջնջված է</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Ձեր դերը DocSpace ԱԲ գործակալում փոխվել է</value>
+    <value>Ձեր դերը ${LetterLogoText} ԱԲ գործակալում փոխվել է</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Բարև, $UserName!
@@ -1706,7 +1706,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Բարև!
 
-Ձեզ DocSpace ԱԲ գործակալում նոր դեր է նշանակվել՝ "${RoomTitle}":"${RoomUrl}": ${UserRole}:
+Ձեզ ${LetterLogoText} ԱԲ գործակալում նոր դեր է նշանակվել՝ "${RoomTitle}":"${RoomUrl}": ${UserRole}:
 
 Իմացեք ավելին սենյակի դերերի և թույլտվությունների մասին "Օժանդակության կենտրոն":"${HelpCenterUrl}" ում.
 

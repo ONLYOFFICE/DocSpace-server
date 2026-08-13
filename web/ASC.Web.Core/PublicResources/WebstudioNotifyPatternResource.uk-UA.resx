@@ -1395,7 +1395,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Вітаємо!
 
-Вам призначено нову роль у AІ-агенті DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Вам призначено нову роль у AІ-агенті ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Дізнайтеся більше про ролі та дозволи в кімнаті в "Довідковому центрі":"${HelpCenterUrl}".
 
@@ -1427,7 +1427,7 @@ $OrangeButton
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Вітаємо!
 
-Вам призначено нову роль у кімнаті DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Вам призначено нову роль у кімнаті ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Дізнайтеся більше про ролі та дозволи в кімнаті в "Довідковому центрі":"${HelpCenterUrl}".
 
@@ -1436,7 +1436,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Вітаємо!
 
-Вам призначено новий тип користувача в DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Вам призначено новий тип користувача в ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Дізнайтеся більше про типи користувачів і дозволи в "Довідковому центрі":"${HelpCenterUrl}".
 
@@ -1697,7 +1697,7 @@ $TrulyYours</value>
     <value>Потрібна дія: не вдається автоматично поповнити баланс гаманця у вашому ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Ваша роль у ШІ-агенті DocSpace змінилася</value>
+    <value>Ваша роль у ШІ-агенті ${LetterLogoText} змінилася</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Новий користувач був доданий до порталу ${LetterLogoText}</value>
@@ -1706,10 +1706,10 @@ $TrulyYours</value>
     <value>Вас запросили приєднатися до ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Ваша роль у кімнаті DocSpace змінилася</value>
+    <value>Ваша роль у кімнаті ${LetterLogoText} змінилася</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Ваш тип користувача DocSpace змінився</value>
+    <value>Ваш тип користувача ${LetterLogoText} змінився</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Ласкаво просимо до простору ${LetterLogoText} DocSpace!</value>

@@ -1397,7 +1397,7 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Salam!
 
-DocSpace otağında "${RoomTitle}":"${RoomUrl}" adlı yeni rol: ${UserRole} təyin edildi.
+${LetterLogoText} otağında "${RoomTitle}":"${RoomUrl}" adlı yeni rol: ${UserRole} təyin edildi.
 
 "Dəstək Mərkəzində":"${HelpCenterUrl}" otaq rolları və icazələr haqqında ətraflı məlumat əldə edin.
 
@@ -1406,7 +1406,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Salam!
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType} sizə yeni istifadəçi növü təyin edilib.
+${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType} sizə yeni istifadəçi növü təyin edilib.
 
 "Dəstək Mərkəzində":"${HelpCenterUrl}" istifadəçi növləri və icazələr haqqında ətraflı məlumat əldə edin.
 
@@ -1665,10 +1665,10 @@ $TrulyYours</value>
     <value>Siz ${__VirtualRootHost} proqramına qoşulmağa dəvət olundunuz</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>DocSpace otağındakı rolunuz dəyişdi</value>
+    <value>${LetterLogoText} otağındakı rolunuz dəyişdi</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>DocSpace istifadəçi tipiniz dəyişdi</value>
+    <value>${LetterLogoText} istifadəçi tipiniz dəyişdi</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>${LetterLogoText} DocSpace-ə xoş gəlmisiniz!</value>
@@ -1686,7 +1686,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace silindi</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>DocSpace AI agentindəki rolunuz dəyişdi</value>
+    <value>${LetterLogoText} AI agentindəki rolunuz dəyişdi</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1709,7 +1709,7 @@ Zəhmət olmasa, avtomatik ödənişin söndürüldüyünə əmin olun. Müştə
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Salam!
 
-DocSpace AI agentində "${RoomTitle}":"${RoomUrl}" sizə yeni rol təyin edildi: ${UserRole}.
+${LetterLogoText} AI agentində "${RoomTitle}":"${RoomUrl}" sizə yeni rol təyin edildi: ${UserRole}.
 
 Otaq rolları və icazələri haqqında daha çox məlumat üçün "Yardım Mərkəzi":"${HelpCenterUrl}" nə baxın.
 

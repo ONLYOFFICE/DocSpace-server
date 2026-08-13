@@ -1395,7 +1395,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Γεια σας!
 
-Σας έχει ανατεθεί ένας νέος ρόλος στον παράγοντα τεχνητής νοημοσύνης DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Σας έχει ανατεθεί ένας νέος ρόλος στον παράγοντα τεχνητής νοημοσύνης ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Μάθετε περισσότερα σχετικά με τους ρόλους και τα δικαιώματα δωματίου στο "Κέντρο βοήθειας":"${HelpCenterUrl}".
 
@@ -1427,7 +1427,7 @@ $OrangeButton
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Γεια σας!
 
-Σας έχει ανατεθεί ένας νέος ρόλος στο δωμάτιο DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Σας έχει ανατεθεί ένας νέος ρόλος στο δωμάτιο ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Μάθετε περισσότερα σχετικά με τους ρόλους και τα δικαιώματα του δωματίου στο "Κέντρο Βοήθειας":"${HelpCenterUrl}".
 
@@ -1436,7 +1436,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Γεια σας!
 
-Σας έχει ανατεθεί ένας νέος τύπος χρήστη στο DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Σας έχει ανατεθεί ένας νέος τύπος χρήστη στο ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Μάθετε περισσότερα σχετικά με τους τύπους χρηστών και τα δικαιώματα στο "Κέντρο Βοήθειας":"${HelpCenterUrl}".
 
@@ -1696,7 +1696,7 @@ $TrulyYours</value>
     <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του υπολοίπου του Πορτοφολιού στο DocSpace ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Ο ρόλος σας σε έναν πράκτορα τεχνητής νοημοσύνης του DocSpace έχει αλλάξει</value>
+    <value>Ο ρόλος σας σε έναν πράκτορα τεχνητής νοημοσύνης του ${LetterLogoText} έχει αλλάξει</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Νέος χρήστης προστέθηκε στην πύλη ${LetterLogoText}</value>
@@ -1705,10 +1705,10 @@ $TrulyYours</value>
     <value>Έχετε προσκληθεί να συμμετάσχετε στο ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Ο ρόλος σας σε ένα δωμάτιο DocSpace έχει αλλάξει</value>
+    <value>Ο ρόλος σας σε ένα δωμάτιο ${LetterLogoText} έχει αλλάξει</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Ο τύπος χρήστη σας στο DocSpace έχει αλλάξει</value>
+    <value>Ο τύπος χρήστη σας στο ${LetterLogoText} έχει αλλάξει</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Καλώς ήρθατε στο DocSpace του ${LetterLogoText}!</value>

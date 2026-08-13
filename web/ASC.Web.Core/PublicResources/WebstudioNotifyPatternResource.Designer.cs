@@ -2216,7 +2216,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are assigned a new role in the DocSpace AI agent &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
+        ///You are assigned a new role in the ${LetterLogoText} AI agent &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
         ///
         ///Learn more about room roles and permissions in &quot;Help Center&quot;:&quot;${HelpCenterUrl}&quot;.
         ///
@@ -2272,7 +2272,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are assigned a new role in the DocSpace room &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
+        ///You are assigned a new role in the ${LetterLogoText} room &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
         ///
         ///Learn more about room roles and permissions in &quot;Help Center&quot;:&quot;${HelpCenterUrl}&quot;.
         ///
@@ -2287,7 +2287,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are assigned a new user type in DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;: ${UserType}.
+        ///You are assigned a new user type in ${LetterLogoText} &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;: ${UserType}.
         ///
         ///Learn more about user types and permissions in &quot;Help Center&quot;:&quot;${HelpCenterUrl}&quot;.
         ///
@@ -3138,7 +3138,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your role in a DocSpace AI agent has changed.
+        ///   Looks up a localized string similar to ${LetterLogoText}: Your role in the AI agent has changed.
         /// </summary>
         public static string subject_user_agent_role_changed {
             get {
@@ -3165,7 +3165,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your role in a DocSpace room has changed.
+        ///   Looks up a localized string similar to ${LetterLogoText}: Your role in the room has changed.
         /// </summary>
         public static string subject_user_role_changed {
             get {
@@ -3174,7 +3174,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your DocSpace user type has changed.
+        ///   Looks up a localized string similar to ${LetterLogoText}: Your user type has changed.
         /// </summary>
         public static string subject_user_type_changed {
             get {

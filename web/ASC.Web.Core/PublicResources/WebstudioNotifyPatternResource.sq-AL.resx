@@ -1408,7 +1408,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Përshëndetje!
 
-Ju jeni caktuar me një lloj të ri përdoruesi në DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Ju jeni caktuar me një lloj të ri përdoruesi në ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Mësoni më shumë rreth llojeve të përdoruesve dhe lejeve në "Qendrën e ndihmës":"${HelpCenterUrl}".
 
@@ -1668,10 +1668,10 @@ $TrulyYours</value>
     <value>Jeni ftuar të bashkoheni në ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Roli juaj në një dhomë të DocSpace ka ndryshuar</value>
+    <value>Roli juaj në një dhomë të ${LetterLogoText} ka ndryshuar</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Lloji përdoruesit tuaj në DocSpace ka ndryshuar</value>
+    <value>Lloji përdoruesit tuaj në ${LetterLogoText} ka ndryshuar</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
@@ -1689,7 +1689,7 @@ $TrulyYours</value>
     <value>DocSpace ${LetterLogoText} është fshirë</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Roli juaj në një agjent AI të DocSpace ka ndryshuar</value>
+    <value>Roli juaj në një agjent AI të ${LetterLogoText} ka ndryshuar</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Përshëndetje, $UserName!
@@ -1714,7 +1714,7 @@ Ju lutemi sigurohuni që faturimi automatik është i çaktivizuar. Kontrolloni 
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Përshëndetje!
 
-Ju është caktuar një rol i ri në agjentin AI të DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Ju është caktuar një rol i ri në agjentin AI të ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Mësoni më shumë rreth roleve dhe lejeve të dhomës në "Qendrën e ndihmës":"${HelpCenterUrl}".
 

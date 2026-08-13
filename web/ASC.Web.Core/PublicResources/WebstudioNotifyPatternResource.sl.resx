@@ -1395,7 +1395,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Pozdravljeni!
 
-Dodeljena vam je nova vloga v agentu umetne inteligence DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Dodeljena vam je nova vloga v agentu umetne inteligence ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Več o vlogah in dovoljenjih v sobah si lahko preberete v "Centru za pomoč":"${HelpCenterUrl}".
 
@@ -1427,7 +1427,7 @@ Povezava velja le 7 dni.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Pozdravljeni!
 
-Dodeljena vam je nova vloga v sobi DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Dodeljena vam je nova vloga v sobi ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Izvedite več o vlogah in dovoljenjih v sobi v "Centru za pomoč":"${HelpCenterUrl}".
 
@@ -1436,7 +1436,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Pozdravljeni!
 
-V DocSpace vam je dodeljena nova vrsta uporabnika "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+V ${LetterLogoText} vam je dodeljena nova vrsta uporabnika "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Več o vrstah uporabnikov in dovoljenjih poiščite v "Centru za pomoč":"${HelpCenterUrl}".
 
@@ -1696,7 +1696,7 @@ $TrulyYours</value>
     <value>Zahtevano dejanje: Stanja v denarnici ${LetterLogoText} v vašem DocSpace ni mogoče samodejno napolniti</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Vaša vloga v agentu umetne inteligence DocSpace se je spremenila</value>
+    <value>Vaša vloga v agentu umetne inteligence ${LetterLogoText} se je spremenila</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Novi uporabniki dodani na portal ${LetterLogoText}</value>
@@ -1705,10 +1705,10 @@ $TrulyYours</value>
     <value>Povabljeni, da se pridružite ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Vaša vloga v sobi DocSpace se je spremenila</value>
+    <value>Vaša vloga v sobi ${LetterLogoText} se je spremenila</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Vaša vrsta uporabnika DocSpace se je spremenila</value>
+    <value>Vaša vrsta uporabnika ${LetterLogoText} se je spremenila</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Dobrodošli v ${LetterLogoText} DocSpace!</value>

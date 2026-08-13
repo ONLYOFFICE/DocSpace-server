@@ -1397,7 +1397,7 @@ De link is slechts 7 dagen geldig.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Hallo!
 
-U hebt een nieuwe rol toegewezen gekregen in de DocSpacekamer "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+U hebt een nieuwe rol toegewezen gekregen in de ${LetterLogoText}kamer "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Meer informatie over kamer rollen en rechten vindt u in "Helpcentrum":"${HelpCenterUrl}".
 
@@ -1406,7 +1406,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Hallo!
 
-U hebt een nieuw gebruikerstype toegewezen gekregen in DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+U hebt een nieuw gebruikerstype toegewezen gekregen in ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Meer informatie over gebruikerstypes en -rechten vindt u in "Help Center":"${HelpCenterUrl}".
 
@@ -1669,10 +1669,10 @@ $TrulyYours</value>
     <value>U bent uitgenodigd om lid te worden van ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Uw rol in een DocSpace kamer is gewijzigd</value>
+    <value>Uw rol in een ${LetterLogoText} kamer is gewijzigd</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Uw DocSpace gebruikerstype is gewijzigd</value>
+    <value>Uw ${LetterLogoText} gebruikerstype is gewijzigd</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Welkom bij ${LetterLogoText} DocSpace!</value>
@@ -1687,7 +1687,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: Uw API-sleutel is verlopen</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Uw rol in een DocSpace AI-agent is gewijzigd</value>
+    <value>Uw rol in een ${LetterLogoText} AI-agent is gewijzigd</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1710,7 +1710,7 @@ Zorg ervoor dat automatische facturering is uitgeschakeld. Controleer de status 
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Hallo!
 
-U heeft een nieuwe rol toegewezen gekregen in de DocSpace AI-agent "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+U heeft een nieuwe rol toegewezen gekregen in de ${LetterLogoText} AI-agent "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Lees meer over ruimterollen en -machtigingen in het "Helpcentrum":"${HelpCenterUrl}".
 

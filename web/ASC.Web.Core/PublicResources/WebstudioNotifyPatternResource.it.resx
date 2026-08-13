@@ -1405,7 +1405,7 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Ciao!
 
-Ti è stato assegnato un nuovo ruolo nella stanza DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Ti è stato assegnato un nuovo ruolo nella stanza ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Scopri di più su ruoli e permessi delle stanze nel "Centro assistenza":"${HelpCenterUrl}".
 
@@ -1414,7 +1414,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Ciao!
 
-Ti è stato assegnato un nuovo tipo utente nel DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Ti è stato assegnato un nuovo tipo utente nel ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Scopri di più sui tipi utente e i permessi nel "Centro assistenza":"${HelpCenterUrl}".
 
@@ -1677,10 +1677,10 @@ $TrulyYours</value>
     <value>Sei stato invitato ad unirti su ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Il tuo ruolo in una stanza DocSpace è stato modificato</value>
+    <value>Il tuo ruolo in una stanza ${LetterLogoText} è stato modificato</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Il tuo tipo utente DocSpace è stato modificato</value>
+    <value>Il tuo tipo utente ${LetterLogoText} è stato modificato</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Benvenuto(ta) in ${LetterLogoText} DocSpace!</value>
@@ -1695,7 +1695,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: La tua chiave API è scaduta</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Il tuo ruolo in un agente IA DocSpace è cambiato</value>
+    <value>Il tuo ruolo in un agente IA ${LetterLogoText} è cambiato</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Ciao, $UserName!
@@ -1709,7 +1709,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Ciao!
 
-Ti è stato assegnato un nuovo ruolo nell'agente IA DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Ti è stato assegnato un nuovo ruolo nell'agente IA ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Scopri di più sui ruoli e le autorizzazioni delle sale nel "Centro assistenza":"${HelpCenterUrl}".
 

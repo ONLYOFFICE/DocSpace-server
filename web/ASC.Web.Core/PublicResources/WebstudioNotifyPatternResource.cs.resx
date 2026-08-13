@@ -1396,7 +1396,7 @@ Odkaz je platný pouze 7 dní.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Dobrý den!
 
-Byla vám přidělena nová role v místnosti DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Byla vám přidělena nová role v místnosti ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Další informace o rolích a oprávněních v místnosti naleznete v části "Centrum nápovědy":"${HelpCenterUrl}".
 
@@ -1405,7 +1405,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Dobrý den!
 
-V DocSpace je vám přiřazen nový typ uživatele "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+V ${LetterLogoText} je vám přiřazen nový typ uživatele "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Další informace o typech uživatelů a oprávněních najdete v části "Centrum nápovědy":"${HelpCenterUrl}".
 
@@ -1665,10 +1665,10 @@ $TrulyYours</value>
     <value>Jste zváni k připojení k ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Vaše role v místnosti DocSpace se změnila</value>
+    <value>Vaše role v místnosti ${LetterLogoText} se změnila</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Váš typ uživatele DocSpace se změnil</value>
+    <value>Váš typ uživatele ${LetterLogoText} se změnil</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Vítejte v ${LetterLogoText} DocSpace!</value>
@@ -1686,7 +1686,7 @@ $TrulyYours</value>
     <value>Dokumentační prostor ${LetterLogoText} byl smazán</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Vaše role v agentovi AI DocSpace se změnila</value>
+    <value>Vaše role v agentovi AI ${LetterLogoText} se změnila</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -1709,7 +1709,7 @@ Ujistěte se prosím, že automatická fakturace je vypnuta. Zkontrolujte stav a
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Dobrý den!
 
-Byla vám přidělena nová role v agentovi AI DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Byla vám přidělena nová role v agentovi AI ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Více informací o rolích a oprávněních místností najdete v "Centru nápovědy":"${HelpCenterUrl}".
 

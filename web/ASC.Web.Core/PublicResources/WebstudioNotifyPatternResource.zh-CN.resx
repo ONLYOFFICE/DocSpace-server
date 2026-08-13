@@ -1718,7 +1718,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace：您的 API 密钥已过期</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>您在 DocSpace AI 代理中的角色已更改</value>
+    <value>您在 ${LetterLogoText} AI 代理中的角色已更改</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>您好，$UserName！
@@ -1732,7 +1732,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>您好！
 
-您已在 DocSpace AI 代理 "${RoomTitle}":"${RoomUrl}" 中被分配了新角色：${UserRole}。
+您已在 ${LetterLogoText} AI 代理 "${RoomTitle}":"${RoomUrl}" 中被分配了新角色：${UserRole}。
 
 在 "帮助中心":"${HelpCenterUrl}" 中了解更多关于房间角色和权限的信息。
 

@@ -1388,7 +1388,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Olá!
 
-Foi atribuída uma nova função no agente DocSpace AI "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Foi atribuída uma nova função no agente ${LetterLogoText} AI "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Saiba mais sobre as funções e permissões da sala em "Centro de Ajuda":"${HelpCenterUrl}".
 
@@ -1420,7 +1420,7 @@ Este link é válido apenas por 7 dias.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Olá!
 
-Foi-lhe atribuída uma nova função na sala DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Foi-lhe atribuída uma nova função na sala ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Saiba mais sobre as funções e permissões da sala em "Centro de ajuda":"${HelpCenterUrl}".
 
@@ -1429,7 +1429,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Olá!
 
-É-lhe atribuído um novo tipo de utilizador no DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+É-lhe atribuído um novo tipo de utilizador no ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Saiba mais sobre os tipos de utilizador e as permissões no "Centro de Ajuda":"${HelpCenterUrl}".
 
@@ -1689,7 +1689,7 @@ $TrulyYours</value>
     <value>Ação necessária: Não é possível recarregar automaticamente o saldo da Carteira no seu ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>A sua função no agente de IA do DocSpace foi alterada</value>
+    <value>A sua função no agente de IA do ${LetterLogoText} foi alterada</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Novo utilizador adicionado ao portal ${LetterLogoText}</value>
@@ -1698,10 +1698,10 @@ $TrulyYours</value>
     <value>Foi convidado(a) para se juntar ao ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>O seu papel numa sala DocSpace mudou</value>
+    <value>O seu papel numa sala ${LetterLogoText} mudou</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>O seu tipo de utilizador do DocSpace foi alterado</value>
+    <value>O seu tipo de utilizador do ${LetterLogoText} foi alterado</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Bem-vindo ao ${LetterLogoText} DocSpace!</value>

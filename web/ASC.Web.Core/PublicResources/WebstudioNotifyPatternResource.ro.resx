@@ -1406,7 +1406,7 @@ Linkul este valabil numai timp de 7 zile.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Bună!
 
-Vi s-a atribuit un nou rol în sala DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Vi s-a atribuit un nou rol în sala ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Aflați mai multe despre roluri și permisiuni în "Centru de ajutor":"${HelpCenterUrl}".
 
@@ -1415,7 +1415,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Bună!
 
-Vi s-a atribuit un nou tip de utilizator DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Vi s-a atribuit un nou tip de utilizator ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Aflați mai multe despre tipuri de utilizator și permisiuni în "Centru de ajutor":"${HelpCenterUrl}".
 
@@ -1675,10 +1675,10 @@ $TrulyYours</value>
     <value>Sunteţi invitat să vă asociaţi ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Rolul dvs în sala DocSpace s-a schimbat</value>
+    <value>Rolul dvs în sala ${LetterLogoText} s-a schimbat</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Tipul dvs de utilizator DocSpace s-a schimbar</value>
+    <value>Tipul dvs de utilizator ${LetterLogoText} s-a schimbar</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Bun venit în spaţiul ${LetterLogoText} DocSpace!</value>
@@ -1696,7 +1696,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace a fost șters</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Rolul tău într-un agent IA DocSpace s-a schimbat</value>
+    <value>Rolul tău într-un agent IA ${LetterLogoText} s-a schimbat</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Bună ziua, $UserName!
@@ -1710,7 +1710,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Bună ziua!
 
-Vi s-a atribuit un nou rol în agentul IA DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Vi s-a atribuit un nou rol în agentul IA ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Aflați mai multe despre rolurile și permisiunile camerelor în "Centrul de ajutor":"${HelpCenterUrl}".
 

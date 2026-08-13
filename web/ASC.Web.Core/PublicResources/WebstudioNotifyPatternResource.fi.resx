@@ -1393,7 +1393,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>ei!
 
-Sinulle on annettu uusi rooli DocSpace tekoälyagentissa "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Sinulle on annettu uusi rooli ${LetterLogoText} tekoälyagentissa "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Lue lisää huoneen rooleista ja oikeuksista "Apukeskuksessa":"${HelpCenterUrl}".
 
@@ -1425,7 +1425,7 @@ Linkki on voimassa 7 päivää.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Hei!
 
-Sinulle on osoitettu uusi rooli DocSpacen huoneessa "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Sinulle on osoitettu uusi rooli ${LetterLogoText}n huoneessa "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Lue lisää huoneen rooleista ja oikeuksista "Help Centerissä":"${HelpCenterUrl}".
 
@@ -1434,7 +1434,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Hei!
 
-Sinulle on annettu uusi käyttäjätyyppi DocSpacessa "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Sinulle on annettu uusi käyttäjätyyppi ${LetterLogoText}ssa "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Lue lisää käyttäjätyypeistä ja oikeuksista "Help Centerissä":"${HelpCenterUrl}".
 
@@ -1694,7 +1694,7 @@ $TrulyYours</value>
     <value>Vaadittu toimenpide: ${LetterLogoText} DocSpace -lompakkosi saldon automaattinen täydentäminen ei onnistu</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Roolisi DocSpace tekoälyagentissa on muuttunut</value>
+    <value>Roolisi ${LetterLogoText} tekoälyagentissa on muuttunut</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Uusi käyttäjä lisätty ${LetterLogoText} portaaliin</value>
@@ -1706,7 +1706,7 @@ $TrulyYours</value>
     <value>Roolisi Docspace-huoneessa on muuttunut</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>DocSpace käyttäjätyyppisi on muuttunut</value>
+    <value>${LetterLogoText} käyttäjätyyppisi on muuttunut</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Tervetuloa ${LetterLogoText} DocSpaceen!</value>

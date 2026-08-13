@@ -1956,7 +1956,7 @@ $TrulyYours</comment>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Hello!
 
-You are assigned a new role in the DocSpace AI agent "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+You are assigned a new role in the ${LetterLogoText} AI agent "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Learn more about room roles and permissions in "Help Center":"${HelpCenterUrl}".
 
@@ -1988,7 +1988,7 @@ The link is only valid for 7 days.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Hello!
 
-You are assigned a new role in the DocSpace room "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+You are assigned a new role in the ${LetterLogoText} room "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Learn more about room roles and permissions in "Help Center":"${HelpCenterUrl}".
 
@@ -1997,7 +1997,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Hello!
 
-You are assigned a new user type in DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+You are assigned a new user type in ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Learn more about user types and permissions in "Help Center":"${HelpCenterUrl}".
 
@@ -2311,7 +2311,7 @@ $TrulyYours</value>
     <value>You are invited to ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Your role in a DocSpace AI agent has changed</value>
+    <value>${LetterLogoText}: Your role in the AI agent has changed</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>New user added to ${LetterLogoText} portal</value>
@@ -2320,10 +2320,10 @@ $TrulyYours</value>
     <value>You’re invited to join ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Your role in a DocSpace room has changed</value>
+    <value>${LetterLogoText}: Your role in the room has changed</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Your DocSpace user type has changed</value>
+    <value>${LetterLogoText}: Your user type has changed</value>
   </data>
   <data name="subject_user_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText}!</value>

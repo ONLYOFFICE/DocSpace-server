@@ -1396,7 +1396,7 @@ Link jest ważny tylko przez 7 dni.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Witaj!
 
-Przypisano Ci nową rolę w pokoju DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Przypisano Ci nową rolę w pokoju ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Dowiedz się więcej o rolach i uprawnieniach w pokojach z Centrum pomocy "Help Center":"${HelpCenterUrl}".
 
@@ -1668,10 +1668,10 @@ $TrulyYours</value>
     <value>Otrzymano zaproszenie do ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Twoja rola w pokoju DocSpace uległa zmianie</value>
+    <value>Twoja rola w pokoju ${LetterLogoText} uległa zmianie</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Twój rodzaj użytkownika w DocSpace uległa zmianie</value>
+    <value>Twój rodzaj użytkownika w ${LetterLogoText} uległa zmianie</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Witaj w ${LetterLogoText} DocSpace!</value>
@@ -1686,7 +1686,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: Twój klucz API wygasł</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Twoja rola w agencie AI DocSpace uległa zmianie</value>
+    <value>Twoja rola w agencie AI ${LetterLogoText} uległa zmianie</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Witaj, $UserName!
@@ -1709,7 +1709,7 @@ Upewnij się, że automatyczne rozliczenia są wyłączone. Sprawdź status auto
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Witaj!
 
-Przypisano Ci nową rolę w agencie AI DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Przypisano Ci nową rolę w agencie AI ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Dowiedz się więcej o rolach i uprawnieniach pokoi w "Centrum pomocy":"${HelpCenterUrl}".
 

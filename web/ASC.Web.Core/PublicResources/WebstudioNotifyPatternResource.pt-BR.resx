@@ -1411,7 +1411,7 @@ O link só é válido por 7 dias.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Olá!
 
-Você recebeu uma nova função na sala do DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Você recebeu uma nova função na sala do ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Saiba mais sobre funções e permissões de sala em "Central de Ajuda":"${HelpCenterUrl}".
 
@@ -1420,7 +1420,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Olá!
 
-Um novo tipo de usuário foi atribuído a você no DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Um novo tipo de usuário foi atribuído a você no ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Saiba mais sobre tipos de usuários e permissões em "Central de Ajuda":"${HelpCenterUrl}".
 
@@ -1683,10 +1683,10 @@ $TrulyYours</value>
     <value>Você foi convidado a juntar-se a ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Sua função em uma sala do DocSpace mudou</value>
+    <value>Sua função em uma sala do ${LetterLogoText} mudou</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Seu tipo de usuário do DocSpace foi alterado</value>
+    <value>Seu tipo de usuário do ${LetterLogoText} foi alterado</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Bem-vindo ao ${LetterLogoText} DocSpace!</value>
@@ -1701,7 +1701,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: Sua chave API expirou</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Sua função em um agente de IA do DocSpace foi alterada</value>
+    <value>Sua função em um agente de IA do ${LetterLogoText} foi alterada</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Olá, $UserName!
@@ -1715,7 +1715,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Olá!
 
-Foi atribuída a você uma nova função no agente de IA do DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Foi atribuída a você uma nova função no agente de IA do ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Saiba mais sobre funções e permissões de sala na "Central de Ajuda":"${HelpCenterUrl}".
 

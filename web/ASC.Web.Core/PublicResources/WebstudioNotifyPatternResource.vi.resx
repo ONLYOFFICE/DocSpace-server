@@ -1396,7 +1396,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Xin chào!
 
-Bạn được chỉ định một vai trò mới trong tác nhân AI DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Bạn được chỉ định một vai trò mới trong tác nhân AI ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Hãy tìm hiểu thêm về vai trò và quyền hạn của phòng trong "Trung Tâm Hỗ Trợ":"${HelpCenterUrl}".
 
@@ -1428,7 +1428,7 @@ Liên kết chỉ có hiệu lực trong 7 ngày.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Xin chào!
 
-Bạn được chỉ định một vai trò mới trong phòng DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Bạn được chỉ định một vai trò mới trong phòng ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Hãy tìm hiểu thêm về vai trò và quyền hạn của phòng trong "Trung Tâm Hỗ Trợ":"${HelpCenterUrl}".
 
@@ -1437,7 +1437,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Xin chào!
 
-Bạn được chỉ định loại người dùng mới trong DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Bạn được chỉ định loại người dùng mới trong ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Hãy tìm hiểu thêm về loại người dùng và quyền hạn trong "Trung Tâm Hỗ Trợ":"${HelpCenterUrl}".
 
@@ -1697,7 +1697,7 @@ $TrulyYours</value>
     <value>Cần hành động: Không thể tự động nạp tiền vào số dư Ví trong DocSpace ${LetterLogoText} của bạn</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Vai trò của bạn trong tác nhân AI DocSpace đã thay đổi</value>
+    <value>Vai trò của bạn trong tác nhân AI ${LetterLogoText} đã thay đổi</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Đã thêm người dùng mới vào cổng ${LetterLogoText}</value>
@@ -1706,10 +1706,10 @@ $TrulyYours</value>
     <value>Bạn được mời tham gia ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Vai trò của bạn trong phòng DocSpace đã thay đổi</value>
+    <value>Vai trò của bạn trong phòng ${LetterLogoText} đã thay đổi</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Loại người dùng DocSpace của bạn đã thay đổi</value>
+    <value>Loại người dùng ${LetterLogoText} của bạn đã thay đổi</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Chào mừng bạn đến với ${LetterLogoText} DocSpace!</value>

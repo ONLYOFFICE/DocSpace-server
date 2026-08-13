@@ -1385,7 +1385,7 @@ $OrangeButton
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>こんにちは！
 
-DocSpaceルーム "${RoomTitle}":"${RoomUrl}" で新しい役割（${UserRole}）が割り当てられました。
+${LetterLogoText}ルーム "${RoomTitle}":"${RoomUrl}" で新しい役割（${UserRole}）が割り当てられました。
 
 ルームの役割と権限について詳しくは "ヘルプセンター":"${HelpCenterUrl}" をご覧ください。
 
@@ -1394,7 +1394,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>こんにちは！
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" で新しいユーザータイプが割り当てられました：${UserType}。
+${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" で新しいユーザータイプが割り当てられました：${UserType}。
 
 ユーザータイプと権限について詳しくは "ヘルプセンター":"${HelpCenterUrl}" をご覧ください。
 
@@ -1653,10 +1653,10 @@ $TrulyYours</value>
     <value>${__VirtualRootHost}への招待が届きました</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>DocSpaceルームでのあなたの役割が変更されました</value>
+    <value>${LetterLogoText}ルームでのあなたの役割が変更されました</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>あなたのDocSpaceユーザータイプが変更されました</value>
+    <value>あなたの${LetterLogoText}ユーザータイプが変更されました</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceへようこそ！</value>
@@ -1674,7 +1674,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpaceが削除されました</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>DocSpace AIエージェントにおけるあなたの役割が変更されました</value>
+    <value>${LetterLogoText} AIエージェントにおけるあなたの役割が変更されました</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>こんにちは、$UserName！
@@ -1688,7 +1688,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>こんにちは！
 
-DocSpace AIエージェント "${RoomTitle}":"${RoomUrl}" に新しい役割が割り当てられました：${UserRole}。
+${LetterLogoText} AIエージェント "${RoomTitle}":"${RoomUrl}" に新しい役割が割り当てられました：${UserRole}。
 
 ルームの役割と権限の詳細については、 "ヘルプセンター":"${HelpCenterUrl}" をご覧ください。
 

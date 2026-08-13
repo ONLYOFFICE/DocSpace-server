@@ -1404,7 +1404,7 @@ $OrangeButton
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Здраво!
 
-Додељена вам је нова улога у просторији DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Додељена вам је нова улога у просторији ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Више о улогама и дозволама у просторијама можете сазнати у "Центру за помоћ":"${HelpCenterUrl}".
 
@@ -1413,7 +1413,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Здраво!
 
-Додељен вам је нови тип корисника у DocSpace-у "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Додељен вам је нови тип корисника у ${LetterLogoText}-у "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Више о типовима корисника и дозволама можете сазнати у "Центру за помоћ":"${HelpCenterUrl}".
 
@@ -1676,10 +1676,10 @@ $TrulyYours</value>
     <value>Позвани сте да се придружите ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Ваша улога у просторији DocSpace је промењена</value>
+    <value>Ваша улога у просторији ${LetterLogoText} је промењена</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Ваш тип корисника у DocSpace -у је промењен</value>
+    <value>Ваш тип корисника у ${LetterLogoText} -у је промењен</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Добродошли у ${LetterLogoText} DocSpace!</value>
@@ -1694,7 +1694,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: Ваш API кључ је истекао</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Ваша улога у DocSpace AI агенту је промењена</value>
+    <value>Ваша улога у ${LetterLogoText} AI агенту је промењена</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Здраво, $UserName!
@@ -1708,7 +1708,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Здраво!
 
-Додељена вам је нова улога у DocSpace ВИ агенту "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Додељена вам је нова улога у ${LetterLogoText} ВИ агенту "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Сазнајте више о улогама и дозволама собе у "Центру за помоћ":"${HelpCenterUrl}".
 

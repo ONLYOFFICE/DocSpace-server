@@ -1448,7 +1448,7 @@ $OrangeButton
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>مرحبًا!
 
-تم تعيين دور جديد لكم في غرفة DocSpace "${RoomTitle}":"${RoomUrl}"، والدور هو: ${UserRole}.
+تم تعيين دور جديد لكم في غرفة ${LetterLogoText} "${RoomTitle}":"${RoomUrl}"، والدور هو: ${UserRole}.
 
 يمكنكم معرفة المزيد حول الأدوار والصلاحيات في الغرف من خلال "مركز المساعدة":"${HelpCenterUrl}".
 
@@ -1457,7 +1457,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>مرحبًا!
 
-تم تعيين نوع مستخدم جديد لكم في DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"، والنوع هو: ${UserType}.
+تم تعيين نوع مستخدم جديد لكم في ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}"، والنوع هو: ${UserType}.
 
 يمكنكم معرفة المزيد حول أنواع المستخدمين والصلاحيات من خلال "مركز المساعدة":"${HelpCenterUrl}".
 
@@ -1720,10 +1720,10 @@ $TrulyYours</value>
     <value>أنت مدعو للانضمام ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>تم تغيير دوركم في إحدى غرف DocSpace</value>
+    <value>تم تغيير دوركم في إحدى غرف ${LetterLogoText}</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>تم تغيير نوع المستخدم الخاص بكم في DocSpace</value>
+    <value>تم تغيير نوع المستخدم الخاص بكم في ${LetterLogoText}</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>مرحبا بكم في ${LetterLogoText} DocSpace!</value>
@@ -1738,7 +1738,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: انتهت صلاحية مفتاح API الخاص بك</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>تم تغيير دورك في وكيل ذكاء اصطناعي في DocSpace</value>
+    <value>تم تغيير دورك في وكيل ذكاء اصطناعي في ${LetterLogoText}</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>مرحبًا، $UserName!
@@ -1752,7 +1752,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>مرحبًا!
 
-لقد تم تعيينك في دور جديد في وكيل الذكاء الاصطناعي في DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+لقد تم تعيينك في دور جديد في وكيل الذكاء الاصطناعي في ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 تعرف على المزيد حول أدوار الغرف وأذوناتها في "مركز المساعدة":"${HelpCenterUrl}".
 

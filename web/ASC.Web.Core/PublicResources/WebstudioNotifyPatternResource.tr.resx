@@ -1388,7 +1388,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Merhaba!
 
-DocSpace Yapay Zekâ Ajanı "${RoomTitle}":"${RoomUrl}" içinde size yeni bir rol atandı: ${UserRole}.
+${LetterLogoText} Yapay Zekâ Ajanı "${RoomTitle}":"${RoomUrl}" içinde size yeni bir rol atandı: ${UserRole}.
 
 Oda rolleri ve izinleri hakkında daha fazla bilgi edinmek için "Yardım Merkezi":"${HelpCenterUrl}" sayfasını ziyaret edebilirsiniz.
 
@@ -1420,7 +1420,7 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Merhaba!
 
-"${RoomTitle}":"${RoomUrl}" adlı DocSpace odasında size yeni bir rol atandı: ${UserRole}.
+"${RoomTitle}":"${RoomUrl}" adlı ${LetterLogoText} odasında size yeni bir rol atandı: ${UserRole}.
 
 Oda rolleri ve izinleri hakkında daha fazla bilgiyi "Yardım Merkezi":"${HelpCenterUrl}" nde bulabilirsiniz.
 
@@ -1429,7 +1429,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Merhaba!
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" içinde size yeni bir kullanıcı türü atandı: ${UserType}.
+${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" içinde size yeni bir kullanıcı türü atandı: ${UserType}.
 
 Kullanıcı türleri ve izinler hakkında daha fazla bilgiyi "Yardım Merkezi":"${HelpCenterUrl}" nde bulabilirsiniz.
 
@@ -1690,7 +1690,7 @@ $TrulyYours</value>
     <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace cüzdan bakiyeniz otomatik olarak yüklenemedi</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>DocSpace Yapay Zekâ Ajanındaki rolünüz değişti</value>
+    <value>${LetterLogoText} Yapay Zekâ Ajanındaki rolünüz değişti</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>${LetterLogoText} portalına yeni kullanıcı eklendi</value>
@@ -1699,10 +1699,10 @@ $TrulyYours</value>
     <value>Davetlisiniz: ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Bir DocSpace odasındaki rolünüz değişti</value>
+    <value>Bir ${LetterLogoText} odasındaki rolünüz değişti</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>DocSpace kullanıcı türünüz değişti</value>
+    <value>${LetterLogoText} kullanıcı türünüz değişti</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>${LetterLogoText} DocSpace'e hoş geldiniz!</value>
