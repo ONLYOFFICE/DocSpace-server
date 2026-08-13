@@ -1223,7 +1223,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Γεια σας!
 
-Σας προσκαλούμε να συμμετάσχετε σε έναν εκπρόσωπο DocSpace στο "${__VirtualRootPath}":"${__VirtualRootPath}". Αποδεχτείτε την πρόσκληση κάνοντας κλικ στον σύνδεσμο:
+Σας προσκαλούμε να συμμετάσχετε σε έναν εκπρόσωπο στο "${__VirtualRootPath}":"${__VirtualRootPath}". Αποδεχτείτε την πρόσκληση κάνοντας κλικ στον σύνδεσμο:
 
 $OrangeButton
 
@@ -1241,11 +1241,11 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Εγγραφείτε στο &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Εγγραφείτε στο &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Σας προσκαλούμε να συμμετάσχετε στο DocSpace του ${LetterLogoText} στη διεύθυνση &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Αποδεχτείτε την πρόσκληση κάνοντας κλικ στον σύνδεσμο:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Σας προσκαλούμε να συμμετάσχετε στο ${LetterLogoText} στη διεύθυνση &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Αποδεχτείτε την πρόσκληση κάνοντας κλικ στον σύνδεσμο:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1687,13 +1687,13 @@ $TrulyYours</value>
     <value>Ανακαλύψτε την επαγγελματική συνδρομή του ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>Εγγραφείτε στο ${LetterLogoText} DocSpace</value>
+    <value>Εγγραφείτε στο ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>Έχετε προσκληθεί στον εκπρόσωπο DocSpace ${LetterLogoText}</value>
+    <value>Έχετε προσκληθεί στον εκπρόσωπο ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>Εγγραφείτε στο ${LetterLogoText} DocSpace</value>
+    <value>Εγγραφείτε στο ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: ολοκληρώστε την εγγραφή</value>
@@ -1714,7 +1714,7 @@ $TrulyYours</value>
     <value>Εγγραφείτε στο ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>Είστε προσκεκλημένοι στην δωμάτιο DocSpace του ${LetterLogoText}</value>
+    <value>Είστε προσκεκλημένοι στην δωμάτιο του ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>Αποτυχία αυτόματης δημιουργίας αντιγράφου ασφαλείας για το DocSpace σας</value>

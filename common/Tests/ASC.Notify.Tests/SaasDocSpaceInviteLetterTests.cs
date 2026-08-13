@@ -34,54 +34,48 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The AI agent invitation for someone who already has an account
-/// (<c>saas_agent_invite_existing_user</c>). Unlike the sign-up invitations it names both the inviter and
-/// the agent, so it is the one letter that exercises the <c>__AuthorName</c> and <c>$Message</c> tags.
+/// The invitation to the portal itself (<c>saas_docspace_invite</c>). Unlike its room and agent
+/// siblings this one is still HTML table markup rather than textile.
 /// </summary>
-public class SaasAgentInviteExistingUserLetterTests : LetterTestBase
+public class SaasDocSpaceInviteLetterTests : LetterTestBase
 {
-    private const string AgentTitle = "Agent title";
+    /// <summary>The confirmation link, passed into <c>Init</c> by the caller.</summary>
+    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/LinkInvite");
 
-    /// <summary>The agent page, passed into <c>Init</c> by the caller.</summary>
-    private static string AgentUrl => LetterEnvironment.PortalLink("ai/agents/1");
-
-    protected override string LetterId => "saas_agent_invite_existing_user";
+    protected override string LetterId => "saas_docspace_invite";
 
     protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_agent_invite_existing_user,
-        () => WebstudioNotifyPatternResource.pattern_saas_agent_invite_existing_user);
+        () => WebstudioNotifyPatternResource.subject_saas_docspace_invite,
+        () => WebstudioNotifyPatternResource.pattern_saas_docspace_invite);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;
 
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>SaasAgentInviteExistingUserNotifyAction.Init</c>.</summary>
+    /// <summary>Mirrors <c>SaasDocSpaceInviteNotifyAction.Init</c>.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
         return
         [
-            OrangeButton("ButtonJoinAgent", culture, AgentUrl),
-            new TagValue(CommonTags.Message, AgentTitle),
-            new TagValue(CommonTags.InviteLink, AgentUrl)
+            OrangeButton("ButtonAccept", culture, ConfirmUrl),
+            new TagValue(CommonTags.InviteLink, ConfirmUrl)
         ];
     }
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
-        letter.Body.Should().Contain(Resource("ButtonJoinAgent", culture))
-            .And.Contain(AgentUrl)
-            .And.Contain(AgentTitle)
-            .And.Contain(AuthorName)
+        letter.Body.Should().Contain(Resource("ButtonAccept", culture))
+            .And.Contain(ConfirmUrl)
             .And.Contain(LetterEnvironment.PortalUrl);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter)
     {
-        letter.Subject.Should().Be($"You're invited to the {LetterEnvironment.LogoText} AI agent");
+        var logoText = LetterEnvironment.LogoText;
+
+        letter.Subject.Should().Be($"Join {logoText}");
 
         letter.Body.Should().Contain("Hello!")
-            .And.Contain($"{AuthorName} invited you to join the AI agent");
+            .And.Contain($"You are invited to join {logoText} at")
+            .And.Contain("Accept the invitation by clicking the link:");
     }
 }

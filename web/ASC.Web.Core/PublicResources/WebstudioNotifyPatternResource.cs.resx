@@ -1201,7 +1201,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Dobrý den!
 
-Jste pozváni k připojení se k agentovi DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Pozvání přijměte kliknutím na odkaz:
+Jste pozváni k připojení se k agentovi na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Pozvání přijměte kliknutím na odkaz:
 
 $OrangeButton
 
@@ -1219,11 +1219,11 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Připojte se k &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Připojte se k &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Dobrý den!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Jste zváni, abyste se připojili k ${LetterLogoText} DocSpace na adrese &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Přijměte pozvánku kliknutím na odkaz:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Jste zváni, abyste se připojili k ${LetterLogoText} na adrese &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Přijměte pozvánku kliknutím na odkaz:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1650,13 +1650,13 @@ $TrulyYours</value>
     <value>Objevte obchodní předplatné ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>Připojit DocSpace ${LetterLogoText}</value>
+    <value>Připojit ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>Jste pozváni do agenta DocSpace ${LetterLogoText}</value>
+    <value>Jste pozváni do agenta ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>Připojte se k ${LetterLogoText} DocSpace</value>
+    <value>Připojte se k ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: kompletní registrace</value>
@@ -1677,7 +1677,7 @@ $TrulyYours</value>
     <value>Připojte se k ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>Jste zváni do místnosti ${LetterLogoText} DocSpace</value>
+    <value>Jste zváni do místnosti ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>Automatické zálohování DocSpace se nezdařilo</value>

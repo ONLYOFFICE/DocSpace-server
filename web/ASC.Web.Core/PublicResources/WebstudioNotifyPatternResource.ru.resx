@@ -1223,7 +1223,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Здравствуйте!
 
-Вас приглашают присоединиться к агенту DocSpace по адресу "${__VirtualRootPath}":"${__VirtualRootPath}". Примите приглашение, перейдя по ссылке:
+Вас приглашают присоединиться к агенту по адресу "${__VirtualRootPath}":"${__VirtualRootPath}". Примите приглашение, перейдя по ссылке:
 
 $OrangeButton
 
@@ -1241,11 +1241,11 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Присоединяйтесь к &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Присоединяйтесь к &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Здравствуйте!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Вас пригласили в ${LetterLogoText} DocSpace &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Примите приглашение, перейдя по ссылке:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Вас пригласили в ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Примите приглашение, перейдя по ссылке:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1687,13 +1687,13 @@ $TrulyYours</value>
     <value>Узнайте о бизнес-подписке на ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>Вас пригласили в агент ${LetterLogoText} DocSpace</value>
+    <value>Вас пригласили в агент ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+    <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: пройдите регистрацию</value>
@@ -1714,7 +1714,7 @@ $TrulyYours</value>
     <value>Присоединяйтесь к ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>Вас пригласили в комнату ${LetterLogoText} DocSpace</value>
+    <value>Вас пригласили в комнату ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>Не удалось выполнить автоматическое резервное копирование для вашего DocSpace</value>

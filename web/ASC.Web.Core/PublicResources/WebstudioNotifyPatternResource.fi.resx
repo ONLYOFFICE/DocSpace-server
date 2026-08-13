@@ -1221,7 +1221,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Hei!
 
-Sinut on kutsuttu liittymään DocSpace agenttiin "${__VirtualRootPath}":"${__VirtualRootPath}". Hyväksy kutsu klikkaamalla linkkiä:
+Sinut on kutsuttu liittymään agenttiin "${__VirtualRootPath}":"${__VirtualRootPath}". Hyväksy kutsu klikkaamalla linkkiä:
 
 $OrangeButton
 
@@ -1239,11 +1239,11 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Liity &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;DocSpaceen&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Liity &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;en&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hei!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sinut on kutsuttu liittymään ${LetterLogoText} DocSpaceen &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Hyväksy kutsu klikkaamalla linkkiä:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sinut on kutsuttu liittymään ${LetterLogoText}en &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Hyväksy kutsu klikkaamalla linkkiä:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1685,13 +1685,13 @@ $TrulyYours</value>
     <value>Tutustu ${LetterLogoText} DocSpace-yritystilaukseen</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>Liity ${LetterLogoText} DocSpaceen</value>
+    <value>Liity ${LetterLogoText}en</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>Sinut on kutsuttu ${LetterLogoText} DocSpace agenttiin</value>
+    <value>Sinut on kutsuttu ${LetterLogoText} agenttiin</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>Liity ${LetterLogoText} DocSpaceen</value>
+    <value>Liity ${LetterLogoText}en</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: viimeistele rekisteröinti</value>
@@ -1712,7 +1712,7 @@ $TrulyYours</value>
     <value>Liity ${LetterLogoText}en</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>Sinut on kutsuttu ${LetterLogoText} DocSpace-huoneeseen</value>
+    <value>Sinut on kutsuttu ${LetterLogoText}-huoneeseen</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>DocSpacesi automaattinen varmuuskopiointi epäonnistui</value>

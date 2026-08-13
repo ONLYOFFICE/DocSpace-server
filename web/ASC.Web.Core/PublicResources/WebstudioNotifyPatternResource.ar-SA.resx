@@ -1253,7 +1253,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>مرحباً!
 
-أنتم مدعوون للانضمام إلى وكيل DocSpace في "${__VirtualRootPath}":"${__VirtualRootPath}". اقبلوا الدعوة بالنقر على الرابط:
+أنتم مدعوون للانضمام إلى وكيل في "${__VirtualRootPath}":"${__VirtualRootPath}". اقبلوا الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -1271,11 +1271,11 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;انضم إل&lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;انضم إل&lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;مرحبا!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;أنت مدعو للانضمام إلى ${LetterLogoText} DocSpace في &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. اقبل الدعوة بالنقر على الرابط:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;أنت مدعو للانضمام إلى ${LetterLogoText} في &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. اقبل الدعوة بالنقر على الرابط:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1705,13 +1705,13 @@ $TrulyYours</value>
     <value>اكتشف اشتراك الأعمال في ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>انضمام إلى DocSpace لـ ${LetterLogoText}</value>
+    <value>انضمام إلى ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>أنتم مدعوون إلى وكيل DocSpace لـ ${LetterLogoText}</value>
+    <value>أنتم مدعوون إلى وكيل ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>انضم إلى ${LetterLogoText} DocSpace</value>
+    <value>انضم إلى ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: أكمل التسجيل</value>
@@ -1732,7 +1732,7 @@ $TrulyYours</value>
     <value>انضم إلى ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>أنت مدعو إلى غرفة ${LetterLogoText} DocSpace</value>
+    <value>أنت مدعو إلى غرفة ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>فشل النسخ الاحتياطي التلقائي لـ DocSpace الخاص بكم</value>

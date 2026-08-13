@@ -1227,7 +1227,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Olá!
 
-Você está convidado a participar de um agente DocSpace AI em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
+Você está convidado a participar de um agente AI em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
 
 $OrangeButton
 
@@ -1236,11 +1236,11 @@ Após clicar no link do convite, defina uma nova palavra-passe para a sua conta.
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Junte-se ao &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Junte-se ao &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Olá!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Foi convidado para juntar-se ao ${LetterLogoText} DocSpace em &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Para aceitar o convite clique no link:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Foi convidado para juntar-se ao ${LetterLogoText} em &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Para aceitar o convite clique no link:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1682,13 +1682,13 @@ $TrulyYours</value>
     <value>Descubra a subscrição business do ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>Junte-se ao DocSpace ${LetterLogoText}</value>
+    <value>Junte-se ao ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>Você foi convidado para o agente DocSpace ${LetterLogoText}</value>
+    <value>Você foi convidado para o agente ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>Junte-se ao ${LetterLogoText} DocSpace</value>
+    <value>Junte-se ao ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: registro completo</value>
@@ -1709,7 +1709,7 @@ $TrulyYours</value>
     <value>Junte-se ao ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>Você está convidado para a sala ${LetterLogoText} DocSpace</value>
+    <value>Você está convidado para a sala ${LetterLogoText}</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>Falha no backup automático do seu DocSpace</value>
@@ -1771,7 +1771,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Olá!
 
-Foi convidado para se juntar a um agente de IA do DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando na ligação:
+Foi convidado para se juntar a um agente de IA em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando na ligação:
 
 $OrangeButton
 

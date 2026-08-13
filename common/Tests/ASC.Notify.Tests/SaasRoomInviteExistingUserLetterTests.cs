@@ -79,7 +79,7 @@ public class SaasRoomInviteExistingUserLetterTests : LetterTestBase
 
     protected override void AssertDefaultCultureText(RenderedLetter letter)
     {
-        letter.Subject.Should().Be($"You're invited to the {LetterEnvironment.LogoText} DocSpace room");
+        letter.Subject.Should().Be($"You're invited to the {LetterEnvironment.LogoText} room");
 
         letter.Body.Should().Contain("Hello!")
             .And.Contain($"{AuthorName} invited you to join the room");

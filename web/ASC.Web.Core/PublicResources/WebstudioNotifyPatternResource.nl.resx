@@ -1202,7 +1202,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Hallo!
 
-U bent uitgenodigd om deel te nemen aan een DocSpace agent op "${__VirtualRootPath}":"${__VirtualRootPath}". Accepteer de uitnodiging door op de link te klikken:
+U bent uitgenodigd om deel te nemen aan een agent op "${__VirtualRootPath}":"${__VirtualRootPath}". Accepteer de uitnodiging door op de link te klikken:
 
 $OrangeButton
 
@@ -1220,11 +1220,11 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Aanmelden bij &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Aanmelden bij &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hallo!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;U bent uitgenodigd om lid te worden van ${LetterLogoText} DocSpace op &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accepteer de uitnodiging door op de link te klikken:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;U bent uitgenodigd om lid te worden van ${LetterLogoText} op &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accepteer de uitnodiging door op de link te klikken:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1654,13 +1654,13 @@ $TrulyYours</value>
     <value>Ontdek het zakelijk abonnement van ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>Word lid van ${LetterLogoText} DocSpace</value>
+    <value>Word lid van ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>U bent uitgenodigd voor de ${LetterLogoText} DocSpace agent</value>
+    <value>U bent uitgenodigd voor de ${LetterLogoText} agent</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>Aanmelden bij ${LetterLogoText} DocSpace</value>
+    <value>Aanmelden bij ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: registratie voltooien</value>
@@ -1681,7 +1681,7 @@ $TrulyYours</value>
     <value>Aanmelden bij ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>U bent uitgenodigd voor de ${LetterLogoText} DocSpace kamer</value>
+    <value>U bent uitgenodigd voor de ${LetterLogoText} kamer</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>Automatische back-up voor uw DocSpace is mislukt</value>

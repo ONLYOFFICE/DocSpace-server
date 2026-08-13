@@ -1216,7 +1216,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Merhaba!
 
-"${__VirtualRootPath}":"${__VirtualRootPath}" adresindeki bir DocSpace ajanına katılmak için davet edildiniz. Daveti kabul etmek için aşağıdaki bağlantıya tıklayın:
+"${__VirtualRootPath}":"${__VirtualRootPath}" adresindeki bir ajanına katılmak için davet edildiniz. Daveti kabul etmek için aşağıdaki bağlantıya tıklayın:
 
 $OrangeButton
 
@@ -1234,11 +1234,11 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;&lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace’e katılın&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;&lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;’e katılın&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Merhaba!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; konumunda ${LetterLogoText} DocSpace'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; konumunda ${LetterLogoText}'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1681,13 +1681,13 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace’in işletme aboneliğini keşfedin</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace’e katıl</value>
+    <value>${LetterLogoText}’e katıl</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace ajanına davet edildiniz</value>
+    <value>${LetterLogoText} ajanına davet edildiniz</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace’e katılın</value>
+    <value>${LetterLogoText}’e katılın</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: kaydı tamamlayın</value>
@@ -1708,7 +1708,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}’e katılın</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace odasına davetlisiniz</value>
+    <value>${LetterLogoText} odasına davetlisiniz</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>DocSpace’iniz için otomatik yedekleme başarısız oldu</value>
