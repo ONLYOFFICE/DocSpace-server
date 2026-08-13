@@ -731,20 +731,20 @@ If you need help, browse our Help Center or ask our support team.
 $TrulyYours</comment>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Join &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;You are invited to &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;You are invited to join ${LetterLogoText} DocSpace at &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accept the invitation by clicking the link:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;You are invited to join ${LetterLogoText} at &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accept the invitation by clicking the link:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-    <comment>Join ${LetterLogoText} DocSpace
+    <comment>Join ${LetterLogoText}
 
 Hello!
 
-You are invited to join ${LetterLogoText} DocSpace at ${__VirtualRootPath}. Accept the invitation by clicking the link:
+You are invited to join ${LetterLogoText} at ${__VirtualRootPath}. Accept the invitation by clicking the link:
 
 $OrangeButton
 
@@ -915,20 +915,20 @@ If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support t
 $TrulyYours</comment>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Join &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;You are invited to &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;You are invited to join ${LetterLogoText} DocSpace at &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accept the invitation by clicking the link:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;You are invited to join ${LetterLogoText} at &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accept the invitation by clicking the link:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-    <comment>Join ${LetterLogoText} DocSpace
+    <comment>Join ${LetterLogoText}
 
 Hello!
 
-You are invited to join ${LetterLogoText} DocSpace at ${__VirtualRootPath}. Accept the invitation by clicking the link:
+You are invited to join ${LetterLogoText} at ${__VirtualRootPath}. Accept the invitation by clicking the link:
 
 $OrangeButton
 
@@ -1248,20 +1248,20 @@ If you need help, browse our Help Center or ask our support team.
 $TrulyYours</comment>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Join &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;You are invited to &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;You are invited to join ${LetterLogoText} DocSpace at &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accept the invitation by clicking the link:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;You are invited to join ${LetterLogoText} at &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accept the invitation by clicking the link:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-    <comment>Join ${LetterLogoText} DocSpace
+    <comment>Join ${LetterLogoText}
 
 Hello!
 
-You are invited to join ${LetterLogoText} DocSpace at ${__VirtualRootPath}. Accept the invitation by clicking the link:
+You are invited to join ${LetterLogoText} at ${__VirtualRootPath}. Accept the invitation by clicking the link:
 
 $OrangeButton
 
@@ -2258,20 +2258,20 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Join &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;You are invited to &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;You are invited to join ${LetterLogoText} DocSpace at &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accept the invitation by clicking the link:&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;You are invited to join ${LetterLogoText} at &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Accept the invitation by clicking the link:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-    <comment>Join ${LetterLogoText} DocSpace
+    <comment>Join ${LetterLogoText}
 
 Hello!
 
-You are invited to join ${LetterLogoText} DocSpace at ${__VirtualRootPath}. Accept the invitation by clicking the link:
+You are invited to join ${LetterLogoText} at ${__VirtualRootPath}. Accept the invitation by clicking the link:
 
 $OrangeButton
 
@@ -2614,7 +2614,7 @@ $TrulyYours</value>
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
-    <value>Join ${LetterLogoText} DocSpace</value>
+    <value>You are invited to ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
@@ -2632,7 +2632,7 @@ $TrulyYours</value>
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>Join ${LetterLogoText} DocSpace</value>
+    <value>You are invited to ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
@@ -2680,7 +2680,7 @@ $TrulyYours</value>
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_opensource_user_activation_v1" xml:space="preserve">
-    <value>Join ${LetterLogoText} DocSpace</value>
+    <value>You are invited to ${LetterLogoText}</value>
   </data>
   <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
@@ -2815,7 +2815,7 @@ $TrulyYours</value>
     <value>You're invited to the ${LetterLogoText} DocSpace room</value>
   </data>
   <data name="subject_saas_user_activation_v1" xml:space="preserve">
-    <value>Join ${LetterLogoText} DocSpace</value>
+    <value>You are invited to ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
