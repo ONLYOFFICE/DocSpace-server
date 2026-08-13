@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Inizia</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Vai ai Servizi</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Vai alle impostazioni del Portafoglio</value>
   </data>
@@ -1572,7 +1569,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Rimozione dei dati utente non riuscita</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Azione richiesta: impossibile rinnovare automaticamente il piano di servizio nel tuo DocSpace di ${LetterLogoText}</value>
+    <value>Azione richiesta: impossibile rinnovare automaticamente il piano di servizio nel tuo ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Richiesta licenza Enterprise</value>

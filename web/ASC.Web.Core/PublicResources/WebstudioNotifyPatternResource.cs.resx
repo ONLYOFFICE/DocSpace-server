@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Začněte</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Přejděte do části Služby</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Přejděte do nastavení peněženky</value>
   </data>

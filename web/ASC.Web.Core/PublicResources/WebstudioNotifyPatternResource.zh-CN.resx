@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>开始使用</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>前往服务</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>前往钱包设置</value>
   </data>

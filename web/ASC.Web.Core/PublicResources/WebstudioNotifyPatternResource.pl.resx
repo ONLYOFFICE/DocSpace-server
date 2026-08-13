@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Rozpocznij</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Przejdź do usług</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Przejdź do ustawień portfela</value>
   </data>
@@ -1563,7 +1560,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Usuwanie danych użytkownika nie powiodło się</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Wymagane działanie: Nie udało się automatycznie odnowić planu w ${LetterLogoText} DocSpace</value>
+    <value>Wymagane działanie: Nie udało się automatycznie odnowić planu w ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Wniosek o licencję Enterprise</value>

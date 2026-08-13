@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Aloita</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Mene Palveluihin</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Mene Lompakon asetuksiin</value>
   </data>
@@ -1595,7 +1592,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}.Käyttäjätietojen poisto epäonnistui</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Tarvittava toimenpide: Palvelusuunnitelmaa ei voi uusia automaattisesti DocSpacessasi ${LetterLogoText}</value>
+    <value>Tarvittava toimenpide: Palvelusuunnitelmaa ei voi uusia automaattisesti ${LetterLogoText}ssasi</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Yrityslisenssipyyntö</value>

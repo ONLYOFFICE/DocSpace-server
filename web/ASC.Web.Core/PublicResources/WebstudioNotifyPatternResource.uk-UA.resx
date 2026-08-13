@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Почати</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Перейти до сервісів</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Перейти до параметрів гаманця</value>
   </data>
@@ -1598,7 +1595,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Не вдалося видалити дані користувача</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Потрібна дія: не вдається автоматично поновити сервісний план у вашому ${LetterLogoText} DocSpace</value>
+    <value>Потрібна дія: не вдається автоматично поновити сервісний план у вашому ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Запит ліцензії підприємства</value>

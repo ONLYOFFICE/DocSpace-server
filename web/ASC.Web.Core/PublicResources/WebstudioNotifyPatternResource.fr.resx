@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Commencer</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Aller aux Services</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Aller dans les paramètres de Wallet</value>
   </data>
@@ -1572,7 +1569,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. La suppression des données utilisateur a échoué</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Action requise : Impossible de renouveler automatiquement le plan de service dans votre ${LetterLogoText} DocSpace</value>
+    <value>Action requise : Impossible de renouveler automatiquement le plan de service dans votre ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Demande de licence Enterprise</value>

@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Започните</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Иди на услуге</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Иди на подешавање новчаника</value>
   </data>
@@ -1571,7 +1568,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Уклањање корисничких података није успело</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Потребна акција: Није могућеautomatski обновити план услуге у вашем ${LetterLogoText} DocSpace</value>
+    <value>Потребна акција: Није могућеautomatski обновити план услуге у вашем ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Захтев за лиценцу предузец́а</value>

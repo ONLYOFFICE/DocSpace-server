@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>시작하기</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>서비스로 이동하기</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>지갑 설정으로 이동하기</value>
   </data>
@@ -1592,7 +1589,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. 사용자 데이터 삭제에 실패했습니다</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>조치가 필요합니다: 고객님의 ${LetterLogoText} DocSpace에서 서비스 플랜을 자동으로 갱신할 수 없습니다</value>
+    <value>조치가 필요합니다: 고객님의 ${LetterLogoText}에서 서비스 플랜을 자동으로 갱신할 수 없습니다</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>엔터프라이즈 라이선스 요청</value>

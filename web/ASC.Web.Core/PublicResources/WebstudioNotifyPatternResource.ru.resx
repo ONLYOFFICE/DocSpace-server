@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Начать</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Перейти к Сервисам</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Перейти к настройкам кошелька</value>
   </data>
@@ -1597,7 +1594,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Не удалось выполнить удаление данных пользователя</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Необходимое действие: невозможно автоматически продлить тарифный план в вашем ${LetterLogoText} DocSpace</value>
+    <value>Необходимое действие: невозможно автоматически продлить тарифный план в вашем ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Запрос лицензии на версию Enterprise</value>

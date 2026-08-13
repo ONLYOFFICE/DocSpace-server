@@ -485,15 +485,6 @@ namespace ASC.Web.Core.PublicResources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Go to Services.
-        /// </summary>
-        public static string ButtonGoToServices {
-            get {
-                return ResourceManager.GetString("ButtonGoToServices", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Go to Wallet settings.
         /// </summary>
         public static string ButtonGoToWalletSettings {
@@ -1564,9 +1555,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///We’re reaching out to inform you that the automatic renewal of your purchased service plan couldn’t be completed.
-        ///
-        ///We kindly ask you to manually renew your current service plan (or purchase a new one).
+        ///We’re reaching out to inform you that the automatic renewal of your purchased tariff plan or services couldn’t be completed. We kindly ask you to renew it manually.
         ///
         ///$OrangeButton
         ///
@@ -2769,7 +2758,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Action required: Unable to auto-renew the service plan in your ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Action required: Unable to auto-renew the purchased services in your ${LetterLogoText}.
         /// </summary>
         public static string subject_renew_subscription_error {
             get {

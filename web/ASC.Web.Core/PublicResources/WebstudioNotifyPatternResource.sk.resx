@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Začnite používať</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Prejsť na Služby</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Prejsť na Nastavenia peňaženky</value>
   </data>
@@ -1597,7 +1594,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Odstránenie používateľských údajov zlyhalo</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Vyžaduje sa akcia: Nie je možné automaticky obnoviť servisný plán vo vašom ${LetterLogoText} DocSpace</value>
+    <value>Vyžaduje sa akcia: Nie je možné automaticky obnoviť servisný plán vo vašom ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Žiadosť o podnikovú licenciu</value>

@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Սկսել</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Անցնել՝ ծառայություններ</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Անցնել դրամապանակի կարգավորումներ</value>
   </data>
@@ -1566,7 +1563,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}: Օգտատիրոջ տվյալների հեռացումը ձախողվեց</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով երկարաձգել սպասարկման սակագինը ձեր ${LetterLogoText} DocSpace-ում։</value>
+    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով երկարաձգել սպասարկման սակագինը ձեր ${LetterLogoText}-ում։</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Ձեռնարկության լիցենզիայի հարցում</value>

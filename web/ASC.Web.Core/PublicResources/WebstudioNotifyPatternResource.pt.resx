@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Iniciar</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Ir para Serviços</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Aceda às Definições da Carteira</value>
   </data>
@@ -1590,7 +1587,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. A remoção de dados do utilizador falhou</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Ação necessária: Não é possível renovar automaticamente o plano de serviço no seu ${LetterLogoText} DocSpace</value>
+    <value>Ação necessária: Não é possível renovar automaticamente o plano de serviço no seu ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Pedido de licença Enterprise</value>

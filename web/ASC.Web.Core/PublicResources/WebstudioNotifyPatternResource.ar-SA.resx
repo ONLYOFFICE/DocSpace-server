@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>ابدء</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>انتقل إلى الخدمات</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>انتقل إلى إعدادات المحفظة</value>
   </data>
@@ -1615,7 +1612,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. فشلت إزالة بيانات المستخدم</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>الإجراء المطلوب: غير قادر على تجديد خطة الخدمة تلقائيًا في ${LetterLogoText} DocSpace</value>
+    <value>الإجراء المطلوب: غير قادر على تجديد خطة الخدمة تلقائيًا في ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>طلب ترخيص المؤسسة</value>

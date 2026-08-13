@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Začni</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Pojdi na Storitve</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Pojdi v nastavitve Denarnice</value>
   </data>
@@ -1597,7 +1594,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Odstranjevanje uporabniških podatkov ni uspelo</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Zahtevano dejanje: Samodejno podaljšanje naročniškega paketa v vašem ${LetterLogoText} DocSpace</value>
+    <value>Zahtevano dejanje: Samodejno podaljšanje naročniškega paketa v vašem ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Zahteva za licenco podjetja</value>

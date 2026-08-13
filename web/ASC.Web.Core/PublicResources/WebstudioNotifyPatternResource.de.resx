@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Loslegen</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Zu den Diensten</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Zu den Wallet-Einstellungen</value>
   </data>
@@ -1569,7 +1566,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Die Entfernung der Benutzerdaten ist fehlgeschlagen</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Erforderliche Aktion: Der Serviceplan in Ihrem ${LetterLogoText} DocSpace kann nicht automatisch verlängert werden</value>
+    <value>Erforderliche Aktion: Der Serviceplan in Ihrem ${LetterLogoText} kann nicht automatisch verlängert werden</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Enterprise-Lizenz Anforderung</value>

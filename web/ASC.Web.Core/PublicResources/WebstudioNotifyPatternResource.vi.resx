@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Bắt đầu</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Vào mục Dịch vụ</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Vào phần cài đặt Ví</value>
   </data>
@@ -1598,7 +1595,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Xóa dữ liệu người dùng không thành công</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Cần hành động: Không thể tự động gia hạn gói dịch vụ trong DocSpace ${LetterLogoText} của bạn</value>
+    <value>Cần hành động: Không thể tự động gia hạn gói dịch vụ trong ${LetterLogoText} của bạn</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Yêu cầu giấy phép doanh nghiệp</value>

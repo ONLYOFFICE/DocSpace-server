@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Filloni</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Shkoni te shërbimet</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Shkoni te cilësimet e portofolit</value>
   </data>
@@ -1563,7 +1560,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Heqja e të dhënave të përdoruesit dështoi</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Kërkohet veprim: Nuk mund të rinovohet automatikisht plani i shërbimit në DocSpace-in tuaj ${LetterLogoText}</value>
+    <value>Kërkohet veprim: Nuk mund të rinovohet automatikisht plani i shërbimit në ${LetterLogoText}-in tuaj</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Kërkesa për licensën të ndërmarrjes</value>

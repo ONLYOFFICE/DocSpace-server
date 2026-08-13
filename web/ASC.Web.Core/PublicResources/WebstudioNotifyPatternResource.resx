@@ -258,9 +258,6 @@
   <data name="ButtonGoToDocSpace" xml:space="preserve">
     <value>Go to your ${LetterLogoText}</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Go to Services</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Go to Wallet settings</value>
   </data>
@@ -1126,9 +1123,7 @@ Exception message: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Hello, $UserName!
 
-We’re reaching out to inform you that the automatic renewal of your purchased service plan couldn’t be completed.
-
-We kindly ask you to manually renew your current service plan (or purchase a new one).
+We’re reaching out to inform you that the automatic renewal of your purchased tariff plan or services couldn’t be completed. We kindly ask you to renew it manually.
 
 $OrangeButton
 
@@ -2188,7 +2183,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. User data removal failed</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Action required: Unable to auto-renew the service plan in your ${LetterLogoText} DocSpace</value>
+    <value>Action required: Unable to auto-renew the purchased services in your ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Enterprise license request</value>

@@ -2745,14 +2745,14 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
     public void Init(UserInfo user)
     {
         var culture = GetCulture(user);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToServices", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitBillingSection", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/services")),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];
     }

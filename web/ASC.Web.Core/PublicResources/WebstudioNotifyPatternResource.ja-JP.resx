@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>开始使用</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>サービスへ移動</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>ウォレット設定へ移動</value>
   </data>
@@ -1551,7 +1548,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}.ユーザーデータ削除失敗</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>対応必要：${LetterLogoText} DocSpaceのサービスプランを自動更新できません</value>
+    <value>対応必要：${LetterLogoText}のサービスプランを自動更新できません</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>企業向けライセンスの依頼</value>

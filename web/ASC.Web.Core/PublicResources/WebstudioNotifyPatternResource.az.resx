@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Başlayın</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Xidmətlərə keçin</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Pul kisəsi parametrlərinə keçin</value>
   </data>
@@ -1560,7 +1557,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. İstifadəçi məlumatlarının silinməsi alınmadı</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Tələb olunan əməliyyat: ${LetterLogoText} DocSpace-də xidmət planını avtomatik yeniləmək mümkün olmadı</value>
+    <value>Tələb olunan əməliyyat: ${LetterLogoText}-də xidmət planını avtomatik yeniləmək mümkün olmadı</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Müəssisə lisenziyası sorğusu</value>

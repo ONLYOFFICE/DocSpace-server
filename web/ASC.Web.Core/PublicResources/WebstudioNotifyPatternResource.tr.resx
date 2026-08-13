@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Başlayın</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Hizmetlere git</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Cüzdan ayarlarına git</value>
   </data>
@@ -1591,7 +1588,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Kullanıcı verisi silme başarısız oldu</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace alanınızdaki hizmet planınız otomatik olarak yenilenemedi</value>
+    <value>Eylem Gerekiyor: ${LetterLogoText} alanınızdaki hizmet planınız otomatik olarak yenilenemedi</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>İşletme lisansı talebi</value>

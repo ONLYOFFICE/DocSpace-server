@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Начало</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Отидете в Услуги</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Отидете в Настройки на портфейл</value>
   </data>
@@ -1559,7 +1556,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Премахването на потребителските данни не бе успешно</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Изисква се действие: Не може да се поднови автоматично планът за обслужване във вашия ${LetterLogoText} DocSpace</value>
+    <value>Изисква се действие: Не може да се поднови автоматично планът за обслужване във вашия ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Заявка за лиценз за предприятие</value>

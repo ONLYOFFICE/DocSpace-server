@@ -240,9 +240,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Darba sākšana</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Doties uz Pakalpojumiem</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Doties uz Maka iestatījumiem</value>
   </data>
@@ -1597,7 +1594,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Lietotāja datu dzēšana neizdevās</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Nepieciešama darbība: Neizdevās automātiski atjaunot pakalpojumu plānu Jūsu ${LetterLogoText} DocSpace</value>
+    <value>Nepieciešama darbība: Neizdevās automātiski atjaunot pakalpojumu plānu Jūsu ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Enterprise licences pieprasījums</value>

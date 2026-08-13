@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Începeți lucrul</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Acces servicii</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Acces configurare Portofel</value>
   </data>
@@ -1570,7 +1567,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Eliminarea datelor de utilizator nu a reușit</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Acțiune necesară: Problema de reînnoire automată a abonamentului la servicii conectate din DocSpace ${LetterLogoText}</value>
+    <value>Acțiune necesară: Problema de reînnoire automată a abonamentului la servicii conectate din ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Solicitare licență Enterprise</value>

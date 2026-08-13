@@ -237,9 +237,6 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Empezar</value>
   </data>
-  <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Ir a Servicios</value>
-  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Ir a la configuración del Monedero</value>
   </data>
@@ -1569,7 +1566,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Fallo en eliminación de los datos de usuario</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Acción requerida: No se puede renovar automáticamente el plan de servicio en su ${LetterLogoText} DocSpace</value>
+    <value>Acción requerida: No se puede renovar automáticamente el plan de servicio en su ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Solicitud de Licencia de Empresa</value>
