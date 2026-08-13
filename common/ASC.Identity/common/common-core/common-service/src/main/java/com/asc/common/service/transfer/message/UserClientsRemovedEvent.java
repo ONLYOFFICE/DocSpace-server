@@ -56,9 +56,7 @@ public class UserClientsRemovedEvent implements Serializable {
   @JsonProperty(value = "user_id", required = true)
   private String userId;
 
-  /**
-   * The unique identifier of the tenant owning the removed clients.
-   */
+  /** The unique identifier of the tenant owning the removed clients. */
   @JsonProperty(value = "tenant_id", required = true)
   private long tenantId;
 }
