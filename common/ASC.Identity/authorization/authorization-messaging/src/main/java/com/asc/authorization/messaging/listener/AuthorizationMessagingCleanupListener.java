@@ -195,6 +195,19 @@ public class AuthorizationMessagingCleanupListener {
           log.info("Removing authorizations and consents for user: {}", event.getUserId());
           jpaAuthorizationRepository.deleteAllAuthorizationsByPrincipalId(event.getUserId());
           jpaConsentRepository.deleteAllConsentsByPrincipalId(event.getUserId());
+
+          // The grants above are the ones the departing user made, these are the ones anyone made
+          // to the clients they created, which their own principal id does not reach.
+          if (event.getTenantId() > 0) {
+            jpaAuthorizationRepository.deleteAllAuthorizationsByOwner(
+                event.getTenantId(), event.getUserId());
+            jpaConsentRepository.deleteAllConsentsByOwner(event.getTenantId(), event.getUserId());
+          } else {
+            log.warn(
+                "Skipping removal of grants made to the clients of user {}: event carries no tenant id",
+                event.getUserId());
+          }
+
           log.info("Authorizations and consents for user {} have been removed", event.getUserId());
         },
         () -> evictTenantClients(event.getTenantId(), "user " + event.getUserId()),
@@ -222,6 +235,12 @@ public class AuthorizationMessagingCleanupListener {
           log.info("Removing authorizations and consents for tenant: {}", event.getTenantId());
           jpaConsentRepository.deleteAllConsentsByTenantId(event.getTenantId());
           jpaAuthorizationRepository.deleteAllAuthorizationsByTenantId(event.getTenantId());
+
+          // The grants above are the ones the tenant's own users made, these are the ones users of
+          // any other tenant made to the departing tenant's clients.
+          jpaConsentRepository.deleteAllConsentsByOwnerTenantId(event.getTenantId());
+          jpaAuthorizationRepository.deleteAllAuthorizationsByOwnerTenantId(event.getTenantId());
+
           log.info(
               "Authorizations and consents for tenant {} have been removed", event.getTenantId());
         },
