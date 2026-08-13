@@ -61,7 +61,7 @@ public class RegisteredClientService
     implements RegisteredClientRepository,
         RegisteredClientAccessibilityService,
         RegisteredClientOwnerService {
-  private static final Duration RESOLUTION_WAIT = Duration.ofMillis(325);
+  private static final Duration RESOLUTION_WAIT = Duration.ofMillis(1500);
   private final SingleFlight<String, CachedRegisteredClient> calls =
       new SingleFlight<>(RESOLUTION_WAIT);
 
