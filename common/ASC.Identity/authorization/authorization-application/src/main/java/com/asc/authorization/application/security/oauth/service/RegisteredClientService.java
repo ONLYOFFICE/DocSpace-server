@@ -37,6 +37,8 @@ import com.asc.authorization.application.exception.client.RegisteredClientPermis
 import com.asc.authorization.application.mapper.ClientMapper;
 import com.asc.authorization.data.client.cache.CachedRegisteredClient;
 import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
+import com.asc.common.utilities.concurrent.SingleFlight;
+import java.time.Duration;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,9 +61,27 @@ public class RegisteredClientService
     implements RegisteredClientRepository,
         RegisteredClientAccessibilityService,
         RegisteredClientOwnerService {
+  private static final Duration RESOLUTION_WAIT = Duration.ofMillis(325);
+  private final SingleFlight<String, CachedRegisteredClient> calls =
+      new SingleFlight<>(RESOLUTION_WAIT);
+
   private final RegisteredClientCacheService registeredClientCacheService;
   private final GrpcRegisteredClientService grpcRegisteredClientService;
   private final ClientMapper clientMapper;
+
+  /**
+   * Fetches a client from the gRPC service and caches it for subsequent lookups.
+   *
+   * @param clientId the client ID to fetch.
+   * @return the fetched snapshot of the client.
+   */
+  private CachedRegisteredClient fetchAndCache(String clientId) {
+    var client = grpcRegisteredClientService.getClient(clientId);
+    var cachedClient = clientMapper.toCachedRegisteredClient(client);
+    registeredClientCacheService.put(cachedClient);
+
+    return cachedClient;
+  }
 
   /**
    * Resolves a client from the cache, falling back to the gRPC service and populating the cache on
@@ -72,13 +92,9 @@ public class RegisteredClientService
    */
   private CachedRegisteredClient resolveCachedClient(String clientId) {
     var cachedClient = registeredClientCacheService.get(clientId).orElse(null);
-    if (cachedClient == null) {
-      var client = grpcRegisteredClientService.getClient(clientId);
-      cachedClient = clientMapper.toCachedRegisteredClient(client);
-      registeredClientCacheService.put(cachedClient);
-    }
+    if (cachedClient != null) return cachedClient;
 
-    return cachedClient;
+    return calls.execute(clientId, () -> fetchAndCache(clientId));
   }
 
   /**
