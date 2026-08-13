@@ -1060,26 +1060,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-        ///
-        ///
-        ///Hello, $UserName!
-        ///
-        ///You are invited to join &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; as a guest user. Accept the invitation by clicking the link:
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is only valid for 7 days.
-        ///
-        ///You will get more tips on how to use your web-office. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them..
-        /// </summary>
-        public static string pattern_enterprise_guest_activation_v10 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_guest_activation_v10", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
@@ -1098,26 +1078,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_enterprise_whitelabel_admin_welcome_v1 {
             get {
                 return ResourceManager.GetString("pattern_enterprise_whitelabel_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-        ///
-        ///
-        ///Hello, $UserName!
-        ///
-        ///$__AuthorName has invited you as a guest user to &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is only valid for 7 days.
-        ///
-        ///You will get more tips on how to use your web-office. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them..
-        /// </summary>
-        public static string pattern_enterprise_whitelabel_guest_activation_v10 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_whitelabel_guest_activation_v10", resourceCulture);
             }
         }
         
@@ -1363,26 +1323,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_opensource_admin_welcome_v1 {
             get {
                 return ResourceManager.GetString("pattern_opensource_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-        ///
-        ///
-        ///Hello!
-        ///
-        ///You are invited to join &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; as a guest user. Accept the invitation by clicking the link:
-        ///
-        ///&quot;$ActivateUrl&quot;:&quot;$ActivateUrl&quot;
-        ///
-        ///The link is only valid for 7 days.
-        ///
-        ///You will get more tips on how to use your web-office. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them..
-        /// </summary>
-        public static string pattern_opensource_guest_activation_v11 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_guest_activation_v11", resourceCulture);
             }
         }
         
@@ -1976,26 +1916,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_saas_docspace_registration {
             get {
                 return ResourceManager.GetString("pattern_saas_docspace_registration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-        ///
-        ///
-        ///Hello!
-        ///
-        ///You are invited to join &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; as a guest user. Accept the invitation by clicking the link:
-        ///
-        ///$OrangeButton
-        ///
-        ///We will also send you useful tips and latest ${LetterLogoText} news once in a while. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them.
-        ///
-        ///$TrulyYours.
-        /// </summary>
-        public static string pattern_saas_guest_activation_v115 {
-            get {
-                return ResourceManager.GetString("pattern_saas_guest_activation_v115", resourceCulture);
             }
         }
         
@@ -2646,15 +2566,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
-        /// </summary>
-        public static string subject_enterprise_guest_activation_v10 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_guest_activation_v10", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
         /// </summary>
         public static string subject_enterprise_whitelabel_admin_activation_v1 {
@@ -2669,15 +2580,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_enterprise_whitelabel_admin_welcome_v1 {
             get {
                 return ResourceManager.GetString("subject_enterprise_whitelabel_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
-        /// </summary>
-        public static string subject_enterprise_whitelabel_guest_activation_v10 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_whitelabel_guest_activation_v10", resourceCulture);
             }
         }
         
@@ -2786,15 +2688,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_opensource_admin_welcome_v1 {
             get {
                 return ResourceManager.GetString("subject_opensource_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
-        /// </summary>
-        public static string subject_opensource_guest_activation_v11 {
-            get {
-                return ResourceManager.GetString("subject_opensource_guest_activation_v11", resourceCulture);
             }
         }
         
@@ -3110,15 +3003,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_docspace_registration {
             get {
                 return ResourceManager.GetString("subject_saas_docspace_registration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
-        /// </summary>
-        public static string subject_saas_guest_activation_v115 {
-            get {
-                return ResourceManager.GetString("subject_saas_guest_activation_v115", resourceCulture);
             }
         }
         

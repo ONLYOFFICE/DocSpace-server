@@ -599,20 +599,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>h1. Unisciti a &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Salve, $UserName!
-
-Sei invitato a unirti a "${__VirtualRootPath}":"${__VirtualRootPath}" come utente ospite. Accetta l'invito cliccando il link:
-
-$OrangeButton
-
-Il link è valido solo per 7 giorni.
-
-Otterrai più consigli su come usare il tuo web-office. Puoi cancellare le sottoscrizioni dalla pagina del tuo profilo in ogni momento e riabilitarle.</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Benvenuto in &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
@@ -648,20 +634,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Nota: la persona che paga l'abbonamento diventa il pagatore. Solo il pagatore è in grado di apportare modifiche all'abbonamento (regolare il numero di gestori). Gli utenti non hanno accesso ai dettagli dei pagamenti. Il proprietario dell'account ${LetterLogoText} DocSpace può riassegnare il pagatore in qualsiasi momento successivo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>h1. Unisciti a &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Salve, $UserName!
-
-$__AuthorName ti ha invitato come ospite su "${__VirtualRootPath}":"${__VirtualRootPath}". A Accetta l'invito cliccando il link:
-
-$OrangeButton
-
-Il link è valido solo per 7 giorni.
-
-Otterrai più consigli su come usare il tuo web-office. Puoi cancellare le sottoscrizioni dalla pagina del tuo profilo in ogni momento e riabilitarle.</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Messaggio dal portale "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -836,20 +808,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Nota: la persona che paga l'abbonamento diventa il pagatore. Solo il pagatore è in grado di apportare modifiche all'abbonamento (regolare il numero di gestori). Gli utenti non hanno accesso ai dettagli dei pagamenti. Il proprietario dell'account ${LetterLogoText} DocSpace può riassegnare il pagatore in qualsiasi momento successivo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>h1. Unisciti a &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Salve!
-
-Sei invitato a unirti a "${__VirtualRootPath}":"${__VirtualRootPath}" come utente ospite. Accetta l'invito cliccando sul link:
-
-"$ActivateUrl":"$ActivateUrl"
-
-Il link è valido solo per 7 giorni.
-
-Riceverai ulteriori suggerimenti su come utilizzare il tuo web-office. Puoi annullare gli abbonamenti sulla pagina del tuo profilo e riattivarli in qualsiasi momento.</value>
   </data>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Password cambiata con successo
@@ -1292,20 +1250,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>h1. Unisciti a &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Salve!
-
-Sei invitato a unirti a "${__VirtualRootPath}":"${__VirtualRootPath}" come utente ospite. Accetta l'invito cliccando il link:
-
-$OrangeButton
-
-Ti invieremo anche consigli utili e le ultime notizie su ${LetterLogoText} ogni tanto. Puoi annullare gli abbonamenti sulla pagina del tuo profilo in qualsiasi momento così come riattivarli.
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Salve, $UserName!
 
@@ -1606,17 +1550,11 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Scopri l'abbonamento aziendale di ${LetterLogoText} DocSpace</value>
   </data>
-  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Unirsi su ${__VirtualRootHost}</value>
-  </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Benvenuto in ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Scopri l'abbonamento aziendale di ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Unirsi su ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Messaggio dell'Utente agli Amministratori</value>
@@ -1650,9 +1588,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Scopri l'abbonamento aziendale di ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Unisciti a ${__VirtualRootHost}</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>La tua password è stata cambiata con successo</value>
@@ -1737,9 +1672,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: completa la registrazione</value>
-  </data>
-  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Unisciti a ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Periodo di grazia è stato attivato per il tuo ${LetterLogoText} DocSpace</value>

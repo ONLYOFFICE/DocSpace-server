@@ -602,20 +602,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>h1. Bashkohunë &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Përshëndetje, $UserName!
-
-Ju jeni ftuar të bashkoheni në "${__VirtualRootPath}":"${__VirtualRootPath}" si përdorues i futas. Pranojeni ftesën duke klikuar linkun:
-
-$OrangeButton
-
-Lidhja është e vlefshme vetëm për 7 ditë.
-
-Do të merrni më shumë këshilla se si të përdorni zyrën tuaj të internetit. Ju mund që t’i anuloni abonimet nñ faqen tuaj tñ profilit në çdo moment si dhe të i riaktivizoni ato.</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Mirë se vini në &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
@@ -651,20 +637,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Shënim: personi që paguan abonimin bëhet pagues. Vetëm paguesi mund të bëjë ndryshime në abonim (rregulloni numrin e menaxherëve). Përdoruesit nuk kanë akses në detajet e pagesave. Pronari i llogarisë së ${LetterLogoText} DocSpace mund ta ricaktojë paguesin në çdo kohë më vonë.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>h1. Bashkohuni me &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Përshëndetje, $UserName!
-
-$__AuthorName ju ka futar si përdorues mysafir në "${__VirtualRootPath}":"${__VirtualRootPath}". Pranojeni ftesën duke klikuar lidhjen:
-
-$OrangeButton
-
-Lidhja është e vlefshme vetëm për 7 ditë.
-
-Do të merrni më shumë këshilla se si të përdorni zyrën tuaj të internetit. Ju mund që t’i anuloni abonimet në faqen tuaj të profilit në çdo moment si dhe të i riaktivizoni ato.</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Mesazhi nga portali "${__VirtualRootPath}":"${__VirtualRootPath}" portal
@@ -839,20 +811,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Ju lutemi vini re: Personi që paguan abonimin bëhet pagues. Vetëm paguesi mund të bëjë ndryshime në abonim (rregulloni numrin e menaxherëve). Përdoruesit nuk kanë akses në detajet e pagesave. Pronari i llogarisë ${LetterLogoText} DocSpace mund ta ricaktojë paguesin në çdo kohë më vonë.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>h1. Bashkohuni me &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Përshëndetje!
-
-Jeni të ftuar të bashkoheni në "${__VirtualRootPath}":"${__VirtualRootPath}" si përdorues i ftuar. Pranojeni ftesën duke klikuar lidhjen:
-
-"$ActivateUrl":"$ActivateUrl"
-
-Lidhja është e vlefshme vetëm për 7 ditë.
-
-Do të merrni më shumë këshilla se si të përdorni zyrën tuaj të internetit. Ju mund të i anuloni abonimet në faqen tuaj të profilit në çdo moment si dhe të i riaktivizoni ato.</value>
   </data>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Password u ndryshua me sukses
@@ -1288,20 +1246,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>h1. Bashkohuni me &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Përshëndetje!
-
-Jeni të ftuar të bashkoheni në "${__VirtualRootPath}":"${__VirtualRootPath}" si përdorues i ftuar. Pranojeni ftesën duke klikuar lidhjen:
-
-$OrangeButton
-
-Ne gjithashtu do të ju dërgojmë këshilla të dobishme dhe lajme më të fundit të ${LetterLogoText} herë pas here. Ju mund të anuloni abonimet në faqen tuaj të profilit në çdo moment si dhe të i riaktivizoni ato.
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
@@ -1600,17 +1544,11 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Zbuloni abonimin e biznesit të ${LetterLogoText} DocSpace</value>
   </data>
-  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Bashkohuni me ${__VirtualRootHost}</value>
-  </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Zbuloni abonimin e biznesit të ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Bashkohuni me ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Mesazh i përdoruesit për administratorët</value>
@@ -1644,9 +1582,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Zbuloni abonimin e biznesit të ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Bashkohuni me ${__VirtualRootHost}</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Fjalëkalimi juaj u ndryshua me sukses</value>
@@ -1728,9 +1663,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: regjistrimi i plotë</value>
-  </data>
-  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Bashkohuni me ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Periudha e hirit për ${LetterLogoText} DocSpace tuaj u aktivizua</value>

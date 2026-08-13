@@ -599,20 +599,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>h1. Připojte se k &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Dobrý den, $UserName!
-
-jste zváni, abyste se připojili k "${__VirtualRootPath}":"${__VirtualRootPath}" jako hostující uživatel. Přijměte pozvání kliknutím na odkaz:
-
-$OrangeButton
-
-Odkaz je platný pouze 7 dní.
-
-Získáte další tipy, jak používat webovou kancelář. Odběry můžete kdykoli zrušit na stránce svého profilu a také je znovu povolit.</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Vítejte v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
@@ -648,20 +634,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Upozornění: plátcem se stává ten, kdo hradí předplatné. Pouze plátce může provádět změny v předplatném (upravovat počet manažerů). Uživatelé nemají přístup k údajům o platbách. Vlastník účtu ${LetterLogoText} DocSpace může plátce kdykoli později znovu přiřadit.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>h1. Připojte se k &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Dobrý den, $UserName!
-
-$__AuthorName vás pozval jako hostujícího uživatele na "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvání kliknutím na odkaz:
-
-$OrangeButton
-
-Odkaz je platný pouze 7 dní.
-
-Získáte další tipy, jak používat webovou kancelář. Odběry můžete kdykoli zrušit na stránce svého profilu a také je znovu povolit.</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Zpráva z "${__VirtualRootPath}":"${__VirtualRootPath}" portálu
@@ -836,20 +808,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Upozornění: plátcem se stává ten, kdo hradí předplatné. Pouze plátce může provádět změny v předplatném (upravovat počet manažerů). Uživatelé nemají přístup k údajům o platbách. Vlastník účtu ${LetterLogoText} DocSpace může plátce kdykoli později znovu přiřadit.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>h1. Připojte se k &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Dobrý den!
-
-Jste zváni, abyste se připojili k "${__VirtualRootPath}":"${__VirtualRootPath}" jako hostující uživatel. Přijměte pozvání kliknutím na odkaz:
-
-"$ActivateUrl":"$ActivateUrl"
-
-Odkaz je platný pouze 7 dní.
-
-Získáte další tipy, jak používat webovou kancelář. Odběry můžete kdykoli zrušit na stránce svého profilu a také je znovu povolit.</value>
   </data>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Heslo úspěšně změněno
@@ -1283,20 +1241,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>h1. Připojte se k &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Dobrý den!
-
-Jste zváni, abyste se připojili k "${__VirtualRootPath}":"${__VirtualRootPath}" jako hostující uživatel. Přijměte pozvání kliknutím na odkaz:
-
-$OrangeButton
-
-Jednou za čas vám také zašleme užitečné tipy a novinky z ${LetterLogoText}. Odběry můžete kdykoli zrušit na stránce svého profilu a také je znovu povolit.
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Dobrý den, $UserName!
 
@@ -1597,17 +1541,11 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Objevte obchodní předplatné ${LetterLogoText} DocSpace</value>
   </data>
-  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Připojte se k ${__VirtualRootHost}</value>
-  </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Vítejte v ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Objevte obchodní předplatné ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Připojte se k ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Uživatelská zpráva správcům</value>
@@ -1641,9 +1579,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Objevte obchodní předplatné ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Připojte se k ${__VirtualRootHost}</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Vaše heslo bylo úspěšně změněno</value>
@@ -1725,9 +1660,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: kompletní registrace</value>
-  </data>
-  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Připojte se k ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Odkladná lhůta pro aktivaci služby ${LetterLogoText} DocSpace</value>

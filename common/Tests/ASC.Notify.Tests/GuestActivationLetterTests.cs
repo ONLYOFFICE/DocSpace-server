@@ -34,26 +34,27 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The welcome letter as a guest receives it. The four guest actions currently render the very same
-/// <c>user_welcome_v1</c> template as the five user ones, so this class is a deliberate duplicate of
-/// <see cref="UserWelcomeLetterTests"/>: it holds the place for the guest wording and starts failing the
-/// day the two letters diverge.
+/// The invitation as a guest receives it. The four guest actions currently render the very same
+/// <c>user_activation_v1</c> template as the four user ones, so this class is a deliberate duplicate of
+/// <see cref="UserActivationLetterTests"/>: it holds the place for the guest wording and starts failing
+/// the day the two letters diverge.
 /// </summary>
-public class GuestWelcomeLetterTests : LetterTestBase
+public class GuestActivationLetterTests : LetterTestBase
 {
-    private static string PortalRoot => LetterEnvironment.PortalUrl;
+    /// <summary>The confirmation link, built by the sending code from <c>ConfirmType.Activation</c>.</summary>
+    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Activation");
 
     /// <summary>
     /// Only names the preview file and the MailPit address — the template comes from <see cref="Pattern"/>.
     /// </summary>
-    protected override string LetterId => "guest_welcome_v1";
+    protected override string LetterId => "guest_activation_v1";
 
     protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_user_welcome_v1,
-        () => WebstudioNotifyPatternResource.pattern_user_welcome_v1);
+        () => WebstudioNotifyPatternResource.subject_user_activation_v1,
+        () => WebstudioNotifyPatternResource.pattern_user_activation_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");
+    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("join_docspace.gif");
 
     /// <summary>The SaaS footer; Enterprise passes <c>null</c> and Opensource <c>opensource</c>.</summary>
     protected override string Footer => "social";
@@ -61,28 +62,25 @@ public class GuestWelcomeLetterTests : LetterTestBase
     /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
     protected override bool TrulyYoursAsTableRow => false;
 
-    /// <summary>Mirrors <c>Init</c>, which is now the same in all four guest actions.</summary>
+    /// <summary>Mirrors <c>Init</c>, which is now the same in all four guest activation actions.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
-        return [OrangeButton("ButtonGetStarted", culture, PortalRoot)];
+        return [OrangeButton("ButtonAccept", culture, ConfirmUrl)];
     }
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonGetStarted", culture))
-            .And.Contain(PortalRoot)
-            .And.Contain(LetterEnvironment.HelpUrl)
-            .And.Contain(LetterEnvironment.SupportUrl);
+        letter.Body.Should().Contain(Resource("ButtonAccept", culture))
+            .And.Contain(ConfirmUrl)
+            .And.Contain(LetterEnvironment.PortalUrl);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter)
     {
-        letter.Subject.Should().Be($"Welcome to {LetterEnvironment.LogoText}!");
+        letter.Subject.Should().Be($"You are invited to {LetterEnvironment.LogoText}");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
-            .And.Contain("Your profile has been successfully added to")
-            .And.Contain("Help Center")
-            .And.Contain("support team");
+        letter.Body.Should().Contain("Hello!")
+            .And.Contain("Accept the invitation by clicking the link:")
+            .And.Contain("After clicking on the invitation link, please set a new password.");
     }
 }

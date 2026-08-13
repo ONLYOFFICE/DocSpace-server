@@ -830,7 +830,7 @@ public sealed class SaasGuestActivationV115NotifyAction(StudioNotifyHelper studi
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_guest_activation_v115, () => WebstudioNotifyPatternResource.pattern_saas_guest_activation_v115)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -841,12 +841,11 @@ public sealed class SaasGuestActivationV115NotifyAction(StudioNotifyHelper studi
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, "social")
         ];
     }
@@ -868,7 +867,7 @@ public sealed class EnterpriseGuestActivationV10NotifyAction(StudioNotifyHelper 
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_guest_activation_v10, () => WebstudioNotifyPatternResource.pattern_enterprise_guest_activation_v10)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -879,12 +878,11 @@ public sealed class EnterpriseGuestActivationV10NotifyAction(StudioNotifyHelper 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, null)
         ];
     }
@@ -906,7 +904,7 @@ public sealed class EnterpriseWhitelabelGuestActivationV10NotifyAction(StudioNot
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_guest_activation_v10, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_guest_activation_v10)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -917,12 +915,11 @@ public sealed class EnterpriseWhitelabelGuestActivationV10NotifyAction(StudioNot
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, null)
         ];
     }
@@ -944,7 +941,7 @@ public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper 
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_guest_activation_v11, () => WebstudioNotifyPatternResource.pattern_opensource_guest_activation_v11)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -955,12 +952,11 @@ public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, "opensource")
         ];
     }

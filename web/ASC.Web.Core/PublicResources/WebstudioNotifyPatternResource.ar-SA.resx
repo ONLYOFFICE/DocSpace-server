@@ -625,19 +625,6 @@ To do so, please consult the "Payments section":"$PricingPage" of your ${LetterL
 
 $TrulyYours</comment>
   </data>
-  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-مرحبا، $UserName!
-
-أنت مدعو للانضمام الى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
-
-$OrangeButton
-
-الرابط صالح لمدة 7 أيام فقط.
-
-ستحصل على مزيد من النصائح حول كيفية استخدام مكتب الويب الخاص بك. يمكنك إلغاء الاشتراكات على صفحة ملفك الشخصي في أي لحظة وكذلك إعادة تمكينها.</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;مرحبا بكم في &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
@@ -673,20 +660,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب ${LetterLogoText} DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-مرحبا، $UserName!
-
-دعاك $__AuthorName كمستخدم ضيف إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
-
-$OrangeButton
-
-الرابط صالح لمدة 7 أيام فقط.
-
-سوف تحصل على مزيد من النصائح حول كيفية استخدام مكتب الويب الخاص بك. يمكنك إلغاء الاشتراكات على صفحة ملفك الشخصي في أي لحظة وكذلك إعادة تمكينها.</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.رسالة من البوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -881,20 +854,6 @@ To do so, please consult the "Payments section":"$PricingPage" of your ${LetterL
 &lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Please note: The person who pays the subscription becomes the payer. Only the payer is able to make changes to the subscription (adjust the number of managers). Users don’t have access to the payments details. The owner of the ${LetterLogoText} DocSpace account is able to reassign the payer anytime later.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</comment>
-  </data>
-  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-مرحباً!
-
-أنت مدعو للانضمام إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
-
-"$ActivateUrl":"$ActivateUrl"
-
-هذا الرابط صالح لمدة 7 أيام فقط.
-
-سوف تحصل على مزيد من النصائح حول كيفية استخدام مكتب الويب الخاص بك. يمكنك إلغاء الاشتراكات على صفحة ملفك الشخصي في أي لحظة وكذلك إعادة تمكينها.</value>
   </data>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.تم تغيير كلمة المرور بنجاح
@@ -1333,20 +1292,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>h1. انضم إلى &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-مرحبا!
-
-أنت مدعو للانضمام إلى "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" كمستخدم ضيف. اقبل الدعوة بالنقر على الرابط:
-
-$OrangeButton
-
-سوف نرسل لك أيضا نصائح مفيدة وآخر أخبار${LetterLogoText} من حين لآخر. يمكنك إلغاء الاشتراكات على صفحة ملفك الشخصي في أي لحظة وكذلك إعادة تمكينها.
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>مرحبا، $UserName!
 
@@ -1648,17 +1593,11 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>اكتشف اشتراك الأعمال في ${LetterLogoText} DocSpace</value>
   </data>
-  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>انضم إلى ${__VirtualRootHost}</value>
-  </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>مرحبا بكم في ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>اكتشف اشتراك الأعمال في ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>انضم إلى ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>رسالة مستخدم إلى المسؤولين</value>
@@ -1692,9 +1631,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>اكتشف اشتراك الأعمال في ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>انضم إلى ${__VirtualRootHost}</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>لقد تم تغيير كلمة المرور الخاصة بك بنجاح</value>
@@ -1779,9 +1715,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: أكمل التسجيل</value>
-  </data>
-  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>انضم إلى ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>فترة السماح ل ${LetterLogoText} DocSpace الخاص بك تنشيط</value>

@@ -600,20 +600,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>h1. Придружите се &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Здраво, $UserName!
-
-Позвани сте да се придружите "${__VirtualRootPath}":"${__VirtualRootPath}" као гост корисник. Прихватите позив кликом на линк:
-
-$OrangeButton
-
-Линк важи само 7 дана.
-
-Добиц́ете више савета о томе како да користите своју веб канцеларију. Можете да откажете претплате на вашој страници рофила у било ком тренутку, као и да их поново омогуц́ите.</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Добродошли у &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
@@ -649,20 +635,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Напомена: Особа која плац́а претплату постаје платилац. Само платилац може да изврши измене у претплати (подеси број менаџера). Корисници немају приступ детаљима плац́ања. Власник ${LetterLogoText} DocSpace налога може касније да поново додели уплатитеља.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>h1. Придружи &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-
-
-Здраво, $UserName!
-
-$__AuthorName вас је позвао као гост корисника на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихвати позивницу кликом на линк:
-
-$OrangeButton
-
-Линк је валидан само за 7 дана.
-
-Добиц́ете више савета о томе како да користите своју веб канцеларију. Можете да откажете претплате на страници профила у било ком тренутку, као и да их поново омогуц́ите.</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Порука са "${__VirtualRootPath}":"${__VirtualRootPath}" портала
@@ -837,20 +809,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Напомена: Особа која плац́а претплату постаје платилац. Само платилац може да изврши измене у претплати (подеси број менаџера). Корисници немају приступ детаљима плац́ања. Власник ${LetterLogoText} DocSpace налога може касније да поново додели уплатитеља.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>h1. Придружите се &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace-у
-
-
-Здраво!
-
-Позвани сте да се придружите "${__VirtualRootPath}":"${__VirtualRootPath}" као гост корисник. Прихватите позив кликом на линк:
-
-"$ActivateUrl":"$ActivateUrl"
-
-Линк важи само 7 дана.
-
-Добиц́ете више савета о томе како да користите своју веб канцеларију. Можете да откажете претплате на страници профила у било ком тренутку, као и да их поново омогуц́ите.</value>
   </data>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Лозинка је успешно промењена
@@ -1292,20 +1250,6 @@ $OrangeButton
  
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>h1. Придружите &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace-у
-
-
-Здраво!
-
-Позвани сте да се придружите "${__VirtualRootPath}":"${__VirtualRootPath}" као гост корисник. Прихватите позив кликом на линк:
-
-$OrangeButton
-
-Такође ц́емо вам с времена на време слати корисне савете и најновије вести ${LetterLogoText}-а. Можете да откажете претплате на страници профила у било ком тренутку, као и да их поново омогуц́ите.
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Здраво, $UserName!
 
@@ -1605,17 +1549,11 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Откријте пословну претплату на ${LetterLogoText} DocSpace</value>
   </data>
-  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Придружите се ${__VirtualRootHost}</value>
-  </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Добродошли у ${LetterLogoText} DocSpace!</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Откријте пословну претплату на ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Придружите се ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Порука корисника администраторима</value>
@@ -1649,9 +1587,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Откријте пословну претплату на ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Придружите се ${__VirtualRootHost}</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ваша лозинка је успешно промењена</value>
@@ -1736,9 +1671,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: заврши регистрацију</value>
-  </data>
-  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Придружите се ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Грејс период за ваш ${LetterLogoText} DocSpace активиран</value>

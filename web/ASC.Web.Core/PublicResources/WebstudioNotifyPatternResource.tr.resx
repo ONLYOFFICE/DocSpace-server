@@ -605,20 +605,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace’e katılın
-
-
-Merhaba, $UserName!
-
-Konuk kullanıcı olarak davetlisiniz: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
-
-$OrangeButton
-
-Bağlantı yalnızca 7 gün boyunca geçerlidir.
-
-Web ofisinizi nasıl kullanacağınıza dair daha fazla ipucu göndereceğiz. Profil sayfanızdaki abonelikleri her an iptal edebileceğiniz gibi yeniden etkinleştirebilirsiniz.</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;&lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;  DocSpace’e hoş geldiniz!&lt;/td&gt;&lt;/tr&gt;
 
@@ -654,20 +640,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ${LetterLogoText} DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace’e katılın
-
-
-Merhaba $UserName!
-
-$__AuthorName size konuk kullanıcı olarak davet ediyor: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
-
-$OrangeButton
-
-Bağlantı yalnızca 7 gün boyunca geçerlidir.
-
-Web ofisinizi nasıl kullanacağınıza dair daha fazla ipucu göndereceğiz. Profil sayfanızdaki abonelikleri her an iptal edebileceğiniz gibi yeniden etkinleştirebilirsiniz.</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı mesajları
@@ -842,20 +814,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ${LetterLogoText} DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace’e katılın
-
-
-Merhaba!
-
-Konuk kullanıcı olarak davetlisiniz: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
-
-"$ActivateUrl":"$ActivateUrl"
-
-Bağlantı yalnızca 7 gün boyunca geçerlidir.
-
-Web ofisinizi nasıl kullanacağınıza dair daha fazla ipucu göndereceğiz. Profil sayfanızdaki abonelikleri her an iptal edebileceğiniz gibi yeniden etkinleştirebilirsiniz.</value>
   </data>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Şifre başarıyla değiştirildi
@@ -1298,20 +1256,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace’e katılın
-
-
-Merhaba!
-
-Konuk kullanıcı olarak davetlisiniz: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
-
-$OrangeButton
-
-Aralıklarla size kullanışlı ipuçları ve güncel ${LetterLogoText} haberlerini de göndereceğiz. Profil sayfanızdaki abonelikleri her an iptal edebileceğiniz gibi yeniden etkinleştirebilirsini.
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Merhaba, $UserName!
 
@@ -1625,17 +1569,11 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace’in işletme aboneliğini keşfedin</value>
   </data>
-  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Şimdi katılın ${__VirtualRootHost}</value>
-  </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace’e hoş geldiniz!</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace’in işletme aboneliğini keşfedin</value>
-  </data>
-  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Şimdi katılın ${__VirtualRootHost}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Yöneticilere kullanıcı mesajı</value>
@@ -1669,9 +1607,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace’in işletme aboneliğini keşfedin</value>
-  </data>
-  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Şimdi katılın ${__VirtualRootHost}</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Şifreniz başarıyla değiştirildi</value>
@@ -1756,9 +1691,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>${LetterLogoText}: kaydı tamamlayın</value>
-  </data>
-  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
-    <value>Şimdi katılın ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>${LetterLogoText} DocSpace’iniz için ödemesiz süre başlatılmıştır</value>
