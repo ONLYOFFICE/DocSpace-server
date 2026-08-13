@@ -37,9 +37,7 @@ namespace ASC.Api.Documents;
 /// Provides API endpoints for managing privacy rooms and encryption keys.
 /// </summary>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("privacyroom")]
+[ApiEndpoint("privacyroom")]
 public class PrivacyRoomControllerCommon(
     AuthContext authContext,
     PermissionContext permissionContext,
