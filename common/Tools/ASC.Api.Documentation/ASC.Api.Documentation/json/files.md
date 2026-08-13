@@ -8928,9 +8928,6 @@ The API date and time parameters.
 ### Model ApplyFilterOption
 [0 - All, 1 - Files, 2 - Folders]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model ArchiveRoomRequest
 The parameters for archiving a room.
@@ -8953,9 +8950,6 @@ The parameters for archiving a room.
 
 ### Model AuditReportFormat
 []
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model AuthData
@@ -9012,14 +9006,8 @@ The base batch request parameters.
 
 ### Model BaseBatchRequestDto.fileIds
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model BaseBatchRequestDto.folderIds
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model BatchRequestDto
@@ -9040,20 +9028,11 @@ The request parameters for copying/moving files.
 ### Model BatchRequestDto.destFolderId
 The destination folder ID.
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model BatchRequestDto.fileIds
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model BatchRequestDto.folderIds
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model BatchTagsRequestDto
@@ -9146,9 +9125,6 @@ The result of checking whether files can be moved or copied to the specified fol
 
 ### Model CheckDestFolderResult
 [0 - All allowed, 1 - Part allowed, 2 - None allowed]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model CheckDestFolderWrapper
@@ -9251,9 +9227,6 @@ The co-editing configuration parameters.
 ### Model CoEditingConfigMode
 [0 - Fast, 1 - Strict]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model ConfigurationDtoInteger
 The configuration parameters.
@@ -9337,9 +9310,6 @@ The parameters for copying a file.
 ### Model CopyAsJsonElement.destFolderId
 The destination folder ID of the copied file.
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model CoverRequestDto
 The request parameters to change the room cover.
@@ -9383,9 +9353,6 @@ The parameters for creating a file.
 
 ### Model CreateFileJsonElement.templateId
 The template file ID for creation.
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model CreateFolder
@@ -9516,15 +9483,9 @@ The customization config parameters.
 ### Model DarkThemeSettingsType
 [Base - Base, Dark - Dark, System - System]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model DateToAutoCleanUp
 [1 - One week, 2 - Two weeks, 3 - One month, 4 - Thirty days, 5 - Two months, 6 - Three months]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model DefaultTemplateItemDto
@@ -9559,9 +9520,6 @@ Default templates settings request parameters.
 
 ### Model DefaultTemplateSettingsRequestDto.selectedFile
 File id to replace template with
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model DefaultTemplateSettingsResetRequestDto
@@ -9606,14 +9564,8 @@ The request parameters for deleting files.
 
 ### Model DeleteBatchRequestDto.fileIds
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model DeleteBatchRequestDto.folderIds
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model DeleteFolder
@@ -9654,9 +9606,6 @@ The settings request parameters.
 
 ### Model DistributedTaskStatus
 [0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model DocServiceUrlDto
@@ -9744,14 +9693,8 @@ The request parameters for downloading files.
 
 ### Model DownloadRequestDto.fileIds
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model DownloadRequestDto.folderIds
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model DownloadRequestItemDto
@@ -9766,9 +9709,6 @@ The download request item with conversion parameters and security settings.
 
 ### Model DownloadRequestItemDto.key
 The unique identifier or reference key for the file to be downloaded.
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model DraftLocationInteger
@@ -9794,14 +9734,8 @@ The request parameters for duplicating files and fodlers.
 
 ### Model DuplicateRequestDto.fileIds
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model DuplicateRequestDto.folderIds
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model EditHistoryArrayWrapper
@@ -9917,9 +9851,6 @@ The editor tool call state. Used to run the agent flow in the editor.
 ### Model EditorType
 [0 - Desktop, 1 - Mobile, 2 - Embedded]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model EmailInvitationDto
 The email invitation parameters.
@@ -9943,9 +9874,6 @@ The configuration parameters for the embedded document type.
 
 ### Model EmployeeActivationStatus
 [0 - Not activated, 1 - Activated, 2 - Pending, 4 - Auto generated]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model EmployeeDto
@@ -10018,9 +9946,6 @@ The full list of user parameters.
 
 ### Model EmployeeStatus
 [1 - Active, 2 - Terminated, 4 - Pending, 5 - Default, 7 - All]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model EncryptionKeyArrayWrapper
@@ -10175,9 +10100,6 @@ The settings for the Feedback &amp; Support menu button.
 
 ### Model FileConflictResolveType
 [Skip - Skip, Overwrite - Overwrite, Duplicate - Duplicate]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model FileDtoInteger
@@ -10523,9 +10445,6 @@ The generic file entry information.
 ### Model FileEntryType
 [1 - Folder, 2 - File]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model FileIntegerArrayWrapper
 
@@ -10636,9 +10555,6 @@ The base operation request parameters.
 ### Model FileOperationType
 [0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model FileOperationWrapper
 
@@ -10690,9 +10606,6 @@ An object that is generated by the integrator to uniquely identify a file in its
 
 ### Model FileShare
 [0 - None, 1 - Read and write, 2 - Read, 3 - Restrict, 4 - Varies, 5 - Review, 6 - Comment, 7 - Fill forms, 8 - Custom filter, 9 - Room manager, 10 - Editing, 11 - Content creator]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model FileShareArrayWrapper
@@ -10770,15 +10683,9 @@ The collection of file sharing parameters.
 ### Model FileStatus
 [0 - None, 1 - Is editing, 2 - Is new, 4 - Is converting, 8 - Is original, 16 - Is editing alone, 32 - Is favorite, 64 - Is template, 128 - Is fill form draft, 256 - Is completed form]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model FileType
 [0 - Unknown, 1 - Archive, 2 - Video, 3 - Audio, 4 - Image, 5 - Spreadsheet, 6 - Presentation, 7 - Document, 10 - Pdf, 11 - Diagram]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model FilesSettingsDto
@@ -10939,9 +10846,6 @@ The parameters of the form filling result.
 
 ### Model FilterType
 [0 - None, 1 - Files  only, 2 - Folders only, 3 - Documents only, 4 - Presentations only, 5 - Spreadsheets only, 7 - Images only, 8 - By user, 9 - By department, 10 - Archive only, 11 - By extension, 12 - Media only, 13 - Filling forms rooms, 14 - Editing rooms, 17 - Custom rooms, 20 - Public rooms, 22 - Pdf, 23 - Pdf form, 24 - Virtual data rooms, 25 - Diagrams only, 26 - Ai rooms]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model FolderContentDtoInteger
@@ -11183,22 +11087,13 @@ The folder link parameters.
 ### Model FolderType
 [0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model FormFillingManageAction
 [0 - Stop, 1 - Resume, 2 - Start, 3 - Edit]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model FormFillingStatus
 [0 - None, 1 - Draft, 2 - You turn, 3 - In progress, 4 - Complete, 5 - Stoped]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model FormMetadata
@@ -11467,15 +11362,9 @@ The information config parameters.
 ### Model LinkType
 [0 - Invitation, 1 - External]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model Location
 [1 - Room, 2 - Documents, 3 - Link]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model LockFileParameters
@@ -11579,15 +11468,9 @@ The parameters of a user mentioned in a message.
 ### Model MessageAction
 [1000 - Login success, 1001 - Login success via social account, 1002 - Login fail invalid combination, 1003 - Login fail social account not found, 1004 - Login fail disabled profile, 1005 - Login fail, 1006 - Logout, 1007 - Login success via sms, 1008 - Login fail via sms, 1009 - Login fail ip security, 1010 - Login success via api, 1011 - Login success via social app, 1012 - Login success via api sms, 1013 - Login fail via api, 1014 - Login fail via api sms, 1015 - Login success via SSO, 1016 - Session started, 1017 - Session completed, 1018 - Login fail via SSO, 1019 - Login success via api social account, 1020 - Login fail via api social account, 1021 - Login succes via tfa app, 1022 - Login fail via Tfa app, 1023 - Login fail brute force, 1024 - Login success via api tfa, 1025 - Login fail via api tfa, 1026 - Login fail recaptcha, 1027 - Authorization link activated, 1028 - Login success via OAuth 2.0, 1029 - Login success via login and password, 4000 - User created, 4001 - Guest created, 4002 - User created via invite, 4003 - Guest created via invite, 4004 - User activated, 4005 - Guest activated, 4006 - User updated, 4007 - User updated language, 4008 - User added avatar, 4009 - User deleted avatar, 4010 - User updated avatar thumbnails, 4011 - User linked social account, 4012 - User unlinked social account, 4013 - User sent activation instructions, 4014 - User sent email change instructions, 4015 - User sent password change instructions, 4016 - User sent delete instructions, 4017 - User updated password, 4018 - User deleted, 4019 - Users updated type, 4020 - Users updated status, 4021 - Users sent activation instructions, 4022 - Users deleted, 4023 - Sent invite instructions, 4024 - User imported, 4025 - Guest imported, 4026 - Group created, 4027 - Group updated, 4028 - Group deleted, 4029 - User updated mobile number, 4030 - User data reassigns, 4031 - User data removing, 4032 - User connected tfa app, 4033 - User disconnected tfa app, 4034 - User logout active connections, 4035 - User logout active connection, 4036 - User logout active connections for user, 4037 - Send join invite, 5000 - File created, 5001 - File renamed, 5002 - File updated, 5003 - File created version, 5004 - File deleted version, 5005 - File updated revision comment, 5006 - File locked, 5007 - File unlocked, 5008 - File updated access, 5009 - File downloaded, 5010 - File downloaded as, 5011 - File uploaded, 5012 - File imported, 5013 - File copied, 5014 - File copied with overwriting, 5015 - File moved, 5016 - File moved with overwriting, 5017 - File moved to trash, 5018 - File deleted, 5019 - Folder created, 5020 - Folder renamed, 5021 - Folder updated access, 5022 - Folder copied, 5023 - Folder copied with overwriting, 5024 - Folder moved, 5025 - Folder moved with overwriting, 5026 - Folder moved to trash, 5027 - Folder deleted, 5028 - ThirdParty created, 5029 - ThirdParty updated, 5030 - ThirdParty deleted, 5031 - Documents ThirdParty settings updated, 5032 - Documents overwriting settings updated, 5033 - Documents uploading formats settings updated, 5034 - User file updated, 5035 - File converted, 5036 - File send access link, 5037 - Document service location setting, 5038 - Authorization keys setting, 5039 - Full text search setting, 5040 - Start transfer setting, 5041 - Backup started, 5042 - License key uploaded, 5043 - File change owner, 5044 - File restore version, 5045 - Document send to sign, 5046 - Document sign complete, 5047 - User updated email, 5048 - Documents store forcesave, 5049 - Documents forcesave, 5050 - Start storage encryption, 5053 - Start storage decryption, 5054 - File opened for change, 5055 - File marked as favorite, 5056 - File removed from favorite, 5057 - Folder downloaded, 5058 - File removed from list, 5059 - Folder removed from list, 5060 - File external link access updated, 5061 - Trash emptied, 5062 - File revision downloaded, 5063 - File marked as read, 5064 - File readed, 5065 - Folder marked as read, 5066 - Folder updated access for, 5068 - File updated access for, 5069 - Documents external share settings updated, 5070 - Room created, 5071 - Room renamed, 5072 - Room archived, 5073 - Room unarchived, 5074 - Room deleted, 5075 - Room update access for user, 5076 - Tag created, 5077 - Tags deleted, 5078 - Added room tags, 5079 - Deleted room tags, 5080 - Room logo created, 5081 - Room logo deleted, 5082 - Room invitation link updated, 5083 - Documents keep new file name settings updated, 5084 - Room remove user, 5085 - Room create user, 5086 - Room invitation link created, 5087 - Room invitation link deleted, 5088 - Room external link created, 5089 - Room external link updated, 5090 - Room external link deleted, 5091 - File external link created, 5092 - File external link updated, 5093 - File external link deleted, 5094 - Room group added, 5095 - Room update access for group, 5096 - Room group remove, 5097 - Room external link revoked, 5098 - Room external link renamed, 5099 - File uploaded with overwriting, 5100 - Room copied, 5101 - Documents display file extension updated, 5102 - Room color changed, 5103 - Room cover changed, 5104 - Room indexing changed, 5105 - Room deny download changed, 5106 - Room index export saved, 5107 - Folder index changed, 5108 - Folder index reordered, 5109 - Room deny download enabled, 5110 - Room deny download disabled, 5111 - File index changed, 5112 - Room watermark set, 5113 - Room watermark disabled, 5114 - Room index export saved, 5115 - Room indexing disabled, 5116 - Room life time set, 5117 - Room life time disabled, 5118 - Room invite resend, 5119 - File version deleted, 5120 - File custom filter enabled, 5121 - File custom filter disabled, 5122 - Folder external link created, 5123 - Folder external link updated, 5124 - Folder external link deleted, 5125 - Backup completed, 5126 - Backup failed, 5127 - Scheduled backup started, 5128 - Scheduled backup completed, 5129 - Scheduled backup failed, 5130 - Scheduled backup deleted, 5131 - Backup cancelled, 5132 - Restore started, 5133 - Restore cancelled, 5150 - Form started to fill, 5151 - Form partially filled, 5152 - Form completely filled, 5153 - Form stopped, 5154 - AI agent created, 5155 - AI agent renamed, 5156 - AI agent deleted, 5157 - MCP server added to AI agent, 5158 - MCP server deleted from AI agent, 5159 - Room change owner, 5160 - Documents default templates settings updated, 5201 - File saved, user quota exceeded, 5202 - File not saved due to user quota exceeded, 5203 - File saved, room quota exceeded, 5204 - File not saved due to room quota exceeded, 5205 - File saved, tenant quota exceeded, 5206 - File not saved due to tenant quota exceeded, 5501 - Ldap enabled, 5502 - Ldap disabled, 5503 - LDAP synchronization completed, 6000 - Language settings updated, 6001 - Time zone settings updated, 6002 - Dns settings updated, 6003 - Trusted mail domain settings updated, 6004 - Password strength settings updated, 6005 - Two factor authentication settings updated, 6006 - Administrator message settings updated, 6007 - Default start page settings updated, 6008 - Products list updated, 6009 - Administrator added, 6010 - Administrator opened full access, 6011 - Administrator deleted, 6012 - Users opened product access, 6013 - Groups opened product access, 6014 - Product access opened, 6015 - Product access restricted, 6016 - Product added administrator, 6017 - Product deleted administrator, 6018 - Greeting settings updated, 6019 - Team template changed, 6020 - Color theme changed, 6021 - Owner sent change owner instructions, 6022 - Owner updated, 6023 - Owner sent portal deactivation instructions, 6024 - Owner sent portal delete instructions, 6025 - Portal deactivated, 6026 - Portal deleted, 6027 - Login history report downloaded, 6028 - Audit trail report downloaded, 6029 - SSO enabled, 6030 - SSO disabled, 6031 - Portal access settings updated, 6032 - Cookie settings updated, 6033 - Mail service settings updated, 6034 - Custom navigation settings updated, 6035 - Audit settings updated, 6036 - Two factor authentication disabled, 6037 - Two factor authentication enabled by sms, 6038 - Two factor authentication enabled by tfa app, 6039 - Portal renamed, 6040 - Quota per room changed, 6041 - Quota per room disabled, 6042 - Quota per user changed, 6043 - Quota per user disabled, 6044 - Quota per portal changed, 6045 - Quota per portal disabled, 6046 - Form submit, 6047 - Form opened for filling, 6048 - Custom quota per room default, 6049 - Custom quota per room changed, 6050 - Custom quota per room disabled, 6051 - Custom quota per user default, 6052 - Custom quota per user changed, 6053 - Custom quota per user disabled, 6054 - DevTools access settings changed, 6055 - Webhook created, 6056 - Webhook updated, 6057 - Webhook deleted, 6058 - Created api key, 6059 - Update api key, 6060 - Deleted User api key, 6061 - Customer wallet topped up, 6062 - Customer operation performed, 6063 - Customer operations report downloaded, 6064 - Customer wallet top up settings updated, 6065 - Customer subscription updated, 6066 - Promotional banners visibility settings changed, 6067 - Customer wallet services settings updated, 6068 - Quota per AI agent changed, 6069 - Quota per AI agent disabled, 6070 - Custom quota per AI agent default, 6071 - Custom quota per AI agent changed, 6072 - Custom quota per AI agent disabled, 6073 - AI provider created, 6074 - AI provider updated, 6075 - AI provider deleted, 6076 - MCP server created, 6077 - MCP server updated, 6078 - MCP server enabled, 6079 - MCP server disabled, 6080 - MCP server deleted, 6081 - WebSearch settings configured, 6082 - WebSearch settings reset, 6083 - Vectorization settings configured, 6084 - Vectorization settings reset, 6085 - Webplugin uploaded, 6086 - Webplugin updated, 6087 - Webplugin deleted, 6088 - Whitelabel settings logo text updated, 6089 - Whitelabel settings logos updated, 6090 - Whitelabel company settings updated, 6091 - Whitelabel additional settings updated, 6092 - Whitelabel mail settings updated, 6093 - Invitation settings updated, 6094 - IP restrictions settings updated, 6095 - Login settings updated, 6096 - AI default provider set, 6097 - AI access enabled, 6098 - AI access disabled, 6099 - User AI settings updated, 6100 - Subscription balance moved to wallet, 6101 - Docs Cloud config updated, 6102 - Docs Cloud quota report downloaded, 7000 - Contact admin mail sent, 7001 - Room invite link used, 7002 - User created and added to room, 7003 - Guest created and added to room, 7004 - Contact sales mail sent, 9901 - Create client, 9902 - Update client, 9903 - Regenerate secret, 9904 - Delete client, 9905 - Change client activation, 9906 - Change client visibility, 9907 - Revoke user client, 9908 - Generate authorization code token, 9909 - Generate personal access token, -1 - None]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model MobilePhoneActivationStatus
 [0 - Not activated, 1 - Activated]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model Module
@@ -11813,22 +11696,13 @@ The provider information.
 ### Model ProviderFilter
 [0 - None, 1 - Box, 2 - DropBox, 3 - GoogleDrive, 4 - kDrive, 5 - OneDrive, 6 - SharePoint, 7 - WebDav, 8 - Yandex, 9 - Storage]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model QuotaFilter
 [0 - All, 1 - Default, 2 - Custom]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model QuotaScope
 [0 - User, 1 - Room, 2 - Tenant]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model RecentConfig
@@ -11862,9 +11736,6 @@ The room data lifetime information.
 
 ### Model RoomDataLifetimePeriod
 [0 - Day, 1 - Month, 2 - Year]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model RoomFromTemplateStatusDto
@@ -11985,9 +11856,6 @@ The room new items information.
 ### Model RoomPrivacyFilter
 [0 - None, 1 - Private, 2 - NotPrivate]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model RoomSecurityDto
 The room security parameters.
@@ -12001,9 +11869,6 @@ The room security parameters.
 
 ### Model RoomSecurityError
 [0 - None, 1 - Form role blocking deletion]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model RoomSecurityWrapper
@@ -12060,9 +11925,6 @@ The room template status.
 ### Model RoomType
 [1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model Run
 The text run parameters.
@@ -12105,9 +11967,6 @@ The parameters for saving form role mapping.
 
 ### Model SearchArea
 [0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents, 8 - Forms, 9 - Form templates]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model SecurityInfoRequestDto
@@ -12165,9 +12024,6 @@ The settings request parameters.
 ### Model ShareFilterType
 [0 - User or group, 1 - Invitation link, 2 - External link, 4 - Additional external link, 8 - Primary external link, 16 - User, 32 - Group]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model Size
 Represents dimensions with width and height values.
@@ -12181,15 +12037,9 @@ Represents dimensions with width and height values.
 ### Model SortOrder
 [0 - Ascending, 1 - Descending]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model SortedByType
 [0 - Date and time, 1 - AZ, 2 - Size, 3 - Author, 4 - Type, 5 - New, 6 - Date and time creation, 7 - Room type, 8 - Tags, 9 - Room, 10 - Custom order, 11 - Last opened, 12 - Used space]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model StartEdit
@@ -12211,22 +12061,13 @@ The parameters of the button that starts filling out the form.
 ### Model StartFillingMode
 [0 - None, 1 - Share to fill out, 2 - Start filling, 3 - Start filling form room]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model Status
 [0 - Ok, 1 - Invalid, 2 - Expired, 3 - Required password, 4 - Invalid password, 5 - External access denied]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model StorageFilter
 [0 - None, 1 - Internal, 2 - ThirdParty]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model StringWrapper
@@ -12242,9 +12083,6 @@ The parameters of the button that starts filling out the form.
 
 ### Model SubjectType
 [0 - User, 1 - External link, 2 - Group, 3 - Invitation link, 4 - Primary external link]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model SubmitForm
@@ -12327,9 +12165,6 @@ The third-party request parameters.
 
 ### Model Thumbnail
 [0 - Waiting, 1 - Created, 2 - Error, 3 - Not required, 4 - Creating]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model UpdateComment
@@ -12513,15 +12348,9 @@ The user invitation parameters.
 ### Model VectorizationStatus
 [0 - In Progress, 1 - Completed, 2 - Failed]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model WatermarkAdditions
 [1 - User name, 2 - User email, 4 - User ip adress, 8 - Current date, 16 - Room name]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model WatermarkDto

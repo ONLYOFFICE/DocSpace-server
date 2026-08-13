@@ -3429,9 +3429,6 @@ No authorization required
 
 ### Model AiActionType
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model AiAgentNewItemsDto
 The agent new item&#39;s information.
@@ -3585,9 +3582,6 @@ Persistent record for a single attachment (file or image) referenced from a user
 ### Model AiBuiltinProviderType
 Union of all 17 built-in AI provider type identifiers.  The &#x60;external&#x60; provider has no built-in transport — it delegates every HTTP request to &#x60;PlatformAdapter.externalFetch&#x60; and parses the response with the inner provider selected by &#x60;Profile.basedOn&#x60;.
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model AiBulkAssignmentResult
 Outcome of  {@link  AssignmentsEngine.bulkAssign } . Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.
@@ -3663,15 +3657,9 @@ Input for creating a prompt — the engine generates &#x60;id&#x60;/&#x60;create
 ### Model AiDistributedTaskStatus
 [0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model AiEmbeddingProviderType
 [0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model AiEmployeeDto
@@ -3852,9 +3840,6 @@ A dictionary representing the sharing settings for the file entry.
 ### Model AiFileEntryType
 [1 - Folder, 2 - File]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model AiFileOperationDto
 The file operation information.
@@ -3876,9 +3861,6 @@ The file operation information.
 ### Model AiFileOperationType
 [0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model AiFileOperationWrapper
 
@@ -3893,9 +3875,6 @@ The file operation information.
 
 ### Model AiFileShare
 [0 - None, 1 - Read and write, 2 - Read, 3 - Restrict, 4 - Varies, 5 - Review, 6 - Comment, 7 - Fill forms, 8 - Custom filter, 9 - Room manager, 10 - Editing, 11 - Content creator]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model AiFolderContentDtoInteger
@@ -4029,9 +4008,6 @@ Outcome of &#x60;createFolder&#x60; / &#x60;renameFolder&#x60; — either the pe
 ### Model AiFolderType
 [0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model AiImportError
 Per-entry error reported by  {@link  PromptsEngine.importBundle } .
@@ -4045,9 +4021,6 @@ Per-entry error reported by  {@link  PromptsEngine.importBundle } .
 
 ### Model AiImportMode
 Mode passed to  {@link  PromptsEngine.importBundle } .
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model AiImportResult
@@ -4153,9 +4126,6 @@ The new item parameters.
 
 ### Model AiOpenAIFinishReason
 OpenAI Chat Completions streaming shapes.   {@link  toOpenAIChatCompletionStream }  maps the engine&#39;s transport-agnostic  {@link  ChatEvent }  stream onto these chunks so a host can expose an OpenAI-compatible &#x60;POST /v1/chat/completions&#x60; (&#x60;stream: true&#x60;) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent.
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model AiOpenAIStreamChunk
@@ -4308,9 +4278,6 @@ Outcome of &#x60;create&#x60; / &#x60;update&#x60; / &#x60;move&#x60; on a promp
 ### Model AiProviderType
 Provider type identifier. Accepts all 17 built-in types with autocomplete, plus any custom &#x60;string&#x60; for dynamically registered providers.
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model AiResolvedAssignment
 Resolved profile for an action — both the storage row and its ID.
@@ -4335,15 +4302,9 @@ The room data lifetime information.
 ### Model AiRoomDataLifetimePeriod
 [0 - Day, 1 - Month, 2 - Year]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model AiRoomType
 [1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model AiSuccessResponse
@@ -4414,9 +4375,6 @@ Chat conversation metadata. Represents a single chat session (thread).
 ### Model AiThreadMessageLike.content
 Message content: either plain text or a list of typed content parts (text, image, tool-call, …). Parts are open-ended by content type.
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model AiThreadMessageLike.content.anyOf item
 
@@ -4482,9 +4440,6 @@ The vectorization settings.
 
 ### Model AiWatermarkAdditions
 [1 - User name, 2 - User email, 4 - User ip adress, 8 - Current date, 16 - Room name]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model AiWatermarkDto
@@ -4568,9 +4523,6 @@ Outcome of  {@link  WebSearchEngine.configure }  — either the persisted config
 
 ### Model aiAgentsUpdateQuota.request.roomIds item
 A DocSpace room id: an integer for native rooms, a string for third-party-backed ones.
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model aiAgentsUpdate request body
@@ -4748,9 +4700,6 @@ Accepted-for-processing acknowledgement (conversion is asynchronous).
 
 ### Model aiExportTextToDocx.request.folderId
 Target folder id (int or string).
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model aiPreferencesSetDeepMode request body

@@ -66,12 +66,14 @@ This endpoint does not need any parameter.
 {{#description}}
 {{.}}
 {{/description}}
+{{#vendorExtensions.x-has-properties}}
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 {{#parent}}{{#parentVars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
 {{/parentVars}}{{/parent}}{{#vars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
 {{/vars}}
+{{/vendorExtensions.x-has-properties}}
 {{/model}}{{/models}}
 
 ## Authorization

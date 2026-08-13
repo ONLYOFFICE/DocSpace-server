@@ -51,6 +51,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     private static final String SCOPES = "x-scopes";
     private static final String TITLE = "x-title";
     private static final String MODEL_ANCHOR = "x-model-anchor";
+    private static final String HAS_PROPERTIES = "x-has-properties";
     private static final String RETURN_MODEL_ANCHOR = "x-return-model-anchor";
 
     /**
@@ -402,6 +403,12 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             for (ModelMap modelMap : models.getModels()) {
                 CodegenModel model = modelMap.getModel();
                 model.vendorExtensions.put(ANCHOR, documentedModels.get(model.classname));
+
+                // Enums and other property-less schemas would otherwise be given a table header
+                // with no rows under it - an empty frame that reads as missing documentation
+                // rather than as a model that has no properties to list.
+                model.vendorExtensions.put(HAS_PROPERTIES, hasProperties(model));
+
                 markProperties(model.name, model.vars);
                 markProperties(model.parent, model.parentVars);
                 markProperties(model.name, model.allVars);
@@ -498,6 +505,19 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         }
 
         return securities;
+    }
+
+    /**
+     * Whether the model has a row to put in its properties table. Inherited properties count:
+     * the template prints those too, so a model that only carries a parent's fields still has
+     * something to show.
+     */
+    private static boolean hasProperties(CodegenModel model) {
+        if (model.vars != null && !model.vars.isEmpty()) {
+            return true;
+        }
+
+        return model.parent != null && model.parentVars != null && !model.parentVars.isEmpty();
     }
 
     private void markProperties(String modelName, List<CodegenProperty> properties) {

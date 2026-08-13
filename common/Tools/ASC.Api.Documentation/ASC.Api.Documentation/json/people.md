@@ -3581,9 +3581,6 @@ The account information parameters.
 ### Model AccountLoginType
 [0 - SSO, 1 - LDAP, 2 - Standart]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model ApiDateTime
 The API date and time parameters.
@@ -3635,9 +3632,6 @@ The response data for the API key operations.
 
 ### Model Area
 [0 - All, 1 - People, 2 - Guests]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model BooleanWrapper
@@ -3724,9 +3718,6 @@ The theme settings request parameters.
 ### Model DarkThemeSettingsType
 [Base - Base, Dark - Dark, System - System]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model DarkThemeSettingsWrapper
 
@@ -3741,9 +3732,6 @@ The theme settings request parameters.
 
 ### Model DistributedTaskStatus
 [0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model EmailInvitationDto
@@ -3766,9 +3754,6 @@ The request parameters for the user email.
 
 ### Model EmployeeActivationStatus
 [0 - Not activated, 1 - Activated, 2 - Pending, 4 - Auto generated]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model EmployeeArrayWrapper
@@ -3875,15 +3860,9 @@ The full list of user parameters.
 ### Model EmployeeStatus
 [1 - Active, 2 - Terminated, 4 - Pending, 5 - Default, 7 - All]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model EmployeeType
 [All - All, RoomAdmin - Room admin, Guest - Guest, DocSpaceAdmin - DocSpace admin, User - User]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model EmployeeWrapper
@@ -4041,9 +4020,6 @@ The member request.
 ### Model MobilePhoneActivationStatus
 [0 - Not activated, 1 - Activated]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model NoContentResult
 
@@ -4088,22 +4064,13 @@ The member request.
 ### Model Payments
 [0 - Paid, 1 - Free]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model QuotaFilter
 [0 - All, 1 - Default, 2 - Custom]
 
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
-
 
 ### Model RecaptchaType
 [0 - Default, 1 - AndroidV2, 2 - iOSV2, 3 - hCaptcha]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model STRINGArrayWrapper
@@ -4138,9 +4105,6 @@ The request parameters for creating a third-party account.
 
 ### Model SortOrder
 [0 - Ascending, 1 - Descending]
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model StartReassignRequestDto
@@ -4292,9 +4256,6 @@ The request parameters for updating a user quota.
 
 ### Model UpdateMembersQuotaRequestDto.quota
 The quota in JSON format.
-
-| Name | Type | Description | Notes |
-|------------ | ------------- | ------------- | -------------|
 
 
 ### Model UpdateMembersRequestDto
