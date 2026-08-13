@@ -51,6 +51,7 @@ import { textToDocxController } from "./controllers/textToDocxController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
+import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
 import { promptsController } from "./controllers/promptsController.js";
@@ -205,6 +206,19 @@ export default function registerRoutes(app: Application): void {
   router.put("/config/user", settingsController.setUserSettings);
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
+
+  // OpenAI-compatible passthrough for the document editor's AI plugin
+  // (external-provider transport). Explicit sub-paths only — the allowlist
+  // is the registration itself. The request body is raw here: `app.ts`
+  // skips the JSON body parser for `/openai/*`.
+  router.post(
+    "/openai/:profileId/v1/chat/completions",
+    openaiPassthroughController.chatCompletions,
+  );
+  router.post(
+    "/openai/:profileId/v1/images/generations",
+    openaiPassthroughController.imagesGenerations,
+  );
 
   let total = 0;
   for (const binding of ENGINE_DOCS) {
