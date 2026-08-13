@@ -47,7 +47,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.lettuce.core.api.StatefulConnection;
+import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -55,8 +58,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -108,7 +111,19 @@ public class ClientCacheConfiguration {
     if (properties.getPassword() != null && !properties.getPassword().isEmpty())
       config.setPassword(properties.getPassword());
 
-    var clientConfigBuilder = LettuceClientConfiguration.builder();
+    var pool =
+        properties.getPool() != null
+            ? properties.getPool()
+            : new ClientCacheConfigurationProperties.Pool();
+    var poolConfig = new GenericObjectPoolConfig<StatefulConnection<?, ?>>();
+    poolConfig.setMaxTotal(pool.getMaxActive());
+    poolConfig.setMaxIdle(pool.getMaxIdle());
+    poolConfig.setMinIdle(pool.getMinIdle());
+    poolConfig.setMaxWait(pool.getMaxWait() != null ? pool.getMaxWait() : Duration.ofMillis(200));
+
+    var timeout = properties.getTimeout() != null ? properties.getTimeout() : Duration.ofSeconds(2);
+    var clientConfigBuilder =
+        LettucePoolingClientConfiguration.builder().commandTimeout(timeout).poolConfig(poolConfig);
     if (properties.isSsl()) clientConfigBuilder.useSsl();
 
     var factory = new LettuceConnectionFactory(config, clientConfigBuilder.build());
