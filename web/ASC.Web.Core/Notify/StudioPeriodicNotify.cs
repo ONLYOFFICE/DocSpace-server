@@ -253,39 +253,35 @@ public class StudioPeriodicNotify(
 
                 #endregion
 
+                #region 14 days after registration to admins and users SAAS (any tariff)
+
+                else if (createdDate.AddDays(14) == nowDate)
+                {
+                    action = serviceProvider.GetService<SaasAdminUserAppsTipsV1NotifyAction>();
+                    paymentMessage = false;
+                    toadmins = true;
+                    tousers = true;
+
+                    topGif = studioNotifyHelper.GetNotificationImageUrl("free_apps.gif");
+
+                    img1 = studioNotifyHelper.GetNotificationImageUrl("windows.png");
+                    img2 = studioNotifyHelper.GetNotificationImageUrl("apple.png");
+                    img3 = studioNotifyHelper.GetNotificationImageUrl("linux.png");
+                    img4 = studioNotifyHelper.GetNotificationImageUrl("android.png");
+
+                    url1 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("downloaddesktop", c);
+                    url2 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("downloadmobile", c);
+
+                    trulyYoursAsTebleRow = true;
+                }
+
+                #endregion
+
                 else if (quota.Free)
                 {
-                    #region After registration letters
-
-                    #region 14 days after registration to admins and users SAAS Free
-
-                    if (createdDate.AddDays(14) == nowDate)
-                    {
-                        action = serviceProvider.GetService<SaasAdminUserAppsTipsV1NotifyAction>();
-                        paymentMessage = false;
-                        toadmins = true;
-                        tousers = true;
-
-                        topGif = studioNotifyHelper.GetNotificationImageUrl("free_apps.gif");
-
-                        img1 = studioNotifyHelper.GetNotificationImageUrl("windows.png");
-                        img2 = studioNotifyHelper.GetNotificationImageUrl("apple.png");
-                        img3 = studioNotifyHelper.GetNotificationImageUrl("linux.png");
-                        img4 = studioNotifyHelper.GetNotificationImageUrl("android.png");
-
-                        url1 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("downloaddesktop", c);
-                        url2 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("downloadmobile", c);
-
-                        trulyYoursAsTebleRow = true;
-                    }
-
-                    #endregion
-
-                    #endregion
-
                     #region 1 year whithout activity to owner SAAS Free
 
-                    else if (nowDate.Day == tenant.CreationDateTime.Day || nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
+                    if (nowDate.Day == tenant.CreationDateTime.Day || nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                     {
                         var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
                         var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
