@@ -35,146 +35,39 @@ namespace ASC.Notify.Tests;
 
 /// <summary>
 /// The "Discover 4 handy apps" letter (<c>saas_admin_handy_apps_v1</c>), sent in SaaS on day 2 after
-/// portal registration to the owner and the DocSpace admins.
-///
-/// <see cref="Letter_HasNoUnresolvedTags"/> renders it and checks the result — it needs nothing but the
-/// resources and runs in every test pass. <see cref="Letter_IsDeliveredToMailPit"/> additionally drops
-/// the letter into the MailPit inbox of the local Aspire stack so it can be reviewed in a mail client;
-/// it is skipped when MailPit is not running.
+/// portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminHandyAppsLetterTests
+public class SaasAdminHandyAppsLetterTests : LetterTestBase
 {
-    private const string PortalUrl = "http://localhost:8092";
-    private const string SiteUrl = "https://www.onlyoffice.com";
-    private const string LogoText = "ONLYOFFICE";
-    private const string RecipientName = "FirstName";
+    protected override string LetterId => "saas_admin_handy_apps_v1";
 
-    /// <summary>
-    /// What <c>StudioNotifyHelper.GetNotificationImageUrl</c> is based on — <c>web:notification:image:path</c>
-    /// in production, the local portal here.
-    /// </summary>
-    private const string NotificationImagePath = $"{PortalUrl}/static/images/notifications";
-
-    /// <summary>Culture of the recipient — change it to preview a translated letter.</summary>
-    private const string CultureName = "en-US";
-
-    private static readonly IPattern _pattern = new EmailPattern(
+    protected override IPattern Pattern => new EmailPattern(
         () => WebstudioNotifyPatternResource.subject_saas_admin_handy_apps_v1,
         () => WebstudioNotifyPatternResource.pattern_saas_admin_handy_apps_v1);
 
-    [Fact]
-    public async Task Letter_HasNoUnresolvedTags()
+    /// <summary>Mirrors the day-2 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
+    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
-        var culture = CultureInfo.GetCultureInfo(CultureName);
-
-        var letter = await LetterPreview.RenderAsync(_pattern, BuildTags(culture), culture);
-
-        letter.Subject.Should().Be($"Discover 4 handy apps inside your {LogoText}");
-
-        letter.Body.Should().Contain($"{LogoText} Files")
-            .And.Contain($"{LogoText} Rooms")
-            .And.Contain($"{LogoText} Forms")
-            .And.Contain($"{LogoText} AI Agents")
-            .And.Contain($"Go to your {LogoText}")
-            .And.Contain(PortalUrl)
-            .And.Contain("Truly Yours");
-
-        // Every tag the pattern uses must have been substituted: a missing TagValue would leave the
-        // raw "$Tag" / "${Tag}" in the letter, which is exactly what a reader would see.
-        letter.Body.Should().NotContain("$UserName")
-            .And.NotContain("$OrangeButton")
-            .And.NotContain("$TrulyYours")
-            .And.NotContain("${" + CommonTags.LetterLogoText + "}");
-
-        await SaveForReviewAsync(letter);
+        return [OrangeButton("ButtonGoToDocSpace", culture, LetterEnvironment.PortalUrl)];
     }
 
-    /// <summary>
-    /// Also drops the rendered letter next to the test binaries, so it can be opened in a browser when
-    /// MailPit is not running.
-    /// </summary>
-    private static async Task SaveForReviewAsync(RenderedLetter letter)
+    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
-        var directory = Path.Combine(AppContext.BaseDirectory, "letter-preview");
-        Directory.CreateDirectory(directory);
-
-        var path = Path.Combine(directory, "saas_admin_handy_apps_v1.html");
-
-        await File.WriteAllTextAsync(path, letter.Body, TestContext.Current.CancellationToken);
-
-        TestContext.Current.TestOutputHelper?.WriteLine($"Subject: {letter.Subject}");
-        TestContext.Current.TestOutputHelper?.WriteLine($"Rendered letter: {path}");
+        letter.Body.Should().Contain(RecipientName)
+            .And.Contain(Resource("ButtonGoToDocSpace", culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
+            .And.Contain(LetterEnvironment.PortalUrl);
     }
 
-    [Fact]
-    public async Task Letter_IsDeliveredToMailPit()
+    protected override void AssertDefaultCultureText(RenderedLetter letter)
     {
-        var cancellationToken = TestContext.Current.CancellationToken;
+        var logoText = LetterEnvironment.LogoText;
 
-        var endpoint = await MailPitEndpoint.ResolveAsync(cancellationToken);
+        letter.Subject.Should().Be($"Discover 4 handy apps inside your {logoText}");
 
-        if (endpoint == null)
-        {
-            Assert.Skip("MailPit is not running. Start the stack with "
-                + "`dotnet run --project common/ASC.AppHost --launch-profile development`, "
-                + "or point MAILPIT_SMTP=host:port and MAILPIT_HTTP=http://host:port at an existing instance.");
-
-            return;
-        }
-
-        var culture = CultureInfo.GetCultureInfo(CultureName);
-        var letter = await LetterPreview.RenderAsync(_pattern, BuildTags(culture), culture);
-
-        // A unique address per run, so the assertion below finds this letter and not one left over
-        // from an earlier run or from the portal itself.
-        var address = $"handy-apps-{Guid.NewGuid():N}@preview.onlyoffice.io";
-
-        var inbox = new MailPitInbox(endpoint);
-
-        await inbox.SendAsync(address, letter.Subject, letter.Body, cancellationToken);
-
-        var delivered = await inbox.WaitForMessageAsync(address, TimeSpan.FromSeconds(15), cancellationToken);
-
-        delivered.Should().NotBeNull("the letter should show up in the MailPit inbox");
-        delivered!.Subject.Should().Be(letter.Subject);
-
-        TestContext.Current.TestOutputHelper?.WriteLine($"Letter delivered to {address}");
-        TestContext.Current.TestOutputHelper?.WriteLine($"Open it in MailPit: {inbox.GetMessageUrl(delivered)}");
-    }
-
-    /// <summary>
-    /// The tag values the letter is rendered with. In production they come from
-    /// <c>BasePeriodicNotifyAction.Init</c> (called by <c>StudioPeriodicNotify.SendSaasLettersAsync</c>)
-    /// and from <c>NotifyConfiguration</c>; here they are sample data, kept in the same shape.
-    /// </summary>
-    private static List<ITagValue> BuildTags(CultureInfo culture)
-    {
-        return
-        [
-            new TagValue(CommonTags.Culture, culture.Name),
-            new TagValue(CommonTags.UserName, RecipientName),
-            TagValues.OrangeButton(GetString("ButtonGoToDocSpace", culture), PortalUrl),
-            TagValues.TrulyYours(SiteUrl, GetString("TrulyYoursText", culture), true),
-
-            // The letter has no top image of its own, so the tenant letter logo is rendered instead —
-            // the same as in production, where the sending code leaves TopGif empty for this letter.
-            new TagValue(CommonTags.TopGif, string.Empty),
-            new TagValue(CommonTags.ImagePath, NotificationImagePath),
-            new TagValue(CommonTags.LetterLogoText, LogoText),
-
-            // "common" is what an owner/admin recipient gets (see BasePeriodicNotifyAction.Init).
-            new TagValue(CommonTags.Footer, "common"),
-            new TagValue(CommonTags.MailWhiteLabelSettings, new MailWhiteLabelSettings().GetDefault()),
-
-            new TagValue(CommonTags.VirtualRootPath, PortalUrl),
-            new TagValue(CommonTags.VirtualRootHost, new Uri(PortalUrl).Host),
-            new TagValue(CommonTags.RecipientSubscriptionConfigURL, $"{PortalUrl}/unsubscribe")
-        ];
-    }
-
-    private static string GetString(string key, CultureInfo culture)
-    {
-        return WebstudioNotifyPatternResource.ResourceManager.GetString(key, culture)
-            ?? throw new InvalidOperationException($"Resource key '{key}' is missing.");
+        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+            .And.Contain($"{logoText} Files")
+            .And.Contain($"{logoText} Rooms")
+            .And.Contain($"{logoText} Forms")
+            .And.Contain($"{logoText} AI Agents");
     }
 }

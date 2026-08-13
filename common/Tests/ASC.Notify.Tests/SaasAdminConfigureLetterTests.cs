@@ -36,160 +36,55 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The "Configure your ONLYOFFICE" letter (<c>saas_admin_configure_v1</c>), sent in SaaS on day 3 after
 /// portal registration to the owner and the DocSpace admins, regardless of the tariff.
-///
-/// <see cref="Letter_HasNoUnresolvedTags"/> renders it and checks the result — it needs nothing but the
-/// resources and runs in every test pass. <see cref="Letter_IsDeliveredToMailPit"/> additionally drops
-/// the letter into the MailPit inbox of the local Aspire stack so it can be reviewed in a mail client;
-/// it is skipped when MailPit is not running.
 /// </summary>
-public class SaasAdminConfigureLetterTests
+public class SaasAdminConfigureLetterTests : LetterTestBase
 {
-    private const string PortalUrl = "http://localhost:8092";
-    private const string SiteUrl = "https://www.onlyoffice.com";
-    private const string HelpCenterUrl = "https://helpcenter.onlyoffice.com";
-    private const string LogoText = "ONLYOFFICE";
-    private const string RecipientName = "FirstName";
+    private static string SettingsUrl => LetterEnvironment.PortalLink("portal-settings");
+    private static string TariffUrl => LetterEnvironment.PortalLink("billing/tariff-plan");
 
-    private const string SettingsUrl = $"{PortalUrl}/portal-settings";
-    private const string TariffUrl = $"{PortalUrl}/billing/tariff-plan";
+    private static string HelpCenterUrl(CultureInfo culture)
+    {
+        return LetterEnvironment.ExternalDomain(LetterEnvironment.ExternalResources.Helpcenter, culture, "https://helpcenter.onlyoffice.com");
+    }
 
-    /// <summary>
-    /// What <c>StudioNotifyHelper.GetNotificationImageUrl</c> is based on — <c>web:notification:image:path</c>
-    /// in production, the local portal here.
-    /// </summary>
-    private const string NotificationImagePath = $"{PortalUrl}/static/images/notifications";
+    protected override string LetterId => "saas_admin_configure_v1";
 
-    /// <summary>The top image the sending code sets for this letter (see <c>SendSaasLettersAsync</c>).</summary>
-    private const string TopGif = $"{NotificationImagePath}/configure_docspace.gif";
-
-    /// <summary>Culture of the recipient — change it to preview a translated letter.</summary>
-    private const string CultureName = "en-US";
-
-    private static readonly IPattern _pattern = new EmailPattern(
+    protected override IPattern Pattern => new EmailPattern(
         () => WebstudioNotifyPatternResource.subject_saas_admin_configure_v1,
         () => WebstudioNotifyPatternResource.pattern_saas_admin_configure_v1);
 
-    [Fact]
-    public async Task Letter_HasNoUnresolvedTags()
-    {
-        var culture = CultureInfo.GetCultureInfo(CultureName);
+    /// <summary>The sending code sets a top image for this letter.</summary>
+    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("configure_docspace.gif");
 
-        var letter = await LetterPreview.RenderAsync(_pattern, BuildTags(culture), culture);
-
-        letter.Subject.Should().Be($"Configure your {LogoText}");
-
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
-            .And.Contain($"Adjust the settings of your {LogoText}")
-            .And.Contain("Set password strength")
-            .And.Contain("Enable two-factor authentication and Single Sign-On")
-            .And.Contain("Control whether users can create public links")
-            .And.Contain("Enable automatic data backup")
-            .And.Contain("Configure now")
-            .And.Contain(SettingsUrl)
-            .And.Contain(TariffUrl)
-            .And.Contain(HelpCenterUrl)
-            .And.Contain(TopGif)
-            .And.Contain("Truly Yours");
-
-        // Every tag the pattern uses must have been substituted: a missing TagValue would leave the
-        // raw "$Tag" / "${Tag}" in the letter, which is exactly what a reader would see.
-        letter.Body.Should().NotContain("$UserName")
-            .And.NotContain("$OrangeButton")
-            .And.NotContain("$TrulyYours")
-            .And.NotContain("$URL1")
-            .And.NotContain("$URL2")
-            .And.NotContain("${" + CommonTags.LetterLogoText + "}");
-
-        await SaveForReviewAsync(letter);
-    }
-
-    /// <summary>
-    /// Also drops the rendered letter next to the test binaries, so it can be opened in a browser when
-    /// MailPit is not running.
-    /// </summary>
-    private static async Task SaveForReviewAsync(RenderedLetter letter)
-    {
-        var directory = Path.Combine(AppContext.BaseDirectory, "letter-preview");
-        Directory.CreateDirectory(directory);
-
-        var path = Path.Combine(directory, "saas_admin_configure_v1.html");
-
-        await File.WriteAllTextAsync(path, letter.Body, TestContext.Current.CancellationToken);
-
-        TestContext.Current.TestOutputHelper?.WriteLine($"Subject: {letter.Subject}");
-        TestContext.Current.TestOutputHelper?.WriteLine($"Rendered letter: {path}");
-    }
-
-    [Fact]
-    public async Task Letter_IsDeliveredToMailPit()
-    {
-        var cancellationToken = TestContext.Current.CancellationToken;
-
-        var endpoint = await MailPitEndpoint.ResolveAsync(cancellationToken);
-
-        if (endpoint == null)
-        {
-            Assert.Skip("MailPit is not running. Start the stack with "
-                + "`dotnet run --project common/ASC.AppHost --launch-profile development`, "
-                + "or point MAILPIT_SMTP=host:port and MAILPIT_HTTP=http://host:port at an existing instance.");
-
-            return;
-        }
-
-        var culture = CultureInfo.GetCultureInfo(CultureName);
-        var letter = await LetterPreview.RenderAsync(_pattern, BuildTags(culture), culture);
-
-        // A unique address per run, so the assertion below finds this letter and not one left over
-        // from an earlier run or from the portal itself.
-        var address = $"configure-{Guid.NewGuid():N}@preview.onlyoffice.io";
-
-        var inbox = new MailPitInbox(endpoint);
-
-        await inbox.SendAsync(address, letter.Subject, letter.Body, cancellationToken);
-
-        var delivered = await inbox.WaitForMessageAsync(address, TimeSpan.FromSeconds(15), cancellationToken);
-
-        delivered.Should().NotBeNull("the letter should show up in the MailPit inbox");
-        delivered!.Subject.Should().Be(letter.Subject);
-
-        TestContext.Current.TestOutputHelper?.WriteLine($"Letter delivered to {address}");
-        TestContext.Current.TestOutputHelper?.WriteLine($"Open it in MailPit: {inbox.GetMessageUrl(delivered)}");
-    }
-
-    /// <summary>
-    /// The tag values the letter is rendered with. In production they come from
-    /// <c>BasePeriodicNotifyAction.Init</c> (called by <c>StudioPeriodicNotify.SendSaasLettersAsync</c>)
-    /// and from <c>NotifyConfiguration</c>; here they are sample data, kept in the same shape.
-    /// </summary>
-    private static List<ITagValue> BuildTags(CultureInfo culture)
+    /// <summary>Mirrors the day-3 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
+    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
         return
         [
-            new TagValue(CommonTags.Culture, culture.Name),
-            new TagValue(CommonTags.UserName, RecipientName),
-            TagValues.OrangeButton(GetString("ButtonConfigureRightNow", culture), SettingsUrl),
-            TagValues.TrulyYours(SiteUrl, GetString("TrulyYoursText", culture), true),
-
-            new TagValue("URL1", HelpCenterUrl),
-            new TagValue("URL2", TariffUrl),
-
-            new TagValue(CommonTags.TopGif, TopGif),
-            new TagValue(CommonTags.ImagePath, NotificationImagePath),
-            new TagValue(CommonTags.LetterLogoText, LogoText),
-
-            // "common" is what an owner/admin recipient gets (see BasePeriodicNotifyAction.Init).
-            new TagValue(CommonTags.Footer, "common"),
-            new TagValue(CommonTags.MailWhiteLabelSettings, new MailWhiteLabelSettings().GetDefault()),
-
-            new TagValue(CommonTags.VirtualRootPath, PortalUrl),
-            new TagValue(CommonTags.VirtualRootHost, new Uri(PortalUrl).Host),
-            new TagValue(CommonTags.RecipientSubscriptionConfigURL, $"{PortalUrl}/unsubscribe")
+            OrangeButton("ButtonConfigureRightNow", culture, SettingsUrl),
+            new TagValue("URL1", HelpCenterUrl(culture)),
+            new TagValue("URL2", TariffUrl)
         ];
     }
 
-    private static string GetString(string key, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
-        return WebstudioNotifyPatternResource.ResourceManager.GetString(key, culture)
-            ?? throw new InvalidOperationException($"Resource key '{key}' is missing.");
+        letter.Body.Should().Contain(RecipientName)
+            .And.Contain(Resource("ButtonConfigureRightNow", culture))
+            .And.Contain(SettingsUrl)
+            .And.Contain(TariffUrl)
+            .And.Contain(HelpCenterUrl(culture));
+    }
+
+    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    {
+        letter.Subject.Should().Be($"Configure your {LetterEnvironment.LogoText}");
+
+        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+            .And.Contain($"Adjust the settings of your {LetterEnvironment.LogoText}")
+            .And.Contain("Set password strength")
+            .And.Contain("Enable two-factor authentication and Single Sign-On")
+            .And.Contain("Control whether users can create public links")
+            .And.Contain("Enable automatic data backup");
     }
 }

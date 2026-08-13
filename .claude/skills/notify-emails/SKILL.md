@@ -101,9 +101,17 @@ Common tags come free from `NotifyConfiguration` — exact names in
 `${__SalesEmail}`, `${__SupportEmail}`, `${__SiteLink}`, `${__DateTime}`, `${LetterLogoText}`,
 `$ProfileUrl`, `$ImagePath`, `$RecipientSubscriptionConfigURL`.
 
-`${LetterLogoText}` is special: `WhiteLabelInterceptor` replaces it on the **final message body**,
-after tag substitution — so it also works *inside* tag values (button label, signature). That is why
-`ButtonGoToDocSpace` can be `Go to your ${LetterLogoText}`.
+**Never write the product name or a URL into the pattern text.** Two hard rules, both enforced by the
+letter tests (§9):
+
+- The word `ONLYOFFICE` must always be `${LetterLogoText}`, so a white-labelled portal sends its own
+  branding. It works everywhere, including inside tag values, because `WhiteLabelInterceptor` replaces
+  it on the **final message body** after tag substitution — that is why `ButtonGoToDocSpace` can be
+  `Go to your ${LetterLogoText}` and `TrulyYoursText` can be `Truly Yours, ${LetterLogoText} Team`.
+- External links come from `externalresources.json` (`ExternalResourceSettingsHelper`, resolved for the
+  recipient's culture) and portal links from `CommonLinkUtility` — passed in as `$URL1`…`$URL14` /
+  `${__VirtualRootPath}` / `${__SupportLink}`. A hard-coded `https://…` in a pattern breaks regional
+  domains and white-labelling.
 
 `$Footer` selects the footer block in `TextileStyler`: `"common"`, `"social"`, `"opensource"`, or
 `null` for none.
@@ -217,35 +225,81 @@ was published on); `../Logs/notify.log` shows what the notify service did.
 
 ## 9. Look at the letter (preview test)
 
-`common/Tests/ASC.Notify.Tests` renders a letter through the real pipeline (resources →
-`NVelocityPatternFormatter` → `TextileStyler` → `HtmlMaster`) with sample tag values, writes the HTML
-next to the test binaries and, when MailPit is running, delivers it to the inbox:
+**Every new letter gets a test in `common/Tests/ASC.Notify.Tests`.** The harness renders it through the
+real pipeline (resources → `NVelocityPatternFormatter` → `TextileStyler` → `HtmlMaster`), saves the HTML
+and — when MailPit is running — delivers it to the inbox:
 
 ```bash
 dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
 ```
 
-- `Letter_HasNoUnresolvedTags` always runs: asserts the subject, the key phrases, and that no raw
-  `$Tag` / `${Tag}` survived, then saves
-  `common/Tests/ASC.Notify.Tests/bin/Debug/net10.0/letter-preview/<id>.html` for a browser.
-- `Letter_IsDeliveredToMailPit` sends the letter over SMTP and asserts it arrived, printing the MailPit
-  message URL. It **skips** when MailPit is not reachable, so it is harmless in
-  `dotnet test ASC.Tests.slnx`. Start the stack with
-  `dotnet run --project common/ASC.AppHost --launch-profile development`, or point
-  `MAILPIT_SMTP=host:port` / `MAILPIT_HTTP=http://host:port` at an existing instance. Ports are
-  discovered automatically from the running `mailpit` container, since Aspire publishes them on random
-  host ports.
+A letter test derives from `LetterTestBase` and describes only its own letter; everything shared lives in
+`Infrastructure/`:
 
-To preview a new letter, copy `SaasAdminHandyAppsLetterTests.cs`: swap the `EmailPattern` for the new
-`subject_*`/`pattern_*` pair and adjust `BuildTags` to the tags that letter's `Init` sets. Change
-`CultureName` to preview a translated version. Note that the preview supplies the tag *values* itself —
-it verifies the template and the markup, not the recipient selection or the schedule condition.
+```csharp
+public class SaasAdminConfigureLetterTests : LetterTestBase
+{
+    protected override string LetterId => "saas_admin_configure_v1";
+
+    protected override IPattern Pattern => new EmailPattern(
+        () => WebstudioNotifyPatternResource.subject_saas_admin_configure_v1,
+        () => WebstudioNotifyPatternResource.pattern_saas_admin_configure_v1);
+
+    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("configure_docspace.gif");
+
+    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture) =>
+    [
+        OrangeButton("ButtonConfigureRightNow", culture, LetterEnvironment.PortalLink("portal-settings")),
+        new TagValue("URL1", LetterEnvironment.ExternalDomain(LetterEnvironment.ExternalResources.Helpcenter, culture, "https://helpcenter.onlyoffice.com")),
+        new TagValue("URL2", LetterEnvironment.PortalLink("billing/tariff-plan"))
+    ];
+
+    protected override void AssertContent(RenderedLetter letter, CultureInfo culture) { /* links, in any culture */ }
+
+    protected override void AssertDefaultCultureText(RenderedLetter letter) { /* English wording */ }
+}
+```
+
+`BuildLetterTags` and `TopGif` must mirror that letter's block in `StudioPeriodicNotify` one-to-one —
+same resource keys, same links, and the top image included whenever the sending code sets `topGif`
+(the harness asserts it reached the letter).
+
+Two tests are generated per culture:
+
+- **`Letter_Renders`** — always runs. Checks, for free: no raw `$Tag`/`${Tag}` survived (tag list taken
+  from the pattern itself), the product name is not hard-coded, no `http(s)://` is hard-coded in the
+  pattern, the top image / letter logo, the signature. Then your `AssertContent`, and
+  `AssertDefaultCultureText` for `en-US` only (another culture may carry a translation). Saves
+  `bin/Debug/net10.0/letter-preview/<letter-id>.<culture>.html`.
+- **`Letter_IsDeliveredToMailPit`** — sends over SMTP, asserts arrival, prints the message URL. **Skips**
+  when MailPit is unreachable, so it is harmless in `dotnet test ASC.Tests.slnx`. Start the stack with
+  `dotnet run --project common/ASC.AppHost --launch-profile development`; the SMTP/web ports are read
+  from the running `mailpit` container (Aspire publishes them on random host ports), or set
+  `MAILPIT_SMTP=host:port` / `MAILPIT_HTTP=http://host:port`.
+
+`Infrastructure/LetterEnvironment.cs` is the only place that knows the surroundings, and they match the
+local Aspire stack: portal at `http://localhost:8092` (`PORTAL_URL` overrides), notification images at
+`{portal}/static/images/notifications`, branding from `BaseWhiteLabelSettings.DefaultLogoText`, external
+links from `buildtools/config/externalresources.json` when it is there (with fallbacks when it is not).
+**A letter test must not hard-code a URL** — use `PortalLink`, `NotificationImageUrl`, `ExternalDomain`,
+`ExternalEntry`.
+
+Cultures come from `Infrastructure/LetterCultures.cs` (`en-US` by default). Add them there permanently,
+or per run:
+
+```bash
+LETTER_CULTURES=en-US,ru-RU,de-DE dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
+```
+
+The preview supplies the tag *values* itself, so it verifies the template, the markup and the
+substitutions — not the recipient selection or the schedule condition.
 
 ## Reference letters to copy from
 
 - **HTML marketing letter, tariff-independent, day N after registration**:
-  `saas_admin_handy_apps_v1` (action `SaasAdminHandyAppsV1NotifyAction`, block at the top of
-  `SendSaasLettersAsync`).
+  `saas_admin_handy_apps_v1` (no top image, one button) and `saas_admin_configure_v1` (top gif, extra
+  `$URL1`/`$URL2` links) — the two blocks at the top of `SendSaasLettersAsync`, each with a test in
+  `common/Tests/ASC.Notify.Tests`.
 - **HTML letter with images and many links**: `saas_video_guides_v1`, `docs_tips`.
 - **Plain textile transactional letter**: `low_wallet_balance`, `password_changed`.
 - **Same letter for several editions**: `docs_tips` is reused by the SaaS, Enterprise and Opensource

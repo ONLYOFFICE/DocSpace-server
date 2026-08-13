@@ -34,7 +34,7 @@
 namespace ASC.Notify.Tests.Infrastructure;
 
 /// <summary>The rendered letter, exactly as the SMTP sender would hand it to MailKit.</summary>
-internal sealed record RenderedLetter(string Subject, string Body);
+public sealed record RenderedLetter(string Subject, string Body);
 
 /// <summary>
 /// Renders a letter the way the notify engine does, but without a portal: pattern text from the
@@ -92,68 +92,19 @@ internal static class LetterPreview
             : text.Replace("${" + CommonTags.LetterLogoText + "}", logoText);
     }
 
+    /// <summary>
+    /// The styler resolves the footer, the social links and the site link through the
+    /// <c>externalresources</c> configuration, so it is built from the same
+    /// <see cref="LetterEnvironment.Configuration"/> the tests take their links from.
+    /// </summary>
     private static TextileStyler CreateStyler()
     {
-        var configuration = BuildConfiguration();
+        var configuration = LetterEnvironment.Configuration;
 
         return new TextileStyler(
             new CoreBaseSettings(configuration),
             configuration,
             new InstanceCrypto(new MachinePseudoKeys(configuration)),
-            new ExternalResourceSettingsHelper(configuration));
-    }
-
-    /// <summary>
-    /// The styler needs the <c>externalresources</c> section for the footer and social links. It lives
-    /// in the buildtools config next to the repository, so it is picked up when present and simply
-    /// left out otherwise (the letter still renders, with empty footer links).
-    /// </summary>
-    private static IConfiguration BuildConfiguration()
-    {
-        var builder = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                // Any value works: only the unsubscribe link is encrypted with it, and the preview
-                // passes RecipientSubscriptionConfigURL, which short-circuits that path.
-                ["core:machinekey"] = "letter-preview"
-            });
-
-        var externalResources = FindExternalResourcesConfig();
-
-        if (externalResources != null)
-        {
-            builder.AddJsonFile(externalResources, optional: true);
-        }
-
-        return builder.Build();
-    }
-
-    private static string? FindExternalResourcesConfig()
-    {
-        const string fileName = "externalresources.json";
-
-        var pathToConf = Environment.GetEnvironmentVariable("pathToConf");
-
-        if (!string.IsNullOrEmpty(pathToConf) && File.Exists(Path.Combine(pathToConf, fileName)))
-        {
-            return Path.Combine(pathToConf, fileName);
-        }
-
-        // From bin/Debug/<tfm> up to the docspace root, where buildtools/ sits next to server/.
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-        while (directory != null)
-        {
-            var candidate = Path.Combine(directory.FullName, "buildtools", "config", fileName);
-
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            directory = directory.Parent;
-        }
-
-        return null;
+            LetterEnvironment.ExternalResources);
     }
 }
