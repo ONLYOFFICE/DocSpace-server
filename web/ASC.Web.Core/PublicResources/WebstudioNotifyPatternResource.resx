@@ -2127,12 +2127,12 @@ $OrangeButton
 $TrulyYours</comment>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace: complete registration
+    <value>h1. Complete ${LetterLogoText} registration
 
 
 Hello!
 
-You are invited to complete registration for ${LetterLogoText} DocSpace at "${__VirtualRootPath}":"${__VirtualRootPath}". Enter your name and set a password by clicking the link:
+You are invited to complete ${LetterLogoText} registration at "${__VirtualRootPath}":"${__VirtualRootPath}". Enter your name and set a password by clicking the link:
 
 $OrangeButton
 
@@ -2788,7 +2788,7 @@ $TrulyYours</value>
     <value>Join ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: complete registration</value>
+    <value>Complete ${LetterLogoText} registration</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Join ${__VirtualRootHost}</value>

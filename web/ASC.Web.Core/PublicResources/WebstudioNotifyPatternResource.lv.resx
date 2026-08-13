@@ -1453,12 +1453,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace: pabeidziet reģistrāciju
+    <value>h1. ${LetterLogoText}: pabeidziet reģistrāciju
 
 
 Sveiki!
 
-Jūs esat aicināts pabeigt reģistrāciju ${LetterLogoText} DocSpace tīmekļa vietnē "${__VirtualRootPath}":"${__VirtualRootPath}". Ievadiet savu vārdu un iestatiet paroli, noklikšķinot uz saites:
+Jūs esat aicināts pabeigt reģistrāciju ${LetterLogoText} tīmekļa vietnē "${__VirtualRootPath}":"${__VirtualRootPath}". Ievadiet savu vārdu un iestatiet paroli, noklikšķinot uz saites:
 
 $OrangeButton
 
@@ -2021,7 +2021,7 @@ $TrulyYours</value>
     <value>Pievienojieties ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: pabeidziet reģistrāciju</value>
+    <value>${LetterLogoText}: pabeidziet reģistrāciju</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Pievienoties ${__VirtualRootHost}</value>

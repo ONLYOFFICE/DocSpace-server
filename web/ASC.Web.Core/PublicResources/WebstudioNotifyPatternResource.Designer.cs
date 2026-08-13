@@ -2061,12 +2061,12 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. ${LetterLogoText} DocSpace: complete registration
+        ///   Looks up a localized string similar to h1. Complete ${LetterLogoText} registration
         ///
         ///
         ///Hello!
         ///
-        ///You are invited to complete registration for ${LetterLogoText} DocSpace at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Enter your name and set a password by clicking the link:
+        ///You are invited to complete ${LetterLogoText} registration at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Enter your name and set a password by clicking the link:
         ///
         ///$OrangeButton
         ///
@@ -3291,7 +3291,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace: complete registration.
+        ///   Looks up a localized string similar to Complete ${LetterLogoText} registration.
         /// </summary>
         public static string subject_saas_docspace_registration {
             get {

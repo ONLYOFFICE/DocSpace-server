@@ -1975,7 +1975,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpaceに参加しましょう</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace：登録を完了してください</value>
+    <value>${LetterLogoText}：登録を完了してください</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>${__VirtualRootHost}に参加しましょう</value>

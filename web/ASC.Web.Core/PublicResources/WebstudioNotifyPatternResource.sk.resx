@@ -1453,12 +1453,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace: dokončenie registrácie
+    <value>h1. ${LetterLogoText}: dokončenie registrácie
 
 
 Dobrý deň!
 
-Pozývame vás na dokončenie registrácie pre ${LetterLogoText} DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Kliknite na odkaz a zadajte svoje meno a nastavte heslo:
+Pozývame vás na dokončenie registrácie pre ${LetterLogoText} na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Kliknite na odkaz a zadajte svoje meno a nastavte heslo:
 
 $OrangeButton
 
@@ -2021,7 +2021,7 @@ $TrulyYours</value>
     <value>Pripojte sa k ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: dokončenie registrácie</value>
+    <value>${LetterLogoText}: dokončenie registrácie</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Pripojte sa k ${__VirtualRootHost}</value>

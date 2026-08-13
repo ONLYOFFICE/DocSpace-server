@@ -1451,12 +1451,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1.${LetterLogoText} DocSpace: viimeistele rekisteröinti
+    <value>h1.${LetterLogoText}: viimeistele rekisteröinti
 
 
 Hei,
 
-Sinut on kutsuttu viimeistelemään rekisteröinti ${LetterLogoText} DocSpaceen "${__VirtualRootPath}":"${__VirtualRootPath}".
+Sinut on kutsuttu viimeistelemään rekisteröinti ${LetterLogoText}en "${__VirtualRootPath}":"${__VirtualRootPath}".
 Syötä nimesi ja aseta salasana klikkaamalla linkkiä:
 
 $OrangeButton
@@ -2019,7 +2019,7 @@ $TrulyYours</value>
     <value>Liity ${LetterLogoText} DocSpaceen</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: viimeistele rekisteröinti</value>
+    <value>${LetterLogoText}: viimeistele rekisteröinti</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Liity ${__VirtualRootHost}</value>

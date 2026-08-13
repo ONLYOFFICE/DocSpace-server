@@ -1441,12 +1441,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace: Finalizați inregistrarea
+    <value>h1. ${LetterLogoText}: Finalizați inregistrarea
 
 
 Bună!
 
-Sunteţi invitat să finalizați înregistrarea în spaţiul ${LetterLogoText} DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Introduceți numele dvs și setați o parolă apăsând pe linkul:
+Sunteţi invitat să finalizați înregistrarea în spaţiul ${LetterLogoText}  "${__VirtualRootPath}":"${__VirtualRootPath}". Introduceți numele dvs și setați o parolă apăsând pe linkul:
  
 $OrangeButton
  
@@ -1994,7 +1994,7 @@ $TrulyYours</value>
     <value>Asociați-vă spaţiului ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Finalizați inregistrarea</value>
+    <value>${LetterLogoText}: Finalizați inregistrarea</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Asociere ${__VirtualRootHost}</value>

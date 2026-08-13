@@ -1427,12 +1427,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace: пълна регистрация
+    <value>h1. ${LetterLogoText}: пълна регистрация
 
 
 Здравейте!
 
-Поканен/а сте да завършите регистрацията за ${LetterLogoText} DocSpace на адрес "${__VirtualRootPath}":"${__VirtualRootPath}". Въведете вашето име и задайте парола, като кликнете линка:
+Поканен/а сте да завършите регистрацията за ${LetterLogoText} на адрес "${__VirtualRootPath}":"${__VirtualRootPath}". Въведете вашето име и задайте парола, като кликнете линка:
 
 $OrangeButton
 
@@ -1983,7 +1983,7 @@ $TrulyYours</value>
     <value>Присъединете се към ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: пълна регистрация</value>
+    <value>${LetterLogoText}: пълна регистрация</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Присъединете се към ${__VirtualRootHost}</value>

@@ -1446,12 +1446,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace: kaydı tamamlayın
+    <value>h1. ${LetterLogoText}: kaydı tamamlayın
 
 
 Merhaba!
 
-${LetterLogoText} DocSpace için "${__VirtualRootPath}":"${__VirtualRootPath}" adresinden kayıt işlemini tamamlamaya davet edildiniz. Bağlantıya tıklayarak adınızı girin ve bir şifre belirleyin:
+${LetterLogoText} için "${__VirtualRootPath}":"${__VirtualRootPath}" adresinden kayıt işlemini tamamlamaya davet edildiniz. Bağlantıya tıklayarak adınızı girin ve bir şifre belirleyin:
 
 $OrangeButton
 
@@ -2015,7 +2015,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace’e katılın</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: kaydı tamamlayın</value>
+    <value>${LetterLogoText}: kaydı tamamlayın</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Şimdi katılın ${__VirtualRootHost}</value>

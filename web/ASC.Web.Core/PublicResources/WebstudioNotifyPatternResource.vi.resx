@@ -1454,12 +1454,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace: hoàn thành đăng ký
+    <value>h1. ${LetterLogoText}: hoàn thành đăng ký
 
 
 Xin chào bạn!
 
-Bạn được mời hoàn tất đăng ký ${LetterLogoText} DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy nhập tên của bạn và đặt mật khẩu bằng cách nhấp vào liên kết:
+Bạn được mời hoàn tất đăng ký ${LetterLogoText} tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy nhập tên của bạn và đặt mật khẩu bằng cách nhấp vào liên kết:
 
 $OrangeButton
 
@@ -2022,7 +2022,7 @@ $TrulyYours</value>
     <value>Tham gia ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: hoàn thành đăng ký</value>
+    <value>${LetterLogoText}: hoàn thành đăng ký</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Tham gia ${__VirtualRootHost}</value>

@@ -1440,12 +1440,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace՝ ամբողջական գրանցում
+    <value>h1. ${LetterLogoText}՝ ամբողջական գրանցում
 
 
 Ողջու՜յն
 
-Դուք հրավիրված եք լրացնել գրանցումը ${LetterLogoText} DocSpace-ում"${__VirtualRootPath}":"${__VirtualRootPath}". Մուտքագրեք ձեր անունը և գաղտնաբառ սահմանեք, սեղմելով հղման վրա՝
+Դուք հրավիրված եք լրացնել գրանցումը ${LetterLogoText}-ում"${__VirtualRootPath}":"${__VirtualRootPath}". Մուտքագրեք ձեր անունը և գաղտնաբառ սահմանեք, սեղմելով հղման վրա՝
 
 $OrangeButton
 
@@ -1990,7 +1990,7 @@ $TrulyYours</value>
     <value>Միացեք ${LetterLogoText} DocSpace-ին</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace՝ ամբողջական գրանցում</value>
+    <value>${LetterLogoText}՝ ամբողջական գրանցում</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Միացեք ${__VirtualRootHost}-ին</value>

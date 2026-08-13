@@ -1453,12 +1453,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace: 등록 완료
+    <value>h1. ${LetterLogoText}: 등록 완료
 
 
 안녕하세요!
  
-"${__VirtualRootPath}":"${__VirtualRootPath}"에서 ${LetterLogoText} DocSpace에 대한 등록을 완료해 주시기 바랍니다. 링크를 클릭하여 이름을 입력하고 비밀번호를 설정하세요:
+"${__VirtualRootPath}":"${__VirtualRootPath}"에서 ${LetterLogoText}에 대한 등록을 완료해 주시기 바랍니다. 링크를 클릭하여 이름을 입력하고 비밀번호를 설정하세요:
 
 $OrangeButton
 
@@ -2016,7 +2016,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace 가입</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: 등록 완료</value>
+    <value>${LetterLogoText}: 등록 완료</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>${__VirtualRootHost} 가입</value>

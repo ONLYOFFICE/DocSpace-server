@@ -1440,12 +1440,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace: Schließen Sie Ihre Registrierung ab
+    <value>h1. ${LetterLogoText}: Schließen Sie Ihre Registrierung ab
  
  
 Hello!
  
-Sie sind eingeladen, die Registrierung für ${LetterLogoText} DocSpace unter "${__VirtualRootPath}":"${__VirtualRootPath}" abzuschließen. Geben Sie Ihren Namen ein und legen Sie ein Passwort fest, indem Sie auf den Link klicken:
+Sie sind eingeladen, die Registrierung für ${LetterLogoText} unter "${__VirtualRootPath}":"${__VirtualRootPath}" abzuschließen. Geben Sie Ihren Namen ein und legen Sie ein Passwort fest, indem Sie auf den Link klicken:
  
 $OrangeButton
  
@@ -1993,7 +1993,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace beitreten</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Schließen Sie Ihre Registrierung ab</value>
+    <value>${LetterLogoText}: Schließen Sie Ihre Registrierung ab</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>${__VirtualRootHost} beitreten</value>
