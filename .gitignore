@@ -26,12 +26,14 @@ node_modules/
 Logs/
 licenses.csv
 common/*/docker-entrypoint.py
+# ---- ASC.Api.Documentation ----
+# Its inputs stay under revision: json/*_2.0.json, emitted by the service builds, and
+# SDK/json/oauth.json, which comes from ASC.Identity. Nothing derived from them does.
+
+# Rebuilt on every run and kept between runs: the custom generator, and the joined spec that
+# every SDK command reads.
 /common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/target
-# per-service sub-documents the Markdown generation splits the joined spec into
-/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/json/split/
-# openapi-generator bookkeeping written next to the generated Markdown docs
-/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/json/.openapi-generator/
-/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/json/.openapi-generator-ignore
+/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/json/api-docs.json
 
 # DocStore copies (source: common/resources/DocStore submodule)
 products/ASC.AI/Server/DocStore/

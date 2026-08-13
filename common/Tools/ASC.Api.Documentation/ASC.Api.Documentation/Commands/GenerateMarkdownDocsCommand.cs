@@ -63,6 +63,8 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         var (joinedDocument, sourceDocuments) = ReadDocumentPaths(configuration);
         var markdown = ReadMarkdownSettings(configuration);
         var splitDirectory = Path.Combine(WorkingDirectory, "json", "split");
+        var outputDirectory = ReadOutputDirectory();
+        var operationsDirectory = Path.Combine(outputDirectory, markdown.OperationsDirectory);
 
         var documents = await OpenapiSplitter.SplitAsync(
             joinedDocument,
@@ -73,8 +75,12 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         // Nothing removes what the generator no longer produces, so a service dropped from the
         // join or renamed would leave its document behind looking current - and it would be
         // committed as if it were still generated.
-        RemoveStale(ReadOutputDirectory(), "*.md", documents.Select(document => $"{document.Name}.md"));
+        RemoveStale(outputDirectory, "*.md", documents.Select(document => $"{document.Name}.md"));
         RemoveStale(splitDirectory, "*.json", documents.Select(document => $"{document.Name}.json"));
+
+        var operations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var aggregateDocuments = new List<MarkdownBundle.AggregateDocument>();
+        var operationDocuments = new List<MarkdownBundle.OperationDocument>();
 
         foreach (var document in documents)
         {
@@ -90,9 +96,99 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             {
                 return exitCode;
             }
+
+            var sliced = await MarkdownSlicer.SliceAsync(
+                Path.Combine(outputDirectory, $"{document.Name}.md"),
+                document.Name,
+                operationsDirectory,
+                markdown.ModelLinkBase,
+                cancellationToken);
+
+            foreach (var operation in sliced)
+            {
+                // All services publish into one directory, mirroring how the site puts every
+                // operation under a single section. The joiner already rejects duplicate operation
+                // ids, so a collision here means two ids differing only in case or punctuation -
+                // silently overwriting one of them would drop an endpoint from the documentation.
+                if (operations.TryGetValue(operation.FileName, out var owner))
+                {
+                    throw new Exception(
+                        $"'{operation.OperationId}' and '{owner}' both publish as {operation.FileName}");
+                }
+
+                operations[operation.FileName] = operation.OperationId;
+
+                operationDocuments.Add(new MarkdownBundle.OperationDocument(
+                    operation.FileName,
+                    operation.OperationId,
+                    operation.Endpoint,
+                    operation.Summary,
+                    operation.Path));
+            }
+
+            aggregateDocuments.Add(new MarkdownBundle.AggregateDocument(
+                $"{document.Name}.md",
+                markdown.TitleFor(document.Name),
+                Path.Combine(outputDirectory, $"{document.Name}.md")));
+
+            AnsiConsole.MarkupLine($"  sliced into [green]{sliced.Count}[/] operation documents");
+        }
+
+        RemoveStale(operationsDirectory, "*.md", operations.Keys);
+
+        if (!string.IsNullOrWhiteSpace(markdown.BundleDirectory))
+        {
+            await MarkdownBundle.WriteAsync(
+                markdown.BundleDirectory,
+                markdown.SiteUrl ?? string.Empty,
+                markdown.IndexTitle,
+                aggregateDocuments,
+                operationDocuments,
+                cancellationToken);
+
+            AnsiConsole.MarkupLine(
+                $"Bundled [green]{aggregateDocuments.Count}[/] references and [green]{operationDocuments.Count}[/] operations for publishing");
+
+            // Only once the bundle holds a complete copy: until then these directories are the
+            // only place the work exists, and a failed run is far easier to diagnose with them
+            // still on disk.
+            RemoveStaging(outputDirectory, operationsDirectory, splitDirectory);
         }
 
         return 0;
+    }
+
+    /// <summary>
+    /// Deletes what the run needed on the way to the bundle and nothing else needs afterwards:
+    /// the rendered documents the bundle now carries, the sub-documents they were rendered from,
+    /// and openapi-generator's bookkeeping.
+    /// </summary>
+    /// <remarks>
+    /// The alternative - leaving them behind and ignoring them - keeps a second copy of every
+    /// published document in the working tree, where it goes stale and gets read as though it
+    /// were current.
+    /// </remarks>
+    private static void RemoveStaging(string outputDirectory, string operationsDirectory, string splitDirectory)
+    {
+        foreach (var path in Directory.EnumerateFiles(outputDirectory, "*.md"))
+        {
+            File.Delete(path);
+        }
+
+        File.Delete(Path.Combine(outputDirectory, ".openapi-generator-ignore"));
+
+        foreach (var directory in new[]
+                 {
+                     operationsDirectory,
+                     splitDirectory,
+                     Path.Combine(outputDirectory, ".openapi-generator")
+                 })
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+        }
     }
 
     /// <summary>
@@ -119,16 +215,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             info["title"] = settings.TitleFor(document.Name);
         }
 
-        // `baseUrl` is deliberately empty in the document - a DocSpace instance lives wherever it
-        // is installed - but an empty default renders as "http://http:" in the page header, so
-        // the pages get the placeholder host the handbook already uses.
-        if (!string.IsNullOrWhiteSpace(settings.ServerUrl)
-            && root["servers"] is JsonArray { Count: > 0 } servers
-            && servers[0]?["variables"]?["baseUrl"] is JsonObject baseUrl
-            && string.IsNullOrEmpty(baseUrl["default"]?.ToString()))
-        {
-            baseUrl["default"] = settings.ServerUrl;
-        }
+        OpenApiServer.ApplyBaseUrlDefault(root, settings.ServerUrl);
 
         await File.WriteAllTextAsync(document.Path, root.ToJsonString(_writeOptions), cancellationToken);
     }
@@ -173,7 +260,15 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             .Where(title => !string.IsNullOrWhiteSpace(title.Value))
             .ToDictionary(title => title.Key, title => title.Value!, StringComparer.OrdinalIgnoreCase);
 
-        return new MarkdownSettings(section["serverUrl"], section["docsUrl"], titles);
+        return new MarkdownSettings(
+            configuration["serverUrl"],
+            section["docsUrl"],
+            section["operationsDirectory"] ?? "operations",
+            ReadBundleDirectory(section),
+            section["siteUrl"],
+            section["indexTitle"] ?? "ONLYOFFICE DocSpace API",
+            section["modelLinkBase"] ?? "../",
+            titles);
     }
 
     /// <summary>
@@ -255,9 +350,25 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
     /// Titles are keyed by the split document name, so a service added to the join without a title
     /// falls back to that name rather than silently inheriting another service's heading.
     /// </summary>
+    /// <summary>
+    /// Where the publishable bundle is assembled. Relative to the current directory, matching the
+    /// other paths in the configuration.
+    /// </summary>
+    private static string? ReadBundleDirectory(IConfiguration section)
+    {
+        var parts = section.GetSection("bundle").Get<string[]>();
+
+        return parts is { Length: > 0 } ? Path.GetFullPath(Path.Combine(parts)) : null;
+    }
+
     private sealed record MarkdownSettings(
         string? ServerUrl,
         string? DocsUrl,
+        string OperationsDirectory,
+        string? BundleDirectory,
+        string? SiteUrl,
+        string IndexTitle,
+        string ModelLinkBase,
         IReadOnlyDictionary<string, string> Titles)
     {
         public string TitleFor(string documentName) =>

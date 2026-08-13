@@ -18,6 +18,7 @@ All URIs are relative to *{{{basePath}}}*, where the host is the address of your
 ## {{classname}}
 {{#operation}}
 
+<!--op:{{operationId}}-->
 ### {{operationId}}
 
 > {{#returnType}}{{.}} {{/returnType}}{{operationId}}({{#allParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/allParams}})
@@ -58,6 +59,7 @@ This endpoint does not need any parameter.
 - **Accept**: {{#produces}}{{{mediaType}}}{{^-last}}, {{/-last}}{{/produces}}{{^produces}}Not defined{{/produces}}
 {{/operation}}
 {{/operations}}{{/apis}}{{/apiInfo}}
+<!--/ops-->
 
 ## Models
 {{#models}}{{#model}}
