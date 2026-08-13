@@ -1303,7 +1303,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Dobrý den! Nastavte si prosím heslo pro svůj účet ${LetterLogoText} DocSpace. Stačí kliknout na tlačítko níže:
+    <value>Dobrý den! Nastavte si prosím heslo pro svůj účet ${LetterLogoText}. Stačí kliknout na tlačítko níže:
 
 $OrangeButton
 
@@ -1632,7 +1632,7 @@ $TrulyYours</value>
     <value>Co je nového na vašem portálu ${__VirtualRootHost} pro $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Nastavení hesla pro ${LetterLogoText} DocSpace</value>
+    <value>Nastavení hesla pro ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Testovací zpráva SMTP</value>

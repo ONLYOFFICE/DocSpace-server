@@ -1323,7 +1323,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Hei! Ole hyvä ja aseta salasana ${LetterLogoText} DocSpace-tilillesi. Klikkaa vain alla olevaa painiketta:
+    <value>Hei! Ole hyvä ja aseta salasana ${LetterLogoText}-tilillesi. Klikkaa vain alla olevaa painiketta:
 
 $OrangeButton
 
@@ -1667,7 +1667,7 @@ $TrulyYours</value>
     <value>Mitä uutta on portaalissasi ${__VirtualRootHost} $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Aseta ${LetterLogoText} DocSpacelle salasana</value>
+    <value>Aseta ${LetterLogoText}lle salasana</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP testiviesti</value>

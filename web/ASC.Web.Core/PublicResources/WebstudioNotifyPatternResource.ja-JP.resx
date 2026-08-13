@@ -1292,7 +1292,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>こんにちは！${LetterLogoText} DocSpaceアカウントにパスワードを設定してください。以下のボタンをクリックしてください。
+    <value>こんにちは！${LetterLogoText}アカウントにパスワードを設定してください。以下のボタンをクリックしてください。
 
 $OrangeButton
 
@@ -1620,7 +1620,7 @@ $TrulyYours</value>
     <value>$Date：ポータルの新着情報${__VirtualRootHost}</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceにパスワードを設定</value>
+    <value>${LetterLogoText}にパスワードを設定</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP テストメッセージ</value>

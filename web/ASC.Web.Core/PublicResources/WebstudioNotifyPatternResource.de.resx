@@ -1312,7 +1312,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Hallo! Bitte legen Sie ein Passwort für Ihr ${LetterLogoText} DocSpace-Konto fest. Klicken Sie einfach auf die folgende Schaltfläche:
+    <value>Hallo! Bitte legen Sie ein Passwort für Ihr ${LetterLogoText}-Konto fest. Klicken Sie einfach auf die folgende Schaltfläche:
 
 $OrangeButton
 
@@ -1641,7 +1641,7 @@ $TrulyYours</value>
     <value>Neues in Ihrem Portal ${__VirtualRootHost} für $Datum</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Legen Sie ein Passwort für ${LetterLogoText} DocSpace fest</value>
+    <value>Legen Sie ein Passwort für ${LetterLogoText} fest</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP-Testmeldung</value>

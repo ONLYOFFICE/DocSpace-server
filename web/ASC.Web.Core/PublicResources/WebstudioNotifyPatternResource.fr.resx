@@ -1312,7 +1312,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Bonjour ! Veuillez créer un mot de passe pour votre compte ${LetterLogoText} DocSpace. Cliquez sur le bouton ci-dessous :
+    <value>Bonjour ! Veuillez créer un mot de passe pour votre compte ${LetterLogoText}. Cliquez sur le bouton ci-dessous :
 
 $OrangeButton
 
@@ -1644,7 +1644,7 @@ $TrulyYours</value>
     <value>Quoi de neuf sur votre portail ${__VirtualRootHost} pour le $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Créer un mot de passe pour ${LetterLogoText} DocSpace</value>
+    <value>Créer un mot de passe pour ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Message de test de SMTP</value>

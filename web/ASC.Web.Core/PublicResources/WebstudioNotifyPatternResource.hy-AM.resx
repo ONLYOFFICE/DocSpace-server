@@ -1310,7 +1310,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Ո՜ղջույն։ Խնդրում ենք ստեղծել գաղտնաբառ Ձեր ${LetterLogoText} DocSpace հաշվի համար: Պարզապես սեղմեք ստորև նշված կոճակը՝
+    <value>Ո՜ղջույն։ Խնդրում ենք ստեղծել գաղտնաբառ Ձեր ${LetterLogoText} հաշվի համար: Պարզապես սեղմեք ստորև նշված կոճակը՝
 
 $OrangeButton
 
@@ -1638,7 +1638,7 @@ $TrulyYours</value>
     <value>Ինչ նորություններ կան ձեր ${__VirtualRootHost} պորտալում $Date-ի համար</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Սահմանեք գաղտնաբառ ${LetterLogoText} DocSpace-ի համար</value>
+    <value>Սահմանեք գաղտնաբառ ${LetterLogoText}-ի համար</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP թեստային հաղորդագրություն</value>

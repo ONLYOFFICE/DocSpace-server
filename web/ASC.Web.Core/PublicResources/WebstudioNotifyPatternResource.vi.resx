@@ -1326,7 +1326,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Chào bạn! Vui lòng thiết lập mật khẩu cho tài khoản ${LetterLogoText} DocSpace của bạn. Chỉ cần nhấp vào nút bên dưới:
+    <value>Chào bạn! Vui lòng thiết lập mật khẩu cho tài khoản ${LetterLogoText} của bạn. Chỉ cần nhấp vào nút bên dưới:
 
 $OrangeButton
 
@@ -1670,7 +1670,7 @@ $TrulyYours</value>
     <value>Có gì mới trên cổng thông tin ${__VirtualRootHost} của bạn cho $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Thiết lập mật khẩu cho ${LetterLogoText} DocSpace</value>
+    <value>Thiết lập mật khẩu cho ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Tin nhắn SMTP thử nghiệm</value>

@@ -2073,7 +2073,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello! Please set up a password for your ${LetterLogoText} DocSpace account. Just click the button below:
+        ///   Looks up a localized string similar to Hello! Please set up a password for your ${LetterLogoText}. Just click the button below:
         ///
         ///$OrangeButton
         ///
@@ -3048,7 +3048,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Set up a password for ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Set up a password for ${LetterLogoText}.
         /// </summary>
         public static string subject_set_password {
             get {

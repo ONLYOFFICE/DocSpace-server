@@ -1318,7 +1318,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Merhaba! Lütfen ${LetterLogoText} DocSpace hesabınız için bir şifre ayarlayın. Aşağıdaki düğmeye tıklamanız yeterlidir:
+    <value>Merhaba! Lütfen ${LetterLogoText} hesabınız için bir şifre ayarlayın. Aşağıdaki düğmeye tıklamanız yeterlidir:
 
 $OrangeButton
 
@@ -1663,7 +1663,7 @@ $TrulyYours</value>
     <value>${__VirtualRootHost} için $Date tarihinde portalınızda ne yenilikler var?</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace için bir şifre oluşturun</value>
+    <value>${LetterLogoText} için bir şifre oluşturun</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP test mesajı</value>

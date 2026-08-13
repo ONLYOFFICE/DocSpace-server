@@ -1308,7 +1308,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Përshëndetje! Ju lutem vendosni një fjalëkalim për llogarinë tuaj të DocSpace në ${LetterLogoText}. Thjesht klikoni butonin më poshtë:
+    <value>Përshëndetje! Ju lutem vendosni një fjalëkalim për llogarinë tuaj të ${LetterLogoText}. Thjesht klikoni butonin më poshtë:
 
 $OrangeButton
 
@@ -1635,7 +1635,7 @@ $TrulyYours</value>
     <value>Çfarë ka të re në portalin tuaj ${__VirtualRootHost} për $Data</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Vendosni një fjalëkalim për ${LetterLogoText} DocSpace</value>
+    <value>Vendosni një fjalëkalim për ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Mesazh testimi SMTP</value>

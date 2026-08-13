@@ -1303,7 +1303,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Witaj! Ustaw hasło dla swojego konta ${LetterLogoText} DocSpace. Wystarczy kliknąć poniższy przycisk:
+    <value>Witaj! Ustaw hasło dla swojego konta ${LetterLogoText}. Wystarczy kliknąć poniższy przycisk:
 
 $OrangeButton
 
@@ -1635,7 +1635,7 @@ $TrulyYours</value>
     <value>Co nowego na Twoim portalu ${__VirtualRootHost} $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Ustaw hasło dla swojego konta ${LetterLogoText} DocSpace</value>
+    <value>Ustaw hasło dla swojego konta ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Wiadomość testowa SMTP</value>

@@ -1325,7 +1325,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Здравствуйте! Пожалуйста, установите пароль для вашей учетной записи ${LetterLogoText} DocSpace. Просто нажмите кнопку ниже:
+    <value>Здравствуйте! Пожалуйста, установите пароль для вашей учетной записи ${LetterLogoText}. Просто нажмите кнопку ниже:
 
 $OrangeButton
 
@@ -1669,7 +1669,7 @@ $TrulyYours</value>
     <value>Новости Вашего портала ${__VirtualRootHost} за $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Установить пароль для ${LetterLogoText} DocSpace</value>
+    <value>Установить пароль для ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Тестовое письмо для проверки настроек SMTP</value>

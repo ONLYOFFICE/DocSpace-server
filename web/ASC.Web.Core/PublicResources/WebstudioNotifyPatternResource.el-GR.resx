@@ -1325,7 +1325,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Γεια σας! Ορίστε έναν κωδικό πρόσβασης για τον λογαριασμό σας ${LetterLogoText} DocSpace. Απλώς κάντε κλικ στο παρακάτω κουμπί:
+    <value>Γεια σας! Ορίστε έναν κωδικό πρόσβασης για τον λογαριασμό σας ${LetterLogoText}. Απλώς κάντε κλικ στο παρακάτω κουμπί:
 
 $OrangeButton
 
@@ -1669,7 +1669,7 @@ $TrulyYours</value>
     <value>Τι νέο υπάρχει στην πύλη σας ${__VirtualRootHost} για τις $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Ρύθμιση κωδικού πρόσβασης για το ${LetterLogoText} DocSpace</value>
+    <value>Ρύθμιση κωδικού πρόσβασης για το ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Δοκιμαστικό μήνυμα SMTP</value>

@@ -1299,7 +1299,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Здравейте! Моля, задайте парола за вашия ${LetterLogoText} DocSpace профил. Просто кликнете върху бутона по-долу:
+    <value>Здравейте! Моля, задайте парола за вашия ${LetterLogoText} профил. Просто кликнете върху бутона по-долу:
 
 $OrangeButton
 
@@ -1631,7 +1631,7 @@ $TrulyYours</value>
     <value>Какво е новото във вашия портал ${__VirtualRootHost} за $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Задайте парола за ${LetterLogoText} DocSpace</value>
+    <value>Задайте парола за ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP тестово съобщение</value>

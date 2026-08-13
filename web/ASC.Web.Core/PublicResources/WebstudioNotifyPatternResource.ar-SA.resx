@@ -1355,7 +1355,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>مرحبًا! يُرجى إعداد كلمة مرور لحسابك في "${LetterLogoText} DocSpace". فقط اضغط على الزر أدناه:
+    <value>مرحبًا! يُرجى إعداد كلمة مرور لحسابك في "${LetterLogoText}". فقط اضغط على الزر أدناه:
 
 $OrangeButton
 
@@ -1687,7 +1687,7 @@ $TrulyYours</value>
     <value>ما الجديد في بوابة ${__VirtualRootHost} في $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>إعداد كلمة مرور لـ "${LetterLogoText} DocSpace"</value>
+    <value>إعداد كلمة مرور لـ "${LetterLogoText}"</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>رسالة اختبار SMTP</value>

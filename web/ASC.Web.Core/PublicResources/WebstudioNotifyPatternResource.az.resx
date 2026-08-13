@@ -1304,7 +1304,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Salam! Lütfən, ${LetterLogoText} DocSpace hesabınız üçün şifrə yaradın. Sadəcə aşağıdakı düyməni basın:
+    <value>Salam! Lütfən, ${LetterLogoText} hesabınız üçün şifrə yaradın. Sadəcə aşağıdakı düyməni basın:
 
 $OrangeButton
 
@@ -1632,7 +1632,7 @@ $TrulyYours</value>
     <value>$Date üçün ${__VirtualRootHost} portalınızda yeniliklər</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace üçün şifrə təyin edin</value>
+    <value>${LetterLogoText} üçün şifrə təyin edin</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP test mesajı</value>

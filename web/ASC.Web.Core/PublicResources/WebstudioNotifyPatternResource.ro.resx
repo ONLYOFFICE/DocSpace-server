@@ -1642,7 +1642,7 @@ $TrulyYours</value>
     <value>Ce este nou pe portalul dvs. ${__VirtualRootHost} for $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Setați parola pentru ${LetterLogoText} DocSpace</value>
+    <value>Setați parola pentru ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Mesaj test SMTP</value>

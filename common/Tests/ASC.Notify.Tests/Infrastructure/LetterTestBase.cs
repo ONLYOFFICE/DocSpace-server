@@ -100,6 +100,13 @@ public abstract class LetterTestBase
     /// <summary>Whether <c>$TrulyYours</c> is a top-level table row (true for the HTML letters).</summary>
     protected virtual bool TrulyYoursAsTableRow => true;
 
+    /// <summary>
+    /// Whether the letter signs off at all. A handful of short transactional letters — the password
+    /// setup link, for one — deliberately carry no <c>$TrulyYours</c>, so the signature check is skipped
+    /// for them.
+    /// </summary>
+    protected virtual bool HasSignature => true;
+
     [Theory]
     [MemberData(nameof(LetterCultures.All), MemberType = typeof(LetterCultures))]
     public async Task Letter_Renders(string cultureName)
@@ -256,8 +263,13 @@ public abstract class LetterTestBase
     }
 
     /// <summary>The signature the harness passes in, in the recipient's culture, plus the site it links to.</summary>
-    private static void AssertSignature(RenderedLetter letter, CultureInfo culture)
+    private void AssertSignature(RenderedLetter letter, CultureInfo culture)
     {
+        if (!HasSignature)
+        {
+            return;
+        }
+
         var signature = Resource("TrulyYoursText", culture)
             .Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText);
 

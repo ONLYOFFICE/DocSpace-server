@@ -1314,7 +1314,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Zdravo! Molim vas postavite lozinku za svoj ${LetterLogoText} DocSpace nalog. Samo kliknite dugme ispod:
+    <value>Zdravo! Molim vas postavite lozinku za svoj ${LetterLogoText} nalog. Samo kliknite dugme ispod:
 
 $OrangeButton
 
@@ -1646,7 +1646,7 @@ $TrulyYours</value>
     <value>Šta je novo na vašem portalu ${__VirtualRootHost} za $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Podesite lozinku za ${LetterLogoText} DocSpace</value>
+    <value>Podesite lozinku za ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP test poruka</value>

@@ -1304,7 +1304,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Hallo! Stel een wachtwoord in voor uw ${LetterLogoText} DocSpace account. Klik dan op de knop hieronder:
+    <value>Hallo! Stel een wachtwoord in voor uw ${LetterLogoText} account. Klik dan op de knop hieronder:
 
 $OrangeButton
 
@@ -1636,7 +1636,7 @@ $TrulyYours</value>
     <value>Wat is er nieuw op uw portaal ${__VirtualRootHost} voor $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Stel een wachtwoord in voor ${LetterLogoText} DocSpace</value>
+    <value>Stel een wachtwoord in voor ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP testbericht</value>
