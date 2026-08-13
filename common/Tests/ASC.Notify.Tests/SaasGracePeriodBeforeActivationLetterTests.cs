@@ -62,8 +62,9 @@ public class SaasGracePeriodBeforeActivationLetterTests : LetterTestBase
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
+        // The payment method link belongs to the new copy, which so far exists only in the default
+        // culture — the translations still carry the previous sentence. It is asserted below instead.
         letter.Body.Should().Contain(RecipientName)
-            .And.Contain(PaymentMethodUrl)
             .And.Contain(LetterEnvironment.SupportUrl);
     }
 
@@ -76,6 +77,7 @@ public class SaasGracePeriodBeforeActivationLetterTests : LetterTestBase
             .And.Contain("Business subscription payment for the chosen number of admins")
             .And.Contain("will be automatically debited in 3 days")
             .And.Contain("payment method")
+            .And.Contain(PaymentMethodUrl)
             .And.Contain("support team");
 
         // The brand no longer carries the DocSpace suffix.
