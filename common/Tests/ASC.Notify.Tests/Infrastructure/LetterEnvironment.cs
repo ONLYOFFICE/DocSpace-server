@@ -71,6 +71,18 @@ internal static class LetterEnvironment
     /// <summary>The site the signature links to — <c>CommonLinkUtility.GetSiteLink</c>.</summary>
     public static string SiteUrl { get; } = Fallback(ExternalResources.Site.GetDefaultRegionalDomain(), "https://www.onlyoffice.com");
 
+    /// <summary>The help center — <c>CommonLinkUtility.GetHelpLinkAsync</c>, i.e. the `__HelpLink` tag.</summary>
+    public static string HelpUrl { get; } = Fallback(ExternalResources.Helpcenter.GetDefaultRegionalDomain(), "https://helpcenter.onlyoffice.com");
+
+    /// <summary>The support desk — <c>CommonLinkUtility.GetSupportLinkAsync</c>, i.e. the `__SupportLink` tag.</summary>
+    public static string SupportUrl { get; } = Fallback(ExternalResources.Support.GetDefaultRegionalDomain(), "https://helpdesk.onlyoffice.com");
+
+    /// <summary>The `__SalesEmail` tag — <c>CommonLinkUtility.GetSalesEmail</c>.</summary>
+    public static string SalesEmail { get; } = Fallback(ExternalResources.Common.GetDefaultRegionalFullEntry("paymentemail"), "sales@onlyoffice.com");
+
+    /// <summary>The `__SupportEmail` tag — <c>CommonLinkUtility.GetSupportEmail</c>.</summary>
+    public static string SupportEmail { get; } = Fallback(ExternalResources.Common.GetDefaultRegionalFullEntry("supportemail"), "support@onlyoffice.com");
+
     /// <summary>
     /// What <c>StudioNotifyHelper.GetNotificationImageUrl</c> returns for an empty file name, i.e. the
     /// value of the <c>ImagePath</c> tag: <c>web:notification:image:path</c> when configured, the

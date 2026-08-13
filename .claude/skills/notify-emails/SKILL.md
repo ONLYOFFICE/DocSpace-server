@@ -284,6 +284,10 @@ links from `buildtools/config/externalresources.json` when it is there (with fal
 **A letter test must not hard-code a URL** — use `PortalLink`, `NotificationImageUrl`, `ExternalDomain`,
 `ExternalEntry`.
 
+`AssertDefaultCultureText` compares against the **rendered** body, not the resx source: `TextileStyler`
+applies typographic replacements, so a straight `'` in the pattern arrives as `&#8217;` and an assertion
+on `haven't` fails. Pick expected substrings without apostrophes or quotes.
+
 Cultures come from `Infrastructure/LetterCultures.cs` (`en-US` by default). Add them there permanently,
 or per run:
 

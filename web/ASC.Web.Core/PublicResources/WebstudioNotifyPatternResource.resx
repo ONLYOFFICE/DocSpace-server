@@ -279,6 +279,9 @@
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Leave feedback</value>
   </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Log into ${LetterLogoText}</value>
+  </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Open DocSpace</value>
   </data>
@@ -1919,55 +1922,49 @@ $OrangeButton
 
 $TrulyYours</comment>
   </data>
-  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Your ${LetterLogoText} DocSpace will be &lt;span style="color: #FF6F3D;"&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+  <data name="pattern_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Your ${LetterLogoText} will be &lt;span style="color: #FF6F3D;"&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Your ${LetterLogoText} DocSpace &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; has been inactive for more than a year.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;You haven't entered your ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; for more than half a year. &lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Since you have decided not to use it anymore, your ${LetterLogoText} DocSpace and all the data will be deleted in accordance with our &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privacy Policy&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Since you have decided not to use it anymore, your ${LetterLogoText} and all the data will be deleted in accordance with our &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privacy Policy&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;We would appreciate your feedback. Why have you decided to stop using ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;We would appreciate your feedback. Why have you decided to stop using ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;If you want to continue using your ${LetterLogoText} DocSpace, just enter it and make any action.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;If you want to continue using your ${LetterLogoText}, just enter it and make any action.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-    <comment>Your ${LetterLogoText} DocSpace will be deleted
+    <comment>Your ${LetterLogoText} will be deleted
 
-Your ${LetterLogoText} DocSpace ${__VirtualRootPath} has been inactive for more than a year.
+You haven't entered your ${LetterLogoText} ${__VirtualRootPath} for more than half a year.
 
-Since you have decided not to use it anymore, your ${LetterLogoText} DocSpace and all the data will be deleted in accordance with our Privacy Policy.
+Since you have decided not to use it anymore, your ${LetterLogoText} and all the data will be deleted in accordance with our Privacy Policy.
 
-We would appreciate your feedback. Why have you decided to stop using ${LetterLogoText} DocSpace?
+We would appreciate your feedback. Why have you decided to stop using ${LetterLogoText}?
 
 $OrangeButton
 
-If you want to continue using your ${LetterLogoText} DocSpace, just enter it and make any action.
+If you want to continue using your ${LetterLogoText}, just enter it and make any action.
 
 $TrulyYours</comment>
   </data>
-  <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Your ${LetterLogoText} DocSpace will be &lt;span style="color: #FF6F3D;"&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Your ${LetterLogoText} will be &lt;span style="color: #FF6F3D;"&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;You haven't entered your ${LetterLogoText} DocSpace &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; for more than half a year. &lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;You haven't entered your ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; for 3 months.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Since you have decided not to use it anymore, your ${LetterLogoText} DocSpace and all the data will be deleted in accordance with our &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privacy Policy&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Please note: your ${LetterLogoText} and all its data will be deleted after 6 months of inactivity. Simply log in now to keep your ${LetterLogoText} active and continue using it.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;We would appreciate your feedback. Why have you decided to stop using ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;If you think this is a mistake and want to continue using ${LetterLogoText} DocSpace, please contact our &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;support team&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
-    <comment>Your ${LetterLogoText} DocSpace will be deleted
+    <comment>Your ${LetterLogoText} will be deleted
 
-You haven't entered your ${LetterLogoText} DocSpace ${__VirtualRootPath} for more than half a year.
+You haven't entered your ${LetterLogoText} ${__VirtualRootPath} for 3 months.
 
-Since you have decided not to use it anymore, your ${LetterLogoText} DocSpace and all the data will be deleted in accordance with our Privacy Policy.
-
-We would appreciate your feedback. Why have you decided to stop using ${LetterLogoText} DocSpace?
+Please note: your ${LetterLogoText} and all its data will be deleted after 6 months of inactivity. Simply log in now to keep your ${LetterLogoText} active and continue using it.
 
 $OrangeButton
-
-If you think this is a mistake and want to continue using ${LetterLogoText} DocSpace, please contact our support team. 
 
 $TrulyYours</comment>
   </data>
@@ -1996,6 +1993,56 @@ Get free ${LetterLogoText} apps to work on documents from any of your devices.
 To work on documents offline, get ${LetterLogoText} Desktop Editors
 
 To edit documents on mobile devices, get ${LetterLogoText} Documents app 
+
+$TrulyYours</comment>
+  </data>
+  <data name="pattern_saas_admin_warning_after_half_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Your ${LetterLogoText} will be &lt;span style="color: #FF6F3D;"&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;You haven't entered your ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; for more than half a year. &lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Since you have decided not to use it anymore, your ${LetterLogoText} and all the data will be deleted in accordance with our &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privacy Policy&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;We would appreciate your feedback. Why have you decided to stop using ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;If you think this is a mistake and want to continue using ${LetterLogoText}, please contact our &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;support team&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+    <comment>Your ${LetterLogoText} will be deleted
+
+You haven't entered your ${LetterLogoText} ${__VirtualRootPath} for more than half a year.
+
+Since you have decided not to use it anymore, your ${LetterLogoText} and all the data will be deleted in accordance with our Privacy Policy.
+
+We would appreciate your feedback. Why have you decided to stop using ${LetterLogoText}?
+
+$OrangeButton
+
+If you think this is a mistake and want to continue using ${LetterLogoText}, please contact our support team. 
+
+$TrulyYours</comment>
+  </data>
+  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Your ${LetterLogoText} will be &lt;span style="color: #FF6F3D;"&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;You haven't entered your ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; for 3 months.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Since you are not using it, your ${LetterLogoText} and all its data will be deleted after 6 months of inactivity in accordance with our &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privacy Policy&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;If you think this is a mistake and want to continue using ${LetterLogoText}, please contact our &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;support team&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+    <comment>Your ${LetterLogoText} will be deleted
+
+You haven't entered your ${LetterLogoText} ${__VirtualRootPath} for 3 months.
+
+Since you are not using it, your ${LetterLogoText} and all its data will be deleted after 6 months of inactivity in accordance with our Privacy Policy.
+
+$OrangeButton
+
+If you think this is a mistake and want to continue using ${LetterLogoText}, please contact our support team.
 
 $TrulyYours</comment>
   </data>
@@ -2713,14 +2760,20 @@ $TrulyYours</value>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>Discover 4 handy apps inside your ${LetterLogoText}</value>
   </data>
-  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
-    <value>Your ${LetterLogoText} DocSpace will be deleted</value>
+  <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
+    <value>Your ${LetterLogoText} will be deleted</value>
   </data>
-  <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>Your ${LetterLogoText} DocSpace will be deleted</value>
+  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>Your ${LetterLogoText} will be deleted</value>
   </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Get free ${LetterLogoText} apps</value>
+  </data>
+  <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
+    <value>Your ${LetterLogoText} will be deleted</value>
+  </data>
+  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
+    <value>Your ${LetterLogoText} will be deleted</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>Discover business subscription of ${LetterLogoText} DocSpace</value>

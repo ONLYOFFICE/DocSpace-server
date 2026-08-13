@@ -279,14 +279,14 @@ public class StudioPeriodicNotify(
 
                 else if (quota.Free)
                 {
-                    #region 1 year whithout activity to owner SAAS Free
+                    #region without activity to owner SAAS Free
 
                     if (nowDate.Day == tenant.CreationDateTime.Day || nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                     {
                         var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
                         var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
 
-                        if (lastAuditEventDate.AddYears(1) > nowDate)
+                        if (lastAuditEventDate.AddMonths(3) > nowDate)
                         {
                             continue;
                         }
@@ -294,27 +294,47 @@ public class StudioPeriodicNotify(
                         var lastLoginEvent = await loginEventsRepository.GetLastSuccessEventAsync(tenant.Id);
                         var lastLoginEventDate = lastLoginEvent != null ? lastLoginEvent.Date.Date : tenant.CreationDateTime.Date;
 
-                        if (lastLoginEventDate.AddYears(1) > nowDate)
+                        if (lastLoginEventDate.AddMonths(3) > nowDate)
                         {
                             continue;
                         }
 
+                        var lastActivityDate = lastAuditEventDate > lastLoginEventDate ? lastAuditEventDate : lastLoginEventDate;
+
                         if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
                         {
-                            action = serviceProvider.GetService<SaasAdminStartupWarningAfterYearV1NotifyAction>();
-                            toowner = true;
+                            // This runs once a month, so each one-month-wide window warns the owner exactly
+                            // once and an idle portal is not spammed on the following checks.
+                            if (lastActivityDate.AddMonths(4) > nowDate)
+                            {
+                                action = serviceProvider.GetService<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>();
+                                toowner = true;
 
-                            orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-                            orangeButtonUrl = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled", c);
+                                orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLogIn", c);
+                                orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~/dashboard");
 
-                            url1 = c => externalResourceSettingsHelper.Common.GetRegionalFullEntry("legalterms", c);
+                                topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
 
-                            topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
+                                trulyYoursAsTebleRow = true;
+                            }
+                            else if (lastActivityDate.AddMonths(6) <= nowDate && lastActivityDate.AddMonths(7) > nowDate)
+                            {
+                                action = serviceProvider.GetService<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>();
+                                toowner = true;
 
-                            trulyYoursAsTebleRow = true;
+                                orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
+                                orangeButtonUrl = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled", c);
+
+                                url1 = c => externalResourceSettingsHelper.Common.GetRegionalFullEntry("legalterms", c);
+
+                                topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
+
+                                trulyYoursAsTebleRow = true;
+                            }
                         }
 
-                        if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
+                        if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day
+                            && lastActivityDate.AddMonths(6).AddDays(7) <= nowDate)
                         {
                             if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
                             {
@@ -323,7 +343,7 @@ public class StudioPeriodicNotify(
 
                             var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
-                            _log.InformationStartRemovingUnusedFreeTenant(tenant.Id, tenantDomain);
+                            _log.InformationStartRemovingInactiveTenant(tenant.Id, tenantDomain);
 
                             await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
                             await identityClient.DeleteTenantClientsAsync(false);
@@ -400,11 +420,30 @@ public class StudioPeriodicNotify(
 
                     #endregion
 
+                    #region 3 months after SAAS PAID expired
+
+                    else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(3) == nowDate)
+                    {
+                        action = serviceProvider.GetService<SaasAdminWarningAfterThreeMonthsV1NotifyAction>();
+                        toowner = true;
+
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLogIn", c);
+                        orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~/dashboard");
+
+                        url1 = c => externalResourceSettingsHelper.Common.GetRegionalFullEntry("legalterms", c);
+
+                        topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
+
+                        trulyYoursAsTebleRow = true;
+                    }
+
+                    #endregion
+
                     #region 6 months after SAAS PAID expired
 
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6) == nowDate)
                     {
-                        action = serviceProvider.GetService<SaasAdminTrialWarningAfterHalfYearV1NotifyAction>();
+                        action = serviceProvider.GetService<SaasAdminWarningAfterHalfYearV1NotifyAction>();
                         toowner = true;
 
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
@@ -425,7 +464,7 @@ public class StudioPeriodicNotify(
 
                         var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
-                        _log.InformationStartRemovingUnusedPaidTenant(tenant.Id, tenantDomain);
+                        _log.InformationStartRemovingUnpaidTenant(tenant.Id, tenantDomain);
 
                         await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
                         await identityClient.DeleteTenantClientsAsync(false);

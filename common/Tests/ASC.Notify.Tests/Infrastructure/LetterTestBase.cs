@@ -188,7 +188,13 @@ public abstract class LetterTestBase
 
             new TagValue(CommonTags.VirtualRootPath, LetterEnvironment.PortalUrl),
             new TagValue(CommonTags.VirtualRootHost, LetterEnvironment.PortalHost),
-            new TagValue(CommonTags.RecipientSubscriptionConfigURL, LetterEnvironment.PortalLink("unsubscribe"))
+            new TagValue(CommonTags.RecipientSubscriptionConfigURL, LetterEnvironment.PortalLink("unsubscribe")),
+
+            new TagValue(CommonTags.HelpLink, LetterEnvironment.HelpUrl),
+            new TagValue(CommonTags.SupportLink, LetterEnvironment.SupportUrl),
+            new TagValue(CommonTags.SiteLink, LetterEnvironment.SiteUrl),
+            new TagValue(CommonTags.SalesEmail, LetterEnvironment.SalesEmail),
+            new TagValue(CommonTags.SupportEmail, LetterEnvironment.SupportEmail)
         };
 
         tags.AddRange(BuildLetterTags(culture));

@@ -1738,29 +1738,43 @@ public sealed class OpensourceAdminWelcomeV1NotifyAction(TenantManager tenantMan
 }
 
 [Scope]
-public sealed class SaasAdminTrialWarningAfterHalfYearV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class SaasAdminWarningAfterHalfYearV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
 {
-    public override string ID => "saas_admin_trial_warning_after_half_year_v1";
+    public override string ID => "saas_admin_warning_after_half_year_v1";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_trial_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_trial_warning_after_half_year_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_warning_after_half_year_v1)
         ];
     }
 }
 
 [Scope]
-public sealed class SaasAdminStartupWarningAfterYearV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class SaasAdminWarningAfterThreeMonthsV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
 {
-    public override string ID => "saas_admin_startup_warning_after_year_v1";
+    public override string ID => "saas_admin_warning_after_three_months_v1";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_year_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_warning_after_three_months_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_warning_after_three_months_v1)
+        ];
+    }
+}
+
+[Scope]
+public sealed class SaasAdminStartupWarningAfterHalfYearV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+{
+    public override string ID => "saas_admin_startup_warning_after_half_year_v1";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_half_year_v1)
         ];
     }
 }
@@ -2357,6 +2371,20 @@ public sealed class SaasAdminHandyAppsV1NotifyAction(UserManager userManager, St
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_handy_apps_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_handy_apps_v1)
+        ];
+    }
+}
+
+[Scope]
+public sealed class SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+{
+    public override string ID => "saas_admin_startup_warning_after_three_months_v1";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_three_months_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_three_months_v1)
         ];
     }
 }
