@@ -132,6 +132,21 @@ public class AuthorizationMessagingCleanupListener {
   }
 
   /**
+   * Evicts every cached client of a tenant, skipping the eviction when the tenant is unknown.
+   *
+   * @param tenantId the tenant whose clients should be evicted
+   * @param context the entity the originating event referred to, used for logging
+   */
+  private void evictTenantClients(long tenantId, String context) {
+    if (tenantId <= 0) {
+      log.warn("Skipping client cache eviction for {}: event carries no tenant id", context);
+      return;
+    }
+
+    registeredClientCacheService.evictAllByTenantId(tenantId);
+  }
+
+  /**
    * Handles messages for client removal events.
    *
    * @param event the client removed event
@@ -182,7 +197,7 @@ public class AuthorizationMessagingCleanupListener {
           jpaConsentRepository.deleteAllConsentsByPrincipalId(event.getUserId());
           log.info("Authorizations and consents for user {} have been removed", event.getUserId());
         },
-        () -> registeredClientCacheService.evictAllByTenantId(event.getTenantId()),
+        () -> evictTenantClients(event.getTenantId(), "user " + event.getUserId()),
         "user");
   }
 
@@ -210,7 +225,7 @@ public class AuthorizationMessagingCleanupListener {
           log.info(
               "Authorizations and consents for tenant {} have been removed", event.getTenantId());
         },
-        () -> registeredClientCacheService.evictAllByTenantId(event.getTenantId()),
+        () -> evictTenantClients(event.getTenantId(), "tenant " + event.getTenantId()),
         "tenant");
   }
 
