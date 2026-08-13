@@ -300,7 +300,7 @@ substitutions — not the recipient selection or the schedule condition.
   `saas_admin_handy_apps_v1` (no top image, one button) and `saas_admin_configure_v1` (top gif, extra
   `$URL1`/`$URL2` links) — the two blocks at the top of `SendSaasLettersAsync`, each with a test in
   `common/Tests/ASC.Notify.Tests`.
-- **HTML letter with images and many links**: `saas_video_guides_v1`, `docs_tips`.
+- **HTML letter with images and many links**: `saas_admin_integrations_v1`, `docs_tips`.
 - **Plain textile transactional letter**: `low_wallet_balance`, `password_changed`.
 - **Same letter for several editions**: `docs_tips` is reused by the SaaS, Enterprise and Opensource
   senders — prefer reusing an action over cloning it when the text is identical.
