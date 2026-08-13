@@ -35,7 +35,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("owner")]
+[ApiEndpoint(Template = "owner")]
 public class OwnerController(
     MessageService messageService,
     CommonLinkUtility commonLinkUtility,

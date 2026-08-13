@@ -34,12 +34,17 @@
 package com.asc.authorization.application.configuration;
 
 import com.asc.authorization.application.configuration.serialization.CacheObjectSerializer;
+import com.asc.authorization.application.security.oauth.service.RedisCacheNamespaceCounterStore;
+import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
+import com.asc.common.utilities.cache.CacheNamespaceRegistry;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -78,6 +83,7 @@ public class CacheManagerConfiguration {
     var mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     mapper.activateDefaultTyping(
         LaissezFaireSubTypeValidator.instance,
         ObjectMapper.DefaultTyping.NON_FINAL,
@@ -135,8 +141,10 @@ public class CacheManagerConfiguration {
 
   /**
    * Creates a {@link RedisTemplate} for callers that need direct Redis access instead of the
-   * higher-level {@link CacheManager} abstraction - for example, pattern-based multi-key eviction,
-   * which {@link CacheManager}'s {@code Cache} interface does not expose.
+   * higher-level {@link CacheManager} abstraction - for example, {@link
+   * com.asc.authorization.application.security.oauth.service.CachingRegisteredClientService}, whose
+   * namespace-versioned entries {@link CacheManager}'s {@code Cache} interface has no way to
+   * express.
    *
    * @param connectionFactory the Redis connection factory
    * @param cacheSerializer the custom serializer for cache values
@@ -154,5 +162,55 @@ public class CacheManagerConfiguration {
     template.setHashValueSerializer(cacheSerializer);
     template.afterPropertiesSet();
     return template;
+  }
+
+  /**
+   * Creates a string-only {@link RedisTemplate} for the registered client cache namespace versions.
+   *
+   * @param connectionFactory the Redis connection factory
+   * @return a configured {@link RedisTemplate} keyed and valued as {@link String}
+   */
+  @Bean
+  @Profile("saas")
+  public RedisTemplate<String, String> registeredClientCacheStringRedisTemplate(
+      RedisConnectionFactory connectionFactory) {
+    var template = new RedisTemplate<String, String>();
+    template.setConnectionFactory(connectionFactory);
+    template.setKeySerializer(RedisSerializer.string());
+    template.setValueSerializer(RedisSerializer.string());
+    template.setHashKeySerializer(RedisSerializer.string());
+    template.setHashValueSerializer(RedisSerializer.string());
+    template.afterPropertiesSet();
+    return template;
+  }
+
+  /**
+   * Creates the Redis-backed counter store the registered client cache's namespace registry reads
+   * and advances its version counters through.
+   *
+   * @param stringRedisTemplate the string-only Redis template for namespace version counters
+   * @return a {@link RedisCacheNamespaceCounterStore} wrapping {@code stringRedisTemplate}
+   */
+  @Bean
+  @Profile("saas")
+  public CacheNamespaceCounterStore registeredClientCacheNamespaceCounterStore(
+      @Qualifier("registeredClientCacheStringRedisTemplate")
+          RedisTemplate<String, String> stringRedisTemplate) {
+    return new RedisCacheNamespaceCounterStore(stringRedisTemplate);
+  }
+
+  /**
+   * Creates the namespace registry {@link
+   * com.asc.authorization.application.security.oauth.service.CachingRegisteredClientService} uses
+   * to invalidate registered clients without scanning the keyspace.
+   *
+   * @param counterStore the counter store backing this registry
+   * @return a {@link CacheNamespaceRegistry} scoped to the registered client cache's own key prefix
+   */
+  @Bean
+  @Profile("saas")
+  public CacheNamespaceRegistry registeredClientCacheNamespaceRegistry(
+      CacheNamespaceCounterStore counterStore) {
+    return new CacheNamespaceRegistry(counterStore, "identity:authorization:client:ver");
   }
 }

@@ -454,8 +454,6 @@ public abstract class BaseStartup
 
         var mvcBuilder = services.AddMvcCore(config =>
         {
-            config.Conventions.Add(new ControllerNameAttributeConvention());
-
             var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
             config.Filters.Add(new AuthorizeFilter(policy));

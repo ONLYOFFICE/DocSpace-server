@@ -78,11 +78,6 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         messageService.SendHeadersMessage(messageAction, target: null, httpHeaders: headers, null);
 
-        if (System.IO.File.Exists(inputData.Script))
-        {
-            System.IO.File.Delete(inputData.Script);
-        }
-
         return file;
     }
 }

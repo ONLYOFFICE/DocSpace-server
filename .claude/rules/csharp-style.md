@@ -9,7 +9,7 @@ paths:
 - **Namespaces**: `ASC.<Module>[.<Feature>][.<Layer>]` (e.g., `ASC.Files.Core.ApiModels.RequestDto`)
 - **Controllers**: `*Controller`
 - **DTOs**: `*RequestDto`, `*ResponseDto`
-- **Custom attributes**: `[Singleton]`, `[Scope]`, `[DefaultRoute]`, `[ControllerName]`
+- **Custom attributes**: `[Singleton]`, `[Scope]`, `[ApiEndpoint]`
 - **Route segments**: camelCase (e.g., `{id}/externalDbSync`, `fromTemplate`) — never snake_case or kebab-case
 
 ## Style (enforced via `.editorconfig`)
@@ -58,5 +58,5 @@ After creating or editing any `.cs` file, verify style BEFORE finishing the task
 ## API Patterns
 - API versioning via `Asp.Versioning`
 - Swagger annotations for OpenAPI generation
-- Controllers inherit common base, use `[DefaultRoute]` attribute
+- Controllers inherit common base, use `[ApiEndpoint]` attribute (sets the route template and controller name)
 - Request/Response models in `ApiModels/RequestDto` and `ApiModels/ResponseDto` namespaces

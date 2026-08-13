@@ -39,9 +39,7 @@ namespace ASC.Api.Settings;
 /// SMTP settings API.
 ///</remarks>
 [Scope]
-[ApiController]
-[DefaultRoute("smtp")]
-[ControllerName("smtpsettings")]
+[ApiEndpoint("smtpsettings", "smtp")]
 public class SmtpSettingsController(
         PermissionContext permissionContext,
         CoreConfiguration coreConfiguration,

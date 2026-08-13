@@ -228,6 +228,27 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
             return (true, preparedRow);
         }
 
+        if (row.TableName == "files_security")
+        {
+            var (prepared, preparedRow) = await base.TryPrepareRow(dump, connection, columnMapper, table, row);
+            if (!prepared)
+            {
+                return (false, null);
+            }
+
+            // internal_entry_id duplicates entry_id for internal entries, but it has no relation of its
+            // own, so without this it keeps the source portal's id after a restore and every query that
+            // joins on it (share flags, ParentShared, tree lookups) stops matching the restored folder.
+            // Derive it from the already remapped entry_id; third-party entries have no internal id and
+            // keep 0, exactly as SecurityDao writes them.
+            preparedRow["internal_entry_id"] =
+                preparedRow.TryGetValue("entry_id", out var entryId) && int.TryParse(Convert.ToString(entryId), out var internalEntryId)
+                    ? internalEntryId
+                    : 0;
+
+            return (true, preparedRow);
+        }
+
         return await base.TryPrepareRow(dump, connection, columnMapper, table, row);
     }
 

@@ -33,7 +33,7 @@
 
 namespace ASC.Files.Api;
 
-[DefaultRoute("group")]
+[ApiEndpoint(Template = "group")]
 public class GroupsController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
