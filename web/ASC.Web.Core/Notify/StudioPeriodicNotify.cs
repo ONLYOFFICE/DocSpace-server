@@ -175,28 +175,30 @@ public class StudioPeriodicNotify(
 
                 #endregion
 
+                #region 3 days after registration to owner and admins SAAS (any tariff)
+
+                else if (createdDate.AddDays(3) == nowDate)
+                {
+                    action = serviceProvider.GetService<SaasAdminConfigureV1NotifyAction>();
+                    paymentMessage = false;
+                    toowner = true;
+                    toadmins = true;
+
+                    orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfigureRightNow", c);
+                    orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~/portal-settings");
+                    topGif = studioNotifyHelper.GetNotificationImageUrl("configure_docspace.gif");
+
+                    url1 = c => externalResourceSettingsHelper.Helpcenter.GetRegionalDomain(c);
+                    url2 = _ => commonLinkUtility.GetFullAbsolutePath("~/billing/tariff-plan");
+
+                    trulyYoursAsTebleRow = true;
+                }
+
+                #endregion
+
                 else if (quota.Free)
                 {
                     #region After registration letters
-
-                    #region 1 days after registration to admins SAAS Free
-
-                    if (createdDate.AddDays(1) == nowDate)
-                    {
-                        action = serviceProvider.GetService<SaasAdminModulesV1NotifyAction>();
-                        paymentMessage = false;
-                        toadmins = true;
-
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfigureRightNow", c);
-                        orangeButtonUrl = c => commonLinkUtility.GetFullAbsolutePath("~/portal-settings/");
-                        topGif = studioNotifyHelper.GetNotificationImageUrl("configure_docspace.gif");
-
-                        url1 = c => externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("administrationguides", c);
-
-                        trulyYoursAsTebleRow = true;
-                    }
-
-                    #endregion
 
                     #region 4 days after registration to admins SAAS Free
 
