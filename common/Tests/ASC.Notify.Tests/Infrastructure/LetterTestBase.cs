@@ -168,9 +168,13 @@ public abstract class LetterTestBase
     }
 
     /// <summary>The orange button, with its caption taken from the resource key the sending code uses.</summary>
-    protected static ITagValue OrangeButton(string captionKey, CultureInfo culture, string url)
+    /// <summary>
+    /// The orange button. <paramref name="tag"/> names it — letters that carry two buttons render the
+    /// second one under its own tag, e.g. <c>$OrangeButtonPwd</c>.
+    /// </summary>
+    protected static ITagValue OrangeButton(string captionKey, CultureInfo culture, string url, string tag = "OrangeButton")
     {
-        return TagValues.OrangeButton(Resource(captionKey, culture), url);
+        return TagValues.OrangeButton(Resource(captionKey, culture), url, tag);
     }
 
     /// <summary>

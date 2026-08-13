@@ -81,7 +81,10 @@ Two styles coexist; match the neighbouring letters:
 
 - **Textile** (older / transactional letters) — see `common/ASC.Core.Common/Notify/Textile/`:
   `"text":"url"` → link, `*text*` → bold, `h1.Text` → heading, `#foreach($x in $List) … #end`,
-  `#if(…) … #end`.
+  `#if(…) … #end`. **Bullet lists work**: `* item` at the start of a line (asterisk + space) becomes
+  `<li>`, `# item` an ordered one — `States/UnorderedListFormatterState.cs`,
+  `States/OrderedListFormatterState.cs`. The space is what tells a list from bold: `*Your login*:` at
+  the start of a line stays inline bold precisely because no space follows the asterisk.
 - **Raw HTML table rows** (all marketing / after-registration letters) — a sequence of
   `<tr border="0" cellspacing="0" cellpadding="0"><td class="fol" style="…">…</td></tr>` blocks
   separated by blank lines, injected into `HtmlMaster`. There are no `<ul>`/`<li>` anywhere in the

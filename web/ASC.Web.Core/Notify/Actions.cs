@@ -1485,7 +1485,7 @@ public sealed class EnterpriseAdminActivationV1NotifyAction(StudioNotifyHelper s
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_admin_activation_v1)
         ];
     }
 
@@ -1504,18 +1504,21 @@ public sealed class EnterpriseAdminActivationV1NotifyAction(StudioNotifyHelper s
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
+        Tags =
+        [
+            new TagValue(CommonTags.UserEmail, u.Email),
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue(CommonTags.Footer, null)
+            new TagValue(CommonTags.Footer, null),
+            new TagValue(CommonTags.Culture, culture.Name)
         ];
     }
 }
 
 [Scope]
-public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "enterprise_whitelabel_admin_activation_v1";
 
@@ -1523,7 +1526,7 @@ public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNoti
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_admin_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_admin_activation_v1)
         ];
     }
 
@@ -1542,18 +1545,21 @@ public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNoti
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
+        Tags =
+        [
+            new TagValue(CommonTags.UserEmail, u.Email),
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue(CommonTags.Footer, null)
+            new TagValue(CommonTags.Footer, null),
+            new TagValue(CommonTags.Culture, culture.Name)
         ];
     }
 }
 
 [Scope]
-public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "opensource_admin_activation_v1";
 
@@ -1561,7 +1567,7 @@ public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper s
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_opensource_admin_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_admin_activation_v1)
         ];
     }
 
@@ -1580,12 +1586,15 @@ public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper s
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
+        Tags =
+        [
+            new TagValue(CommonTags.UserEmail, u.Email),
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue(CommonTags.Footer, "opensource")
+            new TagValue(CommonTags.Footer, "opensource"),
+            new TagValue(CommonTags.Culture, culture.Name)
         ];
     }
 }
