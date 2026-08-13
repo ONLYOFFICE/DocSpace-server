@@ -49,6 +49,13 @@ management:
       probes:
         enabled: true
       show-details: always
+      group:
+        readiness:
+          include: "*"
+          show-details: never
+        liveness:
+          include: livenessState
+          show-details: never
   endpoints:
     web:
       base-path: null
