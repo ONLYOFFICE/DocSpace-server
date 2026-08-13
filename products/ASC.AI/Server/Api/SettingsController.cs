@@ -34,9 +34,7 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[InternalRoute]
-[ApiController]
-[ControllerName("ai")]
+[ApiEndpoint("ai", Internal = true)]
 public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
     /// <remarks>

@@ -35,7 +35,7 @@ using ASC.Web.Api.Controllers.Settings;
 
 namespace ASC.Web.Api.Api.Settings;
 
-[DefaultRoute("push")]
+[ApiEndpoint(Template = "push")]
 public class PushController(
     WebItemManager webItemManager,
     IFusionCache fusionCache,

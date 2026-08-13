@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("greetingsettings")]
+[ApiEndpoint(Template = "greetingsettings")]
 public class GreetingSettingsController(
     TenantInfoSettingsHelper tenantInfoSettingsHelper,
     MessageService messageService,

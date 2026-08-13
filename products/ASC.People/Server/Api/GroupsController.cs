@@ -40,9 +40,7 @@ namespace ASC.People.Api;
 ///</remarks>
 ///<name>group</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("group")]
+[ApiEndpoint("group")]
 public class GroupController(
     GroupSummaryDtoHelper groupSummaryDtoHelper,
     UserManager userManager,
@@ -477,9 +475,7 @@ public class GroupControllerThirdParty(
     : GroupControllerAdditional<string>(apiContext, daoFactory, fileSharing, fileSecurity, groupFullDtoHelper);
 
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("group")]
+[ApiEndpoint("group")]
 public class GroupControllerAdditional<T>(
     ApiContext apiContext,
     IDaoFactory daoFactory,
