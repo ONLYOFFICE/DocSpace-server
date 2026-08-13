@@ -216,43 +216,30 @@ public class StudioPeriodicNotify(
 
                 #endregion
 
+                #region 7 days after registration to owner and admins SAAS (any tariff)
+
+                else if (createdDate.AddDays(7) == nowDate)
+                {
+                    action = serviceProvider.GetService<SaasAdminAiAgentsV1NotifyAction>();
+                    paymentMessage = false;
+                    toowner = true;
+                    toadmins = true;
+
+                    orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonActivateAiFeatures", c);
+                    orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~/portal-settings/ai-settings/ai-models");
+
+                    trulyYoursAsTebleRow = true;
+                }
+
+                #endregion
+
                 else if (quota.Free)
                 {
                     #region After registration letters
 
-                    #region 7 days after registration to admins and users SAAS Free
-
-                    if (createdDate.AddDays(7) == nowDate)
-                    {
-                        action = serviceProvider.GetService<DocsTipsNotifyAction>();
-                        paymentMessage = false;
-                        toadmins = true;
-                        tousers = true;
-
-                        img1 = studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
-                        img2 = studioNotifyHelper.GetNotificationImageUrl("docs_tips2.png");
-                        img3 = studioNotifyHelper.GetNotificationImageUrl("docs_tips3.png");
-                        img4 = studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
-                        img5 = studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
-
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", c);
-                        orangeButtonUrl = c => commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
-
-                        url1 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("collaborationrooms", c);
-                        url2 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("publicrooms", c);
-                        url3 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("customrooms", c);
-                        url4 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("formfillingrooms", c);
-                        url5 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("seamlesscollaboration", c);
-                        url6 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("openai", c);
-
-                        topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
-                    }
-
-                    #endregion
-
                     #region 10 days after registration to admins SAAS Free
 
-                    else if (createdDate.AddDays(10) == nowDate)
+                    if (createdDate.AddDays(10) == nowDate)
                     {
                         action = serviceProvider.GetService<SaasAdminIntegrationsNotifyAction>();
                         paymentMessage = false;

@@ -207,6 +207,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Access Your Web-Office</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Activate AI features</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Click here to activate your email address</value>
   </data>
@@ -1755,6 +1758,69 @@ You can manage all your payment details quickly and easily through Wallet. With 
 
 $TrulyYours</comment>
   </data>
+  <data name="pattern_saas_admin_ai_agents_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Work faster in ${LetterLogoText} with &lt;span style="color: #FF6F3D; white-space: nowrap;"&gt;AI agents&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;${LetterLogoText} comes with built-in AI* to help you get more done, faster. Just open your files and let the assistant guide you through your everyday tasks.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-style: italic; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Please note: AI is built in but not activated by default for security reasons. To use it, you'll need to enable the AI features.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;One AI across all your document work&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;No more switching between tools. A single AI assistant works right inside the apps you already use, so you can:&lt;br /&gt;&lt;br /&gt;&#8226; &lt;b&gt;Create and transform documents&lt;/b&gt;: draft, rewrite, and polish text in seconds.&lt;br /&gt;&#8226; &lt;b&gt;Analyze and automate spreadsheets&lt;/b&gt;: make sense of your numbers without the manual work.&lt;br /&gt;&#8226; &lt;b&gt;Build and refine presentations&lt;/b&gt;: turn ideas into clear, engaging slides.&lt;br /&gt;&#8226; &lt;b&gt;Edit and structure PDFs&lt;/b&gt;: organize and update PDFs intelligently.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;It truly understands your files&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;${LetterLogoText} AI doesn't just read your documents as plain text. It understands their structure, context, and how everything connects. So when you ask a question, you get answers that actually make sense.&lt;br /&gt;&lt;br /&gt;Even better, you get clickable references to the exact spot in your file. Ask something, and jump straight to the right paragraph, table, or cell.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;Let AI agents do the busy work&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;Think of AI agents as helpful assistants that handle multi-step tasks for you, automatically. They can:&lt;br /&gt;&lt;br /&gt;&#8226; Run complete document workflows from start to finish&lt;br /&gt;&#8226; Work across all your ${LetterLogoText} apps and beyond&lt;br /&gt;&#8226; Connect to your favorite external tools&lt;br /&gt;&#8226; Pull in real-time information with web search&lt;br /&gt;&#8226; Tap into your team's internal knowledge&lt;br /&gt;&lt;br /&gt;You focus on the important decisions, and let the agents handle the rest.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;Better together with your team&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;Work is always better when you're not doing it alone. Invite your teammates, set access permissions in a few clicks, and share files, ideas, and tasks, all in one place. Collaboration stays simple and secure.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+    <comment>Work faster in ${LetterLogoText} with AI agents
+
+Hello, $UserName!
+
+${LetterLogoText} comes with built-in AI* to help you get more done, faster. Just open your files and let the assistant guide you through your everyday tasks.
+
+*Please note: AI is built in but not activated by default for security reasons. To use it, you'll need to enable the AI features.
+
+One AI across all your document work
+
+No more switching between tools. A single AI assistant works right inside the apps you already use, so you can:
+
+&#8226; Create and transform documents: draft, rewrite, and polish text in seconds.
+&#8226; Analyze and automate spreadsheets: make sense of your numbers without the manual work.
+&#8226; Build and refine presentations: turn ideas into clear, engaging slides.
+&#8226; Edit and structure PDFs: organize and update PDFs intelligently.
+
+It truly understands your files
+
+${LetterLogoText} AI doesn't just read your documents as plain text. It understands their structure, context, and how everything connects. So when you ask a question, you get answers that actually make sense.
+
+Even better, you get clickable references to the exact spot in your file. Ask something, and jump straight to the right paragraph, table, or cell.
+
+Let AI agents do the busy work
+
+Think of AI agents as helpful assistants that handle multi-step tasks for you, automatically. They can:
+
+&#8226; Run complete document workflows from start to finish
+&#8226; Work across all your ${LetterLogoText} apps and beyond
+&#8226; Connect to your favorite external tools
+&#8226; Pull in real-time information with web search
+&#8226; Tap into your team's internal knowledge
+
+You focus on the important decisions, and let the agents handle the rest.
+
+Better together with your team
+
+Work is always better when you're not doing it alone. Invite your teammates, set access permissions in a few clicks, and share files, ideas, and tasks, all in one place. Collaboration stays simple and secure.
+
+$OrangeButton
+
+$TrulyYours</comment>
+  </data>
   <data name="pattern_saas_admin_configure_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Configure your &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -2685,6 +2751,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_admin_addons_v1" xml:space="preserve">
     <value>Get more from ${LetterLogoText} with useful add-ons</value>
+  </data>
+  <data name="subject_saas_admin_ai_agents_v1" xml:space="preserve">
+    <value>Work faster in ${LetterLogoText} with AI agents</value>
   </data>
   <data name="subject_saas_admin_configure_v1" xml:space="preserve">
     <value>Configure your ${LetterLogoText}</value>
