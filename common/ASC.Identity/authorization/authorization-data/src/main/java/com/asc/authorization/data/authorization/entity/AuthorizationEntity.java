@@ -193,7 +193,8 @@ public class AuthorizationEntity {
    * date and time.
    */
   @PreUpdate
-  private void preUpdate() {
+  @PrePersist
+  private void stampModifiedAt() {
     this.modifiedAt = ZonedDateTime.now();
   }
 
