@@ -1720,6 +1720,44 @@ Enjoy a new way of document collaboration!
 
 $TrulyYours</comment>
   </data>
+  <data name="pattern_saas_admin_addons_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Get more from ${LetterLogoText} with &lt;span style="color: #FF6F3D; white-space: nowrap;"&gt;useful add&amp;#8209;ons&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Want to do even more with ${LetterLogoText}? You can easily tailor it to fit exactly what you need.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Just open the &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Billing section&lt;/a&gt; &#8211; that's your one-stop spot for adding new features whenever you're ready.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&#8226; &lt;b&gt;Docs Connect.&lt;/b&gt; Embed online editors into your app. API and 50+ ready-made integrations are available. A 1-month free trial starts automatically.&lt;br /&gt;&lt;br /&gt;&#8226; &lt;b&gt;AI features.&lt;/b&gt; Get access to a wide range of AI models through OpenRouter integration. You pay only for what you use.&lt;br /&gt;&lt;br /&gt;&#8226; &lt;b&gt;AI search.&lt;/b&gt; Bring real-time information from the internet right into your AI chats for smarter, more helpful answers.&lt;br /&gt;&lt;br /&gt;&#8226; &lt;b&gt;Additional disk storage.&lt;/b&gt; Adjust your storage to the exact amount you need, so you never run short.&lt;br /&gt;&lt;br /&gt;&#8226; &lt;b&gt;Backups.&lt;/b&gt; Add extra backups to keep your important files safe.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;Simple &amp;amp; transparent payments&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;You can manage all your payment details quickly and easily through &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL2"&gt;Wallet&lt;/a&gt;. With a clear transaction history, you'll always know exactly where your money goes.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+    <comment>Get more from ${LetterLogoText} with useful add-ons
+
+Hello, $UserName!
+
+Want to do even more with ${LetterLogoText}? You can easily tailor it to fit exactly what you need.
+
+Just open the Billing section &#8211; that's your one-stop spot for adding new features whenever you're ready.
+
+&#8226; Docs Connect. Embed online editors into your app. API and 50+ ready-made integrations are available. A 1-month free trial starts automatically.
+&#8226; AI features. Get access to a wide range of AI models through OpenRouter integration. You pay only for what you use.
+&#8226; AI search. Bring real-time information from the internet right into your AI chats for smarter, more helpful answers.
+&#8226; Additional disk storage. Adjust your storage to the exact amount you need, so you never run short.
+&#8226; Backups. Add extra backups to keep your important files safe.
+
+$OrangeButton
+
+Simple &amp; transparent payments
+
+You can manage all your payment details quickly and easily through Wallet. With a clear transaction history, you'll always know exactly where your money goes.
+
+$TrulyYours</comment>
+  </data>
   <data name="pattern_saas_admin_configure_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Configure your &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -2706,6 +2744,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_admin_activation_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_saas_admin_addons_v1" xml:space="preserve">
+    <value>Get more from ${LetterLogoText} with useful add-ons</value>
   </data>
   <data name="subject_saas_admin_configure_v1" xml:space="preserve">
     <value>Configure your ${LetterLogoText}</value>

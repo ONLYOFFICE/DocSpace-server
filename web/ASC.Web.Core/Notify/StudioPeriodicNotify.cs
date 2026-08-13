@@ -196,52 +196,33 @@ public class StudioPeriodicNotify(
 
                 #endregion
 
+                #region 4 days after registration to owner and admins SAAS (any tariff)
+
+                else if (createdDate.AddDays(4) == nowDate)
+                {
+                    action = serviceProvider.GetService<SaasAdminAddonsV1NotifyAction>();
+                    paymentMessage = false;
+                    toowner = true;
+                    toadmins = true;
+
+                    orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", c);
+                    orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~/billing/overview");
+
+                    url1 = _ => commonLinkUtility.GetFullAbsolutePath("~/billing/overview");
+                    url2 = _ => commonLinkUtility.GetFullAbsolutePath("~/billing/wallet");
+
+                    trulyYoursAsTebleRow = true;
+                }
+
+                #endregion
+
                 else if (quota.Free)
                 {
                     #region After registration letters
 
-                    #region 4 days after registration to admins SAAS Free
-
-                    if (createdDate.AddDays(4) == nowDate)
-                    {
-                        action = serviceProvider.GetService<SaasAdminVideoGuidesNotifyAction>();
-                        paymentMessage = false;
-                        toadmins = true;
-
-                        img1 = studioNotifyHelper.GetNotificationImageUrl("cover_1.png");
-                        img2 = studioNotifyHelper.GetNotificationImageUrl("cover_2.png");
-                        img3 = studioNotifyHelper.GetNotificationImageUrl("settings.png");
-                        img4 = studioNotifyHelper.GetNotificationImageUrl("management.png");
-                        img5 = studioNotifyHelper.GetNotificationImageUrl("administration.png");
-
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonWatchFullPlaylist", c);
-                        orangeButtonUrl = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("playlist", c);
-
-                        url1 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("full", c);
-                        url2 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("rooms", c);
-                        url3 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("roles", c);
-                        url4 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("security", c);
-                        url5 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("createfiles", c);
-                        url6 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("profile", c);
-                        url7 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("backup", c);
-                        url8 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("whatis", c);
-                        url9 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("operationswithfiles", c);
-                        url10 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("activesessions", c);
-                        url11 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("archive", c);
-                        url12 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("filterfiles", c);
-                        url13 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("fileversions", c);
-                        url14 = c => externalResourceSettingsHelper.Videoguides.GetRegionalFullEntry("hotkeys", c);
-
-                        topGif = studioNotifyHelper.GetNotificationImageUrl("video_guides.gif");
-
-                        trulyYoursAsTebleRow = true;
-                    }
-
-                    #endregion
-
                     #region 7 days after registration to admins and users SAAS Free
 
-                    else if (createdDate.AddDays(7) == nowDate)
+                    if (createdDate.AddDays(7) == nowDate)
                     {
                         action = serviceProvider.GetService<DocsTipsNotifyAction>();
                         paymentMessage = false;
