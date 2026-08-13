@@ -294,9 +294,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Izmantot atlaidi</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Apmeklēt sadaļu Maksājumi</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivizējiet savu e-pastu portālā "${__VirtualRootPath}":"$InviteLink".
 
@@ -1221,9 +1218,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Ņemiet vērā, ka jūsu ${LetterLogoText} DocSpace ir aktivizēts $PaymentDelay ‎dienas (-u) pagarinājuma periods.
+Ņemiet vērā, ka jūsu ${LetterLogoText} ir aktivizēts $PaymentDelay ‎dienas (-u) pagarinājuma periods.
 
-Pārliecinieties, ka apmaksājiet Business abonementu pirms pagarinājuma perioda beigām. Tādējādi jūs varēsiet turpināt izmantot visas ${LetterLogoText} DocSpace priekšrocības.
+Pārliecinieties, ka apmaksājiet Business abonementu pirms pagarinājuma perioda beigām. Tādējādi jūs varēsiet turpināt izmantot visas ${LetterLogoText} priekšrocības.
 
 $OrangeButton
 
@@ -1243,9 +1240,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Ņemiet vērā, ka jūsu ${LetterLogoText} DocSpace ir beidzies $PaymentDelay ‎dienas (-u) pagarinājuma periods.
+Ņemiet vērā, ka jūsu ${LetterLogoText} ir beidzies $PaymentDelay ‎dienas (-u) pagarinājuma periods.
 
-Pārliecinieties, ka apmaksājat savu Business abonementu, cik drīz vien iespējams. Tādējādi jūs varēsiet izmantot visas ${LetterLogoText} DocSpace priekšrocības tāpat kā iepriekš.
+Pārliecinieties, ka apmaksājat savu Business abonementu, cik drīz vien iespējams. Tādējādi jūs varēsiet izmantot visas ${LetterLogoText} priekšrocības tāpat kā iepriekš.
 
 $OrangeButton
 
@@ -1254,9 +1251,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Ņemiet vērā, ka jūsu ${LetterLogoText} DocSpace rīt beigsies $PaymentDelay dienas (-u) pagarinājuma periods.
+Ņemiet vērā, ka jūsu ${LetterLogoText} rīt beigsies $PaymentDelay dienas (-u) pagarinājuma periods.
 
-Noteikti apmaksājiet Business abonementu jau šodien. Tādējādi jūs varēsiet turpināt izmantot visas ${LetterLogoText} DocSpace priekšrocības.
+Noteikti apmaksājiet Business abonementu jau šodien. Tādējādi jūs varēsiet turpināt izmantot visas ${LetterLogoText} priekšrocības.
 
 $OrangeButton
 
@@ -1645,16 +1642,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: pabeidziet reģistrāciju</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace ir aktivizēts</value>
+    <value>Pagarinājuma periods jūsu ${LetterLogoText} ir aktivizēts</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Gaidāmais abonementa maksājums par Jūsu ${LetterLogoText} DocSpace</value>
+    <value>Gaidāmais abonementa maksājums par Jūsu ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace ir beidzies</value>
+    <value>Pagarinājuma periods jūsu ${LetterLogoText} ir beidzies</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace beidzas rīt</value>
+    <value>Pagarinājuma periods jūsu ${LetterLogoText} beidzas rīt</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Pievienojieties ${LetterLogoText}</value>

@@ -645,7 +645,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ButtonUpgrade", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Use discount.
         /// </summary>
@@ -654,13 +654,13 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ButtonUseDiscount", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   Looks up a localized string similar to Visit Payments Section.
+        ///   Looks up a localized string similar to Visit Billing section.
         /// </summary>
-        public static string ButtonVisitPaymentsSection {
+        public static string ButtonVisitBillingSection {
             get {
-                return ResourceManager.GetString("ButtonVisitPaymentsSection", resourceCulture);
+                return ResourceManager.GetString("ButtonVisitBillingSection", resourceCulture);
             }
         }
         

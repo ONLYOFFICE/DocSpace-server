@@ -291,9 +291,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>使用折扣</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>访问付款分区</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.激活您 "${__VirtualRootPath}":"$InviteLink" 门户的电邮。
 

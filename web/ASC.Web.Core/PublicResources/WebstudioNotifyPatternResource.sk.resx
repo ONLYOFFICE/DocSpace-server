@@ -294,9 +294,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Využiť zľavu</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Navštívte sekciu Platby</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivujte si Váš e-mail pre "${__VirtualRootPath}":"$InviteLink" portál.
 
@@ -1221,9 +1218,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Dobrý deň, $UserName!
 
-Vezmite si prosím na vedomie, že bolo aktivovane tolerančné obdobie $PaymentDelay dní pre váš ${LetterLogoText} DocSpace.
+Vezmite si prosím na vedomie, že bolo aktivovane tolerančné obdobie $PaymentDelay dní pre váš ${LetterLogoText}.
 
-Nezabudnite zaplatiť svoje predplatné Business pred uplynutím obdobia odkladu. Takto budete môcť v budúcnosti naplno využívať svoj ${LetterLogoText} DocSpace.
+Nezabudnite zaplatiť svoje predplatné Business pred uplynutím obdobia odkladu. Takto budete môcť v budúcnosti naplno využívať svoj ${LetterLogoText}.
 
 $OrangeButton
 
@@ -1243,9 +1240,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Dobrý deň, $UserName!
 
-Vezmite si prosím na vedomie, že tolerančné obdobie $PaymentDelay dní pre Váš ${LetterLogoText} DocSpace skončilo.
+Vezmite si prosím na vedomie, že tolerančné obdobie $PaymentDelay dní pre Váš ${LetterLogoText} skončilo.
 
-Postarajte sa, aby ste predplatné Business zaplatili čo najskôr. Takto budete môcť využívať všetky výhody svojho ${LetterLogoText} DocSpace ako doteraz.
+Postarajte sa, aby ste predplatné Business zaplatili čo najskôr. Takto budete môcť využívať všetky výhody svojho ${LetterLogoText} ako doteraz.
 
 $OrangeButton
 
@@ -1254,9 +1251,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Dobrý deň, $UserName!
 
-Upozorňujeme, že zajtra uplynie tolerančné obdobie $PaymentDelay dní pre Vaše predplatné ${LetterLogoText} DocSpace.
+Upozorňujeme, že zajtra uplynie tolerančné obdobie $PaymentDelay dní pre Vaše predplatné ${LetterLogoText}.
 
-Postarajte sa, aby ste svoje predplatné Business zaplatili ešte dnes. Takto budete môcť v budúcnosti naplno využívať výhody svojho ${LetterLogoText} DocSpace.
+Postarajte sa, aby ste svoje predplatné Business zaplatili ešte dnes. Takto budete môcť v budúcnosti naplno využívať výhody svojho ${LetterLogoText}.
 
 $OrangeButton
 
@@ -1645,16 +1642,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: dokončenie registrácie</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Dodatočná lehota pre váš ${LetterLogoText} DocSpace bola aktivovaná</value>
+    <value>Dodatočná lehota pre váš ${LetterLogoText} bola aktivovaná</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Nadchádzajúca platba za predplatné pre váš ${LetterLogoText} DocSpace</value>
+    <value>Nadchádzajúca platba za predplatné pre váš ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Dodatočná lehota pre vaše predplatné ${LetterLogoText} DocSpace vypršala</value>
+    <value>Dodatočná lehota pre vaše predplatné ${LetterLogoText} vypršala</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Dodatočná lehota pre váš ${LetterLogoText} DocSpace vyprší zajtra</value>
+    <value>Dodatočná lehota pre váš ${LetterLogoText} vyprší zajtra</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Pripojte sa k ${LetterLogoText}</value>

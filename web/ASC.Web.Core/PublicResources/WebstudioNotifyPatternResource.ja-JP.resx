@@ -291,9 +291,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>割引を利用する</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>お支払い方法について</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.ポータル"${__VirtualRootPath}":"$InviteLink"用のメールをアクティブにしましょう
 
@@ -1212,9 +1209,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>$UserName 様
 
-${LetterLogoText} DocSpaceの$PaymentDelay日数の猶予期間が有効になっていることをご考慮ください。
+${LetterLogoText}の$PaymentDelay日数の猶予期間が有効になっていることをご考慮ください。
 
-猶予期間内にぜひBusinessサブスクリプションをお支払いください。そうすれば、${LetterLogoText} DocSpaceのすべての利点をさらに利用することができます。
+猶予期間内にぜひBusinessサブスクリプションをお支払いください。そうすれば、${LetterLogoText}のすべての利点をさらに利用することができます。
 
 $OrangeButton
 
@@ -1234,9 +1231,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>$UserName 様
 
-${LetterLogoText} DocSpaceの$PaymentDelay日数の猶予期間は終了していますので、ご考慮ください。
+${LetterLogoText}の$PaymentDelay日数の猶予期間は終了していますので、ご考慮ください。
 
-可能な限り早く、Businessサブスクリプションをご購入ください。そうすれば、${LetterLogoText} DocSpaceの特典はこれまで通りご利用いただけます。
+可能な限り早く、Businessサブスクリプションをご購入ください。そうすれば、${LetterLogoText}の特典はこれまで通りご利用いただけます。
 
 $OrangeButton
 
@@ -1245,9 +1242,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>$UserName 様
 
-${LetterLogoText} DocSpaceの$PaymentDelay日数の猶予が明日までとなりますので、ご配慮願います。
+${LetterLogoText}の$PaymentDelay日数の猶予が明日までとなりますので、ご配慮願います。
 
-本日中にぜひBusinessサブスクリプションをご購入ください。そうすれば、${LetterLogoText} DocSpaceのすべての利点をさらにご利用いただけます。
+本日中にぜひBusinessサブスクリプションをご購入ください。そうすれば、${LetterLogoText}のすべての利点をさらにご利用いただけます。
 
 $OrangeButton
 
@@ -1599,16 +1596,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}：登録を完了してください</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceの猶予期限開始</value>
+    <value>${LetterLogoText}の猶予期限開始</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceの次回サブスクリプション支払いについて</value>
+    <value>${LetterLogoText}の次回サブスクリプション支払いについて</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceの猶予期限終了</value>
+    <value>${LetterLogoText}の猶予期限終了</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceの猶予期限は明日終了します</value>
+    <value>${LetterLogoText}の猶予期限は明日終了します</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>${LetterLogoText}に参加しましょう</value>

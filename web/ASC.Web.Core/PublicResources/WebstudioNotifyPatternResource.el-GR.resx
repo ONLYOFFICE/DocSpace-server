@@ -294,9 +294,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Χρήση έκπτωσης</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Επισκεφθείτε το τμήμα πληρωμών</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Ενεργοποιήστε το email σας για την πύλη "${__VirtualRootPath}":"$InviteLink".
 
@@ -1221,9 +1218,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
 
-Λάβετε υπόψη ότι η περίοδος χάριτος των $PaymentDelay ημερών για το DocSpace σας στο ${LetterLogoText} έχει ενεργοποιηθεί.
+Λάβετε υπόψη ότι η περίοδος χάριτος των $PaymentDelay ημερών για το ${LetterLogoText} σας έχει ενεργοποιηθεί.
 
-Φροντίστε να πληρώσετε την Επαγγελματική συνδρομή σας πριν από τη λήξη της περιόδου χάριτος. Έτσι, θα μπορέσετε να χρησιμοποιήσετε περαιτέρω όλα τα οφέλη του DocSpace σας στο ${LetterLogoText}.
+Φροντίστε να πληρώσετε την Επαγγελματική συνδρομή σας πριν από τη λήξη της περιόδου χάριτος. Έτσι, θα μπορέσετε να χρησιμοποιήσετε περαιτέρω όλα τα οφέλη του ${LetterLogoText} σας.
 
 $OrangeButton
 
@@ -1243,9 +1240,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
 
-Λάβετε υπόψη ότι η περίοδος χάριτος των $PaymentDelay ημερών για το DocSpace σας στο ${LetterLogoText} έχει λήξει.
+Λάβετε υπόψη ότι η περίοδος χάριτος των $PaymentDelay ημερών για το ${LetterLogoText} σας έχει λήξει.
 
-Φροντίστε να πληρώσετε την Επαγγελματική συνδρομή σας το συντομότερο δυνατό. Έτσι, θα είστε σε θέση να χρησιμοποιήσετε όλα τα οφέλη του DocSpace σας στο ${LetterLogoText} όπως και πριν.
+Φροντίστε να πληρώσετε την Επαγγελματική συνδρομή σας το συντομότερο δυνατό. Έτσι, θα είστε σε θέση να χρησιμοποιήσετε όλα τα οφέλη του ${LetterLogoText} σας όπως και πριν.
 
 $OrangeButton
 
@@ -1254,9 +1251,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
 
-Λάβετε υπόψη ότι η περίοδος χάριτος των $PaymentDelay ημερών για το DocSpace σας στο ${LetterLogoText} θα λήξει αύριο.
+Λάβετε υπόψη ότι η περίοδος χάριτος των $PaymentDelay ημερών για το ${LetterLogoText} σας θα λήξει αύριο.
 
-Φροντίστε να πληρώσετε την Επαγγελματική συνδρομή σας σήμερα. Έτσι, θα μπορέσετε να χρησιμοποιήσετε περαιτέρω όλα τα οφέλη του DocSpace σας στο ${LetterLogoText}.
+Φροντίστε να πληρώσετε την Επαγγελματική συνδρομή σας σήμερα. Έτσι, θα μπορέσετε να χρησιμοποιήσετε περαιτέρω όλα τα οφέλη του ${LetterLogoText} σας.
 
 $OrangeButton
 
@@ -1645,16 +1642,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: ολοκληρώστε την εγγραφή</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Η περίοδος χάριτος για το ${LetterLogoText} DocSpace ενεργοποιήθηκε</value>
+    <value>Η περίοδος χάριτος για το ${LetterLogoText} ενεργοποιήθηκε</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Προσεχής καταβολή συνδρομής για το DocSpace ${LetterLogoText}</value>
+    <value>Προσεχής καταβολή συνδρομής για το ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Η περίοδος χάριτος για το ${LetterLogoText} DocSpace έληξε</value>
+    <value>Η περίοδος χάριτος για το ${LetterLogoText} έληξε</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Η περίοδος χάριτος για το ${LetterLogoText} DocSpace λήγει αύριο</value>
+    <value>Η περίοδος χάριτος για το ${LetterLogoText} λήγει αύριο</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Εγγραφείτε στο ${LetterLogoText}</value>

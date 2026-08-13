@@ -291,9 +291,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Aplicar descuento</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Visitar la sección de pagos</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Activación de su correo electrónico para el portal "${__VirtualRootPath}":"$InviteLink".
 
@@ -1208,9 +1205,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>¡Hola, $UserName!
  
-Por favor, tenga en cuenta que el período de gracia de $PaymentDelay días para su ${LetterLogoText} DocSpace está activado.
+Por favor, tenga en cuenta que el período de gracia de $PaymentDelay días para su ${LetterLogoText} está activado.
  
-Asegúrese de pagar su suscripción Business antes de que expire el período de gracia. De esta manera, podrá seguir usando todas las ventajas de su ${LetterLogoText} DocSpace.
+Asegúrese de pagar su suscripción Business antes de que expire el período de gracia. De esta manera, podrá seguir usando todas las ventajas de su ${LetterLogoText}.
  
 $OrangeButton
  
@@ -1230,9 +1227,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Por favor, tenga en cuenta que el período de gracia de $PaymentDelay días para su ${LetterLogoText} DocSpace ha terminado.
+Por favor, tenga en cuenta que el período de gracia de $PaymentDelay días para su ${LetterLogoText} ha terminado.
 
-Asegúrese de pagar su suscripción Business lo más pronto posible. Así podrá usar todas las ventajas de su ${LetterLogoText} DocSpace como antes.
+Asegúrese de pagar su suscripción Business lo más pronto posible. Así podrá usar todas las ventajas de su ${LetterLogoText} como antes.
 
 $OrangeButton
 
@@ -1241,9 +1238,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Por favor, tenga en cuenta que el período de gracia de $PaymentDelay días para su ${LetterLogoText} DocSpace expirará mañana.
+Por favor, tenga en cuenta que el período de gracia de $PaymentDelay días para su ${LetterLogoText} expirará mañana.
 
-Asegúrese de pagar su suscripción Business hoy. Así, podrá seguir utilizando todas las ventajas de su ${LetterLogoText} DocSpace.
+Asegúrese de pagar su suscripción Business hoy. Así, podrá seguir utilizando todas las ventajas de su ${LetterLogoText}.
 
 $OrangeButton
 
@@ -1617,16 +1614,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: complete su registro</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>El periodo de gracia para su ${LetterLogoText} DocSpace está activado</value>
+    <value>El periodo de gracia para su ${LetterLogoText} está activado</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Próximo pago de suscripción para su ${LetterLogoText} DocSpace</value>
+    <value>Próximo pago de suscripción para su ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>El periodo de gracia para su ${LetterLogoText} DocSpace ha expirado</value>
+    <value>El periodo de gracia para su ${LetterLogoText} ha expirado</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>El período de gracia para su ${LetterLogoText} DocSpace expira mañana</value>
+    <value>El período de gracia para su ${LetterLogoText} expira mañana</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Únase a ${LetterLogoText}</value>

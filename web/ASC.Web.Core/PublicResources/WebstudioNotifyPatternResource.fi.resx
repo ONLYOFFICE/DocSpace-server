@@ -294,9 +294,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Käytä alennus</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Käy maksuosiossa</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivoi sähköpostisi "${__VirtualRootPath}":"$InviteLink"- portaalille.
 
@@ -1220,9 +1217,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hei, $UserName!
 
-Ole hyvä ja ota huomioon, että armonaika $PaymentDelay päivää ${LetterLogoText} DocSpaceen on aktivoitu.
+Ole hyvä ja ota huomioon, että armonaika $PaymentDelay päivää ${LetterLogoText}en on aktivoitu.
 
-Varmista, että maksat Yritystilauksesi ennen kuin armonaika päättyy. Näin pystyt jatkamaan kaikkien ${LetterLogoText} DocSpacen etujen käyttöä.
+Varmista, että maksat Yritystilauksesi ennen kuin armonaika päättyy. Näin pystyt jatkamaan kaikkien ${LetterLogoText}n etujen käyttöä.
 
 $OrangeButton
 
@@ -1242,9 +1239,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Hei, $UserName!
 
-Ole hyvä ja ota huomioon, että armonaika $PaymentDelay päivää ${LetterLogoText} DocSpaceesi päättyy huomenna.
+Ole hyvä ja ota huomioon, että armonaika $PaymentDelay päivää ${LetterLogoText}esi päättyy huomenna.
 
-Varmista, että maksat Yritystilauksesi tänään. Näin pystyt käyttämään kaikkia ${LetterLogoText} DocSpacen etuja.
+Varmista, että maksat Yritystilauksesi tänään. Näin pystyt käyttämään kaikkia ${LetterLogoText}n etuja.
 
 $OrangeButton
 
@@ -1253,9 +1250,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Hei, $UserName!
 
-Ole hyvä ja ota huomioon, että armonaika $PaymentDelay päivää ${LetterLogoText} DocSpaceesi päättyy huomenna.
+Ole hyvä ja ota huomioon, että armonaika $PaymentDelay päivää ${LetterLogoText}esi päättyy huomenna.
 
-Varmista, että maksat Yritystilauksesi tänään. Näin pystyt käyttämään kaikkia ${LetterLogoText} DocSpacen etuja.
+Varmista, että maksat Yritystilauksesi tänään. Näin pystyt käyttämään kaikkia ${LetterLogoText}n etuja.
 
 $OrangeButton
 
@@ -1643,16 +1640,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: viimeistele rekisteröinti</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Armonaika ${LetterLogoText} DocSpaceesi on aktivoitu</value>
+    <value>Armonaika ${LetterLogoText}esi on aktivoitu</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Tuleva tilausmaksu ${LetterLogoText} DocSpace -tilistäsi</value>
+    <value>Tuleva tilausmaksu ${LetterLogoText} -tilistäsi</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Armonaika ${LetterLogoText} DocSpaceesi on päättynyt</value>
+    <value>Armonaika ${LetterLogoText}esi on päättynyt</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Armonaika ${LetterLogoText} DocSpaceesi päättyy huomenna</value>
+    <value>Armonaika ${LetterLogoText}esi päättyy huomenna</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Liity ${LetterLogoText}en</value>

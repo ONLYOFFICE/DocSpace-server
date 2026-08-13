@@ -291,9 +291,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Օգտագործեք զեղչ</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Այցելեք վճարումների բաժինը</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1. Ակտիվացրեք ձեր էլ.փոստը "${__VirtualRootPath}":"$InviteLink" պորտալի համար:
 
@@ -1208,9 +1205,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Բարև, $UserName:
 
-Խնդրում ենք նկատի ունենալ, որ ձեր ${LetterLogoText} DocSpace-ի համար $PaymentDelay‎ օրերի արտոնյալ ժամկետն ակտիվացված է:
+Խնդրում ենք նկատի ունենալ, որ ձեր ${LetterLogoText}-ի համար $PaymentDelay‎ օրերի արտոնյալ ժամկետն ակտիվացված է:
 
-Համոզվեք, որ վճարեք ձեր բիզնեսի բաժանորդագրությունը մինչև արտոնյալ ժամկետի ավարտը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ${LetterLogoText} DocSpace-ի բոլոր առավելությունները:
+Համոզվեք, որ վճարեք ձեր բիզնեսի բաժանորդագրությունը մինչև արտոնյալ ժամկետի ավարտը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ${LetterLogoText}-ի բոլոր առավելությունները:
 
 $OrangeButton
 
@@ -1230,9 +1227,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Բարև, $UserName:
 
-Խնդրում ենք նկատի ունենալ, որ ձեր ${LetterLogoText} DocSpace-ի համար $PaymentDelay օրերի արտոնյալ ժամկետն ավարտվել է:
+Խնդրում ենք նկատի ունենալ, որ ձեր ${LetterLogoText}-ի համար $PaymentDelay օրերի արտոնյալ ժամկետն ավարտվել է:
 
-Համոզվեք, որ որքան հնարավոր է շուտ վճարեք ձեր Բիզնեսի բաժանորդագրությունը: Այսպիսով, դուք նախկինի պես կկարողանաք օգտագործել ձեր ${LetterLogoText} DocSpace-ի բոլոր առավելությունները:
+Համոզվեք, որ որքան հնարավոր է շուտ վճարեք ձեր Բիզնեսի բաժանորդագրությունը: Այսպիսով, դուք նախկինի պես կկարողանաք օգտագործել ձեր ${LetterLogoText}-ի բոլոր առավելությունները:
 
 $OrangeButton
 
@@ -1241,9 +1238,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Բարև, $UserName:
 
-Խնդրում ենք նկատի ունենալ, որ ձեր ${LetterLogoText} DocSpace-ի $PaymentDelay օրերի արտոնյալ ժամկետը կլրանա վաղը:
+Խնդրում ենք նկատի ունենալ, որ ձեր ${LetterLogoText}-ի $PaymentDelay օրերի արտոնյալ ժամկետը կլրանա վաղը:
 
-Համոզվեք, որ այսօր վճարեք ձեր Business բաժանորդագրությունը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ${LetterLogoText} DocSpace-ի բոլոր առավելությունները:
+Համոզվեք, որ այսօր վճարեք ձեր Business բաժանորդագրությունը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ${LetterLogoText}-ի բոլոր առավելությունները:
 
 $OrangeButton
 
@@ -1614,16 +1611,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}՝ ամբողջական գրանցում</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
+    <value>Ձեր ${LetterLogoText}-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace-ի բաժանորդագրության առաջիկա վճարումը</value>
+    <value>Ձեր ${LetterLogoText}-ի բաժանորդագրության առաջիկա վճարումը</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace-ի արտոնյալ ժամկետը սպառվել է</value>
+    <value>Ձեր ${LetterLogoText}-ի արտոնյալ ժամկետը սպառվել է</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace-ի արտոնյալ ժամկետը լրանում է վաղը</value>
+    <value>Ձեր ${LetterLogoText}-ի արտոնյալ ժամկետը լրանում է վաղը</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Միացեք ${LetterLogoText}-ին</value>

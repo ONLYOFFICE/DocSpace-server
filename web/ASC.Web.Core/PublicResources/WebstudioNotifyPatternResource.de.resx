@@ -291,9 +291,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Rabatt verwenden</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Abschnitt Zahlungen besuchen</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivieren Sie Ihre E-Mail-Adresse fürs Portal "${__VirtualRootPath}":"$InviteLink"
 
@@ -1208,9 +1205,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Bitte beachten Sie, dass die Karenzfrist von $PaymentDelay Tagen für Ihren ${LetterLogoText} DocSpace aktiviert ist.
+Bitte beachten Sie, dass die Karenzfrist von $PaymentDelay Tagen für Ihren ${LetterLogoText} aktiviert ist.
 
-Stellen Sie sicher, dass Sie Ihr Business-Abonnement bezahlen, bevor die Nachfrist abläuft. So können Sie weiterhin alle Vorteile Ihres ${LetterLogoText} DocSpace nutzen.
+Stellen Sie sicher, dass Sie Ihr Business-Abonnement bezahlen, bevor die Nachfrist abläuft. So können Sie weiterhin alle Vorteile Ihres ${LetterLogoText} nutzen.
 
 $OrangeButton
 
@@ -1230,9 +1227,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Bitte beachten Sie, dass die Karenzfrist von $PaymentDelay Tagen für Ihren ${LetterLogoText} DocSpace abgelaufen ist.
+Bitte beachten Sie, dass die Karenzfrist von $PaymentDelay Tagen für Ihren ${LetterLogoText} abgelaufen ist.
 
-Stellen Sie sicher, dass Sie Ihr Business-Abonnement so bald wie möglich bezahlen. So können Sie alle Vorteile Ihres ${LetterLogoText} DocSpace wie bisher nutzen.
+Stellen Sie sicher, dass Sie Ihr Business-Abonnement so bald wie möglich bezahlen. So können Sie alle Vorteile Ihres ${LetterLogoText} wie bisher nutzen.
 
 $OrangeButton
 
@@ -1241,9 +1238,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Bitte beachten Sie, dass die Karenzfrist von $PaymentDelay Tagen für Ihren ${LetterLogoText} DocSpace morgen abläuft.
+Bitte beachten Sie, dass die Karenzfrist von $PaymentDelay Tagen für Ihren ${LetterLogoText} morgen abläuft.
 
-Stellen Sie sicher, dass Sie Ihr Business-Abonnement noch heute bezahlen. So können Sie weiterhin alle Vorteile Ihres ${LetterLogoText} DocSpace nutzen.
+Stellen Sie sicher, dass Sie Ihr Business-Abonnement noch heute bezahlen. So können Sie weiterhin alle Vorteile Ihres ${LetterLogoText} nutzen.
 
 $OrangeButton
 
@@ -1617,16 +1614,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: Schließen Sie Ihre Registrierung ab</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Karenzfrist für ${LetterLogoText} DocSpace aktiviert</value>
+    <value>Karenzfrist für ${LetterLogoText} aktiviert</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Bevorstehende Abonnementzahlung für Ihren ${LetterLogoText} DocSpace</value>
+    <value>Bevorstehende Abonnementzahlung für Ihren ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Karenzfrist für ${LetterLogoText} DocSpace ist abgelaufen</value>
+    <value>Karenzfrist für ${LetterLogoText} ist abgelaufen</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Karenzfrist für ${LetterLogoText} DocSpace läuft morgen ab</value>
+    <value>Karenzfrist für ${LetterLogoText} läuft morgen ab</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>${LetterLogoText} beitreten</value>

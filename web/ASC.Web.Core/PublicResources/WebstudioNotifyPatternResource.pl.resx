@@ -291,9 +291,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Skorzystaj ze zniżki</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Odwiedź sekcję płatności</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktywuj Swój adres e-mail na stronie "${__VirtualRootPath}":"$InviteLink".
 
@@ -1199,9 +1196,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Informujemy, że okres prolongaty wynoszący $PaymentDelay dni dla Twojego konta ${LetterLogoText} DocSpace został aktywowany.
+Informujemy, że okres prolongaty wynoszący $PaymentDelay dni dla Twojego konta ${LetterLogoText} został aktywowany.
 
-Pamiętaj, aby opłacić swój plan Biznes przed upływem okresu prolongaty W ten sposób będziesz w stanie dalej korzystać ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText} DocSpace.
+Pamiętaj, aby opłacić swój plan Biznes przed upływem okresu prolongaty W ten sposób będziesz w stanie dalej korzystać ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText}.
 
 $OrangeButton
 
@@ -1221,9 +1218,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Informujemy, że okres prolongaty wynoszący $PaymentDelay dni dla Twojego konta ${LetterLogoText} DocSpace wygasł.
+Informujemy, że okres prolongaty wynoszący $PaymentDelay dni dla Twojego konta ${LetterLogoText} wygasł.
 
-Opłać swój plan Biznes jak najszybciej. W ten sposób będziesz w stanie korzystać ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText} DocSpace jak dotychczas.
+Opłać swój plan Biznes jak najszybciej. W ten sposób będziesz w stanie korzystać ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText} jak dotychczas.
 
 $OrangeButton
 
@@ -1232,9 +1229,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Przypominamy, że okres prolongaty wynoszący $PaymentDelay dni dla Twojego konta ${LetterLogoText} DocSpace wygaśnie jutro.
+Przypominamy, że okres prolongaty wynoszący $PaymentDelay dni dla Twojego konta ${LetterLogoText} wygaśnie jutro.
 
-Opłać swój plan Biznes już dzisiaj. W ten sposób będziesz w stanie dalej korzystać ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText} DocSpace.
+Opłać swój plan Biznes już dzisiaj. W ten sposób będziesz w stanie dalej korzystać ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText}.
 
 $OrangeButton
 
@@ -1611,16 +1608,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: zakończ rejestrację</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} DocSpace został aktywowany</value>
+    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} został aktywowany</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Nadchodząca płatność za subskrypcję ${LetterLogoText} DocSpace</value>
+    <value>Nadchodząca płatność za subskrypcję ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} DocSpace wygasł</value>
+    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} wygasł</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} DocSpace wygaśnie jutro</value>
+    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} wygaśnie jutro</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Dołącz do ${LetterLogoText}</value>

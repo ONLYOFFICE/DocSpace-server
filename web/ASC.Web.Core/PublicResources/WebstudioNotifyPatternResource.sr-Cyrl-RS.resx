@@ -291,9 +291,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Користи попуст</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Посетите одељак за Плац́ања</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Активирај свој емаил за "${__VirtualRootPath}":"$InviteLink" портал.
 
@@ -1208,9 +1205,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Здраво, $UserName!
 
-Узмите у обзир да је грејс период од $PaymentDelay дана за ваш ${LetterLogoText} DocSpace активиран.
+Узмите у обзир да је грејс период од $PaymentDelay дана за ваш ${LetterLogoText} активиран.
 
-Обавезно платите своју Пословну претплату пре истека грејс периода. Тако ц́ете моц́и даље да користите све предности вашег ${LetterLogoText} DocSpace-а.
+Обавезно платите своју Пословну претплату пре истека грејс периода. Тако ц́ете моц́и даље да користите све предности вашег ${LetterLogoText}-а.
 
 $OrangeButton
 
@@ -1230,9 +1227,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Здраво, $UserName!
 
-Узмите у обзир да је грејс период од $PaymentDelay дана за ваш ${LetterLogoText} DocSpace завршен.
+Узмите у обзир да је грејс период од $PaymentDelay дана за ваш ${LetterLogoText} завршен.
 
-Обавезно платите своју Пословну претплату што је пре могуц́е. Тако ц́ете моц́и да користите све предности вашег ${LetterLogoText} DocSpace-а као и раније.
+Обавезно платите своју Пословну претплату што је пре могуц́е. Тако ц́ете моц́и да користите све предности вашег ${LetterLogoText}-а као и раније.
 
 $OrangeButton
 
@@ -1241,9 +1238,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Здраво, $UserName!
 
-Узмите у обзир да грејс период од $PaymentDelay дана за ваш ${LetterLogoText} DocSpace истиче сутра.
+Узмите у обзир да грејс период од $PaymentDelay дана за ваш ${LetterLogoText} истиче сутра.
 
-Обавезно платите своју Пословну претплату данас. Тако ц́ете моц́и даље да користите све предности вашег ${LetterLogoText} DocSpace-а.
+Обавезно платите своју Пословну претплату данас. Тако ц́ете моц́и даље да користите све предности вашег ${LetterLogoText}-а.
 
 $OrangeButton
 
@@ -1619,16 +1616,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: заврши регистрацију</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Грејс период за ваш ${LetterLogoText} DocSpace активиран</value>
+    <value>Грејс период за ваш ${LetterLogoText} активиран</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Предстојећа уплата претплате за ваш ${LetterLogoText} DocSpace</value>
+    <value>Предстојећа уплата претплате за ваш ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Грејс период за ваш ${LetterLogoText} DocSpace је истекао</value>
+    <value>Грејс период за ваш ${LetterLogoText} је истекао</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Грејс период за ваш ${LetterLogoText} DocSpace истиче сутра</value>
+    <value>Грејс период за ваш ${LetterLogoText} истиче сутра</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Придружите се ${LetterLogoText}-у</value>

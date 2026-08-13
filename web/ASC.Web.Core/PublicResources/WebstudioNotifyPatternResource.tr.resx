@@ -294,9 +294,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>İndirim kulan</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Ödemeler Bölümünü Ziyaret Edin</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"$InviteLink" portalındaki e-posta adresinizi aktifleştirin.
 
@@ -1214,9 +1211,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-Lütfen ${LetterLogoText} DocSpace'iniz için $PaymentDelay‎ günlük ek sürenin etkinleştirildiğini dikkate alın.
+Lütfen ${LetterLogoText}'iniz için $PaymentDelay‎ günlük ek sürenin etkinleştirildiğini dikkate alın.
 
-Business aboneliğinizin ödemesini, ödemesiz dönem sona ermeden önce yaptığınızdan emin olun. Bu sayede ${LetterLogoText} DocSpace'inizin tüm avantajlarından daha fazla yararlanabileceksiniz.
+Business aboneliğinizin ödemesini, ödemesiz dönem sona ermeden önce yaptığınızdan emin olun. Bu sayede ${LetterLogoText}'inizin tüm avantajlarından daha fazla yararlanabileceksiniz.
 
 $OrangeButton
 
@@ -1236,9 +1233,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace'iniz için $PaymentDelay günlük ödemesiz sürenin sona erdiğini lütfen dikkate alın.
+${LetterLogoText}'iniz için $PaymentDelay günlük ödemesiz sürenin sona erdiğini lütfen dikkate alın.
 
-Business aboneliğinizin ödemesini mümkün olan en kısa sürede yaptığınızdan emin olun. Böylece ${LetterLogoText} DocSpace'inizin tüm avantajlarını eskisi gibi kullanabileceksiniz.
+Business aboneliğinizin ödemesini mümkün olan en kısa sürede yaptığınızdan emin olun. Böylece ${LetterLogoText}'inizin tüm avantajlarını eskisi gibi kullanabileceksiniz.
 
 $OrangeButton
 
@@ -1247,9 +1244,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace'iniz için $PaymentDelay günlük ek sürenin yarın sona ereceğini lütfen dikkate alın.
+${LetterLogoText}'iniz için $PaymentDelay günlük ek sürenin yarın sona ereceğini lütfen dikkate alın.
 
-Business aboneliğinizin ödemesini bugün yaptığınızdan emin olun. Böylece ${LetterLogoText} DocSpace'inizin tüm avantajlarından daha fazla yararlanabileceksiniz.
+Business aboneliğinizin ödemesini bugün yaptığınızdan emin olun. Böylece ${LetterLogoText}'inizin tüm avantajlarından daha fazla yararlanabileceksiniz.
 
 $OrangeButton
 
@@ -1639,16 +1636,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: kaydı tamamlayın</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace’iniz için ödemesiz süre başlatılmıştır</value>
+    <value>${LetterLogoText}’iniz için ödemesiz süre başlatılmıştır</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace alanınız için yaklaşan abonelik ödemesi</value>
+    <value>${LetterLogoText} alanınız için yaklaşan abonelik ödemesi</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace’iniz için ödemesiz süre sona ermiştir</value>
+    <value>${LetterLogoText}’iniz için ödemesiz süre sona ermiştir</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace’iniz için ödemesiz süre yarın sona erecektir</value>
+    <value>${LetterLogoText}’iniz için ödemesiz süre yarın sona erecektir</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>${LetterLogoText}’e katılın</value>

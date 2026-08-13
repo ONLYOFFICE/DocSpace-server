@@ -294,9 +294,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Izkoristite popust</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Obiščite razdelek za plačila</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivirajte vaš email za "${__VirtualRootPath}":"$InviteLink" portal.
 
@@ -1221,9 +1218,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Upoštevajte, da je za vaš ${LetterLogoText} DocSpace aktivirano obdobje odloga $PaymentDelay‎ dni.
+Upoštevajte, da je za vaš ${LetterLogoText} aktivirano obdobje odloga $PaymentDelay‎ dni.
 
-Poskrbite za plačano poslovno naročnino pred iztekom obdobja odloga. Tako boste lahko še naprej uporabljali vse prednosti vašega ${LetterLogoText} DocSpace.
+Poskrbite za plačano poslovno naročnino pred iztekom obdobja odloga. Tako boste lahko še naprej uporabljali vse prednosti vašega ${LetterLogoText}.
 
 $OrangeButton
 
@@ -1243,9 +1240,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Upoštevajte, da je obdobje odloga $PaymentDelay dni za vaš ${LetterLogoText} DocSpace poteklo.
+Upoštevajte, da je obdobje odloga $PaymentDelay dni za vaš ${LetterLogoText} poteklo.
 
-Poskrbite za plačilo poslovne naročnine čim prej. Tako boste lahko še naprej uporabljali vse prednosti vašega ${LetterLogoText} DocSpace.
+Poskrbite za plačilo poslovne naročnine čim prej. Tako boste lahko še naprej uporabljali vse prednosti vašega ${LetterLogoText}.
 
 $OrangeButton
 
@@ -1254,9 +1251,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Upoštevajte, da bo jutri poteklo obdobje odloga $PaymentDelay dni za vaš ${LetterLogoText} DocSpace.
+Upoštevajte, da bo jutri poteklo obdobje odloga $PaymentDelay dni za vaš ${LetterLogoText}.
 
-Poskrbite, da boste svojo poslovno naročnino plačali še danes. Tako boste lahko še naprej uporabljali vse prednosti vašega ${LetterLogoText} DocSpace.
+Poskrbite, da boste svojo poslovno naročnino plačali še danes. Tako boste lahko še naprej uporabljali vse prednosti vašega ${LetterLogoText}.
 
 $OrangeButton
 
@@ -1645,16 +1642,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: dokončajte registracijo</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Aktivirano je podaljšano obdobje za vaš ${LetterLogoText} DocSpace</value>
+    <value>Aktivirano je podaljšano obdobje za vaš ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Prihajajoče plačilo naročnine za vaš ${LetterLogoText} DocSpace</value>
+    <value>Prihajajoče plačilo naročnine za vaš ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Preteklo je podaljšano obdobje za vaš ${LetterLogoText} DocSpace</value>
+    <value>Preteklo je podaljšano obdobje za vaš ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Podaljšano obdobje za vaš ${LetterLogoText} DocSpace preteče jutri</value>
+    <value>Podaljšano obdobje za vaš ${LetterLogoText} preteče jutri</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Pridružite se ${LetterLogoText}</value>

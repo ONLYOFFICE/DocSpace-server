@@ -375,8 +375,8 @@ public class StudioPeriodicNotify(
                         action = serviceProvider.GetService<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>();
                         toowner = true;
                         topayer = true;
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
-                        orangeButtonUrl = c => commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
+
+                        url1 = _ => commonLinkUtility.GetFullAbsolutePath("~/billing/payment-method");
                     }
 
                     #endregion
@@ -388,8 +388,8 @@ public class StudioPeriodicNotify(
                         action = serviceProvider.GetService<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>();
                         toowner = true;
                         topayer = true;
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
-                        orangeButtonUrl = c => commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitBillingSection", c);
+                        orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~/billing/overview");
                     }
 
                     #endregion
@@ -401,8 +401,8 @@ public class StudioPeriodicNotify(
                         action = serviceProvider.GetService<SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction>();
                         toowner = true;
                         topayer = true;
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
-                        orangeButtonUrl = c => commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitBillingSection", c);
+                        orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~/billing/overview");
                     }
 
                     #endregion
@@ -414,8 +414,8 @@ public class StudioPeriodicNotify(
                         action = serviceProvider.GetService<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>();
                         toowner = true;
                         topayer = true;
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
-                        orangeButtonUrl = c => commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitBillingSection", c);
+                        orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~/billing/overview");
                     }
 
                     #endregion

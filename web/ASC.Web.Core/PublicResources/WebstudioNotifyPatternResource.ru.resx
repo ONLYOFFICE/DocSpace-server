@@ -294,9 +294,6 @@
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Использовать скидку</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
-    <value>Посетите раздел «Платежи»</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Активируйте Ваш адрес электронной почты на портале "${__VirtualRootPath}":"$InviteLink".
 
@@ -1221,9 +1218,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Здравствуйте, $UserName!
  
-Обратите внимание, что льготный период продолжительностью $PaymentDelay‎ дней для вашего ${LetterLogoText} DocSpace активирован.
+Обратите внимание, что льготный период продолжительностью $PaymentDelay‎ дней для вашего ${LetterLogoText} активирован.
  
-Не забудьте оплатить подписку на тарифный план Business до истечения льготного периода. Таким образом, вы сможете в дальнейшем использовать все преимущества вашего ${LetterLogoText} DocSpace.
+Не забудьте оплатить подписку на тарифный план Business до истечения льготного периода. Таким образом, вы сможете в дальнейшем использовать все преимущества вашего ${LetterLogoText}.
  
 $OrangeButton
  
@@ -1243,9 +1240,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Здравствуйте, $UserName!
  
-Обратите внимание, что льготный период продолжительностью $PaymentDelay‎ дней для вашего ${LetterLogoText} DocSpace истек.
+Обратите внимание, что льготный период продолжительностью $PaymentDelay‎ дней для вашего ${LetterLogoText} истек.
  
-Не забудьте оплатить подписку на тарифный план Business в ближайшее время. Таким образом, вы сможете и в дальнейшем использовать все преимущества вашего ${LetterLogoText} DocSpace.
+Не забудьте оплатить подписку на тарифный план Business в ближайшее время. Таким образом, вы сможете и в дальнейшем использовать все преимущества вашего ${LetterLogoText}.
  
 $OrangeButton
  
@@ -1254,9 +1251,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Здравствуйте, $UserName!
  
-Обратите внимание, что льготный период продолжительностью $PaymentDelay‎ дней для вашего ${LetterLogoText} DocSpace истекает завтра.
+Обратите внимание, что льготный период продолжительностью $PaymentDelay‎ дней для вашего ${LetterLogoText} истекает завтра.
  
-Не забудьте оплатить подписку на тарифный план Business в ближайшее время. Таким образом, вы сможете в дальнейшем использовать все преимущества вашего ${LetterLogoText} DocSpace.
+Не забудьте оплатить подписку на тарифный план Business в ближайшее время. Таким образом, вы сможете в дальнейшем использовать все преимущества вашего ${LetterLogoText}.
  
 $OrangeButton
  
@@ -1645,16 +1642,16 @@ $TrulyYours</value>
     <value>${LetterLogoText}: пройдите регистрацию</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Льготный период для ${LetterLogoText} DocSpace активирован</value>
+    <value>Льготный период для ${LetterLogoText} активирован</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Предстоящий платеж за подписку на ваш ${LetterLogoText} DocSpace</value>
+    <value>Предстоящий платеж за подписку на ваш ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace истек</value>
+    <value>Льготный период для вашего ${LetterLogoText} истек</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace истекает завтра</value>
+    <value>Льготный период для вашего ${LetterLogoText} истекает завтра</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Присоединяйтесь к ${LetterLogoText}</value>
