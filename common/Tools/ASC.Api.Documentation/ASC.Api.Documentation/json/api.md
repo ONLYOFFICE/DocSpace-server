@@ -1,6 +1,9 @@
-# Api
+# ONLYOFFICE DocSpace Portal API
 
-All URIs are relative to *http://localhost:8092*
+The browsable version of this reference, with a request builder and code samples, is published at
+<https://api.onlyoffice.com/docspace/api-backend/usage-api/>.
+
+All URIs are relative to *https://yourportal.onlyoffice.com*, where the host is the address of your DocSpace instance.
 
 ## Endpoints
 
@@ -279,7 +282,7 @@ Returns a single application by id with the per-tenant enabled state and setting
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **String** | The application identifier. | [required] [example: ai-room] |
+| **id** | path | **String** | The application identifier. | [required] [example: "ai-room"] |
 
 #### Responses
 
@@ -1056,7 +1059,7 @@ Uploads and initializes a migration with a migrator name specified in the reques
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **migratorName** | path | **String** | The migrator name extracted from the route parameters. | [required] [example: GoogleWorkspace] |
+| **migratorName** | path | **String** | The migrator name extracted from the route parameters. | [required] [example: "GoogleWorkspace"] |
 
 #### Responses
 
@@ -1378,8 +1381,8 @@ Returns the URL to the checkout setup page.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **BackUrl** | query | **URI** (uri) | The URL where the user will be redirected after setup cancellation. | [required] [example: https://example.com/payment/back] [minLength: 0] [maxLength: 255] |
-| **SuccessUrl** | query | **URI** (uri) | The URL where the user will be redirected after successful payment. | [required] [example: https://example.com/payment/success] [minLength: 0] [maxLength: 255] |
+| **BackUrl** | query | **URI** (uri) | The URL where the user will be redirected after setup cancellation. | [required] [example: "https://example.com/payment/back"] [minLength: 0] [maxLength: 255] |
+| **SuccessUrl** | query | **URI** (uri) | The URL where the user will be redirected after successful payment. | [required] [example: "https://example.com/payment/success"] [minLength: 0] [maxLength: 255] |
 
 #### Responses
 
@@ -1499,8 +1502,8 @@ Returns the customer spending aggregated per calendar month from the accounting 
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **startDate** | query | **Date** (date-time) | Start of the period (inclusive). | [optional] [example: 2025-01-01T00:00:00Z] |
-| **endDate** | query | **Date** (date-time) | End of the period (inclusive). | [optional] [example: 2025-12-31T23:59:59Z] |
+| **startDate** | query | **Date** (date-time) | Start of the period (inclusive). | [optional] [example: "2025-01-01T00:00:00Z"] |
+| **endDate** | query | **Date** (date-time) | End of the period (inclusive). | [optional] [example: "2025-12-31T23:59:59Z"] |
 
 #### Responses
 
@@ -1580,15 +1583,15 @@ Returns the report of customer operations from the accounting service.
 |------------- | ------------- | ------------- | ------------- | -------------|
 | **offset** | query | **Integer** (int32) | The number of items to skip for pagination. The default value is 0. | [optional] [example: 0] |
 | **limit** | query | **Integer** (int32) | The maximum number of items to return for pagination. The default value is 25. | [optional] [example: 25] |
-| **ServiceName** | query | **List** | The service name list. A single string is also accepted for backward compatibility. | [optional] [example: [backup]] |
-| **StartDate** | query | **Date** (date-time) | The report start date. | [optional] [example: 2024-01-01T00:00:00Z] |
-| **EndDate** | query | **Date** (date-time) | The report end date. | [optional] [example: 2024-01-31T23:59:59Z] |
-| **ParticipantName** | query | **String** | The participant name. | [optional] [example: My Own Corporation] |
+| **ServiceName** | query | **List** | The service name list. A single string is also accepted for backward compatibility. | [optional] [example: "[backup]"] |
+| **StartDate** | query | **Date** (date-time) | The report start date. | [optional] [example: "2024-01-01T00:00:00Z"] |
+| **EndDate** | query | **Date** (date-time) | The report end date. | [optional] [example: "2024-01-31T23:59:59Z"] |
+| **ParticipantName** | query | **String** | The participant name. | [optional] [example: "My Own Corporation"] |
 | **Credit** | query | **Boolean** | Specifies whether to include credit operations in the report. | [optional] [example: true] |
 | **Debit** | query | **Boolean** | Specifies whether to include debit operations in the report. | [optional] [example: false] |
 | **Type** | query | **OperationType** | The operation type to filter by. | [optional] [example: Any] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] |
 | **Status** | query | **OperationStatus** | The operation status to filter by. | [optional] [example: Any] [enum: 0, 1, 2, 3] |
-| **OrderBy** | query | **String** | The field to order by. | [optional] [example: StartDate] |
+| **OrderBy** | query | **String** | The field to order by. | [optional] [example: "StartDate"] |
 | **OrderType** | query | **OperationOrderType** | Order direction: Ascending or Descending. | [optional] [example: Descending] [enum: 0, 1] |
 
 #### Responses
@@ -1676,7 +1679,7 @@ Returns the customer usage statistics aggregated per service from the accounting
 | **Metadata** | query | **Map** | Metadata key-value pairs to filter by. | [optional] [example: {"key1":"value1","key2":"value2"}] |
 | **offset** | query | **Integer** (int32) | The number of items to skip for pagination. The default value is 0. | [optional] [example: 0] |
 | **limit** | query | **Integer** (int32) | The maximum number of items to return for pagination. The default value is 25. | [optional] [example: 25] |
-| **OrderBy** | query | **String** | The field to order by. | [optional] [example: ServiceName] |
+| **OrderBy** | query | **String** | The field to order by. | [optional] [example: "ServiceName"] |
 | **OrderType** | query | **OperationOrderType** | Order direction: Ascending or Descending. | [optional] [example: Descending] [enum: 0, 1] |
 
 #### Responses
@@ -1756,7 +1759,7 @@ Returns the URL to the payment account.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **backUrl** | query | **URI** (uri) | The URL where the user will be redirected after payment processing. | [optional] [example: https://example.com] [minLength: 0] [maxLength: 255] |
+| **backUrl** | query | **URI** (uri) | The URL where the user will be redirected after payment processing. | [optional] [example: "https://example.com"] [minLength: 0] [maxLength: 255] |
 
 #### Responses
 
@@ -2929,7 +2932,7 @@ Returns the full absolute path to the current portal.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **virtualPath** | query | **String** | The virtual path for the portal resource access. | [optional] [example: /portal/documents] |
+| **virtualPath** | query | **String** | The virtual path for the portal resource access. | [optional] [example: "/portal/documents"] |
 
 #### Responses
 
@@ -3270,7 +3273,7 @@ Returns a user with the ID specified in the request from the current portal.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **userID** | path | **UUID** (uuid) | The user ID extracted from the route parameters. | [required] [example: 00000000-0000-0000-0000-000000000000] |
+| **userID** | path | **UUID** (uuid) | The user ID extracted from the route parameters. | [required] [example: "00000000-0000-0000-0000-000000000000"] |
 
 #### Responses
 
@@ -3347,7 +3350,7 @@ Sends congratulations to the user after registering a portal.
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
 | **Userid** | query | **UUID** (uuid) | The user ID to receive the congratulatory message. | [required] [example: 00000000-0000-0000-0000-000000000000] |
-| **Key** | query | **String** | The template identifier or email configuration key. | [required] [example: birthday] |
+| **Key** | query | **String** | The template identifier or email configuration key. | [required] [example: "birthday"] |
 
 #### Responses
 
@@ -3699,12 +3702,12 @@ Returns a list of the audit events by the parameters specified in the request.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **userId** | query | **UUID** (uuid) | The ID of the user who triggered the audit event. | [optional] [example: 00000000-0000-0000-0000-000000000001] |
+| **userId** | query | **UUID** (uuid) | The ID of the user who triggered the audit event. | [optional] [example: "00000000-0000-0000-0000-000000000001"] |
 | **moduleType** | query | **LocationType** | The location where the audit event occurred. | [optional] [example: Files] [enum: 0, 1, 2, 3, 27, 29, 30, 31] |
 | **actionType** | query | **ActionType** | The type of action performed in the audit event (e.g., Create, Update, Delete). | [optional] [example: Create] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] |
 | **action** | query | **MessageAction** | The specific action that occurred within the audit event. | [optional] [example: FileCreated] [enum: 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 4000, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 4010, 4011, 4012, 4013, 4014, 4015, 4016, 4017, 4018, 4019, 4020, 4021, 4022, 4023, 4024, 4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 4034, 4035, 4036, 4037, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5019, 5020, 5021, 5022, 5023, 5024, 5025, 5026, 5027, 5028, 5029, 5030, 5031, 5032, 5033, 5034, 5035, 5036, 5037, 5038, 5039, 5040, 5041, 5042, 5043, 5044, 5045, 5046, 5047, 5048, 5049, 5050, 5053, 5054, 5055, 5056, 5057, 5058, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066, 5068, 5069, 5070, 5071, 5072, 5073, 5074, 5075, 5076, 5077, 5078, 5079, 5080, 5081, 5082, 5083, 5084, 5085, 5086, 5087, 5088, 5089, 5090, 5091, 5092, 5093, 5094, 5095, 5096, 5097, 5098, 5099, 5100, 5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128, 5129, 5130, 5131, 5132, 5133, 5150, 5151, 5152, 5153, 5154, 5155, 5156, 5157, 5158, 5159, 5160, 5201, 5202, 5203, 5204, 5205, 5206, 5501, 5502, 5503, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6019, 6020, 6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029, 6030, 6031, 6032, 6033, 6034, 6035, 6036, 6037, 6038, 6039, 6040, 6041, 6042, 6043, 6044, 6045, 6046, 6047, 6048, 6049, 6050, 6051, 6052, 6053, 6054, 6055, 6056, 6057, 6058, 6059, 6060, 6061, 6062, 6063, 6064, 6065, 6066, 6067, 6068, 6069, 6070, 6071, 6072, 6073, 6074, 6075, 6076, 6077, 6078, 6079, 6080, 6081, 6082, 6083, 6084, 6085, 6086, 6087, 6088, 6089, 6090, 6091, 6092, 6093, 6094, 6095, 6096, 6097, 6098, 6099, 6100, 6101, 6102, 7000, 7001, 7002, 7003, 7004, 9901, 9902, 9903, 9904, 9905, 9906, 9907, 9908, 9909, -1] |
 | **entryType** | query | **EntryType** | The type of audit entry (e.g., Folder, User, File). | [optional] [example: File] [enum: 0, 1, 2, 23, 24, 25, 26, 27] |
-| **target** | query | **String** | The target object affected by the audit event (e.g., document ID, user account). | [optional] [example: document.docx] |
+| **target** | query | **String** | The target object affected by the audit event (e.g., document ID, user account). | [optional] [example: "document.docx"] |
 | **from** | query | **ApiDateTime** | The starting date and time for filtering audit events. | [optional] [example: 2024-01-01T00:00:00Z] |
 | **to** | query | **ApiDateTime** | The ending date and time for filtering audit events. | [optional] [example: 2024-01-31T23:59:59Z] |
 | **count** | query | **Integer** (int32) | The maximum number of audit event records to retrieve. | [optional] [example: 100] [min: 1] [max: 100] |
@@ -8507,7 +8510,7 @@ Returns the availability of the module with the ID specified in the request.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **UUID** (uuid) | The ID extracted from the route parameters. | [required] |
+| **id** | path | **UUID** (uuid) | The ID extracted from the route parameters. | [required] [example: "1"] |
 
 #### Responses
 
@@ -8748,7 +8751,7 @@ Returns the space usage statistics for the module with the ID specified in the r
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **UUID** (uuid) | The ID extracted from the route parameters. | [required] |
+| **id** | path | **UUID** (uuid) | The ID extracted from the route parameters. | [required] [example: 1] |
 
 #### Responses
 
@@ -9745,13 +9748,13 @@ Returns the logs of the webhook activities.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **deliveryFrom** | query | **Date** (date-time) | The delivery start time for filtering webhook logs. | [optional] [example: 2024-01-15T10:30:00Z] |
+| **deliveryFrom** | query | **Date** (date-time) | The delivery start time for filtering webhook logs. | [optional] [example: "2024-01-15T10:30:00Z"] |
 | **deliveryTo** | query | **Date** (date-time) | The delivery end time for filtering webhook logs. | [optional] [example: 2024-01-15T10:30:00Z] |
-| **hookUri** | query | **String** | The destination URL where webhooks are delivered. | [optional] [example: https://example.com/webhook] |
+| **hookUri** | query | **String** | The destination URL where webhooks are delivered. | [optional] [example: "https://example.com/webhook"] |
 | **configId** | query | **Integer** (int32) | The webhook configuration identifier. | [optional] [example: 1] |
 | **eventId** | query | **Integer** (int32) | The unique identifier of the event that triggered the webhook. | [optional] [example: 1] |
 | **groupStatus** | query | **WebhookGroupStatus** | The status of the webhook delivery group. | [optional] [example: NotSent] [enum: 0, 1, 2, 4, 8, 16] |
-| **userId** | query | **UUID** (uuid) | The identifier of the user associated with the webhook event. | [optional] |
+| **userId** | query | **UUID** (uuid) | The identifier of the user associated with the webhook event. | [optional] [example: "{}"] |
 | **trigger** | query | **WebhookTrigger** | The type of event that triggered the webhook. | [optional] [example: 0] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824] |
 | **count** | query | **Integer** (int32) | The maximum number of webhook log records to return in the query response. | [optional] [example: 1] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | Specifies the starting index for retrieving webhook logs.  Used for pagination in the webhook delivery log queries. | [optional] [example: 1] |
@@ -10042,7 +10045,7 @@ Returns a web plugin by the name specified in the request.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **name** | path | **String** | The web plugin name. | [required] [example: example-plugin] |
+| **name** | path | **String** | The web plugin name. | [required] [example: "example-plugin"] |
 
 #### Responses
 
@@ -10207,7 +10210,7 @@ The active connections parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **loginEvent** | **Integer** (int32) | The login event. | [required] [example: 1] |
-| **items** | [**List**](#model-activeconnectionsitemdto) | The list of active connection items. | [optional] [example: [{"id":"conn1","ip":"192.168.1.1"}]] [nullable] |
+| **items** | [**List**](#model-activeconnectionsitemdto) | The list of active connection items. | [optional] [example: [{id=conn1, ip=192.168.1.1}]] [nullable] |
 
 
 ### Model ActiveConnectionsItemDto
@@ -10224,7 +10227,7 @@ The active connection item parameters.
 | **city** | **String** | The active connection city. | [optional] [example: New York] [nullable] |
 | **browser** | **String** | The active connection browser. | [optional] [example: Chrome 120.0] [nullable] |
 | **platform** | **String** | The active connection platform. | [optional] [example: Windows] [nullable] |
-| **date** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **date** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **page** | **String** | The active connection page. | [optional] [example: /rooms/shared] [nullable] |
 
 
@@ -10282,7 +10285,7 @@ The additional white label settings wrapper.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **settings** | [**AdditionalWhiteLabelSettings**](#model-additionalwhitelabelsettings) |  | [optional] |
+| **settings** | [**AdditionalWhiteLabelSettings**](#model-additionalwhitelabelsettings) | The additional white label settings. | [optional] |
 
 
 ### Model AdminMessageBaseSettingsRequestsDto
@@ -10302,7 +10305,7 @@ The request parameters for configuring the administrator message content.
 | **message** | **String** | The content of the administrator message to be sent. | [required] [example: Hello, this is a test message from the administrator.] [minLength: 0] [maxLength: 255] [nullable] |
 | **email** | **String** (email) | Email | [required] [example: user@example.com] [minLength: 0] [maxLength: 255] [nullable] |
 | **culture** | **String** | Culture | [optional] [example: en-US] [nullable] |
-| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) |  | [optional] [enum: 0, 1, 2, 3] |
+| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) | The type of CAPTCHA validation used. | [optional] [enum: 0, 1, 2, 3] |
 | **recaptchaResponse** | **String** | The user&#39;s response to the CAPTCHA challenge. | [optional] [example: 03AGdBq24PBCbwiDRaS...] [nullable] |
 
 
@@ -10402,7 +10405,7 @@ The API date and time parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **utcTime** | **Date** (date-time) | The time in UTC format. | [optional] [example: 2018-01-01T00:00:00Z] |
+| **utcTime** | **Date** (date-time) | The time in UTC format. | [optional] [example: 2018-01-01T00:00:00.0000000Z] |
 | **timeZoneOffset** | **String** (date-span) | The time zone offset. | [optional] [example: 00:00:00] |
 
 
@@ -10424,7 +10427,7 @@ The portal application information.
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | The application identifier (stable slug). The client maps this to its title, description and icon. | [optional] [example: ai-rooms] [nullable] |
 | **enabled** | **Boolean** | Whether the application is enabled for the current tenant. | [optional] [example: true] |
-| **settings** | [**AppDto_settings**](#model-appdtosettings) |  | [optional] [nullable] |
+| **settings** | [**AppDto_settings**](#model-appdtosettings) |  | [optional] |
 
 
 ### Model AppDto.settings
@@ -10462,22 +10465,22 @@ The audit event parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **Integer** (int32) | The audit event ID. | [optional] [example: 1] |
-| **date** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **date** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **user** | **String** | The name of the user who triggered the audit event. | [optional] [example: John Doe] [nullable] |
 | **userId** | **UUID** (uuid) | The ID of the user who triggered the audit event. | [optional] [example: 00000000-0000-0000-0000-000000000001] |
 | **action** | **String** | The audit event action. | [optional] [example: User logged in] [nullable] |
-| **actionId** | [**MessageAction**](#model-messageaction) |  | [optional] [enum: 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 4000, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 4010, 4011, 4012, 4013, 4014, 4015, 4016, 4017, 4018, 4019, 4020, 4021, 4022, 4023, 4024, 4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 4034, 4035, 4036, 4037, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5019, 5020, 5021, 5022, 5023, 5024, 5025, 5026, 5027, 5028, 5029, 5030, 5031, 5032, 5033, 5034, 5035, 5036, 5037, 5038, 5039, 5040, 5041, 5042, 5043, 5044, 5045, 5046, 5047, 5048, 5049, 5050, 5053, 5054, 5055, 5056, 5057, 5058, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066, 5068, 5069, 5070, 5071, 5072, 5073, 5074, 5075, 5076, 5077, 5078, 5079, 5080, 5081, 5082, 5083, 5084, 5085, 5086, 5087, 5088, 5089, 5090, 5091, 5092, 5093, 5094, 5095, 5096, 5097, 5098, 5099, 5100, 5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128, 5129, 5130, 5131, 5132, 5133, 5150, 5151, 5152, 5153, 5154, 5155, 5156, 5157, 5158, 5159, 5160, 5201, 5202, 5203, 5204, 5205, 5206, 5501, 5502, 5503, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6019, 6020, 6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029, 6030, 6031, 6032, 6033, 6034, 6035, 6036, 6037, 6038, 6039, 6040, 6041, 6042, 6043, 6044, 6045, 6046, 6047, 6048, 6049, 6050, 6051, 6052, 6053, 6054, 6055, 6056, 6057, 6058, 6059, 6060, 6061, 6062, 6063, 6064, 6065, 6066, 6067, 6068, 6069, 6070, 6071, 6072, 6073, 6074, 6075, 6076, 6077, 6078, 6079, 6080, 6081, 6082, 6083, 6084, 6085, 6086, 6087, 6088, 6089, 6090, 6091, 6092, 6093, 6094, 6095, 6096, 6097, 6098, 6099, 6100, 6101, 6102, 7000, 7001, 7002, 7003, 7004, 9901, 9902, 9903, 9904, 9905, 9906, 9907, 9908, 9909, -1] |
+| **actionId** | [**MessageAction**](#model-messageaction) | The event action ID. | [optional] [enum: 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 4000, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 4010, 4011, 4012, 4013, 4014, 4015, 4016, 4017, 4018, 4019, 4020, 4021, 4022, 4023, 4024, 4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 4034, 4035, 4036, 4037, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5019, 5020, 5021, 5022, 5023, 5024, 5025, 5026, 5027, 5028, 5029, 5030, 5031, 5032, 5033, 5034, 5035, 5036, 5037, 5038, 5039, 5040, 5041, 5042, 5043, 5044, 5045, 5046, 5047, 5048, 5049, 5050, 5053, 5054, 5055, 5056, 5057, 5058, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066, 5068, 5069, 5070, 5071, 5072, 5073, 5074, 5075, 5076, 5077, 5078, 5079, 5080, 5081, 5082, 5083, 5084, 5085, 5086, 5087, 5088, 5089, 5090, 5091, 5092, 5093, 5094, 5095, 5096, 5097, 5098, 5099, 5100, 5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128, 5129, 5130, 5131, 5132, 5133, 5150, 5151, 5152, 5153, 5154, 5155, 5156, 5157, 5158, 5159, 5160, 5201, 5202, 5203, 5204, 5205, 5206, 5501, 5502, 5503, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6019, 6020, 6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029, 6030, 6031, 6032, 6033, 6034, 6035, 6036, 6037, 6038, 6039, 6040, 6041, 6042, 6043, 6044, 6045, 6046, 6047, 6048, 6049, 6050, 6051, 6052, 6053, 6054, 6055, 6056, 6057, 6058, 6059, 6060, 6061, 6062, 6063, 6064, 6065, 6066, 6067, 6068, 6069, 6070, 6071, 6072, 6073, 6074, 6075, 6076, 6077, 6078, 6079, 6080, 6081, 6082, 6083, 6084, 6085, 6086, 6087, 6088, 6089, 6090, 6091, 6092, 6093, 6094, 6095, 6096, 6097, 6098, 6099, 6100, 6101, 6102, 7000, 7001, 7002, 7003, 7004, 9901, 9902, 9903, 9904, 9905, 9906, 9907, 9908, 9909, -1] |
 | **ip** | **String** | The audit event IP. | [optional] [example: 192.0.2.1] [nullable] |
 | **country** | **String** | The audit event country. | [optional] [example: United States] [nullable] |
 | **city** | **String** | The audit event city. | [optional] [example: New York] [nullable] |
 | **browser** | **String** | The audit event browser. | [optional] [example: Chrome 120.0] [nullable] |
 | **platform** | **String** | The audit event platform. | [optional] [example: Windows] [nullable] |
 | **page** | **String** | The audit event page. | [optional] [example: /rooms/shared] [nullable] |
-| **actionType** | [**ActionType**](#model-actiontype) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] |
-| **product** | [**ProductType**](#model-producttype) |  | [optional] [enum: 2, 3, 7, 8] |
-| **location** | [**LocationType**](#model-locationtype) |  | [optional] [enum: 0, 1, 2, 3, 27, 29, 30, 31] |
-| **target** | **List** | The list of target objects affected by the audit event (e.g., document ID, user account). | [optional] [example: ["item1","item2"]] [nullable] |
-| **entries** | [**List**](#model-entrytype) | The list of audit entry types (e.g., Folder, User, File). | [optional] [example: ["File","Folder"]] [nullable] |
+| **actionType** | [**ActionType**](#model-actiontype) | The type of action performed in the audit event (e.g., Create, Update, Delete). | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] |
+| **product** | [**ProductType**](#model-producttype) | The type of product related to the audit event. | [optional] [enum: 2, 3, 7, 8] |
+| **location** | [**LocationType**](#model-locationtype) | The location where the audit event occurred. | [optional] [enum: 0, 1, 2, 3, 27, 29, 30, 31] |
+| **target** | **List** | The list of target objects affected by the audit event (e.g., document ID, user account). | [optional] [example: [item1, item2]] [nullable] |
+| **entries** | [**List**](#model-entrytype) | The list of audit entry types (e.g., Folder, User, File). | [optional] [example: [File, Folder]] [nullable] |
 | **context** | **String** | The audit event context. | [optional] [example: Security settings updated] [nullable] |
 
 
@@ -10515,8 +10518,8 @@ The parameters required for the user authentication requests.
 | **serializedProfile** | **String** | The serialized user profile data, if applicable. | [optional] [example: {"name":"John Doe","email":"john@example.com"}] [nullable] |
 | **codeOAuth** | **String** | The authorization code used for obtaining OAuth tokens. | [optional] [example: 4/0AY0e-g7...] [nullable] |
 | **session** | **Boolean** | Specifies whether the authentication is session-based. | [optional] [example: true] |
-| **confirmData** | [**ConfirmData**](#model-confirmdata) |  | [optional] |
-| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) |  | [optional] [enum: 0, 1, 2, 3] |
+| **confirmData** | [**ConfirmData**](#model-confirmdata) | The additional confirmation data required for authentication. | [optional] |
+| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) | The type of CAPTCHA validation used. | [optional] [enum: 0, 1, 2, 3] |
 | **recaptchaResponse** | **String** | The user&#39;s response to the CAPTCHA challenge. | [optional] [example: 03AGdBq25...] [nullable] |
 | **culture** | **String** | The culture code for localization during authentication. | [optional] [example: en-US] [nullable] |
 
@@ -10543,7 +10546,7 @@ The request parameters for handling the authorization service.
 | **instruction** | **String** | The detailed instructions for configuring or using the authorization service. | [optional] [example: Configure your Google OAuth credentials] [nullable] |
 | **canSet** | **Boolean** | Specifies whether the authorization service can be configured by the user. | [optional] [example: true] |
 | **paid** | **Boolean** | Specifies whether the authorization service is paid or not. | [optional] [example: false] |
-| **props** | [**List**](#model-authkey) | The collection of authorization keys associated with the authorization service. | [optional] [example: [{"name":"key","value":"value"}]] [nullable] |
+| **props** | [**List**](#model-authkey) | The collection of authorization keys associated with the authorization service. | [optional] [example: [{name=key, value=value}]] [nullable] |
 
 
 ### Model AuthWithCodeRequestsDto
@@ -10551,18 +10554,18 @@ The parameters required for the user two-factor authentication requests.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **userName** | **String** | The username or email used for authentication. | [optional] [nullable] |
-| **password** | **String** | The password in plain text for user authentication. | [optional] [nullable] |
-| **passwordHash** | **String** | The hashed password for secure verification. | [optional] [nullable] |
-| **provider** | **String** | The type of authentication provider (e.g., internal, Google, Azure). | [optional] [nullable] |
-| **accessToken** | **String** | The access token used for authentication with external providers. | [optional] [nullable] |
-| **serializedProfile** | **String** | The serialized user profile data, if applicable. | [optional] [nullable] |
-| **codeOAuth** | **String** | The authorization code used for obtaining OAuth tokens. | [optional] [nullable] |
+| **userName** | **String** | The username or email used for authentication. | [optional] |
+| **password** | **String** | The password in plain text for user authentication. | [optional] |
+| **passwordHash** | **String** | The hashed password for secure verification. | [optional] |
+| **provider** | **String** | The type of authentication provider (e.g., internal, Google, Azure). | [optional] |
+| **accessToken** | **String** | The access token used for authentication with external providers. | [optional] |
+| **serializedProfile** | **String** | The serialized user profile data, if applicable. | [optional] |
+| **codeOAuth** | **String** | The authorization code used for obtaining OAuth tokens. | [optional] |
 | **session** | **Boolean** | Specifies whether the authentication is session-based. | [optional] |
-| **confirmData** | [**ConfirmData**](#model-confirmdata) |  | [optional] |
-| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) |  | [optional] [enum: 0, 1, 2, 3] |
-| **recaptchaResponse** | **String** | The user&#39;s response to the CAPTCHA challenge. | [optional] [nullable] |
-| **culture** | **String** | The culture code for localization during authentication. | [optional] [nullable] |
+| **confirmData** | [**ConfirmData**](#model-confirmdata) | The additional confirmation data required for authentication. | [optional] |
+| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) | The type of CAPTCHA validation used. | [optional] [enum: 0, 1, 2, 3] |
+| **recaptchaResponse** | **String** | The user&#39;s response to the CAPTCHA challenge. | [optional] |
+| **culture** | **String** | The culture code for localization during authentication. | [optional] |
 | **code** | **String** | The code for two-factor authentication. | [optional] [nullable] |
 
 
@@ -10600,8 +10603,8 @@ Represents a balance with an account number and a list of sub-accounts.
 | **subAccountNumber** | **Integer** (int32) | The sub-account number. | [optional] [example: 12345] |
 | **accountName** | **String** | The account name. | [optional] [example: account name] [nullable] |
 | **accountCurrency** | **String** | The account currency. | [optional] [example: "USD"] [nullable] |
-| **subAccounts** | [**List**](#model-subaccount) | A list of sub-accounts. | [optional] [example: [{"currency":"USD","amount":1500.75}]] [nullable] |
-| **lastCredit** | [**TransactionInfo**](#model-transactioninfo) |  | [optional] |
+| **subAccounts** | [**List**](#model-subaccount) | A list of sub-accounts. | [optional] [example: [{currency=USD, amount=1500.75}]] [nullable] |
+| **lastCredit** | [**TransactionInfo**](#model-transactioninfo) | The most recent credit transaction applied to the account. | [optional] |
 
 
 ### Model BalanceWrapper
@@ -10633,7 +10636,7 @@ The capabilities parameters.
 |------------ | ------------- | ------------- | -------------|
 | **ldapEnabled** | **Boolean** | Specifies if the LDAP settings are enabled or not. | [required] [example: false] |
 | **ldapDomain** | **String** | The LDAP domain. | [optional] [example: example.com] [nullable] |
-| **providers** | **List** | The list of providers. | [required] [example: ["google","facebook","microsoft"]] [nullable] |
+| **providers** | **List** | The list of providers. | [required] [example: [google, facebook, microsoft]] [nullable] |
 | **ssoLabel** | **String** | The SP login label. | [required] [example: Enterprise SSO] [nullable] |
 | **oauthEnabled** | **Boolean** | Specifies if OAuth is enabled or not. | [required] [example: true] |
 | **ssoUrl** | **URI** (uri) | The SSO URL. If this parameter is empty, then the SSO settings are disabled. | [required] [example: https://sso.example.com/login] [nullable] |
@@ -10656,7 +10659,7 @@ The capabilities parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **module** | **String** |  | [optional] [nullable] |
-| **props** | **Map** |  | [optional] [nullable] |
+| **props** | **null** |  | [optional] |
 | **lastModified** | **Date** (date-time) |  | [optional] |
 
 
@@ -10676,7 +10679,7 @@ The request parameters for changing the tenant wallet service state.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **service** | [**TenantWalletService**](#model-tenantwalletservice) |  | [optional] [enum: -18, -16, -15, -14, -13, -12, -11] |
+| **service** | [**TenantWalletService**](#model-tenantwalletservice) | The wallet service type. | [optional] [enum: -18, -16, -15, -14, -13, -12, -11] |
 | **enabled** | **Boolean** | Specifies whether the wallet service is enabled. | [optional] [example: true] |
 
 
@@ -10711,7 +10714,7 @@ The company white label settings wrapper.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **settings** | [**CompanyWhiteLabelSettings**](#model-companywhitelabelsettings) |  | [optional] |
+| **settings** | [**CompanyWhiteLabelSettings**](#model-companywhitelabelsettings) | The company white label settings. | [optional] |
 
 
 ### Model ConfirmData
@@ -10729,7 +10732,7 @@ The confirmation parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **result** | [**ValidationResult**](#model-validationresult) |  | [required] [enum: 0, 1, 2, 3, 4, 5, 6] |
+| **result** | [**ValidationResult**](#model-validationresult) | The confirmation result. | [required] [enum: 0, 1, 2, 3, 4, 5, 6] |
 | **roomId** | **String** | The confirmation room ID. | [optional] [example: 1] [nullable] |
 | **title** | **String** | The confirmation title. | [optional] [example: Conference Room] [nullable] |
 | **email** | **String** | The confirmation email. | [optional] [example: user@example.com] [nullable] |
@@ -10812,7 +10815,7 @@ The request parameters for creating the webhook configuration.
 | **secretKey** | **String** | The webhook secret key used to sign the webhook payloads for the security verification. | [optional] [example: my-secret-key-123] [minLength: 0] [maxLength: 50] [nullable] |
 | **enabled** | **Boolean** | Specifies whether the webhook configuration is active or not. | [optional] [example: true] |
 | **ssl** | **Boolean** | Specifies whether the SSL certificate verification is required or not. | [optional] [example: true] |
-| **triggers** | [**WebhookTrigger**](#model-webhooktrigger) |  | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824] |
+| **triggers** | [**WebhookTrigger**](#model-webhooktrigger) | The webhook trigger type. | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824] |
 | **targetId** | **String** | Target ID | [optional] [example: 00000000-0000-0000-0000-000000000001] [minLength: 0] [maxLength: 255] [nullable] |
 
 
@@ -10821,7 +10824,7 @@ The CSP (Content Security Policy) parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **domains** | **List** | The list of CSP domains. | [required] [example: ["https://example.com","https://cdn.example.com"]] [nullable] |
+| **domains** | **List** | The list of CSP domains. | [required] [example: [https://example.com, https://cdn.example.com]] [nullable] |
 | **header** | **String** | The CSP header. | [required] [example: default-src 'self'; script-src 'self' https://example.com] [nullable] |
 
 
@@ -10830,7 +10833,7 @@ The request parameters for configuring the Content Security Policy (CSP) setting
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **domains** | **List** | The collection of allowed domains in the Content Security Policy (CSP). | [optional] [example: ["example.com","trusted-site.com"]] [nullable] |
+| **domains** | **List** | The collection of allowed domains in the Content Security Policy (CSP). | [optional] [example: [example.com, trusted-site.com]] [nullable] |
 
 
 ### Model CspWrapper
@@ -10850,7 +10853,7 @@ The external resource parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **domain** | **String** | The external resource domain. | [optional] [example: example.com] [nullable] |
-| **entries** | **Map** | The external resource entries. | [optional] [example: {"welcomeMessage":"Welcome","logoutButton":"Log out"}] [nullable] |
+| **entries** | **null** | The external resource entries. | [optional] [example: {welcomeMessage=Welcome, logoutButton=Log out}] |
 
 
 ### Model CultureSpecificExternalResources
@@ -10858,15 +10861,15 @@ The external resources settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **api** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) |  | [optional] |
-| **common** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) |  | [optional] |
-| **forum** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) |  | [optional] |
-| **helpcenter** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) |  | [optional] |
-| **integrations** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) |  | [optional] |
-| **site** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) |  | [optional] |
-| **socialNetworks** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) |  | [optional] |
-| **support** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) |  | [optional] |
-| **videoguides** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) |  | [optional] |
+| **api** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) | The link to the product API. | [optional] |
+| **common** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) | The link to the common product information. | [optional] |
+| **forum** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) | The link to the forum. | [optional] |
+| **helpcenter** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) | The link to the Help Center. | [optional] |
+| **integrations** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) | The link to the product integrations. | [optional] |
+| **site** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) | The link to the product website. | [optional] |
+| **socialNetworks** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) | The link to the product social nerworks. | [optional] |
+| **support** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) | The link to the product support. | [optional] |
+| **videoguides** | [**CultureSpecificExternalResource**](#model-culturespecificexternalresource) | The link to the video guides. | [optional] |
 
 
 ### Model CurrenciesArrayWrapper
@@ -10894,7 +10897,7 @@ The currencies parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **currency** | **String** | The three-character ISO 4217 currency symbol. | [optional] [nullable] |
+| **currency** | **String** | The three-character ISO 4217 currency symbol. | [optional] |
 | **amount** | **Double** (double) | The amount in the specified currency. | [optional] |
 
 
@@ -10919,7 +10922,7 @@ The current license information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **trial** | **Boolean** | Specifies whether the license is trial or not. | [required] [example: false] |
-| **dueDate** | **Date** (date-time) | The date when the license expires. | [required] [example: 2025-06-15T10:30:00Z] |
+| **dueDate** | **Date** (date-time) | The date when the license expires. | [required] [example: 2025-06-15T10:30:00.0000000Z] |
 
 
 ### Model CustomColorThemesSettingsColorItem
@@ -10936,7 +10939,7 @@ The custom color themes settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **themes** | [**List**](#model-customcolorthemessettingsitem) | The list of the custom color themes. | [optional] [example: [{"id":1,"name":"Custom Theme"}]] [nullable] |
+| **themes** | [**List**](#model-customcolorthemessettingsitem) | The list of the custom color themes. | [optional] [example: [{id=1, name=Custom Theme}]] [nullable] |
 | **selected** | **Integer** (int32) | Specifies whether the custom color theme is selected. | [optional] [example: 1] |
 | **limit** | **Integer** (int32) | The maximum number of the custom color themes. | [optional] [example: 1] |
 
@@ -10948,8 +10951,8 @@ The custom color theme settings.
 |------------ | ------------- | ------------- | -------------|
 | **id** | **Integer** (int32) | The custom color theme ID. | [optional] [example: 1] |
 | **name** | **String** | The custom color theme name. | [optional] [example: blue] [nullable] |
-| **main** | [**CustomColorThemesSettingsColorItem**](#model-customcolorthemessettingscoloritem) |  | [optional] |
-| **text** | [**CustomColorThemesSettingsColorItem**](#model-customcolorthemessettingscoloritem) |  | [optional] |
+| **main** | [**CustomColorThemesSettingsColorItem**](#model-customcolorthemessettingscoloritem) | The custom color theme main colors. | [optional] |
+| **text** | [**CustomColorThemesSettingsColorItem**](#model-customcolorthemessettingscoloritem) | The custom color theme text colors. | [optional] |
 
 
 ### Model CustomColorThemesSettingsRequestsDto
@@ -10957,7 +10960,7 @@ The request parameters for managing the portal theme settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **theme** | [**CustomColorThemesSettingsItem**](#model-customcolorthemessettingsitem) |  | [optional] |
+| **theme** | [**CustomColorThemesSettingsItem**](#model-customcolorthemessettingsitem) | The custom color theme settings. | [optional] |
 | **selected** | **Integer** (int32) | Specifies the optional value indicating the selected custom color theme. | [optional] [example: 1] [nullable] |
 
 
@@ -10978,9 +10981,9 @@ The customer information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **portalId** | **String** | The portal ID. | [optional] [example: portal-001] [nullable] |
-| **paymentMethodStatus** | [**PaymentMethodStatus**](#model-paymentmethodstatus) |  | [optional] [enum: 0, 1, 2] |
+| **paymentMethodStatus** | [**PaymentMethodStatus**](#model-paymentmethodstatus) | The payment method status. | [optional] [enum: 0, 1, 2] |
 | **email** | **String** | The customer email address. | [optional] [example: user@example.com] [nullable] |
-| **payer** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **payer** | [**EmployeeDto**](#model-employeedto) | The user parameters. | [optional] |
 
 
 ### Model CustomerInfoWrapper
@@ -11037,10 +11040,10 @@ The request parameters for generating a report on client operations.
 | **participantName** | **String** | The participant name. | [optional] [example: My Own Corporation] [nullable] |
 | **credit** | **Boolean** | Specifies whether to include credit operations in the report. | [optional] [example: true] [nullable] |
 | **debit** | **Boolean** | Specifies whether to include debit operations in the report. | [optional] [example: false] [nullable] |
-| **type** | [**OperationType**](#model-operationtype) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] |
-| **status** | [**OperationStatus**](#model-operationstatus) |  | [optional] [enum: 0, 1, 2, 3] |
+| **type** | [**OperationType**](#model-operationtype) | The operation type to filter by. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] |
+| **status** | [**OperationStatus**](#model-operationstatus) | The operation status to filter by. | [optional] [enum: 0, 1, 2, 3] |
 | **orderBy** | **String** | The field to order by. | [optional] [example: StartDate] [nullable] |
-| **orderType** | [**OperationOrderType**](#model-operationordertype) |  | [optional] [enum: 0, 1] |
+| **orderType** | [**OperationOrderType**](#model-operationordertype) | Order direction: Ascending or Descending. | [optional] [enum: 0, 1] |
 
 
 ### Model CustomerServiceUsageDto
@@ -11064,7 +11067,7 @@ Represents a paged report of customer service usage statistics.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **collection** | [**List**](#model-customerserviceusagedto) | A collection of service usage statistics. | [optional] [example: [{"service":"backup","totalAmount":49.99}]] [nullable] |
+| **collection** | [**List**](#model-customerserviceusagedto) | A collection of service usage statistics. | [optional] [example: [{service=backup, totalAmount=49.99}]] [nullable] |
 | **offset** | **Integer** (int32) | The report data offset. | [optional] [example: 0] |
 | **limit** | **Integer** (int32) | The report data limit. | [optional] [example: 25] |
 | **totalQuantity** | **Long** (int64) | The total quantity of records in the report. | [optional] [example: 1] |
@@ -11081,10 +11084,10 @@ The request parameters for generating a customer service usage report.
 | **startDate** | **Date** (date-time) | The report start date. | [optional] [example: 2024-01-01T00:00:00Z] [nullable] |
 | **endDate** | **Date** (date-time) | The report end date. | [optional] [example: 2024-01-31T23:59:59Z] [nullable] |
 | **participantName** | **String** | The participant name. | [optional] [example: My Own Corporation] [nullable] |
-| **status** | [**OperationStatus**](#model-operationstatus) |  | [optional] [enum: 0, 1, 2, 3] |
-| **metadata** | **Map** | Metadata key-value pairs to filter by. | [optional] [example: {"key1":"value1","key2":"value2"}] [nullable] |
+| **status** | [**OperationStatus**](#model-operationstatus) | The operation status to filter by. | [optional] [enum: 0, 1, 2, 3] |
+| **metadata** | **null** | Metadata key-value pairs to filter by. | [optional] [example: {key1=value1, key2=value2}] |
 | **orderBy** | **String** | The field to order by. | [optional] [example: ServiceName] [nullable] |
-| **orderType** | [**OperationOrderType**](#model-operationordertype) |  | [optional] [enum: 0, 1] |
+| **orderType** | [**OperationOrderType**](#model-operationordertype) | Order direction: Ascending or Descending. | [optional] [enum: 0, 1] |
 
 
 ### Model CustomerServiceUsageReportWrapper
@@ -11113,17 +11116,17 @@ The database tenant parameters.
 | **language** | **String** | The tenant language. | [optional] [example: en-US] [maxLength: 10] [nullable] |
 | **timeZone** | **String** | The tenant time zone. | [optional] [example: UTC] [maxLength: 50] [nullable] |
 | **trustedDomainsRaw** | **String** | The tenant trusted domains raw. | [optional] [example: tenant.exapmle.com, example.com] [maxLength: 1024] [nullable] |
-| **trustedDomainsEnabled** | [**TenantTrustedDomainsType**](#model-tenanttrusteddomainstype) |  | [optional] [enum: 0, 1, 2] |
-| **status** | [**TenantStatus**](#model-tenantstatus) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6] |
+| **trustedDomainsEnabled** | [**TenantTrustedDomainsType**](#model-tenanttrusteddomainstype) | The type of the tenant trusted domains. | [optional] [enum: 0, 1, 2] |
+| **status** | [**TenantStatus**](#model-tenantstatus) | The tenant status. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6] |
 | **statusChanged** | **Date** (date-time) | The date and time when the tenant status was changed. | [optional] [example: 2025-01-01T12:00:00Z] [nullable] |
 | **statusChangedHack** | **Date** (date-time) | The hacked date and time when the tenant status was changed. | [optional] [example: 2025-01-01T12:00:00Z] |
 | **creationDateTime** | **Date** (date-time) | The tenant creation date. | [optional] [example: 2025-01-01T12:00:00Z] |
 | **ownerId** | **UUID** (uuid) | The tenant owner ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] [nullable] |
 | **paymentId** | **String** | The tenant payment ID. | [optional] [example: pay_1234567890] [maxLength: 38] [nullable] |
-| **industry** | [**TenantIndustry**](#model-tenantindustry) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] |
+| **industry** | [**TenantIndustry**](#model-tenantindustry) | The tenant industry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] |
 | **lastModified** | **Date** (date-time) | The date and time when the tenant was last modified. | [optional] [example: 2025-02-01T08:30:00Z] |
 | **calls** | **Boolean** | Specifies if the calls are available for the current tenant or not. | [optional] [example: true] |
-| **partner** | [**DbTenantPartner**](#model-dbtenantpartner) |  | [optional] |
+| **partner** | [**DbTenantPartner**](#model-dbtenantpartner) | The database tenant partner parameters. | [optional] |
 
 
 ### Model DbTenantPartner
@@ -11142,7 +11145,7 @@ The request parameters for managing the deep link configuration.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **deepLinkSettings** | [**TenantDeepLinkSettings**](#model-tenantdeeplinksettings) |  | [optional] |
+| **deepLinkSettings** | [**TenantDeepLinkSettings**](#model-tenantdeeplinksettings) | The deep link settings. | [optional] |
 
 
 ### Model DeepLinkDto
@@ -11167,7 +11170,7 @@ The request parameters for setting the default product configuration.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **defaultFolderType** | [**FolderType**](#model-foldertype) |  | [required] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **defaultFolderType** | [**FolderType**](#model-foldertype) | The folder type. | [required] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
 
 
 ### Model DistributedTaskStatus
@@ -11192,10 +11195,10 @@ Represents the configuration of a DocsCloud tenant.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **tenantName** | **String** | The tenant name. | [optional] [example: My Portal] [nullable] |
-| **security** | [**DocsCloudSecurityConfig**](#model-docscloudsecurityconfig) |  | [optional] |
-| **server** | [**DocsCloudServerConfig**](#model-docscloudserverconfig) |  | [optional] |
-| **wopi** | [**DocsCloudWopiConfig**](#model-docscloudwopiconfig) |  | [optional] |
-| **ipFilter** | [**DocsCloudIpFilterConfig**](#model-docscloudipfilterconfig) |  | [optional] |
+| **security** | [**DocsCloudSecurityConfig**](#model-docscloudsecurityconfig) | The security configuration. | [optional] |
+| **server** | [**DocsCloudServerConfig**](#model-docscloudserverconfig) | The server configuration. | [optional] |
+| **wopi** | [**DocsCloudWopiConfig**](#model-docscloudwopiconfig) | The WOPI configuration. | [optional] |
+| **ipFilter** | [**DocsCloudIpFilterConfig**](#model-docscloudipfilterconfig) | The IP filter configuration. | [optional] |
 
 
 ### Model DocsCloudConfigWrapper
@@ -11222,7 +11225,7 @@ Represents the IP filter configuration of a DocsCloud tenant.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **rules** | [**List**](#model-docscloudipfilterrule) | The IP filter rules. | [optional] [example: [{"address":"127.0.0.1","allowed":true}]] [nullable] |
+| **rules** | [**List**](#model-docscloudipfilterrule) | The IP filter rules. | [optional] [example: [{address=127.0.0.1, allowed=true}]] [nullable] |
 
 
 ### Model DocsCloudIpFilterRule
@@ -11264,8 +11267,8 @@ Represents the current user quota of a DocsCloud tenant.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **users** | [**List**](#model-docscloudquotauser) | The editor users. | [optional] [example: [{"userid":"00000000-0000-0000-0000-000000000000","expire":"2024-01-15T10:30:00Z"}]] [nullable] |
-| **usersView** | [**List**](#model-docscloudquotauser) | The viewer users. | [optional] [example: [{"userid":"00000000-0000-0000-0000-000000000000","expire":"2024-01-15T10:30:00Z"}]] [nullable] |
+| **users** | [**List**](#model-docscloudquotauser) | The editor users. | [optional] [example: [{userid=00000000-0000-0000-0000-000000000000, expire=2024-01-15T10:30:00Z}]] [nullable] |
+| **usersView** | [**List**](#model-docscloudquotauser) | The viewer users. | [optional] [example: [{userid=00000000-0000-0000-0000-000000000000, expire=2024-01-15T10:30:00Z}]] [nullable] |
 
 
 ### Model DocsCloudQuotaUser
@@ -11322,8 +11325,8 @@ Represents the usage statistics of a DocsCloud tenant for the current period.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **periodDay** | **Integer** (int32) | The length of the statistics period in days. | [optional] [example: 30] |
-| **editor** | [**DocsCloudUserStats**](#model-docsclouduserstats) |  | [optional] |
-| **viewer** | [**DocsCloudUserStats**](#model-docsclouduserstats) |  | [optional] |
+| **editor** | [**DocsCloudUserStats**](#model-docsclouduserstats) | The statistics for editor users. | [optional] |
+| **viewer** | [**DocsCloudUserStats**](#model-docsclouduserstats) | The statistics for viewer users. | [optional] |
 
 
 ### Model DocsCloudTenant
@@ -11341,7 +11344,7 @@ Represents a DocsCloud tenant of a portal.
 | **resourceType** | **Integer** (int32) | The resource type. | [optional] [example: 1] |
 | **isActive** | **Boolean** | Whether the tenant is active (the end date is in the future). | [optional] [example: false] |
 | **address** | **String** | The tenant address. | [optional] [example: https://my-portal.onlyoffice.com] [nullable] |
-| **payment** | [**DocsCloudPayment**](#model-docscloudpayment) |  | [optional] |
+| **payment** | [**DocsCloudPayment**](#model-docscloudpayment) | The tenant payment information. | [optional] |
 
 
 ### Model DocsCloudTenantInfo
@@ -11349,10 +11352,10 @@ Represents the license and server information of a DocsCloud tenant, with usage 
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **license** | [**DocsCloudLicenseInfo**](#model-docscloudlicenseinfo) |  | [optional] |
-| **server** | [**DocsCloudServerInfo**](#model-docscloudserverinfo) |  | [optional] |
-| **usersLimit** | [**DocsCloudUsersLimit**](#model-docsclouduserslimit) |  | [optional] |
-| **stats** | [**DocsCloudStats**](#model-docscloudstats) |  | [optional] |
+| **license** | [**DocsCloudLicenseInfo**](#model-docscloudlicenseinfo) | The license information. | [optional] |
+| **server** | [**DocsCloudServerInfo**](#model-docscloudserverinfo) | The DocsCloud server information. | [optional] |
+| **usersLimit** | [**DocsCloudUsersLimit**](#model-docsclouduserslimit) | The user limits of the license. | [optional] |
+| **stats** | [**DocsCloudStats**](#model-docscloudstats) | The usage statistics for the current period. | [optional] |
 
 
 ### Model DocsCloudTenantInfoWrapper
@@ -11435,8 +11438,8 @@ The Document Builder task parameters.
 | **error** | **String** | The error message occurred during the document building process. | [required] [example: Build failed] [nullable] |
 | **percentage** | **Integer** (int32) | The progress percentage of the document building process. | [required] [example: 75] |
 | **isCompleted** | **Boolean** | Specifies whether the document building process is completed or not. | [required] [example: false] |
-| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) |  | [required] [enum: 0, 1, 2, 3, 4] |
-| **resultFileId** | **oas_any_type_not_mapped** | The result file ID. | [required] [example: 123] [nullable] |
+| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) | The status of the document building process. | [required] [enum: 0, 1, 2, 3, 4] |
+| **resultFileId** | **null** | The result file ID. | [required] [example: 123] |
 | **resultFileName** | **String** | The result file name. | [required] [example: result.docx] [nullable] |
 | **resultFileUrl** | **String** | The result file URL. | [required] [example: http://localhost/files/result.docx] [nullable] |
 
@@ -11500,11 +11503,11 @@ The confirmation email parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **key** | **String** | The email validation key. | [optional] [example: abcdef123456] [nullable] |
-| **emplType** | [**EmployeeType**](#model-employeetype) |  | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
+| **emplType** | [**EmployeeType**](#model-employeetype) | The user type. | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
 | **email** | **String** (email) | The email address. | [optional] [example: user@example.com] [nullable] |
 | **encEmail** | **String** | The encrypted email address. | [optional] [example: user%40example.com] [nullable] |
 | **uiD** | **UUID** (uuid) | The user ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] [nullable] |
-| **type** | [**ConfirmType**](#model-confirmtype) |  | [optional] [enum: EmpInvite, LinkInvite, PortalSuspend, PortalContinue, PortalRemove, DnsChange, PortalOwnerChange, Activation, EmailChange, EmailActivation, PasswordChange, ProfileRemove, PhoneActivation, PhoneAuth, Auth, TfaActivation, TfaAuth, Wizard, GuestShareLink] |
+| **type** | [**ConfirmType**](#model-confirmtype) | The confirmation email type. | [optional] [enum: EmpInvite, LinkInvite, PortalSuspend, PortalContinue, PortalRemove, DnsChange, PortalOwnerChange, Activation, EmailChange, EmailActivation, PasswordChange, ProfileRemove, PhoneActivation, PhoneAuth, Auth, TfaActivation, TfaAuth, Wizard, GuestShareLink] |
 | **first** | **String** | Specifies whether it is the first time account access or not. | [optional] [example: false] [nullable] |
 | **roomId** | **String** | The room ID. | [optional] [example: 1] [nullable] |
 
@@ -11571,7 +11574,7 @@ The encryption settings.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **password** | **String** | The encryption password. | [optional] [example: password] [nullable] |
-| **status** | [**EncryprtionStatus**](#model-encryprtionstatus) |  | [optional] [enum: 0, 1, 2, 3] |
+| **status** | [**EncryprtionStatus**](#model-encryprtionstatus) | The encryption status. | [optional] [enum: 0, 1, 2, 3] |
 | **notifyUsers** | **Boolean** | Specifies if the users will be notified about the encryption operation or not. | [optional] [example: true] |
 
 
@@ -11620,7 +11623,7 @@ The used space parameters of the tenant quota feature.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **value** | **oas_any_type_not_mapped** | The used space value. | [required] [nullable] |
+| **value** | **null** | The used space value. | [required] [example: {}] |
 | **title** | **String** | The used space title. | [optional] [example: 50 GB used] [nullable] |
 
 
@@ -11643,7 +11646,7 @@ The Firebase user parameters.
 | **firebaseDeviceToken** | **String** | The Firebase device token. | [optional] [example: token123] [maxLength: 255] [nullable] |
 | **application** | **String** | The Firebase application. | [optional] [example: web] [maxLength: 20] [nullable] |
 | **isSubscribed** | **Boolean** | Specifies if the user is subscribed to the push notifications or not. | [optional] [example: true] [nullable] |
-| **tenant** | [**DbTenant**](#model-dbtenant) |  | [optional] |
+| **tenant** | [**DbTenant**](#model-dbtenant) | The database tenant parameters. | [optional] |
 
 
 ### Model FireBaseUserWrapper
@@ -11742,7 +11745,7 @@ The group summary parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **ip** | **String** |  | [required] [nullable] |
+| **ip** | **String** |  | [required] |
 | **forAdmin** | **Boolean** |  | [optional] |
 | **id** | **Integer** (int32) |  | [optional] |
 | **tenantId** | **Integer** (int32) |  | [optional] |
@@ -11801,8 +11804,8 @@ The request parameters for creating an invitation link.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **employeeType** | [**EmployeeType**](#model-employeetype) |  | [required] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
-| **expiration** | **Date** (date-time) | The expiration date of the invitation link. | [optional] [example: 2025-06-15T10:30:00Z] [nullable] |
+| **employeeType** | [**EmployeeType**](#model-employeetype) | The user type. | [required] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
+| **expiration** | **Date** (date-time) | The expiration date of the invitation link. | [optional] [example: 2025-06-15T10:30:00.0000000Z] [nullable] |
 | **maxUseCount** | **Integer** (int32) | The maximum number of times the invitation link can be used. | [optional] [example: 1] [min: 1] [max: 1000] [nullable] |
 
 
@@ -11820,8 +11823,8 @@ The invitation link parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **UUID** (uuid) | The ID of the invitation link. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
-| **employeeType** | [**EmployeeType**](#model-employeetype) |  | [required] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
-| **expiration** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **employeeType** | [**EmployeeType**](#model-employeetype) | The user type. | [required] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
+| **expiration** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **isExpired** | **Boolean** | Indicates whether the invitation link has expired. | [optional] [example: true] |
 | **maxUseCount** | **Integer** (int32) | The maximum number of times the invitation link can be used. | [optional] [example: 1] [nullable] |
 | **currentUseCount** | **Integer** (int32) | The current number of times the invitation link has been used. | [optional] [example: 1] |
@@ -11862,7 +11865,7 @@ The parameters for configuring new IP restriction settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **ipRestrictions** | [**List**](#model-iprestrictionbase) | The list of IP restriction addresses. | [required] [example: [{"ip":"192.0.2.1","forAdmin":false}]] [nullable] |
+| **ipRestrictions** | [**List**](#model-iprestrictionbase) | The list of IP restriction addresses. | [required] [example: [{ip=192.0.2.1, forAdmin=false}]] [nullable] |
 | **enable** | **Boolean** | Specifies whether to enable IP restrictions or not. | [optional] [example: true] [nullable] |
 
 
@@ -11921,7 +11924,7 @@ The default white label logo parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **key** | **String** |  | [optional] [nullable] |
-| **value** | [**LogoRequestsDto**](#model-logorequestsdto) |  | [optional] |
+| **value** | [**LogoRequestsDto**](#model-logorequestsdto) | The request parameters for the theme-specific logo configurations. | [optional] |
 
 
 ### Model ItemKeyValuePairStringString
@@ -11956,12 +11959,12 @@ The login event parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **Integer** (int32) | The login event ID. | [optional] [example: 1] |
-| **date** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **date** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **user** | **String** | The user name of the login event. | [optional] [example: John Doe] [nullable] |
-| **userId** | **UUID** (uuid) | The user ID of the login event. | [optional] |
+| **userId** | **UUID** (uuid) | The user ID of the login event. | [optional] [example: {}] |
 | **login** | **String** | The user login of the login event. | [optional] [example: user@example.com] [nullable] |
 | **action** | **String** | The login event action. | [optional] [example: User logged in] [nullable] |
-| **actionId** | [**MessageAction**](#model-messageaction) |  | [optional] [enum: 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 4000, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 4010, 4011, 4012, 4013, 4014, 4015, 4016, 4017, 4018, 4019, 4020, 4021, 4022, 4023, 4024, 4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 4034, 4035, 4036, 4037, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5019, 5020, 5021, 5022, 5023, 5024, 5025, 5026, 5027, 5028, 5029, 5030, 5031, 5032, 5033, 5034, 5035, 5036, 5037, 5038, 5039, 5040, 5041, 5042, 5043, 5044, 5045, 5046, 5047, 5048, 5049, 5050, 5053, 5054, 5055, 5056, 5057, 5058, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066, 5068, 5069, 5070, 5071, 5072, 5073, 5074, 5075, 5076, 5077, 5078, 5079, 5080, 5081, 5082, 5083, 5084, 5085, 5086, 5087, 5088, 5089, 5090, 5091, 5092, 5093, 5094, 5095, 5096, 5097, 5098, 5099, 5100, 5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128, 5129, 5130, 5131, 5132, 5133, 5150, 5151, 5152, 5153, 5154, 5155, 5156, 5157, 5158, 5159, 5160, 5201, 5202, 5203, 5204, 5205, 5206, 5501, 5502, 5503, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6019, 6020, 6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029, 6030, 6031, 6032, 6033, 6034, 6035, 6036, 6037, 6038, 6039, 6040, 6041, 6042, 6043, 6044, 6045, 6046, 6047, 6048, 6049, 6050, 6051, 6052, 6053, 6054, 6055, 6056, 6057, 6058, 6059, 6060, 6061, 6062, 6063, 6064, 6065, 6066, 6067, 6068, 6069, 6070, 6071, 6072, 6073, 6074, 6075, 6076, 6077, 6078, 6079, 6080, 6081, 6082, 6083, 6084, 6085, 6086, 6087, 6088, 6089, 6090, 6091, 6092, 6093, 6094, 6095, 6096, 6097, 6098, 6099, 6100, 6101, 6102, 7000, 7001, 7002, 7003, 7004, 9901, 9902, 9903, 9904, 9905, 9906, 9907, 9908, 9909, -1] |
+| **actionId** | [**MessageAction**](#model-messageaction) | The event action ID. | [optional] [enum: 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 4000, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 4010, 4011, 4012, 4013, 4014, 4015, 4016, 4017, 4018, 4019, 4020, 4021, 4022, 4023, 4024, 4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 4034, 4035, 4036, 4037, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5019, 5020, 5021, 5022, 5023, 5024, 5025, 5026, 5027, 5028, 5029, 5030, 5031, 5032, 5033, 5034, 5035, 5036, 5037, 5038, 5039, 5040, 5041, 5042, 5043, 5044, 5045, 5046, 5047, 5048, 5049, 5050, 5053, 5054, 5055, 5056, 5057, 5058, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066, 5068, 5069, 5070, 5071, 5072, 5073, 5074, 5075, 5076, 5077, 5078, 5079, 5080, 5081, 5082, 5083, 5084, 5085, 5086, 5087, 5088, 5089, 5090, 5091, 5092, 5093, 5094, 5095, 5096, 5097, 5098, 5099, 5100, 5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128, 5129, 5130, 5131, 5132, 5133, 5150, 5151, 5152, 5153, 5154, 5155, 5156, 5157, 5158, 5159, 5160, 5201, 5202, 5203, 5204, 5205, 5206, 5501, 5502, 5503, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6019, 6020, 6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029, 6030, 6031, 6032, 6033, 6034, 6035, 6036, 6037, 6038, 6039, 6040, 6041, 6042, 6043, 6044, 6045, 6046, 6047, 6048, 6049, 6050, 6051, 6052, 6053, 6054, 6055, 6056, 6057, 6058, 6059, 6060, 6061, 6062, 6063, 6064, 6065, 6066, 6067, 6068, 6069, 6070, 6071, 6072, 6073, 6074, 6075, 6076, 6077, 6078, 6079, 6080, 6081, 6082, 6083, 6084, 6085, 6086, 6087, 6088, 6089, 6090, 6091, 6092, 6093, 6094, 6095, 6096, 6097, 6098, 6099, 6100, 6101, 6102, 7000, 7001, 7002, 7003, 7004, 9901, 9902, 9903, 9904, 9905, 9906, 9907, 9908, 9909, -1] |
 | **ip** | **String** | The login event IP. | [optional] [example: 192.0.2.1] [nullable] |
 | **country** | **String** | The login event country. | [optional] [example: United States] [nullable] |
 | **city** | **String** | The login event city. | [optional] [example: New York] [nullable] |
@@ -12023,8 +12026,8 @@ The request parameters for configuring trusted mail domains and visitor invitati
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **type** | [**TenantTrustedDomainsType**](#model-tenanttrusteddomainstype) |  | [required] [enum: 0, 1, 2] |
-| **domains** | **List** | The list of authorized email domains that are considered trusted. | [required] [example: ["example.com","company.com"]] [nullable] |
+| **type** | [**TenantTrustedDomainsType**](#model-tenanttrusteddomainstype) | The type of the tenant trusted domains. | [required] [enum: 0, 1, 2] |
+| **domains** | **List** | The list of authorized email domains that are considered trusted. | [required] [example: [example.com, company.com]] [nullable] |
 | **inviteUsersAsVisitors** | **Boolean** | Specifies the default permission level for the invited users (visitors or not). | [required] [example: false] |
 
 
@@ -12064,7 +12067,7 @@ The request parameters for configuring trusted mail domains and visitor invitati
 | **displayName** | **String** |  | [optional] [nullable] |
 | **firstName** | **String** |  | [optional] [nullable] |
 | **lastName** | **String** |  | [optional] [nullable] |
-| **userType** | [**EmployeeType**](#model-employeetype) |  | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
+| **userType** | [**EmployeeType**](#model-employeetype) | The user type. | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
 | **migratingFiles** | [**MigratingApiFiles**](#model-migratingapifiles) |  | [optional] |
 
 
@@ -12098,7 +12101,7 @@ The migration status parameters.
 |------------ | ------------- | ------------- | -------------|
 | **progress** | **Double** (double) | The migration progress. | [optional] [example: 99.99] |
 | **error** | **String** | The migration error. | [optional] [example: Connection failed] [nullable] |
-| **parseResult** | [**MigrationApiInfo**](#model-migrationapiinfo) |  | [optional] |
+| **parseResult** | [**MigrationApiInfo**](#model-migrationapiinfo) | The migration API information. | [optional] |
 | **isCompleted** | **Boolean** | Specifies whether the migration is completed or not. | [optional] [example: true] |
 
 
@@ -12142,7 +12145,7 @@ The notification channel settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **channels** | [**List**](#model-notificationchanneldto) | The list of notification channels. | [optional] [example: [{"name":"email","isActive":true}]] [nullable] |
+| **channels** | [**List**](#model-notificationchanneldto) | The list of notification channels. | [optional] [example: [{name=email, isActive=true}]] [nullable] |
 
 
 ### Model NotificationChannelStatusWrapper
@@ -12161,7 +12164,7 @@ The notification settings parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **type** | [**NotificationType**](#model-notificationtype) |  | [optional] [enum: 0, 1, 2, 3] |
+| **type** | [**NotificationType**](#model-notificationtype) | The notification type. | [optional] [enum: 0, 1, 2, 3] |
 | **isEnabled** | **Boolean** | Specifies if the notification type is enabled or not. | [optional] [example: true] |
 
 
@@ -12170,7 +12173,7 @@ The request parameters for configuring notification settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **type** | [**NotificationType**](#model-notificationtype) |  | [required] [enum: 0, 1, 2, 3] |
+| **type** | [**NotificationType**](#model-notificationtype) | The notification type. | [required] [enum: 0, 1, 2, 3] |
 | **isEnabled** | **Boolean** | Specifies if the specified notification type is enabled or not. | [optional] [example: true] |
 
 
@@ -12208,7 +12211,7 @@ Represents an operation.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **date** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **date** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **service** | **String** | The service related to the operation. | [optional] [example: Storage] [nullable] |
 | **description** | **String** | The brief operation description. | [optional] [example: Storage quota increase] [nullable] |
 | **details** | **String** | The detailed information about the operation. | [optional] [example: Increased storage from 50GB to 100GB] [nullable] |
@@ -12221,7 +12224,7 @@ Represents an operation.
 | **participantDisplayName** | **String** | The participant display name. | [optional] [example: Example Name] [nullable] |
 | **agentId** | **String** | AI Agent id. | [optional] [example: 123] [nullable] |
 | **agentTitle** | **String** | AI Agent name. | [optional] [example: My AI Agent] [nullable] |
-| **type** | [**OperationType**](#model-operationtype) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] |
+| **type** | [**OperationType**](#model-operationtype) | The operation type | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] |
 
 
 ### Model OperationOrderType
@@ -12357,7 +12360,7 @@ The payment settings parameters.
 | **feedbackAndSupportUrl** | **String** | The URL for accessing the feedback and support resources. | [optional] [example: https://example.com] [nullable] |
 | **buyUrl** | **String** | The URL for purchasing or upgrading the product. | [required] [example: https://example.com/buy] [nullable] |
 | **standalone** | **Boolean** | Indicates whether the system is running in standalone mode. | [required] [example: false] |
-| **currentLicense** | [**CurrentLicenseInfo**](#model-currentlicenseinfo) |  | [required] |
+| **currentLicense** | [**CurrentLicenseInfo**](#model-currentlicenseinfo) | The current license information. | [required] |
 | **max** | **Integer** (int32) | The maximum quota quantity. | [required] [example: 1] |
 
 
@@ -12379,7 +12382,7 @@ The request parameters for the payment URL configuration with quantity informati
 |------------ | ------------- | ------------- | -------------|
 | **backUrl** | **URI** (uri) | The URL where the user will be redirected after payment cancellation. | [required] [example: https://example.com/payment/back] [minLength: 0] [maxLength: 255] |
 | **successUrl** | **URI** (uri) | The URL where the user will be redirected after successful payment. | [required] [example: https://example.com/payment/success] [minLength: 0] [maxLength: 255] |
-| **quantity** | **Map** (int32) | The payment quantity. | [required] [example: {"admin":1}] |
+| **quantity** | **Map** (int32) | The payment quantity. | [required] [example: {admin=1}] |
 
 
 ### Model PluginsDto
@@ -12442,7 +12445,7 @@ The request parameters for specifying payment quantity.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **quantity** | **Map** (int32) | The mapping of item identifiers to their respective quantities in the payment. | [required] [example: {"admin":1}] |
+| **quantity** | **Map** (int32) | The mapping of item identifiers to their respective quantities in the payment. | [required] [example: {admin=1}] |
 
 
 ### Model Quota
@@ -12457,7 +12460,7 @@ The quota parameters.  &lt;example&gt;  {    id: 1,    quantity: 50,    wallet: 
 | **nextQuantity** | **Integer** (int32) | The quota next quantity. | [optional] [example: 100] [nullable] |
 | **additional** | **Boolean** | Indicates whether the quota is primary or additional. | [optional] [example: false] |
 | **nextQuota** | **Integer** (int32) | The quota ID to switch to at the next period. | [optional] [nullable] |
-| **state** | [**QuotaState**](#model-quotastate) |  | [optional] [enum: 0, 1] |
+| **state** | [**QuotaState**](#model-quotastate) | The quota state. | [optional] [enum: 0, 1] |
 
 
 ### Model QuotaArrayWrapper
@@ -12478,15 +12481,15 @@ The quota information.
 |------------ | ------------- | ------------- | -------------|
 | **id** | **Integer** (int32) | The quota ID. | [required] [example: 1] |
 | **title** | **String** | The quota title. | [optional] [example: Basic Plan] [nullable] |
-| **price** | [**PriceDto**](#model-pricedto) |  | [required] |
+| **price** | [**PriceDto**](#model-pricedto) | The price parameters. | [required] |
 | **nonProfit** | **Boolean** | Specifies if the quota is nonprofit or not. | [required] [example: false] |
 | **free** | **Boolean** | Specifies if the quota is free or not. | [required] [example: true] |
 | **trial** | **Boolean** | Specifies if the quota is trial or not. | [required] [example: false] |
-| **features** | [**List**](#model-tenantquotafeaturedto) | The list of tenant quota features. | [required] [example: [{"id":"00000000-0000-0000-0000-000000000001","title":"Premium Storage"}]] [nullable] |
-| **usersQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) |  | [optional] |
-| **roomsQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) |  | [optional] |
-| **aiAgentsQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) |  | [optional] |
-| **tenantCustomQuota** | [**TenantQuotaSettings**](#model-tenantquotasettings) |  | [optional] |
+| **features** | [**List**](#model-tenantquotafeaturedto) | The list of tenant quota features. | [required] [example: [{id=00000000-0000-0000-0000-000000000001, title=Premium Storage}]] [nullable] |
+| **usersQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) | The tenant entity quota settings. | [optional] |
+| **roomsQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) | The tenant entity quota settings. | [optional] |
+| **aiAgentsQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) | The tenant entity quota settings. | [optional] |
+| **tenantCustomQuota** | [**TenantQuotaSettings**](#model-tenantquotasettings) | The tenant quota settings. | [optional] |
 | **dueDate** | **Date** (date-time) | The due date. | [optional] [example: 2024-01-15T10:30:00Z] [nullable] |
 
 
@@ -12543,7 +12546,7 @@ Represents a report containing a collection of operations.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **collection** | [**List**](#model-operationdto) | A collection of operations. | [optional] [example: [{"id":"op1","type":"payment"}]] [nullable] |
+| **collection** | [**List**](#model-operationdto) | A collection of operations. | [optional] [example: [{id=op1, type=payment}]] [nullable] |
 | **offset** | **Integer** (int32) | The report data offset. | [optional] [example: 1] |
 | **limit** | **Integer** (int32) | The report data limit. | [optional] [example: 1] |
 | **totalQuantity** | **Long** (int64) | The total quantity of operations in the report. | [optional] [example: 1] |
@@ -12585,7 +12588,7 @@ The rooms notification settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **disabledRooms** | **List** | The list of rooms with the disabled notifications. | [optional] [example: [1,2,3]] [nullable] |
+| **disabledRooms** | **List** | The list of rooms with the disabled notifications. | [optional] [example: [1, 2, 3]] [nullable] |
 
 
 ### Model RoomsNotificationSettingsWrapper
@@ -12604,7 +12607,7 @@ The request parameters for configuring notification settings for the chat or col
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **roomsId** | **oas_any_type_not_mapped** | The target room identifier. | [optional] [nullable] |
+| **roomsId** | **null** | The target room identifier. | [optional] [example: {}] |
 | **mute** | **Boolean** | Specifies whether the notifications will be delivered to the specified room or not. | [optional] [example: true] |
 
 
@@ -12646,8 +12649,8 @@ The security information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **webItemId** | **String** | The module ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] [nullable] |
-| **users** | [**List**](#model-employeedto) | The list of users with the access to the module. | [optional] [example: [{"displayName":"John Doe"}]] [nullable] |
-| **groups** | [**List**](#model-groupsummarydto) | The list of groups with the access to the module. | [optional] [example: [{"id":"00000000-0000-0000-0000-000000000000","name":"Administrators"}]] [nullable] |
+| **users** | [**List**](#model-employeedto) | The list of users with the access to the module. | [optional] [example: [{displayName=John Doe}]] [nullable] |
+| **groups** | [**List**](#model-groupsummarydto) | The list of groups with the access to the module. | [optional] [example: [{id=00000000-0000-0000-0000-000000000000, name=Administrators}]] [nullable] |
 | **enabled** | **Boolean** | Specifies if the security settings are enabled or not. | [optional] [example: true] |
 | **isSubItem** | **Boolean** | Specifies if the module is a subitem or not. | [optional] [example: true] |
 
@@ -12690,7 +12693,7 @@ The request parameters for setting restricted AI models.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **models** | **Set** | The set of restricted AI model IDs. | [required] [example: ["model1","model2"]] |
+| **models** | **Set** | The set of restricted AI model IDs. | [required] [example: [model1, model2]] |
 
 
 ### Model SettingsDto
@@ -12699,8 +12702,8 @@ The settings information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **timezone** | **String** | The time zone. | [optional] [example: UTC] [nullable] |
-| **trustedDomains** | **List** | The list of the trusted domains. | [optional] [example: ["mydomain.com","mydomain1.com"]] [nullable] |
-| **trustedDomainsType** | [**TenantTrustedDomainsType**](#model-tenanttrusteddomainstype) |  | [optional] [enum: 0, 1, 2] |
+| **trustedDomains** | **List** | The list of the trusted domains. | [optional] [example: [mydomain.com, mydomain1.com]] [nullable] |
+| **trustedDomainsType** | [**TenantTrustedDomainsType**](#model-tenanttrusteddomainstype) | The type of the tenant trusted domains. | [optional] [enum: 0, 1, 2] |
 | **culture** | **String** | The language. | [required] [example: en-US] [nullable] |
 | **utcOffset** | **String** (date-span) | The UTC offset in the TimeSpan format. | [optional] [example: -08:30:00] |
 | **utcHoursOffset** | **Double** (double) | The UTC offset in hours. | [optional] [example: -8.5] |
@@ -12715,17 +12718,17 @@ The settings information.
 | **isAmi** | **Boolean** | Specifies if this portal is the AMI instance or not. | [optional] [example: true] |
 | **baseDomain** | **String** | The base domain. | [required] [example: example.com] [nullable] |
 | **wizardToken** | **String** | The wizard token. | [optional] [example: dGhpc2lzYXRva2Vu...] [nullable] |
-| **passwordHash** | [**PasswordHasher**](#model-passwordhasher) |  | [optional] |
-| **firebase** | [**FirebaseDto**](#model-firebasedto) |  | [optional] |
+| **passwordHash** | [**PasswordHasher**](#model-passwordhasher) | The password hash. | [optional] |
+| **firebase** | [**FirebaseDto**](#model-firebasedto) | The Firebase parameters. | [optional] |
 | **version** | **String** | The portal version. | [optional] [example: 12.5.0] [nullable] |
-| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) |  | [optional] [enum: 0, 1, 2, 3] |
+| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) | The type of CAPTCHA validation used. | [optional] [enum: 0, 1, 2, 3] |
 | **recaptchaPublicKey** | **String** | The ReCAPTCHA public key. | [optional] [example: abc123def456] [nullable] |
 | **debugInfo** | **Boolean** | Specifies if the debug information will be sent or not. | [optional] [example: true] |
 | **socketUrl** | **String** | The socket URL. | [optional] [example: https://example.com] [nullable] |
-| **tenantStatus** | [**TenantStatus**](#model-tenantstatus) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6] |
+| **tenantStatus** | [**TenantStatus**](#model-tenantstatus) | The tenant status. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6] |
 | **tenantAlias** | **String** | The tenant alias. | [optional] [example: mycompany] [nullable] |
 | **displayAbout** | **Boolean** | Specifies whether to display the About portal section. | [optional] [example: true] |
-| **domainValidator** | [**TenantDomainValidator**](#model-tenantdomainvalidator) |  | [optional] |
+| **domainValidator** | [**TenantDomainValidator**](#model-tenantdomainvalidator) | The domain validator. | [optional] |
 | **zendeskKey** | **String** | The Zendesk key. | [optional] [example: abc123def456] [nullable] |
 | **tagManagerId** | **String** | The tag manager ID. | [optional] [example: GTM-XXXXXX] [nullable] |
 | **cookieSettingsEnabled** | **Boolean** | Specifies whether the cookie settings are enabled. | [required] [example: true] |
@@ -12736,13 +12739,13 @@ The settings information.
 | **walletLowBalance** | **Boolean** | Specifies whether the tenant wallet balance is currently below the low-balance threshold. Only returned to portal administrators. | [optional] [example: false] [nullable] |
 | **userNameRegex** | **String** | The user name validation regex. | [optional] [example: ^[a-zA-Z0-9_]{3,20}$] [nullable] |
 | **invitationLimit** | **Integer** (int32) | The maximum number of invitations to the portal. | [optional] [example: 10] [nullable] |
-| **plugins** | [**PluginsDto**](#model-pluginsdto) |  | [optional] |
-| **deepLink** | [**DeepLinkDto**](#model-deeplinkdto) |  | [required] |
-| **formGallery** | [**FormGalleryDto**](#model-formgallerydto) |  | [optional] |
+| **plugins** | [**PluginsDto**](#model-pluginsdto) | The plugins settings. | [optional] |
+| **deepLink** | [**DeepLinkDto**](#model-deeplinkdto) | The deep link settings. | [required] |
+| **formGallery** | [**FormGalleryDto**](#model-formgallerydto) | The form gallery settings. | [optional] |
 | **maxImageUploadSize** | **Long** (int64) | The maximum image upload size. | [optional] [example: 10485760] |
 | **logoText** | **String** | The white label logo text. | [optional] [example: Company Name] [nullable] |
-| **externalResources** | [**CultureSpecificExternalResources**](#model-culturespecificexternalresources) |  | [optional] |
-| **defaultFolderType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **externalResources** | [**CultureSpecificExternalResources**](#model-culturespecificexternalresources) | The external resources settings. | [optional] |
+| **defaultFolderType** | [**FolderType**](#model-foldertype) | The folder type. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
 | **externalDbEnabled** | **Boolean** | Specifies if an external database is connected for storing form results. | [optional] [example: true] |
 
 
@@ -12896,13 +12899,13 @@ The SSO portal settings.
 |------------ | ------------- | ------------- | -------------|
 | **lastModified** | **Date** (date-time) | The timestamp indicating when the settings were last modified. | [optional] [example: 1990-01-01T00:00:00Z] |
 | **enableSso** | **Boolean** | Specifies if the SSO settings are enabled or not. | [optional] [example: false] [nullable] |
-| **idpSettings** | [**SsoIdpSettings**](#model-ssoidpsettings) |  | [optional] |
-| **idpCertificates** | [**List**](#model-ssocertificate) | The list of the IdP certificates. | [optional] [example: [{"crt":"base64-cert-data","key":"base64-key-data"}]] [nullable] |
-| **idpCertificateAdvanced** | [**SsoIdpCertificateAdvanced**](#model-ssoidpcertificateadvanced) |  | [optional] |
+| **idpSettings** | [**SsoIdpSettings**](#model-ssoidpsettings) | The SSO IdP settings. | [optional] |
+| **idpCertificates** | [**List**](#model-ssocertificate) | The list of the IdP certificates. | [optional] [example: [{crt=base64-cert-data, key=base64-key-data}]] [nullable] |
+| **idpCertificateAdvanced** | [**SsoIdpCertificateAdvanced**](#model-ssoidpcertificateadvanced) | The IdP advanced certificate. | [optional] |
 | **spLoginLabel** | **String** | The SP login label. | [optional] [example: Single Sign-on] [nullable] |
-| **spCertificates** | [**List**](#model-ssocertificate) | The list of the SP certificates. | [optional] [example: [{"crt":"base64-cert-data","key":"base64-key-data"}]] [nullable] |
-| **spCertificateAdvanced** | [**SsoSpCertificateAdvanced**](#model-ssospcertificateadvanced) |  | [optional] |
-| **fieldMapping** | [**SsoFieldMapping**](#model-ssofieldmapping) |  | [optional] |
+| **spCertificates** | [**List**](#model-ssocertificate) | The list of the SP certificates. | [optional] [example: [{crt=base64-cert-data, key=base64-key-data}]] [nullable] |
+| **spCertificateAdvanced** | [**SsoSpCertificateAdvanced**](#model-ssospcertificateadvanced) | The SP advanced certificate. | [optional] |
+| **fieldMapping** | [**SsoFieldMapping**](#model-ssofieldmapping) | The SSO field mapping. | [optional] |
 | **hideAuthPage** | **Boolean** | Specifies if the authentication page will be hidden or not. | [optional] [example: false] |
 | **usersType** | **Integer** (int32) | The user type. | [optional] [example: 1] |
 | **disableEmailVerification** | **Boolean** | Specifies if the email verification is disabled or not. | [optional] [example: false] |
@@ -12951,7 +12954,7 @@ The storage information.
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | The storage ID. | [required] [example: storage_001] [nullable] |
 | **title** | **String** | The storage title. | [required] [example: Main Storage] [nullable] |
-| **properties** | [**List**](#model-authkey) | The list of storage authentication keys. | [optional] [example: [{"name":"ApiKey","value":"12345"}]] [nullable] |
+| **properties** | [**List**](#model-authkey) | The list of storage authentication keys. | [optional] [example: [{name=ApiKey, value=12345}]] [nullable] |
 | **current** | **Boolean** | Specifies if this is the current portal storage or not. | [required] [example: true] |
 | **isSet** | **Boolean** | Specifies if this storage can be set or not. | [required] [example: true] |
 
@@ -12970,7 +12973,7 @@ The request parameters for configuring the storage module settings.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **module** | **String** | The name for the storage module to be configured. | [required] [example: default] [nullable] |
-| **props** | [**List**](#model-itemkeyvaluepairstringstring) | The list of configuration key-value pairs for the storage module. | [optional] [example: ["item1","item2"]] [nullable] |
+| **props** | [**List**](#model-itemkeyvaluepairstringstring) | The list of configuration key-value pairs for the storage module. | [optional] [example: [item1, item2]] [nullable] |
 
 
 ### Model StorageSettings
@@ -12978,7 +12981,7 @@ The request parameters for configuring the storage module settings.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **module** | **String** |  | [optional] [nullable] |
-| **props** | **Map** |  | [optional] [nullable] |
+| **props** | **null** |  | [optional] |
 | **lastModified** | **Date** (date-time) |  | [optional] |
 
 
@@ -13008,7 +13011,7 @@ The request parameters for configuring the storage module settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **defaultFolderType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **defaultFolderType** | [**FolderType**](#model-foldertype) | Specifies the type of the default folder associated with the settings. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
 | **lastModified** | **Date** (date-time) | The timestamp indicating when the settings were last modified. | [optional] [example: 1990-01-01T00:00:00Z] |
 
 
@@ -13065,12 +13068,12 @@ The tariff parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **Integer** (int32) | The tariff ID. | [optional] [example: 1] |
-| **state** | [**TariffState**](#model-tariffstate) |  | [optional] [enum: 0, 1, 2, 3] |
+| **state** | [**TariffState**](#model-tariffstate) | The tariff state. | [optional] [enum: 0, 1, 2, 3] |
 | **dueDate** | **Date** (date-time) | The tariff due date. | [required] [example: 2026-03-31T00:00:00Z] |
 | **delayDueDate** | **Date** (date-time) | The tariff delay due date. | [optional] [example: 2026-04-07T00:00:00Z] |
 | **licenseDate** | **Date** (date-time) | The tariff license date. | [optional] [example: 2026-03-01T00:00:00Z] |
 | **customerId** | **String** | The tariff customer ID. | [optional] [example: cus_123] [nullable] |
-| **quotas** | [**List**](#model-quota) | The list of tariff quotas. | [required] [example: {"quotas":[{"id":1,"quantity":50,"wallet":false}]}] [nullable] |
+| **quotas** | [**List**](#model-quota) | The list of tariff quotas. | [required] [example: {quotas=[{id=1, quantity=50, wallet=false}]}] [nullable] |
 | **overdueQuotas** | [**List**](#model-quota) | The list of overdue tariff quotas. | [optional] [example: []] [nullable] |
 
 
@@ -13097,7 +13100,7 @@ The Telegram connection status parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **status** | [**RegStatus**](#model-regstatus) |  | [required] [enum: 0, 1, 2] |
+| **status** | [**RegStatus**](#model-regstatus) | The registration Telegram status. | [required] [enum: 0, 1, 2] |
 | **username** | **String** | The Telegram username. | [optional] [example: john_doe] [nullable] |
 
 
@@ -13147,7 +13150,7 @@ The AI agent quota settings.
 |------------ | ------------- | ------------- | -------------|
 | **enableQuota** | **Boolean** | Specifies if the quota is enabled for the tenant entity or not. | [optional] |
 | **defaultQuota** | **Long** (int64) | The default quota of the tenant entity. | [optional] |
-| **lastRecalculateDate** | **Date** (date-time) | The date of the last quota recalculation. | [optional] [nullable] |
+| **lastRecalculateDate** | **Date** (date-time) | The date of the last quota recalculation. | [optional] |
 | **lastModified** | **Date** (date-time) | The timestamp indicating when the settings were last modified. | [optional] |
 
 
@@ -13177,7 +13180,7 @@ The tenant audit settings wrapper.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **settings** | [**TenantAuditSettings**](#model-tenantauditsettings) |  | [optional] |
+| **settings** | [**TenantAuditSettings**](#model-tenantauditsettings) | The tenant audit settings parameters. | [optional] |
 
 
 ### Model TenantBannerSettings
@@ -13213,7 +13216,7 @@ The deep link settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **handlingMode** | [**DeepLinkHandlingMode**](#model-deeplinkhandlingmode) |  | [optional] [enum: 0, 1, 2] |
+| **handlingMode** | [**DeepLinkHandlingMode**](#model-deeplinkhandlingmode) | The deep link handling mode. | [optional] [enum: 0, 1, 2] |
 | **lastModified** | **Date** (date-time) | The timestamp indicating when the settings were last modified. | [optional] [example: 1990-01-01T00:00:00Z] |
 
 
@@ -13278,7 +13281,7 @@ The tenant parameters.
 | **creationDateTime** | **Date** (date-time) | The tenant creation date and time. | [optional] [example: 2024-01-15T10:30:00Z] |
 | **hostedRegion** | **String** | The hosted region. | [optional] [example: EU] [nullable] |
 | **tenantId** | **Integer** (int32) | The tenant ID. | [optional] [example: 1] |
-| **industry** | [**TenantIndustry**](#model-tenantindustry) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] |
+| **industry** | [**TenantIndustry**](#model-tenantindustry) | The tenant industry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] |
 | **language** | **String** | The tenant language. | [optional] [example: en-US] [nullable] |
 | **lastModified** | **Date** (date-time) | The date and time when the tenant was last modified. | [optional] [example: 2024-02-10T14:20:00Z] |
 | **mappedDomain** | **String** | The tenant mapped domain. | [optional] [example: mycompany.example.com] [nullable] |
@@ -13286,12 +13289,12 @@ The tenant parameters.
 | **ownerId** | **UUID** (uuid) | The tenant owner ID. | [optional] [example: 00000000-0000-0000-0000-000000000001] |
 | **paymentId** | **String** | The tenant payment ID. | [optional] [example: PAY123456789] [nullable] |
 | **spam** | **Boolean** | Specifies if the ONLYOFFICE newsletter is allowed or not. | [optional] [example: false] |
-| **status** | [**TenantStatus**](#model-tenantstatus) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6] |
+| **status** | [**TenantStatus**](#model-tenantstatus) | The tenant status. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6] |
 | **statusChangeDate** | **Date** (date-time) | The date and time when the tenant status was changed. | [optional] [example: 2024-01-15T10:30:00Z] |
 | **timeZone** | **String** | The tenant time zone. | [optional] [example: America/New_York] [nullable] |
-| **trustedDomains** | **List** | The list of tenant trusted domains. | [optional] [example: ["example.com","trusted.com"]] [nullable] |
+| **trustedDomains** | **List** | The list of tenant trusted domains. | [optional] [example: [example.com, trusted.com]] [nullable] |
 | **trustedDomainsRaw** | **String** | The tenant trusted domains in the string format. | [optional] [example: example.com,trusted.com] [nullable] |
-| **trustedDomainsType** | [**TenantTrustedDomainsType**](#model-tenanttrusteddomainstype) |  | [optional] [enum: 0, 1, 2] |
+| **trustedDomainsType** | [**TenantTrustedDomainsType**](#model-tenanttrusteddomainstype) | The type of the tenant trusted domains. | [optional] [enum: 0, 1, 2] |
 | **version** | **Integer** (int32) | The tenant version | [optional] [example: 2] |
 | **versionChanged** | **Date** (date-time) | The date and time when the tenant version was changed. | [optional] [example: 2024-02-01T09:00:00Z] |
 | **region** | **String** | The tenant AWS region. | [optional] [example: us-east-1] [nullable] |
@@ -13330,7 +13333,7 @@ The current tenant quota.
 | **visible** | **Boolean** | Specifies if the tenant quota is visible or not. | [optional] [example: true] |
 | **wallet** | **Boolean** | Specifies if the tenant quota applies to the wallet or not | [optional] [example: true] |
 | **additional** | **Boolean** | Specifies if the tenant quota is primary or additional. | [optional] [example: false] |
-| **dueDate** | **Date** (date-time) | The quota due date. | [optional] [nullable] |
+| **dueDate** | **Date** (date-time) | The quota due date. | [optional] [example: 2021-01-01T00:00:00] [nullable] |
 | **features** | **String** | The tenant quota features. | [optional] [example: audit,ldap,sso] [nullable] |
 | **maxFileSize** | **Long** (int64) | The tenant maximum file size. | [optional] [example: 25000000] |
 | **maxTotalSize** | **Long** (int64) | The tenant maximum total size. | [optional] [example: 25000000000] |
@@ -13362,7 +13365,7 @@ The current tenant quota.
 | **countAIAgent** | **Integer** (int32) | The number of AI agents. | [optional] [example: 5] |
 | **aiTools** | **Boolean** | Specifies if the AI tools enabled as a wallet service or not. | [optional] [example: true] |
 | **aiSearch** | **Boolean** | Specifies if the AI search enabled as a wallet service or not. | [optional] [example: true] |
-| **docsCloud** | **Integer** (int32) | The number of DocsCloud users. | [optional] |
+| **docsCloud** | **Integer** (int32) | The number of DocsCloud users. | [optional] [example: true] |
 | **docsCloudDevPack** | **Boolean** | Specifies if the DocsCloudDevPack enabled or not. | [optional] [example: true] |
 | **docsCloudTrial** | **Boolean** | Specifies if the DocsCloudTrial enabled or not. | [optional] [example: true] |
 
@@ -13375,9 +13378,9 @@ The tenant quota feature parameters.
 | **id** | **String** | The ID of the tenant quota feature. | [optional] [example: 00000000-0000-0000-0000-000000000001] [nullable] |
 | **title** | **String** | The title of the tenant quota feature. | [optional] [example: Premium Storage] [nullable] |
 | **image** | **String** | The image URL of the tenant quota feature. | [optional] [example: /images/premium-storage.png] [nullable] |
-| **value** | **oas_any_type_not_mapped** | The value of the tenant quota feature. | [optional] [nullable] |
+| **value** | **null** | The value of the tenant quota feature. | [optional] [example: {}] |
 | **type** | **String** | The type of the tenant quota feature. | [optional] [example: Storage] [nullable] |
-| **used** | [**FeatureUsedDto**](#model-featureuseddto) |  | [optional] |
+| **used** | [**FeatureUsedDto**](#model-featureuseddto) | The used space parameters of the tenant quota feature. | [optional] |
 | **priceTitle** | **String** | The price title of the tenant quota feature. | [optional] [example: $9.99/month] [nullable] |
 
 
@@ -13430,7 +13433,7 @@ The room quota settings.
 |------------ | ------------- | ------------- | -------------|
 | **enableQuota** | **Boolean** | Specifies if the quota is enabled for the tenant entity or not. | [optional] |
 | **defaultQuota** | **Long** (int64) | The default quota of the tenant entity. | [optional] |
-| **lastRecalculateDate** | **Date** (date-time) | The date of the last quota recalculation. | [optional] [nullable] |
+| **lastRecalculateDate** | **Date** (date-time) | The date of the last quota recalculation. | [optional] |
 | **lastModified** | **Date** (date-time) | The timestamp indicating when the settings were last modified. | [optional] |
 
 
@@ -13495,7 +13498,7 @@ The user quota settings.
 |------------ | ------------- | ------------- | -------------|
 | **enableQuota** | **Boolean** | Specifies if the quota is enabled for the tenant entity or not. | [optional] |
 | **defaultQuota** | **Long** (int64) | The default quota of the tenant entity. | [optional] |
-| **lastRecalculateDate** | **Date** (date-time) | The date of the last quota recalculation. | [optional] [nullable] |
+| **lastRecalculateDate** | **Date** (date-time) | The date of the last quota recalculation. | [optional] |
 | **lastModified** | **Date** (date-time) | The timestamp indicating when the settings were last modified. | [optional] |
 
 
@@ -13522,7 +13525,7 @@ The wallet services settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **enabledServices** | **List** | The list of the enabled wallet services. | [optional] [example: [-11,-12]] [enum: -18, -16, -15, -14, -13, -12, -11] [nullable] |
+| **enabledServices** | **List** | The list of the enabled wallet services. | [optional] [example: [-11, -12]] [enum: -18, -16, -15, -14, -13, -12, -11] [nullable] |
 | **lastModified** | **Date** (date-time) | The date and time when the wallet services settings were last modified. | [optional] [example: 1990-01-01T00:00:00Z] |
 
 
@@ -13556,7 +13559,7 @@ The wrapper for the tenant wallet settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **settings** | [**TenantWalletSettings**](#model-tenantwalletsettings) |  | [optional] |
+| **settings** | [**TenantWalletSettings**](#model-tenantwalletsettings) | The tenant wallet settings. | [optional] |
 
 
 ### Model TenantWrapper
@@ -13616,11 +13619,11 @@ The request parameters for configuring the Two-Factor Authentication (TFA) setti
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **type** | [**TfaRequestsDtoType**](#model-tfarequestsdtotype) |  | [optional] [enum: 0, 1, 2] |
+| **type** | [**TfaRequestsDtoType**](#model-tfarequestsdtotype) | The two-factor authentication type. | [optional] [enum: 0, 1, 2] |
 | **id** | **UUID** (uuid) | The ID of the user for whom the TFA settings are being configured. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
-| **trustedIps** | **List** | The list of IP addresses that bypass TFA verification. | [optional] [example: ["item1","item2"]] [nullable] |
-| **mandatoryUsers** | **List** (uuid) | The list of user IDs for whom TFA is mandatory. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
-| **mandatoryGroups** | **List** (uuid) | The list group IDs whose members must use TFA. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
+| **trustedIps** | **List** | The list of IP addresses that bypass TFA verification. | [optional] [example: [item1, item2]] [nullable] |
+| **mandatoryUsers** | **List** (uuid) | The list of user IDs for whom TFA is mandatory. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
+| **mandatoryGroups** | **List** (uuid) | The list group IDs whose members must use TFA. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
 
 
 ### Model TfaRequestsDtoType
@@ -13650,9 +13653,9 @@ The parameters representing the Two-Factor Authentication (TFA) configuration se
 | **title** | **String** | The display name or description of the TFA configuration. | [required] [example: Default TFA policy] [nullable] |
 | **enabled** | **Boolean** | Indicates whether the TFA configuration is currently active. | [required] [example: true] |
 | **available** | **Boolean** | Indicates whether the TFA configuration can be used. | [required] [example: true] |
-| **trustedIps** | **List** | The list of IP addresses that are exempt from TFA requirements. | [optional] [example: ["item1","item2"]] [nullable] |
-| **mandatoryUsers** | **List** (uuid) | The list of user IDs that are required to use TFA. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
-| **mandatoryGroups** | **List** (uuid) | The list of group IDs whose members are required to use TFA. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
+| **trustedIps** | **List** | The list of IP addresses that are exempt from TFA requirements. | [optional] [example: [item1, item2]] [nullable] |
+| **mandatoryUsers** | **List** (uuid) | The list of user IDs that are required to use TFA. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
+| **mandatoryGroups** | **List** (uuid) | The list of group IDs whose members are required to use TFA. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
 
 
 ### Model TfaValidateRequestsDto
@@ -13698,7 +13701,7 @@ Represents information about the transaction applied to an account.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **currency** | **String** | The three-character ISO 4217 currency symbol. | [optional] [nullable] |
+| **currency** | **String** | The three-character ISO 4217 currency symbol. | [optional] |
 | **amount** | **Double** (double) | The amount in the specified currency. | [optional] |
 | **date** | **Date** (date-time) | The date and time when the credit transaction occurred. | [optional] |
 
@@ -13733,7 +13736,7 @@ The upcoming payment parameters.
 | **unitOfMeasure** | **String** | The quota unit of measure. | [optional] [example: admins] [nullable] |
 | **quantity** | **Integer** (int32) | The quantity that will be charged (the next quantity if set, otherwise the current quantity). | [optional] [example: 100] |
 | **wallet** | **Boolean** | The quota applies to the wallet or not. | [optional] [example: true] |
-| **dueDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **dueDate** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **amount** | **Double** (double) | The amount that will be charged (unit price multiplied by the quantity). | [optional] [example: 14] |
 | **currency** | **String** | The three-character ISO 4217 currency symbol of the amount. | [optional] [example: USD] [nullable] |
 
@@ -13745,11 +13748,11 @@ The request parameters for updating the webhook configuration.
 |------------ | ------------- | ------------- | -------------|
 | **name** | **String** | The human-readable name of the webhook configuration. | [required] [minLength: 0] [maxLength: 50] |
 | **uri** | **String** | The destination URL where the webhook events will be sent. | [required] [minLength: 1] |
-| **secretKey** | **String** | The webhook secret key used to sign the webhook payloads for the security verification. | [optional] [minLength: 0] [maxLength: 50] [nullable] |
+| **secretKey** | **String** | The webhook secret key used to sign the webhook payloads for the security verification. | [optional] [minLength: 0] [maxLength: 50] |
 | **enabled** | **Boolean** | Specifies whether the webhook configuration is active or not. | [optional] |
 | **ssl** | **Boolean** | Specifies whether the SSL certificate verification is required or not. | [optional] |
-| **triggers** | [**WebhookTrigger**](#model-webhooktrigger) |  | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824] |
-| **targetId** | **String** | Target ID | [optional] [minLength: 0] [maxLength: 255] [nullable] |
+| **triggers** | [**WebhookTrigger**](#model-webhooktrigger) | The webhook trigger type. | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824] |
+| **targetId** | **String** | Target ID | [optional] [minLength: 0] [maxLength: 255] |
 | **id** | **Integer** (int32) | The webhook configuration ID. | [required] |
 
 
@@ -13787,14 +13790,14 @@ The user information.
 | **userName** | **String** | The user username. | [optional] [example: johndoe] [nullable] |
 | **birthDate** | **Date** (date-time) | The user birthday. | [optional] [example: 1990-01-01T00:00:00Z] [nullable] |
 | **sex** | **Boolean** | The user sex (male or female). | [optional] [example: true] [nullable] |
-| **status** | [**EmployeeStatus**](#model-employeestatus) |  | [optional] [enum: 1, 2, 4, 5, 7] |
-| **activationStatus** | [**EmployeeActivationStatus**](#model-employeeactivationstatus) |  | [optional] [enum: 0, 1, 2, 4] |
+| **status** | [**EmployeeStatus**](#model-employeestatus) | The user status. | [optional] [enum: 1, 2, 4, 5, 7] |
+| **activationStatus** | [**EmployeeActivationStatus**](#model-employeeactivationstatus) | The user activation status. | [optional] [enum: 0, 1, 2, 4] |
 | **terminatedDate** | **Date** (date-time) | The date and time when the user account was terminated. | [optional] [example: 2025-12-31T23:59:59Z] [nullable] |
 | **title** | **String** | The user title. | [optional] [example: Manager] [nullable] |
 | **workFromDate** | **Date** (date-time) | The user registration date. | [optional] [example: 2020-01-15T00:00:00Z] [nullable] |
 | **email** | **String** (email) | The user email address. | [optional] [example: john.doe@example.com] [nullable] |
 | **contacts** | **String** | The list of user contacts in the string format. | [optional] [example: skype:johndoe\|telegram:@johndoe] [nullable] |
-| **contactsList** | **List** | The list of user contacts. | [optional] [example: ["skype:johndoe","telegram:@johndoe"]] [nullable] |
+| **contactsList** | **List** | The list of user contacts. | [optional] [example: [skype:johndoe, telegram:@johndoe]] [nullable] |
 | **location** | **String** | The user location. | [optional] [example: New York, USA] [nullable] |
 | **notes** | **String** | The user notes. | [optional] [example: Additional information about the user] [nullable] |
 | **removed** | **Boolean** | Specifies if the user account was removed or not. | [optional] [example: false] |
@@ -13803,7 +13806,7 @@ The user information.
 | **isActive** | **Boolean** | Specifies if the user is active or not. | [optional] [example: true] |
 | **cultureName** | **String** | The user culture code. | [optional] [example: en-US] [nullable] |
 | **mobilePhone** | **String** | The user mobile phone. | [optional] [example: +1234567890] [nullable] |
-| **mobilePhoneActivationStatus** | [**MobilePhoneActivationStatus**](#model-mobilephoneactivationstatus) |  | [optional] [enum: 0, 1] |
+| **mobilePhoneActivationStatus** | [**MobilePhoneActivationStatus**](#model-mobilephoneactivationstatus) | The user mobile phone activation status. | [optional] [enum: 0, 1] |
 | **sid** | **String** | The LDAP user identifier. | [optional] [example: S-1-5-21-3623811015-3361044348-30300820-1013] [nullable] |
 | **ldapQouta** | **Long** (int64) | The LDAP user quota attribute. | [optional] [example: 1073741824] |
 | **ssoNameId** | **String** | The SSO SAML user identifier. | [optional] [example: johndoe@example.com] [nullable] |
@@ -13837,8 +13840,8 @@ The request parameters for specifying wallet payment quantity.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **quantity** | **Map** (int32) | The mapping of item identifiers to their respective quantities in the payment. | [required] [example: {"admin":1}] |
-| **productQuantityType** | [**ProductQuantityType**](#model-productquantitytype) |  | [optional] [enum: 0, 1, 2, 3] |
+| **quantity** | **Map** (int32) | The mapping of item identifiers to their respective quantities in the payment. | [required] [example: {admin=1}] |
+| **productQuantityType** | [**ProductQuantityType**](#model-productquantitytype) | The type of action performed on a product&#39;s quantity. | [optional] [enum: 0, 1, 2, 3] |
 
 
 ### Model WalletServiceArrayWrapper
@@ -13858,17 +13861,17 @@ The wallet service information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **Integer** (int32) | The quota ID. | [required] |
-| **title** | **String** | The quota title. | [optional] [nullable] |
-| **price** | [**PriceDto**](#model-pricedto) |  | [required] |
+| **title** | **String** | The quota title. | [optional] |
+| **price** | [**PriceDto**](#model-pricedto) | The price parameters. | [required] |
 | **nonProfit** | **Boolean** | Specifies if the quota is nonprofit or not. | [required] |
 | **free** | **Boolean** | Specifies if the quota is free or not. | [required] |
 | **trial** | **Boolean** | Specifies if the quota is trial or not. | [required] |
-| **features** | [**List**](#model-tenantquotafeaturedto) | The list of tenant quota features. | [required] [nullable] |
-| **usersQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) |  | [optional] |
-| **roomsQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) |  | [optional] |
-| **aiAgentsQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) |  | [optional] |
-| **tenantCustomQuota** | [**TenantQuotaSettings**](#model-tenantquotasettings) |  | [optional] |
-| **dueDate** | **Date** (date-time) | The due date. | [optional] [nullable] |
+| **features** | [**List**](#model-tenantquotafeaturedto) | The list of tenant quota features. | [required] |
+| **usersQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) | The tenant entity quota settings. | [optional] |
+| **roomsQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) | The tenant entity quota settings. | [optional] |
+| **aiAgentsQuota** | [**TenantEntityQuotaSettings**](#model-tenantentityquotasettings) | The tenant entity quota settings. | [optional] |
+| **tenantCustomQuota** | [**TenantQuotaSettings**](#model-tenantquotasettings) | The tenant quota settings. | [optional] |
+| **dueDate** | **Date** (date-time) | The due date. | [optional] |
 | **innerServices** | [**List**](#model-walletservicedto) | The list of inner services. | [optional] [nullable] |
 | **serviceName** | **String** | The service name. | [optional] [nullable] |
 
@@ -13891,7 +13894,7 @@ The request parameters for configuring security settings of a single web module.
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | The module ID. | [required] [example: 00000000-0000-0000-0000-000000000000] [nullable] |
 | **enabled** | **Boolean** | Controls whether the security restrictions are enforced for this module. | [optional] [example: true] |
-| **subjects** | **List** (uuid) | The collection of user and group identifiers granted access to the module. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
+| **subjects** | **List** (uuid) | The collection of user and group identifiers granted access to the module. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
 
 
 ### Model WebItemsSecurityRequestsDto
@@ -13899,7 +13902,7 @@ The request parameters for configuring security settings across multiple web mod
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **items** | [**List**](#model-itemkeyvaluepairstringboolean) | The list of module security configurations. | [optional] [example: ["item1","item2"]] [nullable] |
+| **items** | [**List**](#model-itemkeyvaluepairstringboolean) | The list of module security configurations. | [optional] [example: [item1, item2]] [nullable] |
 
 
 ### Model WebPluginArrayWrapper
@@ -13928,15 +13931,15 @@ The web plugin information.
 | **pluginName** | **String** | The name by which the web plugin is registered in the window object. | [required] [example: examplePlugin] [nullable] |
 | **scopes** | **String** | The web plugin scopes. | [required] [example: Files,Rooms] [nullable] |
 | **image** | **String** | The web plugin image. | [required] [example: https://example.com/image.png] [nullable] |
-| **createBy** | [**EmployeeDto**](#model-employeedto) |  | [required] |
+| **createBy** | [**EmployeeDto**](#model-employeedto) | The user parameters. | [required] |
 | **createOn** | **Date** (date-time) | The date and time when the web plugin was created. | [required] [example: 2024-01-15T10:30:00Z] |
 | **enabled** | **Boolean** | Specifies if the web plugin is enabled or not. | [required] [example: true] |
 | **system** | **Boolean** | Specifies if the web plugin is system or not. | [required] [example: false] |
 | **url** | **String** | The web plugin URL. | [required] [example: https://example.com/plugin.js] [nullable] |
 | **cssUrl** | **String** | The web plugin css URL. | [required] [example: https://example.com/plugin.css] [nullable] |
 | **settings** | **String** | The web plugin settings. | [required] [example: {}] [nullable] |
-| **nameLocale** | **Map** | The web plugin localized name. | [optional] [nullable] |
-| **descriptionLocale** | **Map** | The web plugin localized description. | [optional] [nullable] |
+| **nameLocale** | **null** | The web plugin localized name. | [optional] [example: {}] |
+| **descriptionLocale** | **null** | The web plugin localized description. | [optional] [example: {}] |
 | **runtime** | **String** | The web plugin loading method | [optional] [example: module] [nullable] |
 
 
@@ -13972,7 +13975,7 @@ The parameters for requesting the webhook delivery retries.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **ids** | **List** (int32) | The list of webhook delivery IDs to retry. | [optional] [example: [1,2,3]] [nullable] |
+| **ids** | **List** (int32) | The list of webhook delivery IDs to retry. | [optional] [example: [1, 2, 3]] [nullable] |
 
 
 ### Model WebhookTrigger
@@ -14013,11 +14016,11 @@ The webhook configuration parameters.
 | **uri** | **String** | The webhook URI. | [optional] [example: https://example.com] [nullable] |
 | **enabled** | **Boolean** | Specifies if the webhooks are enabled or not. | [optional] [example: true] |
 | **ssl** | **Boolean** | The webhook SSL verification (enabled or not). | [optional] [example: true] |
-| **triggers** | [**WebhookTrigger**](#model-webhooktrigger) |  | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824] |
+| **triggers** | [**WebhookTrigger**](#model-webhooktrigger) | The webhook trigger type. | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824] |
 | **targetId** | **String** | The webhook target ID. | [optional] [example: 00000000-0000-0000-0000-000000000001] [nullable] |
-| **createdBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **createdBy** | [**EmployeeDto**](#model-employeedto) | The user parameters. | [optional] |
 | **createdOn** | **Date** (date-time) | The date and time when the webhook was created. | [optional] [example: 2024-01-15T10:30:00Z] [nullable] |
-| **modifiedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **modifiedBy** | [**EmployeeDto**](#model-employeedto) | The user parameters. | [optional] |
 | **modifiedOn** | **Date** (date-time) | The date and time when the webhook was modified. | [optional] [example: 2024-01-15T10:30:00Z] [nullable] |
 | **lastFailureOn** | **Date** (date-time) | The date and time of the webhook last failure. | [optional] [example: 2024-01-15T10:30:00Z] [nullable] |
 | **lastFailureContent** | **String** | The webhook last failure content. | [optional] [example: example value] [nullable] |
@@ -14040,7 +14043,7 @@ The webhook configuration with its status.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **configs** | [**WebhooksConfigDto**](#model-webhooksconfigdto) |  | [optional] |
+| **configs** | [**WebhooksConfigDto**](#model-webhooksconfigdto) | The webhook configuration. | [optional] |
 | **status** | **Integer** (int32) | The webhook status. | [optional] [example: 1] |
 
 
@@ -14073,7 +14076,7 @@ The webhook log parameters.
 |------------ | ------------- | ------------- | -------------|
 | **id** | **Integer** (int32) | The webhook log ID. | [required] [example: 1] |
 | **configName** | **String** | The webhook configuration name. | [optional] [example: Example Name] [nullable] |
-| **trigger** | [**WebhookTrigger**](#model-webhooktrigger) |  | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824] |
+| **trigger** | [**WebhookTrigger**](#model-webhooktrigger) | The webhook trigger type. | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824] |
 | **creationTime** | **Date** (date-time) | The webhook creation time. | [optional] [example: 2024-01-15T10:30:00Z] |
 | **method** | **String** | The webhook method. | [optional] [example: example value] [nullable] |
 | **route** | **String** | The webhook route. | [optional] [example: example value] [nullable] |
@@ -14112,10 +14115,10 @@ The white label item parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **type** | [**WhiteLabelLogoType**](#model-whitelabellogotype) |  | [optional] [enum: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] |
+| **type** | [**WhiteLabelLogoType**](#model-whitelabellogotype) | The white label logo type. | [optional] [enum: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] |
 | **name** | **String** | The white label file name. | [optional] [example: Example Name] [nullable] |
-| **size** | [**IMagickGeometry**](#model-imagickgeometry) |  | [optional] |
-| **path** | [**WhiteLabelItemPathDto**](#model-whitelabelitempathdto) |  | [optional] |
+| **size** | [**IMagickGeometry**](#model-imagickgeometry) | The white label file size. | [optional] |
+| **path** | [**WhiteLabelItemPathDto**](#model-whitelabelitempathdto) | The white label file path. | [optional] |
 
 
 ### Model WhiteLabelItemPathDto
@@ -14140,7 +14143,7 @@ The request parameters for configuring the white label branding settings.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **logoText** | **String** | The text to display alongside or in place of the logo. | [optional] [example: Company Name] [minLength: 0] [maxLength: 40] [nullable] |
-| **logo** | [**List**](#model-itemkeyvaluepairstringlogorequestsdto) | The white label tenant IDs with their logos (light or dark). | [optional] [example: ["item1","item2"]] [nullable] |
+| **logo** | [**List**](#model-itemkeyvaluepairstringlogorequestsdto) | The white label tenant IDs with their logos (light or dark). | [optional] [example: [item1, item2]] [nullable] |
 
 
 ### Model WizardRequestsDto

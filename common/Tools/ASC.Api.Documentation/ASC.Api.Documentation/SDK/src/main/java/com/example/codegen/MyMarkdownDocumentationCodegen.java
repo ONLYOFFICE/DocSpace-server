@@ -215,7 +215,35 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             return null;
         }
 
-        return exampleText(((Schema<?>) property).getExample());
+        return exampleText(schemaExample((Schema<?>) property));
+    }
+
+    /**
+     * The example a schema states, in either spelling.
+     * <p>
+     * OpenAPI 3.1 replaced the single `example` with an `examples` array, and the documents the
+     * services emit use the array form. Reading `example` alone leaves the pages with no examples
+     * at all, which looks exactly like a document that states none.
+     */
+    private static Object schemaExample(Schema<?> schema) {
+        if (schema == null) {
+            return null;
+        }
+
+        if (schema.getExample() != null) {
+            return schema.getExample();
+        }
+
+        List<?> examples = schema.getExamples();
+        if (examples != null) {
+            for (Object example : examples) {
+                if (example != null) {
+                    return example;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -252,8 +280,10 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             if (parameter.getExample() != null) {
                 return exampleText(parameter.getExample());
             }
-            if (parameter.getSchema() != null && parameter.getSchema().getExample() != null) {
-                return exampleText(parameter.getSchema().getExample());
+
+            Object schemaExample = schemaExample(parameter.getSchema());
+            if (schemaExample != null) {
+                return exampleText(schemaExample);
             }
         }
 
@@ -347,17 +377,10 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             supportingFiles.add(new SupportingFile("service.mustache", "", documentName + ".md"));
         }
 
-        // Without a default the server URL renders as "http://http:" in every page header.
-        if (openAPI != null && openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
-            Server server = openAPI.getServers().get(0);
-            ServerVariables serverVars = server.getVariables();
-            if (serverVars != null) {
-                ServerVariable baseUrlVar = serverVars.get("baseUrl");
-                if (baseUrlVar != null && "".equals(baseUrlVar.getDefault())) {
-                    baseUrlVar.setDefault("http://localhost:8092");
-                }
-            }
-        }
+        // The page heading and the server URL are not fixed up here: they are written into the
+        // sub-document before the generator is started (see GenerateMarkdownDocsCommand). They
+        // cannot travel as --additional-properties, because openapi-generator-cli is an npm shim
+        // that re-spawns java through a shell, and a value containing spaces does not survive it.
     }
 
     @Override

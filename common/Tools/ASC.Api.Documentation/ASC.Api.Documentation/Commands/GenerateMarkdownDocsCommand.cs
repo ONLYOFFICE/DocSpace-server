@@ -47,12 +47,21 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
 {
     protected override string Name => "Markdown";
 
+    private static readonly JsonSerializerOptions _writeOptions = new()
+    {
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
     public override async Task<int> ExecuteAsync(
         CommandContext context,
         NoArgumentsCommandSettings settings,
         CancellationToken cancellationToken)
     {
-        var (joinedDocument, sourceDocuments) = ReadDocumentPaths();
+        var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+        var (joinedDocument, sourceDocuments) = ReadDocumentPaths(configuration);
+        var markdown = ReadMarkdownSettings(configuration);
         var splitDirectory = Path.Combine(WorkingDirectory, "json", "split");
 
         var documents = await OpenapiSplitter.SplitAsync(
@@ -71,8 +80,10 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         {
             AnsiConsole.MarkupLine($"Rendering [green]{Markup.Escape(document.Name)}.md[/]");
 
+            await ApplyPresentationAsync(document, markdown, cancellationToken);
+
             var exitCode = await RunGeneratorAsync(
-                ["-i", document.Path, "--additional-properties", $"documentName={document.Name}"],
+                BuildArguments(document, markdown),
                 cancellationToken);
 
             if (exitCode != 0)
@@ -82,6 +93,87 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         }
 
         return 0;
+    }
+
+    /// <summary>
+    /// Writes into the sub-document what the generator reads from the document rather than from
+    /// its options: the page heading and the server the URIs are relative to.
+    /// </summary>
+    /// <remarks>
+    /// These cannot travel as `--additional-properties`. openapi-generator-cli is an npm shim
+    /// that re-spawns java through a shell, and a value containing spaces arrives there split
+    /// into separate arguments - "ONLYOFFICE DocSpace Files API" fails the run outright.
+    /// </remarks>
+    private static async Task ApplyPresentationAsync(
+        OpenapiSplitter.SplitDocument document,
+        MarkdownSettings settings,
+        CancellationToken cancellationToken)
+    {
+        var content = await File.ReadAllTextAsync(document.Path, cancellationToken);
+        var root = JsonNode.Parse(content)?.AsObject()
+            ?? throw new Exception($"Split document is not an object: {document.Path}");
+
+        // The joined document titles every service "Api", and the heading comes from info.title.
+        if (root["info"] is JsonObject info)
+        {
+            info["title"] = settings.TitleFor(document.Name);
+        }
+
+        // `baseUrl` is deliberately empty in the document - a DocSpace instance lives wherever it
+        // is installed - but an empty default renders as "http://http:" in the page header, so
+        // the pages get the placeholder host the handbook already uses.
+        if (!string.IsNullOrWhiteSpace(settings.ServerUrl)
+            && root["servers"] is JsonArray { Count: > 0 } servers
+            && servers[0]?["variables"]?["baseUrl"] is JsonObject baseUrl
+            && string.IsNullOrEmpty(baseUrl["default"]?.ToString()))
+        {
+            baseUrl["default"] = settings.ServerUrl;
+        }
+
+        await File.WriteAllTextAsync(document.Path, root.ToJsonString(_writeOptions), cancellationToken);
+    }
+
+    /// <summary>
+    /// Options for one document. Each value goes over as its own `--additional-properties` flag
+    /// rather than as one comma-separated list, because the generator splits that list on commas.
+    /// Only values without spaces belong here - see <see cref="ApplyPresentationAsync"/>.
+    /// </summary>
+    private static List<string> BuildArguments(OpenapiSplitter.SplitDocument document, MarkdownSettings settings)
+    {
+        var arguments = new List<string> { "-i", document.Path };
+
+        AddProperty(arguments, "documentName", document.Name);
+        AddProperty(arguments, "docsUrl", settings.DocsUrl);
+
+        return arguments;
+    }
+
+    private static void AddProperty(List<string> arguments, string name, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        arguments.Add("--additional-properties");
+        arguments.Add($"{name}={value}");
+    }
+
+    /// <summary>
+    /// Presentation the generated documents cannot derive themselves: the joined document carries
+    /// a single `info.title` ("Api") and an empty server URL, so every service would otherwise be
+    /// headed the same and claim to live on localhost.
+    /// </summary>
+    private static MarkdownSettings ReadMarkdownSettings(IConfiguration configuration)
+    {
+        var section = configuration.GetSection("markdown");
+
+        var titles = section.GetSection("titles")
+            .GetChildren()
+            .Where(title => !string.IsNullOrWhiteSpace(title.Value))
+            .ToDictionary(title => title.Key, title => title.Value!, StringComparer.OrdinalIgnoreCase);
+
+        return new MarkdownSettings(section["serverUrl"], section["docsUrl"], titles);
     }
 
     /// <summary>
@@ -131,10 +223,9 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
     /// per-service documents it consumes. Relative paths resolve against the current directory,
     /// matching <see cref="JoinSettings"/>.
     /// </summary>
-    private static (string JoinedDocument, IReadOnlyList<string> SourceDocuments) ReadDocumentPaths()
+    private static (string JoinedDocument, IReadOnlyList<string> SourceDocuments) ReadDocumentPaths(
+        IConfiguration configuration)
     {
-        var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-
         var joinedParts = configuration.GetSection("pathToFile").Get<string[]>();
         if (joinedParts == null || joinedParts.Length == 0)
         {
@@ -158,5 +249,18 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         }
 
         return (Path.GetFullPath(Path.Combine(joinedParts)), sourceDocuments);
+    }
+
+    /// <summary>
+    /// Titles are keyed by the split document name, so a service added to the join without a title
+    /// falls back to that name rather than silently inheriting another service's heading.
+    /// </summary>
+    private sealed record MarkdownSettings(
+        string? ServerUrl,
+        string? DocsUrl,
+        IReadOnlyDictionary<string, string> Titles)
+    {
+        public string TitleFor(string documentName) =>
+            Titles.TryGetValue(documentName, out var title) ? title : documentName;
     }
 }

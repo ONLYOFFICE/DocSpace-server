@@ -1,6 +1,9 @@
-# Api
+# ONLYOFFICE DocSpace AI API
 
-All URIs are relative to *http://localhost:8092*
+The browsable version of this reference, with a request builder and code samples, is published at
+<https://api.onlyoffice.com/docspace/api-backend/usage-api/>.
+
+All URIs are relative to *https://yourportal.onlyoffice.com*, where the host is the address of your DocSpace instance.
 
 ## Endpoints
 
@@ -3354,7 +3357,7 @@ No authorization required
 
 ### aiWebSearchSetActiveConfig
 
-> AiSuccessResponse aiWebSearchSetActiveConfig(aiWebSearchConfigure\_request)
+> AiSuccessResponse aiWebSearchSetActiveConfig(aiWebSearchSetActiveConfig\_request)
 
 `PUT /api/2.0/ai/web-search/set-active-config`
 
@@ -3364,7 +3367,7 @@ Set active config
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **aiWebSearchConfigure\_request** | body | [**aiWebSearchConfigure_request**](#model-aiwebsearchconfigure-request-body) |  | [required] |
+| **aiWebSearchSetActiveConfig\_request** | body | [**aiWebSearchSetActiveConfig_request**](#model-aiwebsearchsetactiveconfig-request-body) |  | [required] |
 
 #### Responses
 
@@ -3435,7 +3438,7 @@ The agent new item&#39;s information.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **agent** | [**AiFileEntryBaseDto**](#model-aifileentrybasedto) |  | [required] |
+| **agent** | [**AiFileEntryBaseDto**](#model-aifileentrybasedto) | The file entry information. | [required] |
 | **items** | [**List**](#model-aifileentrybasedto) | The list of file entry items. | [required] [nullable] |
 
 
@@ -3462,7 +3465,7 @@ Override the action&#39;s baked-in system prompt (replace or append).
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **threadId** | **String** | Target thread; a new one is created (with an auto title) when omitted. | [optional] |
-| **userMessage** | [**AiThreadMessageLike**](#model-aithreadmessagelike) |  | [required] |
+| **userMessage** | [**AiThreadMessageLike**](#model-aithreadmessagelike) | The user turn to send. | [required] |
 | **actionArgs** | [**AiAiActionArgs**](#model-aiaiactionargs) |  | [optional] |
 | **entityId** | **String** | Optional entity (room) scope for profile resolution. | [optional] |
 | **profileId** | **String** | Session-level profile override for this request only. | [optional] |
@@ -3499,7 +3502,7 @@ The AI module settings.
 | **threadId** | **String** | Thread the assistant message belongs to. | [required] |
 | **messageId** | **String** | Storage id of the assistant message holding the tool call. | [required] |
 | **idx** | **BigDecimal** | Index of the tool-call content part inside &#x60;message.content&#x60;. | [required] |
-| **message** | [**AiThreadMessageLike**](#model-aithreadmessagelike) |  | [required] |
+| **message** | [**AiThreadMessageLike**](#model-aithreadmessagelike) | Snapshot of the assistant message at the time the tool call surfaced. | [required] |
 | **actionArgs** | [**AiAiActionArgs**](#model-aiaiactionargs) |  | [optional] |
 | **entityId** | **String** |  | [optional] |
 | **profileId** | **String** |  | [optional] |
@@ -3537,7 +3540,7 @@ The API date and time parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **utcTime** | **Date** (date-time) | The time in UTC format. | [optional] [example: 2018-01-01T00:00:00Z] |
+| **utcTime** | **Date** (date-time) | The time in UTC format. | [optional] [example: 2018-01-01T00:00:00.0000000Z] |
 | **timeZoneOffset** | **String** (date-span) | The time zone offset. | [optional] [example: 00:00:00] |
 
 
@@ -3633,8 +3636,8 @@ Input for creating a new profile — the same shape as  {@link  Profile }  witho
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **name** | **String** | User-defined profile display name. | [required] |
-| **providerType** | [**AiProviderType**](#model-aiprovidertype) |  | [required] |
-| **basedOn** | [**AiBuiltinProviderType**](#model-aibuiltinprovidertype) |  | [optional] [enum: anthropic, ollama, openai, openaicompatible, together, openrouter, genai, deepseek, xai, lm-studio, mistral, groq, zhipu, stabilityai, gpt4all, onlyoffice, external] |
+| **providerType** | [**AiProviderType**](#model-aiprovidertype) | Provider type for this profile. Use &#x60;external&#x60; to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider&#39;s response parser — see  {@link  Profile.basedOn }  for the format selector. | [required] |
+| **basedOn** | [**AiBuiltinProviderType**](#model-aibuiltinprovidertype) | Selects the response-format parser used by the &#x60;external&#x60; provider. Ignored for any other &#x60;providerType&#x60;.  Supported values are &#x60;openai&#x60;, &#x60;anthropic&#x60;, &#x60;mistral&#x60; and &#x60;openrouter&#x60;. Remaining values (&#x60;genai&#x60;, &#x60;stabilityai&#x60;, …) are accepted by the type but not yet implemented; passing one raises an error at request time. | [optional] [enum: anthropic, ollama, openai, openaicompatible, together, openrouter, genai, deepseek, xai, lm-studio, mistral, groq, zhipu, stabilityai, gpt4all, onlyoffice, external] |
 | **baseUrl** | **String** | Base URL of the provider API. | [required] |
 | **key** | **String** | API key or token. Optional for local providers. | [optional] |
 | **headers** | **Map** | Extra HTTP headers sent with every request to this provider. Merged into the SDK client&#39;s default headers; an explicit &#x60;Authorization&#x60; here wins over the one derived from  {@link  key  } . Honoured by the OpenAI-family providers. | [optional] |
@@ -3702,27 +3705,27 @@ The file entry information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **title** | **String** | The file entry title. | [optional] [example: Some title.txt] [nullable] |
-| **access** | [**AiFileShare**](#model-aifileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
-| **ownedBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
+| **access** | [**AiFileShare**](#model-aifileshare) | The access rights to the file entry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedBy** | [**AiEmployeeDto**](#model-aiemployeedto) | Provides information about the employee who shared the file or folder. | [optional] |
+| **ownedBy** | [**AiEmployeeDto**](#model-aiemployeedto) | The information about the employee who owns the file entry. | [optional] |
 | **shared** | **Boolean** | Specifies if the file entry is shared via link or not. | [optional] [example: false] |
 | **sharedForUser** | **Boolean** | Specifies if the file entry is shared for user or not. | [optional] [example: false] |
 | **sharedExternal** | **Boolean** | Specifies if the file entry is shared via a public (non-internal) external link. | [optional] [example: false] |
 | **parentShared** | **Boolean** | Indicates whether the parent entity is shared. | [optional] [example: false] |
 | **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] [example: http://localhost/s/abc123] [nullable] |
-| **created** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **createdBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
-| **updated** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **autoDelete** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **rootFolderType** | [**AiFolderType**](#model-aifoldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **parentRoomType** | [**AiFolderType**](#model-aifoldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **updatedBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
+| **created** | [**AiApiDateTime**](#model-aiapidatetime) | The creation date and time of the file entry. | [optional] |
+| **createdBy** | [**AiEmployeeDto**](#model-aiemployeedto) | The file entry author. | [optional] |
+| **updated** | [**AiApiDateTime**](#model-aiapidatetime) | The last date and time when the file entry was updated. | [optional] |
+| **autoDelete** | [**AiApiDateTime**](#model-aiapidatetime) | The date and time when the file entry will be automatically deleted. | [optional] |
+| **rootFolderType** | [**AiFolderType**](#model-aifoldertype) | The root folder type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **parentRoomType** | [**AiFolderType**](#model-aifoldertype) | The parent room type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **updatedBy** | [**AiEmployeeDto**](#model-aiemployeedto) | The user who updated the file entry. | [optional] |
 | **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] [example: false] [nullable] |
 | **providerKey** | **String** | The provider key of the file entry. | [optional] [example: google-drive] [nullable] |
 | **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] [example: 1] [nullable] |
 | **order** | **String** | The order of the file entry. | [optional] [example: 1] [nullable] |
 | **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] [example: false] [nullable] |
-| **fileEntryType** | [**AiFileEntryType**](#model-aifileentrytype) |  | [optional] [enum: 1, 2] |
+| **fileEntryType** | [**AiFileEntryType**](#model-aifileentrytype) | The file entry type. | [optional] [enum: 1, 2] |
 
 
 ### Model AiFileEntryDtoInteger
@@ -3730,28 +3733,28 @@ The generic file entry information.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **title** | **String** | The file entry title. | [optional] [nullable] |
-| **access** | [**AiFileShare**](#model-aifileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
-| **ownedBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
+| **title** | **String** | The file entry title. | [optional] |
+| **access** | [**AiFileShare**](#model-aifileshare) | The access rights to the file entry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedBy** | [**AiEmployeeDto**](#model-aiemployeedto) | Provides information about the employee who shared the file or folder. | [optional] |
+| **ownedBy** | [**AiEmployeeDto**](#model-aiemployeedto) | The information about the employee who owns the file entry. | [optional] |
 | **shared** | **Boolean** | Specifies if the file entry is shared via link or not. | [optional] |
 | **sharedForUser** | **Boolean** | Specifies if the file entry is shared for user or not. | [optional] |
 | **sharedExternal** | **Boolean** | Specifies if the file entry is shared via a public (non-internal) external link. | [optional] |
 | **parentShared** | **Boolean** | Indicates whether the parent entity is shared. | [optional] |
-| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] [nullable] |
-| **created** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **createdBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
-| **updated** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **autoDelete** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **rootFolderType** | [**AiFolderType**](#model-aifoldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **parentRoomType** | [**AiFolderType**](#model-aifoldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **updatedBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
-| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] [nullable] |
-| **providerKey** | **String** | The provider key of the file entry. | [optional] [nullable] |
-| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] [nullable] |
-| **order** | **String** | The order of the file entry. | [optional] [nullable] |
-| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] [nullable] |
-| **fileEntryType** | [**AiFileEntryType**](#model-aifileentrytype) |  | [optional] [enum: 1, 2] |
+| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] |
+| **created** | [**AiApiDateTime**](#model-aiapidatetime) | The creation date and time of the file entry. | [optional] |
+| **createdBy** | [**AiEmployeeDto**](#model-aiemployeedto) | The file entry author. | [optional] |
+| **updated** | [**AiApiDateTime**](#model-aiapidatetime) | The last date and time when the file entry was updated. | [optional] |
+| **autoDelete** | [**AiApiDateTime**](#model-aiapidatetime) | The date and time when the file entry will be automatically deleted. | [optional] |
+| **rootFolderType** | [**AiFolderType**](#model-aifoldertype) | The root folder type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **parentRoomType** | [**AiFolderType**](#model-aifoldertype) | The parent room type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **updatedBy** | [**AiEmployeeDto**](#model-aiemployeedto) | The user who updated the file entry. | [optional] |
+| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] |
+| **providerKey** | **String** | The provider key of the file entry. | [optional] |
+| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] |
+| **order** | **String** | The order of the file entry. | [optional] |
+| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] |
+| **fileEntryType** | [**AiFileEntryType**](#model-aifileentrytype) | The file entry type. | [optional] [enum: 1, 2] |
 | **id** | **Integer** (int32) | The file entry ID. | [optional] |
 | **rootFolderId** | **Integer** (int32) | The root folder ID of the file entry. | [optional] |
 | **originId** | **Integer** (int32) | The origin ID of the file entry. | [optional] |
@@ -3764,7 +3767,7 @@ The generic file entry information.
 | **availableShareRights** | [**AiFileEntryDtoInteger_allOf_availableShareRights**](#model-aifileentrydtointegeravailablesharerights) |  | [optional] [nullable] |
 | **requestToken** | **String** | The request token of the file entry. | [optional] [nullable] |
 | **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] [nullable] |
-| **expirationDate** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
+| **expirationDate** | [**AiApiDateTime**](#model-aiapidatetime) | Represents the expiration date of the file entry. | [optional] |
 | **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] [nullable] |
 
 
@@ -3859,15 +3862,15 @@ The file operation information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | The file operation ID. | [required] [example: 00000000-0000-0000-0000-000000000000] [nullable] |
-| **Operation** | [**AiFileOperationType**](#model-aifileoperationtype) |  | [required] [enum: 0, 1, 2, 3, 4, 5, 6, 7] |
+| **Operation** | [**AiFileOperationType**](#model-aifileoperationtype) | The file operation type. | [required] [enum: 0, 1, 2, 3, 4, 5, 6, 7] |
 | **progress** | **Integer** (int32) | The file operation progress in percentage. | [required] [example: 100] |
 | **error** | **String** | The file operation error message. | [required] [example: File not found.] [nullable] |
 | **processed** | **String** | The file operation processing status. | [required] [example: 1] [nullable] |
 | **finished** | **Boolean** | Specifies if the file operation is finished or not. | [required] [example: true] |
 | **url** | **URI** (uri) | The file operation URL. | [optional] [example: http://localhost/download] [nullable] |
-| **files** | [**List**](#model-aifileentrybasedto) | The list of files of the file operation. | [optional] [example: [{"id":10,"title":"document.docx"}]] [nullable] |
-| **folders** | [**List**](#model-aifileentrybasedto) | The list of folders of the file operation. | [optional] [example: [{"id":20,"title":"My Folder"}]] [nullable] |
-| **status** | [**AiDistributedTaskStatus**](#model-aidistributedtaskstatus) |  | [optional] [enum: 0, 1, 2, 3, 4] |
+| **files** | [**List**](#model-aifileentrybasedto) | The list of files of the file operation. | [optional] [example: [{id=10, title=document.docx}]] [nullable] |
+| **folders** | [**List**](#model-aifileentrybasedto) | The list of folders of the file operation. | [optional] [example: [{id=20, title=My Folder}]] [nullable] |
+| **status** | [**AiDistributedTaskStatus**](#model-aidistributedtaskstatus) | The status of the distributed task related to the file operation. | [optional] [enum: 0, 1, 2, 3, 4] |
 
 
 ### Model AiFileOperationType
@@ -3900,10 +3903,10 @@ The folder content information.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **files** | [**List**](#model-aifileentrybasedto) | The list of files in the folder. | [optional] [example: [{"id":10,"title":"document.docx"}]] [nullable] |
-| **folders** | [**List**](#model-aifileentrybasedto) | The list of folders in the folder. | [optional] [example: [{"id":20,"title":"My Folder"}]] [nullable] |
-| **current** | [**AiFolderDtoInteger**](#model-aifolderdtointeger) |  | [optional] |
-| **pathParts** | **oas_any_type_not_mapped** | The folder path. | [required] [example: {key = "Key", path = "//path//to//folder"}] [nullable] |
+| **files** | [**List**](#model-aifileentrybasedto) | The list of files in the folder. | [optional] [example: [{id=10, title=document.docx}]] [nullable] |
+| **folders** | [**List**](#model-aifileentrybasedto) | The list of folders in the folder. | [optional] [example: [{id=20, title=My Folder}]] [nullable] |
+| **current** | [**AiFolderDtoInteger**](#model-aifolderdtointeger) | The current folder information. | [optional] |
+| **pathParts** | **null** | The folder path. | [required] [example: {key = "Key", path = "//path//to//folder"}] |
 | **startIndex** | **Integer** (int32) | The folder start index. | [optional] [example: 0] |
 | **count** | **Integer** (int32) | The number of folder elements. | [optional] [example: 4] |
 | **total** | **Integer** (int32) | The total number of elements in the folder. | [required] [example: 4] |
@@ -3926,42 +3929,42 @@ The folder parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **title** | **String** | The file entry title. | [optional] [nullable] |
-| **access** | [**AiFileShare**](#model-aifileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
-| **ownedBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
+| **title** | **String** | The file entry title. | [optional] |
+| **access** | [**AiFileShare**](#model-aifileshare) | The access rights to the file entry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedBy** | [**AiEmployeeDto**](#model-aiemployeedto) | Provides information about the employee who shared the file or folder. | [optional] |
+| **ownedBy** | [**AiEmployeeDto**](#model-aiemployeedto) | The information about the employee who owns the file entry. | [optional] |
 | **shared** | **Boolean** | Specifies if the file entry is shared via link or not. | [optional] |
 | **sharedForUser** | **Boolean** | Specifies if the file entry is shared for user or not. | [optional] |
 | **sharedExternal** | **Boolean** | Specifies if the file entry is shared via a public (non-internal) external link. | [optional] |
 | **parentShared** | **Boolean** | Indicates whether the parent entity is shared. | [optional] |
-| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] [nullable] |
-| **created** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **createdBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
-| **updated** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **autoDelete** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **rootFolderType** | [**AiFolderType**](#model-aifoldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **parentRoomType** | [**AiFolderType**](#model-aifoldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **updatedBy** | [**AiEmployeeDto**](#model-aiemployeedto) |  | [optional] |
-| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] [nullable] |
-| **providerKey** | **String** | The provider key of the file entry. | [optional] [nullable] |
-| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] [nullable] |
-| **order** | **String** | The order of the file entry. | [optional] [nullable] |
-| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] [nullable] |
-| **fileEntryType** | [**AiFileEntryType**](#model-aifileentrytype) |  | [optional] [enum: 1, 2] |
+| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] |
+| **created** | [**AiApiDateTime**](#model-aiapidatetime) | The creation date and time of the file entry. | [optional] |
+| **createdBy** | [**AiEmployeeDto**](#model-aiemployeedto) | The file entry author. | [optional] |
+| **updated** | [**AiApiDateTime**](#model-aiapidatetime) | The last date and time when the file entry was updated. | [optional] |
+| **autoDelete** | [**AiApiDateTime**](#model-aiapidatetime) | The date and time when the file entry will be automatically deleted. | [optional] |
+| **rootFolderType** | [**AiFolderType**](#model-aifoldertype) | The root folder type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **parentRoomType** | [**AiFolderType**](#model-aifoldertype) | The parent room type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **updatedBy** | [**AiEmployeeDto**](#model-aiemployeedto) | The user who updated the file entry. | [optional] |
+| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] |
+| **providerKey** | **String** | The provider key of the file entry. | [optional] |
+| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] |
+| **order** | **String** | The order of the file entry. | [optional] |
+| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] |
+| **fileEntryType** | [**AiFileEntryType**](#model-aifileentrytype) | The file entry type. | [optional] [enum: 1, 2] |
 | **id** | **Integer** (int32) | The file entry ID. | [optional] |
 | **rootFolderId** | **Integer** (int32) | The root folder ID of the file entry. | [optional] |
 | **originId** | **Integer** (int32) | The origin ID of the file entry. | [optional] |
 | **originRoomId** | **Integer** (int32) | The origin room ID of the file entry. | [optional] |
-| **originTitle** | **String** | The origin title of the file entry. | [optional] [nullable] |
-| **originRoomTitle** | **String** | The origin room title of the file entry. | [optional] [nullable] |
+| **originTitle** | **String** | The origin title of the file entry. | [optional] |
+| **originRoomTitle** | **String** | The origin room title of the file entry. | [optional] |
 | **canShare** | **Boolean** | Specifies if the file entry can be shared or not. | [optional] |
 | **shareSettings** | [**AiFileEntryDtoInteger_allOf_shareSettings**](#model-aifileentrydtointegersharesettings) |  | [optional] [nullable] |
 | **security** | [**AiFileEntryDtoInteger_allOf_security**](#model-aifileentrydtointegersecurity) |  | [optional] [nullable] |
 | **availableShareRights** | [**AiFileEntryDtoInteger_allOf_availableShareRights**](#model-aifileentrydtointegeravailablesharerights) |  | [optional] [nullable] |
-| **requestToken** | **String** | The request token of the file entry. | [optional] [nullable] |
-| **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] [nullable] |
-| **expirationDate** | [**AiApiDateTime**](#model-aiapidatetime) |  | [optional] |
-| **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] [nullable] |
+| **requestToken** | **String** | The request token of the file entry. | [optional] |
+| **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] |
+| **expirationDate** | [**AiApiDateTime**](#model-aiapidatetime) | Represents the expiration date of the file entry. | [optional] |
+| **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] |
 | **parentId** | **Integer** (int32) | The parent folder ID of the folder. | [optional] |
 | **filesCount** | **Integer** (int32) | The number of files that the folder contains. | [optional] |
 | **foldersCount** | **Integer** (int32) | The number of folders that the folder contains. | [optional] |
@@ -3969,23 +3972,23 @@ The folder parameters.
 | **new** | **Integer** (int32) | The new element index in the folder. | [optional] |
 | **mute** | **Boolean** | Specifies if the folder notifications are enabled or not. | [optional] |
 | **tags** | **List** | The list of tags of the folder. | [optional] [nullable] |
-| **logo** | [**AiLogo**](#model-ailogo) |  | [optional] |
+| **logo** | [**AiLogo**](#model-ailogo) | The folder logo. | [optional] |
 | **pinned** | **Boolean** | Specifies if the folder is pinned or not. | [optional] |
-| **roomType** | [**AiRoomType**](#model-airoomtype) |  | [optional] [enum: 1, 2, 5, 6, 8, 9] |
+| **roomType** | [**AiRoomType**](#model-airoomtype) | The room type of the folder. | [optional] [enum: 1, 2, 5, 6, 8, 9] |
 | **private** | **Boolean** | Specifies if the folder is private or not. | [optional] |
 | **indexing** | **Boolean** | Specifies if the folder is indexed or not. | [optional] |
 | **denyDownload** | **Boolean** | Specifies if the folder can be downloaded or not. | [optional] |
-| **lifetime** | [**AiRoomDataLifetimeDto**](#model-airoomdatalifetimedto) |  | [optional] |
-| **watermark** | [**AiWatermarkDto**](#model-aiwatermarkdto) |  | [optional] |
-| **type** | [**AiFolderType**](#model-aifoldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **lifetime** | [**AiRoomDataLifetimeDto**](#model-airoomdatalifetimedto) | The room data lifetime settings of the folder. | [optional] |
+| **watermark** | [**AiWatermarkDto**](#model-aiwatermarkdto) | The watermark settings of the folder. | [optional] |
+| **type** | [**AiFolderType**](#model-aifoldertype) | The folder type. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
 | **inRoom** | **Boolean** | Specifies if the folder is placed in the room or not. | [optional] [nullable] |
 | **quotaLimit** | **Long** (int64) | The folder quota limit. | [optional] [nullable] |
 | **isCustomQuota** | **Boolean** | Specifies if the folder room has a custom quota or not. | [optional] [nullable] |
 | **usedSpace** | **Long** (int64) | How much folder space is used (counter). | [optional] [nullable] |
 | **passwordProtected** | **Boolean** | Specifies if the folder is password protected or not. | [optional] [nullable] |
 | **expired** | **Boolean** | Specifies if an external link to the folder is expired or not. | [optional] [nullable] |
-| **chatSettings** | [**AiChatSettingsDto**](#model-aichatsettingsdto) |  | [optional] |
-| **rootRoomType** | [**AiRoomType**](#model-airoomtype) |  | [optional] [enum: 1, 2, 5, 6, 8, 9] |
+| **chatSettings** | [**AiChatSettingsDto**](#model-aichatsettingsdto) | The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.  Only applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured. | [optional] |
+| **rootRoomType** | [**AiRoomType**](#model-airoomtype) | The room type of the root folder. Indicates the type of the parent room if the current folder is nested within a room hierarchy.  This property helps identify the context in which a nested folder exists. | [optional] [enum: 1, 2, 5, 6, 8, 9] |
 | **saveFormAsXLSX** | **Boolean** | Specifies whether to save form data as XLSX file. | [optional] [nullable] |
 | **sendFormToExternalDB** | **Boolean** | Specifies whether to send form data to external database. | [optional] [nullable] |
 | **originalFormId** | **Integer** (int32) | The original form ID that corresponds to this FormFillingFolderDone folder. | [optional] [nullable] |
@@ -4075,7 +4078,7 @@ The room logo information.
 | **medium** | **String** | The medium logo. | [required] [example: https://portal.example.com/logo/medium.png] [nullable] |
 | **small** | **String** | The small logo. | [required] [example: https://portal.example.com/logo/small.png] [nullable] |
 | **color** | **String** | The logo color. | [optional] [example: #4781D1] [nullable] |
-| **cover** | [**AiLogoCover**](#model-ailogocover) |  | [optional] |
+| **cover** | [**AiLogoCover**](#model-ailogocover) | The logo cover. | [optional] |
 
 
 ### Model AiLogoCover
@@ -4094,7 +4097,7 @@ AI model metadata. Describes a single model available from a provider.
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | Model identifier as used by the provider API (e.g. &#x60;gpt-4o&#x60;, &#x60;claude-sonnet-4-20250514&#x60;). | [required] |
 | **name** | **String** | Human-readable model name for display in the UI. | [required] |
-| **provider** | [**AiProviderType**](#model-aiprovidertype) |  | [required] |
+| **provider** | [**AiProviderType**](#model-aiprovidertype) | Provider that offers this model. | [required] |
 | **reasoning** | **Boolean** | Whether this model supports extended thinking / chain-of-thought reasoning. | [optional] |
 | **capabilities** | **BigDecimal** | Bitmask of model capabilities (Chat, Image, Vision, Tools, etc.). Used to filter models per  {@link  ActionType  } . | [optional] |
 
@@ -4115,7 +4118,7 @@ The new item parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **date** | [**AiApiDateTime**](#model-aiapidatetime) |  | [required] |
+| **date** | [**AiApiDateTime**](#model-aiapidatetime) | The date and time when the new item was created. | [required] |
 | **items** | [**List**](#model-aiagentnewitemsdto) | The list of items. | [required] [nullable] |
 
 
@@ -4233,8 +4236,8 @@ Complete AI provider + model configuration saved by the user. Profiles are the p
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | Unique profile identifier (UUID). | [required] |
 | **name** | **String** | User-defined profile display name. | [required] |
-| **providerType** | [**AiProviderType**](#model-aiprovidertype) |  | [required] |
-| **basedOn** | [**AiBuiltinProviderType**](#model-aibuiltinprovidertype) |  | [optional] [enum: anthropic, ollama, openai, openaicompatible, together, openrouter, genai, deepseek, xai, lm-studio, mistral, groq, zhipu, stabilityai, gpt4all, onlyoffice, external] |
+| **providerType** | [**AiProviderType**](#model-aiprovidertype) | Provider type for this profile. Use &#x60;external&#x60; to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider&#39;s response parser — see  {@link  Profile.basedOn }  for the format selector. | [required] |
+| **basedOn** | [**AiBuiltinProviderType**](#model-aibuiltinprovidertype) | Selects the response-format parser used by the &#x60;external&#x60; provider. Ignored for any other &#x60;providerType&#x60;.  Supported values are &#x60;openai&#x60;, &#x60;anthropic&#x60;, &#x60;mistral&#x60; and &#x60;openrouter&#x60;. Remaining values (&#x60;genai&#x60;, &#x60;stabilityai&#x60;, …) are accepted by the type but not yet implemented; passing one raises an error at request time. | [optional] [enum: anthropic, ollama, openai, openaicompatible, together, openrouter, genai, deepseek, xai, lm-studio, mistral, groq, zhipu, stabilityai, gpt4all, onlyoffice, external] |
 | **baseUrl** | **String** | Base URL of the provider API. | [required] |
 | **key** | **String** | API key or token. Optional for local providers. | [optional] |
 | **headers** | **Map** | Extra HTTP headers sent with every request to this provider. Merged into the SDK client&#39;s default headers; an explicit &#x60;Authorization&#x60; here wins over the one derived from  {@link  key  } . Honoured by the OpenAI-family providers. | [optional] |
@@ -4324,7 +4327,7 @@ The room data lifetime information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **deletePermanently** | **Boolean** | Specifies whether to permanently delete the room data or not. | [optional] [example: true] |
-| **period** | [**AiRoomDataLifetimePeriod**](#model-airoomdatalifetimeperiod) |  | [optional] [enum: 0, 1, 2] |
+| **period** | [**AiRoomDataLifetimePeriod**](#model-airoomdatalifetimeperiod) | Specifies the time period type of the room data lifetime. | [optional] [enum: 0, 1, 2] |
 | **value** | **Integer** (int32) | Specifies the time period value of the room data lifetime. | [optional] [example: 33] [min: 1] [max: 999] [nullable] |
 | **enabled** | **Boolean** | Specifies whether the room data lifetime setting is enabled or not. | [optional] [example: true] [nullable] |
 
@@ -4376,7 +4379,7 @@ Minimal provider connection configuration. Used to connect to a provider API.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **type** | [**AiProviderType**](#model-aiprovidertype) |  | [required] |
+| **type** | [**AiProviderType**](#model-aiprovidertype) | Provider type identifier. | [required] |
 | **name** | **String** | User-defined display name for this provider connection. | [required] |
 | **key** | **String** | API key or token. Optional for local providers (Ollama, LM Studio). | [optional] |
 | **baseUrl** | **String** | Base URL of the provider API. | [required] |
@@ -4390,8 +4393,8 @@ Chat conversation metadata. Represents a single chat session (thread).
 | **threadId** | **String** | Unique thread identifier (UUID). | [required] |
 | **title** | **String** | Optional thread title. Auto-generated from the first message if not set. | [optional] |
 | **lastEditDate** | **BigDecimal** | Timestamp (ms since epoch) of the last message in this thread. Used for sorting. | [optional] |
-| **provider** | [**AiTProvider**](#model-aitprovider) |  | [optional] |
-| **model** | [**AiModel**](#model-aimodel) |  | [optional] |
+| **provider** | [**AiTProvider**](#model-aitprovider) | Provider configuration at the time of last message. Used for thread-level provider display. | [optional] |
+| **model** | [**AiModel**](#model-aimodel) | Model info at the time of last message. | [optional] |
 | **profileId** | **String** | ID of the profile used for this thread. Links to  {@link  Profile.id } . | [optional] |
 
 
@@ -4462,7 +4465,7 @@ The vectorization settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **type** | [**AiEmbeddingProviderType**](#model-aiembeddingprovidertype) |  | [optional] [enum: 0, 1, 2, 3] |
+| **type** | [**AiEmbeddingProviderType**](#model-aiembeddingprovidertype) | The type of embedding provider configured for document vectorization. | [optional] [enum: 0, 1, 2, 3] |
 | **needReset** | **Boolean** | Indicates whether the embedding provider API key needs to be reconfigured. | [optional] [example: false] |
 
 
@@ -4489,7 +4492,7 @@ The watermark settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **additions** | [**AiWatermarkAdditions**](#model-aiwatermarkadditions) |  | [required] [enum: 1, 2, 4, 8, 16] |
+| **additions** | [**AiWatermarkAdditions**](#model-aiwatermarkadditions) | Specifies whether to display in the watermark: username, user email, user ip-adress, current date, and room name. | [required] [enum: 1, 2, 4, 8, 16] |
 | **text** | **String** | The watermark text. | [optional] [example: Confidential] [nullable] |
 | **rotate** | **Integer** (int32) | The watermark text and image rotate. | [required] [example: 45] |
 | **imageScale** | **Integer** (int32) | The watermark image scale. | [required] [example: 100] |
@@ -4594,12 +4597,12 @@ A DocSpace room id: an integer for native rooms, a string for third-party-backed
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **result** | **oas_any_type_not_mapped** | Final result of the tool call, as the model should see it. | [required] [nullable] |
+| **result** | **oas_any_type_not_mapped** |  | [required] [nullable] |
 | **allowAlways** | **Boolean** | Persist auto-approve for this tool&#39;s name. | [optional] |
 | **threadId** | **String** | Thread the assistant message belongs to. | [required] |
 | **messageId** | **String** | Storage id of the assistant message holding the tool call. | [required] |
 | **idx** | **BigDecimal** | Index of the tool-call content part inside &#x60;message.content&#x60;. | [required] |
-| **message** | [**AiThreadMessageLike**](#model-aithreadmessagelike) |  | [required] |
+| **message** | [**AiThreadMessageLike**](#model-aithreadmessagelike) | Snapshot of the assistant message at the time the tool call surfaced. | [required] |
 | **actionArgs** | [**AiAiActionArgs**](#model-aiaiactionargs) |  | [optional] |
 | **entityId** | **String** |  | [optional] |
 | **profileId** | **String** |  | [optional] |
@@ -4629,8 +4632,8 @@ A DocSpace room id: an integer for native rooms, a string for third-party-backed
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **actionType** | [**AiActionType**](#model-aiactiontype) |  | [required] [enum: Default, Chat, Code, Summarization, Translation, TextAnalyze, ImageGeneration, OCR, Vision] |
-| **userMessage** | [**AiThreadMessageLike**](#model-aithreadmessagelike) |  | [required] |
+| **actionType** | [**AiActionType**](#model-aiactiontype) | Which AI action to run — selects the assignment slot and action. | [required] [enum: Default, Chat, Code, Summarization, Translation, TextAnalyze, ImageGeneration, OCR, Vision] |
+| **userMessage** | [**AiThreadMessageLike**](#model-aithreadmessagelike) | The user turn to send. | [required] |
 | **actionArgs** | [**AiAiActionArgs**](#model-aiaiactionargs) |  | [optional] |
 | **entityId** | **String** | Optional entity (room) scope for profile resolution. | [optional] |
 
@@ -4639,7 +4642,7 @@ A DocSpace room id: an integer for native rooms, a string for third-party-backed
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **actionType** | [**AiActionType**](#model-aiactiontype) |  | [required] [enum: Default, Chat, Code, Summarization, Translation, TextAnalyze, ImageGeneration, OCR, Vision] |
+| **actionType** | [**AiActionType**](#model-aiactiontype) | Action the assignment applies to. | [required] [enum: Default, Chat, Code, Summarization, Translation, TextAnalyze, ImageGeneration, OCR, Vision] |
 | **profileId** | **String** | Profile id to bind. | [required] |
 
 
@@ -4675,8 +4678,19 @@ A file attachment draft to persist.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **inputs** | [**List**](#model-aiattachmentssavefilerequestinput) |  | [required] |
+| **inputs** | [**List**](#model-aiattachmentssavefilesmanyrequestinputs-item) |  | [required] |
 | **entityId** | **String** |  | [optional] |
+
+
+### Model aiAttachmentsSaveFilesMany.request.inputs item
+A file attachment draft to persist.
+
+| Name | Type | Description | Notes |
+|------------ | ------------- | ------------- | -------------|
+| **path** | **String** | Storage path/key of the file. | [required] |
+| **content** | **String** | File contents. | [required] |
+| **type** | **BigDecimal** | File type discriminator. | [required] |
+| **title** | **String** | Optional display title. | [optional] |
 
 
 ### Model aiAttachmentsSaveImage request body
@@ -4701,8 +4715,18 @@ An image attachment draft to persist.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **inputs** | [**List**](#model-aiattachmentssaveimagerequestinput) |  | [required] |
+| **inputs** | [**List**](#model-aiattachmentssaveimagesmanyrequestinputs-item) |  | [required] |
 | **entityId** | **String** |  | [optional] |
+
+
+### Model aiAttachmentsSaveImagesMany.request.inputs item
+An image attachment draft to persist.
+
+| Name | Type | Description | Notes |
+|------------ | ------------- | ------------- | -------------|
+| **name** | **String** | Image name. | [required] |
+| **base64** | **String** | Full &#x60;data:image/...;base64,…&#x60; data URL. | [required] |
+| **title** | **String** | Optional display title. | [optional] |
 
 
 ### Model aiExportTextToDocx 200 response
@@ -4741,7 +4765,7 @@ Target folder id (int or string).
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **providerType** | [**AiProviderType**](#model-aiprovidertype) |  | [required] |
+| **providerType** | [**AiProviderType**](#model-aiprovidertype) | Provider whose catalog to list. | [required] |
 | **baseUrl** | **String** | Provider API base URL. | [required] |
 | **apiKey** | **String** | Provider API key. | [required] |
 
@@ -4764,7 +4788,7 @@ Target folder id (int or string).
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **bundle** | [**AiPromptBundle**](#model-aipromptbundle) |  | [required] |
+| **bundle** | [**AiPromptBundle**](#model-aipromptbundle) | Bundle to restore. | [required] |
 | **options** | [**aiPromptsImportBundle_request_options**](#model-aipromptsimportbundlerequestoptions) |  | [optional] |
 
 
@@ -4815,7 +4839,7 @@ Fields to change.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **threadId** | **String** |  | [required] |
-| **message** | [**AiThreadMessageLike**](#model-aithreadmessagelike) |  | [required] |
+| **message** | [**AiThreadMessageLike**](#model-aithreadmessagelike) | Message to persist (id/createdAt are storage-assigned). | [required] |
 | **profileId** | **String** |  | [optional] |
 
 
@@ -4833,7 +4857,7 @@ Fields to change.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **threadId** | **String** |  | [required] |
-| **profile** | [**AiProfile**](#model-aiprofile) |  | [required] |
+| **profile** | [**AiProfile**](#model-aiprofile) | Profile used to regenerate the title. | [required] |
 
 
 ### Model aiThreadsRename request body
@@ -4857,7 +4881,7 @@ Fields to change.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **messageId** | **String** |  | [required] |
-| **message** | [**AiThreadMessageLike**](#model-aithreadmessagelike) |  | [required] |
+| **message** | [**AiThreadMessageLike**](#model-aithreadmessagelike) | Replacement message content. | [required] |
 
 
 ### Model aiToolsAddCustomServer request body
@@ -4865,7 +4889,7 @@ Fields to change.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **name** | **String** | Server name (unique within scope). | [required] |
-| **config** | **Object** | One MCP server configuration. The shape is intentionally open — MCP allows per-transport fields (&#x60;command&#x60;/&#x60;args&#x60; for stdio, &#x60;url&#x60; for HTTP, plus env, headers, etc.) and the storage layer stays agnostic to which transport is in use. | [required] |
+| **config** | **Object** | Server transport configuration. | [required] |
 | **entityId** | **String** |  | [optional] |
 
 
@@ -4914,6 +4938,14 @@ Fields to change.
 
 
 ### Model aiWebSearchConfigure request body
+
+| Name | Type | Description | Notes |
+|------------ | ------------- | ------------- | -------------|
+| **config** | [**AiWebSearchConfig**](#model-aiwebsearchconfig) |  | [required] |
+| **entityId** | **String** |  | [optional] |
+
+
+### Model aiWebSearchSetActiveConfig request body
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|

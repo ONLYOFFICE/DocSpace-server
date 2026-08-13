@@ -1,6 +1,9 @@
-# Api
+# ONLYOFFICE DocSpace OAuth 2.0 API
 
-All URIs are relative to *http://localhost:8092*
+The browsable version of this reference, with a request builder and code samples, is published at
+<https://api.onlyoffice.com/docspace/api-backend/usage-api/>.
+
+All URIs are relative to *https://yourportal.onlyoffice.com*, where the host is the address of your DocSpace instance.
 
 ## Endpoints
 
@@ -843,15 +846,15 @@ Client creation request containing client details
 | **name** | **String** | The client name. | [optional] [example: Example Client] [minLength: 3] [maxLength: 256] |
 | **description** | **String** | The description of the client | [optional] [example: Description of the client] [minLength: 0] [maxLength: 255] |
 | **logo** | **String** | The logo of the client in base64 format | [optional] [example: data:image/png;base64,...] [minLength: 1] [pattern: /^data:image\/(?:png\|jpeg\|jpg\|svg\\+xml);base64,.*.{1,}/] |
-| **scopes** | **Set** | The scopes for the client | [optional] [example: ["read","write"]] |
+| **scopes** | **Set** | The scopes for the client | [optional] [example: [read, write]] |
 | **public** | **Boolean** |  | [optional] |
 | **allow\_pkce** | **Boolean** | Indicates whether PKCE is allowed for the client | [optional] [example: true] |
 | **is\_public** | **Boolean** | Indicates if the client is public | [optional] [example: false] |
 | **website\_url** | **String** | The website URL of the client | [optional] [example: http://example.com] [minLength: 1] [pattern: /^(https?:\/\/)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(\/[a-zA-Z0-9-._~:\/?#\\[\\]@!$&'()*+,;=]*)?$\|^https?:\/\/(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(\/[a-zA-Z0-9-._~:\/?#\\[\\]@!$&'()*+,;=]*)?$/] |
 | **terms\_url** | **String** | The terms URL of the client | [optional] [example: http://example.com/terms] [minLength: 1] [pattern: /^(https?:\/\/)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(\/[a-zA-Z0-9-._~:\/?#\\[\\]@!$&'()*+,;=]*)?$\|^https?:\/\/(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(\/[a-zA-Z0-9-._~:\/?#\\[\\]@!$&'()*+,;=]*)?$/] |
 | **policy\_url** | **String** | The policy URL of the client | [optional] [example: http://example.com/policy] [minLength: 1] [pattern: /^(https?:\/\/)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(\/[a-zA-Z0-9-._~:\/?#\\[\\]@!$&'()*+,;=]*)?$\|^https?:\/\/(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(\/[a-zA-Z0-9-._~:\/?#\\[\\]@!$&'()*+,;=]*)?$/] |
-| **redirect\_uris** | **Set** | The redirect URIs for the client | [required] [example: ["http://example.com/redirect"]] |
-| **allowed\_origins** | **Set** | The allowed origins for the client | [required] [example: ["http://example.com"]] |
+| **redirect\_uris** | **Set** | The redirect URIs for the client | [required] [example: [http://example.com/redirect]] |
+| **allowed\_origins** | **Set** | The allowed origins for the client | [required] [example: [http://example.com]] |
 | **logout\_redirect\_uri** | **String** | The logout redirect URI for the client | [optional] [example: http://example.com/logout] [minLength: 1] [pattern: /^(https?:\/\/)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(\/[a-zA-Z0-9-._~:\/?#\\[\\]@!$&'()*+,;=]*)?$\|^https?:\/\/(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(\/[a-zA-Z0-9-._~:\/?#\\[\\]@!$&'()*+,;=]*)?$/] |
 
 
@@ -920,7 +923,7 @@ Client update request containing modified client details
 | **public** | **Boolean** |  | [optional] |
 | **allow\_pkce** | **Boolean** | Indicates whether PKCE is allowed for the client | [optional] [example: true] |
 | **is\_public** | **Boolean** | Indicates whether client is accessible by third-party tenants | [optional] [example: false] |
-| **allowed\_origins** | **Set** | The allowed origins for the client | [optional] [example: ["http://allowed.origin"]] |
+| **allowed\_origins** | **Set** | The allowed origins for the client | [optional] [example: [http://allowed.origin]] |
 
 
 ### Model exchangeToken 200 response

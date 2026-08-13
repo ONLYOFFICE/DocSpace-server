@@ -1,6 +1,9 @@
-# Api
+# ONLYOFFICE DocSpace Backup API
 
-All URIs are relative to *http://localhost:8092*
+The browsable version of this reference, with a request builder and code samples, is published at
+<https://api.onlyoffice.com/docspace/api-backend/usage-api/>.
+
+All URIs are relative to *https://yourportal.onlyoffice.com*, where the host is the address of your DocSpace instance.
 
 ## Endpoints
 
@@ -118,7 +121,7 @@ Deletes the backup with the ID specified in the request.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **UUID** (uuid) | The backup ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
+| **id** | path | **UUID** (uuid) | The backup ID. | [required] [example: "00000000-0000-0000-0000-000000000000"] |
 
 #### Responses
 
@@ -358,8 +361,8 @@ Returns the number of backups for a period of time. The default is the current c
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **from** | query | **Date** (date-time) | The from date. | [optional] [example: 2025-01-01T00:00:00Z] |
-| **to** | query | **Date** (date-time) | The to date. | [optional] [example: 2025-12-31T23:59:59Z] |
+| **from** | query | **Date** (date-time) | The from date. | [optional] [example: "2025-01-01T00:00:00Z"] |
+| **to** | query | **Date** (date-time) | The to date. | [optional] [example: "2025-12-31T23:59:59Z"] |
 | **paid** | query | **Boolean** | Specifies if the backups are paid or not. | [optional] [example: false] |
 
 #### Responses
@@ -600,8 +603,8 @@ The backup parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **storageType** | [**BackupStorageType**](#model-backupstoragetype) |  | [optional] [enum: 0, 1, 2, 3, 4, 5] |
-| **storageParams** | [**List**](#model-itemkeyvaluepairobjectobject) | The backup storage parameters. | [optional] [example: [{"key":"path","value":"/backup"}]] [nullable] |
+| **storageType** | [**BackupStorageType**](#model-backupstoragetype) | The backup storage type. | [optional] [enum: 0, 1, 2, 3, 4, 5] |
+| **storageParams** | [**List**](#model-itemkeyvaluepairobjectobject) | The backup storage parameters. | [optional] [example: [{key=path, value=/backup}]] [nullable] |
 | **dump** | **Boolean** | Specifies if a dump will be created or not. | [optional] [example: false] |
 
 
@@ -612,7 +615,7 @@ The backup history parameters.
 |------------ | ------------- | ------------- | -------------|
 | **id** | **UUID** (uuid) | The backup ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **fileName** | **String** | The backup file name. | [required] [example: tenant-backup] [nullable] |
-| **storageType** | [**BackupStorageType**](#model-backupstoragetype) |  | [required] [enum: 0, 1, 2, 3, 4, 5] |
+| **storageType** | [**BackupStorageType**](#model-backupstoragetype) | The backup storage type. | [required] [enum: 0, 1, 2, 3, 4, 5] |
 | **createdOn** | **Date** (date-time) | The backup creation date. | [required] [example: 2026-03-01T02:15:00Z] |
 | **expiresOn** | **Date** (date-time) | The backup expiration date. | [required] [example: 2026-03-31T02:15:00Z] |
 
@@ -654,8 +657,8 @@ The backup progress parameters.
 | **warning** | **String** | The backup warning message. | [optional] [nullable] |
 | **link** | **String** | The backup link. | [optional] [example: https://example.com/backup/task_123] [nullable] |
 | **tenantId** | **Integer** (int32) | The tenant ID. | [optional] [example: 1] |
-| **backupProgressEnum** | [**BackupProgressEnum**](#model-backupprogressenum) |  | [optional] [enum: 0, 1, 2] |
-| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) |  | [optional] [enum: 0, 1, 2, 3, 4] |
+| **backupProgressEnum** | [**BackupProgressEnum**](#model-backupprogressenum) | The backup progress type. | [optional] [enum: 0, 1, 2] |
+| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) | The backup progress status. | [optional] [enum: 0, 1, 2, 3, 4] |
 | **taskId** | **String** | The task ID. | [optional] [example: task_123] [nullable] |
 
 
@@ -683,8 +686,8 @@ The backup restoring parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **backupId** | **String** | The backup ID. | [required] [example: 00000000-0000-0000-0000-000000000000] [nullable] |
-| **storageType** | [**BackupStorageType**](#model-backupstoragetype) |  | [optional] [enum: 0, 1, 2, 3, 4, 5] |
-| **storageParams** | [**List**](#model-itemkeyvaluepairobjectobject) | The backup storage parameters. | [optional] [example: [{"key":"path","value":"/backup"}]] [nullable] |
+| **storageType** | [**BackupStorageType**](#model-backupstoragetype) | The backup storage type. | [optional] [enum: 0, 1, 2, 3, 4, 5] |
+| **storageParams** | [**List**](#model-itemkeyvaluepairobjectobject) | The backup storage parameters. | [optional] [example: [{key=path, value=/backup}]] [nullable] |
 | **notify** | **Boolean** | Notifies users about the portal restoring process or not. | [optional] [example: true] |
 | **dump** | **Boolean** | Specifies if a dump will be created or not. | [optional] [example: false] |
 
@@ -694,10 +697,10 @@ The backup schedule parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **storageType** | [**BackupStorageType**](#model-backupstoragetype) |  | [optional] [enum: 0, 1, 2, 3, 4, 5] |
-| **storageParams** | [**List**](#model-itemkeyvaluepairobjectobject) | The backup storage parameters. | [optional] [example: [{"key":"path","value":"/backup"}]] [nullable] |
+| **storageType** | [**BackupStorageType**](#model-backupstoragetype) | The backup storage type. | [optional] [enum: 0, 1, 2, 3, 4, 5] |
+| **storageParams** | [**List**](#model-itemkeyvaluepairobjectobject) | The backup storage parameters. | [optional] [example: [{key=path, value=/backup}]] [nullable] |
 | **backupsStored** | **Integer** (int32) | The maximum number of the stored backup copies. | [optional] [example: 5] [nullable] |
-| **cronParams** | [**Cron**](#model-cron) |  | [optional] |
+| **cronParams** | [**Cron**](#model-cron) | The backup cron parameters. | [optional] |
 | **dump** | **Boolean** | Specifies if a dump will be created or not. | [optional] [example: false] |
 
 
@@ -763,7 +766,7 @@ The backup cron parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **period** | [**BackupPeriod**](#model-backupperiod) |  | [optional] [enum: 0, 1, 2] |
+| **period** | [**BackupPeriod**](#model-backupperiod) | The backup period type. | [optional] [enum: 0, 1, 2] |
 | **hour** | **Integer** (int32) | The time of the day to start the backup process. | [optional] [example: 0] |
 | **day** | **Integer** (int32) | The day of the week to start the backup process. | [optional] [example: 0] [nullable] |
 
@@ -773,7 +776,7 @@ The backup cron parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **period** | [**BackupPeriod**](#model-backupperiod) |  | [optional] [enum: 0, 1, 2] |
+| **period** | [**BackupPeriod**](#model-backupperiod) | The backup period type. | [optional] [enum: 0, 1, 2] |
 | **hour** | **Integer** (int32) | The time of the day to start the backup process. | [optional] [example: 0] |
 | **day** | **Integer** (int32) | The day of the week to start the backup process. | [optional] [example: 0] |
 
@@ -800,8 +803,8 @@ The backup cron parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **key** | **oas_any_type_not_mapped** |  | [optional] [nullable] |
-| **value** | **oas_any_type_not_mapped** |  | [optional] [nullable] |
+| **key** | **null** |  | [optional] |
+| **value** | **null** |  | [optional] |
 
 
 ### Model ScheduleDto
@@ -809,9 +812,9 @@ The backup schedule parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **storageType** | [**BackupStorageType**](#model-backupstoragetype) |  | [required] [enum: 0, 1, 2, 3, 4, 5] |
-| **storageParams** | **Map** | The backup storage parameters. | [required] [nullable] |
-| **cronParams** | [**CronParams**](#model-cronparams) |  | [required] |
+| **storageType** | [**BackupStorageType**](#model-backupstoragetype) | The backup storage type. | [required] [enum: 0, 1, 2, 3, 4, 5] |
+| **storageParams** | **null** | The backup storage parameters. | [required] [example: {}] |
+| **cronParams** | [**CronParams**](#model-cronparams) | The backup cron parameters. | [required] |
 | **backupsStored** | **Integer** (int32) | The maximum number of the stored backup copies. | [optional] [example: 5] [nullable] |
 | **lastBackupTime** | **Date** (date-time) | The date and time when the last backup was reated. | [required] [example: 2026-01-01T00:00:00Z] |
 | **dump** | **Boolean** | Specifies if a dump will be created or not. | [required] [example: false] |

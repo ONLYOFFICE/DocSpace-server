@@ -1,6 +1,9 @@
-# Api
+# ONLYOFFICE DocSpace Files API
 
-All URIs are relative to *http://localhost:8092*
+The browsable version of this reference, with a request builder and code samples, is published at
+<https://api.onlyoffice.com/docspace/api-backend/usage-api/>.
+
+All URIs are relative to *https://yourportal.onlyoffice.com*, where the host is the address of your DocSpace instance.
 
 ## Endpoints
 
@@ -1328,7 +1331,7 @@ Retrieves the result of a form-filling session.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **fillingSessionId** | query | **String** | The form-filling session ID. | [optional] [example: doc_key_123] |
+| **fillingSessionId** | query | **String** | The form-filling session ID. | [optional] [example: "doc_key_123"] |
 
 #### Responses
 
@@ -1767,7 +1770,7 @@ Restores a file version specified in the request.
 |------------- | ------------- | ------------- | ------------- | -------------|
 | **fileId** | path | **Integer** (int32) | The file ID of the restore version. | [required] [example: 1] |
 | **version** | query | **Integer** (int32) | The file version of the restore. | [optional] [example: 1] |
-| **url** | query | **String** | The file version URL of the restore. | [optional] [example: https://example.com] |
+| **url** | query | **String** | The file version URL of the restore. | [optional] [example: "https://example.com"] |
 
 #### Responses
 
@@ -1808,7 +1811,7 @@ Saves edits to a file with the ID specified in the request.
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
 | **fileId** | path | **Integer** (int32) | The editing file ID from the request. | [required] [example: 1] |
-| **DownloadUri** | query | **String** | The URI to download the editing file. | [optional] [example: https://example.com/file.txt] |
+| **DownloadUri** | query | **String** | The URI to download the editing file. | [optional] [example: "https://example.com/file.txt"] |
 | **FileExtension** | form | **String** | The editing file extension from the request. | [optional] |
 | **File** | form | **File** (binary) | The edited file to be saved, uploaded as part of the multipart/form-data request.  This property represents the modified file content from the HTTP request form after editing operations.  The file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream. | [optional] |
 | **Forcesave** | form | **Boolean** | Specifies whether to force save the file or not. | [optional] |
@@ -2259,8 +2262,8 @@ Tracks file changes when editing.
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
 | **fileId** | path | **Integer** (int32) | The file ID to track editing changes. | [required] [example: 1] |
-| **tabId** | query | **UUID** (uuid) | The tab ID to track editing changes. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
-| **docKeyForTrack** | query | **String** | The document key for tracking changes. | [optional] [example: abc123] |
+| **tabId** | query | **UUID** (uuid) | The tab ID to track editing changes. | [optional] [example: "00000000-0000-0000-0000-000000000000"] |
+| **docKeyForTrack** | query | **String** | The document key for tracking changes. | [optional] [example: "abc123"] |
 | **isFinish** | query | **Boolean** | Specifies whether to finish file tracking or not. | [optional] [example: true] |
 
 #### Responses
@@ -2719,10 +2722,10 @@ Returns the detailed list of files and folders located in the folder with the ID
 | **excludeSubject** | query | **Boolean** | Specifies whether to exclude search by user or group ID. | [optional] [example: false] |
 | **applyFilterOption** | query | **ApplyFilterOption** | Specifies whether to return only files, only folders, or all elements from the specified folder. | [optional] [example: 1] [enum: 0, 1, 2] |
 | **withSubFolders** | query | **Boolean** | Specifies whether to include files from subfolders in the results. | [optional] [example: true] |
-| **extension** | query | **String** | Specifies whether to search for the specific file extension. | [optional] [example: .docx] |
+| **extension** | query | **String** | Specifies whether to search for the specific file extension. | [optional] [example: ".docx"] |
 | **searchArea** | query | **SearchArea** | The search area. | [optional] [example: 1] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9] |
 | **formsItemKey** | query | **String** | The forms item key. | [optional] [example: doc_key_123] |
-| **formsItemType** | query | **String** | The forms item type. | [optional] [example: text] |
+| **formsItemType** | query | **String** | The forms item type. | [optional] [example: "text"] |
 | **count** | query | **Integer** (int32) | The maximum number of items to retrieve in the request. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The zero-based index of the first item to retrieve in a paginated request. | [optional] [example: 0] |
 | **sortBy** | query | **String** | The property used for sorting the folder request results. | [optional] [example: DateAndTime] |
@@ -3152,12 +3155,12 @@ Returns the detailed list of files located in the Recent section.
 | **excludeSubject** | query | **Boolean** | Specifies whether to exclude search by user or group ID. | [optional] [example: false] |
 | **applyFilterOption** | query | **ApplyFilterOption** | Specifies whether to return only files, only folders or all elements. | [optional] [example: 1] [enum: 0, 1, 2] |
 | **searchArea** | query | **SearchArea** | The search area. | [optional] [example: 1] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9] |
-| **extension** | query | **List** | Specifies whether to search for a specific file extension in the Recent folder. | [optional] [example: .docx] |
+| **extension** | query | **List** | Specifies whether to search for a specific file extension in the Recent folder. | [optional] [example: ".docx"] |
 | **count** | query | **Integer** (int32) | The maximum number of items to return. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The starting position of the results to be returned in the query response. | [optional] [example: 0] |
-| **sortBy** | query | **String** | Specifies the sorting criteria for the folder request. | [optional] [example: DateAndTime] |
+| **sortBy** | query | **String** | Specifies the sorting criteria for the folder request. | [optional] [example: "DateAndTime"] |
 | **sortOrder** | query | **SortOrder** | The order in which the results are sorted. | [optional] [example: 1] [enum: 0, 1] |
-| **filterValue** | query | **String** | The text used for filtering or searching folder contents. | [optional] [example: My Document] |
+| **filterValue** | query | **String** | The text used for filtering or searching folder contents. | [optional] [example: "My Document"] |
 
 #### Responses
 
@@ -3693,7 +3696,7 @@ This method allows users to cancel an ongoing upload session identified by the s
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **sessionId** | path | **String** | The session ID. | [required] [example: session-123-abc] |
+| **sessionId** | path | **String** | The session ID. | [required] [example: "session-123-abc"] |
 | **folderId** | path | **Integer** (int32) | The folder ID. | [required] [example: 1] |
 
 #### Responses
@@ -4290,7 +4293,7 @@ Returns a list of all the active file operations.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | query | **String** | The ID of the file operation. | [optional] [example: operation-123-abc] |
+| **id** | query | **String** | The ID of the file operation. | [optional] [example: "operation-123-abc"] |
 
 #### Responses
 
@@ -4486,7 +4489,7 @@ Finishes an operation with the ID specified in the request or all the active ope
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **String** | The operation unique identifier. | [required] [example: some-operation-id] |
+| **id** | path | **String** | The operation unique identifier. | [required] [example: "some-operation-id"] |
 
 #### Responses
 
@@ -4607,7 +4610,7 @@ This method allows continuing an interrupted or partially completed file upload 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
 | **folderId** | path | **Integer** (int32) | The folder ID. | [required] [example: 1] |
-| **sessionId** | path | **String** | The upload session ID. | [required] [example: session_abc123] |
+| **sessionId** | path | **String** | The upload session ID. | [required] [example: "session_abc123"] |
 | **File** | form | **File** (binary) | The file to be uploaded as part of the multipart/form-data request.  This property represents the uploaded file content from the HTTP request form.  The file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream. | [optional] |
 
 #### Responses
@@ -5971,7 +5974,7 @@ Returns the external data by the key specified in the request.
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
 | **key** | path | **String** | The unique key of the external shared data. | [required] [example: doc_key_123] |
-| **fileId** | query | **String** | The unique document identifier. | [optional] [example: 1] |
+| **fileId** | query | **String** | The unique document identifier. | [optional] [example: "1"] |
 | **folderId** | query | **String** | The unique folder identifier. | [optional] [example: 1] |
 
 #### Responses
@@ -6295,7 +6298,7 @@ Sends a message to the users who are mentioned in the file with the ID specified
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **fileId** | path | **Integer** (int32) | The file ID with the mention message. | [required] |
+| **fileId** | path | **Integer** (int32) | The file ID with the mention message. | [required] [example: "file-id"] |
 | **MentionMessageWrapper** | body | [**MentionMessageWrapper**](#model-mentionmessagewrapper) | The mention message. | [optional] |
 
 #### Responses
@@ -7276,7 +7279,7 @@ Creates a room in the Rooms section stored in a third-party storage.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **String** | The ID of the folder in the third-party storage in which the contents of the room will be stored. | [required] [example: folder-123-abc] |
+| **id** | path | **String** | The ID of the folder in the third-party storage in which the contents of the room will be stored. | [required] [example: "folder-123-abc"] |
 | **CreateThirdPartyRoom** | body | [**CreateThirdPartyRoom**](#model-createthirdpartyroom) | The third-party room information. | [required] |
 
 #### Responses
@@ -7784,7 +7787,7 @@ Returns the access rights of a room with the ID specified in the request.
 | **filterType** | query | **ShareFilterType** | The filter type of the access rights. | [optional] [example: 1] [enum: 0, 1, 2, 4, 8, 15, 16, 32] |
 | **count** | query | **Integer** (int32) | The number of items to be retrieved or processed. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The starting index of the items to retrieve in a paginated request. | [optional] [example: 0] |
-| **filterValue** | query | **String** | The text filter value used for filtering room security information. | [optional] [example: Sample filter] |
+| **filterValue** | query | **String** | The text filter value used for filtering room security information. | [optional] [example: "Sample filter"] |
 
 #### Responses
 
@@ -7905,7 +7908,7 @@ Returns the contents of the Rooms section by the parameters specified in the req
 | **subjectOwnerId** | query | **UUID** (uuid) | The filter by room owner ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **searchArea** | query | **SearchArea** | The room search area (Active, Archive, Any, Recent by links). | [optional] [example: 1] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9] |
 | **withoutTags** | query | **Boolean** | Specifies whether to search by tags or not. | [optional] [example: false] |
-| **tags** | query | **String** | The tags in the serialized format. | [optional] [example: tag1] |
+| **tags** | query | **String** | The tags in the serialized format. | [optional] [example: "tag1"] |
 | **excludeSubject** | query | **Boolean** | Specifies whether to exclude search by user or group ID. | [optional] [example: false] |
 | **provider** | query | **ProviderFilter** | The filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex, Storage). | [optional] [example: 1] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9] |
 | **quotaFilter** | query | **QuotaFilter** | The filter by quota (All - 0, Default - 1, Custom - 2). | [optional] [example: 1] [enum: 0, 1, 2] |
@@ -8507,7 +8510,7 @@ Updates a room with the ID specified in the request.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The room ID. | [required] |
+| **id** | path | **Integer** (int32) | The room ID. | [required] [example: file-id] |
 | **UpdateRoomRequest** | body | [**UpdateRoomRequest**](#model-updateroomrequest) | The request parameters for updating a room. | [required] |
 
 #### Responses
@@ -8902,7 +8905,7 @@ The config parameter which contains the information about the action in the docu
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **action** | [**ActionConfig**](#model-actionconfig) |  | [optional] |
+| **action** | [**ActionConfig**](#model-actionconfig) | The information about the action in the document that will be scrolled to. | [optional] |
 
 
 ### Model AnonymousConfigDto
@@ -8918,7 +8921,7 @@ The API date and time parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **utcTime** | **Date** (date-time) | The time in UTC format. | [optional] [example: 2018-01-01T00:00:00Z] |
+| **utcTime** | **Date** (date-time) | The time in UTC format. | [optional] [example: 2018-01-01T00:00:00.0000000Z] |
 | **timeZoneOffset** | **String** (date-span) | The time zone offset. | [optional] [example: 00:00:00] |
 
 
@@ -8965,7 +8968,7 @@ The authentication data.
 | **rawToken** | **String** | The authentication raw token. | [optional] [example: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","expires_in":3600}] [nullable] |
 | **url** | **URI** (uri) | The authentication URL. | [optional] [example: https://auth.example.com] [nullable] |
 | **provider** | **String** | The authentication provider. | [optional] [example: OAuth2] [nullable] |
-| **token** | [**OAuth20Token**](#model-oauth20token) |  | [optional] |
+| **token** | [**OAuth20Token**](#model-oauth20token) | The authentication token. | [optional] |
 
 
 ### Model AutoCleanUpData
@@ -8974,7 +8977,7 @@ The auto-clearing setting parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **isAutoCleanUp** | **Boolean** | Specifies whether to permanently delete files in the Trash folder. | [optional] [example: false] |
-| **gap** | [**DateToAutoCleanUp**](#model-datetoautocleanup) |  | [optional] [enum: 1, 2, 3, 4, 5, 6] |
+| **gap** | [**DateToAutoCleanUp**](#model-datetoautocleanup) | The period when the trash bin will be cleared. | [optional] [enum: 1, 2, 3, 4, 5, 6] |
 
 
 ### Model AutoCleanUpDataWrapper
@@ -8994,7 +8997,7 @@ The request parameters for updating the trash bin auto-clearing setting.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **set** | **Boolean** | Specifies whether to enable the auto-clearing or not. | [optional] [example: true] |
-| **gap** | [**DateToAutoCleanUp**](#model-datetoautocleanup) |  | [optional] [enum: 1, 2, 3, 4, 5, 6] |
+| **gap** | [**DateToAutoCleanUp**](#model-datetoautocleanup) | The period when the trash bin will be cleared. | [optional] [enum: 1, 2, 3, 4, 5, 6] |
 
 
 ### Model BaseBatchRequestDto
@@ -9028,7 +9031,7 @@ The request parameters for copying/moving files.
 | **folderIds** | [**List**](#model-batchrequestdtofolderids) | The list of folder IDs to be copied/moved. | [optional] [nullable] |
 | **fileIds** | [**List**](#model-batchrequestdtofileids) | The list of file IDs to be copied/moved. | [optional] [nullable] |
 | **destFolderId** | [**BatchRequestDto_allOf_destFolderId**](#model-batchrequestdtodestfolderid) |  | [optional] |
-| **conflictResolveType** | [**FileConflictResolveType**](#model-fileconflictresolvetype) |  | [optional] [enum: Skip, Overwrite, Duplicate] |
+| **conflictResolveType** | [**FileConflictResolveType**](#model-fileconflictresolvetype) | The overwriting behavior of the file copying or moving. | [optional] [enum: Skip, Overwrite, Duplicate] |
 | **deleteAfter** | **Boolean** | Specifies whether to delete the source files/folders after they are moved or copied to the destination folder. | [optional] |
 | **content** | **Boolean** | Specifies whether to copy or move the folder content or not. | [optional] |
 | **toFillOut** | **Boolean** | Specifies whether the file is copied for filling out | [optional] |
@@ -9058,7 +9061,7 @@ The parameters for managing room tags.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **names** | **List** | The list of tag names. | [required] [example: ["tag1","tag2","tag3"]] |
+| **names** | **List** | The list of tag names. | [required] [example: [tag1, tag2, tag3]] |
 
 
 ### Model BooleanWrapper
@@ -9094,8 +9097,8 @@ The request parameters for changing the file owner.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **folderIds** | [**List**](#model-batchrequestdtofileids) | The list of folder IDs to change the owner. | [optional] [example: [1,2,3]] [nullable] |
-| **fileIds** | [**List**](#model-batchrequestdtofileids) | The list of file IDs to change the owner. | [optional] [example: [1,2,3]] [nullable] |
+| **folderIds** | [**List**](#model-batchrequestdtofileids) | The list of folder IDs to change the owner. | [optional] [example: [1, 2, 3]] [nullable] |
+| **fileIds** | [**List**](#model-batchrequestdtofileids) | The list of file IDs to change the owner. | [optional] [example: [1, 2, 3]] [nullable] |
 | **userId** | **UUID** (uuid) | The new file owner ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 
 
@@ -9137,8 +9140,8 @@ The result of checking whether files can be moved or copied to the specified fol
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **result** | [**CheckDestFolderResult**](#model-checkdestfolderresult) |  | [optional] [enum: 0, 1, 2] |
-| **files** | [**List**](#model-fileentrybasedto) | The list of files in the destination folder. | [optional] [example: [{"id":10,"title":"document.docx"}]] [nullable] |
+| **result** | [**CheckDestFolderResult**](#model-checkdestfolderresult) | The result of the validation operation. | [optional] [enum: 0, 1, 2] |
+| **files** | [**List**](#model-fileentrybasedto) | The list of files in the destination folder. | [optional] [example: [{id=10, title=document.docx}]] [nullable] |
 
 
 ### Model CheckDestFolderResult
@@ -9188,7 +9191,7 @@ The request parameters for checking file uploads.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **filesTitle** | **List** | The list of file titles. | [optional] [example: ["file1.docx","file2.pdf","file3.xlsx"]] [nullable] |
+| **filesTitle** | **List** | The list of file titles. | [optional] [example: [file1.docx, file2.pdf, file3.xlsx]] [nullable] |
 
 
 ### Model ChunkedUploadSessionResponseInteger
@@ -9197,7 +9200,7 @@ Represents the response returned from a chunked upload session.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | The unique identifier for the entity. | [optional] [example: 0af4bc0d-9a9d-450c-a72b-f14d9ac55c89] [nullable] |
-| **path** | **List** (int32) | Represents the hierarchical path of folders associated with a chunked upload session. | [optional] [example: ["123","456","789"]] [nullable] |
+| **path** | **List** (int32) | Represents the hierarchical path of folders associated with a chunked upload session. | [optional] [example: [123, 456, 789]] [nullable] |
 | **created** | **Date** (date-time) | The timestamp indicating when the chunked upload session was created. | [optional] [example: 2024-01-15T10:30:00Z] |
 | **expired** | **Date** (date-time) | The date and time when the chunked upload session is set to expire. | [optional] [example: 2024-01-15T11:30:00Z] |
 | **location** | **String** | Represents the URI or path of the chunked upload session&#39;s current location. | [optional] [example: https://example.com/products/files/httphandlers/filehandler.ashx?action=upload] [nullable] |
@@ -9221,7 +9224,7 @@ Represents a wrapper for the response of a chunked upload session operation.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **success** | **Boolean** | Gets or sets a value indicating whether the operation was successful. | [optional] [example: true] |
-| **data** | [**ChunkedUploadSessionResponseInteger**](#model-chunkeduploadsessionresponseinteger) |  | [optional] |
+| **data** | [**ChunkedUploadSessionResponseInteger**](#model-chunkeduploadsessionresponseinteger) | Represents the response returned from a chunked upload session. | [optional] |
 
 
 ### Model ChunkedUploadSessionResponseWrapperIntegerWrapper
@@ -9242,7 +9245,7 @@ The co-editing configuration parameters.
 |------------ | ------------- | ------------- | -------------|
 | **change** | **Boolean** | Specifies if the co-editing mode can be changed in the editor interface or not. | [optional] [example: true] |
 | **fast** | **Boolean** | Specifies if the co-editing mode is fast. | [optional] [example: false] |
-| **mode** | [**CoEditingConfigMode**](#model-coeditingconfigmode) |  | [optional] [enum: 0, 1] |
+| **mode** | [**CoEditingConfigMode**](#model-coeditingconfigmode) | The co-editing mode (fast or strict). | [optional] [enum: 0, 1] |
 
 
 ### Model CoEditingConfigMode
@@ -9257,21 +9260,21 @@ The configuration parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **document** | [**DocumentConfigDto**](#model-documentconfigdto) |  | [required] |
+| **document** | [**DocumentConfigDto**](#model-documentconfigdto) | The document configuration. | [required] |
 | **documentType** | **String** | The document type. | [required] [example: word] [nullable] |
-| **editorConfig** | [**EditorConfigurationDto**](#model-editorconfigurationdto) |  | [required] |
-| **editorType** | [**EditorType**](#model-editortype) |  | [required] [enum: 0, 1, 2] |
+| **editorConfig** | [**EditorConfigurationDto**](#model-editorconfigurationdto) | The editor configuration. | [required] |
+| **editorType** | [**EditorType**](#model-editortype) | The editor type. | [required] [enum: 0, 1, 2] |
 | **editorUrl** | **URI** (uri) | The editor URL. | [required] [example: http://localhost/editor] [nullable] |
 | **token** | **String** | The token of the file configuration. | [optional] [example: token-abc-123] [nullable] |
 | **type** | **String** | The platform type. | [optional] [example: desktop] [nullable] |
-| **file** | [**FileDtoInteger**](#model-filedtointeger) |  | [required] |
+| **file** | [**FileDtoInteger**](#model-filedtointeger) | The file parameters. | [required] |
 | **errorMessage** | **String** | The error message. | [optional] [example: Configuration error] [nullable] |
 | **startFilling** | **Boolean** | Specifies if the file filling has started or not. | [optional] [example: false] [nullable] |
 | **fillingStatus** | **Boolean** | The file filling status. | [optional] [example: false] [nullable] |
-| **startFillingMode** | [**StartFillingMode**](#model-startfillingmode) |  | [optional] [enum: 0, 1, 2, 3] |
+| **startFillingMode** | [**StartFillingMode**](#model-startfillingmode) | The start filling mode. | [optional] [enum: 0, 1, 2, 3] |
 | **fillingSessionId** | **String** | The file filling session ID. | [optional] [example: session-123-456] [nullable] |
-| **quotaExceededScope** | [**QuotaScope**](#model-quotascope) |  | [optional] [enum: 0, 1, 2] |
-| **generationToolCallState** | [**EditorToolCallStateDto**](#model-editortoolcallstatedto) |  | [optional] |
+| **quotaExceededScope** | [**QuotaScope**](#model-quotascope) | Indicates which quota scope has been exceeded. | [optional] [enum: 0, 1, 2] |
+| **generationToolCallState** | [**EditorToolCallStateDto**](#model-editortoolcallstatedto) | The generation tool call state. Used to run the agent flow in the editor. | [optional] |
 
 
 ### Model ConfigurationIntegerWrapper
@@ -9311,10 +9314,10 @@ The result of file convertion operation.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | The conversion operation ID. | [required] [example: 12345] [nullable] |
-| **Operation** | [**FileOperationType**](#model-fileoperationtype) |  | [required] [enum: 0, 1, 2, 3, 4, 5, 6, 7] |
+| **Operation** | [**FileOperationType**](#model-fileoperationtype) | The file operation type. | [required] [enum: 0, 1, 2, 3, 4, 5, 6, 7] |
 | **progress** | **Integer** (int32) | The conversion operation progress. | [required] [example: 50] |
 | **source** | **String** | The source file for the conversion. | [optional] [example: document.docx] [nullable] |
-| **result** | **oas_any_type_not_mapped** | The resulting file after the conversion. | [optional] [example: {"id":10,"title":"converted_file.pdf"}] [nullable] |
+| **result** | **null** | The resulting file after the conversion. | [optional] [example: {id=10, title=converted_file.pdf}] |
 | **error** | **String** | The conversion operation error message. | [optional] [example: Conversion failed] [nullable] |
 | **processed** | **String** | Specifies if the conversion operation is processed or not. | [optional] [example: true] [nullable] |
 
@@ -9400,16 +9403,16 @@ The parameters for creating a room from a template.
 |------------ | ------------- | ------------- | -------------|
 | **templateId** | **Integer** (int32) | The template ID from which the room to be created. | [required] [example: 1] |
 | **title** | **String** | The room title. | [required] [example: My Room From Template] [nullable] |
-| **logo** | [**LogoRequest**](#model-logorequest) |  | [optional] |
+| **logo** | [**LogoRequest**](#model-logorequest) | The logo request parameters. | [optional] |
 | **copyLogo** | **Boolean** | Specifies whether to copy a logo or not. | [optional] [example: false] |
-| **tags** | **List** | The collection of tags. | [optional] [example: ["tag1","tag2","tag3"]] [nullable] |
+| **tags** | **List** | The collection of tags. | [optional] [example: [tag1, tag2, tag3]] [nullable] |
 | **color** | **String** | The color of the room to be created. | [optional] [example: #FF0000] [minLength: 0] [maxLength: 6] [nullable] |
 | **cover** | **String** | The cover of the room to be created. | [optional] [example: cover1.jpg] [minLength: 0] [maxLength: 50] [nullable] |
 | **quota** | **Long** (int64) | The room quota. | [optional] [example: 1073741824] [nullable] |
 | **indexing** | **Boolean** | Specifies whether to create a room with indexing. | [optional] [example: true] [nullable] |
 | **denyDownload** | **Boolean** | Specifies whether to deny downloads from the room. | [optional] [example: false] [nullable] |
-| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) |  | [optional] |
-| **watermark** | [**WatermarkRequestDto**](#model-watermarkrequestdto) |  | [optional] |
+| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) | The room data lifetime information. | [optional] |
+| **watermark** | [**WatermarkRequestDto**](#model-watermarkrequestdto) | The request parameters for adding watermarks. | [optional] |
 | **private** | **Boolean** | Specifies whether the room to be created is private or not. | [optional] [example: false] [nullable] |
 
 
@@ -9422,16 +9425,16 @@ The request parameters for creating a room.
 | **quota** | **Long** (int64) | The room quota. | [optional] [example: 1073741824] [nullable] |
 | **indexing** | **Boolean** | Specifies whether to create a room with indexing. | [optional] [example: true] [nullable] |
 | **denyDownload** | **Boolean** | Specifies whether to deny downloads from the room. | [optional] [example: false] [nullable] |
-| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) |  | [optional] |
-| **watermark** | [**WatermarkRequestDto**](#model-watermarkrequestdto) |  | [optional] |
-| **logo** | [**LogoRequest**](#model-logorequest) |  | [optional] |
-| **tags** | **List** | The list of tags. | [optional] [example: ["tag1","tag2","tag3"]] [nullable] |
+| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) | The room data lifetime information. | [optional] |
+| **watermark** | [**WatermarkRequestDto**](#model-watermarkrequestdto) | The request parameters for adding watermarks. | [optional] |
+| **logo** | [**LogoRequest**](#model-logorequest) | The logo request parameters. | [optional] |
+| **tags** | **List** | The list of tags. | [optional] [example: [tag1, tag2, tag3]] [nullable] |
 | **color** | **String** | The room color. | [optional] [example: #FF0000] [minLength: 0] [maxLength: 6] [nullable] |
 | **cover** | **String** | The room cover. | [optional] [example: cover1.jpg] [minLength: 0] [maxLength: 50] [nullable] |
-| **roomType** | [**RoomType**](#model-roomtype) |  | [required] [enum: 1, 2, 5, 6, 8, 9] |
+| **roomType** | [**RoomType**](#model-roomtype) | The room type. | [required] [enum: 1, 2, 5, 6, 8, 9] |
 | **private** | **Boolean** | Specifies whether the room to be created is private or not. | [optional] [example: false] |
-| **share** | [**List**](#model-fileshareparams) | The collection of sharing parameters. | [optional] [example: [{"shareTo":"00000000-0000-0000-0000-000000000000","access":1}]] [nullable] |
-| **chatSettings** | [**ChatSettings**](#model-chatsettings) |  | [optional] |
+| **share** | [**List**](#model-fileshareparams) | The collection of sharing parameters. | [optional] [example: [{access=1, shareTo=00000000-0000-0000-0000-000000000000}]] [nullable] |
+| **chatSettings** | [**ChatSettings**](#model-chatsettings) | The chat settings. | [optional] |
 | **sendFormToExternalDB** | **Boolean** | Specifies whether to send form data to external database. | [optional] [example: false] [nullable] |
 | **saveFormAsXLSX** | **Boolean** | Specifies whether to save form data as XLSX file. | [optional] [example: false] [nullable] |
 
@@ -9461,14 +9464,14 @@ The parameters for creating a third-party room.
 |------------ | ------------- | ------------- | -------------|
 | **createAsNewFolder** | **Boolean** | Specifies whether to create a third-party room as a new folder or not. | [optional] [example: false] |
 | **title** | **String** | The third-party room name to be created. | [required] [example: My Third-Party Room] [nullable] |
-| **roomType** | [**RoomType**](#model-roomtype) |  | [required] [enum: 1, 2, 5, 6, 8, 9] |
+| **roomType** | [**RoomType**](#model-roomtype) | The room type. | [required] [enum: 1, 2, 5, 6, 8, 9] |
 | **private** | **Boolean** | Specifies whether to create the private third-party room or not. | [optional] [example: false] |
 | **indexing** | **Boolean** | Specifies whether to create the third-party room with indexing. | [optional] [example: true] |
 | **denyDownload** | **Boolean** | Specifies whether to deny downloads from the third-party room. | [optional] [example: false] |
 | **color** | **String** | The color of the third-party room. | [optional] [example: #FF0000] [nullable] |
 | **cover** | **String** | The cover of the third-party room. | [optional] [example: cover1.jpg] [nullable] |
-| **tags** | **List** | The list of tags of the third-party room. | [optional] [example: ["tag1","tag2","tag3"]] [nullable] |
-| **logo** | [**LogoRequest**](#model-logorequest) |  | [optional] |
+| **tags** | **List** | The list of tags of the third-party room. | [optional] [example: [tag1, tag2, tag3]] [nullable] |
+| **logo** | [**LogoRequest**](#model-logorequest) | The logo request parameters. | [optional] |
 
 
 ### Model CustomFilterParameters
@@ -9498,16 +9501,16 @@ The customization config parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **about** | **Boolean** | Specifies if the customization is about. | [optional] [example: true] |
-| **customer** | [**CustomerConfigDto**](#model-customerconfigdto) |  | [optional] |
-| **anonymous** | [**AnonymousConfigDto**](#model-anonymousconfigdto) |  | [optional] |
-| **feedback** | [**FeedbackConfig**](#model-feedbackconfig) |  | [optional] |
+| **customer** | [**CustomerConfigDto**](#model-customerconfigdto) | The customization customer configuration. | [optional] |
+| **anonymous** | [**AnonymousConfigDto**](#model-anonymousconfigdto) | The anonymous configuration of the customization. | [optional] |
+| **feedback** | [**FeedbackConfig**](#model-feedbackconfig) | The settings for the Feedback &amp; Support menu button. | [optional] |
 | **forcesave** | **Boolean** | Specifies if the customization should be force saved. | [optional] [example: false] [nullable] |
-| **goback** | [**GobackConfig**](#model-gobackconfig) |  | [optional] |
-| **review** | [**ReviewConfig**](#model-reviewconfig) |  | [optional] |
-| **logo** | [**LogoConfigDto**](#model-logoconfigdto) |  | [optional] |
+| **goback** | [**GobackConfig**](#model-gobackconfig) | The settings for the Open file location menu button and upper right corner button. | [optional] |
+| **review** | [**ReviewConfig**](#model-reviewconfig) | Configuration for review display settings. | [optional] |
+| **logo** | [**LogoConfigDto**](#model-logoconfigdto) | The logo of the customization. | [optional] |
 | **mentionShare** | **Boolean** | Specifies if the share should be mentioned. | [optional] [example: true] |
-| **submitForm** | [**SubmitForm**](#model-submitform) |  | [optional] |
-| **startFillingForm** | [**StartFillingForm**](#model-startfillingform) |  | [optional] |
+| **submitForm** | [**SubmitForm**](#model-submitform) | The Complete &amp; Submit button settings. | [optional] |
+| **startFillingForm** | [**StartFillingForm**](#model-startfillingform) | The parameters of the button that starts filling out the form. | [optional] |
 
 
 ### Model DarkThemeSettingsType
@@ -9532,7 +9535,7 @@ Default template setting
 | **selectedFile** | **Integer** (int32) | File id to use as a default template | [optional] [example: 123] [nullable] |
 | **fileExtension** | **String** | Extension of a default template | [required] [example: .docx] [nullable] |
 | **fileTitle** | **String** | Title of a default template | [optional] [example: Default Template] [nullable] |
-| **lastModified** | **Date** (date-time) | Last modified date of a default template | [optional] [nullable] |
+| **lastModified** | **Date** (date-time) | Last modified date of a default template | [optional] [example: 2025-01-01T00:00:00] [nullable] |
 | **fileSize** | **Long** (int64) | Filesize (in bytes) of a default template | [optional] [example: 1024] [nullable] |
 | **viewUrl** | **String** | View url of a default template | [optional] [example: http://localhost/template/view] [nullable] |
 
@@ -9542,7 +9545,7 @@ Default templates settings parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **items** | [**List**](#model-defaulttemplateitemdto) | Default templates list. | [required] [example: [{"extension":".docx","title":"Blank Document"}]] [nullable] |
+| **items** | [**List**](#model-defaulttemplateitemdto) | Default templates list. | [required] [example: [{extension=.docx, title=Blank Document}]] [nullable] |
 
 
 ### Model DefaultTemplateSettingsRequestDto
@@ -9692,8 +9695,8 @@ The Document Builder task parameters.
 | **error** | **String** | The error message occurred during the document building process. | [required] [example: Build failed] [nullable] |
 | **percentage** | **Integer** (int32) | The progress percentage of the document building process. | [required] [example: 75] |
 | **isCompleted** | **Boolean** | Specifies whether the document building process is completed or not. | [required] [example: false] |
-| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) |  | [required] [enum: 0, 1, 2, 3, 4] |
-| **resultFileId** | **oas_any_type_not_mapped** | The result file ID. | [required] [example: 123] [nullable] |
+| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) | The status of the document building process. | [required] [enum: 0, 1, 2, 3, 4] |
+| **resultFileId** | **null** | The result file ID. | [required] [example: 123] |
 | **resultFileName** | **String** | The result file name. | [required] [example: result.docx] [nullable] |
 | **resultFileUrl** | **String** | The result file URL. | [required] [example: http://localhost/files/result.docx] [nullable] |
 
@@ -9715,17 +9718,17 @@ The document config parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **fileType** | **String** | The file type of the document. | [optional] [example: docx] [nullable] |
-| **info** | [**InfoConfigDto**](#model-infoconfigdto) |  | [optional] |
+| **info** | [**InfoConfigDto**](#model-infoconfigdto) | The configuration information of the document. | [optional] |
 | **isLinkedForMe** | **Boolean** | Specifies if the documnet is linked for current user. | [optional] [example: false] |
 | **key** | **String** | The document key. | [optional] [example: doc-key-123-abc] [nullable] |
-| **permissions** | [**PermissionsConfig**](#model-permissionsconfig) |  | [optional] |
+| **permissions** | [**PermissionsConfig**](#model-permissionsconfig) | The permissions configuration parameters. | [optional] |
 | **sharedLinkParam** | **String** | The shared link parameter of the document. | [optional] [example: share-param-123] [nullable] |
 | **sharedLinkKey** | **String** | The shared link key of the document. | [optional] [example: share-key-abc] [nullable] |
-| **referenceData** | [**FileReferenceData**](#model-filereferencedata) |  | [optional] |
+| **referenceData** | [**FileReferenceData**](#model-filereferencedata) | An object that is generated by the integrator to uniquely identify a file in its system. | [optional] |
 | **title** | **String** | The document title. | [optional] [example: Document Title] [nullable] |
 | **url** | **URI** (uri) | The document url. | [optional] [example: http://localhost/documents/doc.docx] [nullable] |
 | **isForm** | **Boolean** | Indicates whether this is a form. | [optional] [example: false] |
-| **options** | [**Options**](#model-options) |  | [optional] |
+| **options** | [**Options**](#model-options) | The document options. | [optional] |
 
 
 ### Model DownloadRequestDto
@@ -9826,8 +9829,8 @@ The parameters of the file editing history.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **user** | [**EditHistoryAuthor**](#model-edithistoryauthor) |  | [optional] |
-| **created** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **user** | [**EditHistoryAuthor**](#model-edithistoryauthor) | The information about the file editing history author. | [optional] |
+| **created** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **documentSha256** | **String** | The document hash generated by the SHA-256 algorithm. | [optional] [example: a1b2c3d4e5f6g7h8i9j0] [nullable] |
 
 
@@ -9838,7 +9841,7 @@ The file editing history data.
 |------------ | ------------- | ------------- | -------------|
 | **changesUrl** | **URI** (uri) | The URL address of the file with the document changes data. | [optional] [example: https://example.com/changes] [nullable] |
 | **key** | **String** | The document identifier used to unambiguously identify the document file. | [required] [example: doc1] [nullable] |
-| **previous** | [**EditHistoryUrl**](#model-edithistoryurl) |  | [optional] |
+| **previous** | [**EditHistoryUrl**](#model-edithistoryurl) | The object of the previous version of the document. | [optional] |
 | **token** | **String** | The encrypted signature added to the parameter in the form of a token. | [optional] [example: token] [nullable] |
 | **url** | **URI** (uri) | The URL address of the current document version. | [required] [example: https://example.com/file.docx] [nullable] |
 | **version** | **Integer** (int32) | The document version number. | [required] [example: 1] |
@@ -9865,10 +9868,10 @@ The file editing history parameters.
 | **key** | **String** | The document identifier used to unambiguously identify the document file. | [optional] [example: doc-key-abc123] [nullable] |
 | **version** | **Integer** (int32) | The document version number. | [optional] [example: 2] |
 | **versionGroup** | **Integer** (int32) | The document version group. | [optional] [example: 1] |
-| **user** | [**EditHistoryAuthor**](#model-edithistoryauthor) |  | [optional] |
-| **created** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **user** | [**EditHistoryAuthor**](#model-edithistoryauthor) | The information about the file editing history author. | [optional] |
+| **created** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **changesHistory** | **String** | The file history changes in the string format. | [optional] [example: Changes history text] [nullable] |
-| **changes** | [**List**](#model-edithistorychangeswrapper) | The list of file history changes. | [optional] [example: [{"user":{"id":"123","name":"John Doe"},"created":"2021-01-01T00:00:00Z"}]] [nullable] |
+| **changes** | [**List**](#model-edithistorychangeswrapper) | The list of file history changes. | [optional] [example: [{user={id=123, name=John Doe}, created=2021-01-01T00:00:00Z}]] [nullable] |
 | **serverVersion** | **String** | The current server version number. | [optional] [example: 8.0.1] [nullable] |
 
 
@@ -9888,18 +9891,18 @@ The editor configuration parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **callbackUrl** | **URI** (uri) | The callback URL of the editor. | [optional] [example: http://localhost/callback] [nullable] |
-| **coEditing** | [**CoEditingConfig**](#model-coeditingconfig) |  | [optional] |
+| **coEditing** | [**CoEditingConfig**](#model-coeditingconfig) | The co-editing configuration parameters. | [optional] |
 | **createUrl** | **String** | The creation URL of the editor. | [optional] [example: http://localhost/create] [nullable] |
-| **customization** | [**CustomizationConfigDto**](#model-customizationconfigdto) |  | [optional] |
-| **embedded** | [**EmbeddedConfig**](#model-embeddedconfig) |  | [optional] |
+| **customization** | [**CustomizationConfigDto**](#model-customizationconfigdto) | The customization configuration. | [optional] |
+| **embedded** | [**EmbeddedConfig**](#model-embeddedconfig) | The configuration parameters for the embedded document type. | [optional] |
 | **encryptionKeys** | [**List**](#model-encryptionkeydto) | The encryption keys of the editor configuration. | [optional] [nullable] |
 | **lang** | **String** | The language of the editor configuration. | [required] [example: en-US] [nullable] |
 | **mode** | **String** | The mode of the editor configuration. | [required] [example: edit] [nullable] |
 | **modeWrite** | **Boolean** | Specifies if the mode is write of the editor configuration. | [optional] [example: true] |
-| **plugins** | [**PluginsConfig**](#model-pluginsconfig) |  | [optional] |
+| **plugins** | [**PluginsConfig**](#model-pluginsconfig) | The configuration settings to connect the special add-ons. | [optional] |
 | **recent** | [**List**](#model-recentconfig) | The recent configuration of the editor. | [optional] [example: []] [nullable] |
 | **templates** | [**List**](#model-templatesconfig) | The templates of the editor configuration. | [optional] [example: []] [nullable] |
-| **user** | [**UserConfig**](#model-userconfig) |  | [optional] |
+| **user** | [**UserConfig**](#model-userconfig) | The configuration parameters of the user currently viewing or editing the document. | [optional] |
 
 
 ### Model EditorToolCallStateDto
@@ -9908,7 +9911,7 @@ The editor tool call state. Used to run the agent flow in the editor.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **toolName** | **String** | The tool name. | [required] [example: GenerateDocx] [nullable] |
-| **parameters** | **Object** | The editor tool call parameters. | [required] |
+| **parameters** | **Object** | The tool call parameters. | [required] |
 
 
 ### Model EditorType
@@ -9968,13 +9971,13 @@ The full list of user parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **UUID** (uuid) | The user ID. | [optional] |
-| **displayName** | **String** | The HTML-encoded user&#39;s display name formatted according to the default format for the current culture. | [optional] [nullable] |
-| **avatar** | **String** | The user avatar. | [optional] [nullable] |
-| **avatarOriginal** | **String** | The user original size avatar. | [optional] [nullable] |
-| **avatarMax** | **String** | The user maximum size avatar. | [optional] [nullable] |
-| **avatarMedium** | **String** | The user medium size avatar. | [optional] [nullable] |
-| **avatarSmall** | **String** | The user small size avatar. | [optional] [nullable] |
-| **profileUrl** | **String** | The user profile URL. | [optional] [nullable] |
+| **displayName** | **String** | The HTML-encoded user&#39;s display name formatted according to the default format for the current culture. | [optional] |
+| **avatar** | **String** | The user avatar. | [optional] |
+| **avatarOriginal** | **String** | The user original size avatar. | [optional] |
+| **avatarMax** | **String** | The user maximum size avatar. | [optional] |
+| **avatarMedium** | **String** | The user medium size avatar. | [optional] |
+| **avatarSmall** | **String** | The user small size avatar. | [optional] |
+| **profileUrl** | **String** | The user profile URL. | [optional] |
 | **hasAvatar** | **Boolean** | Specifies if the user has an avatar or not. | [optional] |
 | **isAnonim** | **Boolean** | Specifies if the user is anonymous or not. | [optional] |
 | **firstName** | **String** | The user first name. | [optional] [nullable] |
@@ -9982,9 +9985,9 @@ The full list of user parameters.
 | **userName** | **String** | The user username. | [optional] [nullable] |
 | **email** | **String** (email) | The user email. | [optional] [nullable] |
 | **contacts** | [**List**](#model-contact) | The list of user contacts. | [optional] [nullable] |
-| **status** | [**EmployeeStatus**](#model-employeestatus) |  | [optional] [enum: 1, 2, 4, 5, 7] |
-| **activationStatus** | [**EmployeeActivationStatus**](#model-employeeactivationstatus) |  | [optional] [enum: 0, 1, 2, 4] |
-| **terminated** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **status** | [**EmployeeStatus**](#model-employeestatus) | The user status. | [optional] [enum: 1, 2, 4, 5, 7] |
+| **activationStatus** | [**EmployeeActivationStatus**](#model-employeeactivationstatus) | The user activation status. | [optional] [enum: 0, 1, 2, 4] |
+| **terminated** | [**ApiDateTime**](#model-apidatetime) | The date when the user account was terminated. | [optional] |
 | **department** | **String** | The user department. | [optional] [nullable] |
 | **groups** | [**List**](#model-groupsummarydto) | The list of user groups. | [optional] [nullable] |
 | **location** | **String** | The user location. | [optional] [nullable] |
@@ -9998,17 +10001,17 @@ The full list of user parameters.
 | **isCollaborator** | **Boolean** | Specifies if the user is a portal collaborator or not. | [optional] |
 | **cultureName** | **String** | The user culture code. | [optional] [nullable] |
 | **mobilePhone** | **String** | The user mobile phone number. | [optional] [nullable] |
-| **mobilePhoneActivationStatus** | [**MobilePhoneActivationStatus**](#model-mobilephoneactivationstatus) |  | [optional] [enum: 0, 1] |
+| **mobilePhoneActivationStatus** | [**MobilePhoneActivationStatus**](#model-mobilephoneactivationstatus) | The user mobile phone activation status. | [optional] [enum: 0, 1] |
 | **isSSO** | **Boolean** | Specifies if the SSO settings are enabled for the user or not. | [optional] |
-| **theme** | [**DarkThemeSettingsType**](#model-darkthemesettingstype) |  | [optional] [enum: Base, Dark, System] |
+| **theme** | [**DarkThemeSettingsType**](#model-darkthemesettingstype) | The user theme settings. | [optional] [enum: Base, Dark, System] |
 | **quotaLimit** | **Long** (int64) | The user quota limit. | [optional] [nullable] |
 | **usedSpace** | **Double** (double) | The portal used space of the user. | [optional] [nullable] |
 | **shared** | **Boolean** | Specifies if the user has access rights. | [optional] [nullable] |
 | **isCustomQuota** | **Boolean** | Specifies if the user has a custom quota or not. | [optional] [nullable] |
 | **loginEventId** | **Integer** (int32) | The current login event ID. | [optional] [nullable] |
 | **authCookieLifetime** | **Double** (double) | The auth cookie lifetime in seconds. | [optional] [nullable] |
-| **createdBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **registrationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **createdBy** | [**EmployeeDto**](#model-employeedto) | The user who created the current user. | [optional] |
+| **registrationDate** | [**ApiDateTime**](#model-apidatetime) | The user registration date. | [optional] |
 | **hasPersonalFolder** | **Boolean** | Specifies if the user has a personal folder or not. | [optional] [nullable] |
 | **tfaAppEnabled** | **Boolean** | Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app. | [optional] [nullable] |
 
@@ -10072,8 +10075,8 @@ The external DB synchronization task parameters.
 | **error** | **String** | The error message if the synchronization failed. | [optional] [example: Connection refused] [nullable] |
 | **percentage** | **Integer** (int32) | The progress percentage of the synchronization. | [required] [example: 75] |
 | **isCompleted** | **Boolean** | Specifies whether the synchronization is completed or not. | [required] [example: false] |
-| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) |  | [required] [enum: 0, 1, 2, 3, 4] |
-| **forms** | [**List**](#model-externaldbsyncformresultdto) | The synchronization results for all original forms in the room. | [required] [example: [{"id":42,"title":"Application.pdf","success":true,"error":null}]] [nullable] |
+| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) | The status of the synchronization task. | [required] [enum: 0, 1, 2, 3, 4] |
+| **forms** | [**List**](#model-externaldbsyncformresultdto) | The synchronization results for all original forms in the room. | [required] [example: [{id=42, title=Application.pdf, success=true, error=null}]] [nullable] |
 
 
 ### Model ExternalDbSyncTaskWrapper
@@ -10092,14 +10095,14 @@ The external sharing information and validation data.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **status** | [**Status**](#model-status) |  | [required] [enum: 0, 1, 2, 3, 4, 5] |
+| **status** | [**Status**](#model-status) | The external data status. | [required] [enum: 0, 1, 2, 3, 4, 5] |
 | **id** | **String** | The external data ID. | [optional] [example: 123] [nullable] |
 | **title** | **String** | The external data title. | [optional] [example: Shared Document] [nullable] |
-| **type** | [**FileEntryType**](#model-fileentrytype) |  | [optional] [enum: 1, 2] |
+| **type** | [**FileEntryType**](#model-fileentrytype) | The type of the external data. | [optional] [enum: 1, 2] |
 | **tenantId** | **Integer** (int32) | The tenant ID. | [required] [example: 1] |
 | **entityId** | **String** | The unique identifier of the shared entity. | [optional] [example: 456] [nullable] |
 | **entityTitle** | **String** | The title of the shared entity. | [optional] [example: Entity Title] [nullable] |
-| **entityType** | [**FileEntryType**](#model-fileentrytype) |  | [optional] [enum: 1, 2] |
+| **entityType** | [**FileEntryType**](#model-fileentrytype) | The entry type of the external data. | [optional] [enum: 1, 2] |
 | **isRoom** | **Boolean** | Indicates whether the entity represents a room. | [optional] [example: false] [nullable] |
 | **shared** | **Boolean** | Specifies whether to share the external data or not. | [required] [example: true] |
 | **linkId** | **UUID** (uuid) | The link ID of the external data. | [required] [example: 00000000-0000-0000-0000-000000000000] |
@@ -10182,62 +10185,62 @@ The file parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **title** | **String** | The file entry title. | [optional] [nullable] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **ownedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **title** | **String** | The file entry title. | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights to the file entry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedBy** | [**EmployeeDto**](#model-employeedto) | Provides information about the employee who shared the file or folder. | [optional] |
+| **ownedBy** | [**EmployeeDto**](#model-employeedto) | The information about the employee who owns the file entry. | [optional] |
 | **shared** | **Boolean** | Specifies if the file entry is shared via link or not. | [optional] |
 | **sharedForUser** | **Boolean** | Specifies if the file entry is shared for user or not. | [optional] |
 | **sharedExternal** | **Boolean** | Specifies if the file entry is shared via a public (non-internal) external link. | [optional] |
 | **parentShared** | **Boolean** | Indicates whether the parent entity is shared. | [optional] |
-| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] [nullable] |
-| **created** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **createdBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **updated** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **autoDelete** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **rootFolderType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **parentRoomType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **updatedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] [nullable] |
-| **providerKey** | **String** | The provider key of the file entry. | [optional] [nullable] |
-| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] [nullable] |
-| **order** | **String** | The order of the file entry. | [optional] [nullable] |
-| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] [nullable] |
-| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) |  | [optional] [enum: 1, 2] |
+| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] |
+| **created** | [**ApiDateTime**](#model-apidatetime) | The creation date and time of the file entry. | [optional] |
+| **createdBy** | [**EmployeeDto**](#model-employeedto) | The file entry author. | [optional] |
+| **updated** | [**ApiDateTime**](#model-apidatetime) | The last date and time when the file entry was updated. | [optional] |
+| **autoDelete** | [**ApiDateTime**](#model-apidatetime) | The date and time when the file entry will be automatically deleted. | [optional] |
+| **rootFolderType** | [**FolderType**](#model-foldertype) | The root folder type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **parentRoomType** | [**FolderType**](#model-foldertype) | The parent room type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **updatedBy** | [**EmployeeDto**](#model-employeedto) | The user who updated the file entry. | [optional] |
+| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] |
+| **providerKey** | **String** | The provider key of the file entry. | [optional] |
+| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] |
+| **order** | **String** | The order of the file entry. | [optional] |
+| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] |
+| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) | The file entry type. | [optional] [enum: 1, 2] |
 | **id** | **Integer** (int32) | The file entry ID. | [optional] |
 | **rootFolderId** | **Integer** (int32) | The root folder ID of the file entry. | [optional] |
 | **originId** | **Integer** (int32) | The origin ID of the file entry. | [optional] |
 | **originRoomId** | **Integer** (int32) | The origin room ID of the file entry. | [optional] |
-| **originTitle** | **String** | The origin title of the file entry. | [optional] [nullable] |
-| **originRoomTitle** | **String** | The origin room title of the file entry. | [optional] [nullable] |
+| **originTitle** | **String** | The origin title of the file entry. | [optional] |
+| **originRoomTitle** | **String** | The origin room title of the file entry. | [optional] |
 | **canShare** | **Boolean** | Specifies if the file entry can be shared or not. | [optional] |
 | **shareSettings** | [**FileEntryDtoInteger_allOf_shareSettings**](#model-fileentrydtointegersharesettings) |  | [optional] [nullable] |
 | **security** | [**FileEntryDtoInteger_allOf_security**](#model-fileentrydtointegersecurity) |  | [optional] [nullable] |
 | **availableShareRights** | [**FileEntryDtoInteger_allOf_availableShareRights**](#model-fileentrydtointegeravailablesharerights) |  | [optional] [nullable] |
-| **requestToken** | **String** | The request token of the file entry. | [optional] [nullable] |
-| **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] [nullable] |
-| **expirationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] [nullable] |
+| **requestToken** | **String** | The request token of the file entry. | [optional] |
+| **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] |
+| **expirationDate** | [**ApiDateTime**](#model-apidatetime) | Represents the expiration date of the file entry. | [optional] |
+| **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] |
 | **folderId** | **Integer** (int32) | The folder ID where the file is located. | [optional] |
 | **version** | **Integer** (int32) | The file version. | [optional] |
 | **versionGroup** | **Integer** (int32) | The version group of the file. | [optional] |
 | **contentLength** | **String** | The content length of the file. | [optional] [nullable] |
 | **pureContentLength** | **Long** (int64) | The pure content length of the file. | [optional] [nullable] |
-| **fileStatus** | [**FileStatus**](#model-filestatus) |  | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256] |
-| **editingBy** | **Map** | The list of users editing the file. | [optional] [nullable] |
+| **fileStatus** | [**FileStatus**](#model-filestatus) | The current status of the file. | [optional] [enum: 0, 1, 2, 4, 8, 16, 32, 64, 128, 256] |
+| **editingBy** | **null** | The list of users editing the file. | [optional] |
 | **mute** | **Boolean** | Specifies if the file is muted or not. | [optional] |
 | **viewUrl** | **URI** (uri) | The URL link to view the file. | [optional] [nullable] |
 | **webUrl** | **URI** (uri) | The Web URL link to the file. | [optional] [nullable] |
-| **fileType** | [**FileType**](#model-filetype) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 10, 11] |
+| **fileType** | [**FileType**](#model-filetype) | The file type. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 10, 11] |
 | **fileExst** | **String** | The file extension. | [optional] [nullable] |
 | **comment** | **String** | The comment to the file. | [optional] [nullable] |
 | **encrypted** | **Boolean** | Specifies if the file is encrypted or not. | [optional] [nullable] |
 | **thumbnailUrl** | **URI** (uri) | The thumbnail URL of the file. | [optional] [nullable] |
-| **thumbnailStatus** | [**Thumbnail**](#model-thumbnail) |  | [optional] [enum: 0, 1, 2, 3, 4] |
+| **thumbnailStatus** | [**Thumbnail**](#model-thumbnail) | The current thumbnail status of the file. | [optional] [enum: 0, 1, 2, 3, 4] |
 | **locked** | **Boolean** | Specifies if the file is locked or not. | [optional] [nullable] |
 | **lockedBy** | **String** | The user ID of the person who locked the file. | [optional] [nullable] |
 | **hasDraft** | **Boolean** | Specifies if the file has a draft or not. | [optional] [nullable] |
-| **formFillingStatus** | [**FormFillingStatus**](#model-formfillingstatus) |  | [optional] [enum: 0, 1, 2, 3, 4, 5] |
+| **formFillingStatus** | [**FormFillingStatus**](#model-formfillingstatus) | The status of the form filling process. | [optional] [enum: 0, 1, 2, 3, 4, 5] |
 | **isForm** | **Boolean** | Specifies if the file is a form or not. | [optional] [nullable] |
 | **customFilterEnabled** | **Boolean** | Specifies if the Custom Filter editing mode is enabled for a file or not. | [optional] [nullable] |
 | **customFilterEnabledBy** | **String** | The name of the user who enabled a Custom Filter editing mode for a file. | [optional] [nullable] |
@@ -10246,13 +10249,13 @@ The file parameters.
 | **inProcessFolderId** | **Integer** (int32) | The InProcess folder ID of the file. | [optional] [nullable] |
 | **inProcessFolderTitle** | **String** | The InProcess folder title of the file. | [optional] [nullable] |
 | **resultsFolderId** | **Integer** (int32) | The ID of the FormFillingFolderDone folder that corresponds to this original form. | [optional] [nullable] |
-| **draftLocation** | [**DraftLocationInteger**](#model-draftlocationinteger) |  | [optional] |
+| **draftLocation** | [**DraftLocationInteger**](#model-draftlocationinteger) | The file draft information with its location. | [optional] |
 | **viewAccessibility** | [**FileDtoInteger_allOf_viewAccessibility**](#model-filedtointegerviewaccessibility) |  | [optional] [nullable] |
-| **lastOpened** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **expired** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **vectorizationStatus** | [**VectorizationStatus**](#model-vectorizationstatus) |  | [optional] [enum: 0, 1, 2] |
+| **lastOpened** | [**ApiDateTime**](#model-apidatetime) | The time when the file was last opened. | [optional] |
+| **expired** | [**ApiDateTime**](#model-apidatetime) | The date when the file will be expired. | [optional] |
+| **vectorizationStatus** | [**VectorizationStatus**](#model-vectorizationstatus) | The vectorization status of the file. | [optional] [enum: 0, 1, 2] |
 | **externalDbTableName** | **String** | The name of the table in the external database that corresponds to this form. | [optional] [nullable] |
-| **dimensions** | [**Size**](#model-size) |  | [optional] |
+| **dimensions** | [**Size**](#model-size) | Represents dimensions with width and height values. | [optional] |
 
 
 ### Model FileDtoInteger.viewAccessibility
@@ -10308,27 +10311,27 @@ The file entry information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **title** | **String** | The file entry title. | [optional] [example: Some title.txt] [nullable] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **ownedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights to the file entry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedBy** | [**EmployeeDto**](#model-employeedto) | Provides information about the employee who shared the file or folder. | [optional] |
+| **ownedBy** | [**EmployeeDto**](#model-employeedto) | The information about the employee who owns the file entry. | [optional] |
 | **shared** | **Boolean** | Specifies if the file entry is shared via link or not. | [optional] [example: false] |
 | **sharedForUser** | **Boolean** | Specifies if the file entry is shared for user or not. | [optional] [example: false] |
 | **sharedExternal** | **Boolean** | Specifies if the file entry is shared via a public (non-internal) external link. | [optional] [example: false] |
 | **parentShared** | **Boolean** | Indicates whether the parent entity is shared. | [optional] [example: false] |
 | **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] [example: http://localhost/s/abc123] [nullable] |
-| **created** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **createdBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **updated** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **autoDelete** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **rootFolderType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **parentRoomType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **updatedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **created** | [**ApiDateTime**](#model-apidatetime) | The creation date and time of the file entry. | [optional] |
+| **createdBy** | [**EmployeeDto**](#model-employeedto) | The file entry author. | [optional] |
+| **updated** | [**ApiDateTime**](#model-apidatetime) | The last date and time when the file entry was updated. | [optional] |
+| **autoDelete** | [**ApiDateTime**](#model-apidatetime) | The date and time when the file entry will be automatically deleted. | [optional] |
+| **rootFolderType** | [**FolderType**](#model-foldertype) | The root folder type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **parentRoomType** | [**FolderType**](#model-foldertype) | The parent room type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **updatedBy** | [**EmployeeDto**](#model-employeedto) | The user who updated the file entry. | [optional] |
 | **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] [example: false] [nullable] |
 | **providerKey** | **String** | The provider key of the file entry. | [optional] [example: google-drive] [nullable] |
 | **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] [example: 1] [nullable] |
 | **order** | **String** | The order of the file entry. | [optional] [example: 1] [nullable] |
 | **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] [example: false] [nullable] |
-| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) |  | [optional] [enum: 1, 2] |
+| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) | The file entry type. | [optional] [enum: 1, 2] |
 
 
 ### Model FileEntryBaseWrapper
@@ -10347,28 +10350,28 @@ The generic file entry information.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **title** | **String** | The file entry title. | [optional] [nullable] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **ownedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **title** | **String** | The file entry title. | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights to the file entry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedBy** | [**EmployeeDto**](#model-employeedto) | Provides information about the employee who shared the file or folder. | [optional] |
+| **ownedBy** | [**EmployeeDto**](#model-employeedto) | The information about the employee who owns the file entry. | [optional] |
 | **shared** | **Boolean** | Specifies if the file entry is shared via link or not. | [optional] |
 | **sharedForUser** | **Boolean** | Specifies if the file entry is shared for user or not. | [optional] |
 | **sharedExternal** | **Boolean** | Specifies if the file entry is shared via a public (non-internal) external link. | [optional] |
 | **parentShared** | **Boolean** | Indicates whether the parent entity is shared. | [optional] |
-| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] [nullable] |
-| **created** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **createdBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **updated** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **autoDelete** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **rootFolderType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **parentRoomType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **updatedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] [nullable] |
-| **providerKey** | **String** | The provider key of the file entry. | [optional] [nullable] |
-| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] [nullable] |
-| **order** | **String** | The order of the file entry. | [optional] [nullable] |
-| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] [nullable] |
-| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) |  | [optional] [enum: 1, 2] |
+| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] |
+| **created** | [**ApiDateTime**](#model-apidatetime) | The creation date and time of the file entry. | [optional] |
+| **createdBy** | [**EmployeeDto**](#model-employeedto) | The file entry author. | [optional] |
+| **updated** | [**ApiDateTime**](#model-apidatetime) | The last date and time when the file entry was updated. | [optional] |
+| **autoDelete** | [**ApiDateTime**](#model-apidatetime) | The date and time when the file entry will be automatically deleted. | [optional] |
+| **rootFolderType** | [**FolderType**](#model-foldertype) | The root folder type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **parentRoomType** | [**FolderType**](#model-foldertype) | The parent room type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **updatedBy** | [**EmployeeDto**](#model-employeedto) | The user who updated the file entry. | [optional] |
+| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] |
+| **providerKey** | **String** | The provider key of the file entry. | [optional] |
+| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] |
+| **order** | **String** | The order of the file entry. | [optional] |
+| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] |
+| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) | The file entry type. | [optional] [enum: 1, 2] |
 | **id** | **Integer** (int32) | The file entry ID. | [optional] |
 | **rootFolderId** | **Integer** (int32) | The root folder ID of the file entry. | [optional] |
 | **originId** | **Integer** (int32) | The origin ID of the file entry. | [optional] |
@@ -10381,7 +10384,7 @@ The generic file entry information.
 | **availableShareRights** | [**FileEntryDtoInteger_allOf_availableShareRights**](#model-fileentrydtointegeravailablesharerights) |  | [optional] [nullable] |
 | **requestToken** | **String** | The request token of the file entry. | [optional] [nullable] |
 | **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] [nullable] |
-| **expirationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **expirationDate** | [**ApiDateTime**](#model-apidatetime) | Represents the expiration date of the file entry. | [optional] |
 | **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] [nullable] |
 
 
@@ -10468,28 +10471,28 @@ The generic file entry information.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **title** | **String** | The file entry title. | [optional] [nullable] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **ownedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **title** | **String** | The file entry title. | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights to the file entry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedBy** | [**EmployeeDto**](#model-employeedto) | Provides information about the employee who shared the file or folder. | [optional] |
+| **ownedBy** | [**EmployeeDto**](#model-employeedto) | The information about the employee who owns the file entry. | [optional] |
 | **shared** | **Boolean** | Specifies if the file entry is shared via link or not. | [optional] |
 | **sharedForUser** | **Boolean** | Specifies if the file entry is shared for user or not. | [optional] |
 | **sharedExternal** | **Boolean** | Specifies if the file entry is shared via a public (non-internal) external link. | [optional] |
 | **parentShared** | **Boolean** | Indicates whether the parent entity is shared. | [optional] |
-| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] [nullable] |
-| **created** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **createdBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **updated** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **autoDelete** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **rootFolderType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **parentRoomType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **updatedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] [nullable] |
-| **providerKey** | **String** | The provider key of the file entry. | [optional] [nullable] |
-| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] [nullable] |
-| **order** | **String** | The order of the file entry. | [optional] [nullable] |
-| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] [nullable] |
-| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) |  | [optional] [enum: 1, 2] |
+| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] |
+| **created** | [**ApiDateTime**](#model-apidatetime) | The creation date and time of the file entry. | [optional] |
+| **createdBy** | [**EmployeeDto**](#model-employeedto) | The file entry author. | [optional] |
+| **updated** | [**ApiDateTime**](#model-apidatetime) | The last date and time when the file entry was updated. | [optional] |
+| **autoDelete** | [**ApiDateTime**](#model-apidatetime) | The date and time when the file entry will be automatically deleted. | [optional] |
+| **rootFolderType** | [**FolderType**](#model-foldertype) | The root folder type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **parentRoomType** | [**FolderType**](#model-foldertype) | The parent room type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **updatedBy** | [**EmployeeDto**](#model-employeedto) | The user who updated the file entry. | [optional] |
+| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] |
+| **providerKey** | **String** | The provider key of the file entry. | [optional] |
+| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] |
+| **order** | **String** | The order of the file entry. | [optional] |
+| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] |
+| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) | The file entry type. | [optional] [enum: 1, 2] |
 | **id** | **String** | The file entry ID. | [optional] [nullable] |
 | **rootFolderId** | **String** | The root folder ID of the file entry. | [optional] [nullable] |
 | **originId** | **String** | The origin ID of the file entry. | [optional] [nullable] |
@@ -10502,7 +10505,7 @@ The generic file entry information.
 | **availableShareRights** | [**FileEntryDtoInteger_allOf_availableShareRights**](#model-fileentrydtointegeravailablesharerights) |  | [optional] [nullable] |
 | **requestToken** | **String** | The request token of the file entry. | [optional] [nullable] |
 | **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] [nullable] |
-| **expirationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **expirationDate** | [**ApiDateTime**](#model-apidatetime) | Represents the expiration date of the file entry. | [optional] |
 | **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] [nullable] |
 
 
@@ -10574,8 +10577,8 @@ The external link request parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **linkId** | **UUID** (uuid) | The external link ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **expirationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights type. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **expirationDate** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **title** | **String** | The link name. | [optional] [example: My Document] [minLength: 0] [maxLength: 255] [nullable] |
 | **internal** | **Boolean** | The link scope, whether it is internal or not. | [optional] [example: false] |
 | **primary** | **Boolean** | Specifies whether the file link is primary or not. | [optional] [example: true] |
@@ -10611,15 +10614,15 @@ The file operation information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | The file operation ID. | [required] [example: 00000000-0000-0000-0000-000000000000] [nullable] |
-| **Operation** | [**FileOperationType**](#model-fileoperationtype) |  | [required] [enum: 0, 1, 2, 3, 4, 5, 6, 7] |
+| **Operation** | [**FileOperationType**](#model-fileoperationtype) | The file operation type. | [required] [enum: 0, 1, 2, 3, 4, 5, 6, 7] |
 | **progress** | **Integer** (int32) | The file operation progress in percentage. | [required] [example: 100] |
 | **error** | **String** | The file operation error message. | [required] [example: File not found.] [nullable] |
 | **processed** | **String** | The file operation processing status. | [required] [example: 1] [nullable] |
 | **finished** | **Boolean** | Specifies if the file operation is finished or not. | [required] [example: true] |
 | **url** | **URI** (uri) | The file operation URL. | [optional] [example: http://localhost/download] [nullable] |
-| **files** | [**List**](#model-fileentrybasedto) | The list of files of the file operation. | [optional] [example: [{"id":10,"title":"document.docx"}]] [nullable] |
-| **folders** | [**List**](#model-fileentrybasedto) | The list of folders of the file operation. | [optional] [example: [{"id":20,"title":"My Folder"}]] [nullable] |
-| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) |  | [optional] [enum: 0, 1, 2, 3, 4] |
+| **files** | [**List**](#model-fileentrybasedto) | The list of files of the file operation. | [optional] [example: [{id=10, title=document.docx}]] [nullable] |
+| **folders** | [**List**](#model-fileentrybasedto) | The list of folders of the file operation. | [optional] [example: [{id=20, title=My Folder}]] [nullable] |
+| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) | The status of the distributed task related to the file operation. | [optional] [enum: 0, 1, 2, 3, 4] |
 
 
 ### Model FileOperationRequestBaseDto
@@ -10653,7 +10656,7 @@ The file reference parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **referenceData** | [**FileReferenceData**](#model-filereferencedata) |  | [optional] |
+| **referenceData** | [**FileReferenceData**](#model-filereferencedata) | An object that is generated by the integrator to uniquely identify a file in its system. | [optional] |
 | **error** | **String** | The error message text. | [optional] [example: Error message] [nullable] |
 | **path** | **String** | The file name or relative path for the formula editor. | [optional] [example: /path/file.docx] [nullable] |
 | **url** | **URI** (uri) | The URL address to download the current file. | [optional] [example: https://example.com/file.docx] [nullable] |
@@ -10708,11 +10711,11 @@ The file sharing information and access rights.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedTo** | **oas_any_type_not_mapped** | The user who has the access to the specified file. | [optional] [example: {"displayName":"John Doe"}] [nullable] |
-| **sharedToUser** | [**EmployeeFullDto**](#model-employeefulldto) |  | [optional] |
-| **sharedToGroup** | [**GroupSummaryDto**](#model-groupsummarydto) |  | [optional] |
-| **sharedLink** | [**FileShareLink**](#model-filesharelink) |  | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights type. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedTo** | **null** | The user who has the access to the specified file. | [optional] [example: {displayName=John Doe}] |
+| **sharedToUser** | [**EmployeeFullDto**](#model-employeefulldto) | The full list of user parameters. | [optional] |
+| **sharedToGroup** | [**GroupSummaryDto**](#model-groupsummarydto) | The group summary parameters. | [optional] |
+| **sharedLink** | [**FileShareLink**](#model-filesharelink) | The user who has the access to the specified file. | [optional] |
 | **isLocked** | **Boolean** | Specifies if the access right is locked or not. | [required] [example: false] |
 | **isOwner** | **Boolean** | Specifies if the user is an owner of the specified file or not. | [required] [example: false] |
 | **canEditAccess** | **Boolean** | Specifies if the user can edit the access to the specified file or not. | [required] [example: true] |
@@ -10720,7 +10723,7 @@ The file sharing information and access rights.
 | **canEditDenyDownload** | **Boolean** | Determines whether the user has permission to modify the deny download setting for the file share. | [required] [example: true] |
 | **canEditExpirationDate** | **Boolean** | Indicates whether the expiration date of access permissions can be edited. | [required] [example: true] |
 | **canRevoke** | **Boolean** | Specifies whether the file sharing access can be revoked by the current user. | [required] [example: true] |
-| **subjectType** | [**SubjectType**](#model-subjecttype) |  | [required] [enum: 0, 1, 2, 3, 4] |
+| **subjectType** | [**SubjectType**](#model-subjecttype) | The subject type of the access right. | [required] [enum: 0, 1, 2, 3, 4] |
 
 
 ### Model FileShareLink
@@ -10731,8 +10734,8 @@ A shareable link for a file with its configuration and status.
 | **id** | **UUID** (uuid) | The unique identifier of the shared link. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **title** | **String** | The title of the shared content. | [optional] [example: Shared Document] [nullable] |
 | **shareLink** | **String** | The URL for accessing the shared content. | [optional] [example: http://localhost/share/abc123] [nullable] |
-| **expirationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **linkType** | [**LinkType**](#model-linktype) |  | [optional] [enum: 0, 1] |
+| **expirationDate** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
+| **linkType** | [**LinkType**](#model-linktype) | The sharing link type (e.g., Invitation). | [optional] [enum: 0, 1] |
 | **password** | **String** | The password protection for accessing the shared content. | [optional] [example: password123] [nullable] |
 | **denyDownload** | **Boolean** | Indicates whether downloading of the shared content is prohibited. | [optional] [example: false] [nullable] |
 | **isExpired** | **Boolean** | Indicates whether the shared link has expired. | [optional] [example: false] [nullable] |
@@ -10748,9 +10751,9 @@ The collection of file sharing parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **email** | **String** (email) | The email address. | [optional] [maxLength: 255] [nullable] |
+| **email** | **String** (email) | The email address. | [optional] [maxLength: 255] |
 | **shareTo** | **UUID** (uuid) | The ID of the user to whom the file will be shared. | [optional] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **access** | [**FileShare**](#model-fileshare) | The sharing access rights. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
 
 
 ### Model FileShareWrapper
@@ -10783,27 +10786,27 @@ The file settings parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **extsImagePreviewed** | **List** | The list of extensions of the viewed images. | [optional] [example: [".bmp",".gif",".jpeg",".jpg",".png",".svg"]] [nullable] |
-| **extsMediaPreviewed** | **List** | The list of extensions of the viewed media files. | [optional] [example: [".mp4",".webm",".mp3",".ogg"]] [nullable] |
-| **extsWebPreviewed** | **List** | The list of extensions of the viewed files. | [optional] [example: [".docx",".xlsx",".pptx",".pdf"]] [nullable] |
-| **extsWebEdited** | **List** | The list of extensions of the edited files. | [optional] [example: [".docx",".xlsx",".pptx"]] [nullable] |
-| **extsWebEncrypt** | **List** | The list of extensions of the encrypted files. | [optional] [example: [".docx",".xlsx",".pptx"]] [nullable] |
-| **extsWebReviewed** | **List** | The list of extensions of the reviewed files. | [optional] [example: [".docx"]] [nullable] |
-| **extsWebCustomFilterEditing** | **List** | The list of extensions of the custom filter files. | [optional] [example: [".xlsx"]] [nullable] |
-| **extsWebRestrictedEditing** | **List** | The list of extensions of the files that are restricted for editing. | [optional] [example: [".pdf"]] [nullable] |
-| **extsWebCommented** | **List** | The list of extensions of the commented files. | [optional] [example: [".docx"]] [nullable] |
-| **extsWebTemplate** | **List** | The list of extensions of the template files. | [optional] [example: [".docx",".xlsx",".pptx"]] [nullable] |
-| **extsMustConvert** | **List** | The list of extensions of the files that must be converted. | [optional] [example: [".doc",".xls",".ppt"]] [nullable] |
-| **extsConvertible** | **Map** | The list of the convertible extensions. | [optional] [example: {".doc":[".docx",".pdf"],".xls":[".xlsx",".pdf"]}] [nullable] |
-| **extsUploadable** | **List** | The list of the uploadable extensions. | [optional] [example: [".docx",".xlsx",".pdf"]] [nullable] |
-| **extsArchive** | **List** | The list of extensions of the archive files. | [optional] [example: [".zip",".rar",".7z"]] [nullable] |
-| **extsVideo** | **List** | The list of the video extensions. | [optional] [example: [".mp4",".webm",".avi"]] [nullable] |
-| **extsAudio** | **List** | The list of the audio extensions. | [optional] [example: [".mp3",".ogg",".wav"]] [nullable] |
-| **extsImage** | **List** | The list of the image extensions. | [optional] [example: [".png",".jpg",".gif"]] [nullable] |
-| **extsSpreadsheet** | **List** | The list of the spreadsheet extensions. | [optional] [example: [".xlsx",".xls",".ods"]] [nullable] |
-| **extsPresentation** | **List** | The list of the presentation extensions. | [optional] [example: [".pptx",".ppt",".odp"]] [nullable] |
-| **extsDocument** | **List** | The list of the text document extensions. | [optional] [example: [".docx",".doc",".odt"]] [nullable] |
-| **extsDiagram** | **List** | The list of the diagram extensions. | [optional] [example: [".vsdx"]] [nullable] |
+| **extsImagePreviewed** | **List** | The list of extensions of the viewed images. | [optional] [example: [.bmp, .gif, .jpeg, .jpg, .png, .svg]] [nullable] |
+| **extsMediaPreviewed** | **List** | The list of extensions of the viewed media files. | [optional] [example: [.mp4, .webm, .mp3, .ogg]] [nullable] |
+| **extsWebPreviewed** | **List** | The list of extensions of the viewed files. | [optional] [example: [.docx, .xlsx, .pptx, .pdf]] [nullable] |
+| **extsWebEdited** | **List** | The list of extensions of the edited files. | [optional] [example: [.docx, .xlsx, .pptx]] [nullable] |
+| **extsWebEncrypt** | **List** | The list of extensions of the encrypted files. | [optional] [example: [.docx, .xlsx, .pptx]] [nullable] |
+| **extsWebReviewed** | **List** | The list of extensions of the reviewed files. | [optional] [example: [.docx]] [nullable] |
+| **extsWebCustomFilterEditing** | **List** | The list of extensions of the custom filter files. | [optional] [example: [.xlsx]] [nullable] |
+| **extsWebRestrictedEditing** | **List** | The list of extensions of the files that are restricted for editing. | [optional] [example: [.pdf]] [nullable] |
+| **extsWebCommented** | **List** | The list of extensions of the commented files. | [optional] [example: [.docx]] [nullable] |
+| **extsWebTemplate** | **List** | The list of extensions of the template files. | [optional] [example: [.docx, .xlsx, .pptx]] [nullable] |
+| **extsMustConvert** | **List** | The list of extensions of the files that must be converted. | [optional] [example: [.doc, .xls, .ppt]] [nullable] |
+| **extsConvertible** | **null** | The list of the convertible extensions. | [optional] [example: {.doc=[.docx, .pdf], .xls=[.xlsx, .pdf]}] |
+| **extsUploadable** | **List** | The list of the uploadable extensions. | [optional] [example: [.docx, .xlsx, .pdf]] [nullable] |
+| **extsArchive** | **List** | The list of extensions of the archive files. | [optional] [example: [.zip, .rar, .7z]] [nullable] |
+| **extsVideo** | **List** | The list of the video extensions. | [optional] [example: [.mp4, .webm, .avi]] [nullable] |
+| **extsAudio** | **List** | The list of the audio extensions. | [optional] [example: [.mp3, .ogg, .wav]] [nullable] |
+| **extsImage** | **List** | The list of the image extensions. | [optional] [example: [.png, .jpg, .gif]] [nullable] |
+| **extsSpreadsheet** | **List** | The list of the spreadsheet extensions. | [optional] [example: [.xlsx, .xls, .ods]] [nullable] |
+| **extsPresentation** | **List** | The list of the presentation extensions. | [optional] [example: [.pptx, .ppt, .odp]] [nullable] |
+| **extsDocument** | **List** | The list of the text document extensions. | [optional] [example: [.docx, .doc, .odt]] [nullable] |
+| **extsDiagram** | **List** | The list of the diagram extensions. | [optional] [example: [.vsdx]] [nullable] |
 | **internalFormats** | [**FilesSettingsDto_internalFormats**](#model-filessettingsdtointernalformats) |  | [optional] [nullable] |
 | **masterFormExtension** | **String** | The master form extension. | [optional] [example: .docxf] [nullable] |
 | **paramVersion** | **String** | The URL parameter which specifies the file version. | [optional] [example: ver] [nullable] |
@@ -10827,16 +10830,16 @@ The file settings parameters.
 | **hideConfirmConvertSave** | **Boolean** | Specifies whether to hide the confirmation dialog  for saving the file copy in the original format when converting a file. | [optional] [example: false] |
 | **hideConfirmConvertOpen** | **Boolean** | Specifies whether to hide the confirmation dialog  for opening the conversion result. | [optional] [example: false] |
 | **hideConfirmRoomLifetime** | **Boolean** | Specifies whether to hide the confirmation dialog about the file lifetime in the room. | [optional] [example: false] |
-| **defaultOrder** | [**OrderBy**](#model-orderby) |  | [optional] |
+| **defaultOrder** | [**OrderBy**](#model-orderby) | The sorting parameters. | [optional] |
 | **forcesave** | **Boolean** | Specifies whether to forcesave the files or not. | [optional] [example: false] |
 | **storeForcesave** | **Boolean** | Specifies whether to store the forcesaved file versions or not. | [optional] [example: false] |
 | **recentSection** | **Boolean** | Specifies if the Recent section is displayed or not. | [optional] [example: true] |
 | **favoritesSection** | **Boolean** | Specifies if the Favorites section is displayed or not. | [optional] [example: true] |
 | **templatesSection** | **Boolean** | Specifies if the Templates section is displayed or not. | [optional] [example: true] |
 | **downloadTarGz** | **Boolean** | Specifies whether to download the .tar.gz files or not. | [optional] [example: true] |
-| **automaticallyCleanUp** | [**AutoCleanUpData**](#model-autocleanupdata) |  | [optional] |
+| **automaticallyCleanUp** | [**AutoCleanUpData**](#model-autocleanupdata) | The auto-clearing setting parameters. | [optional] |
 | **canSearchByContent** | **Boolean** | Specifies whether the file can be searched by its content or not. | [optional] [example: true] |
-| **defaultSharingAccessRights** | **List** | The default access rights in sharing settings. | [optional] [example: [1,2]] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] [nullable] |
+| **defaultSharingAccessRights** | **List** | The default access rights in sharing settings. | [optional] [example: [1, 2]] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] [nullable] |
 | **maxUploadThreadCount** | **Integer** (int32) | The maximum number of upload threads. | [optional] [example: 10] |
 | **chunkUploadSize** | **Long** (int64) | The size of a large file that is uploaded in chunks. | [optional] [example: 10485760] |
 | **openEditorInSameTab** | **Boolean** | Specifies whether to open the editor in the same tab or not. | [optional] [example: false] |
@@ -10845,7 +10848,7 @@ The file settings parameters.
 | **externalShareApplyToDocuments** | **Boolean** | When external sharing is restricted, specifies whether the restriction applies to the My Documents section. | [optional] [example: true] |
 | **externalShareApplyToRooms** | **Boolean** | When external sharing is restricted, specifies whether the restriction applies to the Rooms section. | [optional] [example: true] |
 | **blockExistingLinksOnRestrict** | **Boolean** | When external sharing is restricted, specifies whether existing public links are blocked immediately. | [optional] [example: true] |
-| **extsFilesVectorized** | **List** | List of extensions available for vectorization | [optional] [example: [".docx",".pdf",".txt"]] [nullable] |
+| **extsFilesVectorized** | **List** | List of extensions available for vectorization | [optional] [example: [.docx, .pdf, .txt]] [nullable] |
 | **maxVectorizationFileSize** | **Long** (int64) | The maximum file size for vectorization | [optional] [example: 5242880] |
 
 
@@ -10891,12 +10894,12 @@ The file statistics result parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **myDocumentsUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) |  | [optional] |
-| **trashUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) |  | [optional] |
-| **archiveUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) |  | [optional] |
-| **roomsUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) |  | [optional] |
-| **aiAgentsUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) |  | [optional] |
-| **formsUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) |  | [optional] |
+| **myDocumentsUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) | The used space of files in the \\My Documents\\ section. | [optional] |
+| **trashUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) | The used space of files in the \\Trash\\ section. | [optional] |
+| **archiveUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) | The used space of files in the \\Archive\\ section. | [optional] |
+| **roomsUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) | The used space of files in the \\Rooms\\ section. | [optional] |
+| **aiAgentsUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) | The used space of files in the \\AI agents\\ section. | [optional] |
+| **formsUsedSpace** | [**FilesStatisticsFolder**](#model-filesstatisticsfolder) | The used space of files in the \\Forms\\ section. | [optional] |
 
 
 ### Model FilesStatisticsResultWrapper
@@ -10916,9 +10919,9 @@ The parameters of the form filling result.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **formNumber** | **Integer** (int32) | The filling form number. | [required] [example: 1] |
-| **completedForm** | [**FileDtoInteger**](#model-filedtointeger) |  | [optional] |
-| **originalForm** | [**FileDtoInteger**](#model-filedtointeger) |  | [optional] |
-| **manager** | [**EmployeeFullDto**](#model-employeefulldto) |  | [optional] |
+| **completedForm** | [**FileDtoInteger**](#model-filedtointeger) | The file parameters. | [optional] |
+| **originalForm** | [**FileDtoInteger**](#model-filedtointeger) | The file parameters. | [optional] |
+| **manager** | [**EmployeeFullDto**](#model-employeefulldto) | The full list of user parameters. | [optional] |
 | **roomId** | **Integer** (int32) | The room ID where filling the form. | [required] [example: 123] |
 | **isRoomMember** | **Boolean** | Specifies if the manager who fills the form is a room member or not. | [optional] [example: true] |
 
@@ -10946,10 +10949,10 @@ The folder content information.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **files** | [**List**](#model-fileentrybasedto) | The list of files in the folder. | [optional] [example: [{"id":10,"title":"document.docx"}]] [nullable] |
-| **folders** | [**List**](#model-fileentrybasedto) | The list of folders in the folder. | [optional] [example: [{"id":20,"title":"My Folder"}]] [nullable] |
-| **current** | [**FolderDtoInteger**](#model-folderdtointeger) |  | [optional] |
-| **pathParts** | **oas_any_type_not_mapped** | The folder path. | [required] [example: {key = "Key", path = "//path//to//folder"}] [nullable] |
+| **files** | [**List**](#model-fileentrybasedto) | The list of files in the folder. | [optional] [example: [{id=10, title=document.docx}]] [nullable] |
+| **folders** | [**List**](#model-fileentrybasedto) | The list of folders in the folder. | [optional] [example: [{id=20, title=My Folder}]] [nullable] |
+| **current** | [**FolderDtoInteger**](#model-folderdtointeger) | The current folder information. | [optional] |
+| **pathParts** | **null** | The folder path. | [required] [example: {key = "Key", path = "//path//to//folder"}] |
 | **startIndex** | **Integer** (int32) | The folder start index. | [optional] [example: 0] |
 | **count** | **Integer** (int32) | The number of folder elements. | [optional] [example: 4] |
 | **total** | **Integer** (int32) | The total number of elements in the folder. | [required] [example: 4] |
@@ -10983,42 +10986,42 @@ The folder parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **title** | **String** | The file entry title. | [optional] [nullable] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **ownedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **title** | **String** | The file entry title. | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights to the file entry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedBy** | [**EmployeeDto**](#model-employeedto) | Provides information about the employee who shared the file or folder. | [optional] |
+| **ownedBy** | [**EmployeeDto**](#model-employeedto) | The information about the employee who owns the file entry. | [optional] |
 | **shared** | **Boolean** | Specifies if the file entry is shared via link or not. | [optional] |
 | **sharedForUser** | **Boolean** | Specifies if the file entry is shared for user or not. | [optional] |
 | **sharedExternal** | **Boolean** | Specifies if the file entry is shared via a public (non-internal) external link. | [optional] |
 | **parentShared** | **Boolean** | Indicates whether the parent entity is shared. | [optional] |
-| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] [nullable] |
-| **created** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **createdBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **updated** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **autoDelete** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **rootFolderType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **parentRoomType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **updatedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] [nullable] |
-| **providerKey** | **String** | The provider key of the file entry. | [optional] [nullable] |
-| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] [nullable] |
-| **order** | **String** | The order of the file entry. | [optional] [nullable] |
-| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] [nullable] |
-| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) |  | [optional] [enum: 1, 2] |
+| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] |
+| **created** | [**ApiDateTime**](#model-apidatetime) | The creation date and time of the file entry. | [optional] |
+| **createdBy** | [**EmployeeDto**](#model-employeedto) | The file entry author. | [optional] |
+| **updated** | [**ApiDateTime**](#model-apidatetime) | The last date and time when the file entry was updated. | [optional] |
+| **autoDelete** | [**ApiDateTime**](#model-apidatetime) | The date and time when the file entry will be automatically deleted. | [optional] |
+| **rootFolderType** | [**FolderType**](#model-foldertype) | The root folder type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **parentRoomType** | [**FolderType**](#model-foldertype) | The parent room type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **updatedBy** | [**EmployeeDto**](#model-employeedto) | The user who updated the file entry. | [optional] |
+| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] |
+| **providerKey** | **String** | The provider key of the file entry. | [optional] |
+| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] |
+| **order** | **String** | The order of the file entry. | [optional] |
+| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] |
+| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) | The file entry type. | [optional] [enum: 1, 2] |
 | **id** | **Integer** (int32) | The file entry ID. | [optional] |
 | **rootFolderId** | **Integer** (int32) | The root folder ID of the file entry. | [optional] |
 | **originId** | **Integer** (int32) | The origin ID of the file entry. | [optional] |
 | **originRoomId** | **Integer** (int32) | The origin room ID of the file entry. | [optional] |
-| **originTitle** | **String** | The origin title of the file entry. | [optional] [nullable] |
-| **originRoomTitle** | **String** | The origin room title of the file entry. | [optional] [nullable] |
+| **originTitle** | **String** | The origin title of the file entry. | [optional] |
+| **originRoomTitle** | **String** | The origin room title of the file entry. | [optional] |
 | **canShare** | **Boolean** | Specifies if the file entry can be shared or not. | [optional] |
 | **shareSettings** | [**FileEntryDtoInteger_allOf_shareSettings**](#model-fileentrydtointegersharesettings) |  | [optional] [nullable] |
 | **security** | [**FileEntryDtoInteger_allOf_security**](#model-fileentrydtointegersecurity) |  | [optional] [nullable] |
 | **availableShareRights** | [**FileEntryDtoInteger_allOf_availableShareRights**](#model-fileentrydtointegeravailablesharerights) |  | [optional] [nullable] |
-| **requestToken** | **String** | The request token of the file entry. | [optional] [nullable] |
-| **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] [nullable] |
-| **expirationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] [nullable] |
+| **requestToken** | **String** | The request token of the file entry. | [optional] |
+| **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] |
+| **expirationDate** | [**ApiDateTime**](#model-apidatetime) | Represents the expiration date of the file entry. | [optional] |
+| **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] |
 | **parentId** | **Integer** (int32) | The parent folder ID of the folder. | [optional] |
 | **filesCount** | **Integer** (int32) | The number of files that the folder contains. | [optional] |
 | **foldersCount** | **Integer** (int32) | The number of folders that the folder contains. | [optional] |
@@ -11026,23 +11029,23 @@ The folder parameters.
 | **new** | **Integer** (int32) | The new element index in the folder. | [optional] |
 | **mute** | **Boolean** | Specifies if the folder notifications are enabled or not. | [optional] |
 | **tags** | **List** | The list of tags of the folder. | [optional] [nullable] |
-| **logo** | [**Logo**](#model-logo) |  | [optional] |
+| **logo** | [**Logo**](#model-logo) | The folder logo. | [optional] |
 | **pinned** | **Boolean** | Specifies if the folder is pinned or not. | [optional] |
-| **roomType** | [**RoomType**](#model-roomtype) |  | [optional] [enum: 1, 2, 5, 6, 8, 9] |
+| **roomType** | [**RoomType**](#model-roomtype) | The room type of the folder. | [optional] [enum: 1, 2, 5, 6, 8, 9] |
 | **private** | **Boolean** | Specifies if the folder is private or not. | [optional] |
 | **indexing** | **Boolean** | Specifies if the folder is indexed or not. | [optional] |
 | **denyDownload** | **Boolean** | Specifies if the folder can be downloaded or not. | [optional] |
-| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) |  | [optional] |
-| **watermark** | [**WatermarkDto**](#model-watermarkdto) |  | [optional] |
-| **type** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) | The room data lifetime settings of the folder. | [optional] |
+| **watermark** | [**WatermarkDto**](#model-watermarkdto) | The watermark settings of the folder. | [optional] |
+| **type** | [**FolderType**](#model-foldertype) | The folder type. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
 | **inRoom** | **Boolean** | Specifies if the folder is placed in the room or not. | [optional] [nullable] |
 | **quotaLimit** | **Long** (int64) | The folder quota limit. | [optional] [nullable] |
 | **isCustomQuota** | **Boolean** | Specifies if the folder room has a custom quota or not. | [optional] [nullable] |
 | **usedSpace** | **Long** (int64) | How much folder space is used (counter). | [optional] [nullable] |
 | **passwordProtected** | **Boolean** | Specifies if the folder is password protected or not. | [optional] [nullable] |
 | **expired** | **Boolean** | Specifies if an external link to the folder is expired or not. | [optional] [nullable] |
-| **chatSettings** | [**ChatSettingsDto**](#model-chatsettingsdto) |  | [optional] |
-| **rootRoomType** | [**RoomType**](#model-roomtype) |  | [optional] [enum: 1, 2, 5, 6, 8, 9] |
+| **chatSettings** | [**ChatSettingsDto**](#model-chatsettingsdto) | The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.  Only applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured. | [optional] |
+| **rootRoomType** | [**RoomType**](#model-roomtype) | The room type of the root folder. Indicates the type of the parent room if the current folder is nested within a room hierarchy.  This property helps identify the context in which a nested folder exists. | [optional] [enum: 1, 2, 5, 6, 8, 9] |
 | **saveFormAsXLSX** | **Boolean** | Specifies whether to save form data as XLSX file. | [optional] [nullable] |
 | **sendFormToExternalDB** | **Boolean** | Specifies whether to send form data to external database. | [optional] [nullable] |
 | **originalFormId** | **Integer** (int32) | The original form ID that corresponds to this FormFillingFolderDone folder. | [optional] [nullable] |
@@ -11053,42 +11056,42 @@ The folder parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **title** | **String** | The file entry title. | [optional] [nullable] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **sharedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **ownedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
+| **title** | **String** | The file entry title. | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights to the file entry. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **sharedBy** | [**EmployeeDto**](#model-employeedto) | Provides information about the employee who shared the file or folder. | [optional] |
+| **ownedBy** | [**EmployeeDto**](#model-employeedto) | The information about the employee who owns the file entry. | [optional] |
 | **shared** | **Boolean** | Specifies if the file entry is shared via link or not. | [optional] |
 | **sharedForUser** | **Boolean** | Specifies if the file entry is shared for user or not. | [optional] |
 | **sharedExternal** | **Boolean** | Specifies if the file entry is shared via a public (non-internal) external link. | [optional] |
 | **parentShared** | **Boolean** | Indicates whether the parent entity is shared. | [optional] |
-| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] [nullable] |
-| **created** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **createdBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **updated** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **autoDelete** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **rootFolderType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **parentRoomType** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
-| **updatedBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] [nullable] |
-| **providerKey** | **String** | The provider key of the file entry. | [optional] [nullable] |
-| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] [nullable] |
-| **order** | **String** | The order of the file entry. | [optional] [nullable] |
-| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] [nullable] |
-| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) |  | [optional] [enum: 1, 2] |
-| **id** | **String** | The file entry ID. | [optional] [nullable] |
-| **rootFolderId** | **String** | The root folder ID of the file entry. | [optional] [nullable] |
-| **originId** | **String** | The origin ID of the file entry. | [optional] [nullable] |
-| **originRoomId** | **String** | The origin room ID of the file entry. | [optional] [nullable] |
-| **originTitle** | **String** | The origin title of the file entry. | [optional] [nullable] |
-| **originRoomTitle** | **String** | The origin room title of the file entry. | [optional] [nullable] |
+| **shortWebUrl** | **URI** (uri) | The short Web URL. | [optional] |
+| **created** | [**ApiDateTime**](#model-apidatetime) | The creation date and time of the file entry. | [optional] |
+| **createdBy** | [**EmployeeDto**](#model-employeedto) | The file entry author. | [optional] |
+| **updated** | [**ApiDateTime**](#model-apidatetime) | The last date and time when the file entry was updated. | [optional] |
+| **autoDelete** | [**ApiDateTime**](#model-apidatetime) | The date and time when the file entry will be automatically deleted. | [optional] |
+| **rootFolderType** | [**FolderType**](#model-foldertype) | The root folder type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **parentRoomType** | [**FolderType**](#model-foldertype) | The parent room type of the file entry. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **updatedBy** | [**EmployeeDto**](#model-employeedto) | The user who updated the file entry. | [optional] |
+| **providerItem** | **Boolean** | Specifies if the file entry provider is specified or not. | [optional] |
+| **providerKey** | **String** | The provider key of the file entry. | [optional] |
+| **providerId** | **Integer** (int32) | The provider ID of the file entry. | [optional] |
+| **order** | **String** | The order of the file entry. | [optional] |
+| **isFavorite** | **Boolean** | Specifies if the file is a favorite or not. | [optional] |
+| **fileEntryType** | [**FileEntryType**](#model-fileentrytype) | The file entry type. | [optional] [enum: 1, 2] |
+| **id** | **String** | The file entry ID. | [optional] |
+| **rootFolderId** | **String** | The root folder ID of the file entry. | [optional] |
+| **originId** | **String** | The origin ID of the file entry. | [optional] |
+| **originRoomId** | **String** | The origin room ID of the file entry. | [optional] |
+| **originTitle** | **String** | The origin title of the file entry. | [optional] |
+| **originRoomTitle** | **String** | The origin room title of the file entry. | [optional] |
 | **canShare** | **Boolean** | Specifies if the file entry can be shared or not. | [optional] |
 | **shareSettings** | [**FileEntryDtoInteger_allOf_shareSettings**](#model-fileentrydtointegersharesettings) |  | [optional] [nullable] |
 | **security** | [**FileEntryDtoInteger_allOf_security**](#model-fileentrydtointegersecurity) |  | [optional] [nullable] |
 | **availableShareRights** | [**FileEntryDtoInteger_allOf_availableShareRights**](#model-fileentrydtointegeravailablesharerights) |  | [optional] [nullable] |
-| **requestToken** | **String** | The request token of the file entry. | [optional] [nullable] |
-| **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] [nullable] |
-| **expirationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] [nullable] |
+| **requestToken** | **String** | The request token of the file entry. | [optional] |
+| **external** | **Boolean** | Specifies if the folder can be accessed via an external link or not. | [optional] |
+| **expirationDate** | [**ApiDateTime**](#model-apidatetime) | Represents the expiration date of the file entry. | [optional] |
+| **isLinkExpired** | **Boolean** | Indicates whether the shareable link associated with the file or folder has expired. | [optional] |
 | **parentId** | **String** | The parent folder ID of the folder. | [optional] [nullable] |
 | **filesCount** | **Integer** (int32) | The number of files that the folder contains. | [optional] |
 | **foldersCount** | **Integer** (int32) | The number of folders that the folder contains. | [optional] |
@@ -11096,23 +11099,23 @@ The folder parameters.
 | **new** | **Integer** (int32) | The new element index in the folder. | [optional] |
 | **mute** | **Boolean** | Specifies if the folder notifications are enabled or not. | [optional] |
 | **tags** | **List** | The list of tags of the folder. | [optional] [nullable] |
-| **logo** | [**Logo**](#model-logo) |  | [optional] |
+| **logo** | [**Logo**](#model-logo) | The folder logo. | [optional] |
 | **pinned** | **Boolean** | Specifies if the folder is pinned or not. | [optional] |
-| **roomType** | [**RoomType**](#model-roomtype) |  | [optional] [enum: 1, 2, 5, 6, 8, 9] |
+| **roomType** | [**RoomType**](#model-roomtype) | The room type of the folder. | [optional] [enum: 1, 2, 5, 6, 8, 9] |
 | **private** | **Boolean** | Specifies if the folder is private or not. | [optional] |
 | **indexing** | **Boolean** | Specifies if the folder is indexed or not. | [optional] |
 | **denyDownload** | **Boolean** | Specifies if the folder can be downloaded or not. | [optional] |
-| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) |  | [optional] |
-| **watermark** | [**WatermarkDto**](#model-watermarkdto) |  | [optional] |
-| **type** | [**FolderType**](#model-foldertype) |  | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
+| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) | The room data lifetime settings of the folder. | [optional] |
+| **watermark** | [**WatermarkDto**](#model-watermarkdto) | The watermark settings of the folder. | [optional] |
+| **type** | [**FolderType**](#model-foldertype) | The folder type. | [optional] [enum: 0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36] |
 | **inRoom** | **Boolean** | Specifies if the folder is placed in the room or not. | [optional] [nullable] |
 | **quotaLimit** | **Long** (int64) | The folder quota limit. | [optional] [nullable] |
 | **isCustomQuota** | **Boolean** | Specifies if the folder room has a custom quota or not. | [optional] [nullable] |
 | **usedSpace** | **Long** (int64) | How much folder space is used (counter). | [optional] [nullable] |
 | **passwordProtected** | **Boolean** | Specifies if the folder is password protected or not. | [optional] [nullable] |
 | **expired** | **Boolean** | Specifies if an external link to the folder is expired or not. | [optional] [nullable] |
-| **chatSettings** | [**ChatSettingsDto**](#model-chatsettingsdto) |  | [optional] |
-| **rootRoomType** | [**RoomType**](#model-roomtype) |  | [optional] [enum: 1, 2, 5, 6, 8, 9] |
+| **chatSettings** | [**ChatSettingsDto**](#model-chatsettingsdto) | The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.  Only applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured. | [optional] |
+| **rootRoomType** | [**RoomType**](#model-roomtype) | The room type of the root folder. Indicates the type of the parent room if the current folder is nested within a room hierarchy.  This property helps identify the context in which a nested folder exists. | [optional] [enum: 1, 2, 5, 6, 8, 9] |
 | **saveFormAsXLSX** | **Boolean** | Specifies whether to save form data as XLSX file. | [optional] [nullable] |
 | **sendFormToExternalDB** | **Boolean** | Specifies whether to send form data to external database. | [optional] [nullable] |
 | **originalFormId** | **Integer** (int32) | The original form ID that corresponds to this FormFillingFolderDone folder. | [optional] [nullable] |
@@ -11146,8 +11149,8 @@ The folder link parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **linkId** | **UUID** (uuid) | The folder link ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **expirationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights type. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **expirationDate** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **title** | **String** | The link name. | [optional] [example: My Document] [minLength: 0] [maxLength: 255] [nullable] |
 | **password** | **String** | The link password. | [optional] [example: p@ssw0rd] [minLength: 0] [maxLength: 255] [nullable] |
 | **denyDownload** | **Boolean** | Specifies if downloading the file from the link is disabled or not. | [optional] [example: false] |
@@ -11212,8 +11215,8 @@ The folder link parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **createOn** | **Date** (date-time) | The date and time when the form was created. | [optional] |
-| **formsData** | [**List**](#model-formsitemdata) | The list of forms data. | [optional] [example: [{"key":"field1","value":"Answer"}]] [nullable] |
+| **createOn** | **Date** (date-time) | The date and time when the form was created. | [optional] [example: 2025-01-01T00:00:00] |
+| **formsData** | [**List**](#model-formsitemdata) | The list of forms data. | [optional] [example: [{key=field1, value=Answer}]] [nullable] |
 
 
 ### Model FormRole
@@ -11249,12 +11252,12 @@ The form role parameters.
 |------------ | ------------- | ------------- | -------------|
 | **roleName** | **String** | The role name. | [required] [example: Approver] [nullable] |
 | **roleColor** | **String** | The role color. | [optional] [example: #FF5733] [nullable] |
-| **user** | [**EmployeeFullDto**](#model-employeefulldto) |  | [optional] |
+| **user** | [**EmployeeFullDto**](#model-employeefulldto) | The user of the role. | [optional] |
 | **sequence** | **Integer** (int32) | The role sequence. | [required] [example: 1] |
 | **submitted** | **Boolean** | Specifies if the role is submitted. | [required] [example: false] |
-| **stopedBy** | [**EmployeeFullDto**](#model-employeefulldto) |  | [optional] |
-| **history** | **Map** (date-time) | The role history. | [optional] [example: {"0":"2025-01-15T10:30:00Z"}] [nullable] |
-| **roleStatus** | [**FormFillingStatus**](#model-formfillingstatus) |  | [optional] [enum: 0, 1, 2, 3, 4, 5] |
+| **stopedBy** | [**EmployeeFullDto**](#model-employeefulldto) | The user who stopped the role. | [optional] |
+| **history** | **null** | The role history. | [optional] [example: {0=2025-01-15T10:30:00Z}] |
+| **roleStatus** | [**FormFillingStatus**](#model-formfillingstatus) | The role status. | [optional] [enum: 0, 1, 2, 3, 4, 5] |
 
 
 ### Model FormSubmissionsDto
@@ -11343,9 +11346,9 @@ The group member security information.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **user** | [**EmployeeFullDto**](#model-employeefulldto) |  | [required] |
-| **groupAccess** | [**FileShare**](#model-fileshare) |  | [required] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **userAccess** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **user** | [**EmployeeFullDto**](#model-employeefulldto) | The full list of user parameters. | [required] |
+| **groupAccess** | [**FileShare**](#model-fileshare) | The access rights type. | [required] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **userAccess** | [**FileShare**](#model-fileshare) | The group member access rights to the files. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
 | **overridden** | **Boolean** | Specifies if the group access rights are overridden or not. | [required] [example: false] |
 | **canEditAccess** | **Boolean** | Specifies if the group member can edit the group access rights or not. | [required] [example: true] |
 | **owner** | **Boolean** | Specifies if the group member is a group owner or not. | [required] [example: false] |
@@ -11375,7 +11378,7 @@ The action performed on the file.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **id** | [**MessageAction**](#model-messageaction) |  | [optional] [enum: 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 4000, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 4010, 4011, 4012, 4013, 4014, 4015, 4016, 4017, 4018, 4019, 4020, 4021, 4022, 4023, 4024, 4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 4034, 4035, 4036, 4037, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5019, 5020, 5021, 5022, 5023, 5024, 5025, 5026, 5027, 5028, 5029, 5030, 5031, 5032, 5033, 5034, 5035, 5036, 5037, 5038, 5039, 5040, 5041, 5042, 5043, 5044, 5045, 5046, 5047, 5048, 5049, 5050, 5053, 5054, 5055, 5056, 5057, 5058, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066, 5068, 5069, 5070, 5071, 5072, 5073, 5074, 5075, 5076, 5077, 5078, 5079, 5080, 5081, 5082, 5083, 5084, 5085, 5086, 5087, 5088, 5089, 5090, 5091, 5092, 5093, 5094, 5095, 5096, 5097, 5098, 5099, 5100, 5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128, 5129, 5130, 5131, 5132, 5133, 5150, 5151, 5152, 5153, 5154, 5155, 5156, 5157, 5158, 5159, 5160, 5201, 5202, 5203, 5204, 5205, 5206, 5501, 5502, 5503, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6019, 6020, 6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029, 6030, 6031, 6032, 6033, 6034, 6035, 6036, 6037, 6038, 6039, 6040, 6041, 6042, 6043, 6044, 6045, 6046, 6047, 6048, 6049, 6050, 6051, 6052, 6053, 6054, 6055, 6056, 6057, 6058, 6059, 6060, 6061, 6062, 6063, 6064, 6065, 6066, 6067, 6068, 6069, 6070, 6071, 6072, 6073, 6074, 6075, 6076, 6077, 6078, 6079, 6080, 6081, 6082, 6083, 6084, 6085, 6086, 6087, 6088, 6089, 6090, 6091, 6092, 6093, 6094, 6095, 6096, 6097, 6098, 6099, 6100, 6101, 6102, 7000, 7001, 7002, 7003, 7004, 9901, 9902, 9903, 9904, 9905, 9906, 9907, 9908, 9909, -1] |
+| **id** | [**MessageAction**](#model-messageaction) | The event action ID. | [optional] [enum: 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 4000, 4001, 4002, 4003, 4004, 4005, 4006, 4007, 4008, 4009, 4010, 4011, 4012, 4013, 4014, 4015, 4016, 4017, 4018, 4019, 4020, 4021, 4022, 4023, 4024, 4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 4034, 4035, 4036, 4037, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5019, 5020, 5021, 5022, 5023, 5024, 5025, 5026, 5027, 5028, 5029, 5030, 5031, 5032, 5033, 5034, 5035, 5036, 5037, 5038, 5039, 5040, 5041, 5042, 5043, 5044, 5045, 5046, 5047, 5048, 5049, 5050, 5053, 5054, 5055, 5056, 5057, 5058, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066, 5068, 5069, 5070, 5071, 5072, 5073, 5074, 5075, 5076, 5077, 5078, 5079, 5080, 5081, 5082, 5083, 5084, 5085, 5086, 5087, 5088, 5089, 5090, 5091, 5092, 5093, 5094, 5095, 5096, 5097, 5098, 5099, 5100, 5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113, 5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128, 5129, 5130, 5131, 5132, 5133, 5150, 5151, 5152, 5153, 5154, 5155, 5156, 5157, 5158, 5159, 5160, 5201, 5202, 5203, 5204, 5205, 5206, 5501, 5502, 5503, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6019, 6020, 6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029, 6030, 6031, 6032, 6033, 6034, 6035, 6036, 6037, 6038, 6039, 6040, 6041, 6042, 6043, 6044, 6045, 6046, 6047, 6048, 6049, 6050, 6051, 6052, 6053, 6054, 6055, 6056, 6057, 6058, 6059, 6060, 6061, 6062, 6063, 6064, 6065, 6066, 6067, 6068, 6069, 6070, 6071, 6072, 6073, 6074, 6075, 6076, 6077, 6078, 6079, 6080, 6081, 6082, 6083, 6084, 6085, 6086, 6087, 6088, 6089, 6090, 6091, 6092, 6093, 6094, 6095, 6096, 6097, 6098, 6099, 6100, 6101, 6102, 7000, 7001, 7002, 7003, 7004, 9901, 9902, 9903, 9904, 9905, 9906, 9907, 9908, 9909, -1] |
 | **key** | **String** | The action performed on the file. | [optional] [example: fileUploaded] [nullable] |
 
 
@@ -11404,11 +11407,11 @@ The file history information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **Integer** (int32) | The unique identifier for the file history entry. | [required] [example: 123] |
-| **action** | [**HistoryAction**](#model-historyaction) |  | [required] |
-| **initiator** | [**EmployeeDto**](#model-employeedto) |  | [required] |
-| **date** | [**ApiDateTime**](#model-apidatetime) |  | [required] |
-| **data** | [**HistoryData**](#model-historydata) |  | [required] |
-| **related** | [**List**](#model-historydto) | The list of related history. | [optional] [example: [{"id":124,"action":0}]] [nullable] |
+| **action** | [**HistoryAction**](#model-historyaction) | The action performed on the file. | [required] |
+| **initiator** | [**EmployeeDto**](#model-employeedto) | The user parameters. | [required] |
+| **date** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [required] |
+| **data** | [**HistoryData**](#model-historydata) | The history data. | [required] |
+| **related** | [**List**](#model-historydto) | The list of related history. | [optional] [example: [{id=124, action=0}]] [nullable] |
 
 
 ### Model ICompressWrapper
@@ -11438,7 +11441,7 @@ The information config parameters.
 | **folder** | **String** | The folder of the file. | [optional] [example: My Documents] [nullable] |
 | **owner** | **String** | The file owner. | [optional] [example: John Doe] [nullable] |
 | **sharingSettings** | [**List**](#model-aceshortwrapper) | The sharing settings of the file. | [optional] [example: []] [nullable] |
-| **type** | [**EditorType**](#model-editortype) |  | [optional] [enum: 0, 1, 2] |
+| **type** | [**EditorType**](#model-editortype) | The editor type. | [optional] [enum: 0, 1, 2] |
 | **uploaded** | **String** | The uploaded file. | [optional] [example: 2025-01-01T00:00:00] [nullable] |
 
 
@@ -11493,7 +11496,7 @@ The room logo information.
 | **medium** | **String** | The medium logo. | [required] [example: https://portal.example.com/logo/medium.png] [nullable] |
 | **small** | **String** | The small logo. | [required] [example: https://portal.example.com/logo/small.png] [nullable] |
 | **color** | **String** | The logo color. | [optional] [example: #4781D1] [nullable] |
-| **cover** | [**LogoCover**](#model-logocover) |  | [optional] |
+| **cover** | [**LogoCover**](#model-logocover) | The logo cover. | [optional] |
 
 
 ### Model LogoConfigDto
@@ -11536,7 +11539,7 @@ The parameters for managing form filling.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **formId** | **Integer** (int32) | The ID of the form to manage. | [required] [example: 1] |
-| **action** | [**FormFillingManageAction**](#model-formfillingmanageaction) |  | [optional] [enum: 0, 1, 2, 3] |
+| **action** | [**FormFillingManageAction**](#model-formfillingmanageaction) | The action to perform on the form. | [optional] [enum: 0, 1, 2, 3] |
 
 
 ### Model MentionMessageWrapper
@@ -11544,8 +11547,8 @@ The mention message parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **actionLink** | [**ActionLinkConfig**](#model-actionlinkconfig) |  | [optional] |
-| **emails** | **List** | A list of emails that will receive the mention message. | [optional] [example: ["user1@example.com","user2@example.com"]] [nullable] |
+| **actionLink** | [**ActionLinkConfig**](#model-actionlinkconfig) | The config parameter which contains the information about the action in the document that will be scrolled to. | [optional] |
+| **emails** | **List** | A list of emails that will receive the mention message. | [optional] [example: [user1@example.com, user2@example.com]] [nullable] |
 | **message** | **String** | The mention message. | [optional] [example: Hello] [minLength: 0] [maxLength: 255] [nullable] |
 
 
@@ -11554,7 +11557,7 @@ The parameters of a user mentioned in a message.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **user** | [**UserInfo**](#model-userinfo) |  | [optional] |
+| **user** | [**UserInfo**](#model-userinfo) | The user information. | [optional] |
 | **email** | **String** (email) | The user email address. | [optional] [example: user@example.com] [nullable] |
 | **id** | **String** | The user unique identification. | [optional] [example: user_0001] [nullable] |
 | **image** | **String** | The path to the user&#39;s avatar. | [optional] [example: https://portal.example.com/avatar/user_0001.png] [nullable] |
@@ -11619,7 +11622,7 @@ The module information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **String** | The logo cover ID. | [required] [example: default_cover] [nullable] |
-| **data** | **Map** | The logo cover data. | [required] [example: {"small":"base64...","medium":"base64...","large":"base64..."}] [nullable] |
+| **data** | **null** | The logo cover data. | [required] [example: {small=base64..., medium=base64..., large=base64...}] |
 
 
 ### Model NewItemsDtoFileEntryBaseDto
@@ -11627,7 +11630,7 @@ The new item parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **date** | [**ApiDateTime**](#model-apidatetime) |  | [required] |
+| **date** | [**ApiDateTime**](#model-apidatetime) | The date and time when the new item was created. | [required] |
 | **items** | [**List**](#model-fileentrybasedto) | The list of items. | [required] [nullable] |
 
 
@@ -11636,7 +11639,7 @@ The new item parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **date** | [**ApiDateTime**](#model-apidatetime) |  | [required] |
+| **date** | [**ApiDateTime**](#model-apidatetime) | The date and time when the new item was created. | [required] |
 | **items** | [**List**](#model-roomnewitemsdto) | The list of items. | [required] [nullable] |
 
 
@@ -11710,7 +11713,7 @@ The document options.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **watermark\_on\_draw** | [**WatermarkOnDraw**](#model-watermarkondraw) |  | [optional] |
+| **watermark\_on\_draw** | [**WatermarkOnDraw**](#model-watermarkondraw) | The document watermark parameters. | [optional] |
 
 
 ### Model OrderBy
@@ -11719,7 +11722,7 @@ The sorting parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **is\_asc** | **Boolean** | Specifies if the order is ascending. | [optional] [example: true] |
-| **property** | [**SortedByType**](#model-sortedbytype) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] |
+| **property** | [**SortedByType**](#model-sortedbytype) | The parameters by which the files will be sorted. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] |
 
 
 ### Model OrderRequestDto
@@ -11736,7 +11739,7 @@ An item in the ordering request with its entry type and ID.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **entryId** | **Integer** (int32) | The entry unique identifier (file or folder). | [required] [example: 1] |
-| **entryType** | [**FileEntryType**](#model-fileentrytype) |  | [required] [enum: 1, 2] |
+| **entryType** | [**FileEntryType**](#model-fileentrytype) | The entry type (file or folder). | [required] [enum: 1, 2] |
 | **order** | **Integer** (int32) | The order value. | [required] [example: 1] [min: 1] [max: 2147483647] |
 
 
@@ -11745,7 +11748,7 @@ The collection of items to be ordered.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **items** | [**List**](#model-ordersitemrequestdtointeger) | The list of items with their ordering information. | [required] [example: [{"entryId":1,"order":1}]] [nullable] |
+| **items** | [**List**](#model-ordersitemrequestdtointeger) | The list of items with their ordering information. | [required] [example: [{entryId=1, order=1}]] [nullable] |
 
 
 ### Model Paragraph
@@ -11754,7 +11757,7 @@ The paragraph parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **align** | **Integer** (int32) | The paragraph align. | [optional] [example: 2] |
-| **runs** | [**List**](#model-run) | The list of text runs from the paragraph. | [optional] [example: [{"fill":[124,124,124],"text":"CONFIDENTIAL","fontSize":26}]] [nullable] |
+| **runs** | [**List**](#model-run) | The list of text runs from the paragraph. | [optional] [example: [{fill=[124, 124, 124], text=CONFIDENTIAL, fontSize=26}]] [nullable] |
 
 
 ### Model PermissionsConfig
@@ -11779,7 +11782,7 @@ The configuration settings to connect the special add-ons.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **pluginsData** | **List** | The array of absolute URLs to the plugin configuration files. | [optional] [example: ["https://portal.example.com/ThirdParty/plugin/easybib/config.json","https://portal.example.com/ThirdParty/plugin/wordpress/config.json"]] [nullable] |
+| **pluginsData** | **List** | The array of absolute URLs to the plugin configuration files. | [optional] [example: [https://portal.example.com/ThirdParty/plugin/easybib/config.json, https://portal.example.com/ThirdParty/plugin/wordpress/config.json]] [nullable] |
 
 
 ### Model ProviderArrayWrapper
@@ -11852,7 +11855,7 @@ The room data lifetime information.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **deletePermanently** | **Boolean** | Specifies whether to permanently delete the room data or not. | [optional] [example: true] |
-| **period** | [**RoomDataLifetimePeriod**](#model-roomdatalifetimeperiod) |  | [optional] [enum: 0, 1, 2] |
+| **period** | [**RoomDataLifetimePeriod**](#model-roomdatalifetimeperiod) | Specifies the time period type of the room data lifetime. | [optional] [enum: 0, 1, 2] |
 | **value** | **Integer** (int32) | Specifies the time period value of the room data lifetime. | [optional] [example: 33] [min: 1] [max: 999] [nullable] |
 | **enabled** | **Boolean** | Specifies whether the room data lifetime setting is enabled or not. | [optional] [example: true] [nullable] |
 
@@ -11904,9 +11907,9 @@ The room security parameters.
 |------------ | ------------- | ------------- | -------------|
 | **id** | **Integer** (int32) | The group ID. | [optional] [example: 1] |
 | **name** | **String** | Group name | [optional] [example: My Group] [nullable] |
-| **icon** | [**MultiSizeLogoCover**](#model-multisizelogocover) |  | [optional] |
+| **icon** | [**MultiSizeLogoCover**](#model-multisizelogocover) | Group icon | [optional] |
 | **userId** | **UUID** (uuid) | The user ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
-| **rooms** | [**List**](#model-fileentrybasedto) | The list of rooms in the group. | [optional] [example: [{"id":1,"title":"Room 1"},{"id":2,"title":"Room 2"}]] [nullable] |
+| **rooms** | [**List**](#model-fileentrybasedto) | The list of rooms in the group. | [optional] [example: [{id=1, title=Room 1}, {id=2, title=Room 2}]] [nullable] |
 | **totalRooms** | **Integer** (int32) | Total number of rooms in the group. | [optional] [example: 2] |
 
 
@@ -11917,7 +11920,7 @@ The request parameters for creating a room group
 |------------ | ------------- | ------------- | -------------|
 | **name** | **String** | Group name | [required] [example: My Group] [minLength: 0] [maxLength: 128] |
 | **icon** | **String** | Group icon | [required] [example: cover1] [minLength: 0] [maxLength: 50] |
-| **rooms** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs. | [required] [example: [1,2,3]] |
+| **rooms** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs. | [required] [example: [1, 2, 3]] |
 
 
 ### Model RoomGroupWrapper
@@ -11936,9 +11939,9 @@ The room invitation parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **email** | **String** (email) | The email address. | [optional] [maxLength: 255] [nullable] |
+| **email** | **String** (email) | The email address. | [optional] [maxLength: 255] |
 | **id** | **UUID** (uuid) | The ID of the user to share a room with. | [optional] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **access** | [**FileShare**](#model-fileshare) | The room sharing rights. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
 
 
 ### Model RoomInvitationRequest
@@ -11946,7 +11949,7 @@ The request parameters for inviting users to the room.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **invitations** | [**List**](#model-roominvitation) | The collection of invitation parameters. | [optional] [example: [{"id":"00000000-0000-0000-0000-000000000000","access":1}]] [nullable] |
+| **invitations** | [**List**](#model-roominvitation) | The collection of invitation parameters. | [optional] [example: [{id=00000000-0000-0000-0000-000000000000, access=1}]] [nullable] |
 | **notify** | **Boolean** | Specifies whether to notify users about the shared room or not. | [optional] [example: true] |
 | **message** | **String** | The message to send when notifying about the shared room. | [optional] [example: You have been invited to the room] [nullable] |
 | **culture** | **String** | The language of the room invitation. | [optional] [example: en-US] [nullable] |
@@ -11959,11 +11962,11 @@ The room link parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **linkId** | **UUID** (uuid) | The room link ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
-| **access** | [**FileShare**](#model-fileshare) |  | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
-| **expirationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **access** | [**FileShare**](#model-fileshare) | The access rights type. | [optional] [enum: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |
+| **expirationDate** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **internal** | **Boolean** | The link scope, whether it is internal or not. | [optional] [example: false] |
 | **title** | **String** | The link name. | [optional] [example: My Document] [minLength: 0] [maxLength: 255] [nullable] |
-| **linkType** | [**LinkType**](#model-linktype) |  | [optional] [enum: 0, 1] |
+| **linkType** | [**LinkType**](#model-linktype) | The link type. | [optional] [enum: 0, 1] |
 | **password** | **String** | The link password. | [optional] [example: doc_key_123] [minLength: 0] [maxLength: 255] [nullable] |
 | **denyDownload** | **Boolean** | Specifies if downloading the file from the link is disabled or not. | [optional] [example: false] |
 | **maxUseCount** | **Integer** (int32) | The maximum number of times the invitation link can be used. | [optional] [example: 25] [min: 1] [max: 1000] [nullable] |
@@ -11975,7 +11978,7 @@ The room new items information.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **room** | [**FileEntryBaseDto**](#model-fileentrybasedto) |  | [optional] |
+| **room** | [**FileEntryBaseDto**](#model-fileentrybasedto) | The room file entry. | [optional] |
 | **items** | [**List**](#model-fileentrybasedto) | The list of file entry items. | [optional] [nullable] |
 
 
@@ -11991,9 +11994,9 @@ The room security parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **members** | [**List**](#model-filesharedto) | The list of room members. | [optional] [example: [{"access":1,"isOwner":false}]] [nullable] |
+| **members** | [**List**](#model-filesharedto) | The list of room members. | [optional] [example: [{access=1, isOwner=false}]] [nullable] |
 | **warning** | **String** | The warning message. | [optional] [example: Warning message] [nullable] |
-| **error** | [**RoomSecurityError**](#model-roomsecurityerror) |  | [optional] [enum: 0, 1] |
+| **error** | [**RoomSecurityError**](#model-roomsecurityerror) | The error type. | [optional] [enum: 0, 1] |
 
 
 ### Model RoomSecurityError
@@ -12021,12 +12024,12 @@ The room template parameters.
 |------------ | ------------- | ------------- | -------------|
 | **roomId** | **Integer** (int32) | The room template ID. | [required] [example: 1] |
 | **title** | **String** | The room template title. | [required] [example: My Document] [minLength: 0] [maxLength: 400] |
-| **logo** | [**LogoRequest**](#model-logorequest) |  | [optional] |
+| **logo** | [**LogoRequest**](#model-logorequest) | The logo request parameters. | [optional] |
 | **copyLogo** | **Boolean** | Specifies whether to copy room logo or not. | [optional] [example: true] |
-| **share** | **List** | The collection of email addresses of users with whom to share a room. | [optional] [example: ["user1@example.com","user2@example.com"]] [nullable] |
-| **groups** | **List** (uuid) | The collection of groups with whom to share a room. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
+| **share** | **List** | The collection of email addresses of users with whom to share a room. | [optional] [example: [user1@example.com, user2@example.com]] [nullable] |
+| **groups** | **List** (uuid) | The collection of groups with whom to share a room. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
 | **public** | **Boolean** | Specifies whether the room template is public or not. | [optional] [example: true] |
-| **tags** | **List** | The collection of tags. | [optional] [example: ["tag1","tag2"]] [nullable] |
+| **tags** | **List** | The collection of tags. | [optional] [example: [tag1, tag2]] [nullable] |
 | **color** | **String** | The color of the room template. | [optional] [example: #FF0000] [minLength: 0] [maxLength: 6] [nullable] |
 | **cover** | **String** | The cover of the room template. | [optional] [example: cover1] [minLength: 0] [maxLength: 50] [nullable] |
 | **quota** | **Long** (int64) | Room quota | [optional] [example: 10485760] [nullable] |
@@ -12066,7 +12069,7 @@ The text run parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **fill** | **List** (int32) | The fill color of the text run in RGB format. | [optional] [example: [124,124,124]] [nullable] |
+| **fill** | **List** (int32) | The fill color of the text run in RGB format. | [optional] [example: [124, 124, 124]] [nullable] |
 | **text** | **String** | The run text. | [optional] [example: CONFIDENTIAL] [nullable] |
 | **font-size** | **String** | The font size of the text run in points. | [optional] [example: 26] [nullable] |
 
@@ -12097,7 +12100,7 @@ The parameters for saving form role mapping.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **formId** | **Integer** (int32) | The form ID. | [required] [example: 1] |
-| **roles** | [**List**](#model-formrole) | The collection of roles. | [required] [example: [{"roleName":"Approver","userId":"00000000-0000-0000-0000-000000000000"}]] [nullable] |
+| **roles** | [**List**](#model-formrole) | The collection of roles. | [required] [example: [{roleName=Approver, userId=00000000-0000-0000-0000-000000000000}]] [nullable] |
 
 
 ### Model SearchArea
@@ -12112,9 +12115,9 @@ The security information request parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **folderIds** | [**List**](#model-duplicaterequestdtofileids) | The list of the shared folder IDs. | [optional] [example: [1,2,3]] [nullable] |
-| **fileIds** | [**List**](#model-duplicaterequestdtofileids) | The list of the shared file IDs. | [optional] [example: [1,2,3]] [nullable] |
-| **share** | [**List**](#model-fileshareparams) | The collection of sharing parameters. | [optional] [example: [{"access":1,"shareTo":"00000000-0000-0000-0000-000000000000"}]] [nullable] |
+| **folderIds** | [**List**](#model-duplicaterequestdtofileids) | The list of the shared folder IDs. | [optional] [example: [1, 2, 3]] [nullable] |
+| **fileIds** | [**List**](#model-duplicaterequestdtofileids) | The list of the shared file IDs. | [optional] [example: [1, 2, 3]] [nullable] |
+| **share** | [**List**](#model-fileshareparams) | The collection of sharing parameters. | [optional] [example: [{access=1, shareTo=00000000-0000-0000-0000-000000000000}]] [nullable] |
 | **notify** | **Boolean** | Specifies whether to notify users about the shared file or not. | [optional] [example: true] |
 | **sharingMessage** | **String** | The message to send when notifying about the shared file. | [optional] [example: You have been granted access to the file] [minLength: 0] [maxLength: 255] [nullable] |
 
@@ -12124,7 +12127,7 @@ The parameters of the security information request.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **share** | [**List**](#model-fileshareparams) | The collection of sharing parameters. | [optional] [example: [{"access":1,"shareTo":"00000000-0000-0000-0000-000000000000"}]] [nullable] |
+| **share** | [**List**](#model-fileshareparams) | The collection of sharing parameters. | [optional] [example: [{access=1, shareTo=00000000-0000-0000-0000-000000000000}]] [nullable] |
 | **notify** | **Boolean** | Specifies whether to notify users about the shared file or not. | [optional] [example: true] |
 | **sharingMessage** | **String** | The message to send when notifying about the shared file. | [optional] [example: You have been granted access to the file] [minLength: 0] [maxLength: 255] [nullable] |
 
@@ -12137,7 +12140,7 @@ The session request parameters.
 | **fileName** | **String** | The file name. | [required] [example: My Document.docx] [nullable] |
 | **fileSize** | **Long** (int64) | The file size. | [optional] [example: 10485760] |
 | **relativePath** | **String** | The relative path to the file. | [optional] [example: subfolder/documents] [nullable] |
-| **createOn** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **createOn** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **encrypted** | **Boolean** | Specifies whether the file is encrypted or not. | [optional] [example: false] |
 | **createNewIfExist** | **Boolean** | Specifies whether to create a new file if it already exists. | [optional] [example: true] |
 
@@ -12268,7 +12271,7 @@ The request parameters for adding files to the template list.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **fileIds** | **List** (int32) | The list of file IDs. | [optional] [example: [1,2,3]] [nullable] |
+| **fileIds** | **List** (int32) | The list of file IDs. | [optional] [example: [1, 2, 3]] [nullable] |
 
 
 ### Model ThirdPartyBackupRequestDto
@@ -12289,7 +12292,7 @@ The third-party account parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **auth\_data** | [**AuthData**](#model-authdata) |  | [optional] |
+| **auth\_data** | [**AuthData**](#model-authdata) | The authentication data. | [optional] |
 | **corporate** | **Boolean** | Specifies if this is a corporate account or not. | [optional] [example: false] |
 | **roomsStorage** | **Boolean** | Specifies if this is a room storage or not. | [optional] [example: false] |
 | **customer\_title** | **String** | The customer title. | [optional] [example: My Storage] [nullable] |
@@ -12351,8 +12354,8 @@ The parameters for updating a file.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **roomsToAdd** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs to add to the group. | [optional] [example: [1,2,3]] [nullable] |
-| **roomsToRemove** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs to remove from the group. | [optional] [example: [1,2,3]] [nullable] |
+| **roomsToAdd** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs to add to the group. | [optional] [example: [1, 2, 3]] [nullable] |
+| **roomsToRemove** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs to remove from the group. | [optional] [example: [1, 2, 3]] [nullable] |
 | **groupName** | **String** | The group name. | [optional] [example: New Group Name] [minLength: 0] [maxLength: 128] [nullable] |
 
 
@@ -12365,13 +12368,13 @@ The request parameters for updating a room.
 | **quota** | **Long** (int64) | The room quota. | [optional] [example: 10485760] [nullable] |
 | **indexing** | **Boolean** | Specifies whether to create a third-party room with indexing. | [optional] [example: true] [nullable] |
 | **denyDownload** | **Boolean** | Specifies whether to deny downloads from the third-party room. | [optional] [example: true] [nullable] |
-| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) |  | [optional] |
-| **watermark** | [**WatermarkRequestDto**](#model-watermarkrequestdto) |  | [optional] |
-| **logo** | [**LogoRequest**](#model-logorequest) |  | [optional] |
-| **tags** | **List** | The list of tags. | [optional] [example: ["tag1","tag2"]] [nullable] |
+| **lifetime** | [**RoomDataLifetimeDto**](#model-roomdatalifetimedto) | The room data lifetime information. | [optional] |
+| **watermark** | [**WatermarkRequestDto**](#model-watermarkrequestdto) | The watermark settings. | [optional] |
+| **logo** | [**LogoRequest**](#model-logorequest) | The room logo. | [optional] |
+| **tags** | **List** | The list of tags. | [optional] [example: [tag1, tag2]] [nullable] |
 | **color** | **String** | The room color. | [optional] [example: #FF5733] [minLength: 0] [maxLength: 6] [nullable] |
 | **cover** | **String** | The room cover. | [optional] [example: cover1] [minLength: 0] [maxLength: 50] [nullable] |
-| **chatSettings** | [**ChatSettings**](#model-chatsettings) |  | [optional] |
+| **chatSettings** | [**ChatSettings**](#model-chatsettings) | The chat settings. | [optional] |
 | **sendFormToExternalDB** | **Boolean** | Specifies whether to send form data to external database. | [optional] [example: false] [nullable] |
 | **saveFormAsXLSX** | **Boolean** | Specifies whether to save form data as XLSX file. | [optional] [example: false] [nullable] |
 
@@ -12381,7 +12384,7 @@ The request parameters for updating the room quota.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **roomIds** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs. | [optional] [example: [1,2,3]] [nullable] |
+| **roomIds** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs. | [optional] [example: [1, 2, 3]] [nullable] |
 | **quota** | **Long** (int64) | The room quota. | [optional] [example: 10485760] |
 
 
@@ -12390,7 +12393,7 @@ The request parameters for updating the rooms.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **roomIds** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs. | [optional] [example: [1,2,3]] [nullable] |
+| **roomIds** | [**List**](#model-duplicaterequestdtofileids) | The list of room IDs. | [optional] [example: [1, 2, 3]] [nullable] |
 
 
 ### Model UpdateTagRequestDto
@@ -12408,7 +12411,7 @@ The upload result parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **success** | **Boolean** | Specifies if the upload operation is successful or not. | [optional] [example: true] |
-| **data** | **oas_any_type_not_mapped** | The uploaded data. | [optional] [example: {"id":10,"title":"document.docx"}] [nullable] |
+| **data** | **null** | The uploaded data. | [optional] [example: {id=10, title=document.docx}] |
 | **message** | **String** | The message sent after the successful upload operation. | [optional] [example: File uploaded successfully] [nullable] |
 
 
@@ -12434,7 +12437,7 @@ The upload session response parameters.
 | **title** | **String** | The file title. | [optional] [example: My Document.docx] [nullable] |
 | **providerKey** | **String** | The third-party provider key. | [optional] [example: Google] [nullable] |
 | **uploaded** | **Boolean** | Specifies whether the file has been uploaded. | [optional] [example: false] |
-| **file** | [**FileDtoInteger**](#model-filedtointeger) |  | [optional] |
+| **file** | [**FileDtoInteger**](#model-filedtointeger) | The file parameters. | [optional] |
 
 
 ### Model UploadSessionResponseIntegerWrapper
@@ -12456,7 +12459,7 @@ The configuration parameters of the user currently viewing or editing the docume
 | **id** | **String** | The user ID. | [optional] [example: user_0001] [nullable] |
 | **name** | **String** | The full name of the user. | [optional] [example: John Doe] [nullable] |
 | **image** | **String** | The path to the user&#39;s avatar. | [optional] [example: https://portal.example.com/avatar/user_0001.png] [nullable] |
-| **roles** | **List** | Roles | [optional] [example: ["admin","editor"]] [nullable] |
+| **roles** | **List** | Roles | [optional] [example: [admin, editor]] [nullable] |
 | **customerId** | **String** | Customer identifier associated with the user. | [optional] [example: cust_001] [nullable] |
 
 
@@ -12471,14 +12474,14 @@ The user information.
 | **userName** | **String** | The user username. | [optional] [example: johndoe] [nullable] |
 | **birthDate** | **Date** (date-time) | The user birthday. | [optional] [example: 1990-01-01T00:00:00Z] [nullable] |
 | **sex** | **Boolean** | The user sex (male or female). | [optional] [example: true] [nullable] |
-| **status** | [**EmployeeStatus**](#model-employeestatus) |  | [optional] [enum: 1, 2, 4, 5, 7] |
-| **activationStatus** | [**EmployeeActivationStatus**](#model-employeeactivationstatus) |  | [optional] [enum: 0, 1, 2, 4] |
+| **status** | [**EmployeeStatus**](#model-employeestatus) | The user status. | [optional] [enum: 1, 2, 4, 5, 7] |
+| **activationStatus** | [**EmployeeActivationStatus**](#model-employeeactivationstatus) | The user activation status. | [optional] [enum: 0, 1, 2, 4] |
 | **terminatedDate** | **Date** (date-time) | The date and time when the user account was terminated. | [optional] [example: 2025-12-31T23:59:59Z] [nullable] |
 | **title** | **String** | The user title. | [optional] [example: Manager] [nullable] |
 | **workFromDate** | **Date** (date-time) | The user registration date. | [optional] [example: 2020-01-15T00:00:00Z] [nullable] |
 | **email** | **String** (email) | The user email address. | [optional] [example: john.doe@example.com] [nullable] |
 | **contacts** | **String** | The list of user contacts in the string format. | [optional] [example: skype:johndoe\|telegram:@johndoe] [nullable] |
-| **contactsList** | **List** | The list of user contacts. | [optional] [example: ["skype:johndoe","telegram:@johndoe"]] [nullable] |
+| **contactsList** | **List** | The list of user contacts. | [optional] [example: [skype:johndoe, telegram:@johndoe]] [nullable] |
 | **location** | **String** | The user location. | [optional] [example: New York, USA] [nullable] |
 | **notes** | **String** | The user notes. | [optional] [example: Additional information about the user] [nullable] |
 | **removed** | **Boolean** | Specifies if the user account was removed or not. | [optional] [example: false] |
@@ -12487,7 +12490,7 @@ The user information.
 | **isActive** | **Boolean** | Specifies if the user is active or not. | [optional] [example: true] |
 | **cultureName** | **String** | The user culture code. | [optional] [example: en-US] [nullable] |
 | **mobilePhone** | **String** | The user mobile phone. | [optional] [example: +1234567890] [nullable] |
-| **mobilePhoneActivationStatus** | [**MobilePhoneActivationStatus**](#model-mobilephoneactivationstatus) |  | [optional] [enum: 0, 1] |
+| **mobilePhoneActivationStatus** | [**MobilePhoneActivationStatus**](#model-mobilephoneactivationstatus) | The user mobile phone activation status. | [optional] [enum: 0, 1] |
 | **sid** | **String** | The LDAP user identifier. | [optional] [example: S-1-5-21-3623811015-3361044348-30300820-1013] [nullable] |
 | **ldapQouta** | **Long** (int64) | The LDAP user quota attribute. | [optional] [example: 1073741824] |
 | **ssoNameId** | **String** | The SSO SAML user identifier. | [optional] [example: johndoe@example.com] [nullable] |
@@ -12503,7 +12506,7 @@ The user invitation parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **usersIds** | **List** (uuid) | The list of user IDs. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
+| **usersIds** | **List** (uuid) | The list of user IDs. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
 | **resendAll** | **Boolean** | Specifies whether to resend all user invitations or not. | [optional] [example: false] |
 
 
@@ -12526,7 +12529,7 @@ The watermark settings.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **additions** | [**WatermarkAdditions**](#model-watermarkadditions) |  | [required] [enum: 1, 2, 4, 8, 16] |
+| **additions** | [**WatermarkAdditions**](#model-watermarkadditions) | Specifies whether to display in the watermark: username, user email, user ip-adress, current date, and room name. | [required] [enum: 1, 2, 4, 8, 16] |
 | **text** | **String** | The watermark text. | [optional] [example: Confidential] [nullable] |
 | **rotate** | **Integer** (int32) | The watermark text and image rotate. | [required] [example: 45] |
 | **imageScale** | **Integer** (int32) | The watermark image scale. | [required] [example: 100] |
@@ -12542,11 +12545,11 @@ The document watermark parameters.
 |------------ | ------------- | ------------- | -------------|
 | **width** | **Double** (double) | Defines the watermark width measured in millimeters. | [optional] [example: 150] |
 | **height** | **Double** (double) | Defines the watermark height measured in millimeters. | [optional] [example: 100] |
-| **margins** | **List** (int32) | Defines the watermark margins measured in millimeters. | [optional] [example: [10,10,10,10]] [nullable] |
+| **margins** | **List** (int32) | Defines the watermark margins measured in millimeters. | [optional] [example: [10, 10, 10, 10]] [nullable] |
 | **fill** | **String** | Defines the watermark fill color. | [optional] [example: #FF0000] [nullable] |
 | **rotate** | **Integer** (int32) | Defines the watermark rotation angle. | [optional] [example: 45] |
 | **transparent** | **Double** (double) | Defines the watermark transparency percentage. | [optional] [example: 0.4] |
-| **paragraphs** | [**List**](#model-paragraph) | The list of paragraphs of the watermark. | [optional] [example: [{"align":2,"runs":[{"fill":[124,124,124],"text":"CONFIDENTIAL","fontSize":26}]}]] [nullable] |
+| **paragraphs** | [**List**](#model-paragraph) | The list of paragraphs of the watermark. | [optional] [example: [{align=2, runs=[{fill=[124, 124, 124], text=CONFIDENTIAL, fontSize=26}]}]] [nullable] |
 
 
 ### Model WatermarkRequestDto
@@ -12555,7 +12558,7 @@ The request parameters for adding watermarks.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **enabled** | **Boolean** | Specifies whether watermarks are on or off. | [optional] [example: true] [nullable] |
-| **additions** | [**WatermarkAdditions**](#model-watermarkadditions) |  | [optional] [enum: 1, 2, 4, 8, 16] |
+| **additions** | [**WatermarkAdditions**](#model-watermarkadditions) | Specifies whether to display the following addditional information or not: username, user email, user IP address, current date and room name. | [optional] [enum: 1, 2, 4, 8, 16] |
 | **text** | **String** | The watermark text. | [optional] [example: Confidential] [minLength: 0] [maxLength: 255] [nullable] |
 | **rotate** | **Integer** (int32) | The watermark text and image rotate angle. | [optional] [example: -45] |
 | **imageScale** | **Integer** (int32) | The watermark image scale. | [optional] [example: 100] |
@@ -12569,8 +12572,8 @@ The XLSX report task response parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **form** | [**FileDtoInteger**](#model-filedtointeger) |  | [optional] |
-| **task** | [**DocumentBuilderTaskDto**](#model-documentbuildertaskdto) |  | [optional] |
+| **form** | [**FileDtoInteger**](#model-filedtointeger) | The file parameters. | [optional] |
+| **task** | [**DocumentBuilderTaskDto**](#model-documentbuildertaskdto) | The Document Builder task parameters. | [optional] |
 | **isNewFile** | **Boolean** | Specifies whether the XLSX report file is newly created or an existing file will be updated. | [optional] [example: true] |
 
 

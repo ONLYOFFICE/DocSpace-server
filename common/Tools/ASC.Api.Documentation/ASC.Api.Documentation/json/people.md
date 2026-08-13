@@ -1,6 +1,9 @@
-# Api
+# ONLYOFFICE DocSpace People API
 
-All URIs are relative to *http://localhost:8092*
+The browsable version of this reference, with a request builder and code samples, is published at
+<https://api.onlyoffice.com/docspace/api-backend/usage-api/>.
+
+All URIs are relative to *https://yourportal.onlyoffice.com*, where the host is the address of your DocSpace instance.
 
 ## Endpoints
 
@@ -293,7 +296,7 @@ Updates an existing API key changing its name, permissions, and status.
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **keyId** | path | **UUID** (uuid) | The unique identifier of the API key to update. | [required] [example: 00000000-0000-0000-0000-000000000000] |
+| **keyId** | path | **UUID** (uuid) | The unique identifier of the API key to update. | [required] [example: "00000000-0000-0000-0000-000000000000"] |
 | **UpdateApiKeyRequest** | body | [**UpdateApiKeyRequest**](#model-updateapikeyrequest) | The request parameters for updating an existing API key. | [required] |
 
 #### Responses
@@ -539,9 +542,9 @@ Returns the general information about all the groups, such as group ID and group
 | **manager** | query | **Boolean** | Specifies if the user is a manager or not. | [optional] [example: false] |
 | **count** | query | **Integer** (int32) | The number of records to retrieve. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The starting index for paginated results. | [optional] [example: 0] |
-| **sortBy** | query | **String** | Specifies the property used to sort the query results. | [optional] [example: displayName] |
+| **sortBy** | query | **String** | Specifies the property used to sort the query results. | [optional] [example: "displayName"] |
 | **sortOrder** | query | **SortOrder** | The order in which the results are sorted. | [optional] [example: 0] [enum: 0, 1] |
-| **filterValue** | query | **String** | The text used for filtering or searching group data. | [optional] [example: John] |
+| **filterValue** | query | **String** | The text used for filtering or searching group data. | [optional] [example: "John"] |
 
 #### Responses
 
@@ -581,7 +584,7 @@ Moves all the members from the selected group to another one specified in the re
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
 | **fromId** | path | **UUID** (uuid) | The group ID to move from. | [required] [example: 00000000-0000-0000-0000-000000000000] |
-| **toId** | path | **UUID** (uuid) | The group ID to move to. | [required] [example: 11111111-1111-1111-1111-111111111111] |
+| **toId** | path | **UUID** (uuid) | The group ID to move to. | [required] [example: "11111111-1111-1111-1111-111111111111"] |
 
 #### Responses
 
@@ -786,7 +789,7 @@ Returns groups with their sharing settings for a file with the ID specified in r
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The group ID. | [required] |
+| **id** | path | **Integer** (int32) | The group ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **excludeShared** | query | **Boolean** | Specifies whether to exclude the group sharing settings from the response. | [optional] [example: false] |
 | **count** | query | **Integer** (int32) | The number of groups to retrieve in the request. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The starting index from which to begin retrieving groups with their sharing settings. | [optional] [example: 0] |
@@ -830,7 +833,7 @@ Returns groups with their sharing settings in a folder with the ID specified in 
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The group ID. | [required] |
+| **id** | path | **Integer** (int32) | The group ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **excludeShared** | query | **Boolean** | Specifies whether to exclude the group sharing settings from the response. | [optional] [example: false] |
 | **count** | query | **Integer** (int32) | The number of groups to retrieve in the request. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The starting index from which to begin retrieving groups with their sharing settings. | [optional] [example: 0] |
@@ -874,7 +877,7 @@ Returns groups with their sharing settings in a room with the ID specified in re
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The group ID. | [required] |
+| **id** | path | **Integer** (int32) | The group ID. | [required] [example: "00000000-0000-0000-0000-000000000000"] |
 | **excludeShared** | query | **Boolean** | Specifies whether to exclude the group sharing settings from the response. | [optional] [example: false] |
 | **count** | query | **Integer** (int32) | The number of groups to retrieve in the request. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The starting index from which to begin retrieving groups with their sharing settings. | [optional] [example: 0] |
@@ -1174,7 +1177,7 @@ Creates the user photo thumbnails by coordinates of the original image specified
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **userid** | path | **String** | The user ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
+| **userid** | path | **String** | The user ID. | [required] [example: "00000000-0000-0000-0000-000000000000"] |
 | **ThumbnailsRequest** | body | [**ThumbnailsRequest**](#model-thumbnailsrequest) | The thumbnail request. | [required] |
 
 #### Responses
@@ -1553,7 +1556,7 @@ Returns a list of profiles for all the portal users.
 | **filterBy** | query | **String** | Specifies the filter criteria for user-related queries. | [optional] [example: displayName] |
 | **sortBy** | query | **String** | Specifies the property or field name by which the results should be sorted. | [optional] [example: displayName] |
 | **sortOrder** | query | **SortOrder** | The order in which the results are sorted. | [optional] [example: 0] [enum: 0, 1] |
-| **filterSeparator** | query | **String** | The character or string used to separate multiple filter values in a filtering query. | [optional] [example: ,] |
+| **filterSeparator** | query | **String** | The character or string used to separate multiple filter values in a filtering query. | [optional] [example: ","] |
 | **filterValue** | query | **String** | The text value used as an additional filter criterion for profiles retrieval. | [optional] [example: John] |
 
 #### Responses
@@ -1629,9 +1632,9 @@ Returns the detailed information about a profile of the user with the email spec
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **email** | query | **String** (email) | The user email address. | [optional] [example: john.doe@example.com] [minLength: 0] [maxLength: 255] |
-| **encemail** | query | **String** | The user encrypted email address. | [optional] [example: encrypted_email_string] |
-| **culture** | query | **String** | Culture | [optional] [example: en-US] |
+| **email** | query | **String** (email) | The user email address. | [optional] [example: "john.doe@example.com"] [minLength: 0] [maxLength: 255] |
+| **encemail** | query | **String** | The user encrypted email address. | [optional] [example: "encrypted_email_string"] |
+| **culture** | query | **String** | Culture | [optional] [example: "en-US"] |
 
 #### Responses
 
@@ -2046,7 +2049,7 @@ Returns the account entries with their sharing settings for a file with the ID s
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The user ID. | [required] |
+| **id** | path | **Integer** (int32) | The user ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **employeeStatus** | query | **EmployeeStatus** | The user status. | [optional] [example: 1] [enum: 1, 2, 4, 5, 7] |
 | **activationStatus** | query | **EmployeeActivationStatus** | The user activation status. | [optional] [example: 1] [enum: 0, 1, 2, 4] |
 | **excludeShared** | query | **Boolean** | Specifies whether to exclude the account sharing settings from the response. | [optional] [example: false] |
@@ -2054,7 +2057,7 @@ Returns the account entries with their sharing settings for a file with the ID s
 | **invitedByMe** | query | **Boolean** | Specifies whether the user is invited by the current user or not. | [optional] [example: false] |
 | **inviterId** | query | **UUID** (uuid) | The inviter ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **area** | query | **Area** | The area of the account entries. | [optional] [example: 0] [enum: 0, 1, 2] |
-| **employeeTypes** | query | [**List**](#model-employeetype) | The list of the user types. | [optional] [example: [1,2]] |
+| **employeeTypes** | query | [**List**](#model-employeetype) | The list of the user types. | [optional] [example: [1, 2]] |
 | **count** | query | **Integer** (int32) | The number of items to retrieve in a request. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The starting index for the query results. | [optional] [example: 0] |
 | **filterSeparator** | query | **String** | Specifies the separator used in filter expressions. | [optional] [example: ,] |
@@ -2098,7 +2101,7 @@ Returns the account entries with their sharing settings in a folder with the ID 
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The user ID. | [required] |
+| **id** | path | **Integer** (int32) | The user ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **employeeStatus** | query | **EmployeeStatus** | The user status. | [optional] [example: 1] [enum: 1, 2, 4, 5, 7] |
 | **activationStatus** | query | **EmployeeActivationStatus** | The user activation status. | [optional] [example: 1] [enum: 0, 1, 2, 4] |
 | **excludeShared** | query | **Boolean** | Specifies whether to exclude the account sharing settings from the response. | [optional] [example: false] |
@@ -2106,7 +2109,7 @@ Returns the account entries with their sharing settings in a folder with the ID 
 | **invitedByMe** | query | **Boolean** | Specifies whether the user is invited by the current user or not. | [optional] [example: false] |
 | **inviterId** | query | **UUID** (uuid) | The inviter ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **area** | query | **Area** | The area of the account entries. | [optional] [example: 0] [enum: 0, 1, 2] |
-| **employeeTypes** | query | [**List**](#model-employeetype) | The list of the user types. | [optional] [example: [1,2]] |
+| **employeeTypes** | query | [**List**](#model-employeetype) | The list of the user types. | [optional] [example: [1, 2]] |
 | **count** | query | **Integer** (int32) | The number of items to retrieve in a request. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The starting index for the query results. | [optional] [example: 0] |
 | **filterSeparator** | query | **String** | Specifies the separator used in filter expressions. | [optional] [example: ,] |
@@ -2150,7 +2153,7 @@ Returns the account entries with their sharing settings in a room with the ID sp
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The user ID. | [required] |
+| **id** | path | **Integer** (int32) | The user ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **employeeStatus** | query | **EmployeeStatus** | The user status. | [optional] [example: 1] [enum: 1, 2, 4, 5, 7] |
 | **activationStatus** | query | **EmployeeActivationStatus** | The user activation status. | [optional] [example: 1] [enum: 0, 1, 2, 4] |
 | **excludeShared** | query | **Boolean** | Specifies whether to exclude the account sharing settings from the response. | [optional] [example: false] |
@@ -2248,7 +2251,7 @@ Returns a list of users matching the parameters specified in the request.
 | **groupId** | query | **UUID** (uuid) | The group ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **activationStatus** | query | **EmployeeActivationStatus** | The user activation status. | [optional] [example: 1] [enum: 0, 1, 2, 4] |
 | **employeeType** | query | **EmployeeType** | The user type. | [optional] [example: 1] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
-| **employeeTypes** | query | **List** | The list of user types. | [optional] [example: [1,2]] [enum: 0, 1, 2, 3, 4] |
+| **employeeTypes** | query | **List** | The list of user types. | [optional] [example: [1, 2]] [enum: 0, 1, 2, 3, 4] |
 | **isAdministrator** | query | **Boolean** | Specifies if the user is an administrator or not. | [optional] [example: false] |
 | **payments** | query | **Payments** | The user payment status. | [optional] [example: 0] [enum: 0, 1] |
 | **accountLoginType** | query | **AccountLoginType** | The account login type. | [optional] [example: 0] [enum: 0, 1, 2] |
@@ -2303,7 +2306,7 @@ Returns the users with the sharing settings in a file with the ID specified in r
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The user ID. | [required] |
+| **id** | path | **Integer** (int32) | The user ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **employeeStatus** | query | **EmployeeStatus** | The user status. | [optional] [example: 1] [enum: 1, 2, 4, 5, 7] |
 | **activationStatus** | query | **EmployeeActivationStatus** | The user activation status. | [optional] [example: 1] [enum: 0, 1, 2, 4] |
 | **excludeShared** | query | **Boolean** | Specifies whether to exclude the user sharing settings or not. | [optional] [example: false] |
@@ -2311,7 +2314,7 @@ Returns the users with the sharing settings in a file with the ID specified in r
 | **invitedByMe** | query | **Boolean** | Specifies whether the user was invited by the current user or not. | [optional] [example: false] |
 | **inviterId** | query | **UUID** (uuid) | The inviter ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **area** | query | **Area** | The user area. | [optional] [example: 0] [enum: 0, 1, 2] |
-| **employeeTypes** | query | [**List**](#model-employeetype) | The list of user types. | [optional] [example: [1,2]] |
+| **employeeTypes** | query | [**List**](#model-employeetype) | The list of user types. | [optional] [example: [1, 2]] |
 | **count** | query | **Integer** (int32) | The maximum number of users to be retrieved in the request. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The zero-based index of the first record to retrieve in a paged query. | [optional] [example: 0] |
 | **filterSeparator** | query | **String** | The character or string used to separate multiple filter values in a filtering query. | [optional] [example: ,] |
@@ -2355,7 +2358,7 @@ Returns the users with the sharing settings in a folder with the ID specified in
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The user ID. | [required] |
+| **id** | path | **Integer** (int32) | The user ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **employeeStatus** | query | **EmployeeStatus** | The user status. | [optional] [example: 1] [enum: 1, 2, 4, 5, 7] |
 | **activationStatus** | query | **EmployeeActivationStatus** | The user activation status. | [optional] [example: 1] [enum: 0, 1, 2, 4] |
 | **excludeShared** | query | **Boolean** | Specifies whether to exclude the user sharing settings or not. | [optional] [example: false] |
@@ -2363,7 +2366,7 @@ Returns the users with the sharing settings in a folder with the ID specified in
 | **invitedByMe** | query | **Boolean** | Specifies whether the user was invited by the current user or not. | [optional] [example: false] |
 | **inviterId** | query | **UUID** (uuid) | The inviter ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **area** | query | **Area** | The user area. | [optional] [example: 0] [enum: 0, 1, 2] |
-| **employeeTypes** | query | [**List**](#model-employeetype) | The list of user types. | [optional] [example: [1,2]] |
+| **employeeTypes** | query | [**List**](#model-employeetype) | The list of user types. | [optional] [example: [1, 2]] |
 | **count** | query | **Integer** (int32) | The maximum number of users to be retrieved in the request. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The zero-based index of the first record to retrieve in a paged query. | [optional] [example: 0] |
 | **filterSeparator** | query | **String** | The character or string used to separate multiple filter values in a filtering query. | [optional] [example: ,] |
@@ -2407,7 +2410,7 @@ Returns the users with the sharing settings in a room with the ID specified in r
 
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-| **id** | path | **Integer** (int32) | The user ID. | [required] |
+| **id** | path | **Integer** (int32) | The user ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **employeeStatus** | query | **EmployeeStatus** | The user status. | [optional] [example: 1] [enum: 1, 2, 4, 5, 7] |
 | **activationStatus** | query | **EmployeeActivationStatus** | The user activation status. | [optional] [example: 1] [enum: 0, 1, 2, 4] |
 | **excludeShared** | query | **Boolean** | Specifies whether to exclude the user sharing settings or not. | [optional] [example: false] |
@@ -2415,7 +2418,7 @@ Returns the users with the sharing settings in a room with the ID specified in r
 | **invitedByMe** | query | **Boolean** | Specifies whether the user was invited by the current user or not. | [optional] [example: false] |
 | **inviterId** | query | **UUID** (uuid) | The inviter ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **area** | query | **Area** | The user area. | [optional] [example: 0] [enum: 0, 1, 2] |
-| **employeeTypes** | query | [**List**](#model-employeetype) | The list of user types. | [optional] [example: [1,2]] |
+| **employeeTypes** | query | [**List**](#model-employeetype) | The list of user types. | [optional] [example: [1, 2]] |
 | **count** | query | **Integer** (int32) | The maximum number of users to be retrieved in the request. | [optional] [example: 25] [min: 1] [max: 100] |
 | **startIndex** | query | **Integer** (int32) | The zero-based index of the first record to retrieve in a paged query. | [optional] [example: 0] |
 | **filterSeparator** | query | **String** | The character or string used to separate multiple filter values in a filtering query. | [optional] [example: ,] |
@@ -2681,8 +2684,8 @@ Returns a list of the available third-party accounts.
 |------------- | ------------- | ------------- | ------------- | -------------|
 | **inviteView** | query | **Boolean** | Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers. | [optional] [example: false] |
 | **settingsView** | query | **Boolean** | Specifies whether to display the provider settings in a pop-up window (true) or redirect them to the desktop application (false). | [optional] [example: false] |
-| **clientCallback** | query | **String** | The method that is called after authentication. | [optional] [example: onAuthCallback] |
-| **fromOnly** | query | **String** | The provider name if a response is required only from this provider. | [optional] [example: Google] |
+| **clientCallback** | query | **String** | The method that is called after authentication. | [optional] [example: "onAuthCallback"] |
+| **fromOnly** | query | **String** | The provider name if a response is required only from this provider. | [optional] [example: "Google"] |
 
 #### Responses
 
@@ -3587,7 +3590,7 @@ The API date and time parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **utcTime** | **Date** (date-time) | The time in UTC format. | [optional] [example: 2018-01-01T00:00:00Z] |
+| **utcTime** | **Date** (date-time) | The time in UTC format. | [optional] [example: 2018-01-01T00:00:00.0000000Z] |
 | **timeZoneOffset** | **String** (date-span) | The time zone offset. | [optional] [example: 00:00:00] |
 
 
@@ -3611,11 +3614,11 @@ The response data for the API key operations.
 | **name** | **String** | The API key name. | [required] [example: My API Key] [nullable] |
 | **key** | **String** | The full API key value (only returned when creating a new key). | [required] [example: api_key_1234567890abcdef] [nullable] |
 | **keyPostfix** | **String** | The API key postfix (used for identification). | [optional] [example: ...cdef] [nullable] |
-| **permissions** | **List** | The list of permissions granted to the API key. | [required] [example: ["read","write","delete"]] [nullable] |
-| **lastUsed** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **createOn** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
-| **createBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **expiresAt** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **permissions** | **List** | The list of permissions granted to the API key. | [required] [example: [read, write, delete]] [nullable] |
+| **lastUsed** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
+| **createOn** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
+| **createBy** | [**EmployeeDto**](#model-employeedto) | The user parameters. | [optional] |
+| **expiresAt** | [**ApiDateTime**](#model-apidatetime) | The API date and time parameters. | [optional] |
 | **isActive** | **Boolean** | Indicates whether the API key is active or not. | [required] [example: true] |
 
 
@@ -3689,7 +3692,7 @@ The request parameters for creating a new API key.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **name** | **String** | The API key name. | [required] [example: My API Key] [minLength: 0] [maxLength: 30] |
-| **permissions** | **List** | The list of permissions granted to the API key. | [optional] [example: ["read","write"]] [nullable] |
+| **permissions** | **List** | The list of permissions granted to the API key. | [optional] [example: [read, write]] [nullable] |
 | **expiresInDays** | **Integer** (int32) | The number of days until the API key expires (null for no expiration). | [optional] [example: 30] [min: 1] [max: 365] [nullable] |
 
 
@@ -3706,7 +3709,7 @@ The theme parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **theme** | [**DarkThemeSettingsType**](#model-darkthemesettingstype) |  | [optional] [enum: Base, Dark, System] |
+| **theme** | [**DarkThemeSettingsType**](#model-darkthemesettingstype) | The theme type. | [optional] [enum: Base, Dark, System] |
 | **lastModified** | **Date** (date-time) | The last modified date. | [optional] [example: 2020-01-15T00:00:00Z] |
 
 
@@ -3715,7 +3718,7 @@ The theme settings request parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **theme** | [**DarkThemeSettingsType**](#model-darkthemesettingstype) |  | [required] [enum: Base, Dark, System] |
+| **theme** | [**DarkThemeSettingsType**](#model-darkthemesettingstype) | The theme type. | [required] [enum: Base, Dark, System] |
 
 
 ### Model DarkThemeSettingsType
@@ -3757,7 +3760,7 @@ The request parameters for the user email.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **email** | **String** (email) | The user email address. | [required] [example: john.doe@example.com] [minLength: 0] [maxLength: 255] |
-| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) |  | [optional] [enum: 0, 1, 2, 3] |
+| **recaptchaType** | [**RecaptchaType**](#model-recaptchatype) | The type of CAPTCHA validation used. | [optional] [enum: 0, 1, 2, 3] |
 | **recaptchaResponse** | **String** | The user&#39;s response to the CAPTCHA challenge. | [optional] [example: 03AGdBq27...] [nullable] |
 
 
@@ -3813,13 +3816,13 @@ The full list of user parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **UUID** (uuid) | The user ID. | [optional] |
-| **displayName** | **String** | The HTML-encoded user&#39;s display name formatted according to the default format for the current culture. | [optional] [nullable] |
-| **avatar** | **String** | The user avatar. | [optional] [nullable] |
-| **avatarOriginal** | **String** | The user original size avatar. | [optional] [nullable] |
-| **avatarMax** | **String** | The user maximum size avatar. | [optional] [nullable] |
-| **avatarMedium** | **String** | The user medium size avatar. | [optional] [nullable] |
-| **avatarSmall** | **String** | The user small size avatar. | [optional] [nullable] |
-| **profileUrl** | **String** | The user profile URL. | [optional] [nullable] |
+| **displayName** | **String** | The HTML-encoded user&#39;s display name formatted according to the default format for the current culture. | [optional] |
+| **avatar** | **String** | The user avatar. | [optional] |
+| **avatarOriginal** | **String** | The user original size avatar. | [optional] |
+| **avatarMax** | **String** | The user maximum size avatar. | [optional] |
+| **avatarMedium** | **String** | The user medium size avatar. | [optional] |
+| **avatarSmall** | **String** | The user small size avatar. | [optional] |
+| **profileUrl** | **String** | The user profile URL. | [optional] |
 | **hasAvatar** | **Boolean** | Specifies if the user has an avatar or not. | [optional] |
 | **isAnonim** | **Boolean** | Specifies if the user is anonymous or not. | [optional] |
 | **firstName** | **String** | The user first name. | [optional] [nullable] |
@@ -3827,9 +3830,9 @@ The full list of user parameters.
 | **userName** | **String** | The user username. | [optional] [nullable] |
 | **email** | **String** (email) | The user email. | [optional] [nullable] |
 | **contacts** | [**List**](#model-contact) | The list of user contacts. | [optional] [nullable] |
-| **status** | [**EmployeeStatus**](#model-employeestatus) |  | [optional] [enum: 1, 2, 4, 5, 7] |
-| **activationStatus** | [**EmployeeActivationStatus**](#model-employeeactivationstatus) |  | [optional] [enum: 0, 1, 2, 4] |
-| **terminated** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **status** | [**EmployeeStatus**](#model-employeestatus) | The user status. | [optional] [enum: 1, 2, 4, 5, 7] |
+| **activationStatus** | [**EmployeeActivationStatus**](#model-employeeactivationstatus) | The user activation status. | [optional] [enum: 0, 1, 2, 4] |
+| **terminated** | [**ApiDateTime**](#model-apidatetime) | The date when the user account was terminated. | [optional] |
 | **department** | **String** | The user department. | [optional] [nullable] |
 | **groups** | [**List**](#model-groupsummarydto) | The list of user groups. | [optional] [nullable] |
 | **location** | **String** | The user location. | [optional] [nullable] |
@@ -3843,17 +3846,17 @@ The full list of user parameters.
 | **isCollaborator** | **Boolean** | Specifies if the user is a portal collaborator or not. | [optional] |
 | **cultureName** | **String** | The user culture code. | [optional] [nullable] |
 | **mobilePhone** | **String** | The user mobile phone number. | [optional] [nullable] |
-| **mobilePhoneActivationStatus** | [**MobilePhoneActivationStatus**](#model-mobilephoneactivationstatus) |  | [optional] [enum: 0, 1] |
+| **mobilePhoneActivationStatus** | [**MobilePhoneActivationStatus**](#model-mobilephoneactivationstatus) | The user mobile phone activation status. | [optional] [enum: 0, 1] |
 | **isSSO** | **Boolean** | Specifies if the SSO settings are enabled for the user or not. | [optional] |
-| **theme** | [**DarkThemeSettingsType**](#model-darkthemesettingstype) |  | [optional] [enum: Base, Dark, System] |
+| **theme** | [**DarkThemeSettingsType**](#model-darkthemesettingstype) | The user theme settings. | [optional] [enum: Base, Dark, System] |
 | **quotaLimit** | **Long** (int64) | The user quota limit. | [optional] [nullable] |
 | **usedSpace** | **Double** (double) | The portal used space of the user. | [optional] [nullable] |
 | **shared** | **Boolean** | Specifies if the user has access rights. | [optional] [nullable] |
 | **isCustomQuota** | **Boolean** | Specifies if the user has a custom quota or not. | [optional] [nullable] |
 | **loginEventId** | **Integer** (int32) | The current login event ID. | [optional] [nullable] |
 | **authCookieLifetime** | **Double** (double) | The auth cookie lifetime in seconds. | [optional] [nullable] |
-| **createdBy** | [**EmployeeDto**](#model-employeedto) |  | [optional] |
-| **registrationDate** | [**ApiDateTime**](#model-apidatetime) |  | [optional] |
+| **createdBy** | [**EmployeeDto**](#model-employeedto) | The user who created the current user. | [optional] |
+| **registrationDate** | [**ApiDateTime**](#model-apidatetime) | The user registration date. | [optional] |
 | **hasPersonalFolder** | **Boolean** | Specifies if the user has a personal folder or not. | [optional] [nullable] |
 | **tfaAppEnabled** | **Boolean** | Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app. | [optional] [nullable] |
 
@@ -3900,7 +3903,7 @@ The file upload result.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **success** | **Boolean** | Specifies if the upload operation is successful or not. | [optional] [example: true] |
-| **data** | **oas_any_type_not_mapped** | The file upload result data. | [optional] [example: {"fileId":"123","fileName":"photo.jpg"}] [nullable] |
+| **data** | **null** | The file upload result data. | [optional] [example: {fileId=123, fileName=photo.jpg}] |
 | **message** | **String** | The file upload result message. | [optional] [example: File uploaded successfully] [nullable] |
 
 
@@ -3937,8 +3940,8 @@ The group parameters.
 | **id** | **UUID** (uuid) | The group ID. | [required] [example: 00000000-0000-0000-0000-000000000000] |
 | **isLDAP** | **Boolean** | Specifies if the LDAP settings are enabled for the group or not. | [required] [example: false] |
 | **isSystem** | **Boolean** | Indicates whether the group is a system group. | [optional] [example: false] [nullable] |
-| **manager** | [**EmployeeFullDto**](#model-employeefulldto) |  | [optional] |
-| **members** | [**List**](#model-employeefulldto) | The list of group members. | [optional] [example: [{"displayName":"John Doe"}]] [nullable] |
+| **manager** | [**EmployeeFullDto**](#model-employeefulldto) | The group manager full information. | [optional] |
+| **members** | [**List**](#model-employeefulldto) | The list of group members. | [optional] [example: [{displayName=John Doe}]] [nullable] |
 | **shared** | **Boolean** | Specifies whether the group can be shared or not. | [optional] [example: false] [nullable] |
 | **membersCount** | **Integer** (int32) | The number of group members. | [optional] [example: 0] |
 
@@ -3948,7 +3951,7 @@ The group request parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **members** | **List** (uuid) | The list of group member IDs. | [optional] [example: ["00000000-0000-0000-0000-000000000000","11111111-1111-1111-1111-111111111111"]] [nullable] |
+| **members** | **List** (uuid) | The list of group member IDs. | [optional] [example: [00000000-0000-0000-0000-000000000000, 11111111-1111-1111-1111-111111111111]] [nullable] |
 | **groupManager** | **UUID** (uuid) | The group manager ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **groupName** | **String** | The group name. | [required] [example: Marketing Team] [minLength: 1] [maxLength: 128] [nullable] |
 
@@ -3991,7 +3994,7 @@ The request parameters for inviting users.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **invitations** | [**List**](#model-userinvitationrequestdto) | The list of user invitations. | [required] [example: [{"email":"user@example.com","type":1}]] |
+| **invitations** | [**List**](#model-userinvitationrequestdto) | The list of user invitations. | [required] [example: [{email=user@example.com, type=1}]] |
 | **culture** | **String** | The culture code of invitations. | [optional] [example: en-US] [nullable] |
 
 
@@ -4011,14 +4014,14 @@ The user request parameters.
 | **password** | **String** | The user password. | [optional] [example: P@ssw0rd] [nullable] |
 | **passwordHash** | **String** | The user password hash. | [optional] [example: 5f4dcc3b5aa765d61d8327deb882cf99] [nullable] |
 | **email** | **String** (email) | The user email address. | [optional] [example: john.doe@example.com] [minLength: 0] [maxLength: 255] [nullable] |
-| **type** | [**EmployeeType**](#model-employeetype) |  | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
+| **type** | [**EmployeeType**](#model-employeetype) | The user type. | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
 | **isUser** | **Boolean** | Specifies if this is a guest or a user. | [optional] [example: true] [nullable] |
 | **firstName** | **String** | The user first name. | [optional] [example: John] [minLength: 0] [maxLength: 255] [nullable] |
 | **lastName** | **String** | The user last name. | [optional] [example: Doe] [minLength: 0] [maxLength: 255] [nullable] |
-| **department** | **List** (uuid) | The list of the user departments IDs. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
+| **department** | **List** (uuid) | The list of the user departments IDs. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
 | **location** | **String** | The user location. | [optional] [example: New York] [nullable] |
 | **comment** | **String** | The user comment. | [optional] [example: User comment] [nullable] |
-| **contacts** | [**List**](#model-contact) | The list of the user contacts. | [optional] [example: [{"type":"email","value":"john.doe@example.com"}]] [nullable] |
+| **contacts** | [**List**](#model-contact) | The list of the user contacts. | [optional] [example: [{type=email, value=john.doe@example.com}]] [nullable] |
 | **files** | **String** | The avatar photo URL. | [optional] [example: https://example.com/avatar.jpg] [nullable] |
 | **fromInviteLink** | **Boolean** | Specifies if the user is added via the invitation link or not. | [optional] [example: false] |
 | **key** | **String** | The user key. | [optional] [example: user_key_string] [nullable] |
@@ -4032,7 +4035,7 @@ The member request.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **members** | **List** (uuid) | The list of group member IDs. | [optional] [example: ["00000000-0000-0000-0000-000000000000","11111111-1111-1111-1111-111111111111"]] [nullable] |
+| **members** | **List** (uuid) | The list of group member IDs. | [optional] [example: [00000000-0000-0000-0000-000000000000, 11111111-1111-1111-1111-111111111111]] [nullable] |
 
 
 ### Model MobilePhoneActivationStatus
@@ -4127,7 +4130,7 @@ The request parameters for creating a third-party account.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **employeeType** | [**EmployeeType**](#model-employeetype) |  | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
+| **employeeType** | [**EmployeeType**](#model-employeetype) | The user type. | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
 | **key** | **String** | The user link key. | [required] [example: invite_key_123456] [nullable] |
 | **culture** | **String** | The user culture code. | [optional] [example: en-US] [nullable] |
 | **serializedProfile** | **String** | The third-party profile in the serialized format | [required] [example: {"provider":"Google","id":"123456"}] [nullable] |
@@ -4155,7 +4158,7 @@ The parameters for updating the type of the user or guest when reassigning rooms
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **type** | [**EmployeeType**](#model-employeetype) |  | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
+| **type** | [**EmployeeType**](#model-employeetype) | The user type. | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
 | **userId** | **UUID** (uuid) | The user ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **reassignUserId** | **UUID** (uuid) | The user ID to reassign. | [optional] [example: 11111111-1111-1111-1111-111111111111] [nullable] |
 
@@ -4180,7 +4183,7 @@ The task progress response parameters.
 | **error** | **String** | The task progress error message. | [optional] [example: An error occurred during processing] [nullable] |
 | **percentage** | **Integer** (int32) | The percentage of the task progress. | [required] [example: 75] |
 | **isCompleted** | **Boolean** | Specifies if the task peogress is completed or not. | [required] [example: false] |
-| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) |  | [required] [enum: 0, 1, 2, 3, 4] |
+| **status** | [**DistributedTaskStatus**](#model-distributedtaskstatus) | The status of the distributed task. | [required] [enum: 0, 1, 2, 3, 4] |
 
 
 ### Model TaskProgressResponseWrapper
@@ -4244,7 +4247,7 @@ The request parameters for updating an existing API key.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **name** | **String** | The new name for the API key. | [optional] [example: Updated API Key] [minLength: 0] [maxLength: 30] [nullable] |
-| **permissions** | **List** | The new list of permissions for the API key. | [optional] [example: ["read","write","delete"]] [nullable] |
+| **permissions** | **List** | The new list of permissions for the API key. | [optional] [example: [read, write, delete]] [nullable] |
 | **isActive** | **Boolean** | Indicates whether the API key should be active or not. | [optional] [example: true] [nullable] |
 
 
@@ -4253,8 +4256,8 @@ The request for updating a group.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **membersToAdd** | **List** (uuid) | The list of user IDs to add to the group. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
-| **membersToRemove** | **List** (uuid) | The list of user IDs to remove from the group. | [optional] [example: ["11111111-1111-1111-1111-111111111111"]] [nullable] |
+| **membersToAdd** | **List** (uuid) | The list of user IDs to add to the group. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
+| **membersToRemove** | **List** (uuid) | The list of user IDs to remove from the group. | [optional] [example: [11111111-1111-1111-1111-111111111111]] [nullable] |
 | **groupManager** | **UUID** (uuid) | The group manager ID. | [optional] [example: 00000000-0000-0000-0000-000000000000] |
 | **groupName** | **String** | The group name. | [optional] [example: Sales Team] [minLength: 0] [maxLength: 128] [nullable] |
 
@@ -4270,10 +4273,10 @@ The request parameters for updating the user information.
 | **isUser** | **Boolean** | Specifies if this is a guest or a user. | [optional] [example: true] [nullable] |
 | **firstName** | **String** | The user first name. | [optional] [example: John] [minLength: 0] [maxLength: 255] [nullable] |
 | **lastName** | **String** | The user last name. | [optional] [example: Doe] [minLength: 0] [maxLength: 255] [nullable] |
-| **department** | **List** (uuid) | The list of the user departments. | [optional] [example: ["00000000-0000-0000-0000-000000000000"]] [nullable] |
+| **department** | **List** (uuid) | The list of the user departments. | [optional] [example: [00000000-0000-0000-0000-000000000000]] [nullable] |
 | **location** | **String** | The user location. | [optional] [example: New York] [nullable] |
 | **comment** | **String** | The user comment. | [optional] [example: User comment] [nullable] |
-| **contacts** | [**List**](#model-contact) | The list of the user contacts. | [optional] [example: [{"type":"email","value":"john.doe@example.com"}]] [nullable] |
+| **contacts** | [**List**](#model-contact) | The list of the user contacts. | [optional] [example: [{type=email, value=john.doe@example.com}]] [nullable] |
 | **files** | **String** | The user avatar photo URL. | [optional] [example: https://example.com/avatar.jpg] [nullable] |
 | **spam** | **Boolean** | Specifies if tips, updates and offers are allowed to be sent to the user or not. | [optional] [example: false] [nullable] |
 
@@ -4283,7 +4286,7 @@ The request parameters for updating a user quota.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **userIds** | **List** (uuid) | The list of user IDs. | [optional] [example: ["00000000-0000-0000-0000-000000000000","11111111-1111-1111-1111-111111111111"]] [nullable] |
+| **userIds** | **List** (uuid) | The list of user IDs. | [optional] [example: [00000000-0000-0000-0000-000000000000, 11111111-1111-1111-1111-111111111111]] [nullable] |
 | **quota** | [**UpdateMembersQuotaRequestDto_quota**](#model-updatemembersquotarequestdtoquota) |  | [optional] |
 
 
@@ -4299,7 +4302,7 @@ The request parameters for updating the user information.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **userIds** | **List** (uuid) | The list of user IDs. | [optional] [example: ["00000000-0000-0000-0000-000000000000","11111111-1111-1111-1111-111111111111"]] [nullable] |
+| **userIds** | **List** (uuid) | The list of user IDs. | [optional] [example: [00000000-0000-0000-0000-000000000000, 11111111-1111-1111-1111-111111111111]] [nullable] |
 | **resendAll** | **Boolean** | Specifies whether to resend invitation letters to all the users or not. | [optional] [example: false] |
 
 
@@ -4317,7 +4320,7 @@ The user existence check response parameters.
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **exists** | **Boolean** | Specifies whether the user exists or not. | [required] [example: true] |
-| **status** | [**EmployeeStatus**](#model-employeestatus) |  | [optional] [enum: 1, 2, 4, 5, 7] |
+| **status** | [**EmployeeStatus**](#model-employeestatus) | The user status, if the user exists. | [optional] [enum: 1, 2, 4, 5, 7] |
 
 
 ### Model UserExistsResponseWrapper
@@ -4336,8 +4339,8 @@ The user invitation parameters.
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **email** | **String** (email) | The email address. | [optional] [maxLength: 255] [nullable] |
-| **type** | [**EmployeeType**](#model-employeetype) |  | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
+| **email** | **String** (email) | The email address. | [optional] [maxLength: 255] |
+| **type** | [**EmployeeType**](#model-employeetype) | The user type. | [optional] [enum: All, RoomAdmin, Guest, DocSpaceAdmin, User] |
 
 
 ## Authorization
