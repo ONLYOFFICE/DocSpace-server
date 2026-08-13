@@ -634,27 +634,6 @@ $OrangeButton
 
 您将获得更多有关 Web 办公室的使用技巧。您可在档案页面中随时取消或重新启用订阅。</value>
   </data>
-  <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;欢迎来到 &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间！&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您好, $UserName!&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;欢迎来到 ${LetterLogoText} 协作空间！您的用户资料已添加到&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. 现在您可以：&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;加入房间后与其他用户一起工作，包括&lt;b&gt;仅查看、审阅、协作和自定义房间&lt;/b&gt;。&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;处理各种格式的文件&lt;/b&gt;:文本文档、电子表格、演示文稿、可填写的表单、PDF、电子书、多媒体文件。&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;借助两种共同编辑模式协作处理文档&lt;/b&gt;:自动和手动。追踪变化，使用内置的聊天工具进行实时沟通，或进行音频和视频通话&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 32px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;使用人工智能助手插件:&lt;/b&gt;总结和翻译文章、生成图像和关键词、分析词语等。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如果您需要帮助，请浏览我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}"&gt;帮助中心&lt;/a&gt;或询问我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;支持团队&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;加入 &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间&lt;/td&gt;&lt;/tr&gt;
 
@@ -715,27 +694,6 @@ $OrangeButton
 链接有效期为 7 天。
 
 您将获得更多有关 Web 办公室的使用技巧。您可在档案页面中随时取消或重新启用订阅。</value>
-  </data>
-  <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;欢迎来到 &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间！&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您好, $UserName!&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;欢迎来到 ${LetterLogoText} 协作空间！您的用户资料已添加到&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. 现在您可以：&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;加入房间后与其他用户一起工作，包括&lt;b&gt;仅查看、审阅、协作和自定义房间&lt;/b&gt;。&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;处理各种格式的文件&lt;/b&gt;:文本文档、电子表格、演示文稿、可填写的表单、PDF、电子书、多媒体文件。&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;借助两种共同编辑模式协作处理文档&lt;/b&gt;:自动和手动。追踪变化，使用内置的聊天工具进行实时沟通，或进行音频和视频通话&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 32px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;使用人工智能助手插件:&lt;/b&gt;总结和翻译文章、生成图像和关键词、分析词语等。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如果您需要帮助，请浏览我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}"&gt;帮助中心&lt;/a&gt;或询问我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;支持团队&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;加入 &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间&lt;/td&gt;&lt;/tr&gt;
@@ -936,27 +894,6 @@ $TrulyYours</value>
 链接有效期为 7 天。
 
 您将获得更多有关 Web 办公室的使用技巧。您可在档案页面中随时取消或重新启用订阅。</value>
-  </data>
-  <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;欢迎来到 &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间！&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您好, $UserName!&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;欢迎来到 ${LetterLogoText} 协作空间！您的用户资料已添加到&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. 现在您可以：&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;加入房间后与其他用户一起工作，包括&lt;b&gt;仅查看、审阅、协作和自定义房间&lt;/b&gt;。&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;处理各种格式的文件&lt;/b&gt;:文本文档、电子表格、演示文稿、可填写的表单、PDF、电子书、多媒体文件。&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;借助两种共同编辑模式协作处理文档&lt;/b&gt;:自动和手动。追踪变化，使用内置的聊天工具进行实时沟通，或进行音频和视频通话&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 32px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;使用人工智能助手插件:&lt;/b&gt;总结和翻译文章、生成图像和关键词、分析词语等。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如果您需要帮助，请浏览我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}"&gt;帮助中心&lt;/a&gt;或询问我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;支持团队&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;加入 &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间&lt;/td&gt;&lt;/tr&gt;
@@ -1425,27 +1362,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;欢迎来到 &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间！&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您好, $UserName!&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;欢迎来到 ${LetterLogoText} 协作空间！您的用户资料已添加到&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. 现在您可以：&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;加入房间后与其他用户一起工作，包括&lt;b&gt;仅查看、审阅、协作和自定义房间&lt;/b&gt;。&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;处理各种格式的文件&lt;/b&gt;:文本文档、电子表格、演示文稿、可填写的表单、PDF、电子书、多媒体文件。&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;借助两种共同编辑模式协作处理文档&lt;/b&gt;:自动和手动。追踪变化，使用内置的聊天工具进行实时沟通，或进行音频和视频通话&lt;/td&gt; &lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 32px; padding-top: 0px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; Margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;使用人工智能助手插件:&lt;/b&gt;总结和翻译文章、生成图像和关键词、分析词语等。&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如果您需要帮助，请浏览我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__HelpLink}"&gt;帮助中心&lt;/a&gt;或询问我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;支持团队&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>尊敬的$UserName！，
 
@@ -1760,9 +1676,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>加入 ${__VirtualRootHost}</value>
   </data>
-  <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>欢迎来到 ${LetterLogoText} 协作空间！</value>
-  </data>
   <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
     <value>加入 ${LetterLogoText} 协作空间</value>
   </data>
@@ -1774,9 +1687,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>加入 ${__VirtualRootHost}</value>
-  </data>
-  <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>欢迎来到 ${LetterLogoText} 协作空间！</value>
   </data>
   <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>加入 ${LetterLogoText} 协作空间</value>
@@ -1816,9 +1726,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>加入 ${__VirtualRootHost}</value>
-  </data>
-  <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>欢迎来到 ${LetterLogoText} 协作空间！</value>
   </data>
   <data name="subject_opensource_user_activation_v1" xml:space="preserve">
     <value>加入 ${LetterLogoText} 协作空间</value>
@@ -1906,9 +1813,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>加入 ${__VirtualRootHost}</value>
-  </data>
-  <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
-    <value>欢迎来到 ${LetterLogoText} 协作空间！</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>已激活 ${LetterLogoText} 协作空间宽限期</value>

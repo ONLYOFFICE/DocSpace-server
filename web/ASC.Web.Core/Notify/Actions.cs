@@ -974,7 +974,7 @@ public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper 
 }
 
 [Scope]
-public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "saas_guest_welcome_v1";
 
@@ -982,47 +982,29 @@ public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNoti
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_saas_guest_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYouWebOffice", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, "social")
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "enterprise_guest_welcome_v1";
 
@@ -1030,47 +1012,29 @@ public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper stud
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_guest_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYourPortal", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, null)
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "enterprise_whitelabel_guest_welcome_v1";
 
@@ -1078,47 +1042,29 @@ public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyH
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_guest_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYourPortal", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, null)
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class OpensourceGuestWelcomeV1NotifyAction (StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class OpensourceGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "opensource_guest_welcome_v1";
 
@@ -1126,42 +1072,24 @@ public sealed class OpensourceGuestWelcomeV1NotifyAction (StudioNotifyHelper stu
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_opensource_guest_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYouWebOffice", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, "opensource")
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
