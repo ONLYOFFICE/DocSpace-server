@@ -702,7 +702,7 @@ IP: *$IP*
 #end
 Прегледач: *$Browser*
 
-Ако сте ви извршили ову radnju — нису потребни даљи кораци. Ако ова промена изгледа сумњиво или није била овлашћена од стране вас, одмах ресетујте лозинку и онемогућите приступ ${LetterLogoText}-у за овај уређај.
+Ако сте ви извршили ову радњу — нису потребни даљи кораци. Ако ова промена изгледа сумњиво или није била овлашћена од стране вас, одмах ресетујте лозинку и онемогућите приступ ${LetterLogoText}-у за овај уређај.
 
 $OrangeButton
 
@@ -756,7 +756,7 @@ ${LetterLogoText}™ тим за подршку
 *Важно! Сви подаци ускладиштени у вашем простору, као и ваши подаци о регистрацији биц́е изгубљени и нец́е се моц́и повратити.*
 
 #if($AutoRenew == "True")
-Пре него што избришете простор, уверите се да је аутоматски обрачун искључен. Статус аутоматске наплате можете да проверите у свом Stripe account.
+Пре него што избришете простор, уверите се да је аутоматски обрачун искључен. Статус аутоматске наплате можете да проверите у свом Stripe налогу.
 #end
 
 Ако и даље желите да избришете свој простор "${__VirtualRootPath}":"${__VirtualRootPath}", пратите линк испод да бисте потврдили операцију:
@@ -1298,7 +1298,7 @@ $TrulyYours</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Здраво, $UserName!
 
-Обавештавамо вас да автоматска допуна стања у вашем ${LetterLogoText} новчанику није успела.
+Обавештавамо вас да аутоматска допуна стања у вашем ${LetterLogoText} новчанику није успела.
 
 Љубазно вас молимо да ручно проверите и ажурирате стање у новчанику.
 
@@ -1391,13 +1391,13 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Промена власника портала</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Grejs period za vaš ${LetterLogoText} Developer je aktiviran</value>
+    <value>Грејс период за ваш ${LetterLogoText} Developer је активиран</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Ваша лиценца за ${LetterLogoText} Developer ускоро истиче</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Грејс период за ваш О${LetterLogoText} Developer ускоро истиче</value>
+    <value>Грејс период за ваш ${LetterLogoText} Developer ускоро истиче</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Ваш ${LetterLogoText} Developer више није доступан</value>
@@ -1490,7 +1490,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Уклањање корисничких података није успело</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Потребна акција: Није могућеautomatski обновити план услуге у вашем ${LetterLogoText}</value>
+    <value>Потребна акција: Није могуће аутоматски обновити план услуге у вашем ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Захтев за лиценцу предузец́а</value>
@@ -1586,7 +1586,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Процес шифровања је завршен</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Потребна акција: Није могуће automatski допунити стање новчаника у вашем ${LetterLogoText}</value>
+    <value>Потребна акција: Није могуће аутоматски допунити стање новчаника у вашем ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Нови корисник је додат на портал ${LetterLogoText}</value>

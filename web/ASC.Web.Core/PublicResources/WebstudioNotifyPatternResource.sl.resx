@@ -1612,7 +1612,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Postopek šifriranja je končan</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Zahtevano dejanje: Stanja v denarnici ${LetterLogoText} v vašem ${LetterLogoText} ni mogoče samodejno napolniti</value>
+    <value>Zahtevano dejanje: Stanja v denarnici v vašem ${LetterLogoText} ni mogoče samodejno napolniti</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Vaša vloga v agentu umetne inteligence ${LetterLogoText} se je spremenila</value>
