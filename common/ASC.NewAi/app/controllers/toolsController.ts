@@ -33,6 +33,7 @@
 
 import { ToolsEngine } from "@onlyoffice/ai-chat/core";
 import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
+import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { storage } from "../storage/index.js";
 import {
   systemToolsSource,
@@ -141,6 +142,10 @@ export const toolsController = {
     const servers = await engine.listCustomServers(entityId);
     const redacted: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(servers)) {
+      // The portal MCP server is not user-manageable: legacy per-agent
+      // whitelist markers named after it must not surface as selectable
+      // entries (it is always enabled server-side, see systemTools).
+      if (name === PORTAL_MCP_SERVER_NAME) continue;
       redacted[name] = redactSystemServer(name, config);
     }
     res.json(redacted);
@@ -149,6 +154,14 @@ export const toolsController = {
   listSystemTools: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     const tools = await engine.listSystemTools(entityId);
+    // Hide the portal MCP server from every management surface (the MCP
+    // settings page's permission cards, the agent dialog's server picker):
+    // it is always enabled with all tools and cannot be configured. The
+    // chat engine's tool context does not go through this listing, so the
+    // tools themselves stay available everywhere.
+    if (isObject(tools)) {
+      delete (tools as Record<string, unknown>)[PORTAL_MCP_SERVER_NAME];
+    }
     res.json(tools);
   }),
 

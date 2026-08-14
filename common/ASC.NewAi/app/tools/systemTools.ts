@@ -38,7 +38,7 @@ import type {
   ToolsAdapter,
 } from "@onlyoffice/ai-chat/core";
 import type { TMCPItem } from "@onlyoffice/ai-chat";
-import { getMcpServers } from "../../config/index.js";
+import { getMcpServers, PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { withTimeout } from "../storage/httpClient.js";
 import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
@@ -246,16 +246,19 @@ async function agentServerWhitelist(
   if (!agentId) {
     return undefined;
   }
+  // The portal's own MCP server is always enabled, agents included — it
+  // never depends on the per-agent marker map (and the failure path below
+  // keeps it too).
   try {
     const servers = await storage.mcpServers.readAll(agentId);
-    return new Set(Object.keys(servers));
+    return new Set([...Object.keys(servers), PORTAL_MCP_SERVER_NAME]);
   } catch (err) {
     logger.error(
       `systemTools: failed to resolve MCP whitelist for agent ${agentId}: ${
         err instanceof Error ? err.message : String(err)
-      } — serving no system tools`,
+      } — serving only the portal MCP server`,
     );
-    return new Set();
+    return new Set([PORTAL_MCP_SERVER_NAME]);
   }
 }
 

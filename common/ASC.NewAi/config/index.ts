@@ -73,6 +73,14 @@ function mcpEndpointOverride(index: number): string | undefined {
     return process.env[`AI__MCP__${index}__ENDPOINT`];
 }
 
+// The portal's own MCP server (docspace-mcp, the `ai.mcp` entry named
+// below). It is always enabled everywhere — global chat, agents, the
+// editor plugin — and its tools cannot be disabled: the agent whitelist
+// always includes it (systemTools) and its tool-prefs "disabled" entries
+// are ignored (toolPrefsStorage). The client hides it from the MCP
+// management surfaces accordingly.
+export const PORTAL_MCP_SERVER_NAME = "docspace";
+
 // Host-preconfigured MCP servers from the shared `appsettings.json`
 // (`ai.mcp`), with the Aspire endpoint override applied per entry.
 // Malformed entries (missing id / name / endpoint) are dropped so a bad
