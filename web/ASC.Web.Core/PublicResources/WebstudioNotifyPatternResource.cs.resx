@@ -641,23 +641,6 @@ $TrulyYours
 
 ^Chcete-li změnit typ oznámení, prosím upravte své "nastavení odběru":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Dobrý den!
-
-Proces migrace dat z osobního prosotru ${LetterLogoText} Personal do vašeho nového prostoru ${LetterLogoText} DocSpace byl úspěšně dokončen.
-
-Chcete-li získat přístup do svého prostoru DocSpace s importovanými daty, stačí kliknout na tlačítko níže:
-
-$OrangeButton
-
-Aktuálně využíváte plán DocSpace STARTUP. Je zcela zdarma.
-
-==V případě potřeby můžete změnit název nového prostoru DocSpace. Stačí přepnout do Nastavení -&gt; Přizpůsobení -&gt; Přejmenování prostoru DocSpace.==
-
-Užijte si nový způsob spolupráce na dokumentech!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Chyba při migraci portálu dalšího regionu
 
@@ -1438,9 +1421,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Další chyba migrace regionálního portálu</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Migrace dat do ${LetterLogoText} DocSpace úspěšně dokončena</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Zahájena další migrace regionálního portálu</value>

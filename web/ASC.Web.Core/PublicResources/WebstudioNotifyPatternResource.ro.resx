@@ -642,23 +642,6 @@ $TrulyYours
 
 ^Pentru a modifica tipul de notificare, gestionați "setările pentru abonament":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Bună!
- 
-Procesului de migrare a datelor din ${LetterLogoText} Personal în spațiul dvs nou ${LetterLogoText} DocSpace s-a terminat cu succes.
- 
-Pentru accesarea datelor importate în DocSpace, faceți clic pe butonul de mai jos:
- 
-$OrangeButton
- 
-Planul dvs actual DocSpace est STARTUP. Acest abonament este absolut gratuit.
- 
-==Dacă este necesar, puteți schimba numele spațiului dvs DocSpace. Treceți la Setare -&gt; Particularizare -&gt; Redenumire DocSpace.==
- 
-Descoperiți un nou mod de colaborare asupra documentelor!
- 
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1. Eroare de migrare a portalului la o altă regiune
 
@@ -1448,9 +1431,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Eroare de migrare a portalului la o altă regiune</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Migrarea datelor în ${LetterLogoText} DocSpace s-a terminat cu succes</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Migrarea portalului la o altă regiune a început</value>

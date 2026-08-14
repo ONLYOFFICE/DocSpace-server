@@ -654,23 +654,6 @@ $TrulyYours
 
 ^Για να αλλάξετε τον τύπο ειδοποίησης, διαχειριστείτε τις "ρυθμίσεις συνδρομής":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Γεια σας!
-
-Η διαδικασία μεταφοράς δεδομένων από το Προσωπικό ${LetterLogoText} στο νέο σας DocSpace του ${LetterLogoText} ολοκληρώθηκε με επιτυχία.
-
-Για να αποκτήσετε πρόσβαση στο DocSpace σας με τα εισαγόμενα δεδομένα, απλά κάντε κλικ στο παρακάτω κουμπί:
-
-$OrangeButton
-
-Το τρέχον πρόγραμμα DocSpace σας είναι το ΑΡΧΙΚΟ. Είναι απολύτως δωρεάν.
-
-==Εάν είναι απαραίτητο, μπορείτε να αλλάξετε το όνομα του νέου σας DocSpace. Απλά μεταβείτε στις Ρυθμίσεις -&gt; Προσαρμογή -&gt; Μετονομασία DocSpace.==
-
-Απολαύστε έναν νέο τρόπο συνεργασίας στα έγγραφα!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Ακόμα ένα σφάλμα μετάβασης στην πύλη της περιοχής
 
@@ -1472,9 +1455,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Άλλο ένα σφάλμα μετεγκατάστασης στην πύλη της περιοχής</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Η μεταφορά δεδομένων στο DocSpace του ${LetterLogoText} ολοκληρώθηκε με επιτυχία</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Άλλη μια μετεγκατάσταση πύλης περιοχής ξεκίνησε</value>

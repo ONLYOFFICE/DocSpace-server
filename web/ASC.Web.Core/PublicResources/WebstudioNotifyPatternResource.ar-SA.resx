@@ -645,23 +645,6 @@ $TrulyYours
 
 ^لتغيير نوع الإشعار، يرجى إدارة "إعدادات الاشتراك":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>مرحبًا!
-
-تم الانتهاء من عملية ترحيل البيانات من ${LetterLogoText}الشخصي إلى DocSpace ${LetterLogoText} الجديد بنجاح.
-
-للوصول إلى DocSpace الخاصة بك مع البيانات المستوردة، عليك النقر فوق الزر أدناه:
-
-$OrangeButton
-
-خطة DocSpace الحالية الخاصة بك هي STARTUP. وهي مجانية تمامًا.
-
-==إذا لزم الأمر، يمكنك تغيير اسم DocSpace الجديد. يمكنك الذهاب إلى الإعدادات -&gt; التخصيص -&gt; إعادة تسمية DocSpace.==
-
-استمتع بطريقة جديدة للتعاون بين المستندات!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.خطأ آخر في ترحيل بوابة المنطقة
 
@@ -1448,9 +1431,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. خطأ آخر في ترحيل مدخل المنطقة</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>تم إكمال ترحيل البيانات بنجاح إلى ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}.  بدء ترحيل بوابة منطقة أخرى</value>

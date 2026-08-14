@@ -654,23 +654,6 @@ $TrulyYours
 
 ^Щоб змінити тип сповіщення, будь ласка,налаштуйте свої "параметрами підписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Вітаємо!
-
-Процес перенесення даних з ${LetterLogoText} Personal до вашого нового простору ${LetterLogoText} DocSpace успішно завершено.
-
-Щоб отримати доступ до DocSpace з імпортованими даними, просто натисніть кнопку нижче:
-
-$OrangeButton
-
-Ваш поточний план DocSpace — STARTUP. Він абсолютно безплатний.
-
-==Якщо необхідно, ви можете змінити ім'я вашого нового простору DocSpace. Просто виберіть Параметри -&gt; Налаштування -&gt; Перейменування DocSpace.==
-
-Сподіваємося, вам сподобається новий спосіб спільної роботи над документами!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Помилка переміщення порталу до іншого регіону
 
@@ -1473,9 +1456,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}.Інша помилка переміщення регіонального порталу</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Перенесення даних до ${LetterLogoText} DocSpace успішно виконано</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}.Розпочалася інша міграція порталу</value>

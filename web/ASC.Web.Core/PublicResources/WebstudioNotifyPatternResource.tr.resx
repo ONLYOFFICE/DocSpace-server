@@ -647,23 +647,6 @@ $TrulyYours
 
 ^Bu bildirimleri almak istemiyorsanız lütfen "abonelik ayarlarınızı":"$RecipientSubscriptionConfigURL" değiştirin.^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Merhaba!
-
-${LetterLogoText} Personal'dan yeni ${LetterLogoText} DocSpace'inize veri taşıma işlemi başarıyla tamamlandı.
-
-DocSpace'inize içe aktarılan verilerle erişmek için aşağıdaki düğmeyi tıklamanız yeterlidir:
-
-$OrangeButton
-
-Mevcut DocSpace planınız STARTUP'tır. Tamamen ücretsizdir.
-
-==Gerekirse, yeni DocSpace'inizin adını değiştirebilirsiniz. Sadece Ayarlar -&gt; Özelleştirme -&gt; DocSpace Yeniden Adlandırma adımlarını takip edin.==
-
-Yeni bir belge iş birliği yönteminin keyfini çıkarın!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Portal başka bölgeye taşıma hatası
 
@@ -1466,9 +1449,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Başka bir bölgeye portal taşıma hatası</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace'e veri geçişi başarıyla tamamlandı</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Başka bir bölgeye portal taşıma başladı</value>

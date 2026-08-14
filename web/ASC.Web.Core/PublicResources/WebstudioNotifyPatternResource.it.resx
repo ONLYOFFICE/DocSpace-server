@@ -641,23 +641,6 @@ $TrulyYours
 
 ^Per modificare il tipo di notifica, gestisci le tue "impostazioni di sottoscrizione":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Ciao!
-
-Il processo di migrazione dei dati da ${LetterLogoText} Personal al tuo nuovo ${LetterLogoText} DocSpace è stato completato con successo.
-
-Per accedere al tuo DocSpace con i dati importati, fai semplicemente clic sul pulsante qui sotto:
-
-$OrangeButton
-
-Il tuo attuale piano DocSpace è STARTUP. È assolutamente gratuito.
-
-==Se necessario, puoi cambiare il nome del tuo nuovo DocSpace. Basta passare a Impostazioni -&gt; Personalizzazione -&gt; Rinomina DocSpace.==
-
-Goditi un nuovo modo di collaborare sui documenti!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Un errore di migrazione del portale in un'altra regione
 
@@ -1447,9 +1430,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Errore in un'altra regione di migrazione</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>La migrazione dei dati a ${LetterLogoText} DocSpace è stata completata con successo</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Un'altra migrazione regione portale iniziata</value>

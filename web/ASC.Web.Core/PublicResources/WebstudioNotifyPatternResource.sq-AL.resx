@@ -644,23 +644,6 @@ $TrulyYours
 
 ^Për të ndryshuar llojin e njoftimit, ju lutem menaxhoni "cilësimet e abonimit":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Përshëndetje!
-
-Procesi i migrimit të të dhënave nga ${LetterLogoText} Personal në ${LetterLogoText} DocSpace tuaj të ri is përfundoi me sukses.
-
-Për të hyrë në DocSpace me të dhënat e importuara, thjesht klikoni butonin më poshtë:
-
-$OrangeButton
-
-Plani yt aktual i DocSpace është STARTUP. Është absolutisht falas
-
-==Nëse është e nevojshme, mund të ndryshoni emrin e DocSpace tuaj të ri. Thjesht kaloni të Cilësimet -&gt; Personalizimet-&gt; Riemërtimi i DocSpace.==
-
-Shijoni një mënyrë të re të bashkëpunimit të dokumenteve!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Një gabim tjetër i migrimit të portalit të rajonit
 
@@ -1441,9 +1424,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Një tjetër migrim i portalit rajonal filloi</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Migrimi i të dhënave në ${LetterLogoText} DocSpace përfundoi me sukses</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Një tjetër migrim i portalit rajonal përfundoi me sukses</value>

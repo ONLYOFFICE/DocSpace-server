@@ -654,23 +654,6 @@ $TrulyYours
 
 ^알림 유형을 관리하려면 "구독 설정":"$RecipientSubscriptionConfigURL"을 변경하세요.^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>안녕하세요!
-
-${LetterLogoText} Personal에서 새 ${LetterLogoText} DocSpace로의 데이터 마이그레이션 프로세스가 완료되었습니다.
-
-가져오기한 데이터로 DocSpace에 액세스하려면 아래 버튼을 클릭하세요:
-
-$OrangeButton
-
-현재 DocSpace 요금제는 STARTUP이며, 이 요금제는 완전 무료입니다.
-
-==필요한 경우 새 DocSpace의 이름을 변경할 수 있습니다. 설정 -&gt; 사용자 지정 -&gt; DocSpace 이름 변경으로 전환하기만 하면 됩니다.==
-
-새로운 방식의 문서 협업을 즐기세요!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.다른 리전 포털 마이그레이션 오류
 
@@ -1467,9 +1450,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. 다른 리전 포털 마이그레이션 오류</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace로의 데이터 마이그레이션이 완료되었습니다</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. 다른 리전 포털 마이그레이션이 시작되었습니다</value>

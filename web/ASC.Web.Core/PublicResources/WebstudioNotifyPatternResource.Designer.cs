@@ -1185,29 +1185,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello!
-        ///
-        ///The data migration process from ${LetterLogoText} Personal to your new ${LetterLogoText} DocSpace is successfully completed.
-        ///
-        ///To access your DocSpace with the imported data, just click the button below:
-        ///
-        ///$OrangeButton
-        ///
-        ///Your current DocSpace plan is STARTUP. It is absolutely free.
-        ///
-        ///==If necessary, you can change the name of your new DocSpace. Just switch to Settings -&gt; Customization -&gt; DocSpace Renaming.==
-        ///
-        ///Enjoy a new way of document collaboration!
-        ///
-        ///$TrulyYours.
-        /// </summary>
-        public static string pattern_migration_personal_to_docspace {
-            get {
-                return ResourceManager.GetString("pattern_migration_personal_to_docspace", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to h1.Another region portal migration error
         ///
         ///An error has occurred while migrating to another region. Please, try once again later.
@@ -2561,15 +2538,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_migration_error {
             get {
                 return ResourceManager.GetString("subject_migration_error", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Data migration to ${LetterLogoText} successfully completed.
-        /// </summary>
-        public static string subject_migration_personal_to_docspace {
-            get {
-                return ResourceManager.GetString("subject_migration_personal_to_docspace", resourceCulture);
             }
         }
         

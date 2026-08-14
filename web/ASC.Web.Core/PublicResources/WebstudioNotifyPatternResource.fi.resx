@@ -653,23 +653,6 @@ $TrulyYours
 
 ^Muuttaaksesi ilmoitustyyppiä, ole hyvä ja hallitse "tilausasetuksia":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Hei!
-
-Tietojen siirto ${LetterLogoText} Personalista uuteen ${LetterLogoText} DocSpaceen on onnistuneesti suoritettu.
-
-Klikkaa alla olevaa painiketta päästäksesi päivitettyyn DocSpaceen:
-
-$OrangeButton
-
-Nykyinen DocSpace-tilauksesi on STARTUP. Se on täysin ilmainen. 
-
-==Tarvittaessa voit muuttaa uuden DocSpacesi nimen. Klikkaa Asetukset -&gt; Mukauttaminen -&gt; DocSpacen nimeäminen uudelleen.==
-
-Nauti uudesta tavasta tehdä yhteistyötä asiakirjoin!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Toisen alueportaalin siirtovirhe
 
@@ -1470,9 +1453,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Toisen alueen portaalin migraation virhe</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Tietojen siirto ${LetterLogoText} DocSpaceen on onnistuneesti suoritettu</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Toisen alueen portaaliin migraatio alkoi</value>

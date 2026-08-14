@@ -637,23 +637,6 @@ $TrulyYours
 
 ^За да промените типа на известието, моля, управлявайте "настройките за абонамента":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Здравейте!
-
-Процесът по мигриране на данни от ${LetterLogoText} Personal към вашия нов ${LetterLogoText} DocSpace приключи успешно.
-
-За достъп до вашия DocSpace с импортираните данни, просто натиснете бутона по-долу:
-
-$OrangeButton
-
-Текущият ви план за DocSpace е STARTUP. Това е абсолютно безплатно.
-
-==Ако е необходимо, можете да промените името на вашия нов DocSpace. Просто превключете на Настройки -&gt; Персонализиране -&gt; Преименуване на DocSpace.==
-
-Насладете се на нов начин за съвместна работа с документи!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Друга грешка при миграцията на портала на регионален регистър
 
@@ -1434,9 +1417,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Друга грешка при мигрирането на портала за региона</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Миграцията на данни към ${LetterLogoText} DocSpace приключи успешно</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Започна още една миграция на портала на региона</value>

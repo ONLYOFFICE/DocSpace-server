@@ -642,23 +642,6 @@ $TrulyYours
 
 ^Bildiriş növünü dəyişdirmək üçün "abunəlik parametrlərinizi idarə edin":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Salam!
-
-Şəxsi ${LetterLogoText}-dən yeni ${LetterLogoText} DocSpace-ə məlumat köçürməsi uğurla tamamlandı.
-
-İdxal edilmiş məlumatlarla DocSpace-ə daxil olmaq üçün aşağıdakı düyməni sıxmaq kifayətdir:
-
-$OrangeButton
-
-Cari DocSpace planınız BAŞLANĞICDIR və tamamilə pulsuzdur.
-
-==Lazım gələrsə, yeni DocSpace-in adını dəyişə bilərsiniz. Sadəcə Parametrlər -&gt; Fərdiləşdirmə -&gt; DocSpace adının dəyişdirilməsinə keçin.==
-
-Sənəd əməkdaşlığının yeni üsulundan zövq alın!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Portalı başqa bölgəyə köçürərkən xəta
 
@@ -1438,9 +1421,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Portalı başqa bölgəyə köçürmə xətası</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace-ə məlumat köçürməsi uğurla tamamlandı</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Portalın başqa bölgəyə köçürülməsi başladıldı</value>

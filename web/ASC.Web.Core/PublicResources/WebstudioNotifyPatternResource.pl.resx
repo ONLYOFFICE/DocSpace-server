@@ -642,23 +642,6 @@ $TrulyYours
 
 ^Aby zmienić typ alertu, należy skonfigurować "ustawienia subskrypcji":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Witaj!
-
-Proces migracji danych z ${LetterLogoText} Personal do nowego obszaru roboczego ${LetterLogoText} DocSpace został pomyślnie zakończony.
-
-Aby uzyskać dostęp do obszaru z zaimportowanymi danymi, wystarczy kliknąć poniższy przycisk:
-
-$OrangeButton
-
-Twój bieżący plan DocSpace to STARTUP. Jest absolutnie darmowy.
-
-==W razie potrzeby możesz zmienić nazwę nowego DocSpace. Wystarczy przejść do sekcji Ustawienia -&gt; Dostosowywanie -&gt; Zmiana nazwy DocSpace.==
-
-Ciesz się nowym sposobem współpracy nad dokumentami!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Błąd po przeniesieniu portalu na inny region
 
@@ -1438,9 +1421,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Inny błąd migracji portalu obszaru</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Migracja danych do ${LetterLogoText} DocSpace została pomyślnie zakończona</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Rozpoczęła się inna migracja portalu regionu</value>

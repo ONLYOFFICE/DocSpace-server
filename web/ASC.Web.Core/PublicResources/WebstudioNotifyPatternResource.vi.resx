@@ -654,23 +654,6 @@ $TrulyYours
 
 ^Để thay đổi hình thức thông báo, vui lòng điều chỉnh trong "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Xin chào bạn!
-
-Quá trình di chuyển dữ liệu từ ${LetterLogoText} Personal sang ${LetterLogoText} DocSpace mới của bạn đã hoàn thành.
-
-Để truy cập DocSpace của bạn với dữ liệu đã được nhập, chỉ cần nhấp vào nút bên dưới:
-
-$OrangeButton
-
-Gói Doc hiện tại của bạn là STARTUP. Nó hoàn toàn miễn phí.
-
-==Nếu cần, bạn có thể thay đổi tên DocSpace mới của mình. Chỉ cần chuyển sang Cài đặt -&gt; Tùy chỉnh -&gt; Đổi tên DocSpace.==
-
-Tận hưởng một cách cộng tác tài liệu mới!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Lỗi di chuyển cổng vùng khác
 
@@ -1473,9 +1456,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Lỗi di chuyển cổng sang vùng khác</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Đã hoàn thành di chuyển dữ liệu sang ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Đã bắt đầu di chuyển cổng sang vùng khác</value>

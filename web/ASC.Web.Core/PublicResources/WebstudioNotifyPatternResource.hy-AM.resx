@@ -642,23 +642,6 @@ $TrulyYours
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Ողջու՜ն
-
-Տվյալների տեղափոխման գործընթացը ${LetterLogoText} Personal-ից դեպի ձեր նոր ${LetterLogoText} DocSpace բարեհաջող ավարտված է:
-
-Ներմուծված տվյալների հետ ձեր DocSpace մուտք գործելու համար պարզապես սեղմեք ստորև նշված կոճակը.
-
-$OrangeButton
-
-Ձեր ընթացիկ DocSpace պլանը STARTUP-ն է: Այն բացարձակապես անվճար է:
-
-==Անհրաժեշտության դեպքում կարող եք փոխել ձեր նոր DocSpace-ի անունը: Պարզապես անցեք Կարգավորումներ -&gt; Հարմարեցում -&gt; DocSpace-ի վերանվանում:==
-
-Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Տարածաշրջանի պորտալի միգրացիայի մեկ այլ սխալ
 
@@ -1444,9 +1427,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}: Մեկ այլ տարածաշրջանային պորտալի միգրացիայի սխալ</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Տվյալների տեղափոխումը ${LetterLogoText} DocSpace հաջողությամբ ավարտվեց</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}: Մեկ այլ տարածաշրջանային պորտալի միգրացիա սկսվեց</value>

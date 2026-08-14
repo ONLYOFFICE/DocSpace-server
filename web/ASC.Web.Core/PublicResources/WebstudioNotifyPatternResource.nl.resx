@@ -642,23 +642,6 @@ $TrulyYours
 
 ^Om het notificatietype te veranderen, beheer alstublieft uw "abonnementsinstellingen":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Hallo!
-
-De gegevensmigratie van ${LetterLogoText} Personal naar uw nieuwe ${LetterLogoText} DocSpace is succesvol afgerond.
-
-Klik op de knop hieronder om toegang te krijgen tot uw DocSpace met de geïmporteerde gegevens:
-
-$OrangeButton
-
-Uw huidige DocSpace abonnement is STARTUP. Het is helemaal gratis.
-
-==Als het nodig is, kunt u de naam van uw nieuwe DocSpace wijzigen. Ga naar Instellingen -&gt; Aanpassing -&gt; DocSpace Hernoemen.==
-
-Beleef een nieuwe manier van samenwerken aan documenten!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Migratiefout portaal andere regio
 
@@ -1439,9 +1422,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Andere regio Portaal migratiefout</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Migratie van gegevens naar ${LetterLogoText} DocSpace succesvol afgerond</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Andere regio Portaal migratie gestart</value>

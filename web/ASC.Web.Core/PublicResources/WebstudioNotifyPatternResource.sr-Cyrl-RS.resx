@@ -642,23 +642,6 @@ $TrulyYours
 
 ^Да бисте променили тип обавештења, управљајте својим "подешавањима претплате":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Здраво!
-
-Процес миграције података са ${LetterLogoText} Personal на ваш нови ${LetterLogoText} DocSpace је успешно завршен.
-
-Да бисте приступили вашем DocSpace-у са увезеним подацима, само кликните на дугме испод:
-
-$OrangeButton
-
-Ваш тренутни DocSpace план је STARTUP. Потпуно је бесплатан.
-
-==Ако је потребно, можете променити име вашег новог DocSpace -а. Само се пребаците на Подешавања -&gt; Прилагођавање -&gt; DocSpace Преименовање.= =
-
-Уживајте у новом начину сарадње на документима!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Још једна грешка при миграцији портала региона
 
@@ -1446,9 +1429,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Још једна грешка при миграцији регионалног портала</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Миграција података на ${LetterLogoText} DocSpace је успешно завршена</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Почела је још једна миграција регионалног портала</value>

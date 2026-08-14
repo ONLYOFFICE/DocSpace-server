@@ -654,23 +654,6 @@ $TrulyYours
 
 ^Če želite spremeniti vrsto obvestil, jih upravljajte v "nastavitvah naročnine":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Pozdravljeni!
-
-Postopek selitve podatkov iz ${LetterLogoText} Personal v vaš novi ${LetterLogoText} DocSpace je uspešno zaključen.
-
-Za dostop do prostora DocSpace z uvoženimi podatki preprosto kliknite spodnji gumb:
-
-$OrangeButton
-
-Vaš trenutni paket DocSpace je STARTUP. Ta je popolnoma brezplačen.
-
-==Po potrebi lahko spremenite ime svojega novega prostora DocSpace. Preklopite na Nastavitve -&gt; Prilagajanje -&gt; Preimenovanje DocSpace.==
-
-Uživajte v novem načinu sodelovanja pri dokumentih!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Napaka pri migraciji na portal druge regije
 
@@ -1472,9 +1455,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Napaka pri selitvi na portal druge regije</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Selitev podatkov v ${LetterLogoText} DocSpace je bila uspešno zaključena</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Migracija na portal druge regije se je začela</value>

@@ -663,23 +663,6 @@ $TrulyYours
 
 ^若想修改通知类型，请管理您的 "订阅设置":"$RecipientSubscriptionConfigURL"。^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>您好！
-
-从 ${LetterLogoText} 个人版到您的新 ${LetterLogoText} 协作空间的数据迁移过程已成功完成。
-
-要使用导入的数据访问您的协作空间，只需单击下面的按钮：
-
-$OrangeButton
-
-您当前的协作空间计划是初创版。它完全免费。
-
-==如有必要，您可以更改新协作空间的名称。只需切换到设置 -&gt; 自定义 -&gt; 协作空间重命名。==
-
-享受一种新的文档协作方式！
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.另一个地区门户迁移错误
 
@@ -1470,9 +1453,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText} 。另一个地区门户迁移错误</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>数据迁移至 ${LetterLogoText} 协作空间已成功完成</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText} 。另一个地区门户迁移开始</value>

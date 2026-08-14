@@ -2366,40 +2366,6 @@ public sealed class ZoomWelcomeNotifyAction(StudioNotifyHelper studioNotifyHelpe
     }
 }
 
-[Scope]
-public sealed class MigrationPersonalToDocspaceNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
-{
-    public override string ID => "migration_personal_to_docspace";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_migration_personal_to_docspace, () => WebstudioNotifyPatternResource.pattern_migration_personal_to_docspace)
-        ];
-    }
-
-    public async Task Init(UserInfo userInfo, DateTime auditEventDate)
-    {
-        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
-
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
-
-        var cultureInfo = GetCulture(userInfo);
-
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", cultureInfo);
-
-        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
-
-        Tags =
-        [
-            TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
-            new TagValue(CommonTags.Culture, cultureInfo.Name),
-            new TagValue(CommonTags.Footer, "social")
-        ];
-    }
-}
 
 [Scope]
 public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)

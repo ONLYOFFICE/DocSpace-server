@@ -641,23 +641,6 @@ $TrulyYours
 
 ^Para cambiar el tipo de notificación, por favor administre su "configuración de la suscripción":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>¡Hola!
-
-El proceso de migración de datos de ${LetterLogoText} Personal a su nuevo ${LetterLogoText} DocSpace se completó con éxito.
-
-Para acceder a su DocSpace con los datos importados, simplemente haga clic en el botón a continuación:
-
-$OrangeButton
-
-Su plan actual de DocSpace es STARTUP. Es absolutamente gratis.
-
-==Si es necesario, puede cambiar el nombre de su nuevo DocSpace. Simplemente acceda a Configuración -&gt; Personalización -&gt; Cambio de nombre de DocSpace.==
-
-¡Disfrute de una nueva forma de colaboración en documentos!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Error Migración de Portal de Otra Región
 
@@ -1447,9 +1430,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Otro error de migración de portal de región</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>La migración de datos a ${LetterLogoText} DocSpace se ha completado correctamente</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Otra migración de portal de región ha comenzado</value>

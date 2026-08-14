@@ -654,23 +654,6 @@ $TrulyYours
 
 ^Lai mainītu paziņojuma veidu, pārvaldiet "abonēšanas iestatījumus":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Sveiki!
-
-Datu migrācijas process no ${LetterLogoText} Personal uz jūsu jauno ${LetterLogoText} DocSpace ir veiksmīgi pabeigts.
-
-Lai piekļūtu savam DocSpace ar importētajiem datiem, vienkārši noklikšķiniet uz tālāk redzamās pogas:
-
-$OrangeButton
-
-Jūsu pašreizējais DocSpace plāns ir STARTUP (JAUNUZŅĒMUMS). Tas ir pilnīgi bez maksas.
-
-==Ja nepieciešams, varat mainīt jaunā DocSpace nosaukumu. Vienkārši pārslēdzieties uz Iestatījumi -&gt; Pielāgošana -&gt; DocSpace pārdēvēšana.==
-
-Izbaudiet jaunu dokumentu sadarbības veidu!
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Cita reģiona portāla migrācijas kļūda
 
@@ -1472,9 +1455,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}. Kļūda, pārnesot portālu uz citu apgabalu</value>
-  </data>
-  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Datu migrācija uz ${LetterLogoText} DocSpace ir veiksmīgi pabeigta</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Portāla pārnese uz citu apgabalu uzsākta</value>
