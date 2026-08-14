@@ -2070,7 +2070,7 @@ $TrulyYours</value>
     <value>Obtenez des applications ${LetterLogoText} gratuites</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Discover business subscription of ${LetterLogoText}</value>
+    <value>Découvrez l'abonnement business d'${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
     <value>Rejoindre ${LetterLogoText}</value>
