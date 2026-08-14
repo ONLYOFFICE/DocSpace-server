@@ -2650,10 +2650,10 @@ $TrulyYours</value>
     <value>Configure your ${LetterLogoText} workspace</value>
   </data>
   <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
-    <value>Your ${LetterLogoText} Docs will be deleted</value>
+    <value>Your ${LetterLogoText} will be deleted</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>Your ${LetterLogoText} Docs will be deleted</value>
+    <value>Your ${LetterLogoText} will be deleted</value>
   </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Get free ${LetterLogoText} apps</value>

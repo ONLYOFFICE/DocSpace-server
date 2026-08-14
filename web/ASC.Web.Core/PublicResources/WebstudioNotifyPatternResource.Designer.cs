@@ -3149,7 +3149,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} Docs will be deleted.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
         /// </summary>
         public static string subject_saas_admin_startup_warning_after_year_v1 {
             get {
@@ -3158,7 +3158,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} Docs will be deleted.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
         /// </summary>
         public static string subject_saas_admin_trial_warning_after_half_year_v1 {
             get {
