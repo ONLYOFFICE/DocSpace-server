@@ -51,6 +51,7 @@ import { textToDocxController } from "./controllers/textToDocxController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
+import { editorToolsController } from "./controllers/editorToolsController.js";
 import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
@@ -220,6 +221,12 @@ export default function registerRoutes(app: Application): void {
     "/openai/:profileId/v1/images/generations",
     openaiPassthroughController.imagesGenerations,
   );
+
+  // DocSpace tools for the editor AI plugin: sanitized catalog of the same
+  // composed adapter the chat engine uses, plus server-side execution with
+  // the caller's forwarded credentials (see editorToolsController).
+  router.get("/editor-tools/list", editorToolsController.list);
+  router.post("/editor-tools/call", editorToolsController.call);
 
   // Web-search passthrough for the editor AI plugin: the plugin holds a
   // placeholder config, the portal's active provider and key are resolved

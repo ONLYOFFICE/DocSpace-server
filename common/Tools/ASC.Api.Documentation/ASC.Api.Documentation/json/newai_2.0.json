@@ -5200,6 +5200,79 @@
         }
       }
     },
+    "/api/2.0/ai/editor-tools/list": {
+      "get": {
+        "tags": [
+          "AI / Editor tools"
+        ],
+        "operationId": "aiEditorToolsList",
+        "summary": "Sanitized DocSpace tool catalog for the editor AI plugin",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/editor-tools/call": {
+      "post": {
+        "tags": [
+          "AI / Editor tools"
+        ],
+        "operationId": "aiEditorToolsCall",
+        "summary": "Execute a DocSpace tool on behalf of the editor AI plugin",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/ai/websearch/v1/search": {
       "post": {
         "tags": [
