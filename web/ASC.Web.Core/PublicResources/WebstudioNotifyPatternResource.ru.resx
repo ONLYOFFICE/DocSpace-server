@@ -166,7 +166,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; добавлен(а) в комнату: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Добавлен новый пользователь DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Добавлен новый пользователь: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; удален из агента: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -178,7 +178,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; изменил(а) уровень доступа для пользователей &lt;b&gt;{1}&lt;/b&gt; на &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>Обновлен пользователь DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Обновлен пользователь: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>С уважением, команда ${LetterLogoText}</value>
@@ -211,7 +211,7 @@
     <value>Настроить приложение для аутентификации</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Работайте совместно в DocSpace</value>
+    <value>Работайте совместно в ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Настроить прямо сейчас</value>
@@ -220,7 +220,7 @@
     <value>Подтвердить</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Подтвердите приглашение в DocSpace</value>
+    <value>Подтвердите приглашение в ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Подтвердить смену владельца портала</value>
@@ -259,7 +259,7 @@
     <value>Оставить отзыв</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Открыть DocSpace</value>
+    <value>Открыть ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Купить сейчас</value>
@@ -1459,7 +1459,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Пожалуйста, активируйте Ваш адрес электронной почты</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Срок действия вашего ключа API истек</value>
+    <value>${LetterLogoText}: Срок действия вашего ключа API истек</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. Создана резервная копия портала ${__VirtualRootHost}</value>
@@ -1519,10 +1519,10 @@ $TrulyYours</value>
     <value>Скачайте бесплатные приложения ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Узнайте о бизнес-подписке на ${LetterLogoText} DocSpace</value>
+    <value>Узнайте о бизнес-подписке на ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Узнайте о бизнес-подписке на ${LetterLogoText} DocSpace</value>
+    <value>Узнайте о бизнес-подписке на ${LetterLogoText}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Сообщение пользователя для администраторов</value>
@@ -1532,6 +1532,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Приглашение на портал ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Требуется действие: баланс вашего кошелька ${LetterLogoText} заканчивается</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Создание почтового ящика</value>
@@ -1543,7 +1546,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Ошибка при переносе портала в другой регион</value>
   </data>
   <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Миграция данных в ${LetterLogoText} DocSpace успешно завершена</value>
+    <value>Миграция данных в ${LetterLogoText} успешно завершена</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Начался перенос портала в другой регион</value>
@@ -1552,7 +1555,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Перенос портала в другой регион успешно завершен</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Узнайте о бизнес-подписке на ${LetterLogoText} DocSpace</value>
+    <value>Узнайте о бизнес-подписке на ${LetterLogoText}</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ваш пароль успешно изменен</value>
@@ -1564,7 +1567,7 @@ $TrulyYours</value>
     <value>Удаление портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace был удален</value>
+    <value>${LetterLogoText} был удален</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} был удален</value>
@@ -1624,7 +1627,7 @@ $TrulyYours</value>
     <value>Ваш ${LetterLogoText} будет удален</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Узнайте о бизнес-подписке на ${LetterLogoText} DocSpace</value>
+    <value>Узнайте о бизнес-подписке на ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
     <value>Присоединяйтесь к ${LetterLogoText}</value>
@@ -1708,7 +1711,7 @@ $TrulyYours</value>
     <value>Ваш тип пользователя ${LetterLogoText} изменился</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
-    <value>Добро пожаловать в ${LetterLogoText} DocSpace!</value>
+    <value>Добро пожаловать в ${LetterLogoText}!</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>С уважением, команда ${LetterLogoText}</value>

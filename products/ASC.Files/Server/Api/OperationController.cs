@@ -33,7 +33,7 @@
 
 namespace ASC.Files.Api;
 
-[DefaultRoute("fileops")]
+[ApiEndpoint(Template = "fileops")]
 public class OperationController(
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,

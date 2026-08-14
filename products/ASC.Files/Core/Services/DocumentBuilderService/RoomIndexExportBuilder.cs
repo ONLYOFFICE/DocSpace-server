@@ -116,13 +116,20 @@ public class RoomIndexExportBuilder(
 
         var scriptParts = script.Split("${inputDataItems}");
 
-        await using (var writer = new StreamWriter(scriptFilePath))
+        try
         {
+            await using var writer = new StreamWriter(scriptFilePath);
             await writer.WriteAsync(scriptParts[0]);
 
             await WriteItemsToScriptAsync(room, writer);
 
             await writer.WriteAsync(scriptParts[1]);
+        }
+        catch (Exception)
+        {
+            // Nothing owns the file until it is handed over as input data, so clean it up here.
+            DocumentBuilderScriptHelper.DeleteScriptFile(scriptFilePath);
+            throw;
         }
 
         return (scriptFilePath, tempFileName, outputFileName);

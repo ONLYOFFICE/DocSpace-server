@@ -241,7 +241,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New DocSpace user added: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
+        ///   Looks up a localized string similar to New user added: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
         /// </summary>
         public static string ActionUserCreated {
             get {
@@ -277,7 +277,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace user updated: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
+        ///   Looks up a localized string similar to User updated: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
         /// </summary>
         public static string ActionUserUpdated {
             get {
@@ -385,7 +385,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Collaborate in DocSpace.
+        ///   Looks up a localized string similar to Collaborate in ${LetterLogoText}.
         /// </summary>
         public static string ButtonCollaborate {
             get {
@@ -412,7 +412,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirm DocSpace Invite.
+        ///   Looks up a localized string similar to Confirm ${LetterLogoText} Invite.
         /// </summary>
         public static string ButtonConfirmInvite {
             get {
@@ -548,7 +548,7 @@ namespace ASC.Web.Core.PublicResources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Open DocSpace.
+        ///   Looks up a localized string similar to Open ${LetterLogoText}.
         /// </summary>
         public static string ButtonOpenDocSpace {
             get {
@@ -2355,7 +2355,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace: Your API key is expired.
+        ///   Looks up a localized string similar to ${LetterLogoText}: Your API key is expired.
         /// </summary>
         public static string subject_api_key_expired {
             get {
@@ -2535,7 +2535,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText}.
         /// </summary>
         public static string subject_enterprise_admin_welcome_v1 {
             get {
@@ -2544,7 +2544,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText}.
         /// </summary>
         public static string subject_enterprise_whitelabel_admin_welcome_v1 {
             get {
@@ -2616,7 +2616,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data migration to ${LetterLogoText} DocSpace successfully completed.
+        ///   Looks up a localized string similar to Data migration to ${LetterLogoText} successfully completed.
         /// </summary>
         public static string subject_migration_personal_to_docspace {
             get {
@@ -2643,7 +2643,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText}.
         /// </summary>
         public static string subject_opensource_admin_welcome_v1 {
             get {
@@ -2688,7 +2688,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace has been deleted.
+        ///   Looks up a localized string similar to ${LetterLogoText} has been deleted.
         /// </summary>
         public static string subject_portal_deleted_to_support {
             get {
@@ -2922,7 +2922,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText}.
         /// </summary>
         public static string subject_saas_admin_welcome_v1 {
             get {
@@ -3201,7 +3201,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
         /// </summary>
         public static string subject_zoom_welcome {
             get {

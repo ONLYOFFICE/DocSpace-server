@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("iprestrictions")]
+[ApiEndpoint(Template = "iprestrictions")]
 public class IpRestrictionsController(
     PermissionContext permissionContext,
     SettingsManager settingsManager,

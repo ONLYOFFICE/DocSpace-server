@@ -291,7 +291,7 @@ public class VirtualRoomsThirdPartyController(
     }
 }
 
-[DefaultRoute("rooms")]
+[ApiEndpoint(Template = "rooms")]
 public abstract class VirtualRoomsController<T>(
     GlobalFolderHelper globalFolderHelper,
     FileOperationDtoHelper fileOperationDtoHelper,

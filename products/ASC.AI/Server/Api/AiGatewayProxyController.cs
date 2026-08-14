@@ -34,11 +34,9 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[DefaultRoute]
-[ApiController]
+[ApiEndpoint("ai")]
 [ApiExplorerSettings(IgnoreApi = true)]
 [AiFeature]
-[ControllerName("ai")]
 public class AiGatewayProxyController(
     IHttpClientFactory httpClientFactory,
     AiGateway aiGateway,

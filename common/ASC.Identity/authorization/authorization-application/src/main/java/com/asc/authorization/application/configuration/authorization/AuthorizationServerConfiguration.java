@@ -50,7 +50,10 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -111,6 +114,24 @@ public class AuthorizationServerConfiguration {
 
   private final AuthenticationSuccessHandler authenticationSuccessHandler;
   private final AuthenticationFailureHandler authenticationFailureHandler;
+
+  /**
+   * Configures a dedicated security filter chain for the liveness and readiness probe endpoints.
+   *
+   * @param http the HttpSecurity object for configuring security
+   * @return the SecurityFilterChain object representing the configured security filter chain
+   * @throws Exception if an error occurs during configuration
+   */
+  @Order(0)
+  @Bean("authorizationHealthProbeSecurityFilterChain")
+  SecurityFilterChain authorizationHealthProbeSecurityFilterChain(HttpSecurity http)
+      throws Exception {
+    return http.securityMatcher("/health/readiness", "/health/liveness")
+        .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
+        .csrf(AbstractHttpConfigurer::disable)
+        .cors(AbstractHttpConfigurer::disable)
+        .build();
+  }
 
   /**
    * Configures the security filter chain for the authorization server.
@@ -268,6 +289,32 @@ public class AuthorizationServerConfiguration {
     http.csrf(AbstractHttpConfigurer::disable);
 
     return http.build();
+  }
+
+  /**
+   * Both {@code authenticationFilter} and {@code rateLimiterFilter} are {@code @Component}s, so
+   * Spring Boot auto-registers them as raw servlet filters on {@code /*} in addition to their
+   * explicit wiring into {@link HttpSecurity} above. That auto-registration bypasses {@code
+   * securityMatcher} scoping entirely - e.g. requests to {@code /health/readiness} still run
+   * through {@code rateLimiterFilter}, which then depends on Redis being reachable. Disabling the
+   * auto-registration keeps each filter active only where it's explicitly added via {@code
+   * addFilterBefore}.
+   */
+  @Bean("authorizationDisableBasicSignatureAuthFilterAutoRegistration")
+  FilterRegistrationBean<BasicSignatureAuthenticationFilter>
+      disableBasicSignatureAuthFilterAutoRegistration() {
+    var registration = new FilterRegistrationBean<>(authenticationFilter);
+    registration.setEnabled(false);
+    return registration;
+  }
+
+  @Bean("authorizationDisableRateLimiterFilterAutoRegistration")
+  @ConditionalOnProperty(prefix = "bucket4j", name = "enabled", havingValue = "true")
+  FilterRegistrationBean<RateLimiterFilter> disableRateLimiterFilterAutoRegistration(
+      @Qualifier("authorizationRateLimiterFilter") RateLimiterFilter filter) {
+    var registration = new FilterRegistrationBean<>(filter);
+    registration.setEnabled(false);
+    return registration;
   }
 
   /**

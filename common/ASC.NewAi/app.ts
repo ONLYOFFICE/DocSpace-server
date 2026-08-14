@@ -41,7 +41,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import logger, { logStream } from "./app/log.js";
 import { getAppConfig } from "./config/index.js";
-import registerRoutes from "./app/routes.js";
+import registerRoutes, { API_PREFIX } from "./app/routes.js";
 import { requestContextMiddleware } from "./app/requestContext.js";
 import { storage } from "./app/storage/index.js";
 
@@ -63,14 +63,28 @@ const corsOrigins = (process.env["NEW_AI_CORS_ORIGINS"] ?? "")
   .map((o) => o.trim())
   .filter(Boolean);
 
+// strict:false lets bare JSON primitives through; @onlyoffice/ai-chat's
+// ApiProvider serializes single-arg routes as `JSON.stringify(arg)` — e.g.
+// `DELETE profiles/delete` arrives with body `"uuid"`, which strict-mode
+// would reject. Handlers normalize via `unpackPositional` afterwards.
+const jsonParser = bodyParser.json({ strict: false });
+
+// The OpenAI passthrough (`openaiPassthroughController`) forwards the raw
+// request bytes to the provider, so its body must stay unparsed — both to
+// avoid a lossy parse/re-serialize hop and because vision/OCR payloads
+// (base64 data URLs) easily exceed the parser's 100kb default limit.
+const OPENAI_PASSTHROUGH_PREFIX = `${API_PREFIX}/openai/`;
+
 app
   .use(morgan("combined", { stream: logStream }))
   .use(cookieParser())
-  // strict:false lets bare JSON primitives through; @onlyoffice/ai-chat's
-  // ApiProvider serializes single-arg routes as `JSON.stringify(arg)` — e.g.
-  // `DELETE profiles/delete` arrives with body `"uuid"`, which strict-mode
-  // would reject. Handlers normalize via `unpackPositional` afterwards.
-  .use(bodyParser.json({ strict: false }))
+  .use((req, res, next) => {
+    if (req.path.startsWith(OPENAI_PASSTHROUGH_PREFIX)) {
+      next();
+      return;
+    }
+    jsonParser(req, res, next);
+  })
   .use(bodyParser.urlencoded({ extended: false }));
 
 if (corsOrigins.length > 0) {

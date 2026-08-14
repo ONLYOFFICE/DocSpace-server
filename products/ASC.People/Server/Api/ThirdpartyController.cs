@@ -41,7 +41,7 @@ namespace ASC.People.Api;
 ///<remarks>
 /// Third-party API.
 ///</remarks>
-[DefaultRoute("thirdparty")]
+[ApiEndpoint(Template = "thirdparty")]
 public class ThirdpartyController(
     ILogger<ThirdpartyController> logger,
     AccountLinker accountLinker,

@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; a été ajouté(e) à la salle : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Un nouvel utilisateur de DocSpace a été ajouté : &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Un nouvel utilisateur a été ajouté : &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a été retiré de l'agent : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; a changé le niveau d'accès des utilisateurs &lt;b&gt;{1}&lt;/b&gt; en &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>L'utilisateur de DocSpace mis à jour : &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>L'utilisateur mis à jour : &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Bien à vous, l'équipe de support ${LetterLogoText}</value>
@@ -208,7 +208,7 @@
     <value>Configurer l'application d'authentification</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Collaborer à DocSpace</value>
+    <value>Collaborer à ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Configurez maintenant</value>
@@ -217,7 +217,7 @@
     <value>Confirmer</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Confirmer l’invitation à DocSpace</value>
+    <value>Confirmer l’invitation à ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirmation de mise à jour du portail propriétaire</value>
@@ -256,7 +256,7 @@
     <value>Laisser des commentaires</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Ouvrir DocSpace</value>
+    <value>Ouvrir ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Acheter maintenant</value>
@@ -1494,10 +1494,10 @@ $TrulyYours</value>
     <value>Obtenez des applications ${LetterLogoText} gratuites</value>
   </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Découvrez l'abonnement business d’${LetterLogoText} DocSpace</value>
+    <value>Découvrez l'abonnement business d’${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Découvrez l'abonnement business d’${LetterLogoText} DocSpace</value>
+    <value>Découvrez l'abonnement business d’${LetterLogoText}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Le message d'utilisateur aux administrateurs</value>
@@ -1507,6 +1507,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Invitation à se joindre au portail ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Action requise : Le solde de votre portefeuille ${LetterLogoText} est faible</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Création de boîte email</value>
@@ -1518,7 +1521,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Erreur lors de la migration du portail dans une autre région</value>
   </data>
   <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>La migration des données vers ${LetterLogoText} DocSpace s'est achevée avec succès</value>
+    <value>La migration des données vers ${LetterLogoText} s'est achevée avec succès</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Migration du portail dans une autre région a commencé</value>
@@ -1527,7 +1530,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Migration du portail dans une autre région terminée avec succès</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Découvrez l'abonnement business d’${LetterLogoText} DocSpace</value>
+    <value>Découvrez l'abonnement business d’${LetterLogoText}</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Votre mot de passe a été modifié avec succès</value>
@@ -1539,7 +1542,7 @@ $TrulyYours</value>
     <value>Suppression du portail ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>DocSpace ${LetterLogoText} a été supprimé</value>
+    <value>${LetterLogoText} a été supprimé</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} a été supprimé</value>
@@ -1599,7 +1602,7 @@ $TrulyYours</value>
     <value>Votre ${LetterLogoText} sera supprimé</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Découvrez l'abonnement business d’${LetterLogoText} DocSpace</value>
+    <value>Découvrez l'abonnement business d'${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
     <value>Rejoindre ${LetterLogoText}</value>
@@ -1680,7 +1683,7 @@ $TrulyYours</value>
     <value>Votre type d'utilisateur ${LetterLogoText} a changé</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
-    <value>Bienvenue à ${LetterLogoText} DocSpace!</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Bien à vous, l'équipe ${LetterLogoText}</value>
@@ -1689,7 +1692,7 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; a téléchargé un nouveau document : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; dans la base de connaissances de l'agent IA : &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace : Votre clé API a expiré</value>
+    <value>${LetterLogoText} : Votre clé API a expiré</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Votre rôle dans un agent IA ${LetterLogoText} a changé</value>

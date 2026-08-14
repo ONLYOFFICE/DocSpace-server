@@ -178,7 +178,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; was added to the room: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>New DocSpace user added: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>New user added: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; was removed from the AI agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -190,7 +190,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; changed the access level of the users &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>DocSpace user updated: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>User updated: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Best regards, ${LetterLogoText} Support Team</value>
@@ -226,7 +226,7 @@
     <value>Configure the authenticator app</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Collaborate in DocSpace</value>
+    <value>Collaborate in ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Configure now</value>
@@ -235,7 +235,7 @@
     <value>Confirm</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Confirm DocSpace Invite</value>
+    <value>Confirm ${LetterLogoText} Invite</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirm Portal Owner Update</value>
@@ -280,7 +280,7 @@
     <value>Log into ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Open DocSpace</value>
+    <value>Open ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Purchase now</value>
@@ -2056,7 +2056,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Please activate your email address</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Your API key is expired</value>
+    <value>${LetterLogoText}: Your API key is expired</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootHost} portal backup created</value>
@@ -2116,10 +2116,10 @@ $TrulyYours</value>
     <value>Get free ${LetterLogoText} apps</value>
   </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Discover business subscription of ${LetterLogoText} DocSpace</value>
+    <value>Discover business subscription of ${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Discover business subscription of ${LetterLogoText} DocSpace</value>
+    <value>Discover business subscription of ${LetterLogoText}</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>User message to administrators</value>
@@ -2143,7 +2143,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Another region portal migration error</value>
   </data>
   <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>Data migration to ${LetterLogoText} DocSpace successfully completed</value>
+    <value>Data migration to ${LetterLogoText} successfully completed</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Another region portal migration started</value>
@@ -2152,7 +2152,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Another region portal migration successfully completed</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Discover business subscription of ${LetterLogoText} DocSpace</value>
+    <value>Discover business subscription of ${LetterLogoText}</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Your password was changed successfully</value>
@@ -2164,7 +2164,7 @@ $TrulyYours</value>
     <value>Deletion of the ${__VirtualRootHost} portal</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace has been deleted</value>
+    <value>${LetterLogoText} has been deleted</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} has been deleted</value>
@@ -2245,7 +2245,7 @@ $TrulyYours</value>
     <value>Your ${LetterLogoText} will be deleted</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Discover business subscription of ${LetterLogoText} DocSpace</value>
+    <value>Discover business subscription of ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
     <value>Join ${LetterLogoText}</value>
@@ -2338,7 +2338,7 @@ $TrulyYours</value>
     <value>Welcome to ${LetterLogoText}!</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
-    <value>Welcome to ${LetterLogoText} DocSpace!</value>
+    <value>Welcome to ${LetterLogoText}!</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Truly Yours, ${LetterLogoText} Team</value>
