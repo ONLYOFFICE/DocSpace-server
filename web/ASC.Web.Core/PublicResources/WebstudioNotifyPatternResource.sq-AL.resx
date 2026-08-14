@@ -1140,9 +1140,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Po ju kontaktojmë për të ju informuar se pagesa për abonimin tuaj do të tërhiqet automatikisht nga llogaria juaj pas 3 ditësh.
+Po ju kontaktojmë për të ju informuar se pagesa për abonimin tuaj Business për numrin e zgjedhur të administratorëve do të tërhiqet automatikisht nga llogaria juaj pas 3 ditësh.
 
-Për të siguruar një transaksion të suksesshëm, ju lutem konfirmoni që keni fonde të mjaftueshme në metodën tuaj të pagesës.
+Për të siguruar një transaksion të suksesshëm, ju lutem konfirmoni që keni fonde të mjaftueshme në "metodën tuaj të pagesës":"$URL1".
 
 Në qoftë se keni ndonjë pyetje ose keni nevojë për ndihme, mos hezitoni të kontaktoni me "ekipin tonë te suportit":"${__SupportLink}".
 

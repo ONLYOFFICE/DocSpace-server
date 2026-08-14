@@ -1145,11 +1145,11 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Stimate, $UserName!
 
-Vă reamintim că abonamentul dvs va fi facturat și plătit automat din contul dvs la 3 zile.
+Vă reamintim că abonamentul dvs Business pentru numărul de administratori ales va fi facturat și plătit automat din contul dvs la 3 zile.
 
-Pentru a vă asigura că totul decurge fără probleme, verificați dacă dispuneți de suficiente fonduri disponibile conform metodei de plată selectate.
+Pentru a vă asigura că totul decurge fără probleme, verificați dacă dispuneți de suficiente fonduri disponibile conform "metodei de plată":"$URL1" selectate.
 
-Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "support team":"${__SupportLink}".
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "echipa de suport":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>

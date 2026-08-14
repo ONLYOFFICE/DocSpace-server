@@ -1150,9 +1150,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-Abonelik ödemenizin 3 gün içinde hesabınızdan otomatik olarak tahsil edileceğini bildirmek için sizinle iletişime geçiyoruz.
+Seçtiğiniz yönetici sayısı için Business abonelik ödemenizin 3 gün içinde hesabınızdan otomatik olarak tahsil edileceğini bildirmek için sizinle iletişime geçiyoruz.
 
-İşlemin sorunsuz gerçekleşebilmesi için ödeme yönteminizde yeterli bakiye bulunduğundan emin olmanızı rica ediyoruz.
+İşlemin sorunsuz gerçekleşebilmesi için "ödeme yönteminizde":"$URL1" yeterli bakiye bulunduğundan emin olmanızı rica ediyoruz.
 
 Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, "destek ekibimizle":"${__SupportLink}" iletişime geçebilirsiniz.
 

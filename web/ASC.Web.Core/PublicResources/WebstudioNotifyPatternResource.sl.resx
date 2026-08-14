@@ -1157,9 +1157,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Pozdravljen, $UserName!
 
-Obveščamo vas, da bo plačilo vaše naročnine samodejno odtegnjeno z vašega računa v 3 dneh.
+Obveščamo vas, da bo plačilo vaše naročnine Business za izbrano število skrbnikov samodejno odtegnjeno z vašega računa v 3 dneh.
 
-Za zagotovitev nemotenega poteka transakcije vas prosimo, da potrdite, da je na vašem plačilnem računu na voljo dovolj sredstev.
+Za zagotovitev nemotenega poteka transakcije vas prosimo, da potrdite, da je v vašem "načinu plačila":"$URL1" na voljo dovolj sredstev.
 
 Če imate kakršna koli vprašanja ali potrebujete pomoč, se obrnite na našo "ekipo za podporo":"${__SupportLink}".
 

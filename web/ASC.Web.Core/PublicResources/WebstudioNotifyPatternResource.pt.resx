@@ -1145,9 +1145,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Olá, $UserName!
 
-Estamos a contactá-lo para informar que o pagamento da sua subscrição será automaticamente debitado da sua conta dentro de 3 dias.
+Estamos a contactá-lo para informar que o pagamento da sua subscrição Business para o número de administradores escolhido será automaticamente debitado da sua conta dentro de 3 dias.
 
-Para garantir uma transação tranquila, por favor, confirme se há fundos suficientes disponíveis no seu método de pagamento.
+Para garantir uma transação tranquila, por favor, confirme se há fundos suficientes disponíveis no seu "método de pagamento":"$URL1".
 
 Caso tenha alguma dúvida ou necessite de assistência, entre em contacto com a nossa "equipa de suporte":"${__SupportLink}".
 

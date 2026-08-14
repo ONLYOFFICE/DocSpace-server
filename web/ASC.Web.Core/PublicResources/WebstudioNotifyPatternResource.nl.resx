@@ -1136,9 +1136,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Wij willen u erop wijzen dat uw abonnement binnen drie dagen automatisch van uw rekening wordt afgeschreven.
+Wij willen u erop wijzen dat uw Business-abonnement voor het gekozen aantal beheerders binnen drie dagen automatisch van uw rekening wordt afgeschreven.
 
-Om een vlotte transactie te garanderen, verzoeken wij u te controleren of er voldoende saldo beschikbaar is op uw betaalmethode.
+Om een vlotte transactie te garanderen, verzoeken wij u te controleren of er voldoende saldo beschikbaar is op uw "betaalmethode":"$URL1".
 
 Indien u vragen heeft of hulp nodig heeft, kunt u contact opnemen met ons "ondersteuningsteam":"${__SupportLink}".
 

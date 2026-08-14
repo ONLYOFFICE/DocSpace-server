@@ -1167,9 +1167,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>您好, $UserName!
 
-请注意，您的订阅费用将在3天内自动从账户中扣除。
+请注意，您所选管理员数量的 Business 订阅费用将在3天内自动从账户中扣除。
 
-为确保扣款顺利，请确认您的付款方式中有足够金额。
+为确保扣款顺利，请确认您的 "付款方式":"$URL1" 中有足够金额。
 
 如有任何疑问或需要帮助，请随时联系我们的 "支持团队":"${__SupportLink}"。
 

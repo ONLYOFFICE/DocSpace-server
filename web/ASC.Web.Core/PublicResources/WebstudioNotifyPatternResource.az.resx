@@ -1136,9 +1136,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Salam $UserName!
 
-Abunəlik ödənişinizin 3 gün ərzində avtomatik olaraq hesabınızdan silinəcəyini bildirmək üçün sizinlə əlaqə saxlayırıq.
+Seçilmiş administrator sayına görə Business abunəlik ödənişinizin 3 gün ərzində avtomatik olaraq hesabınızdan silinəcəyini bildirmək üçün sizinlə əlaqə saxlayırıq.
 
-Rahat bir əməliyyat üçün ödəniş üsulunuzda kifayət qədər vəsaitin olduğundan əmin olun.
+Rahat bir əməliyyat üçün "ödəniş üsulunuzda":"$URL1" kifayət qədər vəsaitin olduğundan əmin olun.
 
 Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, "dəstək komandamızla":"${__SupportLink}" əlaqə saxlayın.
 

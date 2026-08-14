@@ -1156,9 +1156,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Hei, $UserName!
 
-Haluamme ilmoittaa, että tilausmaksusi veloitetaan automaattisesti tililtäsi 3 päivän kuluttua.
+Haluamme ilmoittaa, että valitun ylläpitäjämäärän Business-tilausmaksusi veloitetaan automaattisesti tililtäsi 3 päivän kuluttua.
 
-Varmistaaksesi sujuvan maksutapahtuman, varmista, että maksutavallasi on riittävästi katetta.
+Varmistaaksesi sujuvan maksutapahtuman, varmista, että "maksutavallasi":"$URL1" on riittävästi katetta.
 
 Jos sinulla on kysyttävää tai tarvitse apua, ota rohkeasti yhteyttä "tukitiimiimme":"${__SupportLink}".
 

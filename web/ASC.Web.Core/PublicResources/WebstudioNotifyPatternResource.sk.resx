@@ -1155,13 +1155,13 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Dobrý deň, $UserName!!
+    <value>Dobrý deň, $UserName!
 
-Chceme vás informovať, že vaša platba za predplatné bude automaticky strhnutá z vášho účtu o 3 dni.
+Chceme vás informovať, že vaša platba za predplatné Business za zvolený počet správcov bude automaticky strhnutá z vášho účtu o 3 dni.
 
-Aby bola transakcia hladká, prosím, overte, či máte na vašom platobnom spôsobe dostatok financií.
+Aby bola transakcia hladká, prosím, overte, či máte vo vašom "platobnom spôsobe":"$URL1" dostatok financií.
 
-Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte sa obrátiť na náš tím podpory: ${__SupportLink}.
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte sa obrátiť na náš "tím podpory":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>

@@ -1144,9 +1144,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Bonjour, $UserName!
 
-Nous vous informons que votre abonnement sera automatiquement débité de votre compte dans 3 jours.
+Nous vous informons que votre abonnement Business pour le nombre d'administrateurs choisi sera automatiquement débité de votre compte dans 3 jours.
 
-Pour garantir le bon déroulement de la transaction, veuillez vous assurer que les sommes disponibles dans votre mode de paiement sont suffisantes.
+Pour garantir le bon déroulement de la transaction, veuillez vous assurer que les sommes disponibles dans votre "mode de paiement":"$URL1" sont suffisantes.
 
 Si vous avez des questions ou si vous avez besoin d'aide, n'hésitez pas à contacter notre "équipe d'assistance":"${__SupportLink}".
 

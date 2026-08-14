@@ -1158,9 +1158,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Xin chào $UserName!
 
-Chúng tôi liên hệ để thông báo rằng khoản thanh toán gói dịch vụ của bạn sẽ tự động được ghi nợ từ tài khoản của bạn sau 3 ngày.
+Chúng tôi liên hệ để thông báo rằng khoản thanh toán gói Business cho số lượng quản trị viên đã chọn sẽ tự động được ghi nợ từ tài khoản của bạn sau 3 ngày.
 
-Để đảm bảo giao dịch diễn ra suôn sẻ, xin vui lòng kiểm tra và chắc chắn rằng có đủ tiền trong tài khoản thanh toán của bạn.
+Để đảm bảo giao dịch diễn ra suôn sẻ, xin vui lòng kiểm tra và chắc chắn rằng có đủ tiền trong "phương thức thanh toán":"$URL1" của bạn.
 
 Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin hãy liên hệ với "nhóm hỗ trợ":"${__SupportLink}" của chúng tôi.
 

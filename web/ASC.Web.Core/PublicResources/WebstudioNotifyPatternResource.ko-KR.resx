@@ -1157,9 +1157,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
 
-고객님의 구독료가 3일 후 계좌에서 자동으로 출금될 예정임을 알려드립니다.
+선택하신 관리자 수에 대한 Business 구독료가 3일 후 계좌에서 자동으로 출금될 예정임을 알려드립니다.
 
-원활하게 진행될 수 있도록 결제 수단의 잔액이 충분한지 확인해 주시기 바랍니다.
+원활하게 진행될 수 있도록 "결제 수단":"$URL1" 의 잔액이 충분한지 확인해 주시기 바랍니다.
 
 궁금한 점이 있거나 도움이 필요한 경우 언제든지 "지원 팀":"${__SupportLink}" 으로 연락주세요.
 

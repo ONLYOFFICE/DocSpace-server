@@ -1146,11 +1146,11 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Obaveštavamo vas da će uplata za vašu pretplatu biti automatski naplaćena sa vašeg računa za 3 dana.
+Obaveštavamo vas da će uplata za vašu Business pretplatu za izabrani broj administratora biti automatski naplaćena sa vašeg računa za 3 dana.
 
-Kako bi transakcija protekla bez problema, molimo vas da proverite da li na odabranoj platnoj metodi imate dovoljno sredstava.
+Kako bi transakcija protekla bez problema, molimo vas da proverite da li na odabranoj "platnoj metodi":"$URL1" imate dovoljno sredstava.
 
-Ukoliko imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno kontaktirajte naš "tim za podršku":"${__SupportLink}.
+Ukoliko imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno kontaktirajte naš "tim za podršku":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>

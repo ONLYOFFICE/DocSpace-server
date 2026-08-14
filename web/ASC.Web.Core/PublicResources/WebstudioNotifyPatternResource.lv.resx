@@ -1157,9 +1157,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Mēs vēlamies Jūs informēt, ka Jūsu abonementa maksa tiks automātiski ieturēta no Jūsu konta pēc 3 dienām.
+Mēs vēlamies Jūs informēt, ka Jūsu Business abonementa maksa par izvēlēto administratoru skaitu tiks automātiski ieturēta no Jūsu konta pēc 3 dienām.
 
-Lai darījums noritētu veiksmīgi, lūdzu, pārliecinieties, ka Jūsu maksājuma metodē ir pietiekami daudz naudas.
+Lai darījums noritētu veiksmīgi, lūdzu, pārliecinieties, ka Jūsu "maksājuma metodē":"$URL1" ir pietiekami daudz naudas.
 
 Ja Jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mūsu "atbalsta komandu":"${__SupportLink}".
 

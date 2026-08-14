@@ -1135,9 +1135,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Informujemy, że płatność za subskrypcję zostanie automatycznie pobrana z Twojego konta za 3 dni.
+Informujemy, że płatność za subskrypcję Business za wybraną liczbę administratorów zostanie automatycznie pobrana z Twojego konta za 3 dni.
 
-Aby transakcja przebiegła bezproblemowo, upewnij się, że masz na nim wystarczające środki.
+Aby transakcja przebiegła bezproblemowo, upewnij się, że w Twojej "metodzie płatności":"$URL1" jest wystarczająco środków.
 
 Jeśli masz pytania lub potrzebujesz pomocy, skontaktuj się z naszym "zespołem wsparcia":"${__SupportLink}".
 

@@ -1135,9 +1135,9 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Dobrý den, $UserName!
 
-Oznamujeme vám, že platba za předplatné bude automaticky stržena z vašeho účtu do 3 dnů.
+Oznamujeme vám, že platba za předplatné Business za zvolený počet správců bude automaticky stržena z vašeho účtu do 3 dnů.
 
-Pro zajištění hladkého průběhu transakce prosím ověřte, zda máte ve zvolené platební metodě k dispozici dostatek finančních prostředků.
+Pro zajištění hladkého průběhu transakce prosím ověřte, zda máte ve zvolené "platební metodě":"$URL1" k dispozici dostatek finančních prostředků.
 
 V případě jakýchkoli dotazů nebo potřeby pomoci se neváhejte obrátit na náš "tým podpory":"${__SupportLink}".
 
