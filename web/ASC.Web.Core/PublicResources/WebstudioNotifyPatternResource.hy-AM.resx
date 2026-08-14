@@ -368,7 +368,7 @@ ${LetterLogoText} աջակցման թիմ
 
 Ձեր ${LetterLogoText}-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պահուստավորման գործընթացը ձախողվել է։
 
-Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}"-ի միջոցով՝
+Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}" հղումով՝
 
 $TrulyYours</value>
   </data>
@@ -445,7 +445,7 @@ $OrangeButton
 
 ${LetterLogoText} Developer-ի ձեր լիցենզիայի ժամկետը լրանում է այսօր:
 
-Մենք ձեզ համար ակտիվացրել ենք $ՎճարմանՀետաձգման‎ օրերի արտոնյալ ժամկետը: Այս ընթացքում փաստաթղթերի խմբագրման հասանելիությունը սահմանափակվում է 20 միաժամանակյա միացումներով (աջակցությունը և թարմացումներն այլևս չեն տրամադրվում):
+Մենք ձեզ համար ակտիվացրել ենք $PaymentDelay‎ օրերի արտոնյալ ժամկետը: Այս ընթացքում փաստաթղթերի խմբագրման հասանելիությունը սահմանափակվում է 20 միաժամանակյա միացումներով (աջակցությունը և թարմացումներն այլևս չեն տրամադրվում):
 
 Լիցենզիան թարմացնելու համար կապվեք ձեր վաճառքի մենեջերի կամ մեզ հետ՝ "${__SalesEmail}":"mailto:${__SalesEmail}":
 
@@ -489,9 +489,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-Your license for ${LetterLogoText} Enterprise expires today.
+${LetterLogoText} Enterprise-ի ձեր լիցենզիայի ժամկետը լրանում է այսօր:
 
-Մենք ձեզ համար ակտիվացրել ենք *$ՎճարմանՀետաձգման‎ օրեր* արտոնյալ ժամանակահատվածը: Այս ընթացքում ${LetterLogoText} մուտքն ապահովված է 3 նշված օգտատերերի համար* (աջակցությունը և թարմացումներն այլևս չեն տրամադրվում):
+Մենք ձեզ համար ակտիվացրել ենք *$PaymentDelay‎ օրեր* արտոնյալ ժամանակահատվածը: Այս ընթացքում ${LetterLogoText} մուտքն ապահովված է 3 նշված օգտատերերի համար* (աջակցությունը և թարմացումներն այլևս չեն տրամադրվում):
 
 Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
 
@@ -617,7 +617,7 @@ $Body</value>
 $Body</value>
   </data>
   <data name="pattern_join" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"$InviteLink"-ին միանալու հրավեր պորտալին
+    <value>h1.Հրավեր միանալու "${__VirtualRootPath}":"$InviteLink" պորտալին պորտալին
 
 Բարեւ Ձեզ,
 
@@ -876,11 +876,11 @@ $OrangeButton
 Խնդրում ենք գնալ օգտվողի պրոֆիլ՝ օգտագործելով "այս հղումը":"$FromUserLink"՝ փաստաթղթերը մեկ այլ օգտատիրոջ վերահանձնելու կամ տվյալները հեռացնելու համար.</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
-    <value>h1.Ձեր պրոֆիլը "$__VirtualRootPath":"$__VirtualRootPath"-ում փոխվել է
+    <value>h1.Ձեր պրոֆիլը "$__VirtualRootPath":"$__VirtualRootPath" կայքում փոխվել է
 
 Հարգելի $UserName,
 
-Ձեր օգտատիրոջ պրոֆիլի մանրամասները "$__VirtualRootPath":"$__VirtualRootPath"-ում փոխվել են "$__AuthorName":"$__AuthorUrl"-ի կողմից:
+Ձեր օգտատիրոջ պրոֆիլի մանրամասները "$__VirtualRootPath":"$__VirtualRootPath" կայքում փոխվել են "$__AuthorName":"$__AuthorUrl" օգտատիրոջ կողմից:
 
 Ձեր պրոֆիլը դիտելու համար հետևեք հետևյալ հղմանը.
 "$UserName":"$MyStaffLink"</value>
@@ -917,7 +917,7 @@ $OrangeButton
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Հարգելի $UserName,
 
-"$FromUserName":"$FromUserLink"օգտատիրոջ տվյալների հեռացման գործընթացը ձախողվեց:
+"$FromUserName":"$FromUserLink" օգտատիրոջ տվյալների հեռացման գործընթացը ձախողվեց:
 
 Բացառության հաղորդագրություն՝ $Message</value>
   </data>
@@ -964,7 +964,7 @@ h3.Պորտալի հասցեն
 "${__VirtualRootPath}":"${__VirtualRootPath}"</value>
   </data>
   <data name="pattern_request_tariff1" xml:space="preserve">
-    <value>h1.SAAS սակագնի հարցում "${__VirtualRootPath}":"${__VirtualRootPath}"-ի համար
+    <value>h1.SAAS սակագնի հարցում "${__VirtualRootPath}":"${__VirtualRootPath}" կայքի համար
 
 h3.Անուն
 $UserName
@@ -1123,7 +1123,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Ողջույն!
 
-Դուք հրավիրված եք միանալու գործակալին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղման վրա՝
+Դուք հրավիրված եք միանալու գործակալին "${__VirtualRootPath}":"${__VirtualRootPath}" հասցեում: Ընդունեք հրավերը՝ սեղմելով հղման վրա՝
 
 $OrangeButton
 
@@ -1134,7 +1134,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Ողջույն!
 
-${__AuthorName}-ը հրավիրել է ձեզ միանալ "$Message":"$InviteLink" գործակալին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում:
+${__AuthorName}-ը հրավիրել է ձեզ միանալ "$Message":"$InviteLink" գործակալին "${__VirtualRootPath}":"${__VirtualRootPath}" հասցեում:
 
 $OrangeButton
 
@@ -1252,7 +1252,7 @@ ${LetterLogoText} Աջակցության թիմ
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի պրոֆիլի փոփոխության ծանուցում
 
-"$__AuthorName":"$__AuthorUrl"-ը փոխել է իր պրոֆիլի տվյալները "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալում:
+"$__AuthorName":"$__AuthorUrl" օգտատերը փոխել է իր պրոֆիլի տվյալները "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալում:
 
 
 ^Եթե չեք ցանկանում ստանալ պրոֆիլի թարմացումների մասին ծանուցումներ, խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
@@ -1341,7 +1341,7 @@ $TrulyYours</value>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Նոր օգտվող է ավելացվել "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալում
 
-"$__AuthorName":"$__AuthorUrl"-ը միացել է ձեր պորտալին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում:
+"$__AuthorName":"$__AuthorUrl" օգտատերը միացել է ձեր պորտալին "${__VirtualRootPath}":"${__VirtualRootPath}" հասցեում:
 
 
 ^Եթե չեք ցանկանում ստանալ նոր օգտատերերի մասին ծանուցումներ, խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
@@ -1366,7 +1366,7 @@ $OrangeButton
 
 Դուք նշանակվել եք նոր դեր "${RoomTitle}":"${RoomUrl}" ${LetterLogoText} սենյակում՝ ${UserRole}:
 
-Կարդացեք սենյակի դերերի և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}"-ում՝
+Կարդացեք սենյակի դերերի և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}" բաժնում՝
 
 $TrulyYours</value>
   </data>
@@ -1375,7 +1375,7 @@ $TrulyYours</value>
 
 Դուք նշանակվել եք նոր օգտատիրոջ տեսակ "${__VirtualRootPath}":"${__VirtualRootPath}" ${LetterLogoText}-ում՝ ${UserType}:
 
-Կարդացեք օգտատիրոջ տեսակների և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}"-ում՝
+Կարդացեք օգտատիրոջ տեսակների և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}" բաժնում՝
 
 $TrulyYours</value>
   </data>

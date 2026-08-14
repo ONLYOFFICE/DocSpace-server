@@ -953,7 +953,7 @@ h3.Last ім'я
 $UserLastName
 
 h3.Position
-$Позиція
+$Position
 
 h3.Email
 "$UserEmail":"mailto:$UserEmail"
