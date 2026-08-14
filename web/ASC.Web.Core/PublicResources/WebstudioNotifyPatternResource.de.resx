@@ -889,9 +889,7 @@ Ausnahmemeldung: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Wir möchten Sie darüber informieren, dass die automatische Verlängerung Ihres erworbenen Serviceplans nicht abgeschlossen werden konnte.
-
-Wir bitten Sie, Ihren aktuellen Serviceplan manuell zu verlängern (oder einen neuen zu erwerben).
+Wir möchten Sie darüber informieren, dass die automatische Verlängerung Ihres erworbenen Tarifplans oder Ihrer Dienste nicht abgeschlossen werden konnte. Wir bitten Sie, ihn manuell zu verlängern.
 
 $OrangeButton
 
@@ -1488,7 +1486,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Die Entfernung der Benutzerdaten ist fehlgeschlagen</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Erforderliche Aktion: Der Serviceplan in Ihrem ${LetterLogoText} kann nicht automatisch verlängert werden</value>
+    <value>Erforderliche Aktion: Die erworbenen Dienste in Ihrem ${LetterLogoText} können nicht automatisch verlängert werden</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Enterprise-Lizenz Anforderung</value>

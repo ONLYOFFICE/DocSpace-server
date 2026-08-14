@@ -902,9 +902,7 @@ Sporočilo o napaki: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Pozdravljen, $UserName!
 
-Obveščamo vas, da samodejne obnove vašega naročniškega paketa ni bilo mogoče izvesti.
-
-Vljudno vas prosimo, da ročno obnovite svoj trenutni naročniški paket (ali kupite novega).
+Obveščamo vas, da samodejne obnove vašega naročniškega paketa ali storitev ni bilo mogoče izvesti. Vljudno vas prosimo, da ga obnovite ročno.
 
 $OrangeButton
 
@@ -1516,7 +1514,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Odstranjevanje uporabniških podatkov ni uspelo</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Zahtevano dejanje: Samodejno podaljšanje naročniškega paketa v vašem ${LetterLogoText}</value>
+    <value>Zahtevano dejanje: Kupljenih storitev v vašem ${LetterLogoText} ni mogoče samodejno podaljšati</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Zahteva za licenco podjetja</value>

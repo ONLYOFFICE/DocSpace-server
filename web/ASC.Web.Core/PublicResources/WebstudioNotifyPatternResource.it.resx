@@ -889,9 +889,7 @@ Messaggio di eccezione: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Ciao, $UserName!
 
-Ti informiamo che il rinnovo automatico del piano di servizio acquistato non è andato a buon fine.
-
-Ti invitiamo gentilmente a rinnovare manualmente il tuo piano attuale (o ad acquistarne uno nuovo).
+Ti informiamo che il rinnovo automatico del piano tariffario o dei servizi acquistati non è andato a buon fine. Ti invitiamo gentilmente a rinnovarlo manualmente.
 
 $OrangeButton
 
@@ -1491,7 +1489,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Rimozione dei dati utente non riuscita</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Azione richiesta: impossibile rinnovare automaticamente il piano di servizio nel tuo ${LetterLogoText}</value>
+    <value>Azione richiesta: impossibile rinnovare automaticamente i servizi acquistati nel tuo ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Richiesta licenza Enterprise</value>

@@ -890,9 +890,7 @@ Mesaj de excepție: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Stimate, $UserName!
 
-Vă informăm că reînnoirea automată a abonamentului la serviciile conectate a eșuat.
-
-Vă rugăm să reînnoiți manual abonamentul la serviciile conectate actual (sau procurați un abonament nou).
+Vă informăm că reînnoirea automată a planului tarifar sau a serviciilor achiziționate a eșuat. Vă rugăm să îl reînnoiți manual.
 
 $OrangeButton
 
@@ -1489,7 +1487,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Eliminarea datelor de utilizator nu a reușit</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Acțiune necesară: Problema de reînnoire automată a abonamentului la servicii conectate din ${LetterLogoText}</value>
+    <value>Acțiune necesară: Serviciile achiziționate din ${LetterLogoText} nu au putut fi reînnoite automat</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Solicitare licență Enterprise</value>

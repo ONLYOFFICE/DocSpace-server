@@ -889,9 +889,7 @@ $OrangeButton
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Здраво, $UserName!
 
-Обавештавамо вас да автоматска обнова ваше купљене услуге није успешно извршена.
-
-Љубазно вас молимо да ручно обновите тренутни план услуге (или купите нови).
+Обавештавамо вас да аутоматска обнова вашег купљеног тарифног плана или услуга није успешно извршена. Љубазно вас молимо да га обновите ручно.
 
 $OrangeButton
 
@@ -1490,7 +1488,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Уклањање корисничких података није успело</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Потребна акција: Није могуће аутоматски обновити план услуге у вашем ${LetterLogoText}</value>
+    <value>Потребна акција: Није могуће аутоматски обновити купљене услуге у вашем ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Захтев за лиценцу предузец́а</value>

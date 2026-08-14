@@ -901,9 +901,7 @@ Mensagem de exceção: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Olá, $UserName!
 
-Estamos entrando em contato para informar que a renovação automática do seu plano de serviço adquirido não pôde ser concluída.
-
-Solicitamos que renove manualmente o seu plano de serviço atual (ou adquira um novo).
+Estamos a contactá-lo para informar que a renovação automática do plano tarifário ou dos serviços adquiridos não pôde ser concluída. Solicitamos que o renove manualmente.
 
 $OrangeButton
 
@@ -1504,7 +1502,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. A remoção de dados do utilizador falhou</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Ação necessária: Não é possível renovar automaticamente o plano de serviço no seu ${LetterLogoText}</value>
+    <value>Ação necessária: Não é possível renovar automaticamente os serviços adquiridos no seu ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Pedido de licença Enterprise</value>

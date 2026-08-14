@@ -880,9 +880,7 @@ Zpráva o výjimce: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Dobrý den, $UserName!
 
-Oznamujeme vám, že automatické obnovení vašeho zakoupeného tarifu nebylo možné dokončit.
-
-Žádáme vás, abyste si ručně obnovili svůj stávající tarif (nebo si zakoupili nový).
+Oznamujeme vám, že automatické obnovení vašeho zakoupeného tarifu nebo služeb nebylo možné dokončit. Žádáme vás, abyste jej obnovili ručně.
 
 $OrangeButton
 
@@ -1479,7 +1477,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Odstranění uživatelských dat se nezdařilo</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Je vyžadována akce: Nelze automaticky obnovit tarif ve vašem dokumentačním prostoru ${LetterLogoText}</value>
+    <value>Je vyžadována akce: Nelze automaticky obnovit zakoupené služby ve vašem ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Žádost Enterprise licence</value>

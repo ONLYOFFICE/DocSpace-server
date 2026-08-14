@@ -890,9 +890,7 @@ $OrangeButton
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>مرحباً، $UserName!
 
-نتواصل معكم لإبلاغكم بأن التجديد التلقائي لخطة الخدمة التي قمتم بشرائها قد فشل.
-
-نرجو منكم تجديد خطة الخدمة الحالية يدوياً (أو شراء خطة جديدة).
+نتواصل معكم لإبلاغكم بأن التجديد التلقائي للخطة التعريفية أو الخدمات التي قمتم بشرائها قد فشل. نرجو منكم تجديدها يدوياً.
 
 $OrangeButton
 
@@ -1492,7 +1490,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. فشلت إزالة بيانات المستخدم</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>الإجراء المطلوب: غير قادر على تجديد خطة الخدمة تلقائيًا في ${LetterLogoText}</value>
+    <value>الإجراء المطلوب: غير قادر على تجديد الخدمات المشتراة تلقائيًا في ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>طلب ترخيص المؤسسة</value>

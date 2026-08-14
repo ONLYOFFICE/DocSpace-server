@@ -889,9 +889,7 @@ $OrangeButton
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Ողջույն, $UserName!
 
-Կապվում ենք ձեզ հետ՝ տեղեկացնելու, որ ձեր գնած ծառայությունների փաթեթի ավտոմատ երկարաձգումը չի կարող ավարտվել։
-
-Խնդրում ենք երկարաձգել ձեր ներկայիս ծառայությունների փաթեթը (կամ գնել նորը)։
+Կապվում ենք ձեզ հետ՝ տեղեկացնելու, որ ձեր գնած սակագնային պլանի կամ ծառայությունների ավտոմատ երկարաձգումը չի կարող ավարտվել։ Խնդրում ենք երկարաձգել այն ձեռքով։
 
 $OrangeButton
 
@@ -1485,7 +1483,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}: Օգտատիրոջ տվյալների հեռացումը ձախողվեց</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով երկարաձգել սպասարկման սակագինը ձեր ${LetterLogoText}-ում։</value>
+    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով երկարաձգել ձեռք բերված ծառայությունները ձեր ${LetterLogoText}-ում։</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Ձեռնարկության լիցենզիայի հարցում</value>

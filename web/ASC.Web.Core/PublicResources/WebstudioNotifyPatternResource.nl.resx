@@ -881,9 +881,7 @@ Uitzonderingsbericht: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Wij nemen contact met u op om u te laten weten dat de automatische verlenging van uw aangeschafte diensten abonnement niet kon worden uitgevoerd.
-
-Wij verzoeken u vriendelijk om uw huidige dienst handmatig te verlengen (of een nieuwe aan te schaffen).
+Wij nemen contact met u op om u te laten weten dat de automatische verlenging van uw aangeschafte tariefplan of diensten niet kon worden uitgevoerd. Wij verzoeken u vriendelijk om het handmatig te verlengen.
 
 $OrangeButton
 
@@ -1483,7 +1481,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Verwijdering gebruikersgegevens mislukt</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Vereiste actie: het is niet mogelijk om het diensten abonnement in uw ${LetterLogoText} automatisch te verlengen</value>
+    <value>Vereiste actie: het is niet mogelijk om de aangeschafte diensten in uw ${LetterLogoText} automatisch te verlengen</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Enterprise licentieverzoek</value>

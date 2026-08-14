@@ -881,9 +881,7 @@ Məlumatın "$FromUserName":"$FromUserLink" istifadəçisindən "$ToUserName":"$
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Salam $UserName!
 
-Aldığınız xidmət planının avtomatik yenilənmədiyini bildirmək üçün sizinlə əlaqə saxlayırıq.
-
-Sizdən cari xidmət planınızı əl ilə yeniləmənizi (və ya yenisini almanızı) xahiş edirik.
+Aldığınız tarif planının və ya xidmətlərin avtomatik yenilənmədiyini bildirmək üçün sizinlə əlaqə saxlayırıq. Sizdən onu əl ilə yeniləmənizi xahiş edirik.
 
 $OrangeButton
 
@@ -1479,7 +1477,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. İstifadəçi məlumatlarının silinməsi alınmadı</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Tələb olunan əməliyyat: ${LetterLogoText}-də xidmət planını avtomatik yeniləmək mümkün olmadı</value>
+    <value>Tələb olunan əməliyyat: ${LetterLogoText}-də alınmış xidmətləri avtomatik yeniləmək mümkün olmadı</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Müəssisə lisenziyası sorğusu</value>

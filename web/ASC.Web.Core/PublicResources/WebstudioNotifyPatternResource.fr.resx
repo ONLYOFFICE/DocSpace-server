@@ -889,9 +889,7 @@ Message d'exception: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Bonjour, $UserName !
 
-Nous vous informons que le renouvellement automatique de votre plan de service n'a pas pu être effectué.
-
-Nous vous demandons de renouveler manuellement votre plan de service actuel (ou d'en acheter un nouveau).
+Nous vous informons que le renouvellement automatique de votre plan tarifaire ou de vos services n'a pas pu être effectué. Nous vous demandons de le renouveler manuellement.
 
 $OrangeButton
 
@@ -1491,7 +1489,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. La suppression des données utilisateur a échoué</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Action requise : Impossible de renouveler automatiquement le plan de service dans votre ${LetterLogoText}</value>
+    <value>Action requise : Impossible de renouveler automatiquement les services achetés dans votre ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Demande de licence Enterprise</value>

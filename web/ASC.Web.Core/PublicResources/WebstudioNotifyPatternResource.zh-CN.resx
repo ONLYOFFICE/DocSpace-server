@@ -911,9 +911,7 @@ $OrangeButton
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>您好，$UserName!
 
-温馨提示，您已购买的服务计划未能自动续订。
-
-请您手动续订当前服务计划（或购买新计划）。
+温馨提示，您已购买的资费套餐或服务未能自动续订。请您手动续订。
 
 $OrangeButton
 
@@ -1511,7 +1509,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}。用户数据移除失败</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>需要操作：无法自动续订您的${LetterLogoText}中的服务套餐</value>
+    <value>需要操作：无法自动续订您的${LetterLogoText}中已购买的服务</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>企业许可证请求</value>

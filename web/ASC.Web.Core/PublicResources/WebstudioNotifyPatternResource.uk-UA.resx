@@ -902,9 +902,7 @@ h1.Шановний $UserName
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
-Повідомляємо вас про те, що не вдалося виконати автоматичне поновлення придбаного вами сервісного плану.
-
-Просимо вас поновити поточний сервісний план вручну (або придбати новий).
+Повідомляємо вас про те, що не вдалося виконати автоматичне поновлення придбаного вами тарифного плану або послуг. Просимо вас поновити його вручну.
 
 $OrangeButton
 
@@ -1517,7 +1515,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Не вдалося видалити дані користувача</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Потрібна дія: не вдається автоматично поновити сервісний план у вашому ${LetterLogoText}</value>
+    <value>Потрібна дія: не вдається автоматично поновити придбані послуги у вашому ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Запит ліцензії підприємства</value>

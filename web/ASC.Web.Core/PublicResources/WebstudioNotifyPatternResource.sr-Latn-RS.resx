@@ -890,9 +890,7 @@ Poruka o izuzetku: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Obaveštavamo vas da automatska obnova vaše kupljene usluge nije uspešno izvršena.
-
-Ljubazno vas molimo da ručno obnovite trenutni plan usluge (ili kupite novi).
+Obaveštavamo vas da automatska obnova vašeg kupljenog tarifnog plana ili usluga nije uspešno izvršena. Ljubazno vas molimo da ga obnovite ručno.
 
 $OrangeButton
 
@@ -1493,7 +1491,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Uklanjanje korisničkih podataka nije uspelo</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Potrebna akcija: Nije moguće automatski obnoviti plan usluge u vašem ${LetterLogoText}</value>
+    <value>Potrebna akcija: Nije moguće automatski obnoviti kupljene usluge u vašem ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Zahtev za licencu preduzeća</value>

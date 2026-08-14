@@ -902,9 +902,7 @@ $OrangeButton
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
 
-Σας ενημερώνουμε ότι η αυτόματη ανανέωση του προγράμματος υπηρεσιών που έχετε αγοράσει δεν ολοκληρώθηκε.
-
-Παρακαλείσθε να ανανεώσετε μη αυτόματα το τρέχον πρόγραμμα υπηρεσιών σας (ή να αγοράσετε ένα νέο).
+Σας ενημερώνουμε ότι η αυτόματη ανανέωση του τιμολογιακού προγράμματος ή των υπηρεσιών που έχετε αγοράσει δεν ολοκληρώθηκε. Παρακαλείσθε να το ανανεώσετε μη αυτόματα.
 
 $OrangeButton
 
@@ -1516,7 +1514,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Η αφαίρεση δεδομένων χρήστη απέτυχε</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του προγράμματος υπηρεσιών στο ${LetterLogoText}</value>
+    <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση των αγορασμένων υπηρεσιών στο ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Αίτημα για επαγγελματική άδεια χρήσης</value>

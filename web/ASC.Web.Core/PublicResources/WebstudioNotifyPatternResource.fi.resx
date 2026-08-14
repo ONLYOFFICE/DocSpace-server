@@ -900,9 +900,7 @@ Poikkeusviesti: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Hei, $UserName!
 
-Otamme sinuun yhteyttä ilmoittaaksemme, että ostamasi palvelupaketin automaattista uusimista ei voitu suorittaa.
-
-Pyydämme sinua ystävällisesti uusimaan nykyisen palvelupakettisi manuaalisesti (tai ostamaan uuden).
+Otamme sinuun yhteyttä ilmoittaaksemme, että ostamasi hinnoittelupaketin tai palveluiden automaattista uusimista ei voitu suorittaa. Pyydämme sinua ystävällisesti uusimaan sen manuaalisesti.
 
 $OrangeButton
 
@@ -1514,7 +1512,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}.Käyttäjätietojen poisto epäonnistui</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Tarvittava toimenpide: Palvelusuunnitelmaa ei voi uusia automaattisesti ${LetterLogoText}ssasi</value>
+    <value>Tarvittava toimenpide: Ostettuja palveluita ei voi uusia automaattisesti ${LetterLogoText}ssasi</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Yrityslisenssipyyntö</value>

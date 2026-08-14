@@ -892,9 +892,7 @@ $UserName 様
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>$UserName 様
 
-ご購入いただいたサービスプランの自動更新が完了できなかったことをお知らせいたします。
-
-お手数ですが、現在のサービスプランを手動で更新（または新規プランをご購入）いただきますようお願い申し上げます。
+ご購入いただいた料金プランまたはサービスの自動更新が完了できなかったことをお知らせいたします。お手数ですが、手動で更新していただきますようお願い申し上げます。
 
 $OrangeButton
 
@@ -1470,7 +1468,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}.ユーザーデータ削除失敗</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>対応必要：${LetterLogoText}のサービスプランを自動更新できません</value>
+    <value>対応必要：${LetterLogoText}のご購入済みサービスを自動更新できません</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>企業向けライセンスの依頼</value>

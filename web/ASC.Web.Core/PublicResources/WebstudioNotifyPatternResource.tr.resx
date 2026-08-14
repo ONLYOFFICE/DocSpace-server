@@ -895,9 +895,7 @@ Kişisel verilerin silinmesi $DocsSpace’te yer açılmasını sağlar</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-Satın aldığınız hizmet planınızın otomatik yenileme işlemi tamamlanamadığını bildirmek için sizinle iletişime geçiyoruz.
-
-Mevcut hizmet planınızı manuel olarak yenilemenizi (veya yeni bir plan satın almanızı) rica ediyoruz.
+Satın aldığınız tarife planının veya hizmetlerin otomatik yenileme işleminin tamamlanamadığını bildirmek için sizinle iletişime geçiyoruz. Manuel olarak yenilemenizi rica ediyoruz.
 
 $OrangeButton
 
@@ -1510,7 +1508,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Kullanıcı verisi silme başarısız oldu</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Eylem Gerekiyor: ${LetterLogoText} alanınızdaki hizmet planınız otomatik olarak yenilenemedi</value>
+    <value>Eylem Gerekiyor: ${LetterLogoText} alanınızdaki satın alınan hizmetler otomatik olarak yenilenemedi</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>İşletme lisansı talebi</value>

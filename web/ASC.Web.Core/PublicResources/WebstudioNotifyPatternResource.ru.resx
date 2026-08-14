@@ -902,9 +902,7 @@ $OrangeButton
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Сообщаем вам, что автоматическое продление приобретенного вами тарифного плана не может быть завершено.
-
-Просим вручную продлить ваш текущий тарифный план (или приобрести новый).
+Сообщаем вам, что автоматическое продление приобретенного вами тарифного плана или услуг не может быть завершено. Просим продлить его вручную.
 
 $OrangeButton
 
@@ -1516,7 +1514,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Не удалось выполнить удаление данных пользователя</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Необходимое действие: невозможно автоматически продлить тарифный план в вашем ${LetterLogoText}</value>
+    <value>Необходимое действие: невозможно автоматически продлить приобретенные услуги в вашем ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Запрос лицензии на версию Enterprise</value>

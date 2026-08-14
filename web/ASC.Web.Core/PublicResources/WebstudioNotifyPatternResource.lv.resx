@@ -902,9 +902,7 @@ Kļūdas ziņojums: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Mēs vēlamies Jūs informēt, ka Jūsu iegādātā pakalpojumu plāna automātiskā atjaunošana neizdevās.
-
-Lūdzu, atjaunojiet savu pašreizējo pakalpojumu plānu manuāli (vai iegādājieties jaunu).
+Mēs vēlamies Jūs informēt, ka Jūsu iegādātā tarifu plāna vai pakalpojumu automātiskā atjaunošana neizdevās. Lūdzu, atjaunojiet to manuāli.
 
 $OrangeButton
 
@@ -1516,7 +1514,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Lietotāja datu dzēšana neizdevās</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Nepieciešama darbība: Neizdevās automātiski atjaunot pakalpojumu plānu Jūsu ${LetterLogoText}</value>
+    <value>Nepieciešama darbība: Neizdevās automātiski atjaunot iegādātos pakalpojumus Jūsu ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Enterprise licences pieprasījums</value>

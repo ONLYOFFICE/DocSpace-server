@@ -902,9 +902,7 @@ Správa o chybe: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Dobrý deň, $UserName!
 
-Snažíme sa vás informovať, že automatické obnovenie vášho zakúpeného servisného plánu sa nepodarilo dokončiť.
-
-Láskavo vás žiadame, aby ste svoj aktuálny servisný plán obnovili manuálne (alebo zakúpili nový).
+Oznamujeme vám, že automatické obnovenie vášho zakúpeného tarifného plánu alebo služieb sa nepodarilo dokončiť. Láskavo vás žiadame, aby ste ho obnovili manuálne.
 
 $OrangeButton
 
@@ -1516,7 +1514,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Odstránenie používateľských údajov zlyhalo</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Vyžaduje sa akcia: Nie je možné automaticky obnoviť servisný plán vo vašom ${LetterLogoText}</value>
+    <value>Vyžaduje sa akcia: Nie je možné automaticky obnoviť zakúpené služby vo vašom ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Žiadosť o podnikovú licenciu</value>

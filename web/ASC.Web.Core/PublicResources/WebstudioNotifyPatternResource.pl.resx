@@ -880,9 +880,7 @@ Komunikat o wyjątku: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Informujemy, że automatyczne odnowienie zakupionego planu nie mogło zostać zrealizowane.
-
-Uprzejmie prosimy o ręczne odnowienie aktualnego planu (lub zakupienie nowego).
+Informujemy, że automatyczne odnowienie zakupionego planu taryfowego lub usług nie mogło zostać zrealizowane. Uprzejmie prosimy o ręczne odnowienie.
 
 $OrangeButton
 
@@ -1482,7 +1480,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Usuwanie danych użytkownika nie powiodło się</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Wymagane działanie: Nie udało się automatycznie odnowić planu w ${LetterLogoText}</value>
+    <value>Wymagane działanie: Nie udało się automatycznie odnowić zakupionych usług w ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Wniosek o licencję Enterprise</value>
