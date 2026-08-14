@@ -40,23 +40,49 @@ public abstract class SdkCommandBase<TSettings> : AsyncCommand<TSettings>
 
     protected string WorkingDirectory => SdkPaths.WorkingDirectory;
 
+    /// <summary>
+    /// Pins the generator version for openapi-generator-cli. The CLI otherwise looks for
+    /// openapitools.json in the current directory and silently writes one pinning
+    /// "latest" when it finds none - which both leaves the file behind wherever the tool
+    /// happened to start and unpins the generator version.
+    /// </summary>
+    private string OpenApiToolsConfig => Path.Combine(WorkingDirectory, "openapitools.json");
+
     public override ValidationResult Validate(CommandContext context, TSettings settings) =>
-        ToolRunner.ValidateAvailable("openapi-generator-cli", "version");
+        ToolRunner.ValidateAvailable("openapi-generator-cli", "--openapitools", OpenApiToolsConfig, "version");
 
     public override async Task<int> ExecuteAsync(
         CommandContext context,
         TSettings settings,
         CancellationToken cancellationToken)
     {
+        return await RunGeneratorAsync([], cancellationToken);
+    }
+
+    /// <summary>
+    /// Runs openapi-generator-cli against `tools{Name}.json`. Commands that need more than one
+    /// pass - a document per service, say - call this repeatedly with the differing options.
+    /// </summary>
+    protected async Task<int> RunGeneratorAsync(
+        IReadOnlyList<string> extraArguments,
+        CancellationToken cancellationToken)
+    {
+        var arguments = new List<string>
+        {
+            "--openapitools",
+            OpenApiToolsConfig,
+            "generate",
+            "-c",
+            Path.Combine("tools", $"tools{Name}.json"),
+            "--custom-generator",
+            Path.Combine("target", "sdk-1.0-jar-with-dependencies.jar")
+        };
+
+        arguments.AddRange(extraArguments);
+
         return await ToolRunner.RunAndWriteAsync(
             "openapi-generator-cli",
-             [
-                 "generate",
-                 "-c",
-                 Path.Combine("tools", $"tools{Name}.json"),
-                 "--custom-generator",
-                 Path.Combine("target", "sdk-1.0-jar-with-dependencies.jar")
-             ],
+             arguments,
              WorkingDirectory,
              cancellationToken,
              $"Failed to start openapi-generator-cli for {Name}.");

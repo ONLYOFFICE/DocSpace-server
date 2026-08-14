@@ -31,38 +31,34 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.ApiModels.RequestDto;
+
+namespace ASC.Api.Documentation;
 
 /// <summary>
-/// The request parameters for generating a folder history report.
+/// The server the documented URIs are relative to.
 /// </summary>
-public class FolderHistoryReportRequestDto
+internal static class OpenApiServer
 {
     /// <summary>
-    /// The folder ID whose history is exported.
+    /// Fills in the `baseUrl` server variable when the document leaves it empty.
     /// </summary>
-    /// <example>1</example>
-    [FromRoute(Name = "folderId")]
-    public required int FolderId { get; set; }
+    /// <remarks>
+    /// The emitter states no default on purpose - a DocSpace instance lives wherever it is
+    /// installed - but consumers do not treat the absence kindly: the Markdown pages head every
+    /// document with "http://http:", and the site builds its curl samples against whatever host
+    /// is serving the documentation, which is never the portal being called. A placeholder host
+    /// is wrong in a way the reader can see and correct; the alternatives are wrong silently.
+    /// </remarks>
+    public static void ApplyBaseUrlDefault(JsonObject document, string? serverUrl)
+    {
+        if (string.IsNullOrWhiteSpace(serverUrl)
+            || document["servers"] is not JsonArray { Count: > 0 } servers
+            || servers[0]?["variables"]?["baseUrl"] is not JsonObject baseUrl
+            || !string.IsNullOrEmpty(baseUrl["default"]?.ToString()))
+        {
+            return;
+        }
 
-    /// <summary>
-    /// The output file format of the report. Defaults to XLSX.
-    /// </summary>
-    /// <example>Xlsx</example>
-    [FromQuery(Name = "format")]
-    public AuditReportFormat Format { get; set; } = AuditReportFormat.Xlsx;
-
-    /// <summary>
-    /// The start date of the history period to export.
-    /// </summary>
-    /// <example>2025-01-01T00:00:00</example>
-    [FromQuery(Name = "from")]
-    public DateTime? From { get; set; }
-
-    /// <summary>
-    /// The end date of the history period to export.
-    /// </summary>
-    /// <example>2025-12-31T23:59:59</example>
-    [FromQuery(Name = "to")]
-    public DateTime? To { get; set; }
+        baseUrl["default"] = serverUrl;
+    }
 }

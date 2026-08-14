@@ -75,8 +75,12 @@ const assignmentsEngine = new AssignmentsEngine({ storage });
 // Gate for creating a thread (review #6, Bug 82719). Two requirements:
 //  1. If an `entityId` is supplied it must reference a folder the caller can
 //     access — a missing folder or a no-access response both surface as 404
-//     (see `assertEntityAccessible`). A non-agent folder is allowed (it scopes
-//     to global downstream); an absent entityId is the legitimate global scope.
+//     (see `assertEntityAccessible`). An accessible NON-agent folder is
+//     allowed BY DESIGN (Bug 82719 reopen decision): threads are either
+//     global or agent-scoped, so `HttpThreadsStorage` folds a non-agent
+//     entityId (e.g. the Trash root, an ordinary room — the main client
+//     sends the current location here) to the global scope instead of
+//     rejecting it. An absent entityId is the legitimate global scope.
 //  2. A live profile must be resolvable — an explicit `profileId` that exists,
 //     or the `Chat` assignment for the scope — otherwise there is no model to
 //     run the thread against, so reject with 404.
@@ -142,7 +146,8 @@ export const threadsController = {
     // object directly, so a missing/non-object profile means there is no model
     // to run the thread against → 404 (this also avoids the engine TypeError
     // that previously collapsed to a 500). A supplied entityId must be
-    // reachable.
+    // reachable; a non-agent one folds to the global scope downstream (see
+    // `assertThreadCreatable` for the Bug 82719 design decision).
     const body = req.body;
     if (!isObject(body) || !isObject(body.profile)) {
       res.status(404).json({

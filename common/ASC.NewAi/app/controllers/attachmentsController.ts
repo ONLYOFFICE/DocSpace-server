@@ -170,12 +170,14 @@ export const attachmentsController = {
     const args = unpackPositional(req.body, ["inputs", "entityId"] as const);
     // Validate each element with the same rules as save-file; a bad element
     // must fail with a clean 400 rather than crash the engine (Bug 82754).
-    const rawInputs = args.inputs;
-    if (rawInputs !== undefined && rawInputs !== null && !Array.isArray(rawInputs)) {
+    // `inputs` itself is required: a missing/null value is a malformed
+    // request, not an empty batch — only an explicit `[]` means "no files"
+    // (Bug 82754 reopen).
+    const list = args.inputs;
+    if (!Array.isArray(list)) {
       res.status(400).json({ error: "inputs must be an array" });
       return;
     }
-    const list = Array.isArray(rawInputs) ? rawInputs : [];
     const inputs: FileInput[] = [];
     for (let i = 0; i < list.length; i++) {
       const parsed = parseFileInput(list[i]);

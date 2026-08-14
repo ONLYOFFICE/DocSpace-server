@@ -211,7 +211,7 @@
     <value>Квота пространства для ИИ-агентов превышена</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту на одного ИИ-агента. Введенное значение превышает общий объем хранилища DocSpace.</value>
+    <value>Не удалось установить квоту на одного ИИ-агента. Введенное значение превышает общий объем хранилища.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Автоматическое продление</value>
@@ -1120,7 +1120,7 @@
     <value>Превышена квота пространства на комнату</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту на комнату. Введенное значение превышает объем хранилища DocSpace.</value>
+    <value>Не удалось установить квоту на комнату. Введенное значение превышает общий объем хранилища.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>АТР (Сингапур)</value>
@@ -1291,7 +1291,7 @@
     <value>Произошла непредвиденная ошибка. Попробуйте еще раз.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Вы успешно подключились к Telegram для получения уведомлений от вашего DocSpace.</value>
+    <value>Вы успешно подключились к Telegram для получения уведомлений от рабочего пространства.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Неправильный код</value>
@@ -1306,7 +1306,7 @@
     <value>Превышена квота пространства на пользователя</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту на пользователя. Введенное значение превышает объем хранилища DocSpace.</value>
+    <value>Не удалось установить квоту на пользователя. Введенное значение превышает общий объем хранилища.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Запад США (Орегон)</value>
@@ -1454,5 +1454,50 @@
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Встройте редакторы ONLYOFFICE Docs в свое приложение с облачными арендаторами и собственными API-ключами.</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Срок действия доступа истекает</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Активен</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Компания</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Дата создания</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Редакторы документов с полными правами доступа</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Редакторы</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Внешний</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Внутренний</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Просмотр в прямом эфире</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Период</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Просмотрщики документов только для чтения</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Тип пользователя</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Квота на пользователя</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID пользователя</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Общий</value>
   </data>
 </root>
