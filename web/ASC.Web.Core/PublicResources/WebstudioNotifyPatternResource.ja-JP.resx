@@ -978,7 +978,7 @@ $TrulyYours
 ^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL"を管理してください。^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.以下是过去一小时内协作空间"${__VirtualRootPath}":"${__VirtualRootPath}" 中的新内容
+    <value>h1.過去1時間の "${__VirtualRootPath}":"${__VirtualRootPath}" 新着情報です。
 
 #foreach($activity in $Activities)
 $activity
@@ -1111,12 +1111,12 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
-    <value>h1. ${LetterLogoText} 协作空间：完成注册
+    <value>h1. ${LetterLogoText} ：登録を完了してください
 
 
-您好！
+こんにちは！
 
-邀请您在 "${__VirtualRootPath}":"${__VirtualRootPath}" 完成 ${LetterLogoText} 协作空间的注册。点击链接输入您的姓名并设置密码：
+"${__VirtualRootPath}":"${__VirtualRootPath}" での ${LetterLogoText} の登録を完了するよう招待されました。リンクをクリックして、お名前を入力し、パスワードを設定してください：
 
 
 $OrangeButton
