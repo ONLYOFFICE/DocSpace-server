@@ -1040,28 +1040,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-se [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-se [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_whitelabel_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_whitelabel_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to h1.Message from the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
         ///
         ///Email: $UserEmail
@@ -1281,17 +1259,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_migration_success_v115 {
             get {
                 return ResourceManager.GetString("pattern_migration_success_v115", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-se [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_opensource_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_admin_welcome_v1", resourceCulture);
             }
         }
         
@@ -2535,24 +2502,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText}.
-        /// </summary>
-        public static string subject_enterprise_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText}.
-        /// </summary>
-        public static string subject_enterprise_whitelabel_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_whitelabel_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to User message to administrators.
         /// </summary>
         public static string subject_for_admin_notify {
@@ -2639,15 +2588,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_migration_success {
             get {
                 return ResourceManager.GetString("subject_migration_success", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText}.
-        /// </summary>
-        public static string subject_opensource_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_opensource_admin_welcome_v1", resourceCulture);
             }
         }
         

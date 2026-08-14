@@ -476,18 +476,9 @@ public class StudioNotifyService(
             throw new ArgumentException("User is not activated yet!");
         }
 
-        if (tenantExtra.Enterprise)
+        if (!tenantExtra.Saas)
         {
             return;
-            //var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(_settingsManager);
-            //notifyAction = defaultRebranding ? Actions.EnterpriseAdminWelcomeV1 : Actions.EnterpriseWhitelabelAdminWelcomeV1;
-        }
-
-        if (tenantExtra.Opensource)
-        {
-            return;
-            //notifyAction = Actions.OpensourceAdminWelcomeV1;
-            //tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
         }
 
         var saasAdminWelcomeV1NotifyAction = serviceProvider.GetService<SaasAdminWelcomeV1NotifyAction>();

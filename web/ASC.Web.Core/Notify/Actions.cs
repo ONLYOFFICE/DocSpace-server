@@ -1620,55 +1620,16 @@ public sealed class SaasAdminWelcomeV1NotifyAction(CommonLinkUtility commonLinkU
         Tags = [
             new TagValue(CommonTags.Footer, "common"),
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.PricingPage, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")),
+            new TagValue(CommonTags.PricingPage, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
             TagValues.TrulyYours(studioNotifyHelper, WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo)), true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("discover_business_subscription.gif"))
         ];
     }
 }
 
-[Scope]
-public sealed class EnterpriseAdminWelcomeV1NotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
-{
-    public override string ID => "enterprise_admin_welcome_v1";
 
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_welcome_v1)
-        ];
-    }
-}
 
-[Scope]
-public sealed class EnterpriseWhitelabelAdminWelcomeV1NotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
-{
-    public override string ID => "enterprise_whitelabel_admin_welcome_v1";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_admin_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_admin_welcome_v1)
-        ];
-    }
-}
-
-[Scope]
-public sealed class OpensourceAdminWelcomeV1NotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
-{
-    public override string ID => "opensource_admin_welcome_v1";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_admin_welcome_v1, () => WebstudioNotifyPatternResource.pattern_opensource_admin_welcome_v1)
-        ];
-    }
-}
 
 [Scope]
 public sealed class SaasAdminWarningAfterHalfYearV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
