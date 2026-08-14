@@ -166,7 +166,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; lisättiin huoneeseen: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Uusi DocSpace käyttäjä lisätty: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Uusi käyttäjä lisätty: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; poistettiin agentista: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -178,7 +178,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; muutti käyttäjien käyttöoikeustasoa &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>DocSpace käyttäjä päivitetty: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Käyttäjä päivitetty: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Parhain terveisin, ${LetterLogoText} SUPPORT-tiimi</value>
@@ -211,7 +211,7 @@
     <value>Määritä todennussovellus</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Tee yhteistyötä DocSpacessa</value>
+    <value>Tee yhteistyötä ${LetterLogoText}ssa</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Aseta Nyt</value>
@@ -220,7 +220,7 @@
     <value>Vahvista</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Vahvista DocSpace-kutsusi</value>
+    <value>Vahvista ${LetterLogoText}-kutsusi</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Vahvista portaalin omistajan päivitys</value>
@@ -259,7 +259,7 @@
     <value>Jätä palautetta</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Avaa DocSpace</value>
+    <value>Avaa ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Osta nyt</value>
@@ -1377,7 +1377,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Ole hyvä ja aktivoi sähköpostiosoitteesi</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: API-avaimesi on vanhentunut</value>
+    <value>${LetterLogoText}: API-avaimesi on vanhentunut</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootHost} portaalin turvavarmenne luotu</value>

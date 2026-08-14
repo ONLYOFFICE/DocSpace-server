@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; is toegevoegd aan de kamer: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Nieuwe DocSpace gebruiker toegevoegd: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Nieuwe gebruiker toegevoegd: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; werd verwijderd van de agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; het toegangsniveau van de gebruikers gewijzigd &lt;b&gt;{1}&lt;/b&gt; naar &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>DocSpace gebruiker bijgewerkt: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Gebruiker bijgewerkt: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Vriendelijke groeten, ${LetterLogoText} Ondersteuningsteam</value>
@@ -208,7 +208,7 @@
     <value>Configureer de authenticator app</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Samenwerken in DocSpace</value>
+    <value>Samenwerken in ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Nu Configureren</value>
@@ -217,7 +217,7 @@
     <value>Bevestigen</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Bevestig DocSpace Uitnodiging</value>
+    <value>Bevestig ${LetterLogoText} Uitnodiging</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Bevestig update portaaleigenaar</value>
@@ -256,7 +256,7 @@
     <value>Laat feedback achter</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>DocSpace openen</value>
+    <value>${LetterLogoText} openen</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Koop nu</value>
@@ -1589,7 +1589,7 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; heeft een nieuw document geüpload: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; naar de kennisbank van de AI-agent: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Uw API-sleutel is verlopen</value>
+    <value>${LetterLogoText}: Uw API-sleutel is verlopen</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Uw rol in een ${LetterLogoText} AI-agent is gewijzigd</value>

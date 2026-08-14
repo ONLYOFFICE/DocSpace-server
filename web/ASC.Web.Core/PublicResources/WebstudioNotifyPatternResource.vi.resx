@@ -166,7 +166,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; đã được thêm vào phòng: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Đã thêm người dùng DocSpace mới: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Đã thêm người dùng mới: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; đã bị xóa khỏi agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -178,7 +178,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; đã thay đổi mức truy cập của người dùng &lt;b&gt;{1}&lt;/b&gt; thành &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>Người dùng DocSpace đã được cập nhật: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Người dùng đã được cập nhật: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Trân trọng, Nhóm Hỗ trợ ${LetterLogoText}</value>
@@ -211,7 +211,7 @@
     <value>Định cấu hình ứng dụng xác thực</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Cộng tác trong DocSpace</value>
+    <value>Cộng tác trong ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Cấu hình ngay</value>
@@ -220,7 +220,7 @@
     <value>Xác nhận</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Xác nhận Lời mời DocSpace</value>
+    <value>Xác nhận Lời mời ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Xác nhận cập nhật chủ sở hữu cổng thông tin</value>
@@ -259,7 +259,7 @@
     <value>Để Lại Phản Hồi</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Mở DocSpace</value>
+    <value>Mở ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Mua Ngay</value>
@@ -1380,7 +1380,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Vui lòng kích hoạt địa chỉ email của bạn</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Khóa API của bạn đã hết hạn</value>
+    <value>${LetterLogoText}: Khóa API của bạn đã hết hạn</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootHost} đã tạo bản sao lưu của cổng</value>

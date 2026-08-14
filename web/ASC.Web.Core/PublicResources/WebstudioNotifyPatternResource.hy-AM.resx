@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; ավելացվել է սենյակ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>DocSpace-ի նոր օգտատեր է ավելացվել՝ &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Ավելացվել է նոր օգտատեր՝ &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt;-ը հեռացվել է գործակալից՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; փոխել է օգտատերերի մուտքի մակարդակը &lt;b&gt;{1}&lt;/b&gt; դեպի &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>DocSpace օգտվողը թարմացվել է՝ &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Օգտվողը թարմացվել է՝ &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Հարգանքներով, ${LetterLogoText} Աջակցման Թիմ</value>
@@ -208,7 +208,7 @@
     <value>Փոխել բջջային հեռախոսահամարը</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Համագործակցեք DocSpace-ում</value>
+    <value>Համագործակցեք ${LetterLogoText}-ում</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Կարգավորել հենց հիմա</value>
@@ -217,7 +217,7 @@
     <value>Հաստատել</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Հաստատեք DocSpace Հրավերը</value>
+    <value>Հաստատեք ${LetterLogoText} Հրավերը</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Հաստատեք պորտալի սեփականատիրոջ թարմացում</value>
@@ -256,7 +256,7 @@
     <value>Թողնել կարծիք</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Բացել DocSpace-ը</value>
+    <value>Բացել ${LetterLogoText}-ը</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Գնել հիմա</value>
@@ -1591,7 +1591,7 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt;-ը վերբեռնել է նոր փաստաթուղթ. &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; AI գործակալի գիտելիքների բազա. &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace. Ձեր API բանալին սպառվել է</value>
+    <value>${LetterLogoText}. Ձեր API բանալին սպառվել է</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText}-ը ջնջված է</value>

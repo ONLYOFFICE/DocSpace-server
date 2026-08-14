@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; je dodat u sobu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Dodat je novi DocSpace korisnik: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Dodat je novi korisnik: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; je uklonjen iz agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; je promenio nivo pristupa korisnika &lt;b&gt;{1}&lt;/b&gt; u &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>Korisnik DocSpace-a je ažuriran: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Korisnik je ažuriran: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Srdačan pozdrav, ${LetterLogoText} tim za podršku</value>
@@ -208,7 +208,7 @@
     <value>Konfiguriši autentifikator aplikaciju</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Sarađujte u DocSpace-u</value>
+    <value>Sarađujte u ${LetterLogoText}-u</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Konfiguriši sada</value>
@@ -217,7 +217,7 @@
     <value>Potvrdi</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Potvrdite poziv za DocSpace</value>
+    <value>Potvrdite poziv za ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Potvrdi ažuriranje portal vlasnika</value>
@@ -256,7 +256,7 @@
     <value>Ostavi Povratne informacije</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Otvori DocSpace</value>
+    <value>Otvori ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Kupite sada</value>
@@ -1599,7 +1599,7 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; je otpremio novi dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; u bazu znanja AI agenta: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Vaš API ključ je istekao</value>
+    <value>${LetterLogoText}: Vaš API ključ je istekao</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Vaša uloga u ${LetterLogoText} AI agentu je promenjena</value>

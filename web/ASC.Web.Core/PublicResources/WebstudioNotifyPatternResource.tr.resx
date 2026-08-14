@@ -166,7 +166,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; odaya eklendi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Yeni DocSpace kullanıcısı eklendi: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Yeni kullanıcı eklendi: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; ajandan kaldırıldı: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -178,7 +178,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; kullanıcıların erişim düzeyini değiştirdi &lt;b&gt;{1}&lt;/b&gt; &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>DocSpace kullanıcısı güncellendi: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Kullanıcı güncellendi: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Saygılarımızla, ${LetterLogoText} Destek Ekibi</value>
@@ -211,7 +211,7 @@
     <value>Kimlik doğrulama uygulamasını yapılandırın</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>DocSpace'te iş birliği yapın</value>
+    <value>${LetterLogoText}'te iş birliği yapın</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Şimdi Yapılandırılıyor</value>
@@ -220,7 +220,7 @@
     <value>Onayla</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>DocSpace Davetini Onaylayın</value>
+    <value>${LetterLogoText} Davetini Onaylayın</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Portal Sahibi Güncellemesini Onaylayın</value>
@@ -259,7 +259,7 @@
     <value>Geribildirim Bırak</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Açık DocSpace</value>
+    <value>Açık ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Şimdi satın al</value>
@@ -1373,7 +1373,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Lütfen e-posta adresinizi etkinleştirin</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: API anahtarınızın süresi doldu</value>
+    <value>${LetterLogoText}: API anahtarınızın süresi doldu</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootHost} portal yedeklemesi oluşturuldu</value>

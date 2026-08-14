@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt;  已被加入房间：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>新增协作空间的用户： &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>新增用户： &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; 从智能体中移除：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; 改变了用户的访问级别 &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>协作空间的用户已更新： &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>用户已更新： &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>${LetterLogoText} 支持团队</value>
@@ -208,7 +208,7 @@
     <value>配置身份验证器应用</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>在协作空间中进行协作</value>
+    <value>在${LetterLogoText}中进行协作</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>立即配置</value>
@@ -217,7 +217,7 @@
     <value>确认</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>确认协作空间邀请</value>
+    <value>确认${LetterLogoText}邀请</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>确认门户所有者更新</value>
@@ -256,7 +256,7 @@
     <value>留下反馈</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>打开协作空间</value>
+    <value>打开${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>立即购买</value>
@@ -1620,7 +1620,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} 协作空间已删除</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace：您的 API 密钥已过期</value>
+    <value>${LetterLogoText}：您的 API 密钥已过期</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>您在 ${LetterLogoText} AI 代理中的角色已更改</value>

@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; беше добавен към стаята: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Добавен е нов потребител на DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Добавен е нов потребител: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; бе премахнат от агента: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; промени нивото на достъп за потребителите &lt;b&gt;{1}&lt;/b&gt; до &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>DocSpace потребителя е актуализиран: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Потребителят е актуализиран: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Поздрави, Екипът за Поддръжка на ${LetterLogoText}</value>
@@ -208,7 +208,7 @@
     <value>Промяна на резервните кодове</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Сътрудничество в DocSpace</value>
+    <value>Сътрудничество в ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Конфигурирайте точно сега</value>
@@ -217,7 +217,7 @@
     <value>Потвърдете</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Потвърдете поканата за DocSpace</value>
+    <value>Потвърдете поканата за ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Потвърдете актуализацията на собственика на портала</value>
@@ -256,7 +256,7 @@
     <value>Оставете отзиви</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Отворете DocSpace</value>
+    <value>Отворете ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Купи сега</value>
@@ -1611,7 +1611,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Вашият API ключ е изтекъл</value>
+    <value>${LetterLogoText}: Вашият API ключ е изтекъл</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Вашата роля в AI агент на ${LetterLogoText} е променена</value>

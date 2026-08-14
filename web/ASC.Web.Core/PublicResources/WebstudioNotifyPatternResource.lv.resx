@@ -166,7 +166,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; tika pievienots telpai: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Pievienots jauns DocSpace lietotājs: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Pievienots jauns lietotājs: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; tika noņemts no aģenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -178,7 +178,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; mainīja lietotāju piekļuves līmeni &lt;b&gt;{1}&lt;/b&gt; uz &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>DocSpace lietotājs atjaunināja: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Lietotājs atjaunināja: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Ar cieņu, ${LetterLogoText} atbalsta komanda</value>
@@ -211,7 +211,7 @@
     <value>Konfigurējiet autentificētāja lietotni</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Sadarboties DocSpace</value>
+    <value>Sadarboties ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Konfigurēt tagad</value>
@@ -220,7 +220,7 @@
     <value>Apstiprināt</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Apstiprināt DocSpace uzaicinājumu</value>
+    <value>Apstiprināt ${LetterLogoText} uzaicinājumu</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Apstiprināt portāla īpašnieka atjaunināšanu</value>
@@ -259,7 +259,7 @@
     <value>Atstāt atsauksmi</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Atvērt DocSpace</value>
+    <value>Atvērt ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Iegādāties tagad</value>
@@ -1379,7 +1379,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Lūdzu, aktivizējiet savu e-pasta adresi</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: jūsu API atslēgas derīguma termiņš ir beidzies</value>
+    <value>${LetterLogoText}: jūsu API atslēgas derīguma termiņš ir beidzies</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText} izveidota portāla ${__VirtualRootHost} rezerves kopija</value>

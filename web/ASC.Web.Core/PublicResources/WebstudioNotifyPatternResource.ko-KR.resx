@@ -166,7 +166,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방에 추가되었습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>새로운 DocSpace 사용자가 추가되었습니다: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>새로운 사용자가 추가되었습니다: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt;님이 에이전트에서 제거되었습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -178,7 +178,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; 님이 사용자 액세스 수준을 변경했습니다: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>DocSpace 사용자가 업데이트되었습니다: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>사용자가 업데이트되었습니다: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>감사합니다, ${LetterLogoText} 지원팀</value>
@@ -211,7 +211,7 @@
     <value>인증 앱 구성</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>DocSpace에서 공동 작업</value>
+    <value>${LetterLogoText}에서 공동 작업</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>지금 구성</value>
@@ -220,7 +220,7 @@
     <value>확인</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>DocSpace 초대 확인</value>
+    <value>${LetterLogoText} 초대 확인</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>포털 소유자 업데이트 확인</value>
@@ -259,7 +259,7 @@
     <value>피드백 남기기</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>오픈 DocSpace</value>
+    <value>오픈 ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>지금 구입</value>
@@ -1614,7 +1614,7 @@ $TrulyYours</value>
     <value>감사드립니다, ${LetterLogoText} 팀</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: API 키가 만료되었습니다</value>
+    <value>${LetterLogoText}: API 키가 만료되었습니다</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>${LetterLogoText} AI 에이전트에서 귀하의 역할이 변경되었습니다</value>

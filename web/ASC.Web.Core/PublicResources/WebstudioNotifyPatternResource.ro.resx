@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; a fost adăugat la sală: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Un nou utilizator DocSpace a fost adăugat: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Un nou utilizator a fost adăugat: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a fost eliminat din agentul: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; s-a modificat nivelul de acces al utilizatorilor &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>Utilizatorul DocSpace a actualizat: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Utilizatorul a actualizat: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Cu stimă, Echipă de Asistență ${LetterLogoText}</value>
@@ -208,7 +208,7 @@
     <value>Configurare aplicație de autentificare</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Colaborare în spațiul DocSpace</value>
+    <value>Colaborare în ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Configurează acum</value>
@@ -217,7 +217,7 @@
     <value>Confirmare</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Confirmare invitație la DocSpace</value>
+    <value>Confirmare invitație la ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirmarea actualizării proprietarului de portal</value>
@@ -256,7 +256,7 @@
     <value>Lasati un feedback</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Deschidere DocSpace</value>
+    <value>Deschidere ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Cumpără acum</value>
@@ -1230,7 +1230,7 @@ $activity
 #end</value>
   </data>
   <data name="pattern_set_password" xml:space="preserve">
-    <value>Bună! Setați parola pentru contul dvs ${LetterLogoText} DocSpace. Faceți clic pe butonul de mai jos:
+    <value>Bună! Setați parola pentru contul dvs ${LetterLogoText}. Faceți clic pe butonul de mai jos:
  
 $OrangeButton
  
@@ -1595,7 +1595,7 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; a încărcat un document nou: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în baza de cunoștințe a agentului IA: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Cheia dvs. API a expirat</value>
+    <value>${LetterLogoText}: Cheia dvs. API a expirat</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} a fost șters</value>

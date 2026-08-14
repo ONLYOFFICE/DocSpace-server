@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; foi adicionado à sala: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Novo usuário DocSpace adicionado: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Novo usuário adicionado: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; foi removido(a) do agente: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; mudou o nível de acesso dos usuários &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>Usuário do DocSpace atualizado: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Usuário atualizado: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Atenciosamente, Equipe de suporte do ${LetterLogoText}</value>
@@ -208,7 +208,7 @@
     <value>Configurar o aplicativo autenticador</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Colaborar no DocSpace</value>
+    <value>Colaborar no ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Configurar agora</value>
@@ -217,7 +217,7 @@
     <value>Confirmar</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Confirmar o convite do DocSpace</value>
+    <value>Confirmar o convite do ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirmar Atualização do Proprietário do Portal</value>
@@ -256,7 +256,7 @@
     <value>Deixar Feedback</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Abrir DocSpace</value>
+    <value>Abrir ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Comprar agora</value>
@@ -1603,7 +1603,7 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; enviou um novo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; para a base de conhecimento do agente de IA: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Sua chave API expirou</value>
+    <value>${LetterLogoText}: Sua chave API expirou</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Sua função em um agente de IA do ${LetterLogoText} foi alterada</value>

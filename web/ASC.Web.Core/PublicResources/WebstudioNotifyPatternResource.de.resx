@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt;  wurde dem Raum hinzugefügt: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Neuer DocSpace-Benutzer hinzugefügt: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Neuer Benutzer hinzugefügt: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; wurde aus dem Agenten entfernt: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; die Zugriffsebene der Benutzer geändert &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>DocSpace-Benutzer aktualisiert: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Benutzer aktualisiert: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Mit freundlichen Grüßen ${LetterLogoText} Support Team</value>
@@ -208,7 +208,7 @@
     <value>Authentifizierungs-App konfigurieren</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>In DocSpace zusammenarbeiten</value>
+    <value>In ${LetterLogoText} zusammenarbeiten</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Jetzt Konfiguration starten</value>
@@ -217,7 +217,7 @@
     <value>Bestätigen</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>DocSpace-Einladung bestätigen</value>
+    <value>${LetterLogoText}-Einladung bestätigen</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Die Aktualisierung des Portalbesitzers bestätigen</value>
@@ -256,7 +256,7 @@
     <value>Kommentare hinterlassen</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>DocSpace öffnen</value>
+    <value>${LetterLogoText} öffnen</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Jetzt kaufen</value>
@@ -735,19 +735,19 @@ ${LetterLogoText} Support Team
 [${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>h1.Das Löschen von "${__VirtualRootPath}":"${__VirtualRootPath}" DocSpace
+    <value>h1.Das Löschen von "${__VirtualRootPath}":"${__VirtualRootPath}" ${LetterLogoText}
  
 Hallo $OwnerName,
  
-Sie haben permanent Ihr DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" zu löschen angefordert.
+Sie haben permanent Ihr ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" zu löschen angefordert.
  
-*Wichtig! Alle Daten, die auf dem DocSpace gespeicherten wurden, sowie Ihre Registrierungsdaten, werden gelöscht und können nicht wiederhergestellt werden.*
+*Wichtig! Alle Daten, die auf dem ${LetterLogoText} gespeicherten wurden, sowie Ihre Registrierungsdaten, werden gelöscht und können nicht wiederhergestellt werden.*
  
 #if($AutoRenew == "True")
-Bevor Sie Ihr DocSpace löschen lassen, vergewissern Sie sich, dass die Option der automatischen Verlängerung Ihres Abonnements ausgeschaltet ist. Überprüfen Sie den Status dieser Option über Ihr persönliches Konto auf der Stripe-Website.
+Bevor Sie Ihr ${LetterLogoText} löschen lassen, vergewissern Sie sich, dass die Option der automatischen Verlängerung Ihres Abonnements ausgeschaltet ist. Überprüfen Sie den Status dieser Option über Ihr persönliches Konto auf der Stripe-Website.
 #end
  
-Wenn Sie noch Ihr DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" löschen möchten, folgen Sie bitte dem Link herunter, um den Vorgang zu bestätigen:
+Wenn Sie noch Ihr ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" löschen möchten, folgen Sie bitte dem Link herunter, um den Vorgang zu bestätigen:
  
 $OrangeButton
  
@@ -1594,7 +1594,7 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; hat ein neues Dokument hochgeladen: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; in die Wissensbasis des KI-Agenten: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Ihr API-Schlüssel ist abgelaufen</value>
+    <value>${LetterLogoText}: Ihr API-Schlüssel ist abgelaufen</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} wurde gelöscht</value>
