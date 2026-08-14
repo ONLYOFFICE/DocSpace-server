@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -112,14 +112,6 @@ public class StudioPeriodicNotify(
 
                 var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
                 var delayDueDate = tariff.DelayDueDate.Date;
-
-                #region 3 days before the wallet is charged for an add-on subscription
-
-                // Every add-on renews on its own due date, whatever the tariff state is, so this reminder
-                // is sent on its own and takes no part in the one-letter-per-run chain below.
-                await SendUpcomingSubscriptionPaymentAsync(tenant, tariff, nowDate, walletQuotas);
-
-                #endregion
 
                 BasePeriodicNotifyAction action = null;
                 var paymentMessage = true;
@@ -498,6 +490,14 @@ public class StudioPeriodicNotify(
                 }
 
 
+                #region 3 days before the wallet is charged for an add-on subscription
+
+                // Every add-on renews on its own due date, whatever the tariff state is, so this reminder
+                // is sent on its own and takes no part in the one-letter-per-run chain above.
+                await SendUpcomingSubscriptionPaymentAsync(tenant, tariff, nowDate, walletQuotas, client, senderName);
+
+                #endregion
+
                 if (action == null)
                 {
                     continue;
@@ -544,7 +544,7 @@ public class StudioPeriodicNotify(
     /// Warns the owner and the payer three days before the wallet is charged for the add-ons that renew
     /// then - one letter per portal, listing every add-on due on that day.
     /// </summary>
-    private async Task SendUpcomingSubscriptionPaymentAsync(Tenant tenant, Tariff tariff, DateTime nowDate, Dictionary<int, TenantQuota> walletQuotas)
+    private async Task SendUpcomingSubscriptionPaymentAsync(Tenant tenant, Tariff tariff, DateTime nowDate, Dictionary<int, TenantQuota> walletQuotas, INotifyClient client, string senderName)
     {
         var features = tariff.Quotas
             // NextQuantity 0 means the subscription was cancelled: it is neither renewed nor charged for.
@@ -563,17 +563,27 @@ public class StudioPeriodicNotify(
             return;
         }
 
-        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+        var users = new List<UserInfo> { await userManager.GetUsersAsync(tenant.OwnerId) };
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
+
+        if (payer.Id != Constants.LostUser.Id && users.TrueForAll(u => u.Id != payer.Id))
+        {
+            users.Add(payer);
+        }
 
         // The add-on titles are the ones the billing page shows, resolved in the recipient's culture.
         Func<CultureInfo, string> subscriptionName = c =>
             string.Join(", ", features.Select(f => Resource.ResourceManager.GetString(FeatureTitleKey(f), c)));
 
-        await serviceProvider.GetService<StudioNotifyService>()
-            .SendUpcomingSubscriptionPaymentAsync(payer.Id == Constants.LostUser.Id ? null : payer, owner, subscriptionName);
+        var action = serviceProvider.GetService<UpcomingSubscriptionPaymentNotifyAction>();
+
+        foreach (var u in users)
+        {
+            action.Init(u, subscriptionName);
+            await client.SendNoticeToAsync(action, u, senderName);
+        }
     }
 
     /// <summary>The title of a wallet add-on, the same key <c>QuotaHelper.GetFeatures</c> resolves.</summary>
