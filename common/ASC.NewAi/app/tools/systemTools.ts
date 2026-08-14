@@ -346,6 +346,51 @@ function withReadOnlyAutoAllow(
   return result;
 }
 
+// A failed MCP tool call is usually NOT a transport error: the MCP server
+// answers 200 with `isError: true` inside the result payload (e.g. when the
+// portal rejected its API call with a 401), so neither the fetch-level warn
+// nor the callTool catch ever fires — on a warn-level stand such failures
+// were completely invisible. Detect that shape and return the last line of
+// the error text (the MCP server's own step trace ends with the actual
+// failure, e.g. "GET …/files/rooms: 401 Unauthorized"; never user content).
+// Returns undefined for successful or unrecognized results.
+function describeToolErrorResult(result: unknown): string | undefined {
+  let payload: unknown = result;
+  if (typeof payload === "string") {
+    try {
+      payload = JSON.parse(payload);
+    } catch {
+      return undefined;
+    }
+  }
+  if (!payload || typeof payload !== "object") {
+    return undefined;
+  }
+  const { isError, content } = payload as {
+    isError?: unknown;
+    content?: unknown;
+  };
+  if (isError !== true) {
+    return undefined;
+  }
+  let text = "";
+  if (Array.isArray(content)) {
+    const first = content.find(
+      (part): part is { text: string } =>
+        !!part &&
+        typeof part === "object" &&
+        typeof (part as { text?: unknown }).text === "string",
+    );
+    text = first?.text ?? "";
+  }
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const last = lines[lines.length - 1] ?? "<no error text>";
+  return last.slice(0, 300);
+}
+
 // Diagnostic wrapper around the source: logs enumeration and invocation so
 // we can see whether the engine is even offered the system tools and
 // whether calls reach the MCP server. Delegates everything to `source`;
@@ -412,7 +457,14 @@ export const systemToolsSource: ToolsAdapter & {
         }
       }
       const result = await source.callTool(toolName, args);
-      logger.info(`systemTools.callTool name=${toolName} ok`);
+      const failure = describeToolErrorResult(result);
+      if (failure) {
+        logger.warn(
+          `systemTools.callTool name=${toolName} returned an error result: ${failure}`,
+        );
+      } else {
+        logger.info(`systemTools.callTool name=${toolName} ok`);
+      }
       return result;
     } catch (err) {
       logger.error(
