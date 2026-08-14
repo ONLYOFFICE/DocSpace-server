@@ -1082,6 +1082,17 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Jūsu ${LetterLogoText} tiks &lt;span style="color: #FF6F3D;"&gt;dzēsts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Jūs 3 mēnešus neesat iespējis savā ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Lūdzu, ņemiet vērā: jūsu ${LetterLogoText} un visi dati tiks dzēsti pēc 6 mēnešu neaktivitātes. Vienkārši piesakieties tagad, lai jūsu ${LetterLogoText} paliktu aktīvs un jūs varētu to turpināt izmantot.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Saņemiet &lt;span style="color: #FF6F3D;"&gt;bezmaksas&lt;/span&gt; ${LetterLogoText} lietojumprogrammas&lt;/td&gt;&lt;/tr&gt;
 
@@ -1107,6 +1118,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tā kā nolēmt vairs to neizmantot, jūsu ${LetterLogoText} un visi dati tiks izdzēsti saskaņā ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Konfidencialitātes politiku&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Mēs būsim pateicīgi par jūsu atsauksmi. Kāpēc nolēmāt pārtraukt lietot ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ja uzskatāt, ka šī ir kļūda, un vēlaties turpināt lietot ${LetterLogoText}, sazinieties ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;atbalsta komandu&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Jūsu ${LetterLogoText} tiks &lt;span style="color: #FF6F3D;"&gt;izdzēsts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Jūs 3 mēnešus neesat iespējis savā ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tā kā jūs to neizmantojat, jūsu ${LetterLogoText} un visi dati pēc 6 mēnešu neaktivitātes tiks dzēsti saskaņā ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privātuma politiku&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ja uzskatāt, ka šī ir kļūda, un vēlaties turpināt lietot ${LetterLogoText}, sazinieties ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;atbalsta komandu&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1350,6 +1374,17 @@ Ar šo sazināmies, lai informētu jūs, ka ${LetterLogoText} maka atlikuma auto
 Lūdzam jūs manuāli pārbaudīt un atjaunināt maka atlikumu.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_upcoming_subscription_payment" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Informējam, ka abonementa „$SubscriptionName“ maksājums pēc 3 dienām tiks automātiski norēķināts no jūsu "${LetterLogoText} maka":"${__VirtualRootPath}/billing/wallet".
+
+Lai darījums noritētu veiksmīgi, lūdzu, pārliecinieties, ka jūsu "${LetterLogoText} makā":"${__VirtualRootPath}/billing/wallet" ir pietiekams atlikums.
+
+Ja jums ir jautājumi vai nepieciešama palīdzība, droši sazinieties ar mūsu "atbalsta komandu":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>
@@ -1601,10 +1636,16 @@ $TrulyYours</value>
   <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} tiks izdzēsts</value>
   </data>
+  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} tiks izdzēsts</value>
+  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Saņemiet bezmaksas ${LetterLogoText} lietojumprogrammas</value>
   </data>
   <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} tiks izdzēsts</value>
+  </data>
+  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} tiks izdzēsts</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
@@ -1675,6 +1716,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Nepieciešama darbība: Neizdevās automātiski papildināt Maka atlikumu Jūsu ${LetterLogoText}</value>
+  </data>
+  <data name="subject_upcoming_subscription_payment" xml:space="preserve">
+    <value>Gaidāmais abonementa „$SubscriptionName“ maksājums jūsu ${LetterLogoText}</value>
   </data>
   <data name="subject_user_activation_v1" xml:space="preserve">
     <value>Jūs esat uzaicināts pievienoties ${LetterLogoText}</value>

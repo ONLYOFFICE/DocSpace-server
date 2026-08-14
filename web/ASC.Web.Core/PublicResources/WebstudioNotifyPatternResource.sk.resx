@@ -1082,6 +1082,17 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Váš ${LetterLogoText} bude &lt;span style="color: #FF6F3D;"&gt;vymazaný&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Už 3 mesiace ste do svojho ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; nevstúpili.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Upozorňujeme: váš ${LetterLogoText} a všetky údaje budú po 6 mesiacoch nečinnosti vymazané. Stačí sa teraz prihlásiť, aby váš ${LetterLogoText} zostal aktívny a mohli ste ho ďalej používať.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Získajte &lt;span style="color: #FF6F3D;"&gt;bezplatné&lt;/span&gt; aplikácie ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
 
@@ -1107,6 +1118,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Keďže ste sa rozhodli, že ju už nebudete používať, Váš účet ${LetterLogoText} a všetky údaje budú vymazané v súlade s našimi &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Zásadami ochrany osobných údajov&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Budeme Vám vďační za vašu spätnú väzbu. Prečo ste sa rozhodli prestať používať ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ak si myslíte, že ide o chybu a chcete naďalej používať ${LetterLogoText}, kontaktujte náš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;tím podpory&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} bude &lt;span style="color: #FF6F3D;"&gt;vymazaný&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Už 3 mesiace ste do svojho ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; nevstúpili.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Keďže ho nepoužívate, váš ${LetterLogoText} a všetky údaje budú po 6 mesiacoch nečinnosti vymazané v súlade s našimi &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;zásadami ochrany osobných údajov&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ak si myslíte, že ide o chybu a chcete naďalej používať ${LetterLogoText}, kontaktujte náš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;tím podpory&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1350,6 +1374,17 @@ Kontaktujeme vás, aby sme vás informovali, že automatické dobitie zostatku p
 Láskavo vás žiadame, aby ste manuálne skontrolovali a aktualizovali zostatok vo vašej peňaženke.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_upcoming_subscription_payment" xml:space="preserve">
+    <value>Dobrý deň, $UserName!
+
+Oznamujeme vám, že platba za predplatné „$SubscriptionName“ bude o 3 dni automaticky stržená z vašej "peňaženky ${LetterLogoText}":"${__VirtualRootPath}/billing/wallet".
+
+Aby transakcia prebehla hladko, overte prosím, že je vo vašej "peňaženke ${LetterLogoText}":"${__VirtualRootPath}/billing/wallet" dostatok prostriedkov.
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, obráťte sa na náš "tím podpory":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>
@@ -1601,10 +1636,16 @@ $TrulyYours</value>
   <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
     <value>Váš ${LetterLogoText} bude vymazaný</value>
   </data>
+  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>Váš ${LetterLogoText} bude vymazaný</value>
+  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Získajte bezplatné aplikácie ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
+    <value>Váš ${LetterLogoText} bude vymazaný</value>
+  </data>
+  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
     <value>Váš ${LetterLogoText} bude vymazaný</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
@@ -1675,6 +1716,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Je potrebná akcia: Nie je možné automaticky dobiť zostatok peňaženky vo vašom ${LetterLogoText}</value>
+  </data>
+  <data name="subject_upcoming_subscription_payment" xml:space="preserve">
+    <value>Nadchádzajúca platba za predplatné „$SubscriptionName“ vo vašom ${LetterLogoText}</value>
   </data>
   <data name="subject_user_activation_v1" xml:space="preserve">
     <value>Boli ste pozvaní do ${LetterLogoText}</value>

@@ -1056,6 +1056,17 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Вашият ${LetterLogoText} ще бъде &lt;span style="color: #FF6F3D;"&gt;изтрит&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Не сте влизали във вашия ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; от 3 месеца.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Обърнете внимание: вашият ${LetterLogoText} и всички данни ще бъдат изтрити след 6 месеца без активност. Просто влезте сега, за да запазите своя ${LetterLogoText} активен и да продължите да го използвате.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Възползвайте се от &lt;span style="color: #FF6F3D;"&gt;безплатните&lt;/span&gt; ${LetterLogoText} приложения&lt;/td&gt;&lt;/tr&gt;
 
@@ -1081,6 +1092,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Тъй като сте решили да не го използвате повече, вашият ${LetterLogoText} и всички данни ще бъдат изтрити в съответствие с нашата &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Декларация за поверителност&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Ще се радваме да чуем вашите отзиви. Защо решихте да спрете да използвате ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ако смятате, че това е грешка и искате да продължите да използвате ${LetterLogoText}, моля, свържете се с нашия &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;екип за поддръжка&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Вашият ${LetterLogoText} ще бъде &lt;span style="color: #FF6F3D;"&gt;изтрит&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Не сте влизали във вашия ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; от 3 месеца.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Тъй като не го използвате, вашият ${LetterLogoText} и всички данни ще бъдат изтрити след 6 месеца без активност в съответствие с нашата &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Политика за поверителност&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ако смятате, че това е грешка и искате да продължите да използвате ${LetterLogoText}, моля, свържете се с нашия &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;екип за поддръжка&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1327,6 +1351,17 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_upcoming_subscription_payment" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Свързваме се с вас, за да ви информираме, че плащането по абонамента „$SubscriptionName“ ще бъде удържано автоматично от "портфейла ви в ${LetterLogoText}":"${__VirtualRootPath}/billing/wallet" след 3 дни.
+
+За да премине транзакцията без проблеми, моля, уверете се, че в "портфейла ви в ${LetterLogoText}":"${__VirtualRootPath}/billing/wallet" има достатъчно средства.
+
+Ако имате въпроси или се нуждаете от съдействие, свържете се с нашия "екип за поддръжка":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Нов потребител добавя към "${__VirtualRootPath}":"${__VirtualRootPath}" портал
 
@@ -1550,10 +1585,16 @@ $TrulyYours</value>
   <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
     <value>Вашият ${LetterLogoText} ще бъде изтрит</value>
   </data>
+  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>Вашият ${LetterLogoText} ще бъде изтрит</value>
+  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Възползвайте се от безплатните ${LetterLogoText} приложения</value>
   </data>
   <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
+    <value>Вашият ${LetterLogoText} ще бъде изтрит</value>
+  </data>
+  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
     <value>Вашият ${LetterLogoText} ще бъде изтрит</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
@@ -1624,6 +1665,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Изисква се действие: Не може да се зареди автоматично балансът на портфейла във вашия ${LetterLogoText}</value>
+  </data>
+  <data name="subject_upcoming_subscription_payment" xml:space="preserve">
+    <value>Предстоящо плащане по абонамента „$SubscriptionName“ във вашия ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Нов потребител е добавен към портала ${LetterLogoText}</value>

@@ -1091,6 +1091,17 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;您的 ${LetterLogoText} 将&lt;span style="color: #FF6F3D;"&gt;被删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您已经 3 个月没有登录您的 ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; 了。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;请注意：您的 ${LetterLogoText} 及其所有数据将在停用 6 个月后被删除。只需现在登录，即可让您的 ${LetterLogoText} 保持活跃并继续使用。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;获取&lt;span style="color: #FF6F3D;"&gt;免费&lt;/span&gt; ${LetterLogoText} 应用&lt;/td&gt;&lt;/tr&gt;
 
@@ -1113,9 +1124,22 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt; 您已经超过半年没有登录您的 ${LetterLogoText}&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;考虑到您决定不再使用它，您的 ${LetterLogoText} 和所有数据将被删除，依据是我们的"隐私政策&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;考虑到您决定不再使用它，您的 ${LetterLogoText} 和所有数据将被删除，依据是我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;我们感谢您提供反馈。您为何决定停止使用 ${LetterLogoText}？&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如果您认为这其中有误，希望继续使用 ${LetterLogoText}，请联系我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;支持团队&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt; 您的 ${LetterLogoText} &lt;span style="color: #FF6F3D;"&gt;将被删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您已经 3 个月没有登录您的 ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; 了。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;由于您未使用，根据我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;，您的 ${LetterLogoText} 及其所有数据将在停用 6 个月后被删除。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如果您认为这其中有误，希望继续使用 ${LetterLogoText}，请联系我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;支持团队&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1363,6 +1387,17 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_upcoming_subscription_payment" xml:space="preserve">
+    <value>您好，$UserName!
+
+温馨提示，“$SubscriptionName”的订阅费用将于 3 天后从您的 "${LetterLogoText} 钱包":"${__VirtualRootPath}/billing/wallet" 中自动扣取。
+
+为确保扣款顺利，请确认您的 "${LetterLogoText} 钱包":"${__VirtualRootPath}/billing/wallet" 余额充足。
+
+如有任何疑问或需要帮助，欢迎随时联系我们的 "支持团队":"${__SupportLink}" 。
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.新用户添加至 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户
 
@@ -1583,10 +1618,16 @@ $TrulyYours</value>
   <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
     <value>您的 ${LetterLogoText} 将被删除</value>
   </data>
+  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 将被删除</value>
+  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>获取免费 ${LetterLogoText} 应用</value>
   </data>
   <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 将被删除</value>
+  </data>
+  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
     <value>您的 ${LetterLogoText} 将被删除</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
@@ -1657,6 +1698,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>需要操作：无法自动为您的${LetterLogoText}中的钱包余额充值</value>
+  </data>
+  <data name="subject_upcoming_subscription_payment" xml:space="preserve">
+    <value>即将扣款：您的 ${LetterLogoText} 中“$SubscriptionName”订阅费用</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>新用户添加到${LetterLogoText}门户</value>

@@ -1060,6 +1060,17 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Twoje konto ${LetterLogoText} zostanie &lt;span style="color: #FF6F3D;"&gt;usunięte&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Nie logowałeś(aś) się na swoje konto ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; od 3 miesięcy.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Zwróć uwagę: Twoje konto ${LetterLogoText} i wszystkie dane zostaną usunięte po 6 miesiącach braku aktywności. Wystarczy, że zalogujesz się teraz, aby konto ${LetterLogoText} pozostało aktywne i mogło być dalej używane.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Pobierz &lt;span style="color: #FF6F3D;"&gt;darmowe&lt;/span&gt;aplikacje ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
 
@@ -1085,6 +1096,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ponieważ zaprzestano korzystania z usługi, konto ${LetterLogoText} oraz wszystkie powiązane z nim dane zostaną usunięte zgodnie z naszą &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Polityką prywatności&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Będziemy wdzięczni za opinię. Dlaczego chcesz zrezygnować z subskrypcji ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jeśli zaszła pomyłka i chcesz kontynuować korzystanie z ${LetterLogoText}, skontaktuj się z naszym &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;zespołem wsparcia&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Twoje konto ${LetterLogoText} zostanie &lt;span style="color: #FF6F3D;"&gt;usunięte&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Nie logowałeś(aś) się na swoje konto ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; od 3 miesięcy.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ponieważ nie korzystasz z konta, Twoje konto ${LetterLogoText} i wszystkie dane zostaną usunięte po 6 miesiącach braku aktywności zgodnie z naszą &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Polityką prywatności&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jeśli zaszła pomyłka i chcesz kontynuować korzystanie z ${LetterLogoText}, skontaktuj się z naszym &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;zespołem wsparcia&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1331,6 +1355,17 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_upcoming_subscription_payment" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że płatność za subskrypcję „$SubscriptionName” zostanie automatycznie pobrana z Twojego "portfela ${LetterLogoText}":"${__VirtualRootPath}/billing/wallet" za 3 dni.
+
+Aby transakcja przebiegła pomyślnie, upewnij się, że na Twoim "portfelu ${LetterLogoText}":"${__VirtualRootPath}/billing/wallet" jest wystarczające saldo.
+
+W razie pytań lub potrzeby pomocy skontaktuj się z naszym "zespołem wsparcia":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Nowy użytkownik jest dodawany do portalu "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1554,10 +1589,16 @@ $TrulyYours</value>
   <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
     <value>Twoje konto ${LetterLogoText} zostanie usunięte</value>
   </data>
+  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>Twoje konto ${LetterLogoText} zostanie usunięte</value>
+  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Pobierz darmowe aplikacje ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
+    <value>Twoje konto ${LetterLogoText} zostanie usunięte</value>
+  </data>
+  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
     <value>Twoje konto ${LetterLogoText} zostanie usunięte</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
@@ -1628,6 +1669,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Wymagane działanie: Nie udało się automatycznie zasilić portfela w ${LetterLogoText}</value>
+  </data>
+  <data name="subject_upcoming_subscription_payment" xml:space="preserve">
+    <value>Nadchodząca płatność za subskrypcję „$SubscriptionName” w Twoim ${LetterLogoText}</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Nowy użytkownik dodany do portalu ${LetterLogoText}</value>

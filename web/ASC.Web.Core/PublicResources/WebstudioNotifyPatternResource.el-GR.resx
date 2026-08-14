@@ -1082,6 +1082,17 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Το ${LetterLogoText} σας θα &lt;span style="color: #FF6F3D;"&gt;διαγραφεί&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Δεν έχετε εισέλθει στο ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; για 3 μήνες.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Λάβετε υπόψη: το ${LetterLogoText} σας και όλα τα δεδομένα θα διαγραφούν μετά από 6 μήνες αδράνειας. Απλώς συνδεθείτε τώρα για να διατηρήσετε το ${LetterLogoText} σας ενεργό και να συνεχίσετε να το χρησιμοποιείτε.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Αποκτήστε &lt;span style="color: #FF6F3D;"&gt;δωρεάν&lt;/span&gt; εφαρμογές ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
 
@@ -1107,6 +1118,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Εφόσον αποφασίσατε να μην το χρησιμοποιείτε πλέον, το ${LetterLogoText} σας και όλα τα δεδομένα θα διαγραφούν σύμφωνα με την &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Πολιτική απορρήτου&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Θα εκτιμούσαμε τα σχόλιά σας. Γιατί αποφασίσατε να σταματήσετε να χρησιμοποιείτε το ${LetterLogoText};&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Εάν πιστεύετε ότι πρόκειται για λάθος και θέλετε να συνεχίσετε να χρησιμοποιείτε το ${LetterLogoText}, επικοινωνήστε με την &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;ομάδα υποστήριξης&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Το ${LetterLogoText} σας θα &lt;span style="color: #FF6F3D;"&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Δεν έχετε εισέλθει στο ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; για 3 μήνες.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Εφόσον δεν το χρησιμοποιείτε, το ${LetterLogoText} σας και όλα τα δεδομένα θα διαγραφούν μετά από 6 μήνες αδράνειας σύμφωνα με την &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Πολιτική Απορρήτου μας&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Εάν πιστεύετε ότι πρόκειται για λάθος και θέλετε να συνεχίσετε να χρησιμοποιείτε το ${LetterLogoText}, επικοινωνήστε με την &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;ομάδα υποστήριξης&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1350,6 +1374,17 @@ $TrulyYours</value>
 Σας παρακαλούμε να ελέγξετε και να ενημερώσετε χειροκίνητα το υπόλοιπο του πορτοφολιού σας.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_upcoming_subscription_payment" xml:space="preserve">
+    <value>Γεια σας, $UserName!
+
+Επικοινωνούμε μαζί σας για να σας ενημερώσουμε ότι η πληρωμή της συνδρομής «$SubscriptionName» θα χρεωθεί αυτόματα από το "Πορτοφόλι σας στο ${LetterLogoText}":"${__VirtualRootPath}/billing/wallet" σε 3 ημέρες.
+
+Για να ολοκληρωθεί ομαλά η συναλλαγή, βεβαιωθείτε ότι υπάρχει επαρκές υπόλοιπο στο "Πορτοφόλι σας στο ${LetterLogoText}":"${__VirtualRootPath}/billing/wallet".
+
+Αν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, επικοινωνήστε με την "ομάδα υποστήριξης":"${__SupportLink}" μας.
 
 $TrulyYours</value>
   </data>
@@ -1601,10 +1636,16 @@ $TrulyYours</value>
   <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
     <value>Το ${LetterLogoText} σας θα διαγραφεί</value>
   </data>
+  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
+    <value>Το ${LetterLogoText} σας θα διαγραφεί</value>
+  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Αποκτήστε δωρεάν εφαρμογές ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
+    <value>Το ${LetterLogoText} σας θα διαγραφεί</value>
+  </data>
+  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
     <value>Το ${LetterLogoText} σας θα διαγραφεί</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
@@ -1675,6 +1716,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του υπολοίπου του Πορτοφολιού στο ${LetterLogoText}</value>
+  </data>
+  <data name="subject_upcoming_subscription_payment" xml:space="preserve">
+    <value>Επερχόμενη πληρωμή συνδρομής για «$SubscriptionName» στο ${LetterLogoText} σας</value>
   </data>
   <data name="subject_user_activation_v1" xml:space="preserve">
     <value>Έχετε προσκληθεί στο ${LetterLogoText}</value>
