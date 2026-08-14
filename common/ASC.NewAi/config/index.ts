@@ -73,6 +73,19 @@ function mcpEndpointOverride(index: number): string | undefined {
     return process.env[`AI__MCP__${index}__ENDPOINT`];
 }
 
+// Portal base URL for the docspace-mcp hop, injected by the Aspire AppHost
+// as `AI__MCP_PORTAL_BASE_URL` (same `__` form as the endpoint override
+// above). docspace-mcp in internal mode reaches the portal API at the URL
+// carried in the forwarded `Referer` header; deriving that from the client
+// headers breaks in dev, where the browser origin is `localhost:8092` — a
+// loopback the MCP *container* cannot reach. When set, this address (the
+// proxy as seen from containers, e.g. `http://host.docker.internal:8092/`)
+// replaces the derived referer. Unset in production installs, where the
+// client-derived portal domain is reachable and tenant-correct.
+export function mcpPortalBaseUrl(): string | undefined {
+    return process.env["AI__MCP_PORTAL_BASE_URL"] || undefined;
+}
+
 // The portal's own MCP server (docspace-mcp, the `ai.mcp` entry named
 // below). It is always enabled everywhere — global chat, agents, the
 // editor plugin — and its tools cannot be disabled: the agent whitelist

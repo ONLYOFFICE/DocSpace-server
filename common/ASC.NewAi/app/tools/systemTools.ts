@@ -38,7 +38,11 @@ import type {
   ToolsAdapter,
 } from "@onlyoffice/ai-chat/core";
 import type { TMCPItem } from "@onlyoffice/ai-chat";
-import { getMcpServers, PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
+import {
+  getMcpServers,
+  mcpPortalBaseUrl,
+  PORTAL_MCP_SERVER_NAME,
+} from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { withTimeout } from "../storage/httpClient.js";
 import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
@@ -49,21 +53,50 @@ import logger from "../log.js";
 // mirrors the C# `HttpClientTransport`, which sends `Referer` = portal root
 // plus `Authorization`. Derive the portal root from the forwarded proxy /
 // client headers so a request without it doesn't get rejected (HTTP 400).
+// docspace-mcp reaches the portal API at the URL carried in `Referer`
+// (its internal-mode credential parser uses it as the API base). The MCP
+// server runs in a container, so a loopback host derived from the browser
+// origin (`localhost:8092` in dev) points at the container itself, not the
+// portal — rewrite it to `host.docker.internal`, which resolves to the
+// host from inside Docker. Real portal domains pass through untouched.
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
+const CONTAINER_HOST_ALIAS = "host.docker.internal";
+
+function rewriteLoopback(portalRoot: string): string {
+  try {
+    const url = new URL(portalRoot);
+    if (LOOPBACK_HOSTS.has(url.hostname)) {
+      url.hostname = CONTAINER_HOST_ALIAS;
+      return url.href;
+    }
+  } catch {
+    // not a URL — return as-is, the MCP server will reject it
+  }
+  return portalRoot;
+}
+
 function portalReferer(headers: Record<string, string>): string | undefined {
+  // Explicit override (`AI__MCP_PORTAL_BASE_URL`) wins over derivation —
+  // for setups where neither the client origin nor the loopback rewrite
+  // yields an address the MCP container can reach.
+  const override = mcpPortalBaseUrl();
+  if (override) {
+    return override.replace(/\/+$/, "") + "/";
+  }
   const origin = headers["origin"];
   if (origin) {
-    return origin.replace(/\/+$/, "") + "/";
+    return rewriteLoopback(origin.replace(/\/+$/, "") + "/");
   }
   const xfHost = headers["x-forwarded-host"]?.split(",")[0]?.trim();
   if (xfHost) {
     const proto = headers["x-forwarded-proto"]?.split(",")[0]?.trim() || "https";
-    return `${proto}://${xfHost}/`;
+    return rewriteLoopback(`${proto}://${xfHost}/`);
   }
   const referer = headers["referer"];
   if (referer) {
     try {
       const parsed = new URL(referer);
-      return `${parsed.protocol}//${parsed.host}/`;
+      return rewriteLoopback(`${parsed.protocol}//${parsed.host}/`);
     } catch {
       // malformed referer — fall through
     }
