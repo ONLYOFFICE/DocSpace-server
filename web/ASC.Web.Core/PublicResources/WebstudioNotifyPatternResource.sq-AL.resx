@@ -1435,7 +1435,7 @@ $TrulyYours</value>
     <value>Fjalëkalimi juaj u ndryshua me sukses</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
-    <value>Çaktivizimi i portalit ${__VirtualRootHost } portal</value>
+    <value>Çaktivizimi i portalit ${__VirtualRootHost} portal</value>
   </data>
   <data name="subject_portal_delete" xml:space="preserve">
     <value>Fshirja e portalit ${__VirtualRootHost}</value>
