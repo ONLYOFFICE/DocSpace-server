@@ -117,6 +117,12 @@
             <version>${springdoc.version}</version>
         </dependency>
 
+        <!-- Misc Dependencies -->
+        <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-pool2</artifactId>
+        </dependency>
+
         <!-- Testing Dependencies -->
         <dependency>
           <groupId>com.asc</groupId>
