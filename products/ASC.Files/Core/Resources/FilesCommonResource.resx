@@ -507,7 +507,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
     <value>Content Creator</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace Administrator</value>
+    <value>Full admin</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
