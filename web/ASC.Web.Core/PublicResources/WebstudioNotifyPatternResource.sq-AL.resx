@@ -475,7 +475,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Licensa juaj për ${LetterLogoText} DocsSpace Enterprise do të skadojë për 7 ditë.
+Licensa juaj për ${LetterLogoText} Enterprise do të skadojë për 7 ditë.
 
 Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë për gjithë jetën* për ${LetterLogoText} Enterprise (me 3 vjet mbështetje dhe përditësime të përfshira).
 
@@ -1325,7 +1325,7 @@ Lidhja është e vlefshme vetëm për 7 ditë.</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Përshëndetje!
 
-Ju jeni caktuar në një rol të ri në dhomën e DocSPace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Ju jeni caktuar në një rol të ri në dhomën e ${LetterLogoText} "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Mësoni më shumë rreth roleve dhe lejeve në dhoma në "Qendrën e ndihmës":"${HelpCenterUrl}".
 

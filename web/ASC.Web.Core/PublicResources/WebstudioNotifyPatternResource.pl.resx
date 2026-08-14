@@ -456,7 +456,7 @@ $TrulyYours</value>
 
 Twoja licencja ${LetterLogoText} Enterprise wygasa dzisiaj.
 
-Aktywowaliśmy dla Ciebie *okres prolongaty wynoszący $PaymentDelay *dni. W tym czasie dostęp do DocSPace jest zapewniony dla 3 *nazwanych użytkowników (wsparcie i aktualizacje nie są już oferowane).
+Aktywowaliśmy dla Ciebie *okres prolongaty wynoszący $PaymentDelay *dni. W tym czasie dostęp do ${LetterLogoText} jest zapewniony dla 3 *nazwanych użytkowników (wsparcie i aktualizacje nie są już oferowane).
 
 Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ${LetterLogoText} Enterprise (z 3-letnim wsparciem i aktualizacjami):
 
@@ -1331,7 +1331,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Witaj!
 
-Przypisano Ci nowy rodzaj użytkownika w DoscSpace  "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+Przypisano Ci nowy rodzaj użytkownika w ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
 
 Dowiedz się więcej o rodzajach użytkowników i uprawnieniach z Centrum pomocy "Help Center":"${HelpCenterUrl}".
 

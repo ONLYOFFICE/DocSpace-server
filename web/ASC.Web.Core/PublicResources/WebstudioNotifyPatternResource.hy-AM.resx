@@ -1329,7 +1329,7 @@ $OrangeButton
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Բարև!
 
-Դուք նշանակվել եք նոր դեր "${RoomTitle}":"${RoomUrl}" Դոկսպեյս սենյակում՝ ${UserRole}:
+Դուք նշանակվել եք նոր դեր "${RoomTitle}":"${RoomUrl}" ${LetterLogoText} սենյակում՝ ${UserRole}:
 
 Կարդացեք սենյակի դերերի և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}"-ում՝
 

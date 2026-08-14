@@ -1175,7 +1175,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Здраво!
 
-Позвани сте да се придружите соби $Message на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихватите позив кликом на линк:
+Позвани сте да се придружите соби на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихватите позив кликом на линк:
 
 $OrangeButton
 

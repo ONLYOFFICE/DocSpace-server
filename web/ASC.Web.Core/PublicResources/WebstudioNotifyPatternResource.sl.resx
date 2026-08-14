@@ -1484,10 +1484,10 @@ $TrulyYours</value>
     <value>Brisanje portala ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>Dokumentni prostor ${LetterLogoText} je izbrisan</value>
+    <value>${LetterLogoText} je izbrisan</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Dokumentni prostor ${LetterLogoText} je izbrisan</value>
+    <value>${LetterLogoText} je izbrisan</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Sprememba naslova portala</value>

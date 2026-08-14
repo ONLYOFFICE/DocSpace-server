@@ -1450,7 +1450,7 @@ $TrulyYours</value>
     <value>Vymazání ${__VirtualRootHost} portálu</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Dokumentační prostor ${LetterLogoText} byl smazán</value>
+    <value>${LetterLogoText} byl smazán</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Změna adresy portálu</value>
@@ -1600,7 +1600,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}: Platnost vašeho API klíče vypršela</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>Dokumentační prostor ${LetterLogoText} byl smazán</value>
+    <value>${LetterLogoText} byl smazán</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Vaše role v agentovi AI ${LetterLogoText} se změnila</value>

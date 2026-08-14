@@ -1488,7 +1488,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} видалено</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Документаційний простір ${LetterLogoText} видалено</value>
+    <value>${LetterLogoText} видалено</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Зміна адреси порталу</value>

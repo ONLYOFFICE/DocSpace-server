@@ -1620,7 +1620,7 @@ $TrulyYours</value>
     <value>Sinut on kutsuttu liittymään ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Roolisi Docspace-huoneessa on muuttunut</value>
+    <value>${LetterLogoText}: Roolisi huoneessa on muuttunut</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>${LetterLogoText} käyttäjätyyppisi on muuttunut</value>

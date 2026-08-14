@@ -1484,10 +1484,10 @@ $TrulyYours</value>
     <value>Vymazanie ${__VirtualRootHost} portálu</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>Dokumentačný priestor ${LetterLogoText} bol odstránený</value>
+    <value>${LetterLogoText} bol odstránený</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Dokumentačný priestor ${LetterLogoText} bol odstránený</value>
+    <value>${LetterLogoText} bol odstránený</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Zmena adresy portálu</value>
