@@ -1378,7 +1378,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace has been deleted.
+        ///   Looks up a localized string similar to ${LetterLogoText} has been deleted.
         ///
         ///*Portal:* ${PortalUrl}
         ///*Owner:* ${UserName} ${UserEmail} 
@@ -1410,7 +1410,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to h1.Disabling account on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;
         ///
-        ///You have requested to disable your account in DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///You have requested to disable your account in &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
         ///If you still want to disable your account, please follow the link below to confirm the operation:
         ///
@@ -1647,7 +1647,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Here is what’s new in your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; in the last hour
+        ///   Looks up a localized string similar to h1.Here is what’s new in your &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; in the last hour
         ///
         ///#foreach($activity in $Activities)
         ///$activity
@@ -2015,7 +2015,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Here is what’s new in your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; on $Date
+        ///   Looks up a localized string similar to h1.Here is what’s new in your &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; on $Date
         ///
         ///#foreach($activity in $Activities)
         ///$activity

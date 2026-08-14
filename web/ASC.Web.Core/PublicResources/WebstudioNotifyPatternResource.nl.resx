@@ -984,7 +984,7 @@ $TrulyYours
 ^Om het notificatietype te veranderen, kunt u dit beheren in uw "abonnementsinstellingen":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Dit is wat er nieuw is in uw DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" in het laatste uur
+    <value>h1.Dit is wat er nieuw is in uw "${__VirtualRootPath}":"${__VirtualRootPath}" in het laatste uur
 
 #foreach($activity in $Activities)
 $activity
@@ -1230,7 +1230,7 @@ ${LetterLogoText} Ondersteuningsteam
 [$__AuthorName]($__AuthorUrl) heeft zijn/haar profielgegevens gewijzigd op het [${__VirtualRootPath}](${__VirtualRootPath}) portaal.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Dit is wat er nieuw is in uw DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" op $Date
+    <value>h1.Dit is wat er nieuw is in uw "${__VirtualRootPath}":"${__VirtualRootPath}" op $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1459,7 +1459,7 @@ $TrulyYours</value>
     <value>Verwijdering van het ${__VirtualRootHost} portaal</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace is verwijderd</value>
+    <value>${LetterLogoText} is verwijderd</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} is verwijderd</value>
@@ -1624,7 +1624,7 @@ U kunt een nieuwe API-sleutel genereren in de "Ontwikkelaarstools":"${__VirtualR
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace is verwijderd.
+    <value>${LetterLogoText} is verwijderd.
 
 *Portaal:* ${PortalUrl}
 *Eigenaar:* ${UserName} ${UserEmail}

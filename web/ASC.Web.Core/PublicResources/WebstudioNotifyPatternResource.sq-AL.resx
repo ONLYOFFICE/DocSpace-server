@@ -825,7 +825,7 @@ Adresa juaj e portalit $PortalUrl u ndryshua në adresën e re "${__VirtualRootP
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Çaktivizimi i llogarisë në "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Ju keni kërkuar të çaktivizoni llogarinë tuaj në DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ju keni kërkuar të çaktivizoni llogarinë tuaj në "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Nëse ende dëshironi të çaktivizoni llogarinë tuaj, ju lutem ndiqni lidhjen e mëposhtme për të konfirmuar operacionin:
 
@@ -987,7 +987,7 @@ $TrulyYours
 ^Për të ndryshuar llojin e njoftimit, ju lutem menaxhoni "cilësimet e abonimit":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Ja çfarë ka të re në DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" në orën e fundit
+    <value>h1.Ja çfarë ka të re në "${__VirtualRootPath}":"${__VirtualRootPath}" në orën e fundit
 
 #foreach($activity in $Activities)
 $activity
@@ -1234,7 +1234,7 @@ ${LetterLogoText} Support Team
 [$__AuthorName]($__AuthorUrl) ka ndryshuar detajet e profilit të tij/sj në portal [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ja çfarë ka të re në DocSpace tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" on $Date
+    <value>h1.Ja çfarë ka të re në "${__VirtualRootPath}":"${__VirtualRootPath}" on $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1611,7 +1611,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: Çelësi juaj API ka skaduar</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>DocSpace ${LetterLogoText} është fshirë</value>
+    <value>${LetterLogoText} është fshirë</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Roli juaj në një agjent AI të ${LetterLogoText} ka ndryshuar</value>
@@ -1626,7 +1626,7 @@ Mund të gjeneroni një çelës të ri API në "Mjetet e zhvilluesit":"${__Virtu
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace është fshirë.
+    <value>${LetterLogoText} është fshirë.
 
 *Portali:* ${PortalUrl}
 

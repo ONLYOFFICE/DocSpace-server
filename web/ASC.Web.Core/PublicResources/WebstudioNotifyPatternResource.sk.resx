@@ -788,7 +788,7 @@ Ak máte nejaké otázky alebo potrebujete asistenciu, prosím neváhajte nás k
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace bol vymazaný.
+    <value>${LetterLogoText} bol vymazaný.
 
 *Portál:* ${PortalUrl}
 *Vlastník:* ${UserName} ${UserEmail} 
@@ -1005,7 +1005,7 @@ $TrulyYours
 ^Ak chcete zmeniť typ notifikácie, prosím nastavte/spravujte si vaše "Nastavenia odberu":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1. Čo sa zmenilo vo vašom DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" za poslednú hodinu
+    <value>h1. Čo sa zmenilo vo vašom "${__VirtualRootPath}":"${__VirtualRootPath}" za poslednú hodinu
 
 #foreach($activity in $Activities)
 $activity
@@ -1251,7 +1251,7 @@ ${LetterLogoText} Tím podpory
 [$__AuthorName]($__AuthorUrl) zmenil údaje svojho profilu na portáli [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Tu nájdete novinky vo vašom priestore DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" za $Date
+    <value>h1.Tu nájdete novinky vo vašom priestore "${__VirtualRootPath}":"${__VirtualRootPath}" za $Date
 
 #foreach($activity in $Activities)
 $activity

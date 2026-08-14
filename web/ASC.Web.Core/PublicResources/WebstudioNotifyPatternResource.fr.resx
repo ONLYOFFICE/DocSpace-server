@@ -775,7 +775,7 @@ Si vous avez des questions ou besoin d'aide, n'hésitez pas à nous contacter à
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace a été supprimé.
+    <value>${LetterLogoText} a été supprimé.
 
 *Portail :* ${PortalUrl} 
 *Propriétaire :* ${UserName} ${UserEmail}*
@@ -831,7 +831,7 @@ L'adresse de votre portail $PortalUrl a été changé pour la nouvelle adresse "
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Désactivation du compte sur "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Vous avez demandé la désactivation de votre compte dans DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Vous avez demandé la désactivation de votre compte dans "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Si vous souhaitez toujours désactiver votre compte, veuillez suivre le lien ci-dessous pour confirmer l'opération :
 
@@ -992,7 +992,7 @@ $TrulyYours
 ^Pour changer le type de notification, veuillez gérer vos "paramètres d'abonnement":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Voici ce qui s'est passé dans votre DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" au cours de la dernière heure
+    <value>h1.Voici ce qui s'est passé dans votre "${__VirtualRootPath}":"${__VirtualRootPath}" au cours de la dernière heure
  
 #foreach($activity in $Activities)
 $activity
@@ -1238,7 +1238,7 @@ L'équipe d'assistance de ${LetterLogoText}
 [$__AuthorName]($__AuthorUrl) a changé les détails de son profil sur le portail [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Voici ce qu'il y a de nouveau dans votre DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" le $Date
+    <value>h1.Voici ce qu'il y a de nouveau dans votre "${__VirtualRootPath}":"${__VirtualRootPath}" le $Date
 
 #foreach($activity in $Activities)
 $activity

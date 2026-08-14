@@ -788,7 +788,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace видалено.
+    <value>${LetterLogoText} видалено.
 
 *Портал:* ${PortalUrl}
 *Власник:* ${UserName} ${UserEmail} 
@@ -844,7 +844,7 @@ _Примітка_. Це посилання дійсне лише протяго
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Вимкнення облікового запису на "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Ви зробили запит на вимкнення вашого облікового запису в DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ви зробили запит на вимкнення вашого облікового запису в "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Якщо ви все ще хочете вимкнути ваш обліковий запис, перейдіть за посиланням нижче, щоб підтвердити операцію.
 
@@ -1005,7 +1005,7 @@ $TrulyYours
 ^Щоб змінити тип сповіщення, налаштуйте свої "параметри підписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>&lt;value&gt;h1.Ось що нового у вашому просторі DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" за останню годину
+    <value>&lt;value&gt;h1.Ось що нового у вашому просторі "${__VirtualRootPath}":"${__VirtualRootPath}" за останню годину
 
 #foreach($activity in $Activities)
 $activity
@@ -1251,7 +1251,7 @@ $TrulyYours</value>
 [$__AuthorName]($__AuthorUrl) змінив(-ла) дані у своєму профілі на порталі [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ось що нового у вашому DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" станом на $Date
+    <value>h1.Ось що нового у вашому "${__VirtualRootPath}":"${__VirtualRootPath}" станом на $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1493,7 +1493,7 @@ $TrulyYours</value>
     <value>Видалення порталу ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace видалено</value>
+    <value>${LetterLogoText} видалено</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>Документаційний простір ${LetterLogoText} видалено</value>

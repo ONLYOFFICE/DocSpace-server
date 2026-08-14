@@ -777,7 +777,7 @@ Ako imate bilo kakvih pitanja ili vam je potrebna pomoć, slobodno nas kontakti
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace je obrisan.
+    <value>${LetterLogoText} je obrisan.
 
 *Portal:* ${PortalUrl}
 *Vlasnik:* ${UserName} ${UserEmail}
@@ -994,7 +994,7 @@ $TrulyYours
 ^Da biste promenili tip obaveštenja, upravljajte svojim "podešavanjima pretplate":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Evo šta je novo na vašem DocSpace-u "${__VirtualRootPath}":"${__VirtualRootPath}" u poslednjih sat vremena
+    <value>h1.Evo šta je novo na vašem "${__VirtualRootPath}":"${__VirtualRootPath}" u poslednjih sat vremena
  
 #foreach ($activity u $Activities)
 $activity
@@ -1240,7 +1240,7 @@ ${LetterLogoText} tim za podršku
 [$__AuthorName]($__AuthorUrl) je promenio/la detalje svog profila na [${__VirtualRootPath}](${__VirtualRootPath}) portalu.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Evo šta je novo u vašem DocSpace-u "${__VirtualRootPath}":"${__VirtualRootPath}" na $Date
+    <value>h1.Evo šta je novo u vašem "${__VirtualRootPath}":"${__VirtualRootPath}" na $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1469,7 +1469,7 @@ $TrulyYours</value>
     <value>Brisanje portala ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace je obrisan</value>
+    <value>${LetterLogoText} je obrisan</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} je obrisan</value>

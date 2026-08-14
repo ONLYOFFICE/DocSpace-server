@@ -983,7 +983,7 @@ $TrulyYours
 ^Chcete-li změnit typ oznámení, spravujte své "nastavení odběru":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Zde jsou novinky ve vašem DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" za poslední hodinu.
+    <value>h1.Zde jsou novinky ve vašem "${__VirtualRootPath}":"${__VirtualRootPath}" za poslední hodinu.
 
 #foreach($activity in $Activities)
 $activity
@@ -1229,7 +1229,7 @@ Tým podpory ${LetterLogoText}
 [$__AuthorName]($__AuthorUrl) změnil své profilové údaje na portálu [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Zde je to, co je nového ve vašem DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ke dni $Date
+    <value>h1.Zde je to, co je nového ve vašem "${__VirtualRootPath}":"${__VirtualRootPath}" ke dni $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1623,7 +1623,7 @@ Nový API klíč můžete vygenerovat v "Nástrojích pro vývojáře":"${__Virt
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace byl smazán.
+    <value>${LetterLogoText} byl smazán.
 
 *Portál:* ${PortalUrl}
 *Vlastník:* ${UserName} ${UserEmail}

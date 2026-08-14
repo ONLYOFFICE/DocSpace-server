@@ -788,7 +788,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace je bil izbrisan.
+    <value>${LetterLogoText} je bil izbrisan.
 
 *Portal:* ${PortalUrl}
 *Lastnik:* ${UserName} ${UserEmail} 
@@ -1005,7 +1005,7 @@ $TrulyYours
 ^Če želite spremeniti vrsto obvestila, uredite svoje "naročniške nastavitve":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Tukaj je nekaj novosti iz vašega DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" v the zadnji uri
+    <value>h1.Tukaj je nekaj novosti iz vašega "${__VirtualRootPath}":"${__VirtualRootPath}" v the zadnji uri
 
 #foreach($activity v $Activities)
 $activity
@@ -1251,7 +1251,7 @@ ${LetterLogoText} Ekipa za podporo
 [$__AuthorName]($__AuthorUrl) je spremenil/a podatke o svojem profilu na [${__VirtualRootPath}](${__VirtualRootPath}) portalu.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1. Tukaj so novosti v vašem DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" dne $Date
+    <value>h1. Tukaj so novosti v vašem "${__VirtualRootPath}":"${__VirtualRootPath}" dne $Date
 
 #foreach($activity v $Activities)
 $activity

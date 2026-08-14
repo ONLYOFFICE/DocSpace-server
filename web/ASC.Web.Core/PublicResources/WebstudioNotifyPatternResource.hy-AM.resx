@@ -777,7 +777,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace-ը ջնջվել է։
+    <value>${LetterLogoText}-ը ջնջվել է։
 
 *Portal:* ${PortalUrl} *Owner:* ${UserName} ${UserEmail} *Customer:* ${OwnerName} 
 
@@ -831,7 +831,7 @@ ${LetterLogoText} աջակցման թիմ
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Հաշվի անջատումը միացված է"${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Դուք դիմել եք  DocSpace-ում ձեր հաշիվը անջատելու համար"${__VirtualRootPath}":"${__VirtualRootPath}".
+Դուք դիմել եք  "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Եթե դուք դեռ ցանկանում եք անջատել ձեր հաշիվը, խնդրում ենք հետևել ստորև նշված հղմանը, որպեսզի հաստատեք գործողությունը՝
 
@@ -992,7 +992,7 @@ $TrulyYours
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Ահա թե ինչ նորություն կա ձեր DocSpace-ում "${__VirtualRootPath}":"${__VirtualRootPath}" վերջին մեկ ժամվա ընթացքում 
+    <value>h1.Ահա թե ինչ նորություն կա ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" վերջին մեկ ժամվա ընթացքում 
 
 #foreach($activity in $Activities)
 $activity
@@ -1236,7 +1236,7 @@ ${LetterLogoText} Աջակցության թիմ
 [$__AuthorName]($__AuthorUrl) փոխել է իր պրոֆիլի տվյալները [${__VirtualRootPath}](${__VirtualRootPath}) պորտալում.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ահա, թե ինչ նորություն կա ձեր DocSpace-ում "${__VirtualRootPath}":"${__VirtualRootPath}" $Date-ին
+    <value>h1.Ահա, թե ինչ նորություն կա ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" $Date-ին
 
 #foreach ($activity $Activities-ում)
 $activity
@@ -1614,7 +1614,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace. Ձեր API բանալին սպառվել է</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace-ը ջնջված է</value>
+    <value>${LetterLogoText}-ը ջնջված է</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Ձեր դերը ${LetterLogoText} ԱԲ գործակալում փոխվել է</value>

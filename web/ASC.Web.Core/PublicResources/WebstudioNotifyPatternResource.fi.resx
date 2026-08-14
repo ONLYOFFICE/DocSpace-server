@@ -787,7 +787,7 @@ Jos sinulla on kysyttävää tai tarvitset apua, ole hyvä ja ota meihin yhteytt
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace on poistettu.
+    <value>${LetterLogoText} on poistettu.
 
 *Portaali:* ${PortalUrl}
 *Omistaja:* ${UserName} ${UserEmail} 
@@ -1003,7 +1003,7 @@ $TrulyYours
 ^Muuttaaksesi ilmoitustyyppiä, ole hyvä ja mene "tilauksen hallintaan":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Uutta DocSpacessa "${__VirtualRootPath}":"${__VirtualRootPath}" viimeisen tunnin aikana
+    <value>h1.Uutta "${__VirtualRootPath}":"${__VirtualRootPath}" viimeisen tunnin aikana
 
 #foreach($activity in $Activities)
 $activity
@@ -1249,7 +1249,7 @@ ${LetterLogoText} Tukitiimi
 [$__AuthorName]($__AuthorUrl) on muuttanut profiilitietojaan [${__VirtualRootPath}](${__VirtualRootPath}) -portaalissa.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Uutta DocSpacessa "${__VirtualRootPath}":"${__VirtualRootPath}" $Date
+    <value>h1.Uutta "${__VirtualRootPath}":"${__VirtualRootPath}" $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1490,7 +1490,7 @@ $TrulyYours</value>
     <value>${__VirtualRootHost} portaalin poisto</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace on poistettu</value>
+    <value>${LetterLogoText} on poistettu</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} on poistettu</value>

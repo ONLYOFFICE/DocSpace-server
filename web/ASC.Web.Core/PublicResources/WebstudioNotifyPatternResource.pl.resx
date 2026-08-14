@@ -983,7 +983,7 @@ $TrulyYours
 ^Aby zmienić typ powiadomienia, zarządzaj "ustawieniami subskrypcji":"$RecipientSubscriptionConfigURL"^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Oto co nowego w Twoim DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"w ciągu ostatniej godziny
+    <value>h1.Oto co nowego w Twoim "${__VirtualRootPath}":"${__VirtualRootPath}"w ciągu ostatniej godziny
 
 #foreach($activity in $Activities)
 $activity
@@ -1229,7 +1229,7 @@ Użytkownik "$__AuthorName":"$__AuthorUrl" zmienił swój profil na portalu "${_
 Użytkownik [$__AuthorName]($__AuthorUrl) zmienił swoje dane profilowe w portalu [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Oto co nowego w Twoim DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"w ciągu ostatniej godziny
+    <value>h1.Oto co nowego w Twoim "${__VirtualRootPath}":"${__VirtualRootPath}"w ciągu ostatniej godziny
 
 #foreach($activity in $Activities)
 $activity
@@ -1458,7 +1458,7 @@ $TrulyYours</value>
     <value>Usuwanie portalu ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace został usunięty</value>
+    <value>${LetterLogoText} został usunięty</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} został usunięty</value>
@@ -1623,7 +1623,7 @@ Możesz wygenerować nowy klucz API w "Narzędziach deweloperskich":"${__Virtual
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace został usunięty.
+    <value>${LetterLogoText} został usunięty.
 
 *Portal:* ${PortalUrl}
 *Właściciel:* ${UserName} ${UserEmail}

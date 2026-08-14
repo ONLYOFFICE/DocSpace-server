@@ -984,7 +984,7 @@ $TrulyYours
 ^Bildiriş növünü dəyişdirmək üçün "abunəlik parametrlərinizi idarə edin":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Son bir saatda DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ilə bağlı yeniliklər budur
+    <value>h1.Son bir saatda "${__VirtualRootPath}":"${__VirtualRootPath}" ilə bağlı yeniliklər budur
 
 #foreach($activity in $Activities)
 $activity
@@ -1230,7 +1230,7 @@ ${LetterLogoText} Dəstək Komandası
 [$__AuthorName]($__AuthorUrl), [${__VirtualRootPath}](${__VirtualRootPath}) portalında profil detallarını dəyişib.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.$Date tarixində DocSpace-də "${__VirtualRootPath}":"${__VirtualRootPath}" olan yeniliklər buradadır
+    <value>h1.$Date tarixində "${__VirtualRootPath}":"${__VirtualRootPath}" olan yeniliklər buradadır
 
 #foreach($activity in $Activities)
 $activity
@@ -1608,7 +1608,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: API açarınızın müddəti bitib</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace silindi</value>
+    <value>${LetterLogoText} silindi</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>${LetterLogoText} AI agentindəki rolunuz dəyişdi</value>
@@ -1623,7 +1623,7 @@ Bu e-poçt sizi "*$Message*" API açarınızın müddətinin bitdiyini və deakt
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace silindi.
+    <value>${LetterLogoText} silindi.
 
 *Portal:* ${PortalUrl}
 *Sahib:* ${UserName} ${UserEmail}

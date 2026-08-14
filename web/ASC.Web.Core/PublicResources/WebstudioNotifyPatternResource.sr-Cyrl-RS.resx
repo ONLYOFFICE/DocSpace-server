@@ -776,7 +776,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace је обрисан.
+    <value>${LetterLogoText} је обрисан.
 
 *Портал:* ${PortalUrl}
 *Власник:* ${UserName} ${UserEmail}
@@ -992,7 +992,7 @@ $TrulyYours
 ^Да бисте променили тип обавештења, управљајте својим "подешавањима претплате":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>DocSpace-у "${__VirtualRootPath}":"${__VirtualRootPath}" у последњих сат времена
+    <value>"${__VirtualRootPath}":"${__VirtualRootPath}" у последњих сат времена
 
 #foreach ($activity у $Activities)
 $activity
@@ -1238,7 +1238,7 @@ ${LetterLogoText} тим за подршку
 [$__AuthorName]($__AuthorUrl) је променио/ла детаље свог профила на [${__VirtualRootPath}](${__VirtualRootPath}) порталу.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ево шта је ново у вашем DocSpace-у "${__VirtualRootPath}":"${__VirtualRootPath}" на $Date
+    <value>h1.Ево шта је ново у вашем "${__VirtualRootPath}":"${__VirtualRootPath}" на $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1466,7 +1466,7 @@ $TrulyYours</value>
     <value>Брисање портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace је обрисан</value>
+    <value>${LetterLogoText} је обрисан</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} је обрисан</value>

@@ -788,7 +788,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace удален.
+    <value>${LetterLogoText} удален.
 
 *Портал:* ${PortalUrl}
 *Владелец:* ${UserName} ${UserEmail}
@@ -844,7 +844,7 @@ _Обратите внимание_: эта ссылка действитель�
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Отключение учетной записи "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Вы запросили отключение вашей учетной записи в DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Вы запросили отключение вашей учетной записи в "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Если Вы по-прежнему хотите отключить вашу учетную запись, пожалуйста, перейдите по следующей ссылке для подтверждения операции:
 
@@ -1005,7 +1005,7 @@ $TrulyYours
 ^Чтобы изменить тип оповещения, пожалуйста, настройте "параметры подписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Что нового в вашем DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" за последний час
+    <value>h1.Что нового в вашем "${__VirtualRootPath}":"${__VirtualRootPath}" за последний час
 
 #foreach($activity in $Activities)
 $activity
@@ -1251,7 +1251,7 @@ $TrulyYours</value>
 Пользователь [$__AuthorName]($__AuthorUrl) изменил свой профиль на портале [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Что нового в вашем DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" $Date
+    <value>h1.Что нового в вашем "${__VirtualRootPath}":"${__VirtualRootPath}" $Date
 
 #foreach($activity in $Activities)
 $activity

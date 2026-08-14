@@ -776,7 +776,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>تم حذف ${LetterLogoText} DocSpace.
+    <value>تم حذف ${LetterLogoText}.
 
 *البوابة:* ${PortalUrl}
 *المالك:* ${UserName} ${UserEmail}
@@ -993,7 +993,7 @@ $TrulyYours
 ^لتغيير نوع الإشعار، يرجى إدارة "إعدادات الاشتراك":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.إليك ما هو جديد في DocSpaceالخاص بك "${__VirtualRootPath}":"${__VirtualRootPath}" في الساعة الأخيرة
+    <value>h1.إليك ما هو جديد في "${__VirtualRootPath}":"${__VirtualRootPath}" في الساعة الأخيرة
 
 #foreach($activity in $Activities)
 $activity
@@ -1239,7 +1239,7 @@ $TrulyYours</value>
 [$__AuthorName]($__AuthorUrl) قام بتغيير تفاصيل ملفه الشخصي في بوابة [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1. إليك كل ماهو جديد في DocSpaceالخاص بك"${__VirtualRootPath}":"${__VirtualRootPath}" في $Date
+    <value>h1. إليك كل ماهو جديد في "${__VirtualRootPath}":"${__VirtualRootPath}" في $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1468,7 +1468,7 @@ $TrulyYours</value>
     <value>حذف مدخل ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>تم حذف ${LetterLogoText} DocSpace</value>
+    <value>تم حذف ${LetterLogoText}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>تم حذف ${LetterLogoText}</value>

@@ -872,7 +872,7 @@ If you have any questions or need assistance please feel free to contact us at "
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace has been deleted.
+    <value>${LetterLogoText} has been deleted.
 
 *Portal:* ${PortalUrl}
 *Owner:* ${UserName} ${UserEmail} 
@@ -939,7 +939,7 @@ Your $PortalUrl portal address was changed to the new "${__VirtualRootPath}":"${
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Disabling account on "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-You have requested to disable your account in DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+You have requested to disable your account in "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 If you still want to disable your account, please follow the link below to confirm the operation:
 
@@ -1098,7 +1098,7 @@ $TrulyYours
 ^To change the notification type, please manage your "subscription settings":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Here is what’s new in your DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" in the last hour
+    <value>h1.Here is what’s new in your "${__VirtualRootPath}":"${__VirtualRootPath}" in the last hour
 
 #foreach($activity in $Activities)
 $activity
@@ -1729,7 +1729,7 @@ ${LetterLogoText} Support Team
 [$__AuthorName]($__AuthorUrl) has changed his/her profile details at the [${__VirtualRootPath}](${__VirtualRootPath}) portal.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Here is what’s new in your DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" on $Date
+    <value>h1.Here is what’s new in your "${__VirtualRootPath}":"${__VirtualRootPath}" on $Date
 
 #foreach($activity in $Activities)
 $activity

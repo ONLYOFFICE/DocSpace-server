@@ -788,7 +788,7 @@ Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với c
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace đã bị xóa
+    <value>${LetterLogoText} đã bị xóa
 
 *Cổng thông tin:* ${PortalUrl}
 *Chủ sở hữu:* ${UserName} ${UserEmail}
@@ -844,7 +844,7 @@ Thân gửi $UserDisplayName,
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Vô hiệu hóa tài khoản trên "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Bạn đã yêu cầu vô hiệu hóa tài khoản của mình trong DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Bạn đã yêu cầu vô hiệu hóa tài khoản của mình trong "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Nếu bạn vẫn muốn vô hiệu hóa tài khoản của mình, vui lòng truy cập liên kết bên dưới để xác nhận thao tác:
 
@@ -1006,7 +1006,7 @@ $TrulyYours
 ^Để thay đổi loại thông báo này, vui lòng điều chỉnh trong "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Dưới đây là những tính năng mới trong DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn trong giờ qua
+    <value>h1.Dưới đây là những tính năng mới trong "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn trong giờ qua
 
 #foreach($activity in $Activities)
 $activity
@@ -1252,7 +1252,7 @@ Nhóm hỗ trợ ${LetterLogoText}
 [$__AuthorName]($__AuthorUrl) đã thay đổi thông tin hồ sơ của mình tại cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Đây là những điều mới trong DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn vào $Date
+    <value>h1.Đây là những điều mới trong "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn vào $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1493,7 +1493,7 @@ $TrulyYours</value>
     <value>Xoá cổng ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace đã bị xóa</value>
+    <value>${LetterLogoText} đã bị xóa</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} đã bị xóa</value>

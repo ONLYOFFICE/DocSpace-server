@@ -788,7 +788,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>Το ${LetterLogoText} DocSpace έχει διαγραφεί.
+    <value>Το ${LetterLogoText} έχει διαγραφεί.
 
 *Portal:* ${PortalUrl}
 *Owner:* ${UserName} ${UserEmail}
@@ -1005,7 +1005,7 @@ $TrulyYours
 ^Για να αλλάξετε τον τύπο ειδοποίησης, διαχειριστείτε τις "ρυθμίσεις συνδρομής":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Να τι νέο υπάρχει στο DocSpace σας "${__VirtualRootPath}":"${__VirtualRootPath}" την τελευταία ώρα
+    <value>h1.Να τι νέο υπάρχει στο "${__VirtualRootPath}":"${__VirtualRootPath}" την τελευταία ώρα
 
 #foreach($activity in $Activities)
 $activity
@@ -1251,7 +1251,7 @@ $TrulyYours</value>
 Ο χρήστης [$__AuthorName]($__AuthorUrl) άλλαξε τα στοιχεία του προφίλ του στην πύλη [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Να τι νέο υπάρχει στο DocSpace σας "${__VirtualRootPath}":"${__VirtualRootPath}" την τελευταία ώρα
+    <value>h1.Να τι νέο υπάρχει στο "${__VirtualRootPath}":"${__VirtualRootPath}" την τελευταία ώρα
 
 #foreach($activity in $Activities)
 $activity
@@ -1492,7 +1492,7 @@ $TrulyYours</value>
     <value>Διαγραφή της πύλης ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>Το ${LetterLogoText} DocSpace έχει διαγραφεί</value>
+    <value>Το ${LetterLogoText} έχει διαγραφεί</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>Το ${LetterLogoText} έχει διαγραφεί</value>

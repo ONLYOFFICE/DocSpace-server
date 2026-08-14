@@ -788,7 +788,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace가 삭제되었습니다.
+    <value>${LetterLogoText}가 삭제되었습니다.
 
 *포털:* ${PortalUrl}
 *소유자:* ${UserName} ${UserEmail} 
@@ -1005,7 +1005,7 @@ $TrulyYours
 ^알림 유형을 관리하려면 "구독 설정":"$RecipientSubscriptionConfigURL"을 변경하세요.^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.지난 1시간 동안 DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 에 새로 추가된 내용입니다 $Date
+    <value>h1.지난 1시간 동안 "${__VirtualRootPath}":"${__VirtualRootPath}" 에 새로 추가된 내용입니다 $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1251,7 +1251,7 @@ ${LetterLogoText} 지원팀 드림
 [$__AuthorName]($__AuthorUrl)님이 [${__VirtualRootPath}](${__VirtualRootPath}) 포털의 자신의 프로필 정보를 변경했습니다.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.$Date, 고객님의 DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 의 새 소식입니다
+    <value>h1.$Date, 고객님의 "${__VirtualRootPath}":"${__VirtualRootPath}" 의 새 소식입니다
 
 #foreach($Activities 내 $activity)
 $activity
@@ -1487,7 +1487,7 @@ $TrulyYours</value>
     <value>${__VirtualRootHost} 포털 삭제</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace가 삭제되었습니다</value>
+    <value>${LetterLogoText}가 삭제되었습니다</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText}가 삭제되었습니다</value>

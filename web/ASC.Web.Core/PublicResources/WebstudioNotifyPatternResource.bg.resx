@@ -818,7 +818,7 @@ _Забележка_: този линк е валиден само 7 дни. М�
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Деактивиране профил на "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Заявихте деактивиране на профила ви в DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Заявихте деактивиране на профила ви в "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Ако все пак искате да деактивирате профила си, молим да следвате връзката по-долу, за да потвърдите операцията:
 
@@ -979,7 +979,7 @@ $TrulyYours
 ^За да промените типа на известието, моля, управлявайте "настройките за абонамента":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Ето какво е новото във вашия DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" през последния час
+    <value>h1.Ето какво е новото във вашия "${__VirtualRootPath}":"${__VirtualRootPath}" през последния час
 
 #foreach($activity в $Activities)
 $activity
@@ -1225,7 +1225,7 @@ $TrulyYours</value>
 [$__AuthorName]($__AuthorUrl) е променил данните за своя профил в портала [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ето какво е новото във вашия DocSpace ${__VirtualRootPath}":"${__VirtualRootPath}" за $Date
+    <value>h1.Ето какво е новото във вашия ${__VirtualRootPath}":"${__VirtualRootPath}" за $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1454,7 +1454,7 @@ $TrulyYours</value>
     <value>Изтриване на портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace беше изтрит</value>
+    <value>${LetterLogoText} беше изтрит</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} беше изтрит</value>
@@ -1613,7 +1613,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace беше изтрит.
+    <value>${LetterLogoText} беше изтрит.
 
 *Портал:* ${PortalUrl}
 *Собственик:* ${UserName} ${UserEmail}

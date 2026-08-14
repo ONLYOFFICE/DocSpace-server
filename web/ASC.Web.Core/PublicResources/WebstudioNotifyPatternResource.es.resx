@@ -775,7 +775,7 @@ Si usted tiene alguna pregunta o necesita ayuda no dude en contactar con nosotro
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace se ha eliminado.
+    <value>${LetterLogoText} se ha eliminado.
 
 *Portal:* ${PortalUrl}
 *Propietario:* ${UserName} ${UserEmail} 
@@ -831,7 +831,7 @@ La dirección de su portal $PortalUrl ha cambiado a la nueva dirección "${__Vir
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Desactivación de la cuenta en "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Ha solicitado desactivar su cuenta en DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ha solicitado desactivar su cuenta en "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Si todavía desea desactivar su cuenta, siga el siguiente enlace para confirmar la operación:
 
@@ -992,7 +992,7 @@ $TrulyYours
 ^Para cambiar el tipo de notificación, por favor administre su "configuración de la suscripción":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Aquí están las novedades en su DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" en la última hora
+    <value>h1.Aquí están las novedades en su "${__VirtualRootPath}":"${__VirtualRootPath}" en la última hora
 
 #foreach($activity en $Activities)
 $activity
@@ -1238,7 +1238,7 @@ ${LetterLogoText} Equipo de soporte
 [$__AuthorName]($__AuthorUrl) ha cambiado los detalles de su perfil en el portal [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Estas son las novedades de su DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" el $Date
+    <value>h1.Estas son las novedades de su "${__VirtualRootPath}":"${__VirtualRootPath}" el $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1614,7 +1614,7 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; cargó un nuevo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; en la base de conocimientos del agente de IA: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace se ha eliminado</value>
+    <value>${LetterLogoText} se ha eliminado</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
     <value>${LetterLogoText} DocSpace: Tu clave API ha expirado</value>

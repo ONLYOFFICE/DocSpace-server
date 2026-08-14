@@ -776,7 +776,7 @@ Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne co
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} spațiul DocSpace a fost șters.
+    <value>${LetterLogoText} spațiul ${LetterLogoText} a fost șters.
  
 *Portal:* ${PortalUrl}
 *Proprietar:* ${UserName} ${UserEmail} 
@@ -832,7 +832,7 @@ Adresa de portal $PortalUrl a fost schimbată cu una nouă "${__VirtualRootPath}
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Dezactivarea contului "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Ați solicitat dezactivarea contului dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ați solicitat dezactivarea contului dvs "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Dacă doriți totuși să dezactivați contul dvs, urmăriți linkul de mai jos pentru a confirma acțiunea:
 
@@ -993,7 +993,7 @@ $TrulyYours
 ^Pentru a modifica tipul de notificare, gestionați setările pentru abonament:":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Ce este nou în spațiul dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" de ultima oră
+    <value>h1.Ce este nou în spațiul dvs "${__VirtualRootPath}":"${__VirtualRootPath}" de ultima oră
  
 #foreach($activity in $Activities)
 $activity
@@ -1239,7 +1239,7 @@ ${LetterLogoText} Echipă de Asistență
 [$__AuthorName]($__AuthorUrl) și-a schimbat detaliile profilului său pe portalul [${__VirtualRootPath}](${__VirtualRootPath}) portal.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ce este nou în spațiul dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" în data de $Date
+    <value>h1.Ce este nou în spațiul dvs "${__VirtualRootPath}":"${__VirtualRootPath}" în data de $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1618,7 +1618,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: Cheia dvs. API a expirat</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace a fost șters</value>
+    <value>${LetterLogoText} a fost șters</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Rolul tău într-un agent IA ${LetterLogoText} s-a schimbat</value>

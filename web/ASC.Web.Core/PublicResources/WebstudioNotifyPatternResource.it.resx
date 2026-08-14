@@ -775,7 +775,7 @@ Se hai domande o hai bisogno di assistenza, non esitate a contattarci all'indiri
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace è stato eliminato.
+    <value>${LetterLogoText} è stato eliminato.
 
 *Portale:* ${PortalUrl}
 *Proprietario:* ${UserName} ${UserEmail}
@@ -831,7 +831,7 @@ Il tuo indirizzo del portale $PortalUrl è stato cambiato con il nuovo indirizzo
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Disattivazione dell'account su "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Hai richiesto di disabilitare il tuo account in DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+Hai richiesto di disabilitare il tuo account in "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Se desideri comunque disattivare il tuo account, segui il link sottostante per confermare l'operazione:
 
@@ -992,7 +992,7 @@ $TrulyYours
 ^Per modificare il tipo di notifica, gestisci le tue "impostazioni di sottoscrizione":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Ecco le novità nel tuo DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" nell'ultima ora
+    <value>h1.Ecco le novità nel tuo "${__VirtualRootPath}":"${__VirtualRootPath}" nell'ultima ora
 
 #foreach($activity in $Activities)
 $activity
@@ -1238,7 +1238,7 @@ Team di supporto ${LetterLogoText}
 [$__AuthorName]($__AuthorUrl) ha modificato i suoi dettagli sul portale [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ecco cosa c'è di nuovo nel tuo DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" il $Date
+    <value>h1.Ecco cosa c'è di nuovo nel tuo "${__VirtualRootPath}":"${__VirtualRootPath}" il $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1467,7 +1467,7 @@ $TrulyYours</value>
     <value>Eliminazione del ${__VirtualRootHost} portale</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace è stato eliminato</value>
+    <value>${LetterLogoText} è stato eliminato</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} è stato eliminato</value>

@@ -835,7 +835,7 @@ $PortalUrl ポータルアドレスは、新しい"${__VirtualRootPath}":"${__Vi
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"でのアカウントの無効化
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" のアカウントを無効にするようリクエストを受け付けました。
+"${__VirtualRootPath}":"${__VirtualRootPath}" のアカウントを無効にするようリクエストを受け付けました。
 
 それでもアカウントを無効にしたい場合は、以下のリンクから操作をご確認ください:
 
@@ -1218,7 +1218,7 @@ $TrulyYours</value>
 [$__AuthorName]($__AuthorUrl)が[${__VirtualRootPath}](${__VirtualRootPath})ポータルのプロフィール詳細を変更しました。</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.$Date："${__VirtualRootPath}":"${__VirtualRootPath}" DocSpaceの新着情報です。
+    <value>h1.$Date："${__VirtualRootPath}":"${__VirtualRootPath}" 新着情報です。
 
 #foreach($activity in $Activities)
 $activity
@@ -1596,7 +1596,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace：APIキーの有効期限が切れました</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceが削除されました</value>
+    <value>${LetterLogoText}が削除されました</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>${LetterLogoText} AIエージェントにおけるあなたの役割が変更されました</value>
@@ -1623,7 +1623,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}の自動バックアップに失敗しました</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceが削除されました。
+    <value>${LetterLogoText}が削除されました。
 
 *ポータル：* ${PortalUrl}
 *オーナー：* ${UserName} ${UserEmail}

@@ -775,7 +775,7 @@ Falls Sie einige Fragen haben oder Hilfe brauchen, kontaktieren Sie uns bitte un
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace wurde gelöscht.
+    <value>${LetterLogoText} wurde gelöscht.
 
 *Portal:* ${PortalUrl}
 *Besitzer:* ${UserName} ${UserEmail} 
@@ -831,7 +831,7 @@ Ihre Portal-Adresse $PortalUrl wurde auf die neue Adresse "${__VirtualRootPath}"
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Deaktivierung des Kontos auf "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Sie haben beantragt, Ihr DocSpace-Konto "${__VirtualRootPath}":"${__VirtualRootPath}" zu deaktivieren.
+Sie haben beantragt, Ihr Konto "${__VirtualRootPath}":"${__VirtualRootPath}" zu deaktivieren.
 
 Wenn Sie Ihr Konto dennoch deaktivieren möchten, folgen Sie bitte dem unten stehenden Link, um den Vorgang zu bestätigen:
 
@@ -992,7 +992,7 @@ $TrulyYours
 ^Um den Benachrichtigungstyp zu ändern, verwalten Sie Ihre "Abonnement-Einstellungen":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Hier ist, was in der letzten Stunde in Ihrem DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" neu hinzugekommen ist
+    <value>h1.Hier ist, was in der letzten Stunde in Ihrem "${__VirtualRootPath}":"${__VirtualRootPath}" neu hinzugekommen ist
  
 #foreach($activity in $Activities)
 $activity
@@ -1238,7 +1238,7 @@ ${LetterLogoText} Support Team
 [$__AuthorName]($__AuthorUrl) hat seine/ihre Profil-Details im Portal [${__VirtualRootPath}](${__VirtualRootPath}) geändert.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Hier ist, was neu ist in Ihrem DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" am $Date
+    <value>h1.Hier ist, was neu ist in Ihrem "${__VirtualRootPath}":"${__VirtualRootPath}" am $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1617,7 +1617,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace: Ihr API-Schlüssel ist abgelaufen</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace wurde gelöscht</value>
+    <value>${LetterLogoText} wurde gelöscht</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Ihre Rolle in einem ${LetterLogoText}-KI-Agenten hat sich geändert</value>

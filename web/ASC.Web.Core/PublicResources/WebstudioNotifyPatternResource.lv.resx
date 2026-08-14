@@ -788,7 +788,7 @@ Ja jums radušies kādi jautājumi vai ir nepieciešama palīdzība, rakstiet mu
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace ir dzēsts.
+    <value>${LetterLogoText} ir dzēsts.
 
 *Portāls:* ${PortalUrl}
 *Īpašnieks:* ${UserName} ${UserEmail} 
@@ -844,7 +844,7 @@ Jūsu $PortalUrl portāla adrese tika nomainīta uz jauno "${__VirtualRootPath}"
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>Konta atspējošana "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Jūs pieprasījāt atspējot savu kontu DocSpace ${__VirtualRootPath}:${__VirtualRootPath}.
+Jūs pieprasījāt atspējot savu kontu ${__VirtualRootPath}:${__VirtualRootPath}.
 
 Ja joprojām vēlies atspējot kontu, izmanto tālāk norādīto saiti, lai apstiprinātu darbību:
 
@@ -1005,7 +1005,7 @@ $TrulyYours
 ^Lai mainītu paziņojuma veidu, lūdzu, labojiet savus "abonēšanas uzstādījumus":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Kas jauns jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" pēdējās stundas laikā
+    <value>h1.Kas jauns jūsu "${__VirtualRootPath}":"${__VirtualRootPath}" pēdējās stundas laikā
 
 #foreach($activity šeit: $Activities)
 $activity
@@ -1251,7 +1251,7 @@ ${LetterLogoText} atbalsta komanda
 [$__AuthorName]($__AuthorUrl) ir mainījis savu profila informāciju [${__VirtualRootPath}](${__VirtualRootPath}) portālā.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Lūk, kas jauns jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" $Date
+    <value>h1.Lūk, kas jauns jūsu "${__VirtualRootPath}":"${__VirtualRootPath}" $Date
 
 #foreach($activity šeit: $Activities)
 $aktivitāte
@@ -1492,7 +1492,7 @@ $TrulyYours</value>
     <value>${__VirtualRootHost} portāla dzēšana</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace ir dzēsts</value>
+    <value>${LetterLogoText} ir dzēsts</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} ir dzēsts</value>
