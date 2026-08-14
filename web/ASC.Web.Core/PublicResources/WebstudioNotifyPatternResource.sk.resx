@@ -694,7 +694,7 @@ Ak ste tento e-mail dostali omylom, ignorujte ho alebo sa obráťte na administr
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Heslo bolo úspešne zmenené
 
-Vaše heslo pre účet *$UserName*, *$UserEmail* bolo úspešne zmenené dňa *$Date* v DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Vaše heslo pre účet *$UserName*, *$UserEmail* bolo úspešne zmenené dňa *$Date* v ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Zariadenie: *$Device*
@@ -703,7 +703,7 @@ Poloha: *$Location*
 #end
 Prehliadač: *$Browser*
 
-Ak ste túto akciu vykonali vy, nie sú potrebné žiadne ďalšie kroky. Ak táto zmena vyzerá podozrivo alebo ste ju neschválili, okamžite si obnovte heslo a zakážte prístup k DocSpace pre toto zariadenie.
+Ak ste túto akciu vykonali vy, nie sú potrebné žiadne ďalšie kroky. Ak táto zmena vyzerá podozrivo alebo ste ju neschválili, okamžite si obnovte heslo a zakážte prístup k ${LetterLogoText} pre toto zariadenie.
 
 $OrangeButton
 

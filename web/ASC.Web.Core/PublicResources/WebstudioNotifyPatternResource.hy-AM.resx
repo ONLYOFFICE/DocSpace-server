@@ -397,7 +397,7 @@ $OrangeButton
 
 Հարգելի $OwnerName,
 
-"${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի սեփականատիրոջը փոխելու հարցում է եղել $UserName-ի:
+"${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի սեփականատիրոջը փոխելու հարցում է եղել ${UserName}-ի:
 
 Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
 
@@ -682,7 +682,7 @@ $OrangeButton
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Գաղտնաբառը հաջողությամբ փոխվել է
 
-Ձեր հաշվի գաղտնաբառը *$UserName*, *$UserEmail* հաջողությամբ փոփոխվել է *$Date* in DocSpace-ում: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ձեր հաշվի գաղտնաբառը *$UserName*, *$UserEmail* հաջողությամբ փոփոխվել է *$Date* in ${LetterLogoText}-ում: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Device: *$Device*
@@ -691,7 +691,7 @@ Device: *$Device*
 #end
 Բրաուզեր: *$Browser*
 
-Եթե այս գործողությունը կատարվել է ձեր կողմից՝ լրացուցիչ քայլեր անհրաժեշտ չեն։ Եթե այս փոփոխությունը կասկածելի է թվում կամ իրականացված չէ ձեր թույլտվությամբ, խնդրում ենք անմիջապես վերականգնել ձեր գաղտնաբառը և անջատել DocSpace-ի մուտքը այս սարքից։
+Եթե այս գործողությունը կատարվել է ձեր կողմից՝ լրացուցիչ քայլեր անհրաժեշտ չեն։ Եթե այս փոփոխությունը կասկածելի է թվում կամ իրականացված չէ ձեր թույլտվությամբ, խնդրում ենք անմիջապես վերականգնել ձեր գաղտնաբառը և անջատել ${LetterLogoText}-ի մուտքը այս սարքից։
 
 $OrangeButton
 
@@ -1090,7 +1090,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Ողջույն!
 
-$__AuthorName-ը հրավիրել է ձեզ միանալ "$Message":"$InviteLink" գործակալին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում:
+${__AuthorName}-ը հրավիրել է ձեզ միանալ "$Message":"$InviteLink" գործակալին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում:
 
 $OrangeButton
 
@@ -1177,7 +1177,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
-$__AuthorName-ը ձեզ հրավիրել է միանալու սենյակ "$Message":"$InviteLink"՝ "${__VirtualRootPath}":"${__VirtualRootPath}".
+${__AuthorName}-ը ձեզ հրավիրել է միանալու սենյակ "$Message":"$InviteLink"՝ "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 
@@ -1219,9 +1219,9 @@ ${LetterLogoText} Աջակցության թիմ
 [$__AuthorName]($__AuthorUrl) փոխել է իր պրոֆիլի տվյալները [${__VirtualRootPath}](${__VirtualRootPath}) պորտալում.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ահա, թե ինչ նորություն կա ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" $Date-ին
+    <value>h1.Ահա, թե ինչ նորություն կա ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" ${Date}-ին
 
-#foreach ($activity $Activities-ում)
+#foreach ($activity ${Activities}-ում)
 $activity
 
 #end</value>
@@ -1339,7 +1339,7 @@ $TrulyYours</value>
     <value>h1. Բարի գալուստ &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
 
-Ողջույն, $ՕգտվողիԱնուն:!
+Ողջույն, $UserName:!
 
 Դուք հենց նոր ստեղծեցիք ${LetterLogoText}-ը՝ փաստաթղթերի կենտրոն, որտեղ կարող եք խթանել համագործակցությունը ձեր թիմի, հաճախորդների, գործընկերների և այլնի հետ: Հասցեն է՝"${__VirtualRootPath}":"${__VirtualRootPath}".
 Ձեր ընթացիկ սակագնային պլանը ՍՏԱՐՏԱՓՆ է: Այն բացարձակապես անվճար է և ներառում է՝
@@ -1540,7 +1540,7 @@ $TrulyYours</value>
     <value>${__VirtualRootHost} պորտալի պրոֆիլի փոփոխության ծանուցում</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Ինչ նորություններ կան ձեր ${__VirtualRootHost} պորտալում $Date-ի համար</value>
+    <value>Ինչ նորություններ կան ձեր ${__VirtualRootHost} պորտալում ${Date}-ի համար</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
     <value>Սահմանեք գաղտնաբառ ${LetterLogoText}-ի համար</value>

@@ -778,7 +778,7 @@ If you received this email by mistake, please ignore it or contact your "$Portal
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Password changed successfully
 
-Your password for the account *$UserName*, *$UserEmail* was successfully changed on *$Date* in DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Your password for the account *$UserName*, *$UserEmail* was successfully changed on *$Date* in ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Device: *$Device*
@@ -787,7 +787,7 @@ Location: *$Location*
 #end
 Browser: *$Browser*
 
-If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to DocSpace for this device.
+If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to ${LetterLogoText} for this device.
 
 $OrangeButton
 

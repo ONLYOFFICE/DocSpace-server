@@ -694,7 +694,7 @@ Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua h
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Mật khẩu đã được thay đổi thành công
 
-Mật khẩu của bạn cho tài khoản *$UserName*, *$UserEmail* đã được thay đổi thành công vào ngày *$Date* trong DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Mật khẩu của bạn cho tài khoản *$UserName*, *$UserEmail* đã được thay đổi thành công vào ngày *$Date* trong ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Thiết bị: *$Device*
@@ -703,7 +703,7 @@ Vị trí: *$Location*
 #end
 Trình duyệt: *$Browser*
 
-Nếu hành động này do bạn thực hiện — không cần thực hiện thêm bước nào nữa. Nếu thay đổi này có vẻ đáng ngờ hoặc không được bạn ủy quyền, vui lòng đặt lại mật khẩu ngay lập tức và vô hiệu hóa quyền truy cập vào DocSpace cho thiết bị này.
+Nếu hành động này do bạn thực hiện — không cần thực hiện thêm bước nào nữa. Nếu thay đổi này có vẻ đáng ngờ hoặc không được bạn ủy quyền, vui lòng đặt lại mật khẩu ngay lập tức và vô hiệu hóa quyền truy cập vào ${LetterLogoText} cho thiết bị này.
 
 $OrangeButton
 

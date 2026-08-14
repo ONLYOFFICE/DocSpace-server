@@ -1242,7 +1242,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to h1.Password changed successfully
         ///
-        ///Your password for the account *$UserName*, *$UserEmail* was successfully changed on *$Date* in DocSpace: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///Your password for the account *$UserName*, *$UserEmail* was successfully changed on *$Date* in ${LetterLogoText}: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
         ///IP: *$IP*
         ///Device: *$Device*
@@ -1251,7 +1251,7 @@ namespace ASC.Web.Core.PublicResources {
         ///#end
         ///Browser: *$Browser*
         ///
-        ///If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to DocSpace for this device.
+        ///If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to ${LetterLogoText} for this device.
         ///
         ///$ [rest of string was truncated]&quot;;.
         /// </summary>

@@ -687,7 +687,7 @@ Bu e-postayı yanlışlıkla aldıysanız, lütfen dikkate almayın veya daha fa
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Şifre başarıyla değiştirildi
 
-*$UserName*, *$UserEmail* hesabınızın şifresi, DocSpace'de *$Date* tarihinde başarıyla değiştirildi: "${__VirtualRootPath}":"${__VirtualRootPath}".
+*$UserName*, *$UserEmail* hesabınızın şifresi, ${LetterLogoText}'de *$Date* tarihinde başarıyla değiştirildi: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Cihaz: *$Device*
@@ -696,7 +696,7 @@ Konum: *$Location*
 #end
 Tarayıcı: *$Browser*
 
-Bu işlem sizin tarafınızdan yapıldıysa, başka bir adım gerekmez. Bu değişiklik şüpheli görünüyorsa veya sizin tarafınızdan yetkilendirilmemişse, lütfen şifrenizi hemen sıfırlayın ve bu cihaz için DocSpace erişimini devre dışı bırakın.
+Bu işlem sizin tarafınızdan yapıldıysa, başka bir adım gerekmez. Bu değişiklik şüpheli görünüyorsa veya sizin tarafınızdan yetkilendirilmemişse, lütfen şifrenizi hemen sıfırlayın ve bu cihaz için ${LetterLogoText} erişimini devre dışı bırakın.
 
 $OrangeButton
 

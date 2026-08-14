@@ -682,7 +682,7 @@ Als u deze e-mail per ongeluk hebt ontvangen, negeer deze dan of neem contact op
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Password succesvol gewijzigd
 
-Uw wachtwoord voor het account *$UserName*, *$UserEmail* is succesvol gewijzigd op *$Date* in DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Uw wachtwoord voor het account *$UserName*, *$UserEmail* is succesvol gewijzigd op *$Date* in ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Apparaat: *$Device*
@@ -691,7 +691,7 @@ Locatie: *$Location*
 #end
 Browser: *$Browser*
 
-Als u deze actie heeft uitgevoerd, zijn er geen verdere stappen nodig. Als deze wijziging verdacht lijkt of niet door u is geautoriseerd, reset dan onmiddellijk uw wachtwoord en schakel de toegang tot DocSpace voor dit apparaat uit.
+Als u deze actie heeft uitgevoerd, zijn er geen verdere stappen nodig. Als deze wijziging verdacht lijkt of niet door u is geautoriseerd, reset dan onmiddellijk uw wachtwoord en schakel de toegang tot ${LetterLogoText} voor dit apparaat uit.
 
 $OrangeButton
 

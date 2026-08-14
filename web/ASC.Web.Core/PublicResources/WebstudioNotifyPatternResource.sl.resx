@@ -694,7 +694,7 @@ $OrangeButton
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Geslo uspešno spremenjeno
 
-Vaše geslo za račun *$UserName*, *$UserEmail* je bilo uspešno spremenjeno dne *$Date* v DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Vaše geslo za račun *$UserName*, *$UserEmail* je bilo uspešno spremenjeno dne *$Date* v ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Naprava: *$Device*
@@ -703,7 +703,7 @@ Lokacija: *$Location*
 #end
 Brskalnik: *$Browser*
 
-Če ste to dejanje izvedli sami, nadaljnji koraki niso potrebni. Če se vam zdi ta sprememba sumljiva ali je niste odobrili, takoj ponastavite geslo in onemogočite dostop do DocSpace za to napravo.
+Če ste to dejanje izvedli sami, nadaljnji koraki niso potrebni. Če se vam zdi ta sprememba sumljiva ali je niste odobrili, takoj ponastavite geslo in onemogočite dostop do ${LetterLogoText} za to napravo.
 
 $OrangeButton
 

@@ -682,7 +682,7 @@ $OrangeButton
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Лозинка је успешно промењена
 
-Ваша лозинка за налог *$UserName*, *$UserEmail* је успешно промењена дана *$Date* у DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ваша лозинка за налог *$UserName*, *$UserEmail* је успешно промењена дана *$Date* у ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Уређај: *$Device*
@@ -691,7 +691,7 @@ IP: *$IP*
 #end
 Прегледач: *$Browser*
 
-Ако сте ви извршили ову radnju — нису потребни даљи кораци. Ако ова промена изгледа сумњиво или није била овлашћена од стране вас, одмах ресетујте лозинку и онемогућите приступ DocSpace-у за овај уређај.
+Ако сте ви извршили ову radnju — нису потребни даљи кораци. Ако ова промена изгледа сумњиво или није била овлашћена од стране вас, одмах ресетујте лозинку и онемогућите приступ ${LetterLogoText}-у за овај уређај.
 
 $OrangeButton
 

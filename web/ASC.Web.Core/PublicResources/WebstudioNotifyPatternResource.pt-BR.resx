@@ -687,7 +687,7 @@ Se você recebeu este e-mail por engano, por favor ignore-o ou contate seu admin
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Senha alterada com sucesso
 
-Sua senha para a conta *$UserName*, *$UserEmail* foi alterada com sucesso em *$Date* no DocSpace: "${__VirtualRootPath}": "${__VirtualRootPath}".
+Sua senha para a conta *$UserName*, *$UserEmail* foi alterada com sucesso em *$Date* no ${LetterLogoText}: "${__VirtualRootPath}": "${__VirtualRootPath}".
 
 IP: *$IP*
 Dispositivo: *$Device*
@@ -696,7 +696,7 @@ Local: *$Location*
 #end
 Navegador: *$Browser*
 
-Se esta ação foi realizada por você, nenhuma outra etapa é necessária. Se esta alteração parecer suspeita ou não tiver sido autorizada por você, redefina sua senha imediatamente e desative o acesso ao DocSpace para este dispositivo.
+Se esta ação foi realizada por você, nenhuma outra etapa é necessária. Se esta alteração parecer suspeita ou não tiver sido autorizada por você, redefina sua senha imediatamente e desative o acesso ao ${LetterLogoText} para este dispositivo.
 
 $OrangeButton
 

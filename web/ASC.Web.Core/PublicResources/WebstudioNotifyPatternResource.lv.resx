@@ -694,7 +694,7 @@ Ja šo e-pasta ziņojumu saņēmāt kļūdas dēļ, ignorējiet to vai sazinieti
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1. Parole veiksmīgi nomainīta
 
-Jūsu konta *$UserName*, *$UserEmail* parole tika veiksmīgi nomainīta *$Date* vietnē DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Jūsu konta *$UserName*, *$UserEmail* parole tika veiksmīgi nomainīta *$Date* vietnē ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Ierīce: *$Device*
@@ -703,7 +703,7 @@ Atrašanās vieta: *$Location*
 #end
 Pārlūkprogramma: *$Browser*
 
-Ja šo darbību veicāt jūs, nekādas turpmākas darbības nav nepieciešamas. Ja šīs izmaiņas šķiet aizdomīgas vai jūs tās neatļāvāt, lūdzu, nekavējoties atiestatiet paroli un atspējojiet piekļuvi DocSpace šai ierīcei.
+Ja šo darbību veicāt jūs, nekādas turpmākas darbības nav nepieciešamas. Ja šīs izmaiņas šķiet aizdomīgas vai jūs tās neatļāvāt, lūdzu, nekavējoties atiestatiet paroli un atspējojiet piekļuvi ${LetterLogoText} šai ierīcei.
 
 $OrangeButton
 

@@ -684,7 +684,7 @@ Nëse e keni marrë gabimisht këtë email, ju lutemi shpërfilleni ose kontakto
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Password u ndryshua me sukses
 
-Fjalëkalimi juaj për llogarinë *$UserName*, *$UserEmail* u ndryshua me sukses më *$Date* në DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Fjalëkalimi juaj për llogarinë *$UserName*, *$UserEmail* u ndryshua me sukses më *$Date* në ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Pajisja: *$Device*
@@ -693,7 +693,7 @@ Vendndodhja: *$Location*
 #end
 Shfletuesi: *$Browser*
 
-Nëse ky veprim është bërë nga ju — nuk kërkohen hapa të mëtejshëm. Nëse ky ndryshim duket i dyshimtë ose nuk është autorizuar nga ju, ju lutemi rivendosni menjëherë fjalëkalimin tuaj dhe çaktivizoni qasjen në DocSpace për këtë pajisje.
+Nëse ky veprim është bërë nga ju — nuk kërkohen hapa të mëtejshëm. Nëse ky ndryshim duket i dyshimtë ose nuk është autorizuar nga ju, ju lutemi rivendosni menjëherë fjalëkalimin tuaj dhe çaktivizoni qasjen në ${LetterLogoText} për këtë pajisje.
 
 $OrangeButton
 

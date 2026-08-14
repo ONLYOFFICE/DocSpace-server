@@ -683,7 +683,7 @@ Ako ste greškom primili ovaj email, zanemarite ga ili kontaktirajte administrat
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Lozinka je uspešno promenjena
 
-Vaša lozinka za nalog *$UserName*, *$UserEmail* je uspešno promenjena dana *$Date* u DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+Vaša lozinka za nalog *$UserName*, *$UserEmail* je uspešno promenjena dana *$Date* u ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Uređaj: *$Device*
@@ -692,7 +692,7 @@ Lokacija: *$Location*
 #end
 Pregledač: *$Browser*
 
-Ako ste vi izvršili ovu radnju — nisu potrebni dalji koraci. Ako ova promena izgleda sumnjivo ili nije bila ovlašćena od strane vas, odmah resetujte lozinku i onemogućite pristup DocSpace-u za ovaj uređaj.
+Ako ste vi izvršili ovu radnju — nisu potrebni dalji koraci. Ako ova promena izgleda sumnjivo ili nije bila ovlašćena od strane vas, odmah resetujte lozinku i onemogućite pristup ${LetterLogoText}-u za ovaj uređaj.
 
 $OrangeButton
 

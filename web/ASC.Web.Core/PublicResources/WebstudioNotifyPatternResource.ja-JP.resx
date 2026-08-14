@@ -694,7 +694,7 @@ $OrangeButton
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.パスワードの変更が完了しました
 
-アカウント *$UserName*, *$UserEmail* のパスワードが *$Date* にDocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}" で正常に変更されました。
+アカウント *$UserName*, *$UserEmail* のパスワードが *$Date* に${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" で正常に変更されました。
 
 IP: *$IP*
 デバイス: *$Device*
@@ -703,7 +703,7 @@ IP: *$IP*
 #end
 ブラウザ: *$Browser*
 
-この操作があなた自身によって行われた場合は、これ以上の対応は必要ありません。この変更が不審に思われる場合や、あなたが許可していない場合は、すぐにパスワードをリセットし、このデバイスからのDocSpaceへのアクセスを無効にしてください。
+この操作があなた自身によって行われた場合は、これ以上の対応は必要ありません。この変更が不審に思われる場合や、あなたが許可していない場合は、すぐにパスワードをリセットし、このデバイスからの${LetterLogoText}へのアクセスを無効にしてください。
 
 $OrangeButton
 

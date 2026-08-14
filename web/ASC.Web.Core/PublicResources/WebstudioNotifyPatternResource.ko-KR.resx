@@ -694,7 +694,7 @@ $OrangeButton
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.비밀번호가 성공적으로 변경되었습니다.
 
-*$UserName*, *$UserEmail* 계정의 비밀번호가 *$Date* 에 DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}" 에서 성공적으로 변경되었습니다.
+*$UserName*, *$UserEmail* 계정의 비밀번호가 *$Date* 에 ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" 에서 성공적으로 변경되었습니다.
 
 IP: *$IP*
 기기: *$Device*
@@ -703,7 +703,7 @@ IP: *$IP*
 #end
 브라우저: *$Browser*
 
-본인이 직접 변경한 경우 추가 단계는 필요하지 않습니다. 변경 내용이 의심스럽거나 본인의 승인 없이 변경된 경우, 즉시 비밀번호를 재설정하고 이 기기의 DocSpace 접근 권한을 비활성화하세요.
+본인이 직접 변경한 경우 추가 단계는 필요하지 않습니다. 변경 내용이 의심스럽거나 본인의 승인 없이 변경된 경우, 즉시 비밀번호를 재설정하고 이 기기의 ${LetterLogoText} 접근 권한을 비활성화하세요.
 
 $OrangeButton
 

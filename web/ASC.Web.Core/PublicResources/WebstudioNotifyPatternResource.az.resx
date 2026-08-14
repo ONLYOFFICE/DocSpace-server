@@ -682,7 +682,7 @@ Bu e-məktubu səhvən almısınızsa, ona məhəl qoymayın və ya əlavə məl
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Parol uğurla dəyişdirildi
 
-*$UserName*, *$UserEmail* hesabınız üçün parolunuz DocSpace-də *$Date* tarixində uğurla dəyişdirildi: "${__VirtualRootPath}":"${__VirtualRootPath}".
+*$UserName*, *$UserEmail* hesabınız üçün parolunuz ${LetterLogoText}-də *$Date* tarixində uğurla dəyişdirildi: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Cihaz: *$Device*
@@ -691,7 +691,7 @@ Məkan: *$Location*
 #end
 Brauzer: *$Browser*
 
-Əgər bu hərəkəti sizin tərəfinizdən etmisinizsə - əlavə addımlar tələb olunmur. Bu dəyişiklik şübhəli görünürsə və ya sizin tərəfinizdən icazə verilməyibsə, lütfən, parolunuzu dərhal sıfırlayın və bu cihaz üçün DocSpace-ə girişi söndürün.
+Əgər bu hərəkəti sizin tərəfinizdən etmisinizsə - əlavə addımlar tələb olunmur. Bu dəyişiklik şübhəli görünürsə və ya sizin tərəfinizdən icazə verilməyibsə, lütfən, parolunuzu dərhal sıfırlayın və bu cihaz üçün ${LetterLogoText}-ə girişi söndürün.
 
 $OrangeButton
 
@@ -1333,7 +1333,7 @@ $TrulyYours</value>
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;-ə xoş gəlmisiniz!
 
 
-Salam, $İstifadəçiAdı!
+Salam, $UserName!
 
 Siz indicə ${LetterLogoText} yaratdınız, komanda, müştəri, tərəfdaşlarınız və s. ilə əməkdaşlığı gücləndirə biləcəyiniz sənəd mərkəzi. Ünvanı "${__VirtualRootPath}":"${__VirtualRootPath}"-dir.
 Cari tarif planınız STARTUP-dır. Tamamilə pulsuzdur və ona daxildir:
