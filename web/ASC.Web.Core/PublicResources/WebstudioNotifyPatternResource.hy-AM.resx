@@ -421,7 +421,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-Ձեր ${LetterLogoText} Developer լիցենզիան կլրանա 7 օրից: 
+Ձեր ${LetterLogoText} Developer լիցենզիան կլրանա 7 օրից:
 
 Լիցենզիան թարմացնելու համար կապվեք ձեր վաճառքի մենեջերի կամ մեզ հետ՝ "${__SalesEmail}":"mailto:${__SalesEmail}":
 
@@ -473,7 +473,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-${LetterLogoText} Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: 
+${LetterLogoText} Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից:
 
 Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
 
@@ -762,7 +762,7 @@ $TrulyYours</value>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText}-ը ջնջվել է։
 
-*Portal:* ${PortalUrl} *Owner:* ${UserName} ${UserEmail} *Customer:* ${OwnerName} 
+*Portal:* ${PortalUrl} *Owner:* ${UserName} ${UserEmail} *Customer:* ${OwnerName}
 
 Խնդրում ենք համոզվել, որ ավտոմատ հաշվառումն անջատված է։ Ստուգեք ավտոմատ հաշվառման կարգավիճակը հաճախորդի Stripe հաշվում։</value>
   </data>
@@ -883,7 +883,7 @@ $OrangeButton
 Խնդրում ենք երկարաձգել ձեր ներկայիս ծառայությունների փաթեթը (կամ գնել նորը)։
 
 $OrangeButton
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_request_license" xml:space="preserve">
@@ -975,7 +975,7 @@ $TrulyYours
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
-    <value>h1.Ահա թե ինչ նորություն կա ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" վերջին մեկ ժամվա ընթացքում 
+    <value>h1.Ահա թե ինչ նորություն կա ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" վերջին մեկ ժամվա ընթացքում
 
 #foreach($activity in $Activities)
 $activity
@@ -1006,7 +1006,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt; Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է՝&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Work Sans', Helvetica, Arial, Tahoma; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 0px; padding-bottom: 44px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;3 ադմին&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt; Մինչև 12 սենյակ&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt; Անսահմանափակ թվով օգտատերեր և հյուրեր &lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt; 2 ԳԲ սկավառակի տարածություն&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Work Sans', Helvetica, Arial, Tahoma; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 0px; padding-bottom: 44px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" colspan="2" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 520px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Փաստաթղթեր, Ֆայլեր, Սենյակներ, Ձևաթղթեր, ԱԲ գործակալներ&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;3 ադմին&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt; Մինչև 12 սենյակ&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt; Անսահմանափակ թվով օգտատերեր և հյուրեր &lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt; 2 ԳԲ սկավառակի տարածություն&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt; Վայելեք փաստաթղթերի համագործակցության նոր տարբերակը:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1186,7 +1186,7 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Ողջուն, $UserName,
 
-Ձեր ${LetterLogoText}-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պլանավորված պահուստավորման գործընթացը ձախողվել է։ Խորհուրդ ենք տալիս ստուգել "Պահուստավորում":"${__VirtualRootPath}/portal-settings/backup/data-backup" և "Services":"${__VirtualRootPath}/billing/addons" կարգավորումները։ 
+Ձեր ${LetterLogoText}-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պլանավորված պահուստավորման գործընթացը ձախողվել է։ Խորհուրդ ենք տալիս ստուգել "Պահուստավորում":"${__VirtualRootPath}/portal-settings/backup/data-backup" և "Services":"${__VirtualRootPath}/billing/addons" կարգավորումները։
 
 Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}" միջոցով։
 
@@ -1221,7 +1221,7 @@ ${LetterLogoText} Աջակցության թիմ
   <data name="pattern_send_whats_new" xml:space="preserve">
     <value>h1.Ահա, թե ինչ նորություն կա ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" ${Date}-ին
 
-#foreach ($activity ${Activities}-ում)
+#foreach($activity in $Activities)
 $activity
 
 #end</value>
@@ -1286,12 +1286,12 @@ $TrulyYours</value>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
     <value>Ողջույն, $UserName!
 
-Տեղեկացնում ենք, որ ${LetterLogoText} Wallet-ի մնացորդի ավտոմատ լիցքավորումը չի հաջողվել։ 
+Տեղեկացնում ենք, որ ${LetterLogoText} Wallet-ի մնացորդի ավտոմատ լիցքավորումը չի հաջողվել։
 
 Խնդրում ենք ստուգել և թարմացնել ձեր դրամապանակի մնացորդը։
 
 $OrangeButton
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_user_has_join" xml:space="preserve">

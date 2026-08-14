@@ -914,7 +914,7 @@ $CompanyTitle
 h3.Veličina kompanije
 $CompanySize
 
-h3.Sadržaj zahteva 
+h3.Sadržaj zahteva
 $Body
 
 
@@ -978,10 +978,10 @@ $TrulyYours
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
     <value>h1.Evo šta je novo na vašem "${__VirtualRootPath}":"${__VirtualRootPath}" u poslednjih sat vremena
- 
-#foreach ($activity u $Activities)
+
+#foreach($activity u $Activities)
 $activity
- 
+
 #end</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
@@ -1008,7 +1008,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Vaš trenutni tarifni plan je STARTUP. Potpuno je besplatan i uključuje:&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Work Sans', Helvetica, Arial, Tahoma; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 0px; padding-bottom: 44px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;3 administratora&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Do 12 soba&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Neograničen broj korisnika i gostiju&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;2 GB prostora na disku&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Work Sans', Helvetica, Arial, Tahoma; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 0px; padding-bottom: 44px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" colspan="2" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 520px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Dokumenti, Datoteke, Sobe, Obrasci, AI agenti&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;3 administratora&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Do 12 soba&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Neograničen broj korisnika i gostiju&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;2 GB prostora na disku&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt; Uživajte u novom načinu saradnje sa dokumentima!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1111,14 +1111,14 @@ $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
     <value>h1. ${LetterLogoText}: završite registraciju
- 
- 
+
+
 Zdravo!
- 
+
 Pozvani ste da završite registraciju za ${LetterLogoText} na "${__VirtualRootPath}":"${__VirtualRootPath}". Unesite svoje ime i postavite lozinku klikom na link:
- 
+
 $OrangeButton
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">

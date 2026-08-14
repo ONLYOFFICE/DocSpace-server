@@ -602,12 +602,12 @@ $OrangeButton
       Login: &lt;b&gt;$Login&lt;/b&gt;
       Passwort: "&lt;b&gt;Kennwort festlegen&lt;/b&gt;":"$MyStaffLink"
 
-      Eingehende E-Mail (IMAP): 
+      Eingehende E-Mail (IMAP):
       Server: &lt;b&gt;$Server&lt;/b&gt;
       Port: &lt;b&gt;$ImapPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
-      Ausgehende E-Mail (SMTP): 
+      Ausgehende E-Mail (SMTP):
       Server: &lt;b&gt;$Server&lt;/b&gt;
       Port: &lt;b&gt;$SmtpPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
@@ -645,7 +645,7 @@ $TrulyYours
     <value>h1.Andere Region Portal Migration Fehler
 
 Ein Fehler hat während der Migration zu eine andere Region aufgetreten. Versuchen Sie bitte später noch einmal.
-Ihr Portal ist nun unter der alten Adresse "$PortalUrl":"$PortalUrl" verfügbar 
+Ihr Portal ist nun unter der alten Adresse "$PortalUrl":"$PortalUrl" verfügbar
 
 Falls Sie einige Fragen haben oder Hilfe brauchen, kontaktieren Sie uns bitte unter "${__SalesEmail}":"mailto:${__SalesEmail}"
 
@@ -761,7 +761,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} wurde gelöscht.
 
 *Portal:* ${PortalUrl}
-*Besitzer:* ${UserName} ${UserEmail} 
+*Besitzer:* ${UserName} ${UserEmail}
 *Kunde:* ${OwnerName}
 
 Bitte stellen Sie sicher, dass die automatische Abrechnung deaktiviert ist. Überprüfen Sie den Status der automatischen Abrechnung im Stripe-Kundenkonto.</value>
@@ -910,7 +910,7 @@ $Website
 h3.Unternehmensname
 $CompanyTitle
 
-h3.Unternehmensgröße 
+h3.Unternehmensgröße
 $CompanySize
 
 h3.Inhaltsanforderung
@@ -976,10 +976,10 @@ $TrulyYours
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
     <value>h1.Hier ist, was in der letzten Stunde in Ihrem "${__VirtualRootPath}":"${__VirtualRootPath}" neu hinzugekommen ist
- 
+
 #foreach($activity in $Activities)
 $activity
- 
+
 #end</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
@@ -1006,7 +1006,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Ihr Tarifplan ist STARTUP. Er ist absolut kostenlos und umfasst:&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Work Sans', Helvetica, Arial, Tahoma; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 0px; padding-bottom: 44px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;3 Administratoren&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Bis zu 12 Räume&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Unbegrenzte Anzahl an Benutzern und Gästen&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;2 GB Festplattenspeicher&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Work Sans', Helvetica, Arial, Tahoma; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 0px; padding-bottom: 44px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" colspan="2" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 520px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Dokumente, Dateien, Räume, Formulare, KI-Agenten&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;3 Administratoren&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 16px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Bis zu 12 Räume&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-right: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;Unbegrenzte Anzahl an Benutzern und Gästen&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-bottom: 0px; padding-left: 12px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; border-radius: 2px; border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; height: 0px; Margin: 0 auto; width: 248px; padding: 0; vertical-align: top;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; line-height: 17px; Margin: 0; padding: 12px 8px; text-align: center;"&gt;2 GB Festplattenspeicher&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Genießen Sie eine innovative Art der Zusammenarbeit mit Dokumenten!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1339,18 +1339,18 @@ $TrulyYours</value>
   </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Willkommen im &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
- 
- 
+
+
 Hallo, $UserName!
- 
+
 Sie haben gerade ${LetterLogoText} erstellt, einen Dokumenten-Hub, in dem Sie die Zusammenarbeit mit Ihrem Team, Kunden, Partnern usw. fördern können. Seine Adresse ist "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Ihr aktueller Tarifplan ist STARTUP. Er ist absolut kostenlos und beinhaltet:
- 
+
 &lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 15%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 Administratoren&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 15%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Bis zu 100 Räume&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 15%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB Speicherplatz&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
- 
+
 *Genießen Sie eine neue Art der Zusammenarbeit mit Dokumenten!*
- 
+
 $TrulyYours</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
@@ -1543,7 +1543,7 @@ $TrulyYours</value>
     <value>${__VirtualRootHost} Benachrichtigung über die Profiländerung des Portals</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Neues in Ihrem Portal ${__VirtualRootHost} für $Datum</value>
+    <value>Neues in Ihrem Portal ${__VirtualRootHost} für $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
     <value>Legen Sie ein Passwort für ${LetterLogoText} fest</value>
