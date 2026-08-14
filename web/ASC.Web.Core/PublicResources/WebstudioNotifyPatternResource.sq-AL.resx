@@ -596,6 +596,17 @@ $OrangeButton
 
 *Shënim*: kjo lidhje është e vlefshme vetëm për 48 orë. Ju lutemi, përfundoni operacionin brenda asaj kohe.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Po ju kontaktojmë për t'ju informuar se balanca e portofolit ${LetterLogoText} po mbaron.
+
+Ju lutem rimbushni balancën e portofolit tuaj për të shmangur çdo ndërprerje të shërbimeve me pagesë.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>I/E dashur $UserName,
 
@@ -1415,6 +1426,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Ftesë për t’u bashkuar me portalin ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Kërkohet veprim: Balanca e portofolit në ${LetterLogoText}-in tuaj po mbaron</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Krijimi i kutisë postare</value>

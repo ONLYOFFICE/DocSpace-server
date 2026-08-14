@@ -593,6 +593,17 @@ $OrangeButton
 
 *Note*: este enlace tiene una validez de sólo 48 horas. Por favor, complete la operación en dicho periodo.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>¡Hola, $UserName!
+
+Nos ponemos en contacto con usted para informarle de que el saldo de su monedero en ${LetterLogoText} se está agotando.
+
+Le rogamos que recargue el saldo de su monedero para evitar cualquier interrupción de los servicios de pago.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Estimado/a $UserName,
 
@@ -1421,6 +1432,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Invitación a unirse al portal ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Acción requerida: El saldo del Monedero en su ${LetterLogoText} se está agotando</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Creación de buzón de correo</value>

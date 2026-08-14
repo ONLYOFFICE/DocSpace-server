@@ -594,6 +594,17 @@ $OrangeButton
 
 *Напомена*: овај линк важи само 48 сати. Завршите операцију у том року.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Обавештавамо вас да се стање у вашем ${LetterLogoText} новчанику приближава нули.
+
+Љубазно вас молимо да допуните стање у новчанику како бисте избегли прекид плаћених услуга.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Поштовани $UserName,
 
@@ -1420,6 +1431,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Позив за придруживање ${__VirtualRootHost} порталу</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Потребна акција: Стање новчаника у вашем ${LetterLogoText} се приближава нули</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Креирање поштанског сандучета</value>

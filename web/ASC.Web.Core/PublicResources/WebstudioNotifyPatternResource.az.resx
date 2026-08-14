@@ -594,6 +594,17 @@ $OrangeButton
 
 *Qeyd*: bu link yalnız 48 saat etibarlıdır. Bu müddət ərzində əməliyyatı tamamlayın.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Salam $UserName!
+
+${LetterLogoText} Pul kisəsi balansınızın azaldığını bildirmək üçün sizə müraciət edirik.
+
+Ödənişli xidmətlərdə fasilə yaranmaması üçün pul kisəsi balansınızı artırmağınızı xahiş edirik.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Salam $UserName,
 
@@ -1412,6 +1423,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>${__VirtualRootHost} portalına qoşulmağa dəvət</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Tələb olunan əməliyyat: ${LetterLogoText} Pul kisəsi balansınız azalır</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Poçt qutusunun yaradılması</value>

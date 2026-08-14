@@ -606,6 +606,17 @@ $OrangeButton
 
 *Poznámka*: tento link je platný iba 48 hodín. Prosím, dokončite operáciu v tejto dobe.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Dobrý deň, $UserName!
+
+Kontaktujeme vás, aby sme vás informovali, že zostatok peňaženky ${LetterLogoText} sa míňa.
+
+Láskavo vás žiadame, aby ste dobili zostatok vo svojej peňaženke a predišli tak prerušeniu platených služieb.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Vážený / Vážená $UserName,
 
@@ -1446,6 +1457,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Pozvánka na vstup do ${__VirtualRootHost} portálu</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Je potrebná akcia: Zostatok peňaženky vo vašom ${LetterLogoText} sa míňa</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Vytvorenie poštovej schránky</value>

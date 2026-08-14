@@ -594,6 +594,17 @@ $OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 48 ժամ: Խնդրում ենք ավարտել գործողությունը այդ ժամկետում.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Տեղեկացնում ենք, որ ձեր ${LetterLogoText} Wallet-ի մնացորդը սպառվում է։
+
+Խնդրում ենք լիցքավորել ձեր դրամապանակի մնացորդը՝ վճարովի ծառայությունների ընդհատումից խուսափելու համար։
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Հարգելի $UserName,
 
@@ -1418,6 +1429,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>${__VirtualRootHost} պորտալին միանալու հրավեր</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Պահանջվող գործողություն՝ ձեր ${LetterLogoText}-ի դրամապանակի մնացորդը սպառվում է։</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}: Փոստարկղի ստեղծում</value>

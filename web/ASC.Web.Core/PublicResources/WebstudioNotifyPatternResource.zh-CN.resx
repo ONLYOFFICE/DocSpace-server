@@ -614,6 +614,17 @@ $OrangeButton
 
 *注意*：此链接仅在48小时内有效。请在此期限内完成操作。</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>您好，$UserName!
+
+温馨提示，${LetterLogoText} 钱包余额即将不足。
+
+请及时充值钱包余额，以免影响付费服务的正常使用。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>亲爱的 $UserName，
 
@@ -1444,6 +1455,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>加入${__VirtualRootHost}门户的邀请函</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>需要操作：您的${LetterLogoText}钱包余额不足</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}。邮箱创建</value>

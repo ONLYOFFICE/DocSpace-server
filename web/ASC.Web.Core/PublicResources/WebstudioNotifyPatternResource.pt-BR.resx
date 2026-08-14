@@ -598,6 +598,17 @@ $OrangeButton
 
 *Observe*: este link é válido apenas por 48 horas. Por favor, complete a operação dentro deste período.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos entrando em contato para informar que o saldo da Carteira ${LetterLogoText} está acabando.
+
+Pedimos que você recarregue o saldo da sua carteira para evitar qualquer interrupção dos serviços pagos.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Estimado/a $UserName,
 
@@ -1427,6 +1438,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Convite para se juntar ao portal ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Ação necessária: O saldo da Carteira no seu ${LetterLogoText} está acabando</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Criação de caixa de correio</value>

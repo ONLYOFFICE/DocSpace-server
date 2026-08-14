@@ -606,6 +606,17 @@ $OrangeButton
 
 *Piezīme*: šī saite ir derīga 48 stundas. Lūdzu, šajā laikā pabeidziet šo darbību.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Ar šo sazināmies, lai informētu jūs, ka ${LetterLogoText} maka atlikums ir zems.
+
+Lūdzam papildināt maka atlikumu, lai izvairītos no maksas pakalpojumu pārtraukumiem.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Cien. $UserName,
 
@@ -1446,6 +1457,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Uzaicinājums pievienoties portālam ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Nepieciešama darbība: Maka atlikums Jūsu ${LetterLogoText} ir zems</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Pastkastes izveide</value>

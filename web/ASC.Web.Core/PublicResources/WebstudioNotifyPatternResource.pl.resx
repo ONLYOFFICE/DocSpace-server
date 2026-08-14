@@ -594,6 +594,17 @@ $OrangeButton
 
 *Uwaga*: ten link jest aktywny tylko 48 godzin. Proszę wykonać tę operację w ciągu tego czasu.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że saldo portfela ${LetterLogoText} jest na wyczerpaniu.
+
+Uprzejmie prosimy o doładowanie salda portfela, aby uniknąć przerwy w świadczeniu usług płatnych.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Witaj, $UserName
 
@@ -1412,6 +1423,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Zaproszenie na portal ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Wymagane działanie: Saldo portfela w ${LetterLogoText} jest na wyczerpaniu</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Tworzenie skrzynki pocztowej</value>

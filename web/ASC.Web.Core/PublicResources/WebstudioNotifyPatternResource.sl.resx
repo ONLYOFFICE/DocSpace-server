@@ -606,6 +606,17 @@ $OrangeButton
 
 *Opomba*: ta povezava velja le 48 ur. Prosimo, dokončajte operacijo v tem roku.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Pozdravljen, $UserName!
+
+Obveščamo vas, da se stanje denarnice ${LetterLogoText} izteka.
+
+Vljudno vas prosimo, da napolnite stanje v denarnici in se tako izognete prekinitvi plačljivih storitev.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Dragi $UserName,
 
@@ -1446,6 +1457,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Povabilo za pridružitev na ${__VirtualRootHost} portalu</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Zahtevano dejanje: Stanje v denarnici v vašem ${LetterLogoText} se izteka</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Ustvarjanje poštnega predala</value>

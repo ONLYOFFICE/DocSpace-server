@@ -606,6 +606,17 @@ $OrangeButton
 
 *Lưu ý*: liên kết này chỉ có giá trị trong 48 giờ. Vui lòng hoàn tất thao tác này trong khoảng thời gian đó.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi đang liên hệ để thông báo với bạn rằng số dư Ví ${LetterLogoText} sắp hết.
+
+Chúng tôi vui lòng yêu cầu bạn nạp thêm tiền vào số dư ví để tránh gián đoạn các dịch vụ trả phí.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Kính gửi $UserName,
 
@@ -1447,6 +1458,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Lời mời tham gia cổng ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Cần hành động: Số dư Ví trong ${LetterLogoText} của bạn sắp hết</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Tạo hộp thư</value>

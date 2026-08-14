@@ -606,6 +606,17 @@ $OrangeButton
 
 *ご注意*: このリンクは48時間のみ有効です。期間内に操作を完了してください。</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>$UserName 様！
+
+${LetterLogoText}ウォレットの残高が少なくなっていることをお知らせいたします。
+
+有料サービスが中断しないよう、ウォレット残高のチャージをお願い申し上げます。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>$UserName 様
 
@@ -1403,6 +1414,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>${__VirtualRootHost}ポータルへの招待</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>対応必要：${LetterLogoText}のウォレット残高が不足しています</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}.メールボックス作成</value>

@@ -599,6 +599,17 @@ $OrangeButton
 
 *Not*: bu link 48 saat boyunca geçerli olacaktır. Lütfen işlemi bu sürede tamamlayın.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+${LetterLogoText} Cüzdan bakiyenizin azaldığını bildirmek için size ulaşıyoruz.
+
+Ücretli hizmetlerde kesinti yaşanmaması için cüzdan bakiyenizi yüklemenizi rica ediyoruz.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Sayın $UserName,
 
@@ -1440,6 +1451,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>${__VirtualRootHost} portalına davet edildiniz</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Eylem Gerekiyor: ${LetterLogoText} cüzdan bakiyeniz azalıyor</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Posta kutusu oluşturma</value>

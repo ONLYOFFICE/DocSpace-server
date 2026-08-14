@@ -594,6 +594,17 @@ $OrangeButton
 
 *Let op*: deze link is maar 48 uur geldig. Voltooi de actie alstublieft binnen die periode.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+We nemen contact met u op om u te laten weten dat het ${LetterLogoText} Wallet-saldo bijna op is.
+
+We verzoeken u vriendelijk om uw wallet-saldo op te waarderen om onderbreking van betaalde diensten te voorkomen.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Beste $UserName,
 
@@ -1413,6 +1424,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Uitnodiging om u aan te sluiten bij het ${__VirtualRootHost} portaal</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Actie vereist: het saldo van uw Wallet in uw ${LetterLogoText} raakt op</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Mailbox aanmaken</value>

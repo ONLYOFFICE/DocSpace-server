@@ -593,6 +593,17 @@ $OrangeButton
 
 *Note*: ce lien est valable pour 48 heures seulement. Veuillez remplir l'opération au cours de cette période.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Bonjour, $UserName !
+
+Nous vous informons que le solde du Wallet de ${LetterLogoText} est faible.
+
+Nous vous demandons de recharger le solde de votre Wallet afin d'éviter toute interruption des services payants.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Cher/chère $UserName,
 

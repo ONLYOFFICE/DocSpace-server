@@ -598,6 +598,17 @@ $OrangeButton
 
 *ملاحظة*: هذا الرابط صالح لمدة 48 ساعة فقط. يرجى إكمال العملية خلال تلك الفترة.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>مرحباً، $UserName!
+
+نتواصل معكم لإبلاغكم بأن رصيد ${LetterLogoText} Wallet الخاص بكم على وشك النفاد.
+
+نرجو منكم تعبئة رصيد محفظتكم لتفادي أي انقطاع في الخدمات المدفوعة.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>عزيزي $UserName،
 
@@ -1422,6 +1433,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>دعوة للانضمام إلى بوابة ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>الإجراء المطلوب: رصيد محفظة ${LetterLogoText} الخاصة بكم على وشك النفاد</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. إنشاء صندوق البريد</value>

@@ -593,6 +593,17 @@ $OrangeButton
 
 *Nota*: questo link sara valido solo per 48 ore dalla ricezione di questo messaggio. Si prega di completare l'operazione entro questo arco di tempo.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Ciao, $UserName!
+
+Ti informiamo che il saldo del ${LetterLogoText} Wallet sta per esaurirsi.
+
+Ti chiediamo gentilmente di ricaricare il saldo del tuo portafoglio per evitare interruzioni dei servizi a pagamento.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Gentile $UserName,
 
@@ -1421,6 +1432,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Invito ad unirsi al portale ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Azione richiesta: il saldo del Portafoglio nel tuo ${LetterLogoText} sta per esaurirsi</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Creazione dell'indirizzo mail</value>

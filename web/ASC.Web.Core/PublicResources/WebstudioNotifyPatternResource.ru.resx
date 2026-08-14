@@ -606,6 +606,17 @@ $OrangeButton
 
 *Обратите внимание*: эта ссылка действительна только 48 часов. Пожалуйста, выполните данную операцию в течение этого времени.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Сообщаем вам, что баланс вашего кошелька ${LetterLogoText} заканчивается.
+
+Просим пополнить баланс кошелька, чтобы избежать перерыва в предоставлении платных услуг.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Здравствуйте, $UserName,
 

@@ -594,6 +594,17 @@ $OrangeButton
 
 *Menţiune*: Acest link este valabil doar timp de 48 ore. Vă rugăm să finalizați procedura în perioada dată.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Stimate, $UserName!
+
+Vă informăm că soldul contului dvs de Portofel ${LetterLogoText} este pe terminate.
+
+Vă rugăm să alimentați contul de portofel pentru a evita întreruperea serviciilor cu plată.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Stimată/Stimate $UserName,
 
@@ -1422,6 +1433,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Invitația să vă alăturați portalului ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Acțiune necesară: Soldul contului de Portofel din ${LetterLogoText} este pe terminate</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Creare cutie poșt</value>

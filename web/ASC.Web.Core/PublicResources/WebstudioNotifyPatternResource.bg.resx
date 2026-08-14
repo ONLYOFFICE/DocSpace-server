@@ -589,6 +589,17 @@ $OrangeButton
 
 * Забележка *: Тази връзка е валидна само за 48 часа. Моля, завършете операцията в рамките на този период.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Свързваме се с вас, за да ви информираме, че балансът на портфейла на ${LetterLogoText} е на изчерпване.
+
+Молим ви да попълните баланса на портфейла си, за да избегнете прекъсване на платените услуги.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Уважаеми $UserName,
 
@@ -1408,6 +1419,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Покана за присъединяване към портала ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Изисква се действие: Балансът на портфейла ви в ${LetterLogoText} е на изчерпване</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Създаване на пощенска кутия</value>

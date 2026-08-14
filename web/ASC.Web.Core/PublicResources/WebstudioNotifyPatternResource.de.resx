@@ -593,6 +593,17 @@ $OrangeButton
 
 *Hinweis*: Dieser Link ist nur 48 Tage gültig. Bitte schließen Sie die Aktivierung Ihrer E-Mail-Adresse in dieser Zeitperiode ab.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Wir möchten Sie darüber informieren, dass Ihr ${LetterLogoText} Wallet-Guthaben zur Neige geht.
+
+Wir bitten Sie, Ihr Wallet-Guthaben aufzuladen, um Unterbrechungen der kostenpflichtigen Dienste zu vermeiden.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Sehr geehrte/er Frau/ Herr $UserName,
 
@@ -1421,6 +1432,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Einladung zum Portal ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Erforderliche Aktion: Ihr Wallet-Guthaben in ${LetterLogoText} geht zur Neige</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Mailbox erstellen</value>

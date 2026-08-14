@@ -606,6 +606,17 @@ $OrangeButton
 
 *알림*: 이 링크는 48시간 동안만 유효합니다. 기간 내에 작업을 완료하세요.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>$UserName님, 안녕하세요!
+
+${LetterLogoText} 지갑 잔액이 부족함을 알려드립니다.
+
+유료 서비스가 중단되지 않도록 지갑 잔액을 충전해 주시기 바랍니다.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>$UserName님,
 
@@ -1443,6 +1454,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>${__VirtualRootHost}에 초대받으셨습니다</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>조치가 필요합니다: 고객님의 ${LetterLogoText} 지갑 잔액이 부족합니다</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. 메일함 생성</value>

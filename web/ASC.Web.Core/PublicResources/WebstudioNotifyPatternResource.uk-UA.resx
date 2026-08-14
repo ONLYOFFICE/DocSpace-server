@@ -606,6 +606,17 @@ $OrangeButton
 
 *Примітка*: це посилання дійсне лише 48 годин. Будь ласка, завершіть операцію протягом цього періоду.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Повідомляємо Вас, що баланс гаманця ${LetterLogoText} добігає кінця.
+
+Просимо Вас поповнити баланс гаманця, щоб уникнути перерви в наданні платних послуг.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
@@ -1447,6 +1458,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Запрошення приєднатись до порталу ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Потрібна дія: баланс гаманця у вашому ${LetterLogoText} добігає кінця</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Створення поштової скриньки</value>

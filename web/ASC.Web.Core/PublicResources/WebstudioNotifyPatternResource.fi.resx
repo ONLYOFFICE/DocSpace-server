@@ -605,6 +605,17 @@ $OrangeButton
 
 *Huom*: tämä linkki on voimassa vain 48 tuntia. Ole hyvä ja viimeistele toiminto sen aikana.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Otamme sinuun yhteyttä ilmoittaaksemme, että ${LetterLogoText}-lompakon saldosi on vähissä.
+
+Pyydämme sinua ystävällisesti lataamaan lompakkosi saldoa, jotta maksulliset palvelut eivät keskeytyisi.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Hyvä $UserName,
 
@@ -1444,6 +1455,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Kutsu liittyä ${__VirtualRootHost} portaaliin</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Vaadittu toimenpide: ${LetterLogoText}-lompakkosi saldo on vähissä</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Postilaatikon luominen</value>

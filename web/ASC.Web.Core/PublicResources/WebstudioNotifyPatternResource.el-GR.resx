@@ -606,6 +606,17 @@ $OrangeButton
 
 *Σημείωση*: αυτός ο σύνδεσμος ισχύει μόνο για 48 ώρες. Παρακαλείστε να ολοκληρώσετε τη λειτουργία εντός του εν λόγω χρονικού διαστήματος.</value>
   </data>
+  <data name="pattern_low_wallet_balance" xml:space="preserve">
+    <value>Γεια σου, $UserName!
+
+Επικοινωνούμε μαζί σας για να σας ενημερώσουμε ότι το υπόλοιπο του Πορτοφολιού σας στο ${LetterLogoText} εξαντλείται.
+
+Σας παρακαλούμε να ανανεώσετε το υπόλοιπο του πορτοφολιού σας για να αποφύγετε τυχόν διακοπή των επί πληρωμή υπηρεσιών.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Αγαπητέ $UserName,
 
@@ -1446,6 +1457,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_join" xml:space="preserve">
     <value>Πρόσκληση για συμμετοχή στην πύλη ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Απαιτείται ενέργεια: Το υπόλοιπο του Πορτοφολιού σας στο ${LetterLogoText} εξαντλείται</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Δημιουργία γραμματοκιβωτίου</value>
