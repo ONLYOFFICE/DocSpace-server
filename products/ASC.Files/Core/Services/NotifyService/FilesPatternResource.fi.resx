@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace ilmoitus. tekoälyagentti poistettu</value>
+    <value>${LetterLogoText}-ilmoitus. tekoälyagentti poistettu</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Asiakirjat. Kaikki allekirjoittajat viimeistelivät $DocumentTitle</value>
@@ -262,19 +262,19 @@ $Message</value>
     <value>Allekirjoituksen tila muuttunut</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace-ilmoitus. Mainittu dokumentissa</value>
+    <value>${LetterLogoText}-ilmoitus. Mainittu dokumentissa</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace-ilmoitus. Lomake on täytetty</value>
+    <value>${LetterLogoText}-ilmoitus. Lomake on täytetty</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace-ilmoitus.</value>
+    <value>${LetterLogoText}-ilmoitus.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace-ilmoitus. Lomake on täytetty</value>
+    <value>${LetterLogoText}-ilmoitus. Lomake on täytetty</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace-ilmoitus.</value>
+    <value>${LetterLogoText}-ilmoitus.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Asiakirjoja. Sähköpostilähetys on valmis.</value>
@@ -283,7 +283,7 @@ $Message</value>
     <value>Postitus on suoritettu.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace-ilmoitus. Huone poistettu</value>
+    <value>${LetterLogoText}-ilmoitus. Huone poistettu</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Asiakirjat. Pääsy tiedostoon $DocumentTitle myönnetty</value>
@@ -307,9 +307,9 @@ $Message</value>
     <value>Asiakirjoja. Pääsy kansioon myönnetty: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace-ilmoitus.</value>
+    <value>${LetterLogoText}-ilmoitus.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace-ilmoitus.</value>
+    <value>${LetterLogoText}-ilmoitus.</value>
   </data>
 </root>

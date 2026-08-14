@@ -247,19 +247,19 @@ $Message</value>
     <value>签名状态已变更</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>协作空间消息通知。已在文档中提及</value>
+    <value>${LetterLogoText} 通知。已在文档中提及</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>协作空间通知。表单已填写完毕</value>
+    <value>${LetterLogoText} 通知。表单已填写完毕</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>协作空间通知。</value>
+    <value>${LetterLogoText} 通知。</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>协作空间通知。表单已填写完毕</value>
+    <value>${LetterLogoText} 通知。表单已填写完毕</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>协作空间通知。</value>
+    <value>${LetterLogoText} 通知。</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>文档。 邮件发送已完成。</value>
@@ -268,7 +268,7 @@ $Message</value>
     <value>邮件发送完成。</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>协作空间消息通知。房间已删除</value>
+    <value>${LetterLogoText} 通知。房间已删除</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>文档：允许访问 $DocumentTitle</value>
@@ -292,10 +292,10 @@ $Message</value>
     <value>文件。已授予文件夹访问权限: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>协作空间通知。</value>
+    <value>${LetterLogoText} 通知。</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>协作空间通知。</value>
+    <value>${LetterLogoText} 通知。</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName 删除了一个 AI 代理
@@ -309,6 +309,6 @@ $__AuthorName 删除了 AI 代理：$RoomTitle</value>
     <value>您已被邀请加入 AI 代理 "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace 通知。AI 代理已删除</value>
+    <value>${LetterLogoText} 通知。AI 代理已删除</value>
   </data>
 </root>

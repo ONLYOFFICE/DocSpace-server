@@ -248,19 +248,19 @@ $Message</value>
     <value>Status podpisu uległ zmianie</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Powiadomienie DocSpace. Wspomniano w dokumencie</value>
+    <value>Powiadomienie ${LetterLogoText}. Wspomniano w dokumencie</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Powiadomienie DocSpace. Formularz został wypełniony</value>
+    <value>Powiadomienie ${LetterLogoText}. Formularz został wypełniony</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Powiadomienie DocSpace.</value>
+    <value>Powiadomienie ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Powiadomienie DocSpace. Formularz został wypełniony</value>
+    <value>Powiadomienie ${LetterLogoText}. Formularz został wypełniony</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Powiadomienie DocSpace.</value>
+    <value>Powiadomienie ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Dokumenty. Wiadomości zostały wysłane.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Wiadomości zostały wysłane.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Powiadomienie DocSpace. Pokój został usunięty</value>
+    <value>Powiadomienie ${LetterLogoText}. Pokój został usunięty</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Dokumenty. Udzielono dostępu do dokumentu: $DocumentTitle</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Dokumenty. Przyznano dostęp do katalogu: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Powiadomienie DocSpace.</value>
+    <value>Powiadomienie ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Powiadomienie DocSpace.</value>
+    <value>Powiadomienie ${LetterLogoText}.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName usunął agenta AI
@@ -310,6 +310,6 @@ $__AuthorName usunął agenta AI: $RoomTitle</value>
     <value>Zostałeś zaproszony do agenta AI "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Powiadomienie DocSpace. Agent AI usunięty</value>
+    <value>Powiadomienie ${LetterLogoText}. Agent AI usunięty</value>
   </data>
 </root>

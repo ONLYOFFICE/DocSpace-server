@@ -248,19 +248,19 @@ $Message</value>
     <value>署名の状態が変更されました</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpaceの通知です。ドキュメントにメンションされました</value>
+    <value>${LetterLogoText}の通知。ドキュメントにメンションされました</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpaceからの通知。フォームが記入されました</value>
+    <value>${LetterLogoText}の通知。フォームが記入されました</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpaceの通知。</value>
+    <value>${LetterLogoText}の通知。</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpaceからの通知。フォームが記入されました</value>
+    <value>${LetterLogoText}の通知。フォームが記入されました</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpaceの通知。</value>
+    <value>${LetterLogoText}の通知。</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>文書。メーリングは完了です。</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>郵送が完了しました。</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpaceの通知です。ルームが削除されました</value>
+    <value>${LetterLogoText}の通知。ルームが削除されました</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>ドキュメント。文書に付与されたアクセス：$DocumentTitle</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>文書。[$DocumentTitle]($DocumentURL)フォルダにアクセスが付与されました</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpaceの通知。</value>
+    <value>${LetterLogoText}の通知。</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpaceの通知。</value>
+    <value>${LetterLogoText}の通知。</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName がAIエージェントを削除しました
@@ -310,6 +310,6 @@ $__AuthorName がAIエージェントを削除しました： RoomTitle</value>
     <value>AIエージェント "$RoomTitle" に招待されました</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace通知。AIエージェントが削除されました</value>
+    <value>${LetterLogoText}の通知。AIエージェントが削除されました</value>
   </data>
 </root>
