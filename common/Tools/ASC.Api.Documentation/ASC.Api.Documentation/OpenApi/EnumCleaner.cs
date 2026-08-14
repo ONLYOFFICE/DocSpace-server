@@ -79,9 +79,17 @@ public class EnumCleaner
 
                     obj["type"] = targetType;
 
+                    // Both spellings are carried: openapi 3.1 states a schema's examples in an `examples`
+                    // array, 3.0 in a singular `example`, and this collapse runs before or after the
+                    // rewrite between them depending on which document is being produced.
                     if (preferred["example"] != null)
                     {
                         obj["example"] = preferred["example"]!.DeepClone();
+                    }
+
+                    if (preferred["examples"] != null)
+                    {
+                        obj["examples"] = preferred["examples"]!.DeepClone();
                     }
 
                     if (preferred["x-enum-varnames"] != null)
