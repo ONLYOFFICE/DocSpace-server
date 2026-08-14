@@ -60,6 +60,7 @@ import { threadsController } from "./controllers/threadsController.js";
 import { toolsController } from "./controllers/toolsController.js";
 import { vectorizationController } from "./controllers/vectorizationController.js";
 import { webSearchController } from "./controllers/webSearchController.js";
+import { webSearchPassthroughController } from "./controllers/webSearchPassthroughController.js";
 
 export { API_PREFIX };
 
@@ -218,6 +219,18 @@ export default function registerRoutes(app: Application): void {
   router.post(
     "/openai/:profileId/v1/images/generations",
     openaiPassthroughController.imagesGenerations,
+  );
+
+  // Web-search passthrough for the editor AI plugin: the plugin holds a
+  // placeholder config, the portal's active provider and key are resolved
+  // here (see webSearchPassthroughController).
+  router.post(
+    "/websearch/v1/search",
+    webSearchPassthroughController.search,
+  );
+  router.post(
+    "/websearch/v1/contents",
+    webSearchPassthroughController.contents,
   );
 
   let total = 0;

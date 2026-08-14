@@ -87,6 +87,8 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
   { method: "POST", path: "/vectorization/tasks", tag: "Vectorization", operationId: "aiVectorizationStartTask", summary: "Start a vectorization task", hasBody: true },
   { method: "POST", path: "/openai/{profileId}/v1/chat/completions", tag: "OpenAI passthrough", operationId: "aiOpenaiChatCompletions", summary: "OpenAI-compatible chat completions proxied to the profile's provider", pathParams: ["profileId"], hasBody: true },
   { method: "POST", path: "/openai/{profileId}/v1/images/generations", tag: "OpenAI passthrough", operationId: "aiOpenaiImagesGenerations", summary: "OpenAI-compatible image generation proxied to the profile's provider", pathParams: ["profileId"], hasBody: true },
+  { method: "POST", path: "/websearch/v1/search", tag: "Web search", operationId: "aiWebSearchPassthroughSearch", summary: "Web search proxied to the portal's active web-search provider", hasBody: true },
+  { method: "POST", path: "/websearch/v1/contents", tag: "Web search", operationId: "aiWebSearchPassthroughContents", summary: "Web page contents proxied to the portal's active web-search provider", hasBody: true },
 ];
 
 // Base path the service is mounted under (the DocSpace nginx route). Shared
