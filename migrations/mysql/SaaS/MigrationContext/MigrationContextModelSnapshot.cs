@@ -5741,6 +5741,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("modified_at");
 
+                    b.Property<long?>("OwnerTenantId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_tenant_id");
+
+                    b.Property<string>("OwnerUserId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("owner_user_id");
+
                     b.Property<DateTime?>("RefreshTokenExpiresAt")
                         .HasMaxLength(6)
                         .HasColumnType("datetime(6)")
@@ -5785,6 +5794,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:IndexPrefixLength", new[] { 255 });
 
                     b.HasIndex(new[] { "Id" }, "idx_identity_authorizations_id");
+
+                    b.HasIndex(new[] { "OwnerTenantId", "OwnerUserId" }, "idx_identity_authorizations_owner");
 
                     b.HasIndex(new[] { "RefreshTokenHash" }, "idx_identity_authorizations_refresh_token_hash")
                         .HasAnnotation("MySql:IndexPrefixLength", new[] { 64 });
@@ -6027,8 +6038,19 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("modified_at");
 
+                    b.Property<long?>("OwnerTenantId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_tenant_id");
+
+                    b.Property<string>("OwnerUserId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("owner_user_id");
+
                     b.HasKey("PrincipalId", "RegisteredClientId")
                         .HasName("PRIMARY");
+
+                    b.HasIndex(new[] { "OwnerTenantId", "OwnerUserId" }, "idx_identity_consents_owner");
 
                     b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consents_principal_id");
 

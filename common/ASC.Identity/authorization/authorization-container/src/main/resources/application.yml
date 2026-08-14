@@ -72,7 +72,7 @@ management:
     health:
       probes:
         enabled: true
-      show-details: always
+      show-details: never
       group:
         readiness:
           include: "*"

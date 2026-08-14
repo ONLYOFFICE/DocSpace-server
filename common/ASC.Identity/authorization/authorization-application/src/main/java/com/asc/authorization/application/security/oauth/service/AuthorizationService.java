@@ -108,6 +108,7 @@ public class AuthorizationService
   private final JpaConsentRepository jpaConsentRepository;
   private final JpaAuthorizationRepository jpaAuthorizationRepository;
   private final RegisteredClientAccessibilityService registeredClientAccessibilityRepository;
+  private final RegisteredClientOwnerService registeredClientOwnerService;
 
   @Autowired
   public AuthorizationService(
@@ -121,7 +122,8 @@ public class AuthorizationService
       HashingService hashingService,
       JpaConsentRepository jpaConsentRepository,
       JpaAuthorizationRepository jpaAuthorizationRepository,
-      RegisteredClientAccessibilityService registeredClientAccessibilityRepository) {
+      RegisteredClientAccessibilityService registeredClientAccessibilityRepository,
+      RegisteredClientOwnerService registeredClientOwnerService) {
     this.environment = environment;
     this.securityConfigurationProperties = securityConfigurationProperties;
     this.transactionManager = transactionManager;
@@ -133,6 +135,7 @@ public class AuthorizationService
     this.jpaConsentRepository = jpaConsentRepository;
     this.jpaAuthorizationRepository = jpaAuthorizationRepository;
     this.registeredClientAccessibilityRepository = registeredClientAccessibilityRepository;
+    this.registeredClientOwnerService = registeredClientOwnerService;
   }
 
   /**
@@ -235,6 +238,27 @@ public class AuthorizationService
   }
 
   /**
+   * Records which client owner the authorization points at, so that removing that owner's clients
+   * removes the authorization no matter which tenant the authorizing user belonged to.
+   *
+   * <p>An owner that is already recorded is left alone, so that a lookup which could not resolve
+   * the client does not erase what an earlier save established.
+   *
+   * @param entity the authorization about to be persisted
+   * @param clientOwner the owner resolved before the transaction opened
+   */
+  private void applyClientOwner(
+      AuthorizationEntity entity, Optional<RegisteredClientOwnerService.Owner> clientOwner) {
+    if (entity.getOwnerTenantId() != null) return;
+
+    clientOwner.ifPresent(
+        owner -> {
+          entity.setOwnerTenantId(owner.tenantId());
+          entity.setOwnerUserId(owner.userId());
+        });
+  }
+
+  /**
    * Saves an OAuth2 authorization to the database.
    *
    * <p>The authorization is encrypted, hashed, and stored. If the authorization already exists, it
@@ -251,6 +275,11 @@ public class AuthorizationService
       setClientStateCookie(authorization);
 
       var signature = getRequestSignature();
+      // Resolved here, before any transaction opens: a client cache miss reaches the registration
+      // service over gRPC, and a remote call must not hold a database connection while it waits.
+      var clientOwner =
+          registeredClientOwnerService.findClientOwner(authorization.getRegisteredClientId());
+
       // TODO: Proper annotations and separate services
       var isSaaS =
           Arrays.stream(environment.getActiveProfiles())
@@ -292,6 +321,13 @@ public class AuthorizationService
 
         if (signature != null && signature.getTenantId() > 0)
           authorizationMessage.setTenantId(signature.getTenantId());
+
+        clientOwner.ifPresent(
+            owner -> {
+              authorizationMessage.setOwnerTenantId(owner.tenantId());
+              authorizationMessage.setOwnerUserId(owner.userId());
+            });
+
         authorizationMessage.setAccessTokenValue(atoken);
         authorizationMessage.setRefreshTokenValue(rtoken);
 
@@ -328,6 +364,8 @@ public class AuthorizationService
 
               if (signature != null && signature.getTenantId() > 0)
                 entity.setTenantId(signature.getTenantId());
+
+              applyClientOwner(entity, clientOwner);
               entity.setAccessTokenValue(atoken);
               entity.setRefreshTokenValue(rtoken);
 

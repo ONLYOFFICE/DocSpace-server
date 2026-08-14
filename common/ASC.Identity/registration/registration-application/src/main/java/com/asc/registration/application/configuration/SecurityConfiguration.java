@@ -80,7 +80,7 @@ public class SecurityConfiguration {
   }
 
   /**
-   * Configures a dedicated security filter chain for the liveness and readiness probe endpoints.
+   * Configures a dedicated security filter chain for actuator health endpoints.
    *
    * @param http the HttpSecurity object for configuring security
    * @return the SecurityFilterChain object representing the configured security filter chain
@@ -90,7 +90,7 @@ public class SecurityConfiguration {
   @Bean("registrationHealthProbeSecurityFilterChain")
   SecurityFilterChain registrationHealthProbeSecurityFilterChain(HttpSecurity http)
       throws Exception {
-    return http.securityMatcher("/health/readiness", "/health/liveness")
+    return http.securityMatcher("/health", "/health/**")
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
         .csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)
@@ -145,7 +145,7 @@ public class SecurityConfiguration {
    * Both filters are {@code @Component}s, so Spring Boot auto-registers them as raw servlet filters
    * on {@code /*} in addition to their explicit wiring into {@link HttpSecurity} above. That
    * auto-registration bypasses {@code securityMatcher} scoping entirely, so a request to a path
-   * excluded from a chain (like the health probes) still runs through them. Disabling the
+   * excluded from a chain (like the health endpoints) still runs through them. Disabling the
    * auto-registration keeps each filter active only where it's explicitly added via {@code
    * addFilterAt}/{@code addFilterAfter}.
    */

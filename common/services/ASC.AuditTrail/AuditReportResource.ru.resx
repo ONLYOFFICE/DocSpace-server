@@ -916,7 +916,7 @@
     <value>Отправка</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Пользователь {0} отправил приглашение {1} в этот DocSpace</value>
+    <value>Пользователь {0} отправил приглашение {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Отправлены пригласительные инструкции: {0}</value>
@@ -1211,5 +1211,17 @@
   </data>
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>ИИ-настройки пользователя обновлены</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Файлы [{0}]. Файл не сохранен. Превышен лимит хранилища для портала.</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Файлы [{0}]. Отмечены как прочитанные</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Файлы [{0}]. Сохранение файла превышает квоту хранилища портала.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Папки [{0}]. Отмечены как прочитанные</value>
   </data>
 </root>
