@@ -823,15 +823,15 @@ ${LetterLogoText}™ Тим за подршку
 *Напомена*: DNS подешавања и опције јединственог пријављивања престају да раде док их не промените.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Уклањање профила са портала "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Онемогућавање налога на "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Захтевали сте да трајно избришете свој профил са портала "${__VirtualRootPath}":"${__VirtualRootPath}".
+Захтевали сте да онемогућите свој налог на "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Ако и даље желите да избришете свој профил, пратите доњи линк да бисте потврдили операцију:
+Ако и даље желите да онемогућите свој налог, пратите доњи линк да бисте потврдили операцију:
 
 $OrangeButton
 
-*Напомена*: овај линк важи само 7 дана. Довршите процес брисања профила у том периоду.</value>
+*Напомена*: овај линк важи само 7 дана. Довршите процес онемогућавања налога у том периоду.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Корисник "$FromUserName":"$FromUserLink" је избрисао/ла свој профил и овај профил је сада блокиран. Све корисничке датотеке су и даље додељене њему/њој и заузимају простор на диску.
@@ -1467,7 +1467,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Промена адресе портала</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Брисање вашег профила са портала ${__VirtualRootHost}</value>
+    <value>Онемогућавање налога на ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Корисник је избрисао свој профил</value>

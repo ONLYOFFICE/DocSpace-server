@@ -824,15 +824,15 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 *ملاحظة*: تتوقف إعدادات DNS وخيارات تسجيل الدخول لمرة واحدة عن العمل حتى تقوم بتغييرها.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.إزالة ملف التعريف من بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.تعطيل الحساب على "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
-لقد طلبت حذف ملف التعريف الخاص بك نهائيا من بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+لقد طلبتم تعطيل حسابكم في "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}".
 
-إذا كنت لا تزال ترغب في حذف ملف التعريف الخاص بك، فيرجى اتباع الرابط أدناه لتأكيد العملية
+إذا كنتم لا تزالون ترغبون في تعطيل حسابكم، فيرجى اتباع الرابط أدناه لتأكيد العملية:
 
 $OrangeButton
 
-*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية حذف الملف الشخصي خلال تلك الفترة.</value>
+*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية تعطيل الحساب خلال تلك الفترة.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>قام المستخدم "$FromUserName":"$FromUserLink" بحذف ملفه الشخصي، وتم حظر هذا الملف الشخصي الآن. لا تزال جميع ملفات المستخدم مخصصة له/لها وتشغل مساحة على القرص.
@@ -1469,7 +1469,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}.تغيير عنوان البوابة الإلكترونية</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>حذف ملف التعريف الخاص بك من بوابة ${__VirtualRootHost}</value>
+    <value>تعطيل الحساب على ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>قام المستخدم بحذف ملفه الشخصي</value>

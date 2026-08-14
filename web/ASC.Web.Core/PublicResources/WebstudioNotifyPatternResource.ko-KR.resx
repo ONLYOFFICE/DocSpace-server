@@ -836,15 +836,15 @@ $UserDisplayName님,
 *알림*: DNS 설정 및 싱글 사인-온 옵션은 고객님께서 변경할 때까지 작동하지 않습니다.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털에서 프로필 삭제
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 에서 계정 비활성화
 
-"${__VirtualRootPath}":"${__VirtualRootPath}" 포털에서 고객님의 프로필의 영구 삭제를 요청하셨습니다.
+"${__VirtualRootPath}":"${__VirtualRootPath}" 에서 고객님의 계정 비활성화를 요청하셨습니다.
 
-그래도 프로필을 삭제하고 싶다면 아래 링크를 따라 작업을 확인해주세요.
+그래도 계정을 비활성화하고 싶다면 아래 링크를 따라 작업을 확인해주세요.
 
 $OrangeButton
 
-*알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 프로필 삭제 프로세스를 완료하세요.</value>
+*알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 계정 비활성화 프로세스를 완료하세요.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>"$FromUserName":"$FromUserLink" 사용자가 자신의 프로필을 삭제하였으며 이 프로필은 현재 차단되었습니다. 모든 사용자 파일은 여전히 해당 사용자에게 할당된 상태로 디스크 공간을 차지합니다.
@@ -1490,7 +1490,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. 포털 주소 변경</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootHost} 포털에서 프로필 삭제</value>
+    <value>${__VirtualRootHost}에서 계정 비활성화</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>사용자가 자신의 프로필을 삭제했습니다</value>

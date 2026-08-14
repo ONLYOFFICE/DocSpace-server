@@ -836,15 +836,15 @@ Vaša $PortalUrl portálová adresa bola zmenená na novú "${__VirtualRootPath}
 *Poznámka*: nastavenia DNS a možnosti jednotného prihlásenia prestanú fungovať, kým ich nezmeníte.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Odstránenie profilu z "${__VirtualRootPath}":"${__VirtualRootPath}" portálu
+    <value>h1.Zakázanie účtu na "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Požiadali ste o trvalé odstránenie Vášho profilu z "${__VirtualRootPath}":"${__VirtualRootPath}" portálu.
+Požiadali ste o zakázanie Vášho účtu na "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Ak stále chcete vymazať Váš profil, prosím nasledujte link nižšie pre potvrdenie operácie: 
+Ak stále chcete Váš účet zakázať, prosím nasledujte link nižšie pre potvrdenie operácie:
 
 $OrangeButton
 
-*Poznámka*: tento link je platný len 7 dní. Prosím dokončite proces vymazania profilu v tejto dobe.</value>
+*Poznámka*: tento link je platný len 7 dní. Prosím dokončite proces zakázania účtu v tejto dobe.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Používateľ "$FromUserName":"$FromUserLink" vymazal svoj profil a teraz je tento profil zablokovaný. Všetky súbory používateľa sú mu / jej stále priradené a zaberajú miesto na disku. 
@@ -1493,7 +1493,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Zmena adresy portálu</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Vymazanie Vášho profilu z ${__VirtualRootHost} portálu</value>
+    <value>Zakázanie účtu na ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Používateľ vymazal svoj profil</value>

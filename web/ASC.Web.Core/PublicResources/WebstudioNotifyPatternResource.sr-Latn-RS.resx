@@ -824,15 +824,15 @@ Vaša adresa portala $PortalUrl je promenjena u novu "${__VirtualRootPath}":"${_
 *Napomena*: DNS podešavanja i opcije jedinstvenog prijavljivanja prestaju da rade dok ih ne promenite.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Uklanjanje profila sa portala "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Onemogućavanje naloga na "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Zahtevali ste da trajno izbrišete svoj profil sa portala "${__VirtualRootPath}":"${__VirtualRootPath}".
+Zahtevali ste da onemogućite svoj nalog na "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Ako i dalje želite da izbrišete svoj profil, pratite donji link da biste potvrdili operaciju:
+Ako i dalje želite da onemogućite svoj nalog, pratite donji link da biste potvrdili operaciju:
 
 $OrangeButton
 
-*Napomena*: ovaj link važi samo 7 dana. Dovršite proces brisanja profila u tom periodu.</value>
+*Napomena*: ovaj link važi samo 7 dana. Dovršite proces onemogućavanja naloga u tom periodu.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Korisnik "$FromUserName":"$FromUserLink" je izbrisao/la svoj profil i ovaj profil je sada blokiran. Sve korisničke datoteke su i dalje dodeljene njemu/njoj i zauzimaju prostor na disku.
@@ -1470,7 +1470,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Promena adrese portala</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Brisanje vašeg profila sa portala ${__VirtualRootHost}</value>
+    <value>Onemogućavanje naloga na ${__VirtualRootHost}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Korisnik je izbrisao svoj profil</value>

@@ -814,15 +814,15 @@ Vaše $PortalUrl portálová adresa by změněna na novou "${__VirtualRootPath}"
 *Poznámka*: nastavení DNS a možnosti jednotné přihlášení přestanou fungovat, dokud je nezměníte.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Odstranění profilu z "${__VirtualRootPath}":"${__VirtualRootPath}" portálu 
+    <value>h1.Zakázání účtu na "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Požádali jste o trvalé odstranění Vašeho profilu z "${__VirtualRootPath}":"${__VirtualRootPath}" portálu.
+Požádali jste o zakázání Vašeho účtu na "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Pokud stále chcete odstranit Váš profil, prosím následujte odkaz níže pro potvrzení operace:
+Pokud stále chcete Váš účet zakázat, prosím následujte odkaz níže pro potvrzení operace:
 
 $OrangeButton
 
-*Poznámka*: tento odkaz je platný pouze 7 dní. Prosím, dokončete proces vymazání profilu v tomto období.</value>
+*Poznámka*: tento odkaz je platný pouze 7 dní. Prosím, dokončete proces zakázání účtu v tomto období.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Uživatel "$FromUserName":"$FromUserLink" smazal svůj profil a tento profil je nyní zablokován. Všechny soubory uživatele jsou mu stále přiřazeny a zabírají místo na disku. 

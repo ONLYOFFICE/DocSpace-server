@@ -835,15 +835,15 @@ ${PortalUrl}- portaalisi osoite vaihdettiin uuteen "${__VirtualRootPath}":"${__V
 *Huom*: DNS-asetukset ja yksivaiheinen sisäänkirjautumisvaihtoehto eivät toimi enää ennen kuin muutat ne.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Profiiliin poistaminen "${__VirtualRootPath}":"${__VirtualRootPath}" -portaalista
+    <value>h1.Tilin poistaminen käytöstä "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Olet pyytänyt profiilisi lopullista poistoa "${__VirtualRootPath}":"${__VirtualRootPath}" -portaalista.
+Olet pyytänyt tilisi poistamista käytöstä "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Jos vielä haluat poistaa profiilisi, ole hyvä ja seuraa linkkiä vahvistaaksesi operaation:
+Jos vielä haluat poistaa tilisi käytöstä, ole hyvä ja seuraa linkkiä vahvistaaksesi operaation:
 
 $OrangeButton
 
-*Huom*: tämä linkki on voimassa vain 7 päivää. Ole hyvä ja viimeistele poistotoiminto siinä ajassa.</value>
+*Huom*: tämä linkki on voimassa vain 7 päivää. Ole hyvä ja viimeistele tilin käytöstä poistaminen siinä ajassa.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Käyttäjä "$FromUserName":"$FromUserLink" on poistanut profiilinsa, ja tämä profiili on nyt lukittu. Kaikki käyttäjän tiedostot ovat silti hänen tilillään ja vievät levytilaa.

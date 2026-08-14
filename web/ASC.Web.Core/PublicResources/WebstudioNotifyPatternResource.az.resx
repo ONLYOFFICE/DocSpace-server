@@ -815,15 +815,15 @@ $PortalUrl portalınızın ünvanı yeni "${__VirtualRootPath}":"${__VirtualRoot
 *Qeyd*: Ona siz onları dəyişdirənə qədər DNS parametrləri və Tək Giriş seçimləri deaktiv edilib.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Profile "${__VirtualRootPath}":"${__VirtualRootPath}" portalından silinir
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" üzərində hesabın deaktiv edilməsi
 
-Siz "${__VirtualRootPath}":"${__VirtualRootPath}" portalından profilinizi həmişəlik silmək üçün sorğu göndərmisiniz.
+Siz "${__VirtualRootPath}":"${__VirtualRootPath}" üzərində hesabınızı deaktiv etmək üçün sorğu göndərmisiniz.
 
-Profilinizi silmək istəyirsinizsə, aşağıdakı linki izləyin:
+Hesabınızı hələ də deaktiv etmək istəyirsinizsə, əməliyyatı təsdiqləmək üçün aşağıdakı linki izləyin:
 
 $OrangeButton
 
-*Qeyd*: bu link 7 gün ərzində etibarlı olacaq. Bu müddət ərzində profilin silinməsini tamamlayın.</value>
+*Qeyd*: bu link 7 gün ərzində etibarlı olacaq. Bu müddət ərzində hesabın deaktiv edilməsini tamamlayın.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>İstifadəçi "$FromUserName":"$FromUserLink" öz profilini silib və bu profil indi bloklanıb. Bütün istifadəçi faylları hələ də ona təyin edilir və diskdə yer tutur.
@@ -1456,7 +1456,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Portal ünvanının dəyişdirilməsi</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootHost} portalında profilinizin silinməsi</value>
+    <value>${__VirtualRootHost} üzərində hesabın deaktiv edilməsi</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>İstifadəçi öz profilini silib</value>
