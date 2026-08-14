@@ -117,6 +117,10 @@
     "allPublicConstructors": true
   },
   {
+    "name": "com.asc.authorization.application.exception.client.GrpcDeadlineExceededException",
+    "allPublicConstructors": true
+  },
+  {
     "name": "com.asc.authorization.data.client.cache.CachedRegisteredClient",
     "allDeclaredConstructors": true,
     "allPublicMethods": true,

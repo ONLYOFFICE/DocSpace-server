@@ -31,36 +31,31 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.authorization.data.client.cache;
+package com.asc.authorization.application.security.oauth.service;
 
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.Set;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.Optional;
 
 /**
- * A flat, plain-serializable snapshot of the fields required to reconstruct a Spring Authorization
- * Server {@code RegisteredClient} from a cache entry, without depending on the gRPC transport types
- * or the framework's immutable, builder-only {@code RegisteredClient} representation.
+ * Resolves who owns a registered client, so that grants can record the client's owner alongside the
+ * user who granted them and be removed when that owner's clients are removed.
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CachedRegisteredClient implements Serializable {
-  private String clientId;
-  private String clientSecret;
-  private String name;
-  private Set<String> authenticationMethods;
-  private Set<String> redirectUris;
-  private Set<String> scopes;
-  private Instant createdOn;
-  private String createdBy;
-  private long tenantId;
-  private boolean enabled;
-  private boolean publicClient;
-  private String cacheNamespace;
+public interface RegisteredClientOwnerService {
+  /**
+   * The tenant a client belongs to and the user who created it.
+   *
+   * @param tenantId the tenant owning the client
+   * @param userId the user who created the client, null when unknown
+   */
+  record Owner(long tenantId, String userId) {}
+
+  /**
+   * Loads the owner of a client. Unlike {@link
+   * RegisteredClientAccessibilityService#findAccessibleClient(String)} this ignores whether the
+   * client is public and enabled, because a grant to a private or disabled client still has to
+   * record its owner.
+   *
+   * @param clientId the client ID whose owner to resolve
+   * @return the owner, or empty if the client could not be resolved
+   */
+  Optional<Owner> findClientOwner(String clientId);
 }
