@@ -94,6 +94,22 @@ Two styles coexist; match the neighbouring letters:
 
 ## 4. Substitutions
 
+> ### ⚠ NEVER TRANSLATE A SUBSTITUTION
+>
+> **Tag names, the Velocity keywords around them and the literals they are compared against are
+> code, not prose.** `$UserName`, `#foreach($activity in $Activities)`, `#if($AutoRenew == "True")`,
+> `#end` stay byte-identical in every culture — translate only the words *around* them.
+>
+> A translated token fails silently: the reader gets a raw `$Datum` where a date belonged, or an
+> empty activity digest because `#foreach($activity em $Activities)` stopped being a directive.
+> Velocity is **case-sensitive**, so `#If(` is dead too, and it takes its orphaned `#end` with it.
+> Real damage found in the localized files: `$NombreUsuario`, `$Meno vlastníka`, `$VonesëPagese`,
+> `$aktivitāte`, `$Invite Link` and `$ Body` split by a stray space, `#final` instead of `#end`,
+> `== "Verdadeiro"` instead of `== "True"`.
+>
+> The same goes for a lost `$`: `"{__VirtualRootPath}/billing/addons"` prints the path literally.
+> The letter tests (§9) catch this only for the cultures they are run with — see `LETTER_CULTURES`.
+
 Per-letter tags are set in `Init` (`new TagValue("URL1", …)`), plus helpers from `TagValues`:
 `OrangeButton(text, url, tag)`, `TrulyYours(helper, text, asTableRow)`, `Image(...)`,
 `WithoutUnsubscribe()`.
@@ -219,8 +235,10 @@ $x = [xml](Get-Content web/ASC.Web.Core/PublicResources/WebstudioNotifyPatternRe
 ($x.root.data | Where-Object { $_.name -eq 'pattern_my_letter' }).value
 ```
 
-The resx uses **LF** line endings while the `.cs` files use CRLF — keep each file as it is.
-`git diff --check` reports "trailing whitespace" on every added line in this repo (`core.autocrlf=true`
+Everything in the working tree is **CRLF** — resx and `.cs` alike (`core.autocrlf=true` stores LF in
+the repository and converts on checkout). Write CRLF, and never let an editor re-save a resx with LF:
+the diff then covers the whole file and buries the one line that actually changed.
+`git diff --check` reports "trailing whitespace" on every added line in this repo (same `autocrlf`
 artifact); confirm real trailing whitespace with a grep before chasing it.
 
 Runtime check: MailPit catches outgoing mail in local dev (the Aspire dashboard shows the port it
@@ -235,6 +253,19 @@ and — when MailPit is running — delivers it to the inbox:
 ```bash
 dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
 ```
+
+**That run covers `en-US` only** — `LetterCultures.Names` holds just the default culture, so a letter
+that renders fine in English and is broken in twenty others still passes. Whenever you touch localized
+resx, run the cultures too:
+
+```bash
+LETTER_CULTURES=en-US,de,ru,zh-CN dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
+```
+
+Every culture multiplies the case count, and the full sweep takes a few minutes — worth it after a
+translation import. Only `AssertContent` (tags resolved, links and buttons present) runs per culture;
+`AssertDefaultCultureText` checks wording and stays on `en-US`, since any other culture may legitimately
+translate it. A culture with no resx of its own falls back to the default one, exactly as production does.
 
 A letter test derives from `LetterTestBase` and describes only its own letter; everything shared lives in
 `Infrastructure/`:
