@@ -92,6 +92,13 @@ Two styles coexist; match the neighbouring letters:
   not recognized and the letter prints the raw quotes and the URL instead. A slightly loose space
   before the particle is the lesser evil. Textile links inside these three cultures are worth
   eyeballing in the rendered preview (§9) rather than trusting the source.
+
+  **ar-SA opens such a caption with `{white-space: nowrap}` — keep it.** Textile reads a leading
+  `{…}` as inline CSS for the phrase, and the Arabic file uses it in 29 places, always where the
+  caption *is* the portal address: `"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"`.
+  It stops the long URL from breaking across lines in right-to-left text. It looks like stray markup
+  and is easy to drop while rewriting a sentence; no other culture has it, so a diff that removes it
+  from one Arabic key will not look wrong on its own.
 - **Raw HTML table rows** (all marketing / after-registration letters) — a sequence of
   `<tr border="0" cellspacing="0" cellpadding="0"><td class="fol" style="…">…</td></tr>` blocks
   separated by blank lines, injected into `HtmlMaster`. There are no `<ul>`/`<li>` anywhere in the
