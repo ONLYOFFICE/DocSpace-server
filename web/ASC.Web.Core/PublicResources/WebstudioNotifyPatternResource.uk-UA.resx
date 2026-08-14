@@ -303,6 +303,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Перейти до розділу Платежі</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ласкаво просимо до &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Вітаємо, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ви щойно створили свій ${LetterLogoText}, де можна легко редагувати офісні файли, керувати ними та працювати над ними спільно.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Адреса вашого ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Ваш логін*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Підтвердьте свою адресу електронної пошти (посилання дійсне протягом 7 днів):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Сподіваємося, вам сподобається новий спосіб спільної роботи над документами!&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Активуйте свою електронну пошту для порталу "${__VirtualRootPath}":"$InviteLink"
 
@@ -1021,7 +1044,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Вітаємо, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ви щойно *створили ${LetterLogoText}* — центр документів, за допомогою якого можна покращити співпрацю зі своєю командою, клієнтами, партнерами тощо.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ви щойно створили свій ${LetterLogoText}, де можна легко редагувати офісні файли, керувати ними та працювати над ними спільно.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Адреса вашого ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1330,6 +1353,19 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Вас запрошено до ${LetterLogoText}
+
+Вітаємо!
+
+Вас запросили приєднатися до ${LetterLogoText} за адресою "${__VirtualRootPath}":"${__VirtualRootPath}". Щоб прийняти запрошення, натисніть на посилання:
+
+$OrangeButton
+
+Після натискання на запрошувальне посилання встановіть новий пароль для свого облікового запису.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Вітаємо!
 
@@ -1380,6 +1416,19 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.Ласкаво просимо до ${LetterLogoText}!
+
+Вітаємо, $UserName!
+
+Вітаємо у ${LetterLogoText}! Ваш профіль успішно додано до "${__VirtualRootPath}":"${__VirtualRootPath}". Тут можна легко редагувати офісні файли всіх популярних форматів, керувати ними та працювати над ними спільно.
+
+$OrangeButton
+
+Якщо потрібна допомога, завітайте до "Довідкового центру":"${__HelpLink}" або зверніться до "служби підтримки":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Ласкаво просимо до простору &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
@@ -1396,6 +1445,9 @@ $TrulyYours</value>
 *Отримайте задоволення від нового способу спільної роботи над документами!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>Ласкаво просимо до ${LetterLogoText}!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Будь ласка, активуйте свою адресу електронної пошти</value>
@@ -1625,6 +1677,9 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Потрібна дія: не вдається автоматично поповнити баланс гаманця у вашому ${LetterLogoText}</value>
   </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Вас запрошено до ${LetterLogoText}</value>
+  </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Ваша роль у ШІ-агенті ${LetterLogoText} змінилася</value>
   </data>
@@ -1639,6 +1694,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Ваш тип користувача ${LetterLogoText} змінився</value>
+  </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>Ласкаво просимо до ${LetterLogoText}!</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Ласкаво просимо до простору ${LetterLogoText}!</value>

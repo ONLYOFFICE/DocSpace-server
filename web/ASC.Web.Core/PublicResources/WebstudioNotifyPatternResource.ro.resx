@@ -300,6 +300,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Accesați secțiunea Plăți</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Bun venit în spaţiul &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Stimate, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tocmai ați creat ${LetterLogoText}, unde puteți edita, gestiona și colabora cu ușurință la fișiere de birou.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Adresa dvs. ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Datele dvs. de conectare*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Descoperiți un nou mod de colaborare asupra documentelor!&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Activați poștă dvs electronică pentru portalul "${__VirtualRootPath}":"$InviteLink".
 
@@ -1009,7 +1032,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Stimate, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tocmai ați *creat spațiul ${LetterLogoText}*, un hub de documente pentru a oferi un impuls colaborării în echipa, cu clienții și partenerii dvs și nu numai.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tocmai ați creat ${LetterLogoText}, unde puteți edita, gestiona și colabora cu ușurință la fișiere de birou.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Adresa dvs. ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1359,6 +1382,19 @@ Aflați mai multe despre tipuri de utilizator și permisiuni în "Centru de ajut
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.Bun venit în spaţiul ${LetterLogoText}!
+
+Stimate, $UserName!
+
+Bine ați venit în ${LetterLogoText}! Profilul dvs a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Aici puteți edita, gestiona și colabora cu ușurință la fișiere de birou de toate formatele populare.
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, consultați "Centru de ajutor":"${__HelpLink}" sau contactați "echipa de suport":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Bun venit în spaţiul &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
@@ -1374,6 +1410,9 @@ Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și 
 *Descoperiți un nou mod de colaborare asupra documentelor!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ${LetterLogoText}!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Activați adresa dvs de e-mail</value>
@@ -1609,6 +1648,9 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Tipul dvs de utilizator ${LetterLogoText} s-a schimbar</value>
   </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ${LetterLogoText}!</value>
+  </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Bun venit în spaţiul ${LetterLogoText}!</value>
   </data>
@@ -1624,6 +1666,9 @@ $TrulyYours</value>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} a fost șters</value>
   </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Sunteţi invitat să vă asociaţi la ${LetterLogoText}</value>
+  </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Rolul tău într-un agent IA ${LetterLogoText} s-a schimbat</value>
   </data>
@@ -1633,6 +1678,19 @@ $TrulyYours</value>
 Acest e-mail este pentru a vă informa că cheia dvs. API "*$Message*" a expirat și a fost dezactivată.
 
 Puteți genera o nouă cheie API în "Instrumente pentru dezvoltatori":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Sunteţi invitat să vă asociaţi la ${LetterLogoText}
+
+Bună!
+
+Sunteţi invitat să vă asociaţi la ${LetterLogoText} la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
 
 $TrulyYours</value>
   </data>

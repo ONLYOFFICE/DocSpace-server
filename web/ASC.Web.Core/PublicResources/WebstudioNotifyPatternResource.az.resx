@@ -300,6 +300,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Ödənişlər bölməsinə keçin</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;&lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;-ə xoş gəlmisiniz!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Salam, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Siz indicə ${LetterLogoText} yaratdınız — burada ofis fayllarını asanlıqla redaktə edə, idarə edə və birgə işləyə bilərsiniz.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*${LetterLogoText} ünvanınız*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Giriş məlumatlarınız*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;E-poçtunuzu təsdiqləyin (link 7 gün ərzində etibarlıdır):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Sənəd əməkdaşlığının yeni üsulundan həzz alın!&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.E-poçt ünvanınızın "${__VirtualRootPath}":"$InviteLink" portalında aktivləşdirilməsi.
 
@@ -1000,7 +1023,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Salam, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Komandanız, müştəriləriniz, tərəfdaşlarınız və s. ilə əməkdaşlığı artıra biləcəyiniz sənəd mərkəzi olan *${LetterLogoText} yaratdınız*.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Siz indicə ${LetterLogoText} yaratdınız — burada ofis fayllarını asanlıqla redaktə edə, idarə edə və birgə işləyə bilərsiniz.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*${LetterLogoText} ünvanınız*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1350,6 +1373,19 @@ ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType} siz
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.${LetterLogoText}-ə xoş gəlmisiniz!
+
+Salam, $UserName!
+
+${LetterLogoText}-ə xoş gəlmisiniz! Profiliniz uğurla "${__VirtualRootPath}":"${__VirtualRootPath}" ünvanına əlavə edildi. Burada bütün populyar formatlarda ofis fayllarını asanlıqla redaktə edə, idarə edə və birgə işləyə bilərsiniz.
+
+$OrangeButton
+
+Kömək lazımdırsa, "Dəstək Mərkəzinə":"${__HelpLink}" baxın və ya "dəstək komandamızla":"${__SupportLink}" əlaqə saxlayın.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;-ə xoş gəlmisiniz!
 
@@ -1364,6 +1400,9 @@ Cari tarif planınız STARTUP-dır. Tamamilə pulsuzdur və ona daxildir:
 *Sənəd əməkdaşlığının yeni üsulundan həzz alın!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>${LetterLogoText}-ə xoş gəlmisiniz!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. E-poçt ünvanınızı aktiv edin</value>
@@ -1599,6 +1638,9 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>${LetterLogoText} istifadəçi tipiniz dəyişdi</value>
   </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>${LetterLogoText}-ə xoş gəlmisiniz!</value>
+  </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>${LetterLogoText}-ə xoş gəlmisiniz!</value>
   </data>
@@ -1613,6 +1655,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} silindi</value>
+  </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Siz ${LetterLogoText}-ə dəvət olundunuz</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>${LetterLogoText} AI agentindəki rolunuz dəyişdi</value>
@@ -1634,6 +1679,19 @@ $TrulyYours</value>
 *Müştəri:* ${OwnerName}
 
 Zəhmət olmasa, avtomatik ödənişin söndürüldüyünə əmin olun. Müştərinin Stripe hesabında avtomatik ödənişin statusunu yoxlayın.</value>
+  </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Siz ${LetterLogoText}-ə dəvət olundunuz
+
+Salam!
+
+"${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında ${LetterLogoText}-ə qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
+
+$OrangeButton
+
+Dəvət linkinə kliklədikdən sonra hesabınız üçün yeni şifrə təyin edin.
+
+$TrulyYours</value>
   </data>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Salam!

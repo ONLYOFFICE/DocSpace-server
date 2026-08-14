@@ -303,6 +303,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Siirry Maksut-osioon</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Tervetuloa &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;en!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hei, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Loit juuri oman ${LetterLogoText}si, jossa voit helposti muokata ja hallita toimistotiedostoja sekä tehdä niiden parissa yhteistyötä.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*${LetterLogoText}-osoitteesi*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Kirjautumistietosi*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Vahvista sähköpostiosoitteesi (linkki on voimassa 7 päivää):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Nauti uudesta tavasta tehdä yhteistyötä asiakirjoilla!&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivoi sähköpostisi "${__VirtualRootPath}":"$InviteLink"- portaalille.
 
@@ -1019,7 +1042,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hei, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Olet juuri *luonut ${LetterLogoText}n*, asiakirjakeskittymän, jossa voit tehostaa yhteistyötä tiimisi, asiakkaittesi, kumppaneittesi jne kanssa.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Loit juuri oman ${LetterLogoText}si, jossa voit helposti muokata ja hallita toimistotiedostoja sekä tehdä niiden parissa yhteistyötä.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*${LetterLogoText}-osoitteesi*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1328,6 +1351,19 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Sinut on kutsuttu ${LetterLogoText}iin
+
+Hei!
+
+Sinut on kutsuttu liittymään ${LetterLogoText}iin "${__VirtualRootPath}":"${__VirtualRootPath}". Hyväksy kutsu klikkaamalla linkkiä:
+
+$OrangeButton
+
+Ole hyvä ja aseta tilillesi uusi salasana kutsulinkin klikkaamisen jälkeen.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>ei!
 
@@ -1378,6 +1414,19 @@ Lue lisää käyttäjätyypeistä ja oikeuksista "Help Centerissä":"${HelpCente
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.Tervetuloa ${LetterLogoText}en!
+
+Hei, $UserName!
+
+Tervetuloa ${LetterLogoText}iin! Profiilisi lisättiin onnistuneesti osoitteeseen "${__VirtualRootPath}":"${__VirtualRootPath}". Täällä voit helposti muokata ja hallita kaikkien yleisten muotojen toimistotiedostoja sekä tehdä niiden parissa yhteistyötä.
+
+$OrangeButton
+
+Jos tarvitset apua, tutustu "Help Centeriin":"${__HelpLink}" tai kysy "tukitiimiltämme":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Tervetuloa &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;en!
 
@@ -1393,6 +1442,9 @@ Tämänhetkinen tilauksesi on STARTUP. Se on täysin ilmainen ja sisältää:
 *nauti uudesta tavasta tehdä yhteistyötä asiakirjoilla!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>Tervetuloa ${LetterLogoText}en!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Ole hyvä ja aktivoi sähköpostiosoitteesi</value>
@@ -1622,6 +1674,9 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Vaadittu toimenpide: ${LetterLogoText} -lompakkosi saldon automaattinen täydentäminen ei onnistu</value>
   </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Sinut on kutsuttu ${LetterLogoText}iin</value>
+  </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Roolisi ${LetterLogoText} tekoälyagentissa on muuttunut</value>
   </data>
@@ -1636,6 +1691,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>${LetterLogoText} käyttäjätyyppisi on muuttunut</value>
+  </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>Tervetuloa ${LetterLogoText}en!</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Tervetuloa ${LetterLogoText}en!</value>

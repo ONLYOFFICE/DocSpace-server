@@ -300,6 +300,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Przejdź do sekcji płatności</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Witaj w &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Witaj, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Właśnie utworzyłeś swój ${LetterLogoText}, w którym możesz łatwo edytować pliki biurowe, zarządzać nimi i wspólnie nad nimi pracować.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Adres Twojego ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Twoje dane logowania*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Potwierdź swój adres e-mail (link jest ważny przez 7 dni):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Ciesz się nowym sposobem współpracy nad dokumentami!&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktywuj Swój adres e-mail na stronie "${__VirtualRootPath}":"$InviteLink".
 
@@ -999,7 +1022,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Witaj, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Właśnie udało Ci się *utworzyć konto w ${LetterLogoText}*. Jest to centrum dokumentów, dzięki któremu możesz usprawnić współpracę ze swoim zespołem, klientami, partnerami i nie tylko.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Właśnie utworzyłeś swój ${LetterLogoText}, w którym możesz łatwo edytować pliki biurowe, zarządzać nimi i wspólnie nad nimi pracować.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Adres Twojego ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1349,6 +1372,19 @@ Dowiedz się więcej o rodzajach użytkowników i uprawnieniach z Centrum pomocy
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.Witaj w ${LetterLogoText}!
+
+Witaj, $UserName!
+
+Witamy w ${LetterLogoText}! Twój profil został pomyślnie dodany do "${__VirtualRootPath}":"${__VirtualRootPath}". Tutaj możesz łatwo edytować pliki biurowe we wszystkich popularnych formatach, zarządzać nimi i wspólnie nad nimi pracować.
+
+$OrangeButton
+
+Jeśli potrzebujesz pomocy, zajrzyj do "Help Center":"${__HelpLink}" lub zapytaj nasz "zespół wsparcia":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Witaj w &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
@@ -1364,6 +1400,9 @@ Twój bieżący plan cenowy to STARTUP. Jest absolutnie darmowy i obejmuje:
 *Ciesz się nowym sposobem współpracy nad dokumentami!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>Witaj w ${LetterLogoText}!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Proszę aktywować swój adres e-mail</value>
@@ -1602,6 +1641,9 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Twój rodzaj użytkownika w ${LetterLogoText} uległa zmianie</value>
   </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>Witaj w ${LetterLogoText}!</value>
+  </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Witaj w ${LetterLogoText}!</value>
   </data>
@@ -1613,6 +1655,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
     <value>${LetterLogoText}: Twój klucz API wygasł</value>
+  </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Zaproszono Cię do ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Twoja rola w agencie AI ${LetterLogoText} uległa zmianie</value>
@@ -1634,6 +1679,19 @@ $TrulyYours</value>
 *Klient:* ${OwnerName}
 
 Upewnij się, że automatyczne rozliczenia są wyłączone. Sprawdź status automatycznych rozliczeń na koncie klienta w Stripe.</value>
+  </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Zaproszono Cię do ${LetterLogoText}
+
+Cześć!
+
+Zaproszono Cię do ${LetterLogoText} pod adresem "${__VirtualRootPath}":"${__VirtualRootPath}". Zaakceptuj zaproszenie, klikając link:
+
+$OrangeButton
+
+Po kliknięciu linku z zaproszeniem skonfiguruj nowe hasło dla swojego konta.
+
+$TrulyYours</value>
   </data>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Witaj!

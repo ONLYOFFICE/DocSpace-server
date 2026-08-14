@@ -300,6 +300,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>前往付款部分</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;欢迎来到 &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;！&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您好, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;您刚刚创建了自己的${LetterLogoText}，可以在这里轻松编辑、管理办公文件并进行协作。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*您的 ${LetterLogoText} 地址*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*您的登录信息*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;请确认您的电子邮箱（该链接有效期为7天）:&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;欢迎享受一种新的文档协作方式！&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.激活您 "${__VirtualRootPath}":"$InviteLink" 门户的电邮。
 
@@ -1030,7 +1053,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您好, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;您已成功 *创建 ${LetterLogoText} *，您可以使用它管理文档，提升与团队、客户、合作伙伴的协作。&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;您刚刚创建了自己的${LetterLogoText}，可以在这里轻松编辑、管理办公文件并进行协作。&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*您的 ${LetterLogoText} 地址*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1381,6 +1404,19 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.欢迎来到 ${LetterLogoText}！
+
+您好, $UserName!
+
+欢迎使用 ${LetterLogoText}！您的个人资料已成功添加到 "${__VirtualRootPath}":"${__VirtualRootPath}" 。在这里，您可以轻松编辑、管理各种常见格式的办公文件并进行协作。
+
+$OrangeButton
+
+如需帮助，请查阅 "帮助中心":"${__HelpLink}" 或联系我们的 "支持团队":"${__SupportLink}" 。
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. 欢迎使用 &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;！
 
@@ -1396,6 +1432,9 @@ $TrulyYours</value>
 *用新方式开启文档协作！*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>欢迎来到 ${LetterLogoText}！</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}。请激活您的电邮地址</value>
@@ -1631,6 +1670,9 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>${LetterLogoText}：您的用户类型已更改</value>
   </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>欢迎来到 ${LetterLogoText}！</value>
+  </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>欢迎使用 ${LetterLogoText}！</value>
   </data>
@@ -1646,6 +1688,9 @@ $TrulyYours</value>
   <data name="subject_api_key_expired" xml:space="preserve">
     <value>${LetterLogoText}：您的 API 密钥已过期</value>
   </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>您已受邀加入 ${LetterLogoText}</value>
+  </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>您在 ${LetterLogoText} AI 代理中的角色已更改</value>
   </data>
@@ -1655,6 +1700,19 @@ $TrulyYours</value>
 此邮件是为了通知您，您的 API 密钥 "*$Message*" 已过期并已停用。
 
 您可以在 "开发者工具":"${__VirtualRootPath}/developer-tools/api-keys" 中生成新的 API 密钥。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.您已受邀加入 ${LetterLogoText}
+
+你好！
+
+您受邀加入在 "${__VirtualRootPath}":"${__VirtualRootPath}" 的${LetterLogoText}。请点击链接接受邀请：
+
+$OrangeButton
+
+点击邀请链接后，请为您的帐号设置一个新密码。
 
 $TrulyYours</value>
   </data>

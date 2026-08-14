@@ -303,6 +303,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Doties uz sadaļu Maksājumi</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Laipni lūdzam &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Sveiki, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jūs tikko izveidojāt savu ${LetterLogoText}, kurā varat ērti rediģēt un pārvaldīt biroja failus un sadarboties ar tiem.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Jūsu ${LetterLogoText} adrese*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Jūsu pieteikšanās dati*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Apstipriniet savu e-pastu (saite ir derīga 7 dienas):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Izbaudiet jaunu dokumentu sadarbības veidu!&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivizējiet savu e-pastu portālā "${__VirtualRootPath}":"$InviteLink".
 
@@ -1021,7 +1044,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Sveiki, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jūs tikko *izveidojāt ${LetterLogoText}* - dokumentu centru, kurā varat uzlabot sadarbību ar savu komandu, klientiem, partneriem un daudz ko citu.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jūs tikko izveidojāt savu ${LetterLogoText}, kurā varat ērti rediģēt un pārvaldīt biroja failus un sadarboties ar tiem.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Jūsu ${LetterLogoText} adrese*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1330,6 +1353,19 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Jūs esat uzaicināts pievienoties ${LetterLogoText}
+
+Sveiki!
+
+Jūs esat uzaicināts (-a) pievienoties ${LetterLogoText} šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
+
+$OrangeButton
+
+Pēc tam, kad noklikšķiniet uz uzaicinājuma saites, iestatiet jaunu paroli savam kontam.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Sveiki!
 
@@ -1380,6 +1416,19 @@ Uzziniet vairāk par lietotāju tipiem un atļaujām sadaļā "Palīdzības cent
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.Laipni lūdzam ${LetterLogoText}!
+
+Sveiki, $UserName!
+
+Laipni lūdzam ${LetterLogoText}! Jūsu profils ir veiksmīgi pievienots "${__VirtualRootPath}":"${__VirtualRootPath}". Šeit varat ērti rediģēt un pārvaldīt visu populāro formātu biroja failus un sadarboties ar tiem.
+
+$OrangeButton
+
+Ja nepieciešama palīdzība, apmeklējiet mūsu "Palīdzības centru":"${__HelpLink}" vai jautājiet mūsu "atbalsta komandai":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Laipni lūdzam &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
@@ -1395,6 +1444,9 @@ Jūsu pašreizējais tarifu plāns ir STARTUP (JAUNUZŅĒMUMS). Tas ir pilnīgi 
 *Izbaudiet jaunu dokumentu sadarbības veidu!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>Laipni lūdzam ${LetterLogoText}!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Lūdzu, aktivizējiet savu e-pasta adresi</value>
@@ -1624,6 +1676,9 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Nepieciešama darbība: Neizdevās automātiski papildināt Maka atlikumu Jūsu ${LetterLogoText}</value>
   </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Jūs esat uzaicināts pievienoties ${LetterLogoText}</value>
+  </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Jūsu loma ${LetterLogoText} MI aģentā ir mainīta</value>
   </data>
@@ -1638,6 +1693,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} lietotāja tips ir mainīts</value>
+  </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>Laipni lūdzam ${LetterLogoText}!</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Laipni lūdzam ${LetterLogoText}!</value>

@@ -303,6 +303,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Vào phần Thanh toán</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Chào mừng bạn đến với &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Xin chào $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Bạn vừa tạo ${LetterLogoText} của mình, nơi bạn có thể dễ dàng chỉnh sửa, quản lý và cộng tác trên các tệp văn phòng.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Địa chỉ ${LetterLogoText} của bạn*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Thông tin đăng nhập của bạn*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Xin vui lòng xác nhận email của bạn (liên kết có hiệu lực trong 7 ngày):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Tận hưởng một cách cộng tác tài liệu mới!&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Kích hoạt email của bạn cho cổng "${__VirtualRootPath}":"$InviteLink".
 
@@ -1022,7 +1045,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Xin chào $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Bạn vừa *tạo ${LetterLogoText}*, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Bạn vừa tạo ${LetterLogoText} của mình, nơi bạn có thể dễ dàng chỉnh sửa, quản lý và cộng tác trên các tệp văn phòng.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Địa chỉ ${LetterLogoText} của bạn*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1331,6 +1354,19 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Bạn được mời vào ${LetterLogoText}
+
+Xin chào!
+
+Bạn được mời tham gia ${LetterLogoText} tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Sau khi nhấp vào liên kết mời, xin vui lòng đặt mật khẩu mới cho tài khoản của bạn.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Xin chào!
 
@@ -1381,6 +1417,19 @@ Hãy tìm hiểu thêm về loại người dùng và quyền hạn trong "Trung
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.Chào mừng bạn đến với ${LetterLogoText}!
+
+Xin chào $UserName!
+
+Chào mừng bạn đến với ${LetterLogoText}! Hồ sơ của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Tại đây, bạn có thể dễ dàng chỉnh sửa, quản lý và cộng tác trên các tệp văn phòng thuộc mọi định dạng phổ biến.
+
+$OrangeButton
+
+Nếu cần trợ giúp, hãy xem "Trung Tâm Hỗ Trợ":"${__HelpLink}" hoặc liên hệ "nhóm hỗ trợ":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Chào mừng bạn đến với &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
@@ -1396,6 +1445,9 @@ Gói dịch vụ hiện tại của bạn là STARTUP. Nó hoàn toàn miễn ph
 *Tận hưởng một cách cộng tác tài liệu mới!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ${LetterLogoText}!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Vui lòng kích hoạt địa chỉ email của bạn</value>
@@ -1625,6 +1677,9 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Cần hành động: Không thể tự động nạp tiền vào số dư Ví trong ${LetterLogoText} của bạn</value>
   </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Bạn được mời vào ${LetterLogoText}</value>
+  </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Vai trò của bạn trong tác nhân AI ${LetterLogoText} đã thay đổi</value>
   </data>
@@ -1639,6 +1694,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Loại người dùng ${LetterLogoText} của bạn đã thay đổi</value>
+  </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ${LetterLogoText}!</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Chào mừng bạn đến với ${LetterLogoText}!</value>

@@ -303,6 +303,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Prejsť do časti Platby</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Vitajte v &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Dobrý deň, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Práve ste vytvorili svoj ${LetterLogoText}, kde môžete jednoducho upravovať a spravovať kancelárske súbory a spolupracovať na nich.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Adresa vášho ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Vaše prihlasovacie údaje*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Potvrďte svoj e-mail (odkaz je platný 7 dní):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Užite si nový spôsob spolupráce na dokumentoch!&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivujte si Váš e-mail pre "${__VirtualRootPath}":"$InviteLink" portál.
 
@@ -1021,7 +1044,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Dobrý deň, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Práve ste *vytvorili ${LetterLogoText}*, hub dokumentov, v ktorom môžete zlepšiť spoluprácu so svojím tímom, zákazníkmi, partnermi a ďalšími.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Práve ste vytvorili svoj ${LetterLogoText}, kde môžete jednoducho upravovať a spravovať kancelárske súbory a spolupracovať na nich.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Adresa vášho ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1330,6 +1353,19 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Boli ste pozvaní do ${LetterLogoText}
+
+Dobrý deň!
+
+Pozývame Vás do ${LetterLogoText} na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Pozvanie prijmite kliknutím na odkaz:
+
+$OrangeButton
+
+Po kliknutí na odkaz pozvánky nastavte nové heslo pre svoj účet.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Dobrý deň!
 
@@ -1380,6 +1416,19 @@ Viac informácií o typoch používateľov a oprávneniach sa dozviete v "Centre
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.Vitajte v ${LetterLogoText}!
+
+Dobrý deň, $UserName!
+
+Vitajte v ${LetterLogoText}! Váš profil bol úspešne pridaný do "${__VirtualRootPath}":"${__VirtualRootPath}". Tu môžete jednoducho upravovať a spravovať kancelárske súbory všetkých bežných formátov a spolupracovať na nich.
+
+$OrangeButton
+
+Ak potrebujete pomoc, navštívte "Centrum pomoci":"${__HelpLink}" alebo sa obráťte na náš "tím podpory":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Vitajte v &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
@@ -1395,6 +1444,9 @@ Váš aktuálny tarifný plán je STARTUP. Je úplne zadarmo a zahrňuje:
 *Vychutnajte si nový spôsob spolupráce na dokumentoch!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>Vitajte v ${LetterLogoText}!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Prosím aktivujte svoju e-mailovú adresu</value>
@@ -1624,6 +1676,9 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Je potrebná akcia: Nie je možné automaticky dobiť zostatok peňaženky vo vašom ${LetterLogoText}</value>
   </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Boli ste pozvaní do ${LetterLogoText}</value>
+  </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Vaša rola v AI agente ${LetterLogoText} bola zmenená</value>
   </data>
@@ -1638,6 +1693,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Váš typ používateľa ${LetterLogoText} sa zmenil</value>
+  </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>Vitajte v ${LetterLogoText}!</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Vitajte v ${LetterLogoText}!</value>

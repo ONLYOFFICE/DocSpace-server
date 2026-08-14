@@ -300,6 +300,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Անցնել վճարումների բաժին</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Բարի գալուստ &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Ողջույն, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Դուք հենց նոր ստեղծեցիք ձեր ${LetterLogoText}-ը, որտեղ կարող եք հեշտությամբ խմբագրել, կառավարել գրասենյակային ֆայլերը և համագործակցել դրանց շուրջ։&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Ձեր ${LetterLogoText} հասցեն*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Ձեր մուտքի տվյալները*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt; Վայելեք փաստաթղթերի համագործակցության նոր տարբերակը:&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1. Ակտիվացրեք ձեր էլ.փոստը "${__VirtualRootPath}":"$InviteLink" պորտալի համար:
 
@@ -1008,7 +1031,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Ողջույն, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Դուք հենց նոր *ստեղծեցիք ${LetterLogoText}*-ը՝ փաստաթղթերի կենտրոն, որտեղ կարող եք խթանել համագործակցությունը ձեր թիմի, հաճախորդների, գործընկերների և այլն.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Դուք հենց նոր ստեղծեցիք ձեր ${LetterLogoText}-ը, որտեղ կարող եք հեշտությամբ խմբագրել, կառավարել գրասենյակային ֆայլերը և համագործակցել դրանց շուրջ։&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Ձեր ${LetterLogoText} հասցեն*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1187,7 +1210,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
-Դուք հրավիրված եք միանալու սենյակին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ անցնելով հղումով.
+Դուք հրավիրված եք միանալու սենյակին "${__VirtualRootPath}":"${__VirtualRootPath}" հասցեում: Ընդունեք հրավերը՝ անցնելով հղումով.
 
 $OrangeButton
 
@@ -1356,6 +1379,19 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.Բարի գալուստ ${LetterLogoText}:
+
+Ողջույն, $UserName!
+
+Բարի գալուստ ${LetterLogoText}! Ձեր պրոֆիլը հաջողությամբ ավելացվել է "${__VirtualRootPath}":"${__VirtualRootPath}" հասցեում։ Այստեղ կարող եք հեշտությամբ խմբագրել, կառավարել բոլոր տարածված ձևաչափերի գրասենյակային ֆայլերը և համագործակցել դրանց շուրջ։
+
+$OrangeButton
+
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"${__HelpLink}" կամ դիմեք մեր "աջակցության թիմին":"${__SupportLink}"։
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Բարի գալուստ &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
@@ -1370,6 +1406,9 @@ $TrulyYours</value>
 *Օգտվեք փաստաթղթերի համագործակցության նոր եղանակը!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>Բարի գալուստ ${LetterLogoText}:</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}: Խնդրում ենք ակտիվացնել ձեր էլ. հասցեն</value>
@@ -1605,6 +1644,9 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Ձեր օգտատիրոջ տեսակը ${LetterLogoText}-ում փոխվել է</value>
   </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>Բարի գալուստ ${LetterLogoText}:</value>
+  </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Բարի գալուստ ${LetterLogoText}:</value>
   </data>
@@ -1620,6 +1662,9 @@ $TrulyYours</value>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText}-ը ջնջված է</value>
   </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Դուք հրավիրված եք ${LetterLogoText}</value>
+  </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Ձեր դերը ${LetterLogoText} ԱԲ գործակալում փոխվել է</value>
   </data>
@@ -1629,6 +1674,19 @@ $TrulyYours</value>
 Այս նամակը ուղարկվում է ձեզ տեղեկացնելու, որ ձեր API բանալին "*$Message*" սպառվել և անջատվել է:
 
 Կարող եք ստեղծել նոր API բանալի "Մշակողի գործիքներ":"${__VirtualRootPath}/developer-tools/api-keys" ում:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Դուք հրավիրված եք ${LetterLogoText}
+
+Բարեւ Ձեզ!
+
+Դուք հրավիրված եք միանալու ${LetterLogoText}-ին "${__VirtualRootPath}":"${__VirtualRootPath}" հասցեում: Ընդունեք հրավերը՝ անցնելով հղումով.
+
+$OrangeButton
+
+Հրավերի հղումը սեղմելուց հետո խնդրում ենք նոր գաղտնաբառ սահմանել ձեր հաշվի համար:
 
 $TrulyYours</value>
   </data>

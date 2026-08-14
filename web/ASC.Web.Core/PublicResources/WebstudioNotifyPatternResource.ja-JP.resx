@@ -238,7 +238,7 @@
     <value>ポータルを削除する</value>
   </data>
   <data name="ButtonGetStarted" xml:space="preserve">
-    <value>开始使用</value>
+    <value>始める</value>
   </data>
   <data name="ButtonGoToDocSpace" xml:space="preserve">
     <value>${LetterLogoText}へ移動</value>
@@ -299,6 +299,29 @@
   </data>
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>お支払いセクションへ移動</value>
+  </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;&lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;へようこそ!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;$UserName 様&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;オフィス文書の編集、管理、共同作業を手軽に行える${LetterLogoText}を作成いたしました。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*${LetterLogoText}のアドレス*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*ログイン情報*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;メールのご確認をお願いします。リンクの有効期限は7日間です：&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;ドキュメントコラボレーションの新時代をどうぞお楽しみください！&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.ポータル"${__VirtualRootPath}":"$InviteLink"用のメールをアクティブにしましょう
@@ -1011,7 +1034,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;$UserName 様&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;社内チーム、顧客、パートナーなどとのコラボレーションを促進するドキュメントハブである${LetterLogoText}でお客様のアカウントを作成いたしました。&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;オフィス文書の編集、管理、共同作業を手軽に行える${LetterLogoText}を作成いたしました。&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*${LetterLogoText}のアドレス*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1338,6 +1361,19 @@ ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" で新しいユ�
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.${LetterLogoText}へようこそ!
+
+$UserName 様
+
+${LetterLogoText}へようこそ！お客様のプロフィールが "${__VirtualRootPath}":"${__VirtualRootPath}" に追加されました。ここでは、主要な形式のオフィス文書を手軽に編集、管理し、共同作業を行えます。
+
+$OrangeButton
+
+お困りの際は "ヘルプセンター":"${__HelpLink}" をご覧いただくか、"サポートチーム":"${__SupportLink}" までお問い合わせください。
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;へようこそ！
 
@@ -1355,6 +1391,9 @@ ${LetterLogoText}をご利用いただきありがとうございます。
 *ドキュメントコラボレーションの新時代をどうぞお楽しみください！*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>${LetterLogoText}へようこそ!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}.メールアドレスを有効にしてください</value>
@@ -1587,6 +1626,9 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>あなたの${LetterLogoText}ユーザータイプが変更されました</value>
   </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>${LetterLogoText}へようこそ!</value>
+  </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>${LetterLogoText}へようこそ！</value>
   </data>
@@ -1602,6 +1644,9 @@ $TrulyYours</value>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText}が削除されました</value>
   </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>${LetterLogoText}に招待されています</value>
+  </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>${LetterLogoText} AIエージェントにおけるあなたの役割が変更されました</value>
   </data>
@@ -1611,6 +1656,19 @@ $TrulyYours</value>
 このメールは、APIキー "*$Message*" の有効期限が切れ、無効化されたことをお知らせするものです。
 
 新しいAPIキーは "開発者ツール":"${__VirtualRootPath}/developer-tools/api-keys" で生成できます。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.${LetterLogoText}に招待されています
+
+こんにちは！
+
+"${__VirtualRootPath}":"${__VirtualRootPath}" の${LetterLogoText}に招待されています。リンクをクリックして招待を承諾してください：
+
+$OrangeButton
+
+招待リンクをクリックした後、アカウントに新しいパスワードを設定してください。
 
 $TrulyYours</value>
   </data>

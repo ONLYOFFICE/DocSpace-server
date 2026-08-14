@@ -300,6 +300,29 @@
   <data name="ButtonVisitBillingSection" xml:space="preserve">
     <value>Shkoni te seksioni i pagesave</value>
   </data>
+  <data name="pattern_admin_activation_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Mirë se vini në &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Përshëndetje, $UserName!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sapo keni krijuar ${LetterLogoText}-in tuaj, ku mund të redaktoni, menaxhoni dhe bashkëpunoni me lehtësi në skedarët e zyrës.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Adresa juaj e ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Të dhënat tuaja të hyrjes*: $UserEmail&lt;/td&gt;&lt;/tr&gt;
+
+#if($OrangeButton != "")
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ju lutem konfirmoni emailin tuaj (lidhja është e vlefshme për 7 ditë):&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+
+#end
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt;Shijoni një mënyrë të re të bashkëpunimit të dokumenteve!&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivizoni email-it tuaj për portalin "${__VirtualRootPath}":"$InviteLink".
 
@@ -1003,7 +1026,7 @@ $activity
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Përshëndetje, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sapo keni *krijuar ${LetterLogoText}*, një qendër dokumentesh ku mund të rritni bashkëpunimin me ekipin tuaj, klientët, partnerët dhe më shumë.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sapo keni krijuar ${LetterLogoText}-in tuaj, ku mund të redaktoni, menaxhoni dhe bashkëpunoni me lehtësi në skedarët e zyrës.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;*Adresa juaj e ${LetterLogoText}*: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1352,6 +1375,19 @@ Mësoni më shumë rreth llojeve të përdoruesve dhe lejeve në "Qendrën e ndi
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_welcome_v1" xml:space="preserve">
+    <value>h1.Mirë se vini në ${LetterLogoText}!
+
+Përshëndetje, $UserName!
+
+Mirë se vini në ${LetterLogoText}! Profili juaj u shtua me sukses në "${__VirtualRootPath}":"${__VirtualRootPath}". Këtu mund të redaktoni, menaxhoni dhe bashkëpunoni me lehtësi në skedarët e zyrës të të gjitha formateve të njohura.
+
+$OrangeButton
+
+Nëse keni nevojë për ndihmë, shihni "Qendrën e ndihmës":"${__HelpLink}" ose pyesni "ekipin tonë te suportit":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Mirë se vini në &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
@@ -1367,6 +1403,9 @@ Plani juaj aktual tarifor është STARTUP. Është absolutisht falas dhe përfsh
 *Shijoni një mënyrë të re të bashkëpunimit të dokumenteve!*
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_admin_activation_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText}!</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Ju lutemi aktivizoni adresën tuaj të email-it</value>
@@ -1602,6 +1641,9 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Lloji përdoruesit tuaj në ${LetterLogoText} ka ndryshuar</value>
   </data>
+  <data name="subject_user_welcome_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText}!</value>
+  </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Mirë se vini në ${LetterLogoText}!</value>
   </data>
@@ -1616,6 +1658,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} është fshirë</value>
+  </data>
+  <data name="subject_user_activation_v1" xml:space="preserve">
+    <value>Je i ftuar në ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
     <value>Roli juaj në një agjent AI të ${LetterLogoText} ka ndryshuar</value>
@@ -1639,6 +1684,19 @@ $TrulyYours</value>
 *Klienti:* ${OwnerName}
 
 Ju lutemi sigurohuni që faturimi automatik është i çaktivizuar. Kontrolloni statusin e faturimit automatik në llogarinë Stripe të klientit.</value>
+  </data>
+  <data name="pattern_user_activation_v1" xml:space="preserve">
+    <value>h1.Je i ftuar në ${LetterLogoText}
+
+Përshëndetje!
+
+Jeni të ftuar të bashkoheni në ${LetterLogoText} në "${__VirtualRootPath}":"${__VirtualRootPath}". Pranojeni ftesën duke klikuar lidhjen:
+
+$OrangeButton
+
+Pasi të klikoni në lidhjen e ftesës, vendosni një fjalëkalim të ri për llogarinë tuaj.
+
+$TrulyYours</value>
   </data>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Përshëndetje!
