@@ -2743,7 +2743,7 @@ $TrulyYours</value>
     <value>Action required: Unable to auto top up the Wallet balance in ${LetterLogoText}</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Your role in a AI agent has changed</value>
+    <value>Your role in an AI agent has changed</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>New user added to ${LetterLogoText} portal</value>
