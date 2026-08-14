@@ -901,7 +901,7 @@
     <value>ՈՒղարկել</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>{0} օգտատերը հրավեր է ուղարկել {1}-ին միանալու այս DocSpace-ին</value>
+    <value>{0} օգտատերը հրավեր է ուղարկել {1}-ին</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Հրավերի հրահանգները ուղարկված են: {0}</value>

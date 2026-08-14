@@ -211,7 +211,7 @@
     <value>Tekoälyagenttitilan kiintiö ylitetty</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Kiintiön asetus per tekoälyagentti epäonnistui. Syötetty arvo on suurempi kuin DocSpace tila yhteensä.</value>
+    <value>Kiintiön asetus per tekoälyagentti epäonnistui. Syötetty arvo on suurempi kuin tallennustila yhteensä.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automaattinen uusiminen</value>
@@ -769,7 +769,7 @@
     <value>Käyttäjätunnuksesi on poistettu käytöstä</value>
   </data>
   <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>Antamasi sähköpostiosoite on jo toisen käyttäjän käytössä. Pelottavaa</value>
+    <value>{!User} tällä sähköpostiosoitteella on jo rekisteröity</value>
   </data>
   <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
     <value>Sähköposteja tästä verkkotunnuksesta ei ole sallittu rekisteröintiin</value>
@@ -781,7 +781,7 @@
     <value>Tämä sähköposti on liitetty käyttäjälle {0} kolmannen osapuolen palveluntarjoajana</value>
   </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
-    <value>Nykyinen sähköposti ja uusi sähköposti ovat sama. Nyt ei jokin tässä täsmää</value>
+    <value>Nykyinen sähköposti ja uusi sähköposti ovat sama</value>
   </data>
   <data name="ErrorEmptyFields" xml:space="preserve">
     <value>Täytä kaikki kentät</value>
@@ -790,7 +790,7 @@
     <value>Viestin teksti on tyhjä</value>
   </data>
   <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
-    <value>Lisättyä tiedostoa ei löytynyt. Ei sitten millään</value>
+    <value>Lisättyä tiedostoa ei löytynyt</value>
   </data>
   <data name="ErrorFileNotImage" xml:space="preserve">
     <value>Tuntematon kuvatiedoston tyyppi</value>
@@ -802,7 +802,7 @@
     <value>Kuvan koko ylitti sallitut parametrit</value>
   </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
-    <value>Kuvatiedoston koko on liian suuri. Ei pysty</value>
+    <value>Kuvatiedoston koko on liian suuri</value>
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
     <value>Väärä etunimi tai sukunimi</value>
@@ -820,7 +820,7 @@
     <value>Sinun hintavaihtoehtosi ei tue tätä mahdollisuutta</value>
   </data>
   <data name="ErrorNotCorrectEmail" xml:space="preserve">
-    <value>Sähköpostiosoite ei kelpaa. Jokin siinä mättää</value>
+    <value>Sähköpostiosoite ei kelpaa</value>
   </data>
   <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
     <value>Virheellinen verkkotunnuksen nimi</value>
@@ -871,10 +871,10 @@
     <value>Käyttäjä poistettu käytöstä</value>
   </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
-    <value>Käyttäjää ei löytynyt. Minne lie kadonnut</value>
+    <value>Käyttäjää ei löytynyt</value>
   </data>
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
-    <value>Käyttäjä, jonka sähköposti on {0} ei löytynyt. Outoa</value>
+    <value>Käyttäjää, jonka sähköposti on "{0}", ei löytynyt</value>
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL ei ole saatavilla. HEAD-pyyntö ei vastaa 200 http statusta.</value>
@@ -1120,7 +1120,7 @@
     <value>Huonetilakiintiö ylitetty</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Huonekohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko DocSpacen muisti.</value>
+    <value>Huonekohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko tallennustila.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Aasia (Singapore)</value>
@@ -1285,7 +1285,7 @@
     <value>Odottamaton virhe. Ole hyvä ja yritä uudelleen.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Sinut on onnistuneesti yhdistetty Telegramiin saadaksesi ilmoituksia DocSpacestasi.</value>
+    <value>Sinut on onnistuneesti yhdistetty Telegramiin saadaksesi ilmoituksia työtilastasi.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Väärä koodi</value>
@@ -1300,7 +1300,7 @@
     <value>Käyttäjätilakiintiö ylitetty</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Käyttäjäkohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko DocSpacen muisti.</value>
+    <value>Käyttäjäkohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko tallennustila.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>US (Oregon)</value>

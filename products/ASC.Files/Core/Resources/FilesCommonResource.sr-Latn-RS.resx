@@ -500,7 +500,7 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
     <value>Kreator sadržaja</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace Administrator</value>
+    <value>Puni administrator</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Uređivač</value>

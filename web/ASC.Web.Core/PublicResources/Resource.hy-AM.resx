@@ -211,7 +211,7 @@
     <value>ԱԲ գործակալի տարածքի քվոտան գերազանցվել է</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Չհաջողվեց սահմանել քվոտա յուրաքանչյուր ԱԲ գործակալի համար։ Մուտքագրված արժեքը մեծ է DocSpace-ի ընդհանուր պահեստից։</value>
+    <value>Չհաջողվեց սահմանել քվոտա յուրաքանչյուր ԱԲ գործակալի համար։ Մուտքագրված արժեքը մեծ է ընդհանուր պահեստից։</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Ավտոմատ երկարաձգում</value>
@@ -769,7 +769,7 @@
     <value>Ձեր պրոֆիլը կասեցված է</value>
   </data>
   <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>{!Օգտվող} այս էլփոստով արդեն գրանցված է</value>
+    <value>{!User} այս էլփոստով արդեն գրանցված է</value>
   </data>
   <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
     <value>Այս տիրույթից էլեկտրոնային նամակները գրանցման համար չեն թույլատրվում</value>
@@ -1120,7 +1120,7 @@
     <value>Սենյակի տարածքի չափաբաժինը գերազանցվել է</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Չհաջողվեց սահմանել քվոտա մեկ սենյակի համար: Մուտքագրված արժեքը մեծ է DocSpace-ի ընդհանուր պահեստից:</value>
+    <value>Չհաջողվեց սահմանել քվոտա մեկ սենյակի համար: Մուտքագրված արժեքը մեծ է ընդհանուր պահեստից:</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Ասիա Խաղաղ օվկիանոս (Սինգապուր)</value>
@@ -1285,7 +1285,7 @@
     <value>Անսպասելի սխալ տեղի ունեցավ։ Խնդրում ենք կրկին փորձել։</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Դուք հաջողությամբ միացել եք Telegram-ին՝ ձեր DocSpace-ից ծանուցումներ ստանալու համար։</value>
+    <value>Դուք հաջողությամբ միացել եք Telegram-ին՝ ձեր աշխատանքային տարածքից ծանուցումներ ստանալու համար։</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Սխալ կոդը</value>
@@ -1300,7 +1300,7 @@
     <value>Օգտատիրոջ տարածքի չափաբաժինը գերազանցել է</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Չհաջողվեց սահմանել յուրաքանչյուր օգտատիրոջ քվոտան: Մուտքագրված արժեքը մեծ է DocSpace-ի ընդհանուր պահեստից:</value>
+    <value>Չհաջողվեց սահմանել յուրաքանչյուր օգտատիրոջ քվոտան: Մուտքագրված արժեքը մեծ է ընդհանուր պահեստից:</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>ԱՄՆ Արևմտյան (Օրեգոն) շրջան</value>

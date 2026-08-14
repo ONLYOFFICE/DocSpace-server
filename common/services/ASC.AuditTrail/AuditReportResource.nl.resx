@@ -901,7 +901,7 @@
     <value>Verzenden</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Gebruiker {0} stuurde een uitnodiging naar {1} om lid te worden van deze DocSpace</value>
+    <value>Gebruiker {0} stuurde een uitnodiging naar {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Uitnodigingsinstructies Verstuurd: {0}</value>

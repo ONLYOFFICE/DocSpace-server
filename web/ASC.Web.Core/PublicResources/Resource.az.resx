@@ -211,7 +211,7 @@
     <value>AI agentinin yaddaş sahəsi limiti aşıldı</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>AI agenti üçün kvota təyin etmək mümkün olmadı. Daxil edilmiş dəyər ümumi DocSpace yaddaşından böyükdür.</value>
+    <value>AI agenti üçün kvota təyin etmək mümkün olmadı. Daxil edilmiş dəyər ümumi yaddaşdan böyükdür.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Avtomatik yenilənmə</value>
@@ -1120,7 +1120,7 @@
     <value>Otaq sahəsi kvota limitini keçib</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Otaq üçün kvota təyin etmək mümkün olmadı. Daxil edilmiş dəyər ümumi DocSpace yaddaşından böyükdür.</value>
+    <value>Otaq üçün kvota təyin etmək mümkün olmadı. Daxil edilmiş dəyər ümumi yaddaşdan böyükdür.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asiya Sakit Okean (Sinqapur)</value>
@@ -1285,7 +1285,7 @@
     <value>Gözlənilməz xəta baş verdi. Lütfən, yenidən cəhd edin.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>DocSpace-dən bildirişlər almaq üçün Telegram-a uğurla qoşuldunuz.</value>
+    <value>İş sahəsindən bildirişlər almaq üçün Telegram-a uğurla qoşuldunuz.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Səhv kod</value>
@@ -1300,7 +1300,7 @@
     <value>İstifadəçi məkanı kvota limitini keçib</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>İstifadəçi üçün kvota təyin etmək alınmadı. Daxil edilmiş dəyər ümumi DocSpace yaddaşından böyükdür.</value>
+    <value>İstifadəçi üçün kvota təyin etmək alınmadı. Daxil edilmiş dəyər ümumi yaddaşdan böyükdür.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>ABŞ Qərbi (Oreqon) Bölgəsi</value>

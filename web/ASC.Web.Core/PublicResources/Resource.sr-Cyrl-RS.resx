@@ -211,7 +211,7 @@
     <value>Квота простора AI агента је прекорачена</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Неуспешно подешавање квоте по AI агенту. Унета вредност је већа од укупног DocSpace складишта.</value>
+    <value>Неуспешно подешавање квоте по AI агенту. Унета вредност је већа од укупног складишта.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Аутоматска обнова</value>
@@ -763,49 +763,49 @@
     <value>Лоши кључеви</value>
   </data>
   <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>Ваш профил је суспендован</value>
+    <value>Последњи пун приступни простор не може бити обрисан</value>
   </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
-    <value>{!User} са овим емаил-ом је већ регистрован</value>
+    <value>Ваш профил је суспендован</value>
   </data>
   <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>Емаил-ови са овог домена нису дозвољени за регистрацију</value>
+    <value>{!User} са овим емаил-ом је већ регистрован</value>
   </data>
   <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
-    <value>Емаил поље је празно</value>
+    <value>Емаил-ови са овог домена нису дозвољени за регистрацију</value>
   </data>
   <data name="ErrorEmailEmpty" xml:space="preserve">
-    <value>Тренутни емаил и нови емаил су исти</value>
+    <value>Емаил поље је празно</value>
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Ова емаил адреса је повезана са корисником {0} као пружалац услуга треће стране</value>
   </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
-    <value>Молимо попуните сва поља</value>
+    <value>Тренутни емаил и нови емаил су исти</value>
   </data>
   <data name="ErrorEmptyFields" xml:space="preserve">
-    <value>Текст порука је празна</value>
+    <value>Молимо попуните сва поља</value>
   </data>
   <data name="ErrorEmptyMessage" xml:space="preserve">
-    <value>Отпремљена датотека не може бити пронађена</value>
+    <value>Текст порука је празна</value>
   </data>
   <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
-    <value>Непознати тип датотеке слике</value>
+    <value>Отпремљена датотека не може бити пронађена</value>
   </data>
   <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Величина слике превазилази дозвољене параметре</value>
+    <value>Непознати тип датотеке слике</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Група није пронађена</value>
   </data>
   <data name="ErrorImageSize" xml:space="preserve">
-    <value>Величина датотеке слике је превелика</value>
+    <value>Величина слике превазилази дозвољене параметре</value>
   </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
-    <value>Нетачно име или презиме</value>
+    <value>Величина датотеке слике је превелика</value>
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
-    <value>Приступ порталу је ограничен</value>
+    <value>Нетачно име или презиме</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Лимит за позивницу је прекорачен</value>
@@ -1120,7 +1120,7 @@
     <value>Квота простора за собу прекорачена</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Подешавање квоте по соби није успело. Унесена вредност је већа од укупног DocSpace складишта.</value>
+    <value>Подешавање квоте по соби није успело. Унесена вредност је већа од укупног складишта.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Азија Пацифик (Сингапур)</value>
@@ -1285,7 +1285,7 @@
     <value>Дошло је до неочекиване грешке. Молимо покушајте поново.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Успешно сте повезали Telegram да примате обавештења из свог DocSpace-а.</value>
+    <value>Успешно сте повезали Telegram да примате обавештења из свог радног простора.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Нетачан код</value>
@@ -1300,7 +1300,7 @@
     <value>Корисничка квота простора прекорачена</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Подешавање квоте по соби није успело. Унесена вредност је већа од укупног DocSpace складишта.</value>
+    <value>Подешавање квоте по кориснику није успело. Унесена вредност је већа од укупног складишта.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Западна Регија SAD (Орегон)</value>

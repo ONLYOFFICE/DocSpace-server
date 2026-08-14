@@ -211,7 +211,7 @@
     <value>Speicherplatzkontingent für KI-Agenten überschritten</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Kontingent konnte pro KI-Agent nicht festgelegt werden. Der eingegebene Wert überschreitet den gesamten DocSpace-Speicherplatz.</value>
+    <value>Kontingent konnte pro KI-Agent nicht festgelegt werden. Der eingegebene Wert überschreitet den gesamten Speicherplatz.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatische Verlängerung</value>
@@ -763,13 +763,13 @@
     <value>Schlechte Tasten</value>
   </data>
   <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>Der letzte DocSpace mit Vollzugriff kann nicht gelöscht werden</value>
+    <value>Der letzte Bereich mit Vollzugriff kann nicht gelöscht werden</value>
   </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>Ihr Profil ist gesperrt</value>
   </data>
   <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>Ein Benutzer mit dieser E-Mail-Adresse ist bereits registriert</value>
+    <value>{!User} mit dieser E-Mail-Adresse ist bereits registriert</value>
   </data>
   <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
     <value>Die Registrierung der E-Mails von dieser Domäne ist verboten</value>
@@ -865,7 +865,7 @@
     <value>Zu viele Anmeldeversuche. Bitte versuchen Sie es später noch einmal</value>
   </data>
   <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Fügen Sie mindestens 1 zulässige IP-Adresse hinzu.</value>
+    <value>Fügen Sie mindestens 1 vertrauenswürdige Domäne hinzu.</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Benutzer deaktiviert</value>
@@ -1120,7 +1120,7 @@
     <value>Raumkontingent überschritten</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Quote pro Raum konnte nicht festgelegt werden. Der eingegebene Wert ist größer als der gesamte DocSpace-Speicher.</value>
+    <value>Quote pro Raum konnte nicht festgelegt werden. Der eingegebene Wert ist größer als der gesamte Speicher.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asien-Pazifik (Singapur)</value>
@@ -1285,7 +1285,7 @@
     <value>Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Sie wurden erfolgreich mit Telegram verbunden, um Benachrichtigungen von Ihrem DocSpace zu erhalten.</value>
+    <value>Sie wurden erfolgreich mit Telegram verbunden, um Benachrichtigungen von Ihrem Arbeitsbereich zu erhalten.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Falscher Code</value>
@@ -1300,7 +1300,7 @@
     <value>Benutzerkontingent überschritten</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Quote pro Benutzer konnte nicht festgelegt werden. Der eingegebene Wert ist größer als der gesamte DocSpace-Speicher.</value>
+    <value>Quote pro Benutzer konnte nicht festgelegt werden. Der eingegebene Wert ist größer als der gesamte Speicher.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Region US West (Oregon)</value>

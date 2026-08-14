@@ -211,7 +211,7 @@
     <value>Překročen limit prostoru pro agenty AI</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nastavení limitu pro agenty AI se nezdařilo. Zadaná hodnota je větší než celková velikost úložiště DocSpace.</value>
+    <value>Nastavení limitu pro agenty AI se nezdařilo. Zadaná hodnota je větší než celková velikost úložiště.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatické obnovení</value>
@@ -1120,7 +1120,7 @@
     <value>Překročení kvóty místa v místnosti</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodařilo se nastavit kvótu na místnost. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
+    <value>Nepodařilo se nastavit kvótu na místnost. Zadaná hodnota je větší než celkové úložiště.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asie - Pacifik (Singapur)</value>
@@ -1285,7 +1285,7 @@
     <value>Došlo k neočekávané chybě. Zkuste to znovu.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Úspěšně jste se připojili k Telegramu, abyste mohli přijímat oznámení z vašeho DocSpace.</value>
+    <value>Úspěšně jste se připojili k Telegramu, abyste mohli přijímat oznámení z pracovního prostoru.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Nesprávný kód</value>
@@ -1300,7 +1300,7 @@
     <value>Překročení kvóty uživatelského prostoru</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodařilo se nastavit kvótu na uživatele. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
+    <value>Nepodařilo se nastavit kvótu na uživatele. Zadaná hodnota je větší než celkové úložiště.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Region Západní USA (Oregon)</value>
