@@ -97,7 +97,11 @@ export const editorToolsController = {
             type: "object",
             properties: {},
           }) as Record<string, unknown>,
-          requireApproval: approval.has(serverType),
+          // Server-type policy, overridable per tool: read-only (GET) MCP
+          // operations arrive with `requireApproval: false` from
+          // systemToolsSource and run without a dialog.
+          requireApproval:
+            approval.has(serverType) && item.requireApproval !== false,
         });
       }
     }

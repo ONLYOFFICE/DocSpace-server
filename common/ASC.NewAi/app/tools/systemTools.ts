@@ -37,6 +37,7 @@ import type {
   McpHttpServerConfig,
   ToolsAdapter,
 } from "@onlyoffice/ai-chat/core";
+import type { TMCPItem } from "@onlyoffice/ai-chat";
 import { getMcpServers } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { withTimeout } from "../storage/httpClient.js";
@@ -282,6 +283,33 @@ function filterByWhitelist<T>(
   return filtered;
 }
 
+// Read-only (GET) MCP operations run without an approval dialog.
+//
+// docspace-mcp marks its read-only operations with the MCP-standard
+// `annotations.readOnlyHint: true`; the raw descriptor survives the
+// `tools/list` cast, so the hint is readable here. System servers are
+// host-configured and trusted, so the hint is honored for all of them:
+// `requireApproval: false` auto-allows the call in every consumer of this
+// catalog — the DocSpace chat engine (autoAllow on tool-call-pending),
+// agents, and the editor plugin (via editor-tools/list). Mutating tools
+// keep prompting through the systemServerTypes approval flow.
+function withReadOnlyAutoAllow(
+  grouped: Record<string, TMCPItem[]>,
+): Record<string, TMCPItem[]> {
+  const result: Record<string, TMCPItem[]> = {};
+  for (const [type, items] of Object.entries(grouped)) {
+    result[type] = items.map((tool) => {
+      const annotations = (
+        tool as { annotations?: { readOnlyHint?: unknown } }
+      ).annotations;
+      return annotations?.readOnlyHint === true
+        ? { ...tool, requireApproval: false }
+        : tool;
+    });
+  }
+  return result;
+}
+
 // Diagnostic wrapper around the source: logs enumeration and invocation so
 // we can see whether the engine is even offered the system tools and
 // whether calls reach the MCP server. Delegates everything to `source`;
@@ -303,7 +331,9 @@ export const systemToolsSource: ToolsAdapter & {
     let grouped: Awaited<ReturnType<typeof source.getTools>>;
     try {
       const whitelist = await agentServerWhitelist(entityId);
-      grouped = filterByWhitelist(await source.getTools(), whitelist);
+      grouped = withReadOnlyAutoAllow(
+        filterByWhitelist(await source.getTools(), whitelist),
+      );
     } catch (err) {
       logger.error(
         `systemTools.getTools failed after ${Date.now() - started}ms: ${err instanceof Error ? err.message : String(err)}`,
