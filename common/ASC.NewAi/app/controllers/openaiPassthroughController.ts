@@ -104,13 +104,11 @@ function upstreamAbortSignal(res: Response): AbortSignal {
   return controller.signal;
 }
 
-async function readRawBody(req: AsyncIterable<Buffer>): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) {
-    chunks.push(chunk as Buffer);
-  }
-  return Buffer.concat(chunks);
-}
+// The request body is streamed to the provider, never buffered, so memory
+// use is independent of the body size. This cap only rejects declared
+// oversizes up front (the nginx `location ~* /ai` enforces the same limit
+// for undeclared ones) — legitimate vision/OCR data URLs stay well below.
+const MAX_BODY_BYTES = 100 * 1024 * 1024;
 
 function passthrough(subPath: string) {
   return asyncHandler(async (req, res) => {
@@ -133,19 +131,32 @@ function passthrough(subPath: string) {
     const search = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
     const target = `${base}/${subPath}${search}`;
 
-    const body = await readRawBody(req);
+    const declaredLength = Number(req.headers["content-length"]);
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+      openAiError(res, 413, "Request body too large", "invalid_request_error");
+      return;
+    }
 
+    // Stream the body through. fetch() strips `Content-Length` (a
+    // forbidden header per the spec), so the upload goes chunked — fine
+    // for OpenAI-compatible providers and the internal gateway alike.
+    // `duplex: "half"` is mandatory for a stream body in Node's fetch.
     let upstream: globalThis.Response;
     try {
       upstream = await fetch(target, {
         method: "POST",
         headers: providerHeaders(req.headers["content-type"], profile),
-        body,
+        body: Readable.toWeb(req) as unknown as RequestInit["body"],
+        duplex: "half",
         signal: upstreamAbortSignal(res),
-      });
+      } as RequestInit);
     } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
-        // Client is gone; nothing to answer.
+      if (
+        (err instanceof Error && err.name === "AbortError") ||
+        res.destroyed
+      ) {
+        // Client is gone (abort, or a disconnect mid-upload that errored
+        // the piped body stream); nothing to answer.
         return;
       }
       // Detail stays in the log — the error can carry the provider URL.
