@@ -1101,7 +1101,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>您好！
 
-您已受邀加入智能体 "${__VirtualRootPath}":"${__VirtualRootPath}"。请点击以下链接接受邀请：
+您已受邀加入智能体 "${__VirtualRootPath}":"${__VirtualRootPath}" 。请点击以下链接接受邀请：
 
 $OrangeButton
 
@@ -1112,7 +1112,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>您好！
 
-$__AuthorName 邀请您加入智能体 "$Message":"$InviteLink"，地址为 "${__VirtualRootPath}":"${__VirtualRootPath}"。
+$__AuthorName 邀请您加入智能体 "$Message":"$InviteLink" ，地址为 "${__VirtualRootPath}":"${__VirtualRootPath}" 。
 
 $OrangeButton
 
@@ -1200,7 +1200,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>你好！
 
-$__AuthorName 邀请您加入"${__VirtualRootPath}":"${__VirtualRootPath}"的"$Message":"$InviteLink"房间。
+$__AuthorName 邀请您加入 "${__VirtualRootPath}":"${__VirtualRootPath}" 的 "$Message":"$InviteLink" 房间。
 
 $OrangeButton
 
@@ -1354,7 +1354,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>您好！
 
-您在 ${LetterLogoText} 中被分配了一个新的用户类型："${__VirtualRootPath}":"${__VirtualRootPath}"：${UserType}。
+您在 ${LetterLogoText} 中被分配了一个新的用户类型："${__VirtualRootPath}":"${__VirtualRootPath}" ：${UserType}。
 
 在 "帮助中心":"${HelpCenterUrl}" 中了解更多关于用户类型和权限的信息。
 
