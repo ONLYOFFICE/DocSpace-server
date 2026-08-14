@@ -195,6 +195,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Dostop do vaše spletne pisarne</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Aktiviraj funkcije AI</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Kliknite tukaj za aktivacijo svojega email naslova</value>
   </data>
@@ -240,6 +243,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Začni</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Pojdi v svoj ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Pojdi v nastavitve Denarnice</value>
   </data>
@@ -257,6 +263,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Pustite povratne informacije</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Prijava v ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Odpri ${LetterLogoText}</value>
@@ -290,6 +299,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Izkoristite popust</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Pojdi v razdelek za plačila</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivirajte vaš email za "${__VirtualRootPath}":"$InviteLink" portal.

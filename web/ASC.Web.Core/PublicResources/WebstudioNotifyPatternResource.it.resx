@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Accedi al tuo Web-Office</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Attiva le funzioni IA</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Clicca qui per attivare il tuo indirizzo email</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Inizia</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Vai al tuo ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Vai alle impostazioni del Portafoglio</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Esprimi una valutazione</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Accedi a ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Apri ${LetterLogoText}</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Usa lo sconto</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Vai alla sezione Pagamenti</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Attiva la tua email per "${__VirtualRootPath}":"$InviteLink" portale.

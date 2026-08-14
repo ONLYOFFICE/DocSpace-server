@@ -195,6 +195,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Перейти в виртуальный офис</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Активировать ИИ-функции</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Нажмите сюда, чтобы активировать адрес электронной почты</value>
   </data>
@@ -240,6 +243,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Начать</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Перейти в ваш ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Перейти к настройкам кошелька</value>
   </data>
@@ -257,6 +263,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Оставить отзыв</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Войти в ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Открыть ${LetterLogoText}</value>
@@ -290,6 +299,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Использовать скидку</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Перейти в раздел Платежи</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Активируйте Ваш адрес электронной почты на портале "${__VirtualRootPath}":"$InviteLink".

@@ -195,6 +195,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Web-Ofisinize Erişin</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Yapay zekâ özelliklerini etkinleştir</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>E-posta adresinizi etkinleştirmek için buraya tıklayın</value>
   </data>
@@ -240,6 +243,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Başlayın</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>${LetterLogoText}'inize gidin</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Cüzdan ayarlarına git</value>
   </data>
@@ -257,6 +263,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Geribildirim Bırak</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>${LetterLogoText}'e giriş yap</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Açık ${LetterLogoText}</value>
@@ -290,6 +299,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>İndirim kulan</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Ödemeler bölümüne git</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"$InviteLink" portalındaki e-posta adresinizi aktifleştirin.

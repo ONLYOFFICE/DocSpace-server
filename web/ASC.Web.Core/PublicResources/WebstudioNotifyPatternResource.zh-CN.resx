@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>访问您的在线办公室</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>启用 AI 功能</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>点击此处以激活您的邮件地址</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>开始使用</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>前往您的${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>前往钱包设置</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>留下反馈</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>登录${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>打开${LetterLogoText}</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>使用折扣</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>前往付款部分</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.激活您 "${__VirtualRootPath}":"$InviteLink" 门户的电邮。

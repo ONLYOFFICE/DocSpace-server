@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Veb-Ofisinizə Daxil Olun</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>AI funksiyalarını aktivləşdirin</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>E-poçt ünvanınızı aktiv etmək üçün bura klikləyin</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Başlayın</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>${LetterLogoText}-inizə keçin</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Pul kisəsi parametrlərinə keçin</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Fikrinizi bildirin</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>${LetterLogoText}-ə daxil olun</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>${LetterLogoText}-i açın</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Endirimdən istifadə edin</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Ödənişlər bölməsinə keçin</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.E-poçt ünvanınızın "${__VirtualRootPath}":"$InviteLink" portalında aktivləşdirilməsi.

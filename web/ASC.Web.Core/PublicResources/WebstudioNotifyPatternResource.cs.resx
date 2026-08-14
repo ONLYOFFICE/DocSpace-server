@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Přístup k vaší webové kanceláři</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Aktivovat funkce AI</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Kliknutím zde aktivujete svou e-mailovou adresu</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Začněte</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Přejít do vašeho ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Přejděte do nastavení peněženky</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Zanechat zpětnou vazbu</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Přihlásit se do ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Otevřít ${LetterLogoText}</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Použijte slevu</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Přejít do sekce Platby</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivujte Váš e-mail pro "${__VirtualRootPath}":"$InviteLink" portál.

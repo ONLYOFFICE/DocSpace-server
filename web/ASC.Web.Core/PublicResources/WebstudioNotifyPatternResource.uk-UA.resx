@@ -195,6 +195,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Доступ до вашого веб-офісу</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Активувати функції AI</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Натисніть тут, щоб активувати адресу електронної пошти</value>
   </data>
@@ -240,6 +243,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Почати</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Перейти до вашого ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Перейти до параметрів гаманця</value>
   </data>
@@ -257,6 +263,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Залишити відгук</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Увійти в ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Відкрийте ${LetterLogoText}</value>
@@ -290,6 +299,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Використати знижку</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Перейти до розділу Платежі</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Активуйте свою електронну пошту для порталу "${__VirtualRootPath}":"$InviteLink"

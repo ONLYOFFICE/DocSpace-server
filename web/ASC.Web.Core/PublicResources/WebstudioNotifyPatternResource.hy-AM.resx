@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Մուտք գործեք ձեր Web-Office</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Ակտիվացնել ԱԲ գործառույթները</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Սեղմեք այստեղ՝ ձեր էլփոստի հասցեն ակտիվացնելու համար</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Սկսել</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Անցնել ձեր ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Անցնել դրամապանակի կարգավորումներ</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Թողնել կարծիք</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Մուտք գործել ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Բացել ${LetterLogoText}-ը</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Օգտագործեք զեղչ</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Անցնել վճարումների բաժին</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1. Ակտիվացրեք ձեր էլ.փոստը "${__VirtualRootPath}":"$InviteLink" պորտալի համար:

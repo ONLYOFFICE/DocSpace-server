@@ -195,6 +195,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>웹-오피스 액세스</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>AI 기능 활성화</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>이메일 주소를 활성화하려면 여기를 클릭하세요</value>
   </data>
@@ -240,6 +243,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>시작하기</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>${LetterLogoText}로 이동</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>지갑 설정으로 이동하기</value>
   </data>
@@ -257,6 +263,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>피드백 남기기</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>${LetterLogoText} 로그인</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>오픈 ${LetterLogoText}</value>
@@ -290,6 +299,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>할인 적용</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>결제 섹션으로 이동</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"$InviteLink" 포털에 대한 이메일 주소를 활성화해주세요

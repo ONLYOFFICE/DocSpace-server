@@ -195,6 +195,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Αποκτήστε πρόσβαση στο Web-Office σας</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Ενεργοποιήστε τις λειτουργίες AI</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Πατήστε εδώ για να ενεργοποιήσετε τη διεύθυνση email σας</value>
   </data>
@@ -240,6 +243,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Ξεκινήστε</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Μεταβείτε στο ${LetterLogoText} σας</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Μεταβείτε στις Ρυθμίσεις πορτοφολιού</value>
   </data>
@@ -257,6 +263,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Αφήστε σχόλια</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Συνδεθείτε στο ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Ανοίξτε το ${LetterLogoText}</value>
@@ -290,6 +299,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Χρήση έκπτωσης</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Μεταβείτε στην ενότητα πληρωμών</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Ενεργοποιήστε το email σας για την πύλη "${__VirtualRootPath}":"$InviteLink".

@@ -195,6 +195,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Nettitoimistoosi pääsy</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Ota tekoälytoiminnot käyttöön</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Klikkaa tästä aktivoidaksesi sähköpostiosoitteesi</value>
   </data>
@@ -240,6 +243,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Aloita</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Siirry ${LetterLogoText}iin</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Mene Lompakon asetuksiin</value>
   </data>
@@ -257,6 +263,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Jätä palautetta</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Kirjaudu ${LetterLogoText}iin</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Avaa ${LetterLogoText}</value>
@@ -290,6 +299,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Käytä alennus</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Siirry Maksut-osioon</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivoi sähköpostisi "${__VirtualRootPath}":"$InviteLink"- portaalille.

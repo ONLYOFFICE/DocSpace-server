@@ -195,6 +195,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Piekļūt tīmekļa birojam</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Aktivizēt MI funkcijas</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Noklikšķiniet šeit, lai aktivizētu savu e-pasta adresi</value>
   </data>
@@ -240,6 +243,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Darba sākšana</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Doties uz savu ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Doties uz Maka iestatījumiem</value>
   </data>
@@ -257,6 +263,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Atstāt atsauksmi</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Pieteikties ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Atvērt ${LetterLogoText}</value>
@@ -290,6 +299,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Izmantot atlaidi</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Doties uz sadaļu Maksājumi</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivizējiet savu e-pastu portālā "${__VirtualRootPath}":"$InviteLink".

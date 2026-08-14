@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Webオフィスにアクセスする</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>AI機能を有効にする</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>メールアドレスの有効化はこちら</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>开始使用</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>${LetterLogoText}へ移動</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>ウォレット設定へ移動</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>フィードバックを書く</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>${LetterLogoText}にログイン</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>${LetterLogoText}を開く</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>割引を利用する</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>お支払いセクションへ移動</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.ポータル"${__VirtualRootPath}":"$InviteLink"用のメールをアクティブにしましょう

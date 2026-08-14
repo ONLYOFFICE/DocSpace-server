@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Uzyskaj dostęp do witryny sieci Web</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Aktywuj funkcje AI</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Kliknij tutaj, aby aktywować swój adres e-mail</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Rozpocznij</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Przejdź do swojego ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Przejdź do ustawień portfela</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Zostaw opinię</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Zaloguj się do ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Otwórz ${LetterLogoText}</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Skorzystaj ze zniżki</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Przejdź do sekcji płatności</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktywuj Swój adres e-mail na stronie "${__VirtualRootPath}":"$InviteLink".

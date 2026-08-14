@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Ihr Web-Office zugreifen</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>KI-Funktionen aktivieren</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Klicken Sie hier, um Ihre E-Mail-Adresse zu aktivieren</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Loslegen</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Zu Ihrem ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Zu den Wallet-Einstellungen</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Kommentare hinterlassen</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Bei ${LetterLogoText} anmelden</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>${LetterLogoText} öffnen</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Rabatt verwenden</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Zum Bereich Zahlungen</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivieren Sie Ihre E-Mail-Adresse fürs Portal "${__VirtualRootPath}":"$InviteLink"

@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Accédez à votre bureau web</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Activer les fonctions IA</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Cliquez ici pour activer votre adresse de courriel</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Commencer</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Accéder à votre ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Aller dans les paramètres de Wallet</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Laisser des commentaires</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Se connecter à ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Ouvrir ${LetterLogoText}</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Appliquer la réduction</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Accéder à la section Paiements</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Activation de votre adresse mail sur le portail "${__VirtualRootPath}":"$InviteLink".

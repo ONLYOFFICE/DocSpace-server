@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Accesaţi biroul dvs web</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Activați funcțiile IA</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Faceți clic aici pentru a activa adresa dvs de e-mail</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Începeți lucrul</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Accesați ${LetterLogoText}</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Acces configurare Portofel</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Lasati un feedback</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Conectare la ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Deschidere ${LetterLogoText}</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Utilizați reducerea</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Accesați secțiunea Plăți</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Activați poștă dvs electronică pentru portalul "${__VirtualRootPath}":"$InviteLink".

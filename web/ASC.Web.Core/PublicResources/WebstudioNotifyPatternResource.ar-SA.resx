@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>الوصول إلى مكتب الويب الخاص بك</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>تفعيل ميزات الذكاء الاصطناعي</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>انقر هنا لتنشيط عنوان بريدك الإلكتروني</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>ابدء</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>انتقل إلى ${LetterLogoText} الخاص بك</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>انتقل إلى إعدادات المحفظة</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>اترك تعليق</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>تسجيل الدخول إلى ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>افتح ${LetterLogoText}</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>استخدام الخصم</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>انتقل إلى قسم المدفوعات</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1. قم بتنشيط بريدك الإلكتروني لبوابة "{white-space: nowrap}${__VirtualRootPath}":"$InviteLink".

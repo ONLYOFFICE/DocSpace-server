@@ -192,6 +192,9 @@
   <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Hyni në zyrën tuaj të internetit</value>
   </data>
+  <data name="ButtonActivateAiFeatures" xml:space="preserve">
+    <value>Aktivizoni veçoritë AI</value>
+  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Klikoni këtu për të aktivizuar adresën tuaj të email-it</value>
   </data>
@@ -237,6 +240,9 @@
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Filloni</value>
   </data>
+  <data name="ButtonGoToDocSpace" xml:space="preserve">
+    <value>Shkoni te ${LetterLogoText}-i juaj</value>
+  </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Shkoni te cilësimet e portofolit</value>
   </data>
@@ -254,6 +260,9 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Lërini kontaktet</value>
+  </data>
+  <data name="ButtonLogIn" xml:space="preserve">
+    <value>Hyni në ${LetterLogoText}</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Hapni ${LetterLogoText}-in tuaj</value>
@@ -287,6 +296,9 @@
   </data>
   <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Përdorni zbritjen</value>
+  </data>
+  <data name="ButtonVisitBillingSection" xml:space="preserve">
+    <value>Shkoni te seksioni i pagesave</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivizoni email-it tuaj për portalin "${__VirtualRootPath}":"$InviteLink".
