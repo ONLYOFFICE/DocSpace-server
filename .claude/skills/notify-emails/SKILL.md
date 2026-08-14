@@ -85,6 +85,13 @@ Two styles coexist; match the neighbouring letters:
   `<li>`, `# item` an ordered one — `States/UnorderedListFormatterState.cs`,
   `States/OrderedListFormatterState.cs`. The space is what tells a list from bold: `*Your login*:` at
   the start of a line stays inline bold precisely because no space follows the asterisk.
+
+  **In ja-JP, ko-KR and zh-CN put a space on both sides of a `"text":"url"` link.** Those languages
+  write no space around a link, and the parser needs a boundary: with a particle glued to the
+  closing quote — `"決済方法":"$URL1"に`, `"결제 수단":"$URL1"의`, `"付款方式":"$URL1"中` — the link is
+  not recognized and the letter prints the raw quotes and the URL instead. A slightly loose space
+  before the particle is the lesser evil. Textile links inside these three cultures are worth
+  eyeballing in the rendered preview (§9) rather than trusting the source.
 - **Raw HTML table rows** (all marketing / after-registration letters) — a sequence of
   `<tr border="0" cellspacing="0" cellpadding="0"><td class="fol" style="…">…</td></tr>` blocks
   separated by blank lines, injected into `HtmlMaster`. There are no `<ul>`/`<li>` anywhere in the
