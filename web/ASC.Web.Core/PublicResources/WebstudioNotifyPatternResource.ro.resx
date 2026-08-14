@@ -408,7 +408,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Stimate, $UserName!
  
-Astăzi expiră licența dvs ${LetterLogoText} DocSpace Developer.
+Astăzi expiră licența dvs ${LetterLogoText} Developer.
  
 O perioadă de grație de $PaymentDelay zile a fost activată pentru dvs. În această perioadă, editarea documentelor este limitată la 20 conexiuni simultane (asistența și actualizări nu mai sunt disponibile).
  
@@ -421,7 +421,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Stimate, $UserName!
  
-Licența dvs ${LetterLogoText} DocSpace Developer va expira în 7 zile.
+Licența dvs ${LetterLogoText} Developer va expira în 7 zile.
  
 Pentru actualizarea licenței, contactați direct managerul de vânzări dvs personal sau contactați-ne la acest email: "${__SalesEmail}":"mailto:${__SalesEmail}".
  
@@ -432,7 +432,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Stimate, $UserName!
 
-Perioadă de grație pentru licența dvs ${LetterLogoText} DocSpace Developer va expira în 7 zile. De aceea spațiul DocSpace va deveni indisponibil.
+Perioadă de grație pentru licența dvs ${LetterLogoText} Developer va expira în 7 zile. De aceea spațiul ${LetterLogoText} va deveni indisponibil.
  
 Pentru actualizarea licenței, contactați direct managerul de vânzări dvs personal sau contactați-ne la acest email: "${__SalesEmail}":"mailto:${__SalesEmail}".
  
@@ -443,7 +443,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Stimate, $UserName!
  
-Astăzi expiră perioadă de grație pentru licența dvs ${LetterLogoText} DocSpace Developer. De aceea spațiul DocSpace nu va mai fi disponibil.
+Astăzi expiră perioadă de grație pentru licența dvs ${LetterLogoText} Developer. De aceea spațiul ${LetterLogoText} nu va mai fi disponibil.
  
 Pentru actualizarea licenței, contactați direct managerul de vânzări dvs personal sau contactați-ne la acest email: "${__SalesEmail}":"mailto:${__SalesEmail}".
  
@@ -454,11 +454,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Stimate, $UserName!
  
-Astăzi expiră licența dvs ${LetterLogoText} DocSpace Enterprise.
+Astăzi expiră licența dvs ${LetterLogoText} Enterprise.
  
-O perioadă de grație* de $PaymentDelay‎ zile a fost activată pentru dvs. În această perioadă, accesul la DocSpace va fi acordat la 3 utilizatori desemnați (asistența și actualizări nu mai sunt disponibile).
+O perioadă de grație* de $PaymentDelay‎ zile a fost activată pentru dvs. În această perioadă, accesul la ${LetterLogoText} va fi acordat la 3 utilizatori desemnați (asistența și actualizări nu mai sunt disponibile).
  
-Pentru a putea utiliza toate caracteristicile disponibile la momentul achiziționării pentru *o perioadă nelimitată de timp*, vă recomandăm să *obțineți o licență pe viață LIFETIME* pentru ${LetterLogoText} DocSpace Enterprise (cu 3 ani de asistență și actualizări):
+Pentru a putea utiliza toate caracteristicile disponibile la momentul achiziționării pentru *o perioadă nelimitată de timp*, vă recomandăm să *obțineți o licență pe viață LIFETIME* pentru ${LetterLogoText} Enterprise (cu 3 ani de asistență și actualizări):
  
 $OrangeButton
  
@@ -473,9 +473,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Stimate, $UserName!
  
-Licența dvs ${LetterLogoText} DocSpace  Enterprise va expira în 7 zile.
+Licența dvs ${LetterLogoText} ${LetterLogoText}  Enterprise va expira în 7 zile.
  
-Pentru a putea utiliza toate caracteristicile disponibile la momentul achiziționării pentru *o perioadă nelimitată de timp*, vă recomandăm să *obțineți o licență pe viață LIFETIME* pentru ${LetterLogoText} DocSpace Enterprise (cu 3 ani de asistență și actualizări):
+Pentru a putea utiliza toate caracteristicile disponibile la momentul achiziționării pentru *o perioadă nelimitată de timp*, vă recomandăm să *obțineți o licență pe viață LIFETIME* pentru ${LetterLogoText} Enterprise (cu 3 ani de asistență și actualizări):
  
 $OrangeButton
  
@@ -488,9 +488,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Stimate, $UserName!
  
-Perioadă de grație pentru licența dvs ${LetterLogoText} DocSpace Enterprise va expira în 7 zile. De aceea spațiul DocSpace va deveni indisponibil.
+Perioadă de grație pentru licența dvs ${LetterLogoText} Enterprise va expira în 7 zile. De aceea spațiul ${LetterLogoText} va deveni indisponibil.
  
-Pentru a putea utiliza toate caracteristicile disponibile la momentul achiziționării pentru *o perioadă nelimitată de timp*, vă recomandăm să *obțineți o licență pe viață LIFETIME* pentru ${LetterLogoText} DocSpace Enterprise (cu 3 ani de asistență și actualizări):
+Pentru a putea utiliza toate caracteristicile disponibile la momentul achiziționării pentru *o perioadă nelimitată de timp*, vă recomandăm să *obțineți o licență pe viață LIFETIME* pentru ${LetterLogoText} Enterprise (cu 3 ani de asistență și actualizări):
  
 $OrangeButton
  
@@ -503,9 +503,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Stimate, $UserName!
  
-Astăzi expiră perioadă de grație pentru licența dvs ${LetterLogoText} DocSpace Enterprise. De aceea spațiul DocSpace nu va mai fi disponibil.
+Astăzi expiră perioadă de grație pentru licența dvs ${LetterLogoText} Enterprise. De aceea spațiul ${LetterLogoText} nu va mai fi disponibil.
  
-Pentru a putea utiliza toate caracteristicile disponibile la momentul achiziționării pentru *o perioadă nelimitată de timp*, vă recomandăm să *obțineți o licență pe viață LIFETIME* pentru ${LetterLogoText} DocSpace Enterprise (cu 3 ani de asistență și actualizări):
+Pentru a putea utiliza toate caracteristicile disponibile la momentul achiziționării pentru *o perioadă nelimitată de timp*, vă recomandăm să *obțineți o licență pe viață LIFETIME* pentru ${LetterLogoText} Enterprise (cu 3 ani de asistență și actualizări):
  
 $OrangeButton
  
@@ -518,7 +518,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Stimate, $UserName!
  
-Licența dvs ${LetterLogoText} DocSpace  Enterprise va expira în 7 zile. De aceea actualizări și asistentă tehnică nu vor mai fi disponibile.*
+Licența dvs ${LetterLogoText} ${LetterLogoText}  Enterprise va expira în 7 zile. De aceea actualizări și asistentă tehnică nu vor mai fi disponibile.*
  
 Pentru actualizarea licenței, contactați direct managerul de vânzări dvs personal sau contactați-ne la acest email: "${__SalesEmail}":"mailto:${__SalesEmail}".
  
@@ -531,7 +531,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Stimate, $UserName!
  
-Astăzi expiră licența dvs ${LetterLogoText} DocSpace Enterprise. De aceea actualizări și asistentă tehnică nu vor mai fi disponibile.*
+Astăzi expiră licența dvs ${LetterLogoText} Enterprise. De aceea actualizări și asistentă tehnică nu vor mai fi disponibile.*
  
 Pentru actualizarea licenței, contactați direct managerul de vânzări dvs personal sau contactați-ne la acest email: "${__SalesEmail}":"mailto:${__SalesEmail}".
  
@@ -1462,34 +1462,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Schimbare adresă portal</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Perioadă de grație pentru ${LetterLogoText} DocSpace Developer a fost activată</value>
+    <value>Perioadă de grație pentru ${LetterLogoText} Developer a fost activată</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Licența dvs ${LetterLogoText} DocSpace Developer va expira în curând</value>
+    <value>Licența dvs ${LetterLogoText} Developer va expira în curând</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Perioadă de grație pentru ${LetterLogoText} DocSpace Developer va expira în curând</value>
+    <value>Perioadă de grație pentru ${LetterLogoText} Developer va expira în curând</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer nu mai este disponibil pentru dvs</value>
+    <value>${LetterLogoText} Developer nu mai este disponibil pentru dvs</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Perioadă de grație pentru ${LetterLogoText} DocSpace Enterprise a fost activată</value>
+    <value>Perioadă de grație pentru ${LetterLogoText} Enterprise a fost activată</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Licența dvs ${LetterLogoText} DocSpace Enterprise va expira în curând</value>
+    <value>Licența dvs ${LetterLogoText} Enterprise va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Perioadă de grație pentru ${LetterLogoText} DocSpace Developer va expira în curând</value>
+    <value>Perioadă de grație pentru ${LetterLogoText} Developer va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise nu mai este disponibil pentru dvs</value>
+    <value>${LetterLogoText} Enterprise nu mai este disponibil pentru dvs</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Licența dvs ${LetterLogoText} DocSpace Enterprise va expira în curând</value>
+    <value>Licența dvs ${LetterLogoText} Enterprise va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Astăzi expiră licența dvs ${LetterLogoText} DocSpace Enterprise</value>
+    <value>Astăzi expiră licența dvs ${LetterLogoText} Enterprise</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Obțineți aplicații ${LetterLogoText} gratuit</value>

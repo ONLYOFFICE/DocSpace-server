@@ -410,7 +410,7 @@ $OrangeButton
 
 いつも${LetterLogoText}をご利用いただきありがとうございます。
 
-${LetterLogoText} DocSpace Developerのライセンスは本日で期限切れとなりますので、お知らせいたします。
+${LetterLogoText} Developerのライセンスは本日で期限切れとなりますので、お知らせいたします。
 
 お客様のために $PaymentDelay 日間の猶予期間を設定いたしました。この期間中は、ドキュメントの編集へのアクセスは20の同時接続に制限されます。なお、サポートおよびアップデートは提供されませんので、ご了承ください。
 
@@ -425,7 +425,7 @@ $TrulyYours</value>
 
 いつも${LetterLogoText}をご利用いただきありがとうございます。
 
-${LetterLogoText} DocSpace Developerのライセンスは7日後に期限切れになりますので、お知らせいたします。
+${LetterLogoText} Developerのライセンスは7日後に期限切れになりますので、お知らせいたします。
 
 ライセンスを更新するには、担当営業マネージャーに直接ご連絡いただくか、または "${__SalesEmail}":"mailto:${__SalesEmail}" までお問い合わせください。
 
@@ -436,7 +436,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>$UserName 様
 
-${LetterLogoText} DocSpace Developerライセンスの猶予期間は7日後に終了しますので、お知らせいたします。なお、DocSpaceはご利用いただけなくなりますので、ご了承ください。
+${LetterLogoText} Developerライセンスの猶予期間は7日後に終了しますので、お知らせいたします。なお、${LetterLogoText}はご利用いただけなくなりますので、ご了承ください。
 
 ライセンスを更新するには、担当営業マネージャーに直接ご連絡いただくか、または "${__SalesEmail}":"mailto:${__SalesEmail}" までお問い合わせください。
 
@@ -447,7 +447,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>$UserName 様
 
-${LetterLogoText} DocSpace Developerライセンスの猶予期間は本日で終了しますので、お知らせいたします。なお、DocSpaceはご利用いただけなくなりますので、ご了承ください。
+${LetterLogoText} Developerライセンスの猶予期間は本日で終了しますので、お知らせいたします。なお、${LetterLogoText}はご利用いただけなくなりますので、ご了承ください。
 
 ライセンスを更新するには、担当営業マネージャーに直接ご連絡いただくか、または "${__SalesEmail}":"mailto:${__SalesEmail}" までお問い合わせください。
 
@@ -460,11 +460,11 @@ $TrulyYours</value>
 
 いつも${LetterLogoText}をご利用いただきありがとうございます。
 
-${LetterLogoText} DocSpace Enterpriseのライセンスは本日で期限切れとなります。
+${LetterLogoText} Enterpriseのライセンスは本日で期限切れとなります。
 
-お客様のために *$PaymentDelay 日の猶予期間* を設定しました。この期間中は、DocSpaceへのアクセスは3名の指定ユーザー*に提供されます。なお、サポートおよびアップデートは提供されません。
+お客様のために *$PaymentDelay 日の猶予期間* を設定しました。この期間中は、${LetterLogoText}へのアクセスは3名の指定ユーザー*に提供されます。なお、サポートおよびアップデートは提供されません。
 
-購入時に利用可能であったすべての機能を無期限で利用できるようにするため、${LetterLogoText} DocSpace EnterpriseのLIFETIMEライセンス（3 年間のサポートとアップデート付き）をご購入いただくことをお勧めします。
+購入時に利用可能であったすべての機能を無期限で利用できるようにするため、${LetterLogoText} EnterpriseのLIFETIMEライセンス（3 年間のサポートとアップデート付き）をご購入いただくことをお勧めします。
 
 $OrangeButton
 
@@ -481,9 +481,9 @@ $TrulyYours</value>
 
 いつも${LetterLogoText}をご利用いただきありがとうございます。
 
-${LetterLogoText} DocSpace Enterpriseのライセンスは7日後に期限切れになります。
+${LetterLogoText} Enterpriseのライセンスは7日後に期限切れになります。
 
-購入時に利用可能であったすべての機能を無期限で利用できるようにするため、${LetterLogoText} DocSpace EnterpriseのLIFETIMEライセンス（3 年間のサポートとアップデート付き）をご購入いただくことをお勧めします。
+購入時に利用可能であったすべての機能を無期限で利用できるようにするため、${LetterLogoText} EnterpriseのLIFETIMEライセンス（3 年間のサポートとアップデート付き）をご購入いただくことをお勧めします。
 
 $OrangeButton
 
@@ -498,9 +498,9 @@ $TrulyYours</value>
 
 いつも${LetterLogoText}をご利用いただきありがとうございます。
 
-${LetterLogoText} DocSpace Enterpriseライセンスの猶予期間は7日後に終了します。 猶予期間がすぎると、DocSpaceが利用できなくなりますので、ご注意ください。
+${LetterLogoText} Enterpriseライセンスの猶予期間は7日後に終了します。 猶予期間がすぎると、${LetterLogoText}が利用できなくなりますので、ご注意ください。
 
-購入時に利用可能であったすべての機能を無期限で利用できるようにするには、${LetterLogoText} DocSpace EnterpriseのLIFETIMEライセンス（3年間のサポートとアップデート付き）を取得することをお勧めします。
+購入時に利用可能であったすべての機能を無期限で利用できるようにするには、${LetterLogoText} EnterpriseのLIFETIMEライセンス（3年間のサポートとアップデート付き）を取得することをお勧めします。
 
 $OrangeButton
 
@@ -515,9 +515,9 @@ $TrulyYours</value>
 
 いつも${LetterLogoText}をご利用いただきありがとうございます。
 
-${LetterLogoText} DocSpace Enterpriseライセンスの猶予期間は本日で終了します。 猶予期間がすぎると、DocSpaceが利用できなくなりますので、ご注意ください。
+${LetterLogoText} Enterpriseライセンスの猶予期間は本日で終了します。 猶予期間がすぎると、${LetterLogoText}が利用できなくなりますので、ご注意ください。
 
-購入時に利用可能であったすべての機能を無期限で利用できるようにするには、${LetterLogoText} DocSpace EnterpriseのLIFETIMEライセンス（3年間のサポートとアップデート付き）を取得することをお勧めします。
+購入時に利用可能であったすべての機能を無期限で利用できるようにするには、${LetterLogoText} EnterpriseのLIFETIMEライセンス（3年間のサポートとアップデート付き）を取得することをお勧めします。
 
 $OrangeButton
 
@@ -530,7 +530,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>$UserName 様
 
-${LetterLogoText} DocSpace Enterpriseのライセンスは7日後に期限切れになります。7日後にアップデートとサポートは利用できなくなります。*
+${LetterLogoText} Enterpriseのライセンスは7日後に期限切れになります。7日後にアップデートとサポートは利用できなくなります。*
 
 ライセンスを更新するには、担当営業マネージャーに直接連絡するか、または "${__SalesEmail}":"mailto:${__SalesEmail}" からお問い合わせください
 
@@ -543,7 +543,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>$UserName 様
 
-${LetterLogoText} DocSpace Enterpriseのライセンスは本日で期限切れとなります。 明日以降、アップデートとサポートは利用できなくなります。*
+${LetterLogoText} Enterpriseのライセンスは本日で期限切れとなります。 明日以降、アップデートとサポートは利用できなくなります。*
 
 ライセンスを更新するには、担当営業マネージャーに直接連絡するか、または "${__SalesEmail}":"mailto:${__SalesEmail}" からお問い合わせください
 
@@ -1443,34 +1443,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}.ポータル所有者変更</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developerの猶予期間が有効になりました</value>
+    <value>${LetterLogoText} Developerの猶予期間が有効になりました</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developerライセンスがまもなく期限切れになります</value>
+    <value>${LetterLogoText} Developerライセンスがまもなく期限切れになります</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developerの猶予期間がまもなく終了します</value>
+    <value>${LetterLogoText} Developerの猶予期間がまもなく終了します</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developerはご利用いただけなくなりました</value>
+    <value>${LetterLogoText} Developerはご利用いただけなくなりました</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterpriseの猶予期間が開始されました</value>
+    <value>${LetterLogoText} Enterpriseの猶予期間が開始されました</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterpriseライセンスはまもなく期限切れになります</value>
+    <value>${LetterLogoText} Enterpriseライセンスはまもなく期限切れになります</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterpriseの猶予期間はまもなく終了します</value>
+    <value>${LetterLogoText} Enterpriseの猶予期間はまもなく終了します</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterpriseはご利用いただけなくなりました</value>
+    <value>${LetterLogoText} Enterpriseはご利用いただけなくなりました</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterpriseライセンスはまもなく期限切れになります</value>
+    <value>${LetterLogoText} Enterpriseライセンスはまもなく期限切れになります</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterpriseライセンスは本日期限切れになります</value>
+    <value>${LetterLogoText} Enterpriseライセンスは本日期限切れになります</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>${LetterLogoText}の無料アプリを入手しましょう</value>

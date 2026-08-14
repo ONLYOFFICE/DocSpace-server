@@ -420,7 +420,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η άδειά σας για το ${LetterLogoText} DocSpace Developer λήγει σήμερα.
+Η άδειά σας για το ${LetterLogoText} Developer λήγει σήμερα.
 
 Ενεργοποιήσαμε μια περίοδο χάριτος $PaymentDelay ημερών για εσάς. Κατά τη διάρκεια αυτής της περιόδου, η πρόσβαση στην επεξεργασία εγγράφων περιορίζεται σε 20 ταυτόχρονες συνδέσεις (δεν παρέχονται πλέον υποστήριξη και ενημερώσεις).
 
@@ -433,7 +433,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η άδειά σας για το ${LetterLogoText} DocSpace Developer θα λήξει σε 7 ημέρες.
+Η άδειά σας για το ${LetterLogoText} Developer θα λήξει σε 7 ημέρες.
 
 Για να ενημερώσετε την άδεια χρήσης, επικοινωνήστε απευθείας με τον ειδικό υπεύθυνο πωλήσεων ή επικοινωνήστε μαζί μας μέσω του  "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -444,7 +444,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η περίοδος χάριτος για την άδεια χρήσης του ${LetterLogoText} DocSpace Developer σας θα λήξει σε 7 ημέρες. Αυτό σημαίνει ότι το DocSpace δεν θα είναι διαθέσιμο.
+Η περίοδος χάριτος για την άδεια χρήσης του ${LetterLogoText} Developer σας θα λήξει σε 7 ημέρες. Αυτό σημαίνει ότι το ${LetterLogoText} δεν θα είναι διαθέσιμο.
 
 Για να ενημερώσετε την άδεια χρήσης, επικοινωνήστε απευθείας με τον ειδικό υπεύθυνο πωλήσεων ή επικοινωνήστε μαζί μας μέσω του "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -455,7 +455,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η περίοδος χάριτος για την άδεια χρήσης του ${LetterLogoText} DocSpace Developer σας λήγει σήμερα. Αυτό σημαίνει ότι το DocSpace δεν θα είναι πλέον διαθέσιμο.
+Η περίοδος χάριτος για την άδεια χρήσης του ${LetterLogoText} Developer σας λήγει σήμερα. Αυτό σημαίνει ότι το ${LetterLogoText} δεν θα είναι πλέον διαθέσιμο.
 
 Για να ενημερώσετε την άδεια χρήσης, επικοινωνήστε απευθείας με τον ειδικό υπεύθυνο πωλήσεων ή επικοινωνήστε μαζί μας μέσω του "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -466,11 +466,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η άδειά σας για το ${LetterLogoText} DocSpace Enterprise λήγει σήμερα.
+Η άδειά σας για το ${LetterLogoText} Enterprise λήγει σήμερα.
 
-Ενεργοποιήσαμε *μια περίοδο χάριτος $PaymentDelay ημερών* για εσάς. Κατά τη διάρκεια αυτής της περιόδου, παρέχεται πρόσβαση στο DocSpace για 3 ονομαστικούς χρήστες* (δεν παρέχονται πλέον υποστήριξη και ενημερώσεις).
+Ενεργοποιήσαμε *μια περίοδο χάριτος $PaymentDelay ημερών* για εσάς. Κατά τη διάρκεια αυτής της περιόδου, παρέχεται πρόσβαση στο ${LetterLogoText} για 3 ονομαστικούς χρήστες* (δεν παρέχονται πλέον υποστήριξη και ενημερώσεις).
 
-Για να είστε σε θέση να χρησιμοποιήσετε όλες τις δυνατότητες που είναι διαθέσιμες τη στιγμή της αγοράς για *απεριόριστο χρονικό διάστημα*, σας συνιστούμε να *αποκτήσετε μια άδεια LIFETIME* για το ${LetterLogoText} DocSpace Enterprise (με 3 χρόνια υποστήριξης και ενημερώσεων):
+Για να είστε σε θέση να χρησιμοποιήσετε όλες τις δυνατότητες που είναι διαθέσιμες τη στιγμή της αγοράς για *απεριόριστο χρονικό διάστημα*, σας συνιστούμε να *αποκτήσετε μια άδεια LIFETIME* για το ${LetterLogoText} Enterprise (με 3 χρόνια υποστήριξης και ενημερώσεων):
 
 $OrangeButton
 
@@ -485,9 +485,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η άδειά σας για το ${LetterLogoText} DocSpace Enterprise θα λήξει σε 7 ημέρες.
+Η άδειά σας για το ${LetterLogoText} Enterprise θα λήξει σε 7 ημέρες.
 
-Για να μπορείτε να χρησιμοποιήσετε όλες τις δυνατότητες που είναι διαθέσιμες τη στιγμή της αγοράς για *απεριόριστο χρονικό διάστημα*, σας συνιστούμε να *αποκτήσετε μια άδεια LIFETIME* για το ${LetterLogoText} DocSpace Enterprise (με 3 χρόνια υποστήριξης και ενημερώσεων).
+Για να μπορείτε να χρησιμοποιήσετε όλες τις δυνατότητες που είναι διαθέσιμες τη στιγμή της αγοράς για *απεριόριστο χρονικό διάστημα*, σας συνιστούμε να *αποκτήσετε μια άδεια LIFETIME* για το ${LetterLogoText} Enterprise (με 3 χρόνια υποστήριξης και ενημερώσεων).
 
 $OrangeButton
 
@@ -500,9 +500,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η περίοδος χάριτος για την άδεια χρήσης του ${LetterLogoText} DocSpace Enterprise σας θα λήξει σε 7 ημέρες. Αυτό σημαίνει ότι το DocSpace δεν θα είναι διαθέσιμο.
+Η περίοδος χάριτος για την άδεια χρήσης του ${LetterLogoText} Enterprise σας θα λήξει σε 7 ημέρες. Αυτό σημαίνει ότι το ${LetterLogoText} δεν θα είναι διαθέσιμο.
 
-Για να είστε σε θέση να χρησιμοποιήσετε όλες τις δυνατότητες που είναι διαθέσιμες τη στιγμή της αγοράς για *απεριόριστο χρονικό διάστημα*, σας συνιστούμε να *αποκτήσετε μια άδεια LIFETIME* για το ${LetterLogoText} DocSpace Enterprise (με 3 χρόνια υποστήριξης και ενημερώσεων):
+Για να είστε σε θέση να χρησιμοποιήσετε όλες τις δυνατότητες που είναι διαθέσιμες τη στιγμή της αγοράς για *απεριόριστο χρονικό διάστημα*, σας συνιστούμε να *αποκτήσετε μια άδεια LIFETIME* για το ${LetterLogoText} Enterprise (με 3 χρόνια υποστήριξης και ενημερώσεων):
 
 $OrangeButton
 
@@ -515,9 +515,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η περίοδος χάριτος για την άδεια χρήσης του ${LetterLogoText} DocSpace Enterprise σας λήγει σήμερα. Αυτό σημαίνει ότι το DocSpace δεν θα είναι πλέον διαθέσιμο.
+Η περίοδος χάριτος για την άδεια χρήσης του ${LetterLogoText} Enterprise σας λήγει σήμερα. Αυτό σημαίνει ότι το ${LetterLogoText} δεν θα είναι πλέον διαθέσιμο.
 
-Για να είστε σε θέση να χρησιμοποιήσετε όλες τις δυνατότητες που είναι διαθέσιμες τη στιγμή της αγοράς για *απεριόριστο χρονικό διάστημα*, σας συνιστούμε να *αποκτήσετε μια άδεια LIFETIME* για το ${LetterLogoText} DocSpace Enterprise (με 3 χρόνια υποστήριξης και ενημερώσεων):
+Για να είστε σε θέση να χρησιμοποιήσετε όλες τις δυνατότητες που είναι διαθέσιμες τη στιγμή της αγοράς για *απεριόριστο χρονικό διάστημα*, σας συνιστούμε να *αποκτήσετε μια άδεια LIFETIME* για το ${LetterLogoText} Enterprise (με 3 χρόνια υποστήριξης και ενημερώσεων):
 
 $OrangeButton
 
@@ -530,7 +530,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η άδειά σας για το ${LetterLogoText} DocSpace Enterprise θα λήξει σε 7 ημέρες. Αυτό σημαίνει ότι οι ενημερώσεις και η υποστήριξη δεν θα είναι πλέον διαθέσιμες.*
+Η άδειά σας για το ${LetterLogoText} Enterprise θα λήξει σε 7 ημέρες. Αυτό σημαίνει ότι οι ενημερώσεις και η υποστήριξη δεν θα είναι πλέον διαθέσιμες.*
 
 Για να ενημερώσετε την άδεια χρήσης, επικοινωνήστε απευθείας με τον ειδικό υπεύθυνο πωλήσεων ή επικοινωνήστε μαζί μας μέσω του "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -543,7 +543,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Γεια σας, $UserName!
 
-Η άδειά σας για το ${LetterLogoText} DocSpace Enterprise λήγει σήμερα. Αυτό σημαίνει ότι οι ενημερώσεις και η υποστήριξη δεν είναι πλέον διαθέσιμες.*
+Η άδειά σας για το ${LetterLogoText} Enterprise λήγει σήμερα. Αυτό σημαίνει ότι οι ενημερώσεις και η υποστήριξη δεν είναι πλέον διαθέσιμες.*
 
 Για να ενημερώσετε την άδεια χρήσης, επικοινωνήστε απευθείας με τον ειδικό υπεύθυνο πωλήσεων ή επικοινωνήστε μαζί μας μέσω του "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1486,34 +1486,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Αλλαγή του ιδιοκτήτη της πύλης</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Περίοδος χάριτος για την ενεργοποίηση του ${LetterLogoText} DocSpace Developer σας</value>
+    <value>Περίοδος χάριτος για την ενεργοποίηση του ${LetterLogoText} Developer σας</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Η άδεια χρήσης του ${LetterLogoText} DocSpace Developer σας θα λήξει σύντομα</value>
+    <value>Η άδεια χρήσης του ${LetterLogoText} Developer σας θα λήξει σύντομα</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Η περίοδος χάριτος για το ${LetterLogoText} DocSpace Developer σας  θα λήξει σύντομα</value>
+    <value>Η περίοδος χάριτος για το ${LetterLogoText} Developer σας  θα λήξει σύντομα</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Το ${LetterLogoText} DocSpace Developer σας δεν είναι πλέον διαθέσιμο</value>
+    <value>Το ${LetterLogoText} Developer σας δεν είναι πλέον διαθέσιμο</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Περίοδος χάριτος για το ${LetterLogoText} DocSpace Enterprise σας που έχετε ενεργοποιήσει</value>
+    <value>Περίοδος χάριτος για το ${LetterLogoText} Enterprise σας που έχετε ενεργοποιήσει</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Η άδεια χρήσης του ${LetterLogoText} DocSpace Enterprise σας θα λήξει σύντομα</value>
+    <value>Η άδεια χρήσης του ${LetterLogoText} Enterprise σας θα λήξει σύντομα</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Η περίοδος χάριτος για το ${LetterLogoText} DocSpace Enterprise σας θα λήξει σύντομα</value>
+    <value>Η περίοδος χάριτος για το ${LetterLogoText} Enterprise σας θα λήξει σύντομα</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Το ${LetterLogoText} DocSpace Enterprise σας δεν είναι πλέον διαθέσιμο</value>
+    <value>Το ${LetterLogoText} Enterprise σας δεν είναι πλέον διαθέσιμο</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Η άδεια χρήσης του ${LetterLogoText} DocSpace Enterprise σας θα λήξει σύντομα</value>
+    <value>Η άδεια χρήσης του ${LetterLogoText} Enterprise σας θα λήξει σύντομα</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Η άδεια χρήσης του ${LetterLogoText} DocSpace Enterprise σας λήγει σήμερα</value>
+    <value>Η άδεια χρήσης του ${LetterLogoText} Enterprise σας λήγει σήμερα</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Αποκτήστε δωρεάν εφαρμογές ${LetterLogoText}</value>

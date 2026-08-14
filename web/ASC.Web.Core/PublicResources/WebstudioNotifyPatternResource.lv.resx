@@ -420,7 +420,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} DocSpace Developer licences derīguma termiņš beidzas šodien.
+Jūsu ${LetterLogoText} Developer licences derīguma termiņš beidzas šodien.
 
 Mēs aktivizējām jums $PaymentDelay dienu pagarinājuma periodu. Šajā laikā piekļuve dokumentu rediģēšanai ir ierobežota līdz 20 vienlaicīgiem savienojumiem (atbalsts un atjauninājumi vairs netiek nodrošināti).
 
@@ -433,7 +433,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} DocSpace Developer licences derīguma termiņš beigsies pēc 7 dienām.
+Jūsu ${LetterLogoText} Developer licences derīguma termiņš beigsies pēc 7 dienām.
 
 Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -444,7 +444,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Pagarinājuma periods jūsu ${LetterLogoText} DocSpace Developer licencei beigsies pēc 7 dienām. Tas nozīmē, ka DocSpace vairs nebūs pieejams.
+Pagarinājuma periods jūsu ${LetterLogoText} Developer licencei beigsies pēc 7 dienām. Tas nozīmē, ka ${LetterLogoText} vairs nebūs pieejams.
 
 Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -455,7 +455,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} DocSpace Developer licences pagarinājuma periods beidzas šodien. Tas nozīmē, ka DocSpace vairs nebūs pieejams.
+Jūsu ${LetterLogoText} Developer licences pagarinājuma periods beidzas šodien. Tas nozīmē, ka ${LetterLogoText} vairs nebūs pieejams.
 
 Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -466,11 +466,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} DocSpace Developer licences derīguma termiņš beidzas šodien.
+Jūsu ${LetterLogoText} Developer licences derīguma termiņš beidzas šodien.
 
-Mēs aktivizējām *$PaymentDelay‎ ‎dienu pagarinājuma periodu*. Šajā laikā piekļuve DocSpace tiek nodrošināta trīs nosauktajiem lietotājiem* (atbalsts un atjauninājumi vairs netiek nodrošināti).
+Mēs aktivizējām *$PaymentDelay‎ ‎dienu pagarinājuma periodu*. Šajā laikā piekļuve ${LetterLogoText} tiek nodrošināta trīs nosauktajiem lietotājiem* (atbalsts un atjauninājumi vairs netiek nodrošināti).
 
-Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ${LetterLogoText} DocSpace Enterprise (ar trīs gadu atbalstu un atjauninājumiem):
+Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ${LetterLogoText} Enterprise (ar trīs gadu atbalstu un atjauninājumiem):
 
 $OrangeButton
 
@@ -485,9 +485,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} DocSpace Enterprise licences derīguma termiņš beigsies pēc septiņām dienām.
+Jūsu ${LetterLogoText} Enterprise licences derīguma termiņš beigsies pēc septiņām dienām.
 
-Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ${LetterLogoText} DocSpace Enterprise (ar trīs gadu atbalstu un atjauninājumiem).
+Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ${LetterLogoText} Enterprise (ar trīs gadu atbalstu un atjauninājumiem).
 
 $OrangeButton
 
@@ -500,9 +500,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} DocSpace Enterprise licences derīguma termiņš beigsies pēc septiņām dienām.
+Jūsu ${LetterLogoText} Enterprise licences derīguma termiņš beigsies pēc septiņām dienām.
 
-Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ${LetterLogoText} DocSpace Enterprise (ar trīs gadu atbalstu un atjauninājumiem).
+Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ${LetterLogoText} Enterprise (ar trīs gadu atbalstu un atjauninājumiem).
 
 $OrangeButton
 
@@ -515,9 +515,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} DocSpace Enterprise licences pagarinājuma periods beidzas šodien. Tas nozīmē, ka DocSpace vairs nebūs pieejams.
+Jūsu ${LetterLogoText} Enterprise licences pagarinājuma periods beidzas šodien. Tas nozīmē, ka ${LetterLogoText} vairs nebūs pieejams.
 
-Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ${LetterLogoText} DocSpace Enterprise (ar trīs gadu atbalstu un atjauninājumiem):
+Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu laika periodu*, mēs iesakām * iegūt MŪŽA licenci* ${LetterLogoText} Enterprise (ar trīs gadu atbalstu un atjauninājumiem):
 
 $OrangeButton
 
@@ -530,7 +530,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} DocSpace Enterprise licences derīguma termiņš beigsies pēc septiņām dienām. Tas nozīmē, ka atjauninājumi un atbalsts vairs nebūs pieejams.*
+Jūsu ${LetterLogoText} Enterprise licences derīguma termiņš beigsies pēc septiņām dienām. Tas nozīmē, ka atjauninājumi un atbalsts vairs nebūs pieejams.*
 
 Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -543,7 +543,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} DocSpace Developer licences derīguma termiņš beidzas šodien. Tas nozīmē, ka atjauninājumi un atbalsts vairs nebūs pieejami.*
+Jūsu ${LetterLogoText} Developer licences derīguma termiņš beidzas šodien. Tas nozīmē, ka atjauninājumi un atbalsts vairs nebūs pieejami.*
 
 Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1486,34 +1486,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Portāla īpašnieka maiņa</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace ir aktivizēts</value>
+    <value>Pagarinājuma periods jūsu ${LetterLogoText} ir aktivizēts</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} DocSpace izstrādātāja licences derīguma termiņš drīz beigsies</value>
+    <value>Jūsu ${LetterLogoText} izstrādātāja licences derīguma termiņš drīz beigsies</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace izstrādātājam drīz beigsies</value>
+    <value>Pagarinājuma periods jūsu ${LetterLogoText} izstrādātājam drīz beigsies</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} DocSpace izstrādātājs vairs nav pieejams</value>
+    <value>Jūsu ${LetterLogoText} izstrādātājs vairs nav pieejams</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace Enterprise ir aktivizēts</value>
+    <value>Pagarinājuma periods jūsu ${LetterLogoText} Enterprise ir aktivizēts</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} DocSpace Enterprise licences derīguma termiņš drīz beigsies</value>
+    <value>Jūsu ${LetterLogoText} Enterprise licences derīguma termiņš drīz beigsies</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace Enterprise izstrādātājam drīz beigsies</value>
+    <value>Pagarinājuma periods jūsu ${LetterLogoText} Enterprise izstrādātājam drīz beigsies</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} DocSpace Enterprise vairs nav pieejams</value>
+    <value>Jūsu ${LetterLogoText} Enterprise vairs nav pieejams</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} DocSpace Enterprise licences derīguma termiņš drīz beigsies</value>
+    <value>Jūsu ${LetterLogoText} Enterprise licences derīguma termiņš drīz beigsies</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} DocSpace Enterprise licences derīguma termiņš beidzas šodien</value>
+    <value>Jūsu ${LetterLogoText} Enterprise licences derīguma termiņš beidzas šodien</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Saņemiet bezmaksas ${LetterLogoText} lietojumprogrammas</value>

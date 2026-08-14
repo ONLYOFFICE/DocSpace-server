@@ -420,7 +420,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Developer poteče danes.
+Vaša licenca za ${LetterLogoText} Developer poteče danes.
 
 Za vas smo aktivirali obdobje odloga $PaymentDelay dni. V tem času je dostop do urejanja dokumentov omejen na 20 sočasnih povezav (podpora in posodobitve niso več na voljo).
 
@@ -433,7 +433,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Developer bo potekla čez 7 dni.
+Vaša licenca za ${LetterLogoText} Developer bo potekla čez 7 dni.
 
 Če želite posodobiti licenco, se obrnite neposredno na svojega dodeljenega vodjo prodaje ali stopite v stik z nami prek "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -444,7 +444,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Obdobje odloga za vašo licenco za razvijalce ${LetterLogoText} DocSpace bo poteklo čez 7 dni. To pomeni, da vam DocSpace ne bo več na voljo.
+Obdobje odloga za vašo licenco za razvijalce ${LetterLogoText} bo poteklo čez 7 dni. To pomeni, da vam ${LetterLogoText} ne bo več na voljo.
 
 Če želite posodobiti licenco, se obrnite neposredno na svojega dodeljenega vodjo prodaje ali stopite v stik z nami prek "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -455,7 +455,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Obdobje podaljšanega odloga za vašo licenco ${LetterLogoText} DocSpace Developer poteče danes. To pomeni, da vam DocSpace ne bo več na voljo.
+Obdobje podaljšanega odloga za vašo licenco ${LetterLogoText} Developer poteče danes. To pomeni, da vam ${LetterLogoText} ne bo več na voljo.
 
 Če želite posodobiti licenco, se obrnite neposredno na svojega dodeljenega vodjo prodaje ali stopite v stik z nami prek "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -466,11 +466,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Enterprise poteče danes.
+Vaša licenca za ${LetterLogoText} Enterprise poteče danes.
 
-Za vas smo aktivirali *odlog plačila $PaymentDelay dni*. V tem času je dostop do DocSpace zagotovljen za 3 imenovane uporabnike* (podpora in posodobitve niso več na voljo).
+Za vas smo aktivirali *odlog plačila $PaymentDelay dni*. V tem času je dostop do ${LetterLogoText} zagotovljen za 3 imenovane uporabnike* (podpora in posodobitve niso več na voljo).
 
-Da bi lahko *neomejeno* uporabljali vse funkcije, ki so na voljo ob nakupu, vam priporočamo, da *pridobite TRAJNO licenco* za ${LetterLogoText} DocSpace Enterprise (s 3-letno podporo in vključenimi posodobitvami):
+Da bi lahko *neomejeno* uporabljali vse funkcije, ki so na voljo ob nakupu, vam priporočamo, da *pridobite TRAJNO licenco* za ${LetterLogoText} Enterprise (s 3-letno podporo in vključenimi posodobitvami):
 
 $OrangeButton
 
@@ -485,9 +485,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Enterprise bo potekla čez 7 dni.
+Vaša licenca za ${LetterLogoText} Enterprise bo potekla čez 7 dni.
 
-Da bi lahko uporabljali vse funkcije, ki so na voljo v trenutku nakupa, za *neomejeno časovno obdobje*, vam priporočamo, da *pridobite TRAJNO licenco* za ${LetterLogoText} DocSpace Enterprise (s 3-letno podporo in vključenimi posodobitvami).
+Da bi lahko uporabljali vse funkcije, ki so na voljo v trenutku nakupa, za *neomejeno časovno obdobje*, vam priporočamo, da *pridobite TRAJNO licenco* za ${LetterLogoText} Enterprise (s 3-letno podporo in vključenimi posodobitvami).
 
 $OrangeButton
 
@@ -500,9 +500,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Obdobje odloga za vašo licenco ${LetterLogoText} DocSpace Enterprise bo poteklo čez 7 dni. To pomeni, da DocSpace ne bo več na voljo.
+Obdobje odloga za vašo licenco ${LetterLogoText} Enterprise bo poteklo čez 7 dni. To pomeni, da ${LetterLogoText} ne bo več na voljo.
 
-Da bi lahko *neomejeno* uporabljali vse funkcije, ki so na voljo ob nakupu, vam priporočamo, da *pridobite Trajno licenco* za ${LetterLogoText} DocSpace Enterprise (s 3-letno podporo in vključenimi posodobitvami):
+Da bi lahko *neomejeno* uporabljali vse funkcije, ki so na voljo ob nakupu, vam priporočamo, da *pridobite Trajno licenco* za ${LetterLogoText} Enterprise (s 3-letno podporo in vključenimi posodobitvami):
 
 $OrangeButton
 
@@ -515,9 +515,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Obdobje podaljšanja za vašo licenco ${LetterLogoText} DocSpace Enterprise poteče danes. To pomeni, da vam DocSpace ne bo več na voljo.
+Obdobje podaljšanja za vašo licenco ${LetterLogoText} Enterprise poteče danes. To pomeni, da vam ${LetterLogoText} ne bo več na voljo.
 
-Da bi lahko *neomejeno* uporabljali vse funkcije, ki so na voljo ob nakupu, vam priporočamo, da *pridobite TRAJNO licenco* za ${LetterLogoText} DocSpace Enterprise (s 3-letno podporo in vključenimi posodobitvami):
+Da bi lahko *neomejeno* uporabljali vse funkcije, ki so na voljo ob nakupu, vam priporočamo, da *pridobite TRAJNO licenco* za ${LetterLogoText} Enterprise (s 3-letno podporo in vključenimi posodobitvami):
 
 $OrangeButton
 
@@ -530,7 +530,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Enterprise bo potekla čez 7 dni. To pomeni, da posodobitve in podpora ne bodo več na voljo.*
+Vaša licenca za ${LetterLogoText} Enterprise bo potekla čez 7 dni. To pomeni, da posodobitve in podpora ne bodo več na voljo.*
 
 Če želite posodobiti licenco, se obrnite neposredno na svojega dodeljenega vodjo prodaje ali stopite v stik z nami prek "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -543,7 +543,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Enterprise poteče danes. To pomeni, da posodobitve in podpora ne bodo več na voljo.*
+Vaša licenca za ${LetterLogoText} Enterprise poteče danes. To pomeni, da posodobitve in podpora ne bodo več na voljo.*
 
 Če želite posodobiti licenco, se obrnite neposredno na svojega dodeljenega vodjo prodaje ali stopite v stik z nami prek "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1486,34 +1486,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Sprememba lastnika portala</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Aktivirano je podaljšano obdobje za razvijalca ${LetterLogoText} DocSpace</value>
+    <value>Aktivirano je podaljšano obdobje za razvijalca ${LetterLogoText}</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaša licenca za razvijalce ${LetterLogoText} DocSpace bo kmalu potekla</value>
+    <value>Vaša licenca za razvijalce ${LetterLogoText} bo kmalu potekla</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Podaljšano obdobje za vaš ${LetterLogoText} DocSpace za razvijaleca bo kmalu potekel</value>
+    <value>Podaljšano obdobje za vaš ${LetterLogoText} za razvijaleca bo kmalu potekel</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Vaš ${LetterLogoText} DocSpace razvijalec ni več na voljo</value>
+    <value>Vaš ${LetterLogoText} razvijalec ni več na voljo</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Podaljšano obdobje za vaš ${LetterLogoText} DocSpace Enterprise je aktiviran</value>
+    <value>Podaljšano obdobje za vaš ${LetterLogoText} Enterprise je aktiviran</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaša licenca ${LetterLogoText} DocSpace Enterprise bo kmalu potekla</value>
+    <value>Vaša licenca ${LetterLogoText} Enterprise bo kmalu potekla</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Podaljšano obdobje za vaš ${LetterLogoText} DocSpace Enterprise bo kmalu poteklo</value>
+    <value>Podaljšano obdobje za vaš ${LetterLogoText} Enterprise bo kmalu poteklo</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Vaš ${LetterLogoText} DocSpace Enterprise ni več na voljo</value>
+    <value>Vaš ${LetterLogoText} Enterprise ni več na voljo</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Vaša licenca ${LetterLogoText} DocSpace Enterprise bo kmalu potekla</value>
+    <value>Vaša licenca ${LetterLogoText} Enterprise bo kmalu potekla</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Vaša licenca ${LetterLogoText} DocSpace Enterprise poteče danes</value>
+    <value>Vaša licenca ${LetterLogoText} Enterprise poteče danes</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Dobite brezplačne ${LetterLogoText} aplikacije</value>

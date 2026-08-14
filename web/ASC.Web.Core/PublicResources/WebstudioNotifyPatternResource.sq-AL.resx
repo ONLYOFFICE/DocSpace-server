@@ -409,7 +409,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Licensa juaj për ${LetterLogoText} DocSpace Developer skadon sot.
+Licensa juaj për ${LetterLogoText} Developer skadon sot.
 
 Ne kemi aktivizuar një periudhe mospagimi prej $PaymentDelay. Gjatë kësaj kohe, aksesi në redaktimin e dokumenteve është e kufizuar në 20 lidhje të njëkohshme (mbështetja dhe përditësimet nuk ofrohen më).
 
@@ -422,7 +422,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Licensa juaj për ${LetterLogoText} DocSpace Developer do të skadojë për 7 ditë.
+Licensa juaj për ${LetterLogoText} Developer do të skadojë për 7 ditë.
 
 Për të përditësuar licensën, ju lutemi kontaktoni drejtpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -433,7 +433,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Periudha e hirit për licensën tuaj të zhvilluesit ${LetterLogoText} DocSpace do të skadojë për 7 ditë. Do të thotë që DocSpace do të bëhet i padisponueshëm.
+Periudha e hirit për licensën tuaj të zhvilluesit ${LetterLogoText} do të skadojë për 7 ditë. Do të thotë që ${LetterLogoText} do të bëhet i padisponueshëm.
 
 Për të përditësuar licensën, ju lutem kontaktoni drejtpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -444,7 +444,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Periudha e hirit pë licensën tuaj të zhvilluesit ${LetterLogoText} DocSpace skadon sot. Do të thotë që DocSpace nuk do të jetë më i disponueshëm.
+Periudha e hirit pë licensën tuaj të zhvilluesit ${LetterLogoText} skadon sot. Do të thotë që ${LetterLogoText} nuk do të jetë më i disponueshëm.
 
 Për të përditësuar licencën, ju lutemi kontaktoni drejtpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -455,11 +455,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Licensa juaj për ${LetterLogoText} DocSpace Enterprise skadon sot.
+Licensa juaj për ${LetterLogoText} Enterprise skadon sot.
 
-Ne kemi aktivizuar *një periudhë mospagimi prej $VonesëPagese ditë* për ty. Gjatë kësaj kohe, aksesi në DocSpace ofrohet për 3 përdorues me emër* (mbështetja dhe përditësimet nuk ofrohen më).
+Ne kemi aktivizuar *një periudhë mospagimi prej $VonesëPagese ditë* për ty. Gjatë kësaj kohe, aksesi në ${LetterLogoText} ofrohet për 3 përdorues me emër* (mbështetja dhe përditësimet nuk ofrohen më).
 
-Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ne ju rekomandojmë *të merrni një licensë për gjithë jetën* për ${LetterLogoText} DocSpace Enterprise (me 3 vjet mbështetje dhe pëditësime të përfshira):
+Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ne ju rekomandojmë *të merrni një licensë për gjithë jetën* për ${LetterLogoText} Enterprise (me 3 vjet mbështetje dhe pëditësime të përfshira):
 
 $OrangeButton
 
@@ -477,7 +477,7 @@ $TrulyYours</value>
 
 Licensa juaj për ${LetterLogoText} DocsSpace Enterprise do të skadojë për 7 ditë.
 
-Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë për gjithë jetën* për ${LetterLogoText} DocSpace Enterprise (me 3 vjet mbështetje dhe përditësime të përfshira).
+Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë për gjithë jetën* për ${LetterLogoText} Enterprise (me 3 vjet mbështetje dhe përditësime të përfshira).
 
 $OrangeButton
 
@@ -490,9 +490,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Periudha e hirit për licensën tuaj ${LetterLogoText} DocSpace Enterprise do të skadojë për 7 ditë. Do të thotë që DocSpace do të bëhet i padisponueshëm.
+Periudha e hirit për licensën tuaj ${LetterLogoText} Enterprise do të skadojë për 7 ditë. Do të thotë që ${LetterLogoText} do të bëhet i padisponueshëm.
 
-Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë përgjithmonë* për ${LetterLogoText} DocSpace Enterprise (me 3 vjet mbështetje dhe përditësime të perfshira):
+Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë përgjithmonë* për ${LetterLogoText} Enterprise (me 3 vjet mbështetje dhe përditësime të perfshira):
 
 $OrangeButton
 
@@ -505,9 +505,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Periudha e hirit për licensën tuaj ${LetterLogoText} DocSpace Enterprise skadon sot. Do të thotë që DocSpace nuk do të jetë më i disponueshëm.
+Periudha e hirit për licensën tuaj ${LetterLogoText} Enterprise skadon sot. Do të thotë që ${LetterLogoText} nuk do të jetë më i disponueshëm.
 
-Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë për gjithë jetën * për ${LetterLogoText} DocSpace Enterprise (me 3 vjet mbështetje dhe përditësime të përfshira):
+Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë për gjithë jetën * për ${LetterLogoText} Enterprise (me 3 vjet mbështetje dhe përditësime të përfshira):
 
 $OrangeButton
 
@@ -520,7 +520,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Licensa juaj për ${LetterLogoText} DocSpace Enterprise do të skadojë për 7 ditë. Do të thotë që përditësimet dhe mbështetja nuk do të jenë më të disponueshme.*
+Licensa juaj për ${LetterLogoText} Enterprise do të skadojë për 7 ditë. Do të thotë që përditësimet dhe mbështetja nuk do të jenë më të disponueshme.*
 
 Për të përditësuar licensën, ju lutem kontaktoni dretpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -533,7 +533,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Licensa juaj për ${LetterLogoText} DocSpace Enterprise skadon sot. Do të thotë që përditësimet dhe mbështetja nuk janë më të disponueshme.*
+Licensa juaj për ${LetterLogoText} Enterprise skadon sot. Do të thotë që përditësimet dhe mbështetja nuk janë më të disponueshme.*
 
 Për të përditësuar licensën, ju lutemi kontaktoni drejtpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1455,34 +1455,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Ndyshim i pronarit të portalit</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Periudha e hirit për ${LetterLogoText} DocSpace Developer është aktivizuar</value>
+    <value>Periudha e hirit për ${LetterLogoText} Developer është aktivizuar</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Licensa juaj e ${LetterLogoText} DocSpace Developer do të skadojë së shpejti</value>
+    <value>Licensa juaj e ${LetterLogoText} Developer do të skadojë së shpejti</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Periudha e hirit për ${LetterLogoText} DocSpace Developer do të skadojë së shpejti</value>
+    <value>Periudha e hirit për ${LetterLogoText} Developer do të skadojë së shpejti</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Licensa juaj ${LetterLogoText} DocSpace Developer nuk ofrohet më</value>
+    <value>Licensa juaj ${LetterLogoText} Developer nuk ofrohet më</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Periudha e hirit për ${LetterLogoText} DocSpace Enterprise është aktivizuar</value>
+    <value>Periudha e hirit për ${LetterLogoText} Enterprise është aktivizuar</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Licensa juaj e ${LetterLogoText} DocSpace Enterprise do të skadojë së shpejti</value>
+    <value>Licensa juaj e ${LetterLogoText} Enterprise do të skadojë së shpejti</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Periudha e hirit për ${LetterLogoText} DocSpace Enterprise do të skadojë së shpejti</value>
+    <value>Periudha e hirit për ${LetterLogoText} Enterprise do të skadojë së shpejti</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Licensa juaj ${LetterLogoText} DocSpace Enterprise nuk ofrohet më</value>
+    <value>Licensa juaj ${LetterLogoText} Enterprise nuk ofrohet më</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Licensa juaj e ${LetterLogoText} DocSpace Enterprise do të skadojë së shpejti</value>
+    <value>Licensa juaj e ${LetterLogoText} Enterprise do të skadojë së shpejti</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Licensa juaj ${LetterLogoText} DocSpace Enterprise skadon sot</value>
+    <value>Licensa juaj ${LetterLogoText} Enterprise skadon sot</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Merrni aplikacione falas ${LetterLogoText}</value>

@@ -408,7 +408,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Twoja licencja ${LetterLogoText} DocSpace Developer wygasa dzisiaj.
+Twoja licencja ${LetterLogoText} Developer wygasa dzisiaj.
 
 Aktywowaliśmy dla Ciebie okres prolongaty wynoszący $PaymentDelay dni. W tym czasie dostęp do edycji dokumentów jest ograniczony do 20 jednoczesnych połączeń (wsparcie i aktualizacje nie są już oferowane).
 
@@ -421,7 +421,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Twoja licencja ${LetterLogoText} DocSpace Developer wygaśnie za 7 dni.
+Twoja licencja ${LetterLogoText} Developer wygaśnie za 7 dni.
 
 Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -432,7 +432,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Okres prolongaty dla Twojej licencji ${LetterLogoText} DocSpace Developer wygaśnie za 7 dni. Oznacza to, że Twoje konto DocSpace stanie się niedostępne.
+Okres prolongaty dla Twojej licencji ${LetterLogoText} Developer wygaśnie za 7 dni. Oznacza to, że Twoje konto ${LetterLogoText} stanie się niedostępne.
 
 Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -443,7 +443,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Okres prolongaty dla Twojej licencji ${LetterLogoText} DocSpace Developer wygasa dzisiaj. Oznacza to, że Twoje konto DocSpace stanie się niedostępne.
+Okres prolongaty dla Twojej licencji ${LetterLogoText} Developer wygasa dzisiaj. Oznacza to, że Twoje konto ${LetterLogoText} stanie się niedostępne.
 
 Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -454,11 +454,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Twoja licencja ${LetterLogoText} DocSpace Enterprise wygasa dzisiaj.
+Twoja licencja ${LetterLogoText} Enterprise wygasa dzisiaj.
 
 Aktywowaliśmy dla Ciebie *okres prolongaty wynoszący $PaymentDelay *dni. W tym czasie dostęp do DocSPace jest zapewniony dla 3 *nazwanych użytkowników (wsparcie i aktualizacje nie są już oferowane).
 
-Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ${LetterLogoText} DocSpace Enterprise (z 3-letnim wsparciem i aktualizacjami):
+Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ${LetterLogoText} Enterprise (z 3-letnim wsparciem i aktualizacjami):
 
 $OrangeButton
 
@@ -473,9 +473,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Twoja licencja ${LetterLogoText} DocSpace Enterprise wygaśnie za 7 dni.
+Twoja licencja ${LetterLogoText} Enterprise wygaśnie za 7 dni.
 
-Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ${LetterLogoText} DocSpace Enterprise (z 3-letnim wsparciem i aktualizacjami).
+Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ${LetterLogoText} Enterprise (z 3-letnim wsparciem i aktualizacjami).
 
 $OrangeButton
 
@@ -488,9 +488,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Okres prolongaty dla Twojej licencji ${LetterLogoText} DocSpace Enterprise wygaśnie za 7 dni. Oznacza to, że Twoje konto DocSpace stanie się niedostępne.
+Okres prolongaty dla Twojej licencji ${LetterLogoText} Enterprise wygaśnie za 7 dni. Oznacza to, że Twoje konto ${LetterLogoText} stanie się niedostępne.
 
-Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ${LetterLogoText} DocSpace Enterprise (z 3-letnim wsparciem i aktualizacjami):
+Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ${LetterLogoText} Enterprise (z 3-letnim wsparciem i aktualizacjami):
 
 $OrangeButton
 
@@ -503,9 +503,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Okres prolongaty dla Twojej licencji ${LetterLogoText} DocSpace Enterprise wygasa dzisiaj. Oznacza to, że Twoje konto DocSpace stanie się niedostępne.
+Okres prolongaty dla Twojej licencji ${LetterLogoText} Enterprise wygasa dzisiaj. Oznacza to, że Twoje konto ${LetterLogoText} stanie się niedostępne.
 
-Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ${LetterLogoText} DocSpace Enterprise (z 3-letnim wsparciem i aktualizacjami):
+Aby móc korzystać ze wszystkich funkcji dostępnych w chwili zakupu przez *nieograniczony czas*, należy *zakupić DOŻYWOTNĄ licencję* ${LetterLogoText} Enterprise (z 3-letnim wsparciem i aktualizacjami):
 
 $OrangeButton
 
@@ -518,7 +518,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Twoja licencja ${LetterLogoText} DocSpace Enterprise wygaśnie za 7 dni. Oznacza to, że aktualizacje i wsparcie stanął się niedostępne.*
+Twoja licencja ${LetterLogoText} Enterprise wygaśnie za 7 dni. Oznacza to, że aktualizacje i wsparcie stanął się niedostępne.*
 
 Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -531,7 +531,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Twoja licencja ${LetterLogoText} DocSpace Enterprise wygasa dzisiaj. Oznacza to, że aktualizacje i wsparcie są niedostępne.*
+Twoja licencja ${LetterLogoText} Enterprise wygasa dzisiaj. Oznacza to, że aktualizacje i wsparcie są niedostępne.*
 
 Aby zaktualizować licencję, skontaktuj się bezpośrednio ze swoim osobistym menedżerem ds. sprzedaży lub z nami pod adresem "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1452,34 +1452,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Zmiana właściciela portalu</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} DocSpace Developer został aktywowany</value>
+    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} Developer został aktywowany</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Twoja licencja ${LetterLogoText} DocSpace Developer wkrótce wygaśnie</value>
+    <value>Twoja licencja ${LetterLogoText} Developer wkrótce wygaśnie</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} DocSpace Developer wkrótce wygaśnie</value>
+    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} Developer wkrótce wygaśnie</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Twoje konto ${LetterLogoText} DocSpace Developer nie jest już dostępne</value>
+    <value>Twoje konto ${LetterLogoText} Developer nie jest już dostępne</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} DocSpace Enterprise został aktywowany</value>
+    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} Enterprise został aktywowany</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Twoja licencja ${LetterLogoText} DocSpace Enterprise wkrótce wygaśnie</value>
+    <value>Twoja licencja ${LetterLogoText} Enterprise wkrótce wygaśnie</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} DocSpace Enterprise wkrótce wygaśnie</value>
+    <value>Okres prolongaty dla Twojego konta ${LetterLogoText} Enterprise wkrótce wygaśnie</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Twoje konto ${LetterLogoText} DocSpace Enterprise nie jest już dostępne</value>
+    <value>Twoje konto ${LetterLogoText} Enterprise nie jest już dostępne</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Twoja licencja ${LetterLogoText} DocSpace Enterprise wkrótce wygaśnie</value>
+    <value>Twoja licencja ${LetterLogoText} Enterprise wkrótce wygaśnie</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Twoja licencja ${LetterLogoText} DocSpace Enterprise wygasa dzisiaj</value>
+    <value>Twoja licencja ${LetterLogoText} Enterprise wygasa dzisiaj</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Pobierz darmowe aplikacje ${LetterLogoText}</value>

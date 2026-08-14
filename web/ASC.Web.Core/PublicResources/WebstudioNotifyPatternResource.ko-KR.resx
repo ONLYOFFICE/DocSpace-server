@@ -420,7 +420,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Developer 라이센스가 오늘 만료됩니다.
+고객님의 ${LetterLogoText} Developer 라이센스가 오늘 만료됩니다.
 
 $PaymentDelay일의 유예 기간이 시작되었습니다. 이 기간 동안 문서 편집에 대한 액세스는 동시 연결 20대로 제한됩니다(지원 및 업데이트는 더 이상 제공되지 않습니다).
 
@@ -433,7 +433,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Developer 라이센스가 7일 후에 만료됩니다.
+고객님의 ${LetterLogoText} Developer 라이센스가 7일 후에 만료됩니다.
 
 라이센스를 업데이트하려면 전담 영업 관리자에게 직접 문의하거나 다음 이메일 주소로 연락주세요: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -444,7 +444,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Developer 라이센스 유예 기간이 7일 후에 만료됩니다. 그리고 만료되면 DocSpace를 사용할 수 없습니다.
+고객님의 ${LetterLogoText} Developer 라이센스 유예 기간이 7일 후에 만료됩니다. 그리고 만료되면 ${LetterLogoText}를 사용할 수 없습니다.
 
 라이센스를 업데이트하려면 전담 영업 관리자에게 직접 문의하거나 다음 이메일 주소로 연락주세요: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -455,7 +455,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Developer 라이센스 유예 기간이 오늘 만료됩니다. 그리고 만료되면 DocSpace를 더 이상 이용할 수 없습니다.
+고객님의 ${LetterLogoText} Developer 라이센스 유예 기간이 오늘 만료됩니다. 그리고 만료되면 ${LetterLogoText}를 더 이상 이용할 수 없습니다.
 
 라이센스를 업데이트하려면 전담 영업 관리자에게 직접 문의하거나 다음 이메일 주소로 연락주세요: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -466,11 +466,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Enterprise 라이센스가 오늘 만료됩니다.
+고객님의 ${LetterLogoText} Enterprise 라이센스가 오늘 만료됩니다.
 
-*$PaymentDelay‎일의 유예 기간* 이 시작되었습니다. 이 기간 동안 DocSpace에 대한 액세스는 3명의 지정 사용자*로 제한됩니다(지원 및 업데이트는 더 이상 제공되지 않습니다).
+*$PaymentDelay‎일의 유예 기간* 이 시작되었습니다. 이 기간 동안 ${LetterLogoText}에 대한 액세스는 3명의 지정 사용자*로 제한됩니다(지원 및 업데이트는 더 이상 제공되지 않습니다).
 
-구입 시점에 제공되는 모든 기능을 *기간 제한 없이* 사용하기 위해서는 ${LetterLogoText} DocSpace Enterprise *평생 라이센스를 취득* 하는 것이 권장됩니다(3년 지원 및 업데이트 포함):
+구입 시점에 제공되는 모든 기능을 *기간 제한 없이* 사용하기 위해서는 ${LetterLogoText} Enterprise *평생 라이센스를 취득* 하는 것이 권장됩니다(3년 지원 및 업데이트 포함):
 
 $OrangeButton
 
@@ -485,9 +485,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Enterprise 라이센스가 7일 후에 만료됩니다.
+고객님의 ${LetterLogoText} Enterprise 라이센스가 7일 후에 만료됩니다.
 
-구입 시점에 제공되는 모든 기능을 *기간 제한 없이* 사용하기 위해서는 ${LetterLogoText} DocSpace Enterprise *평생 라이센스를 취득* 하는 것이 권장됩니다(3년 지원 및 업데이트 포함).
+구입 시점에 제공되는 모든 기능을 *기간 제한 없이* 사용하기 위해서는 ${LetterLogoText} Enterprise *평생 라이센스를 취득* 하는 것이 권장됩니다(3년 지원 및 업데이트 포함).
 
 $OrangeButton
 
@@ -500,9 +500,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Enterprise 라이센스 유예 기간이 7일 후에 만료됩니다. 그리고 만료되면 DocSpace를 이용할 수 없습니다.
+고객님의 ${LetterLogoText} Enterprise 라이센스 유예 기간이 7일 후에 만료됩니다. 그리고 만료되면 ${LetterLogoText}를 이용할 수 없습니다.
 
-구입 시점에 제공되는 모든 기능을 *기간 제한 없이* 사용하기 위해서는 ${LetterLogoText} DocSpace Enterprise *평생 라이센스를 취득* 하는 것이 권장됩니다(3년 지원 및 업데이트 포함):
+구입 시점에 제공되는 모든 기능을 *기간 제한 없이* 사용하기 위해서는 ${LetterLogoText} Enterprise *평생 라이센스를 취득* 하는 것이 권장됩니다(3년 지원 및 업데이트 포함):
 
 $OrangeButton
 
@@ -515,9 +515,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Enterprise 라이센스 유예 기간이 오늘 만료됩니다. 그리고 만료되면 DocSpace를 더 이상 이용할 수 없습니다.
+고객님의 ${LetterLogoText} Enterprise 라이센스 유예 기간이 오늘 만료됩니다. 그리고 만료되면 ${LetterLogoText}를 더 이상 이용할 수 없습니다.
 
-구입 시점에 제공되는 모든 기능을 *기간 제한 없이* 사용하기 위해서는 ${LetterLogoText} DocSpace Enterprise *평생 라이센스를 취득* 하는 것이 권장됩니다(3년 지원 및 업데이트 포함): 
+구입 시점에 제공되는 모든 기능을 *기간 제한 없이* 사용하기 위해서는 ${LetterLogoText} Enterprise *평생 라이센스를 취득* 하는 것이 권장됩니다(3년 지원 및 업데이트 포함): 
 
 $OrangeButton
 
@@ -530,7 +530,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Enterprise 라이센스가 7일 후에 만료됩니다. 그리고 만료되면 업데이트 및 지원을 더 이상 이용할 수 없습니다.*
+고객님의 ${LetterLogoText} Enterprise 라이센스가 7일 후에 만료됩니다. 그리고 만료되면 업데이트 및 지원을 더 이상 이용할 수 없습니다.*
 
 라이센스를 업데이트하려면 전담 영업 관리자에게 직접 문의하거나 저희에게 연락주세요: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -543,7 +543,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>안녕하세요, $UserName님!
 
-고객님의 ${LetterLogoText} DocSpace Enterprise 라이센스가 오늘 만료됩니다. 그리고 만료되면 업데이트 및 지원을 더 이상 이용할 수 없습니다.*
+고객님의 ${LetterLogoText} Enterprise 라이센스가 오늘 만료됩니다. 그리고 만료되면 업데이트 및 지원을 더 이상 이용할 수 없습니다.*
 
 라이센스를 업데이트하려면 전담 영업 관리자에게 직접 문의하거나 다음 이메일 주소로 연락주세요: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1481,34 +1481,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. 포털 소유자 변경</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer 유예 기간이 시작되었습니다</value>
+    <value>${LetterLogoText} Developer 유예 기간이 시작되었습니다</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer 라이센스가 곧 만료됩니다</value>
+    <value>${LetterLogoText} Developer 라이센스가 곧 만료됩니다</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer 유예 기간이 곧 종료됩니다</value>
+    <value>${LetterLogoText} Developer 유예 기간이 곧 종료됩니다</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer를 더 이상 이용할 수 없습니다</value>
+    <value>${LetterLogoText} Developer를 더 이상 이용할 수 없습니다</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise 유예 기간이 시작되었습니다</value>
+    <value>${LetterLogoText} Enterprise 유예 기간이 시작되었습니다</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise 라이센스가 곧 만료됩니다</value>
+    <value>${LetterLogoText} Enterprise 라이센스가 곧 만료됩니다</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise 유예 기간이 곧 종료됩니다</value>
+    <value>${LetterLogoText} Enterprise 유예 기간이 곧 종료됩니다</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise를 더 이상 이용할 수 없습니다</value>
+    <value>${LetterLogoText} Enterprise를 더 이상 이용할 수 없습니다</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise 라이센스가 곧 만료됩니다</value>
+    <value>${LetterLogoText} Enterprise 라이센스가 곧 만료됩니다</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise 라이센스가 오늘 만료됩니다</value>
+    <value>${LetterLogoText} Enterprise 라이센스가 오늘 만료됩니다</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>무료 ${LetterLogoText} 앱을 이용하세요</value>

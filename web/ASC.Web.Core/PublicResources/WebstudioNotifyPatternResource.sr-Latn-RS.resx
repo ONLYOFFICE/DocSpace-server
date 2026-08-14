@@ -409,7 +409,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Developer ističe danas.
+Vaša licenca za ${LetterLogoText} Developer ističe danas.
 
 Aktivirali smo grejs period od $PaymentDelay dana za vas. Tokom ovog perioda, pristup uređivanju dokumenata je ograničen na 20 istovremenih veza (podrška i ažuriranja više nisu obezbeđeni).
 
@@ -422,7 +422,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Developer ističe za 7 dana.
+Vaša licenca za ${LetterLogoText} Developer ističe za 7 dana.
 
 Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -433,7 +433,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Grejs period za vašu ${LetterLogoText} DocSpace Developer licencu ističe za 7 dana. To znači da će DocSpace biti nedostupan.
+Grejs period za vašu ${LetterLogoText} Developer licencu ističe za 7 dana. To znači da će ${LetterLogoText} biti nedostupan.
 
 Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -444,7 +444,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Grejs period za vašu licencu ${LetterLogoText} DocSpace Developer ističe danas. To znači da DocSpace više neće biti dostupan.
+Grejs period za vašu licencu ${LetterLogoText} Developer ističe danas. To znači da ${LetterLogoText} više neće biti dostupan.
 
 Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -455,11 +455,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Enterprise ističe danas.
+Vaša licenca za ${LetterLogoText} Enterprise ističe danas.
 
-Aktivirali smo *grejs period od $PaymentDelay dana* za vas. Tokom ovog perioda, pristup DocSpace-u je obezbeđen za 3 imenovana korisnika* (podrška i ažuriranja se više ne obezbeđuju).
+Aktivirali smo *grejs period od $PaymentDelay dana* za vas. Tokom ovog perioda, pristup ${LetterLogoText}-u je obezbeđen za 3 imenovana korisnika* (podrška i ažuriranja se više ne obezbeđuju).
 
-Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ${LetterLogoText} DocSpace Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
+Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ${LetterLogoText} Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
 
 $OrangeButton
 
@@ -474,9 +474,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Enterprise ističe za 7 dana.
+Vaša licenca za ${LetterLogoText} Enterprise ističe za 7 dana.
 
-Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ${LetterLogoText} DocSpace Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
+Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ${LetterLogoText} Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
 
 $OrangeButton
 
@@ -489,9 +489,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Grejs period za vašu ${LetterLogoText} DocSpace Enterprise licencu ističe za 7 dana. To znači da će DocSpace postati nedostupan.
+Grejs period za vašu ${LetterLogoText} Enterprise licencu ističe za 7 dana. To znači da će ${LetterLogoText} postati nedostupan.
 
-Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ${LetterLogoText} DocSpace Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
+Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ${LetterLogoText} Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
 
 $OrangeButton
 
@@ -504,9 +504,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Grejs period za vašu ${LetterLogoText} DocSpace Enterprise licencu ističe danas. To znači da DocSpace više neće biti dostupan.
+Grejs period za vašu ${LetterLogoText} Enterprise licencu ističe danas. To znači da ${LetterLogoText} više neće biti dostupan.
 
-Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ${LetterLogoText} DocSpace Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
+Da biste mogli da koristite sve funkcije dostupne u trenutku kupovine na *neograničen vremenski period*, preporučujemo vam *nabavite DOŽIVOTNU licencu* za ${LetterLogoText} Enterprise (sa uključenom podrškom i ažuriranjima tokom 3 godine):
 
 $OrangeButton
 
@@ -519,7 +519,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Enterprise ističe za 7 dana. To znači da ažuriranja i podrška više neće biti dostupni.*
+Vaša licenca za ${LetterLogoText} Enterprise ističe za 7 dana. To znači da ažuriranja i podrška više neće biti dostupni.*
 
 Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -532,7 +532,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Vaša licenca za ${LetterLogoText} DocSpace Enterprise ističe danas. To znači da ažuriranja i podrška više nisu dostupni.*
+Vaša licenca za ${LetterLogoText} Enterprise ističe danas. To znači da ažuriranja i podrška više nisu dostupni.*
 
 Da biste ažurirali licencu, obratite se direktno svom dodeljenom menadžeru prodaje ili nam se obratite preko "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1463,34 +1463,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Promena vlasnika portala</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Grejs period za vaš ${LetterLogoText} DocSpace Developer je aktiviran</value>
+    <value>Grejs period za vaš ${LetterLogoText} Developer je aktiviran</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaša licenca za ${LetterLogoText} DocSpace Developer uskoro ističe</value>
+    <value>Vaša licenca za ${LetterLogoText} Developer uskoro ističe</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Grejs period za vaš ${LetterLogoText} DocSpace Developer uskoro ističe</value>
+    <value>Grejs period za vaš ${LetterLogoText} Developer uskoro ističe</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Vaš ${LetterLogoText} DocSpace Developer više nije dostupan</value>
+    <value>Vaš ${LetterLogoText} Developer više nije dostupan</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Grejs period za vaš ${LetterLogoText} DocSpace Enterprise je aktiviran</value>
+    <value>Grejs period za vaš ${LetterLogoText} Enterprise je aktiviran</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaša ${LetterLogoText} DocSpace Enterprise licenca uskoro ističe</value>
+    <value>Vaša ${LetterLogoText} Enterprise licenca uskoro ističe</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Grejs period za vaš ${LetterLogoText} DocSpace Enterprise uskoro ističe</value>
+    <value>Grejs period za vaš ${LetterLogoText} Enterprise uskoro ističe</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Vaš ${LetterLogoText} DocSpace Enterprise više nije dostupan</value>
+    <value>Vaš ${LetterLogoText} Enterprise više nije dostupan</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Vaša ${LetterLogoText} DocSpace Enterprise licenca uskoro ističe</value>
+    <value>Vaša ${LetterLogoText} Enterprise licenca uskoro ističe</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Vaša ${LetterLogoText} DocSpace Enterprise licenca ističe danas</value>
+    <value>Vaša ${LetterLogoText} Enterprise licenca ističe danas</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Preuzmite besplatne ${LetterLogoText} aplikacije</value>

@@ -410,7 +410,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-ينتهي ترخيص "${LetterLogoText} DocSpace Developer" الخاص بك اليوم.
+ينتهي ترخيص "${LetterLogoText} Developer" الخاص بك اليوم.
 
 لقد قمنا بتفعيل فترة سماح لمدة $PaymentDelay يومًا لك. خلال هذه الفترة، سيكون الوصول إلى تحرير المستندات محدودًا بـ 20 اتصالًا متزامنًا (لن يتم تقديم الدعم والتحديثات بعد الآن).
 
@@ -423,7 +423,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-سينتهي ترخيص "${LetterLogoText} DocSpace Developer" الخاص بك خلال 7 أيام.
+سينتهي ترخيص "${LetterLogoText} Developer" الخاص بك خلال 7 أيام.
 
 لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -434,7 +434,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-ستَنتهي فترة السماح لترخيص"${LetterLogoText} DocSpace Developer" الخاص بك خلال 7 أيام، مما يعني أن DocSpace سيصبح غير متاح.
+ستَنتهي فترة السماح لترخيص"${LetterLogoText} Developer" الخاص بك خلال 7 أيام، مما يعني أن ${LetterLogoText} سيصبح غير متاح.
 
 لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -445,7 +445,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-تنتهي اليوم فترة السماح لترخيص "${LetterLogoText} DocSpace Developer" الخاص بك، مما يعني أن DocSpace لن يكون متاحًا بعد الآن.
+تنتهي اليوم فترة السماح لترخيص "${LetterLogoText} Developer" الخاص بك، مما يعني أن ${LetterLogoText} لن يكون متاحًا بعد الآن.
 
 لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -456,11 +456,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-ينتهي ترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك اليوم.
+ينتهي ترخيص "${LetterLogoText} Enterprise" الخاص بك اليوم.
 
-لقد قمنا بتفعيل *فترة سماح لمدة $PaymentDelay يومًا* لك. خلال هذه الفترة، سيكون الوصول إلى DocSpace متاحًا لثلاثة مستخدمين معينين فقط* (لن يتم تقديم الدعم والتحديثات بعد الآن).
+لقد قمنا بتفعيل *فترة سماح لمدة $PaymentDelay يومًا* لك. خلال هذه الفترة، سيكون الوصول إلى ${LetterLogoText} متاحًا لثلاثة مستخدمين معينين فقط* (لن يتم تقديم الدعم والتحديثات بعد الآن).
 
-للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على ترخيص *مدى الحياة* لـ "${LetterLogoText} DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
+للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على ترخيص *مدى الحياة* لـ "${LetterLogoText} Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
 
 $OrangeButton
 
@@ -477,9 +477,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-سينتهي ترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك خلال 7 أيام.
+سينتهي ترخيص "${LetterLogoText} Enterprise" الخاص بك خلال 7 أيام.
 
-للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "${LetterLogoText} DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
+للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "${LetterLogoText} Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
 
 $OrangeButton
 
@@ -492,9 +492,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-ستنتهي فترة السماح لترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك خلال 7 أيام، مما يعني أن DocSpace سيصبح غير متاح.
+ستنتهي فترة السماح لترخيص "${LetterLogoText} Enterprise" الخاص بك خلال 7 أيام، مما يعني أن ${LetterLogoText} سيصبح غير متاح.
 
-للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "${LetterLogoText} DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
+للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "${LetterLogoText} Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
 
 $OrangeButton
 
@@ -507,9 +507,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-تنتهي فترة السماح لترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك اليوم، مما يعني أن DocSpace لن يكون متاحًا بعد الآن.
+تنتهي فترة السماح لترخيص "${LetterLogoText} Enterprise" الخاص بك اليوم، مما يعني أن ${LetterLogoText} لن يكون متاحًا بعد الآن.
 
-للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "${LetterLogoText} DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
+للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "${LetterLogoText} Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
 
 $OrangeButton
 
@@ -522,7 +522,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-سينتهي ترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك خلال 7 أيام، مما يعني أن التحديثات والدعم لن يكونا متاحين.*
+سينتهي ترخيص "${LetterLogoText} Enterprise" الخاص بك خلال 7 أيام، مما يعني أن التحديثات والدعم لن يكونا متاحين.*
 
 لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -535,7 +535,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-ينتهي ترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك اليوم، مما يعني أن التحديثات والدعم لن يعودوا متاحين.*
+ينتهي ترخيص "${LetterLogoText} Enterprise" الخاص بك اليوم، مما يعني أن التحديثات والدعم لن يعودوا متاحين.*
 
 لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1504,34 +1504,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. تغيير مالك البوابة الإلكترونية</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>تم تفعيل فترة السماح لـ "${LetterLogoText} DocSpace Developer" الخاص بك</value>
+    <value>تم تفعيل فترة السماح لـ "${LetterLogoText} Developer" الخاص بك</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>ترخيص "${LetterLogoText} DocSpace Developer" الخاص بك سينتهي قريبًا</value>
+    <value>ترخيص "${LetterLogoText} Developer" الخاص بك سينتهي قريبًا</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>فترة السماح لـ"${LetterLogoText} DocSpace Developer" الخاص بك ستنتهي قريبًا</value>
+    <value>فترة السماح لـ"${LetterLogoText} Developer" الخاص بك ستنتهي قريبًا</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>ترخيص "${LetterLogoText} DocSpace Developer" الخاص بك لم يعد متوفرًا</value>
+    <value>ترخيص "${LetterLogoText} Developer" الخاص بك لم يعد متوفرًا</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>تم تفعيل فترة السماح لـ"${LetterLogoText} DocSpace Enterprise" الخاص بك</value>
+    <value>تم تفعيل فترة السماح لـ"${LetterLogoText} Enterprise" الخاص بك</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>ترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك سينتهي قريبًا</value>
+    <value>ترخيص "${LetterLogoText} Enterprise" الخاص بك سينتهي قريبًا</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>فترة السماح لـ "${LetterLogoText} DocSpace Enterprise" الخاص بك ستنتهي قريبًا</value>
+    <value>فترة السماح لـ "${LetterLogoText} Enterprise" الخاص بك ستنتهي قريبًا</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>ترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك لم يعد متوفرًا</value>
+    <value>ترخيص "${LetterLogoText} Enterprise" الخاص بك لم يعد متوفرًا</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>ترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك سينتهي قريبًا</value>
+    <value>ترخيص "${LetterLogoText} Enterprise" الخاص بك سينتهي قريبًا</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>ترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك ينتهي اليوم</value>
+    <value>ترخيص "${LetterLogoText} Enterprise" الخاص بك ينتهي اليوم</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>احصل على تطبيقات ${LetterLogoText} المجانية</value>

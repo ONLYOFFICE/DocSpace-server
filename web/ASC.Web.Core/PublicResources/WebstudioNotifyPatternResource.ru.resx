@@ -420,7 +420,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Срок действия вашей лицензии для ${LetterLogoText} DocSpace Developer истекает сегодня.
+Срок действия вашей лицензии для ${LetterLogoText} Developer истекает сегодня.
 
 Мы активировали для вас льготный период на $PaymentDelay‎ дней. В течение этого периода доступ к редактированию документов ограничен до 20 одновременных подключений (поддержка и обновления не предоставляются).
 
@@ -433,7 +433,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Срок действия вашей лицензии для ${LetterLogoText} DocSpace Developer истекает через 7 дней.
+Срок действия вашей лицензии для ${LetterLogoText} Developer истекает через 7 дней.
 
 Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -444,7 +444,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Льготный период для вашей лицензии ${LetterLogoText} DocSpace Developer истекает через 7 дней. Это означает, что DocSpace станет недоступен.
+Льготный период для вашей лицензии ${LetterLogoText} Developer истекает через 7 дней. Это означает, что ${LetterLogoText} станет недоступен.
 
 Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -455,7 +455,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Срок действия вашей лицензии для ${LetterLogoText} DocSpace Developer истекает сегодня. Это означает, что DocSpace станет недоступен.
+Срок действия вашей лицензии для ${LetterLogoText} Developer истекает сегодня. Это означает, что ${LetterLogoText} станет недоступен.
 
 Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -466,11 +466,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise истекает сегодня.
+Срок действия вашей лицензии для ${LetterLogoText} Enterprise истекает сегодня.
 
-Мы активировали для вас *льготный период на $PaymentDelay‎ дней*. В течение этого периода доступ к DocSpace предоставляется 3 указанным пользователям* (поддержка и обновления не предоставляются).
+Мы активировали для вас *льготный период на $PaymentDelay‎ дней*. В течение этого периода доступ к ${LetterLogoText} предоставляется 3 указанным пользователям* (поддержка и обновления не предоставляются).
 
-Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ${LetterLogoText} DocSpace Enterprise (включены 3 года поддержки и обновлений):
+Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ${LetterLogoText} Enterprise (включены 3 года поддержки и обновлений):
 
 $OrangeButton
 
@@ -485,9 +485,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise истекает через 7 дней.
+Срок действия вашей лицензии для ${LetterLogoText} Enterprise истекает через 7 дней.
 
-Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ${LetterLogoText} DocSpace Enterprise (включены 3 года поддержки и обновлений).
+Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ${LetterLogoText} Enterprise (включены 3 года поддержки и обновлений).
 
 $OrangeButton
 
@@ -500,9 +500,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Льготный период для вашей лицензии ${LetterLogoText} DocSpace Enterprise истекает через 7 дней. Это означает, что DocSpace станет недоступен.
+Льготный период для вашей лицензии ${LetterLogoText} Enterprise истекает через 7 дней. Это означает, что ${LetterLogoText} станет недоступен.
 
-Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ${LetterLogoText} DocSpace Enterprise (включены 3 года поддержки и обновлений):
+Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ${LetterLogoText} Enterprise (включены 3 года поддержки и обновлений):
 
 $OrangeButton
 
@@ -515,9 +515,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Льготный период для вашей лицензии ${LetterLogoText} DocSpace Enterprise истекает завтра. Это означает, что DocSpace станет недоступен.
+Льготный период для вашей лицензии ${LetterLogoText} Enterprise истекает завтра. Это означает, что ${LetterLogoText} станет недоступен.
 
-Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ${LetterLogoText} DocSpace Enterprise (включены 3 года поддержки и обновлений):
+Чтобы вы могли использовать все функциональные возможности, доступные на момент покупки, в течение *неограниченного периода времени*, рекомендуем *приобрести БЕССРОЧНУЮ лицензию* для ${LetterLogoText} Enterprise (включены 3 года поддержки и обновлений):
 
 $OrangeButton
 
@@ -530,7 +530,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise истекает через 7 дней. Это означает, что обновления и поддержка станут недоступны.*
+Срок действия вашей лицензии для ${LetterLogoText} Enterprise истекает через 7 дней. Это означает, что обновления и поддержка станут недоступны.*
 
 Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -543,7 +543,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Здравствуйте, $UserName!
 
-Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise истекает сегодня. Это означает, что обновления и поддержка станут недоступны.*
+Срок действия вашей лицензии для ${LetterLogoText} Enterprise истекает сегодня. Это означает, что обновления и поддержка станут недоступны.*
 
 Для обновления лицензии, пожалуйста, свяжитесь с вашим менеджером по продажам или напишите нам по адресу: "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1486,34 +1486,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Смена владельца портала</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace Developer активирован</value>
+    <value>Льготный период для вашего ${LetterLogoText} Developer активирован</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Срок действия вашей лицензии для ${LetterLogoText} DocSpace Developer скоро истекает</value>
+    <value>Срок действия вашей лицензии для ${LetterLogoText} Developer скоро истекает</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace Developer скоро истекает</value>
+    <value>Льготный период для вашего ${LetterLogoText} Developer скоро истекает</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Ваш ${LetterLogoText} DocSpace Developer больше не доступен</value>
+    <value>Ваш ${LetterLogoText} Developer больше не доступен</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace Enterprise активирован</value>
+    <value>Льготный период для вашего ${LetterLogoText} Enterprise активирован</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise скоро истекает</value>
+    <value>Срок действия вашей лицензии для ${LetterLogoText} Enterprise скоро истекает</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Льготный период для вашего ${LetterLogoText} DocSpace Enterprise скоро истекает</value>
+    <value>Льготный период для вашего ${LetterLogoText} Enterprise скоро истекает</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Ваш ${LetterLogoText} DocSpace Enterprise больше не доступен</value>
+    <value>Ваш ${LetterLogoText} Enterprise больше не доступен</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise скоро истекает</value>
+    <value>Срок действия вашей лицензии для ${LetterLogoText} Enterprise скоро истекает</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Срок действия вашей лицензии для ${LetterLogoText} DocSpace Enterprise истекает сегодня</value>
+    <value>Срок действия вашей лицензии для ${LetterLogoText} Enterprise истекает сегодня</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Скачайте бесплатные приложения ${LetterLogoText}</value>

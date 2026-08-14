@@ -408,7 +408,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-${LetterLogoText} DocSpace Developer-ի ձեր լիցենզիայի ժամկետը լրանում է այսօր:
+${LetterLogoText} Developer-ի ձեր լիցենզիայի ժամկետը լրանում է այսօր:
 
 Մենք ձեզ համար ակտիվացրել ենք $ՎճարմանՀետաձգման‎ օրերի արտոնյալ ժամկետը: Այս ընթացքում փաստաթղթերի խմբագրման հասանելիությունը սահմանափակվում է 20 միաժամանակյա միացումներով (աջակցությունը և թարմացումներն այլևս չեն տրամադրվում):
 
@@ -421,7 +421,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-Ձեր ${LetterLogoText} DocSpace Developer լիցենզիան կլրանա 7 օրից: 
+Ձեր ${LetterLogoText} Developer լիցենզիան կլրանա 7 օրից: 
 
 Լիցենզիան թարմացնելու համար կապվեք ձեր վաճառքի մենեջերի կամ մեզ հետ՝ "${__SalesEmail}":"mailto:${__SalesEmail}":
 
@@ -432,7 +432,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-Ձեր ${LetterLogoText} DocSpace Developer լիցենզիայի արտոնյալ ժամկետը կլրանա 7 օրից: Դա նշանակում է, որ DocSpace-ն անհասանելի կդառնա:
+Ձեր ${LetterLogoText} Developer լիցենզիայի արտոնյալ ժամկետը կլրանա 7 օրից: Դա նշանակում է, որ ${LetterLogoText}-ն անհասանելի կդառնա:
 
 Լիցենզիան թարմացնելու համար կապվեք ձեր վաճառքի մենեջերի կամ մեզ հետ՝ "${__SalesEmail}":"mailto:${__SalesEmail}":
 
@@ -443,7 +443,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-${LetterLogoText} DocSpace Developer լիցենզիայի արտոնյալ ժամկետն այսօր լրանում է: Դա նշանակում է, որ DocSpace-ն այլևս հասանելի չի լինի:
+${LetterLogoText} Developer լիցենզիայի արտոնյալ ժամկետն այսօր լրանում է: Դա նշանակում է, որ ${LetterLogoText}-ն այլևս հասանելի չի լինի:
 
 Լիցենզիան թարմացնելու համար կապվեք ձեր վաճառքի մենեջերի կամ մեզ հետ՝ "${__SalesEmail}":"mailto:${__SalesEmail}":
 
@@ -454,11 +454,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-Your license for ${LetterLogoText} DocSpace Enterprise expires today.
+Your license for ${LetterLogoText} Enterprise expires today.
 
-Մենք ձեզ համար ակտիվացրել ենք *$ՎճարմանՀետաձգման‎ օրեր* արտոնյալ ժամանակահատվածը: Այս ընթացքում DocSpace մուտքն ապահովված է 3 նշված օգտատերերի համար* (աջակցությունը և թարմացումներն այլևս չեն տրամադրվում):
+Մենք ձեզ համար ակտիվացրել ենք *$ՎճարմանՀետաձգման‎ օրեր* արտոնյալ ժամանակահատվածը: Այս ընթացքում ${LetterLogoText} մուտքն ապահովված է 3 նշված օգտատերերի համար* (աջակցությունը և թարմացումներն այլևս չեն տրամադրվում):
 
-Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} DocSpace Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
+Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
 
 $OrangeButton
 
@@ -473,9 +473,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-${LetterLogoText} DocSpace Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: 
+${LetterLogoText} Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: 
 
-Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} DocSpace Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
+Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
 
 $OrangeButton
 
@@ -488,9 +488,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-${LetterLogoText} DocSpace Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: Դա նշանակում է, որ թարմացումները և աջակցությունն այլևս հասանելի չեն լինի։
+${LetterLogoText} Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: Դա նշանակում է, որ թարմացումները և աջակցությունն այլևս հասանելի չեն լինի։
 
-Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} DocSpace Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
+Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
 
 $OrangeButton
 
@@ -503,9 +503,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-Այսօր լրանում է Ձեր ${LetterLogoText} DocSpace Enterprise-ի լիցենզիայի արտոնյալ ժամկետը: Դա նշանակում է, որ DocSpace-ն այլևս հասանելի չի լինի:
+Այսօր լրանում է Ձեր ${LetterLogoText} Enterprise-ի լիցենզիայի արտոնյալ ժամկետը: Դա նշանակում է, որ ${LetterLogoText}-ն այլևս հասանելի չի լինի:
 
-Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} DocSpace Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
+Որպեսզի կարողանաք օգտագործել գնման պահին հասանելի բոլոր հնարավորությունները *անսահմանափակ ժամանակով*, խորհուրդ ենք տալիս *ստանալ LIFETIME լիցենզիա* ${LetterLogoText} Enterprise-ի համար (3 տարվա աջակցությունը և թարմացումը ներառյալ).
 
 $OrangeButton
 
@@ -518,7 +518,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-${LetterLogoText} DocSpace Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: Դա նշանակում է, որ թարմացումները և աջակցությունն այլևս հասանելի չեն լինի։*
+${LetterLogoText} Enterprise-ի Ձեր լիցենզիայի ժամկետը կլրանա 7 օրից: Դա նշանակում է, որ թարմացումները և աջակցությունն այլևս հասանելի չեն լինի։*
 
 Լիցենզիան թարմացնելու համար խնդրում ենք կապվել ձեր վաճառքի մենեջերի կամ մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -531,7 +531,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Ո՜ղջույն, $UserName!
 
-${LetterLogoText} DocSpace Enterprise-ի Ձեր լիցենզիայի ժամկետը այսօր լրանում է: Դա նշանակում է, որ թարմացումները և աջակցությունն այլևս հասանելի չեն։*
+${LetterLogoText} Enterprise-ի Ձեր լիցենզիայի ժամկետը այսօր լրանում է: Դա նշանակում է, որ թարմացումները և աջակցությունն այլևս հասանելի չեն։*
 
 Լիցենզիան թարմացնելու համար խնդրում ենք կապվել ձեր վաճառքի մենեջերի կամ մեզ հետ "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1458,34 +1458,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}: Պորտալի սեփականատիրոջ փոփոխություն</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Developer-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
+    <value>Ձեր ${LetterLogoText} Developer-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Developer-ի լիցենզիայի ժամկետը շուտով կլրանա</value>
+    <value>Ձեր ${LetterLogoText} Developer-ի լիցենզիայի ժամկետը շուտով կլրանա</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Developer-ի արտոնյալ ժամկետը շուտով կլրանա</value>
+    <value>Ձեր ${LetterLogoText} Developer-ի արտոնյալ ժամկետը շուտով կլրանա</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Developer-ն այլևս հասանելի չէ</value>
+    <value>Ձեր ${LetterLogoText} Developer-ն այլևս հասանելի չէ</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Enterprise-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
+    <value>Ձեր ${LetterLogoText} Enterprise-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Enterprise-ի լիցենզիայի ժամկետը շուտով կլրանա</value>
+    <value>Ձեր ${LetterLogoText} Enterprise-ի լիցենզիայի ժամկետը շուտով կլրանա</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Enterprise-ի արտոնյալ ժամկետը շուտով կլրանա</value>
+    <value>Ձեր ${LetterLogoText} Enterprise-ի արտոնյալ ժամկետը շուտով կլրանա</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Enterprise-ն այլևս հասանելի չէ</value>
+    <value>Ձեր ${LetterLogoText} Enterprise-ն այլևս հասանելի չէ</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Enterprise-ի լիցենզիայի ժամկետը շուտով կլրանա</value>
+    <value>Ձեր ${LetterLogoText} Enterprise-ի լիցենզիայի ժամկետը շուտով կլրանա</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace Enterprise-ի լիցենզիայի ժամկետը լրանում է այսօր</value>
+    <value>Ձեր ${LetterLogoText} Enterprise-ի լիցենզիայի ժամկետը լրանում է այսօր</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ստացեք անվճար ${LetterLogoText} հավելվածներ</value>

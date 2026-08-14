@@ -417,7 +417,7 @@ $OrangeButton
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal sahibi değişikliğini bu sürede tamamlayın.</value>
   </data>
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Merhaba, $UserName!${LetterLogoText} DocSpace Developer lisansınızın süresi bugün doluyor.
+    <value>Merhaba, $UserName!${LetterLogoText} Developer lisansınızın süresi bugün doluyor.
 
 Sizin için $PaymentDelay günlük bir ödemesiz süre etkinleştirdik. Bu süre zarfında, belge düzenleme erişimi 20 eşzamanlı bağlantı ile sınırlıdır (destek ve güncellemeler artık sağlanmamaktadır).
 
@@ -428,7 +428,7 @@ Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan i
 $TrulyYours</value>
   </data>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Merhaba, $UserName!${LetterLogoText} DocSpace Developer lisansınızın süresi 7 gün içinde dolacaktır.
+    <value>Merhaba, $UserName!${LetterLogoText} Developer lisansınızın süresi 7 gün içinde dolacaktır.
 
 Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya "${__SalesEmail}":"mailto:${__SalesEmail}" üzerinden bize ulaşın.
 
@@ -439,7 +439,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace Developer lisansınızın ödemesiz süresi 7 gün içinde sona erecek. Bu, DocSpace'ın kullanılamaz hale geleceği anlamına geliyor.
+${LetterLogoText} Developer lisansınızın ödemesiz süresi 7 gün içinde sona erecek. Bu, ${LetterLogoText}'ın kullanılamaz hale geleceği anlamına geliyor.
 
 Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya bize "${__SalesEmail}":"mailto:${__SalesEmail}" üzerinden ulaşın.
 
@@ -450,7 +450,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace Developer lisansınızın ödemesiz süresi bugün sona eriyor. Bu, DocSpace'ın artık kullanılamayacağı anlamına geliyor.
+${LetterLogoText} Developer lisansınızın ödemesiz süresi bugün sona eriyor. Bu, ${LetterLogoText}'ın artık kullanılamayacağı anlamına geliyor.
 
 Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya bize "${__SalesEmail}":"mailto:${__SalesEmail}" üzerinden ulaşın.
 
@@ -461,11 +461,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace Enterprise lisansınız bugün sona eriyor.
+${LetterLogoText} Enterprise lisansınız bugün sona eriyor.
 
-Sizin için *$PaymentDelay‎ günlük ödemesiz süreyi* etkinleştirdik. Bu süre zarfında, DocSpace'e erişim adı verilen 3 kullanıcıya* sağlanır (destek ve güncellemeler artık sağlanmaz).
+Sizin için *$PaymentDelay‎ günlük ödemesiz süreyi* etkinleştirdik. Bu süre zarfında, ${LetterLogoText}'e erişim adı verilen 3 kullanıcıya* sağlanır (destek ve güncellemeler artık sağlanmaz).
 
-Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ${LetterLogoText} DocSpace Enterprise için *ÖMÜR BOYU lisans* almanızı öneririz (3 yıllık destek ve güncellemeler dahil):
+Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ${LetterLogoText} Enterprise için *ÖMÜR BOYU lisans* almanızı öneririz (3 yıllık destek ve güncellemeler dahil):
 
 $OrangeButton
 
@@ -478,9 +478,9 @@ Sertifika güncellemesi için atanmış satış yöneticinizle de doğrudan ilet
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace Enterprise için lisansınız 7 gün içinde sona erecektir.
+${LetterLogoText} Enterprise için lisansınız 7 gün içinde sona erecektir.
 
-Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ${LetterLogoText} DocSpace Enterprise için *ÖMÜR BOYU lisans* almanızı öneririz (3 yıllık destek ve güncellemeler dahil).
+Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ${LetterLogoText} Enterprise için *ÖMÜR BOYU lisans* almanızı öneririz (3 yıllık destek ve güncellemeler dahil).
 
 $OrangeButton
 
@@ -493,9 +493,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace Enterprise lisansınızın ödemesiz süresi 7 gün içinde sona erecek. Bu, DocSpace'ın kullanılamaz hale geleceği anlamına geliyor.
+${LetterLogoText} Enterprise lisansınızın ödemesiz süresi 7 gün içinde sona erecek. Bu, ${LetterLogoText}'ın kullanılamaz hale geleceği anlamına geliyor.
 
-Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ${LetterLogoText} DocSpace Enterprise için ÖMÜR BOYU lisans almanızı öneririz (3 yıl destek ve güncellemeler dahil):
+Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ${LetterLogoText} Enterprise için ÖMÜR BOYU lisans almanızı öneririz (3 yıl destek ve güncellemeler dahil):
 
 $OrangeButton
 
@@ -508,9 +508,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace Enterprise lisansınızın ödemesiz süresi bugün sona eriyor. Bu, DocSpace'in artık kullanılamayacağı anlamına geliyor.
+${LetterLogoText} Enterprise lisansınızın ödemesiz süresi bugün sona eriyor. Bu, ${LetterLogoText}'in artık kullanılamayacağı anlamına geliyor.
 
-Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ${LetterLogoText} DocSpace Enterprise için *ÖMÜR BOYU lisans* almanızı öneririz (3 yıllık destek ve güncellemeler dahil):
+Satın alma anında mevcut olan tüm özellikleri *sınırsız bir süre* boyunca kullanabilmek için, ${LetterLogoText} Enterprise için *ÖMÜR BOYU lisans* almanızı öneririz (3 yıllık destek ve güncellemeler dahil):
 
 $OrangeButton
 
@@ -523,7 +523,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace Enterprise lisansınız 7 gün içinde sona erecek. Bu, güncellemelerin ve desteğin artık sağlanmayacağı anlamına geliyor.*
+${LetterLogoText} Enterprise lisansınız 7 gün içinde sona erecek. Bu, güncellemelerin ve desteğin artık sağlanmayacağı anlamına geliyor.*
 
 Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin.
 
@@ -536,7 +536,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-${LetterLogoText} DocSpace Enterprise lisansınız bugün sona eriyor. Bu, güncellemelerin ve desteğin artık sağlanmayacağı anlamına geliyor.*
+${LetterLogoText} Enterprise lisansınız bugün sona eriyor. Bu, güncellemelerin ve desteğin artık sağlanmayacağı anlamına geliyor.*
 
 Lisansı güncellemek için lütfen atanmış satış yöneticinizle doğrudan iletişime geçin veya bizimle "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden iletişime geçin.
 
@@ -1480,34 +1480,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Portal sahibi değişikliği</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer için ödemesiz süre etkinleştirildi</value>
+    <value>${LetterLogoText} Developer için ödemesiz süre etkinleştirildi</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer lisansınız yakında sona erecek</value>
+    <value>${LetterLogoText} Developer lisansınız yakında sona erecek</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer için ödemesiz süre yakında sona erecek</value>
+    <value>${LetterLogoText} Developer için ödemesiz süre yakında sona erecek</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer ürününüz artık mevcut değil</value>
+    <value>${LetterLogoText} Developer ürününüz artık mevcut değil</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise için ödemesiz süre etkinleştirildi</value>
+    <value>${LetterLogoText} Enterprise için ödemesiz süre etkinleştirildi</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise lisansınızın süresi yakında dolacak</value>
+    <value>${LetterLogoText} Enterprise lisansınızın süresi yakında dolacak</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise için ödemesiz süre yakında sona erecek</value>
+    <value>${LetterLogoText} Enterprise için ödemesiz süre yakında sona erecek</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise ürününüz artık mevcut değil</value>
+    <value>${LetterLogoText} Enterprise ürününüz artık mevcut değil</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise lisansınızın süresi yakında dolacak</value>
+    <value>${LetterLogoText} Enterprise lisansınızın süresi yakında dolacak</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise lisansınızın süresi bugün doluyor</value>
+    <value>${LetterLogoText} Enterprise lisansınızın süresi bugün doluyor</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ücretsiz ${LetterLogoText} uygulamalarını edinin</value>

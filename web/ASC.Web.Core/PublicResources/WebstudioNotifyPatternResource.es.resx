@@ -407,7 +407,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Su licencia de ${LetterLogoText} DocSpace Developer expira hoy.
+Su licencia de ${LetterLogoText} Developer expira hoy.
 
 Hemos activado un período de gracia de $PaymentDelay días para usted. Durante este tiempo, el acceso a la edición de documentos está limitado a 20 conexiones simultáneas (soporte y actualizaciones ya no se proporcionan).
 
@@ -420,7 +420,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Su licencia de ${LetterLogoText} DocSpace Developer expirará en 7 días.
+Su licencia de ${LetterLogoText} Developer expirará en 7 días.
 
 Para actualizar la licencia, por favor, póngase en contacto directamente con su gerente de ventas dedicado o póngase en contacto con nosotros a través de "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -431,7 +431,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-El período de gracia para su licencia de ${LetterLogoText} DocSpace Developer expirará en 7 días. Esto significa que DocSpace no estará disponible.
+El período de gracia para su licencia de ${LetterLogoText} Developer expirará en 7 días. Esto significa que ${LetterLogoText} no estará disponible.
 
 Para actualizar la licencia, por favor, póngase en contacto directamente con su gerente de ventas dedicado o póngase en contacto con nosotros a través de "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -442,7 +442,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-El período de gracia para su licencia de ${LetterLogoText} DocSpace Developer expira hoy. Esto significa que DocSpace dejará de estar disponible.
+El período de gracia para su licencia de ${LetterLogoText} Developer expira hoy. Esto significa que ${LetterLogoText} dejará de estar disponible.
 
 Para actualizar la licencia, por favor, póngase en contacto directamente con su gerente de ventas dedicado o póngase en contacto con nosotros a través de "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -453,11 +453,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Su licencia de ${LetterLogoText} DocSpace Enterprise expira hoy.
+Su licencia de ${LetterLogoText} Enterprise expira hoy.
 
-Hemos activado *un período de gracia de $PaymentDelay días* para usted. Durante este tiempo, el acceso a DocSpace se proporciona para 3 usuarios designados* (soporte y actualizaciones ya no se proporcionan).
+Hemos activado *un período de gracia de $PaymentDelay días* para usted. Durante este tiempo, el acceso a ${LetterLogoText} se proporciona para 3 usuarios designados* (soporte y actualizaciones ya no se proporcionan).
 
-Para poder utilizar todas las funciones disponibles en el momento de la compra durante un *período de tiempo ilimitado*, le recomendamos *obtener una licencia de POR VIDA* para ${LetterLogoText} DocSpace Enterprise (con 3 años de soporte y actualizaciones incluidos):
+Para poder utilizar todas las funciones disponibles en el momento de la compra durante un *período de tiempo ilimitado*, le recomendamos *obtener una licencia de POR VIDA* para ${LetterLogoText} Enterprise (con 3 años de soporte y actualizaciones incluidos):
 
 $OrangeButton
 
@@ -472,9 +472,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Su licencia de ${LetterLogoText} DocSpace Enterprise expirará en 7 días.
+Su licencia de ${LetterLogoText} Enterprise expirará en 7 días.
 
-Para poder utilizar todas las funciones disponibles en el momento de la compra durante un *periodo de tiempo ilimitado*, le recomendamos *obtener una licencia de POR VIDA* para ${LetterLogoText} DocSpace Enterprise (con 3 años de soporte y actualizaciones incluidos).
+Para poder utilizar todas las funciones disponibles en el momento de la compra durante un *periodo de tiempo ilimitado*, le recomendamos *obtener una licencia de POR VIDA* para ${LetterLogoText} Enterprise (con 3 años de soporte y actualizaciones incluidos).
 
 $OrangeButton
 
@@ -487,9 +487,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-El período de gracia para su licencia de ${LetterLogoText} DocSpace Enterprise expirará en 7 días. Esto significa que DocSpace dejará de estar disponible.
+El período de gracia para su licencia de ${LetterLogoText} Enterprise expirará en 7 días. Esto significa que ${LetterLogoText} dejará de estar disponible.
 
-Para poder utilizar todas las funciones disponibles en el momento de la compra durante un *período de tiempo ilimitado*, le recomendamos *obtener una licencia de POR VIDA* para ${LetterLogoText} DocSpace Enterprise (con 3 años de soporte y actualizaciones incluidos):
+Para poder utilizar todas las funciones disponibles en el momento de la compra durante un *período de tiempo ilimitado*, le recomendamos *obtener una licencia de POR VIDA* para ${LetterLogoText} Enterprise (con 3 años de soporte y actualizaciones incluidos):
 
 $OrangeButton
 
@@ -502,9 +502,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-El período de gracia para su licencia de ${LetterLogoText} DocSpace Enterprise expira hoy. Esto significa que DocSpace dejará de estar disponible.
+El período de gracia para su licencia de ${LetterLogoText} Enterprise expira hoy. Esto significa que ${LetterLogoText} dejará de estar disponible.
 
-Para poder utilizar todas las funciones disponibles en el momento de la compra durante un *período de tiempo ilimitado*, le recomendamos *obtener una licencia de POR VIDA* para ${LetterLogoText} DocSpace Enterprise (con 3 años de soporte y actualizaciones incluidos):
+Para poder utilizar todas las funciones disponibles en el momento de la compra durante un *período de tiempo ilimitado*, le recomendamos *obtener una licencia de POR VIDA* para ${LetterLogoText} Enterprise (con 3 años de soporte y actualizaciones incluidos):
 
 $OrangeButton
 
@@ -517,7 +517,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Su licencia de ${LetterLogoText} DocSpace Enterprise expirará en 7 días. Esto significa que las actualizaciones y el soporte dejarán de estar disponibles.*
+Su licencia de ${LetterLogoText} Enterprise expirará en 7 días. Esto significa que las actualizaciones y el soporte dejarán de estar disponibles.*
 
 Para actualizar la licencia, por favor, póngase en contacto directamente con su gerente de ventas dedicado o póngase en contacto con nosotros a través de "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -530,7 +530,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Su licencia de ${LetterLogoText} DocSpace Enterprise expira hoy. Esto significa que las actualizaciones y el soporte ya no están disponibles.*
+Su licencia de ${LetterLogoText} Enterprise expira hoy. Esto significa que las actualizaciones y el soporte ya no están disponibles.*
 
 Para actualizar la licencia, por favor, póngase en contacto directamente con su gerente de ventas dedicado o póngase en contacto con nosotros a través de "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1461,34 +1461,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Cambio de dueño de portal</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>El periodo de gracia para su ${LetterLogoText} DocSpace Developer está activado</value>
+    <value>El periodo de gracia para su ${LetterLogoText} Developer está activado</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Su licencia de ${LetterLogoText} DocSpace Developer expirará pronto</value>
+    <value>Su licencia de ${LetterLogoText} Developer expirará pronto</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>El período de gracia para su ${LetterLogoText} DocSpace Developer expirará pronto</value>
+    <value>El período de gracia para su ${LetterLogoText} Developer expirará pronto</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Su ${LetterLogoText} DocSpace Developer ya no está disponible</value>
+    <value>Su ${LetterLogoText} Developer ya no está disponible</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>El período de gracia para su ${LetterLogoText} DocSpace Enterprise está activado</value>
+    <value>El período de gracia para su ${LetterLogoText} Enterprise está activado</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Su licencia de ${LetterLogoText} DocSpace Enterprise expirará pronto</value>
+    <value>Su licencia de ${LetterLogoText} Enterprise expirará pronto</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>El período de gracia para su ${LetterLogoText} DocSpace Enterprise expirará pronto</value>
+    <value>El período de gracia para su ${LetterLogoText} Enterprise expirará pronto</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Su ${LetterLogoText} DocSpace Enterprise ya no está disponible</value>
+    <value>Su ${LetterLogoText} Enterprise ya no está disponible</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Su licencia de ${LetterLogoText} DocSpace Enterprise expirará pronto</value>
+    <value>Su licencia de ${LetterLogoText} Enterprise expirará pronto</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Su licencia de ${LetterLogoText} DocSpace Enterprise expira hoy</value>
+    <value>Su licencia de ${LetterLogoText} Enterprise expira hoy</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Obtenga gratis las aplicaciones de ${LetterLogoText}</value>

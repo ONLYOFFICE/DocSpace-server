@@ -418,7 +418,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Developer-lisenssisi päättyy tänään.
+${LetterLogoText} Developer-lisenssisi päättyy tänään.
 
 Olemme aktivoineet sinulle $PaymentDelay päivän lisäajan. Tämän lisäajan aikana pääsy asiakirjojen muokkaamiseen on rajoitettu 20 samanaikaiseen yhteyteen (tuki ja päivitykset eivät ole enää tarjolla).
 
@@ -432,7 +432,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Developer-lisenssi päättyy 7 päivän päästä.
+${LetterLogoText} Developer-lisenssi päättyy 7 päivän päästä.
 
 Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -443,7 +443,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Developer-lisenssin lisäaika päättyy 7 päivän päästä.Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
+${LetterLogoText} Developer-lisenssin lisäaika päättyy 7 päivän päästä.Se tarkoittaa sitä, että ${LetterLogoText} ei ole enää käytettävissä.
 
 Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -454,7 +454,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Developer-lisenssin lisäaika päättyy tänään. Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
+${LetterLogoText} Developer-lisenssin lisäaika päättyy tänään. Se tarkoittaa sitä, että ${LetterLogoText} ei ole enää käytettävissä.
 
 Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -465,11 +465,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Enterprise lisenssisi vanhenee tänään.
+${LetterLogoText} Enterprise lisenssisi vanhenee tänään.
 
-Olemme aktivoineet sinulle *$PaymentDelay‎ päivän lisäajan*. Sen aikana DocSpaceen pääsee 3 nimettyä käyttäjää * (tukea ja päivityksiä ei enää tarjota).
+Olemme aktivoineet sinulle *$PaymentDelay‎ päivän lisäajan*. Sen aikana ${LetterLogoText}en pääsee 3 nimettyä käyttäjää * (tukea ja päivityksiä ei enää tarjota).
 
-Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ${LetterLogoText} DocSpace Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
+Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ${LetterLogoText} Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
 
 $OrangeButton
 
@@ -484,9 +484,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Enterprise lisenssisi vanhenee 7 päivän kuluttua.
+${LetterLogoText} Enterprise lisenssisi vanhenee 7 päivän kuluttua.
 
-Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ${LetterLogoText} DocSpace Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
+Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ${LetterLogoText} Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
 
 $OrangeButton
 
@@ -499,9 +499,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Enterprisen lisenssisi lisäaika päättyy 7 päivän kuluttua. Se tarkoittaa sitä, että DocSpace ei ole enää käytössä.
+${LetterLogoText} Enterprisen lisenssisi lisäaika päättyy 7 päivän kuluttua. Se tarkoittaa sitä, että ${LetterLogoText} ei ole enää käytössä.
 
-Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ${LetterLogoText} DocSpace Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
+Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ${LetterLogoText} Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
 
 $OrangeButton
 
@@ -514,9 +514,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Enterprise- lisenssisi vanhenee tänään. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.*
+${LetterLogoText} Enterprise- lisenssisi vanhenee tänään. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.*
 
-Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ${LetterLogoText} DocSpace Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
+Voidaksesi käyttää *rajattomasti* kaikkia saatavilla olevia ominaisuuksia ostohetkestä alkaen, suosittelemme, että *hankit ikuisen lisenssin* ${LetterLogoText} Enterpriseen (sisältäen 3 vuoden tuen ja päivitykset):
 
 $OrangeButton
 
@@ -529,7 +529,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Enterprise- lisenssisi vanhenee 7 päivän päästä. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.* 
+${LetterLogoText} Enterprise- lisenssisi vanhenee 7 päivän päästä. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.* 
 
 Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
 
@@ -542,7 +542,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-${LetterLogoText} DocSpace Enterprise- lisenssisi vanhenee tänään. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.*
+${LetterLogoText} Enterprise- lisenssisi vanhenee tänään. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.*
 
 Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
 
@@ -1484,34 +1484,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Portaalin omistajan muutos</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developerin lisäaika on aktivoitu</value>
+    <value>${LetterLogoText} Developerin lisäaika on aktivoitu</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer-lisenssisi päättyy pian</value>
+    <value>${LetterLogoText} Developer-lisenssisi päättyy pian</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developerin lisäaika päättyy pian</value>
+    <value>${LetterLogoText} Developerin lisäaika päättyy pian</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Developer ei ole enää käytettävissä</value>
+    <value>${LetterLogoText} Developer ei ole enää käytettävissä</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprisen lisäaika on aktivoitu</value>
+    <value>${LetterLogoText} Enterprisen lisäaika on aktivoitu</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise-lisenssi päättyy pian</value>
+    <value>${LetterLogoText} Enterprise-lisenssi päättyy pian</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprisen lisäaika päättyy pian</value>
+    <value>${LetterLogoText} Enterprisen lisäaika päättyy pian</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise ei ole enää käytettävissä</value>
+    <value>${LetterLogoText} Enterprise ei ole enää käytettävissä</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise-lisenssi päättyy pian</value>
+    <value>${LetterLogoText} Enterprise-lisenssi päättyy pian</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace Enterprise-lisenssi päättyy tänään</value>
+    <value>${LetterLogoText} Enterprise-lisenssi päättyy tänään</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ilmaisia ${LetterLogoText} sovelluksia</value>

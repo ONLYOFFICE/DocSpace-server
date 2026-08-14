@@ -408,7 +408,7 @@ $OrangeButton
   <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Uw licentie voor ${LetterLogoText} DocSpace Developer verloopt vandaag.
+Uw licentie voor ${LetterLogoText} Developer verloopt vandaag.
 
 Wij hebben een wachtperiode van $PaymentDelay dagen voor u ingeschakeld. In deze periode is de toegang tot documentbewerking beperkt tot 20 gelijktijdige verbindingen (ondersteuning en updates worden niet langer aangeboden).
 
@@ -421,7 +421,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Uw licentie voor ${LetterLogoText} DocSpace Developer verloopt over 7 dagen.
+Uw licentie voor ${LetterLogoText} Developer verloopt over 7 dagen.
 
 Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -432,7 +432,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Hallo, $UserName!
 
-De wachtperiode voor uw ${LetterLogoText} DocSpace Developer licentie verloopt over 7 dagen. Dit betekent dat DocSpace niet beschikbaar zal zijn.
+De wachtperiode voor uw ${LetterLogoText} Developer licentie verloopt over 7 dagen. Dit betekent dat ${LetterLogoText} niet beschikbaar zal zijn.
 
 Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -443,7 +443,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Hallo, $UserName!
 
-De wachtperiode voor uw ${LetterLogoText} DocSpace Developer licentie verloopt vandaag. Dit betekent dat DocSpace niet meer beschikbaar zal zijn.
+De wachtperiode voor uw ${LetterLogoText} Developer licentie verloopt vandaag. Dit betekent dat ${LetterLogoText} niet meer beschikbaar zal zijn.
 
 Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -454,11 +454,11 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Uw licentie voor ${LetterLogoText} DocSpace Enterprise verloopt vandaag.
+Uw licentie voor ${LetterLogoText} Enterprise verloopt vandaag.
 
-Wij hebben *een wachtperiode van $PaymentDelay dagen voor u ingeschakeld. Gedurende deze tijd is er toegang tot DocSpace voor 3 benoemde gebruikers* (ondersteuning en updates worden niet langer geleverd).
+Wij hebben *een wachtperiode van $PaymentDelay dagen voor u ingeschakeld. Gedurende deze tijd is er toegang tot ${LetterLogoText} voor 3 benoemde gebruikers* (ondersteuning en updates worden niet langer geleverd).
 
-Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ${LetterLogoText} DocSpace Enterprise (inclusief 3 jaar ondersteuning en updates):
+Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ${LetterLogoText} Enterprise (inclusief 3 jaar ondersteuning en updates):
 
 $OrangeButton
 
@@ -473,9 +473,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Uw licentie voor ${LetterLogoText} DocSpace Enterprise verloopt over 7 dagen.
+Uw licentie voor ${LetterLogoText} Enterprise verloopt over 7 dagen.
 
-Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ${LetterLogoText} DocSpace Enterprise (inclusief 3 jaar ondersteuning en updates).
+Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ${LetterLogoText} Enterprise (inclusief 3 jaar ondersteuning en updates).
 
 $OrangeButton
 
@@ -488,9 +488,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Hallo, $UserName!
 
-De wachtperiode voor uw ${LetterLogoText} DocSpace Enterprise licentie verloopt over 7 dagen. Dit betekent dat DocSpace niet beschikbaar zal zijn.
+De wachtperiode voor uw ${LetterLogoText} Enterprise licentie verloopt over 7 dagen. Dit betekent dat ${LetterLogoText} niet beschikbaar zal zijn.
 
-Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ${LetterLogoText} DocSpace Enterprise (inclusief 3 jaar ondersteuning en updates):
+Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ${LetterLogoText} Enterprise (inclusief 3 jaar ondersteuning en updates):
 
 $OrangeButton
 
@@ -503,9 +503,9 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Hallo, $UserName!
 
-De wachtperiode voor uw ${LetterLogoText} DocSpace Enterprise licentie verloopt vandaag. Dit betekent dat DocSpace niet meer beschikbaar zal zijn.
+De wachtperiode voor uw ${LetterLogoText} Enterprise licentie verloopt vandaag. Dit betekent dat ${LetterLogoText} niet meer beschikbaar zal zijn.
 
-Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ${LetterLogoText} DocSpace Enterprise (inclusief 3 jaar ondersteuning en updates):
+Om alle functionaliteiten te kunnen gebruiken die beschikbaar zijn op het moment van aankoop voor een *onbeperkte periode*, raden wij u aan *een Levenslange licentie* aan te schaffen voor ${LetterLogoText} Enterprise (inclusief 3 jaar ondersteuning en updates):
 
 $OrangeButton
 
@@ -518,7 +518,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Uw licentie voor ${LetterLogoText} DocSpace Enterprise verloopt over 7 dagen. Dit betekent dat updates en ondersteuning niet meer beschikbaar zullen zijn.*
+Uw licentie voor ${LetterLogoText} Enterprise verloopt over 7 dagen. Dit betekent dat updates en ondersteuning niet meer beschikbaar zullen zijn.*
 
 Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -531,7 +531,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Uw licentie voor ${LetterLogoText} DocSpace Enterprise verloopt vandaag. Dit betekent dat updates en ondersteuning niet meer beschikbaar zijn.*
+Uw licentie voor ${LetterLogoText} Enterprise verloopt vandaag. Dit betekent dat updates en ondersteuning niet meer beschikbaar zijn.*
 
 Om de licentie aan te passen, neemt u rechtstreeks contact op met uw toegewezen sales manager of neemt u contact met ons op via "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1453,34 +1453,34 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Verandering van Portaal eigenaar</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Wachtperiode voor uw ${LetterLogoText} DocSpace Developer geactiveerd</value>
+    <value>Wachtperiode voor uw ${LetterLogoText} Developer geactiveerd</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Uw ${LetterLogoText} DocSpace Developer licentie verloopt binnenkort</value>
+    <value>Uw ${LetterLogoText} Developer licentie verloopt binnenkort</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Wachtperiode voor uw ${LetterLogoText} DocSpace Developer verloopt binnenkort</value>
+    <value>Wachtperiode voor uw ${LetterLogoText} Developer verloopt binnenkort</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Uw ${LetterLogoText} DocSpace Developer niet langer beschikbaar</value>
+    <value>Uw ${LetterLogoText} Developer niet langer beschikbaar</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Wachtperiode voor uw ${LetterLogoText} DocSpace Enterprise geactiveerd</value>
+    <value>Wachtperiode voor uw ${LetterLogoText} Enterprise geactiveerd</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Uw ${LetterLogoText} DocSpace Enterprise licentie verloopt binnenkort</value>
+    <value>Uw ${LetterLogoText} Enterprise licentie verloopt binnenkort</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Wachtperiode voor uw ${LetterLogoText} DocSpace Enterprise verloopt binnenkort</value>
+    <value>Wachtperiode voor uw ${LetterLogoText} Enterprise verloopt binnenkort</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Uw ${LetterLogoText} DocSpace Enterprise niet langer beschikbaar</value>
+    <value>Uw ${LetterLogoText} Enterprise niet langer beschikbaar</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Uw ${LetterLogoText} DocSpace Enterprise licentie verloopt binnenkort</value>
+    <value>Uw ${LetterLogoText} Enterprise licentie verloopt binnenkort</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Uw ${LetterLogoText} DocSpace Enterprise licentie verloopt vandaag</value>
+    <value>Uw ${LetterLogoText} Enterprise licentie verloopt vandaag</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ontvang gratis ${LetterLogoText} apps</value>

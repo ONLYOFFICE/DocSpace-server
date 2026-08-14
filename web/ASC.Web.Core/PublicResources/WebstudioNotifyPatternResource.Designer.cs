@@ -861,7 +861,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Developer expires today.
+        ///Your license for ${LetterLogoText} Developer expires today.
         ///
         ///We have activated a grace period of $PaymentDelay days for you. During this time, access to document editing is limited to 20 simultaneous connections (support and updates are no longer provided).
         ///
@@ -878,7 +878,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Developer will expire in 7 days.
+        ///Your license for ${LetterLogoText} Developer will expire in 7 days.
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -895,7 +895,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ${LetterLogoText} DocSpace Developer license will expire in 7 days. It means DocSpace will become unavailable.
+        ///The grace period for your ${LetterLogoText} Developer license will expire in 7 days. It means ${LetterLogoText} will become unavailable.
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -912,7 +912,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ${LetterLogoText} DocSpace Developer license expires today. It means DocSpace will be no longer available.
+        ///The grace period for your ${LetterLogoText} Developer license expires today. It means ${LetterLogoText} will be no longer available.
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -929,11 +929,11 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Enterprise expires today.
+        ///Your license for ${LetterLogoText} Enterprise expires today.
         ///
-        ///We have activated *a grace period of $PaymentDelay‎ days* for you. During this time, access to DocSpace is provided for 3 named users* (support and updates are no longer provided).
+        ///We have activated *a grace period of $PaymentDelay‎ days* for you. During this time, access to ${LetterLogoText} is provided for 3 named users* (support and updates are no longer provided).
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates  [rest of string was truncated]&quot;;.
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_activation {
             get {
@@ -944,9 +944,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Enterprise will expire in 7 days.
+        ///Your license for ${LetterLogoText} Enterprise will expire in 7 days.
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates included).
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates included).
         ///
         ///$OrangeButton
         ///
@@ -963,9 +963,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ${LetterLogoText} DocSpace Enterprise license will expire in 7 days. It means DocSpace will become unavailable.
+        ///The grace period for your ${LetterLogoText} Enterprise license will expire in 7 days. It means ${LetterLogoText} will become unavailable.
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates included):
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates included):
         ///
         ///$OrangeButton
         ///
@@ -980,9 +980,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ${LetterLogoText} DocSpace Enterprise license expires today. It means DocSpace will be no longer available.
+        ///The grace period for your ${LetterLogoText} Enterprise license expires today. It means ${LetterLogoText} will be no longer available.
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates included):
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates included):
         ///
         ///$OrangeButton
         ///
@@ -997,7 +997,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Enterprise will expire in 7 days. It means updates and support will be no longer available.*
+        ///Your license for ${LetterLogoText} Enterprise will expire in 7 days. It means updates and support will be no longer available.*
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -1014,7 +1014,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Enterprise expires today. It means updates and support are no longer available.*
+        ///Your license for ${LetterLogoText} Enterprise expires today. It means updates and support are no longer available.*
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -2436,7 +2436,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Developer activated.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} Developer activated.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_activation {
             get {
@@ -2445,7 +2445,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Developer license will expire soon.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Developer license will expire soon.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_before_activation {
             get {
@@ -2454,7 +2454,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Developer will expire soon.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} Developer will expire soon.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -2463,7 +2463,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Developer no longer available.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Developer no longer available.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_expiration {
             get {
@@ -2472,7 +2472,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Enterprise activated.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} Enterprise activated.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_activation {
             get {
@@ -2481,7 +2481,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise license will expire soon.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Enterprise license will expire soon.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_before_activation {
             get {
@@ -2490,7 +2490,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Enterprise will expire soon.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} Enterprise will expire soon.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -2499,7 +2499,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise no longer available.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Enterprise no longer available.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_expiration {
             get {
@@ -2508,7 +2508,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise license will expire soon.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Enterprise license will expire soon.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_lifetime_before_expiration {
             get {
@@ -2517,7 +2517,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise license expires today.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Enterprise license expires today.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_lifetime_expiration {
             get {
