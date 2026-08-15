@@ -61,6 +61,11 @@ public class MdToDocxTaskPublisher(
         var intFolderId = folderId is int id ? id : 0;
         var thirdpartyFolderId = folderId as string;
 
+        if (string.IsNullOrEmpty(thirdpartyFolderId) && intFolderId <= 0)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_InvalidFolderId);
+        }
+
         // Early-rejection optimization only: fail fast on the HTTP request thread, so the
         // caller gets an immediate error for an invalid/forbidden folder instead of an
         // asynchronous failure on the event bus. This is NOT the authoritative gate —
