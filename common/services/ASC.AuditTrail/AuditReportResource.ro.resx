@@ -247,7 +247,7 @@
     <value>Abonamentrul clientului a fost actualizat: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate</value>
+    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Portofelul clientului a fost alimentat: {0}</value>

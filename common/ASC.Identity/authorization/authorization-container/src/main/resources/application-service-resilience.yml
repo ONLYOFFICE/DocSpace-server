@@ -1,9 +1,25 @@
 resilience4j:
+  circuitbreaker:
+    circuitBreakerAspectOrder: 399
+    instances:
+      grpcClientCircuitBreaker:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: ${CIRCUITBREAKER_GRPC_CLIENT_SLIDING_WINDOW_SIZE:10}
+        minimumNumberOfCalls: ${CIRCUITBREAKER_GRPC_CLIENT_MINIMUM_NUMBER_OF_CALLS:5}
+        failureRateThreshold: ${CIRCUITBREAKER_GRPC_CLIENT_FAILURE_RATE_THRESHOLD:50}
+        waitDurationInOpenState: ${CIRCUITBREAKER_GRPC_CLIENT_WAIT_DURATION:5s}
+        permittedNumberOfCallsInHalfOpenState: ${CIRCUITBREAKER_GRPC_CLIENT_HALF_OPEN_CALLS:2}
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        registerHealthIndicator: false
+        ignoreExceptions:
+          - com.asc.authorization.application.exception.client.RegisteredClientPermissionException
+          - com.asc.authorization.application.exception.client.NonRetryableGrpcException
   retry:
+    retryAspectOrder: 400
     instances:
       grpcClientRetry:
-        maxAttempts: ${RETRY_GRPC_CLIENT_MAX_ATTEMPTS:3}
-        waitDuration: ${RETRY_GRPC_CLIENT_WAIT_DURATION:200ms}
+        maxAttempts: ${RETRY_GRPC_CLIENT_MAX_ATTEMPTS:2}
+        waitDuration: ${RETRY_GRPC_CLIENT_WAIT_DURATION:325ms}
         enableExponentialBackoff: true
         exponentialBackoffMultiplier: ${RETRY_GRPC_CLIENT_MULTIPLIER:1.625}
         retryExceptions:
@@ -11,3 +27,5 @@ resilience4j:
         ignoreExceptions:
           - com.asc.authorization.application.exception.client.RegisteredClientPermissionException
           - com.asc.authorization.application.exception.client.NonRetryableGrpcException
+          - com.asc.authorization.application.exception.client.GrpcDeadlineExceededException
+          - io.github.resilience4j.circuitbreaker.CallNotPermittedException

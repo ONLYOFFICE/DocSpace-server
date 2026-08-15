@@ -33,13 +33,14 @@
 
 import { ToolsEngine } from "@onlyoffice/ai-chat/core";
 import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
+import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { storage } from "../storage/index.js";
 import {
   systemToolsSource,
   getSystemServerConfig,
 } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { asString, isObject } from "../narrow.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
 
@@ -90,6 +91,10 @@ export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = args.name as string;
+    // Scope is resolved inside mcpServersStorage (create/readAll both run the
+    // entityId through resolveAgentEntityId), so a non-agent folder writes to
+    // and reads back from the global scope and the server stays visible
+    // (Bug 82863) — no 404 gate needed here.
     const result = await engine.addCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -137,6 +142,10 @@ export const toolsController = {
     const servers = await engine.listCustomServers(entityId);
     const redacted: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(servers)) {
+      // The portal MCP server is not user-manageable: legacy per-agent
+      // whitelist markers named after it must not surface as selectable
+      // entries (it is always enabled server-side, see systemTools).
+      if (name === PORTAL_MCP_SERVER_NAME) continue;
       redacted[name] = redactSystemServer(name, config);
     }
     res.json(redacted);
@@ -145,12 +154,28 @@ export const toolsController = {
   listSystemTools: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     const tools = await engine.listSystemTools(entityId);
+    // Hide the portal MCP server from every management surface (the MCP
+    // settings page's permission cards, the agent dialog's server picker):
+    // it is always enabled with all tools and cannot be configured. The
+    // chat engine's tool context does not go through this listing, so the
+    // tools themselves stay available everywhere.
+    if (isObject(tools)) {
+      delete (tools as Record<string, unknown>)[PORTAL_MCP_SERVER_NAME];
+    }
     res.json(tools);
   }),
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["map", "entityId"] as const);
-    const map = (args.map as Record<string, McpServerConfig>) ?? {};
+    // `map` is required. Without it the loop below yields an empty map and
+    // replaceAll wipes every registered MCP server for the scope, silently
+    // destroying the configuration on a malformed request (Bug 82864). Reject
+    // a missing/invalid map with a 400 instead.
+    if (!isObject(args.map)) {
+      res.status(400).json({ error: "map is required and must be an object" });
+      return;
+    }
+    const map = args.map as Record<string, McpServerConfig>;
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
       normalized[name] = await resolveConfig(name, config);

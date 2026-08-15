@@ -241,7 +241,7 @@
     <value>顧客サブスクリプションが更新されました: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>顧客ウォレット対応サービス設定が更新されました</value>
+    <value>顧客ウォレット対応サービス設定が更新されました: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>顧客ウォレットがチャージされました: {0}</value>

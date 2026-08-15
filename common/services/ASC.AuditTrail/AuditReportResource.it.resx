@@ -247,7 +247,7 @@
     <value>Abbonamento cliente aggiornato: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Impostazioni dei servizi abilitati per il portafoglio clienti aggiornate</value>
+    <value>Impostazioni dei servizi abilitati per il portafoglio clienti aggiornate: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Portafoglio cliente ricaricato: {0}</value>

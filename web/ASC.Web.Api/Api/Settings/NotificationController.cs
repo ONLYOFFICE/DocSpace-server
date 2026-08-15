@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("notification")]
+[ApiEndpoint(Template = "notification")]
 public class NotificationController(
     IFusionCache fusionCache,
     WebItemManager webItemManager,

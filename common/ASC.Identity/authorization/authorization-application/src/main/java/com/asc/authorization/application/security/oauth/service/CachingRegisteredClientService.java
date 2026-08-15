@@ -35,8 +35,9 @@ package com.asc.authorization.application.security.oauth.service;
 
 import com.asc.authorization.data.client.cache.CachedRegisteredClient;
 import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
+import com.asc.common.utilities.cache.CacheNamespaceRegistry;
 import java.time.Duration;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,7 +46,15 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-/** Redis-backed implementation of {@link RegisteredClientCacheService}. */
+/**
+ * Redis-backed implementation of {@link RegisteredClientCacheService}.
+ *
+ * <p>Entries are keyed by client id alone, since lookups happen before a tenant is known, and carry
+ * the cache namespace of their tenant instead. Evicting a tenant advances that namespace, which
+ * detaches its entries in constant time and leaves every other tenant's entries in place.
+ *
+ * @see CacheNamespaceRegistry
+ */
 @Slf4j
 @Service
 @Profile("saas")
@@ -54,14 +63,16 @@ public class CachingRegisteredClientService implements RegisteredClientCacheServ
   private static final String CACHE_PREFIX = "identity:authorization:client";
   private static final String CACHE_KEY_SEPARATOR = ":";
 
-  private static final int CACHE_EXPIRE_AFTER_WRITE_MINUTES = 5;
+  private static final int CACHE_EXPIRE_AFTER_WRITE_MINUTES = 3;
 
   private final RedisTemplate<String, Object> redisTemplate;
+  private final CacheNamespaceRegistry versionRegistry;
 
   public CachingRegisteredClientService(
-      @Qualifier("registeredClientCacheRedisTemplate")
-          RedisTemplate<String, Object> redisTemplate) {
+      @Qualifier("registeredClientCacheRedisTemplate") RedisTemplate<String, Object> redisTemplate,
+      CacheNamespaceRegistry versionRegistry) {
     this.redisTemplate = redisTemplate;
+    this.versionRegistry = versionRegistry;
   }
 
   private String buildCacheKey(String clientId) {
@@ -75,8 +86,17 @@ public class CachingRegisteredClientService implements RegisteredClientCacheServ
       return;
     }
 
+    var namespace = versionRegistry.namespaceOf(client.getTenantId());
+    if (namespace == null) {
+      log.warn(
+          "Skipped caching registered client {} because its namespace could not be resolved",
+          client.getClientId());
+      return;
+    }
+
     var key = buildCacheKey(client.getClientId());
     try {
+      client.setCacheNamespace(namespace);
       redisTemplate
           .opsForValue()
           .set(key, client, Duration.ofMinutes(CACHE_EXPIRE_AFTER_WRITE_MINUTES));
@@ -95,8 +115,13 @@ public class CachingRegisteredClientService implements RegisteredClientCacheServ
     try {
       var cached = redisTemplate.opsForValue().get(key);
       if (cached instanceof CachedRegisteredClient client) {
-        log.info("Cache hit for registered client");
-        return Optional.of(client);
+        var namespace = versionRegistry.namespaceOf(client.getTenantId());
+        if (Objects.equals(client.getCacheNamespace(), namespace)) {
+          log.info("Cache hit for registered client");
+          return Optional.of(client);
+        }
+
+        log.info("Ignoring registered client cached under an old namespace");
       }
     } catch (Exception e) {
       log.error("Failed to retrieve cached registered client", e);
@@ -119,25 +144,21 @@ public class CachingRegisteredClientService implements RegisteredClientCacheServ
     }
 
     try {
-      redisTemplate.delete(buildCacheKey(clientId));
+      redisTemplate.unlink(buildCacheKey(clientId));
     } catch (Exception e) {
       log.error("Failed to evict registered client from cache", e);
     }
   }
 
-  // NOTE: Tenant removal is rare, so trading a bit of over-eviction
   @Override
   public void evictAllByTenantId(long tenantId) {
-    clear();
+    versionRegistry.invalidateTenant(tenantId);
+    log.info("Evicted all cached registered clients for tenant {}", tenantId);
   }
 
   @Override
   public void clear() {
-    try {
-      var keys = redisTemplate.keys(CACHE_PREFIX + CACHE_KEY_SEPARATOR + "*");
-      if (keys != null && !keys.isEmpty()) redisTemplate.delete(new HashSet<>(keys));
-    } catch (Exception e) {
-      log.error("Failed to clear registered client cache", e);
-    }
+    versionRegistry.invalidateAll();
+    log.info("Cleared entire registered client cache");
   }
 }

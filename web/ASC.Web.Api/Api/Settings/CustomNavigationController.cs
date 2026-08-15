@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("customnavigation")]
+[ApiEndpoint(Template = "customnavigation")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class CustomNavigationController(
     MessageService messageService,

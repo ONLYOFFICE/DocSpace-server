@@ -872,6 +872,23 @@ public class StudioNotifyService(
         }
     }
 
+    public async Task SendLowWalletBalanceAsync(UserInfo payer, UserInfo owner)
+    {
+        var users = new[] { payer, owner }
+            .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
+            .DistinctBy(user => user.Email);
+
+        var lowWalletBalanceNotifyAction = serviceProvider.GetService<LowWalletBalanceNotifyAction>();
+
+        foreach (var user in users)
+        {
+            lowWalletBalanceNotifyAction.Init(user);
+
+            var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
+            await studioNotifyServiceHelper.SendNoticeToAsync(lowWalletBalanceNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
+        }
+    }
+
     public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner)
     {
         var users = new[] { payer, owner }

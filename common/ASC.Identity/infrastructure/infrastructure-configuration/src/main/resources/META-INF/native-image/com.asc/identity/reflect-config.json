@@ -117,6 +117,16 @@
     "allPublicConstructors": true
   },
   {
+    "name": "com.asc.authorization.application.exception.client.GrpcDeadlineExceededException",
+    "allPublicConstructors": true
+  },
+  {
+    "name": "com.asc.authorization.data.client.cache.CachedRegisteredClient",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  },
+  {
     "name": "com.asc.registration.core.domain.exception.ClientNotFoundException",
     "allPublicConstructors": true
   },
@@ -178,6 +188,12 @@
   },
   {
     "name": "com.asc.registration.core.domain.value.ClientModificationInfo",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.asc.registration.application.transfer.CachedClient",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
     "allDeclaredFields": true
   },
   {

@@ -7,6 +7,7 @@ bucket4j:
     username: ${REDIS_USERNAME:}
     password: ${REDIS_PASSWORD:}
     ssl: ${REDIS_SSL:false}
+    timeout: ${REDIS_TIMEOUT:1s}
   rate-limits:
     limits:
       - method: GET

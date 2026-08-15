@@ -31,6 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
@@ -158,6 +159,22 @@ function withClearedKeys(
   return next;
 }
 
+// The portal MCP server's tools are always enabled and cannot be disabled
+// anywhere (global chat, agents, the editor plugin). Its "disabled"
+// entries are dropped on read — so a legacy stored entry has no effect —
+// and never persisted on write. Enforced here, at the single storage
+// chokepoint every consumer (engine tool context, UI permission cards)
+// goes through.
+function withoutPortalServer(
+  disabled: Record<string, string[]>,
+): Record<string, string[]> {
+  if (!(PORTAL_MCP_SERVER_NAME in disabled)) {
+    return disabled;
+  }
+  const { [PORTAL_MCP_SERVER_NAME]: _dropped, ...rest } = disabled;
+  return rest;
+}
+
 async function putDisabled(
   disabled: Record<string, string[]>,
   entityId: string | undefined,
@@ -165,7 +182,7 @@ async function putDisabled(
   const scopedEntityId = await resolveAgentEntityId(entityId);
   const stored = parseDisabled(await fetchToolPrefsSafe(scopedEntityId));
   await aiService.put(DISABLED_PATH, {
-    disabled: withClearedKeys(disabled, stored),
+    disabled: withoutPortalServer(withClearedKeys(disabled, stored)),
     entityId: scopedEntityId,
   });
 }
@@ -193,7 +210,7 @@ export class HttpToolPrefsStorage implements ToolPrefsStorage {
   async readDisabled(entityId?: string): Promise<Record<string, string[]>> {
     try {
       const raw = await readToolPrefsRaw(entityId);
-      return parseDisabled(raw);
+      return withoutPortalServer(parseDisabled(raw));
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return {};

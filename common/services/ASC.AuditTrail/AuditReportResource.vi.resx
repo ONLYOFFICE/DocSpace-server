@@ -247,7 +247,7 @@
     <value>Đã cập nhật gói đăng ký của khách hàng: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Đã cập nhật cài đặt dịch vụ hỗ trợ ví của khách hàng</value>
+    <value>Đã cập nhật cài đặt dịch vụ hỗ trợ ví của khách hàng: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Ví của khách hang đã được nạp tiền: {0}</value>

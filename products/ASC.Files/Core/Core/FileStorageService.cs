@@ -624,13 +624,16 @@ public class FileStorageService //: IFileStorageService
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
+        var folderType = DocSpaceHelper.MapToFolderType(roomType);
+
+        await CheckPublicRoomCreationAsync(folderType);
 
         return await CreateRoomAsync(async () =>
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings, sendFormToExternalDB, saveFormAsXLSX);
+                return await InternalCreateFolderAsync(parentId, title, folderType, privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings, sendFormToExternalDB, saveFormAsXLSX);
             }
         }, privacy, share);
     }
@@ -673,6 +676,8 @@ public class FileStorageService //: IFileStorageService
         }
 
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
+
+        await CheckPublicRoomCreationAsync(folderType);
 
         var room = await CreateRoomAsync(async () =>
         {
@@ -810,6 +815,8 @@ public class FileStorageService //: IFileStorageService
         await CheckCanCreateRoomFromTemplateAsync(templateId);
 
         var template = await folderDao.GetFolderAsync(templateId);
+
+        await CheckPublicRoomCreationAsync(template.FolderType);
 
         WatermarkRequestDto watermarkDto = null;
         if (watermark != null)
@@ -6031,6 +6038,26 @@ public class FileStorageService //: IFileStorageService
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Throws <see cref="SecurityException"/> when an attempt is made to create a
+    /// <see cref="FolderType.PublicRoom"/> while external link creation is restricted for the Rooms
+    /// section. Such a room always gets a public primary link, so it must be rejected before anything
+    /// is persisted — otherwise the restriction could be bypassed from any section that offers room
+    /// creation (Rooms, Backup, room templates, third-party storage).
+    /// </summary>
+    private async Task CheckPublicRoomCreationAsync(FolderType folderType)
+    {
+        if (folderType != FolderType.PublicRoom)
+        {
+            return;
+        }
+
+        if (await externalShare.IsPublicRoomCreationRestrictedAsync())
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
     }
 
     /// <summary>

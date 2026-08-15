@@ -47,7 +47,8 @@ public class PaymentHelper(
     DocsCloudClient docsCloudClient,
     WalletStaticProvider walletStaticProvider,
     CoreSettings coreSettings,
-    ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> maxTotalSizeStatistic)
+    ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> maxTotalSizeStatistic,
+    TenantWalletSettingsConfig walletSettingsConfig)
 {
     public void DemandConfigured()
     {
@@ -124,7 +125,7 @@ public class PaymentHelper(
     /// Ensures that the tariff service is configured, the current user has administrator rights and the customer exists.
     /// </summary>
     /// <returns>The tenant ID of the validated customer.</returns>
-    public async Task<int> EnsureCustomerAndAdminRightsAsync()
+    public async Task<int> EnsureCustomerAndAdminRightsAsync(bool refresh = false)
     {
         DemandConfigured();
 
@@ -132,7 +133,7 @@ public class PaymentHelper(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        await GetCustomerInfoRequiredAsync(tenantId);
+        await GetCustomerInfoRequiredAsync(tenantId, refresh);
 
         return tenantId;
     }
@@ -271,9 +272,9 @@ public class PaymentHelper(
         return result;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, bool throwIfFailure = false)
     {
-        var result = await tariffService.PaymentChangeAsync(tenantId, quantity, productQuantityType, currency, checkQuota, customerParticipantName);
+        var result = await tariffService.PaymentChangeAsync(tenantId, quantity, productQuantityType, currency, checkQuota, customerParticipantName, null, throwIfFailure);
 
         if (result)
         {
@@ -304,9 +305,35 @@ public class PaymentHelper(
             messageService.Send(MessageAction.CustomerWalletToppedUp, $"{amount} {currency}");
 
             await quotaSocketManager.TopUpWallet(false);
+
+            await EnsureLowBalanceThresholdAsync();
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The wallet balance below which a low-balance notification is sent, sourced from config (not user-configurable).
+    /// </summary>
+    public int GetDefaultLowBalanceThreshold()
+    {
+        return walletSettingsConfig.LowBalanceThreshold;
+    }
+
+    // stamps a non-default TenantWalletSettings row for tenants without auto top-up configured, so the low-balance
+    // poller (which only scans persisted wallet-settings rows) can discover them without scanning every active tenant
+    private async Task EnsureLowBalanceThresholdAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantWalletSettings>();
+        if (settings.Enabled)
+        {
+            return;
+        }
+
+        settings.LowBalanceThreshold = GetDefaultLowBalanceThreshold();
+        settings.LowBalanceNotified = false;
+
+        await settingsManager.SaveAsync(settings);
     }
 
     public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId)
@@ -387,7 +414,7 @@ public class PaymentHelper(
             throw new InvalidOperationException("Failed to save tenant wallet service settings");
         }
 
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, service.ToStringFast());
 
         if (service == TenantWalletService.AITools)
         {
@@ -474,7 +501,7 @@ public class PaymentHelper(
     {
         var result = await aiGateway.SetRestrictedModelsAsync(models);
 
-        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, string.Join(", ", models));
 
         return result;
     }

@@ -37,7 +37,7 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("docscloud")]
+[ApiEndpoint(Template = "docscloud")]
 public class DocsCloudController(
     PermissionContext permissionContext,
     TenantManager tenantManager,
@@ -407,11 +407,9 @@ public class DocsCloudController(
         const TenantWalletService from = TenantWalletService.DocsCloud;
         const TenantWalletService to = TenantWalletService.DocsCloudDevPack;
 
-        var tenant = tenantManager.GetCurrentTenant();
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync(refresh: true);
 
-        await paymentHelper.DemandCustomerPayerAsync(tenant.Id);
-
-        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+        var tariff = await tariffService.GetTariffAsync(tenantId);
         if (tariff.State > TariffState.Paid)
         {
             throw new BillingException("Tariff is not paid");

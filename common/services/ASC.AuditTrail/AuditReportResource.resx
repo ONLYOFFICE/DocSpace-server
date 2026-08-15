@@ -256,7 +256,7 @@
     <value>Customer subscription updated: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Customer wallet enabled services settings updated</value>
+    <value>Customer wallet enabled services settings updated: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Customer wallet topped up: {0}</value>
@@ -931,7 +931,7 @@
     <value>Send</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>User {0} sent an invitation to {1} to join this DocSpace</value>
+    <value>User {0} sent an invitation to {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Invite Instructions Sent: {0}</value>

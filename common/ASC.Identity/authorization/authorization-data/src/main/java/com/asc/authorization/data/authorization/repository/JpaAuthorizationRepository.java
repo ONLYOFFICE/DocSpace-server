@@ -149,6 +149,33 @@ public interface JpaAuthorizationRepository
   void deleteAllAuthorizationsByTenantId(@Param("tenantId") long tenantId);
 
   /**
+   * Deletes every authorization granted to a client owned by a specific tenant, whichever tenant
+   * the authorizing user belonged to.
+   *
+   * @param ownerTenantId the ID of the tenant owning the clients.
+   */
+  @Modifying
+  @Query(
+      value = "DELETE FROM identity_authorizations WHERE owner_tenant_id = :ownerTenantId",
+      nativeQuery = true)
+  void deleteAllAuthorizationsByOwnerTenantId(@Param("ownerTenantId") long ownerTenantId);
+
+  /**
+   * Deletes every authorization granted to a client created by a specific user, whichever tenant
+   * the authorizing user belonged to.
+   *
+   * @param ownerTenantId the ID of the tenant owning the clients.
+   * @param ownerUserId the ID of the user who created the clients.
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_authorizations WHERE owner_tenant_id = :ownerTenantId AND owner_user_id = :ownerUserId",
+      nativeQuery = true)
+  void deleteAllAuthorizationsByOwner(
+      @Param("ownerTenantId") long ownerTenantId, @Param("ownerUserId") String ownerUserId);
+
+  /**
    * Retrieves a list of authorizations for a specific principal, optionally filtered by a last
    * modified date. The query limits results to valid consents (non-empty token fields) and orders
    * them by the most recent modification date.

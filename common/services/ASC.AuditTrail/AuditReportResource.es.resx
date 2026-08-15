@@ -247,7 +247,7 @@
     <value>Suscripción del cliente actualizada: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Se ha actualizado la configuración de los servicios habilitados para el monedero del cliente</value>
+    <value>Se ha actualizado la configuración de los servicios habilitados para el monedero del cliente: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Monedero del cliente recargado: {0}</value>

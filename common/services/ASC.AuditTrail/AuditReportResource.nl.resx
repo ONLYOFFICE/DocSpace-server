@@ -247,7 +247,7 @@
     <value>Klantabonnement bijgewerkt: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Instellingen voor ingeschakelde klantwallet-services bijgewerkt</value>
+    <value>Instellingen voor ingeschakelde klantwallet-services bijgewerkt: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Klant wallet opgeladen: {0}</value>

@@ -247,7 +247,7 @@
     <value>تم تحديث اشتراك العميل: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء</value>
+    <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>تم تعبئة محفظة العميل: {0}</value>

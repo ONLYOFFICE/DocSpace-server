@@ -45,6 +45,7 @@ import logger from "../log.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse } from "./_helpers.js";
+import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
   HttpToolsAdapter,
@@ -332,13 +333,57 @@ async function* logStreamErrors<T>(
   }
 }
 
+// A user message must carry some non-whitespace text before a stream is
+// opened. `content` is either a plain string or an array of parts; text
+// lives on `{ type: "text", text }` parts (and bare string parts), mirroring
+// the engine's own text extraction. Attachment-only parts (file/image) do
+// not count — an empty prompt otherwise reaches the provider and streams
+// back nothing (Bug 82720).
+function hasNonEmptyText(userMessage: unknown): boolean {
+  if (!isObject(userMessage)) {
+    return false;
+  }
+  const content = userMessage["content"];
+  if (typeof content === "string") {
+    return content.trim().length > 0;
+  }
+  if (!Array.isArray(content)) {
+    return false;
+  }
+  for (const part of content) {
+    if (typeof part === "string") {
+      if (part.trim().length > 0) {
+        return true;
+      }
+      continue;
+    }
+    if (
+      isObject(part)
+      && part["type"] === "text"
+      && typeof part["text"] === "string"
+      && part["text"].trim().length > 0
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
+    // Without this the provider request runs without the forwarded auth /
+    // request headers, so a correct call comes back with an empty message
+    // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
+    // Mirrors sendWithStream.
+    markForwardHeadersToProvider();
     const result = await engine.send(req.body);
     res.json(result);
   }),
 
   sendCustom: asyncHandler<SendCustomInput>(async (req, res) => {
+    // As with `send`, the forwarded headers must be marked before the
+    // provider call or a correct request fails with a 500 (Bug 82836).
+    markForwardHeadersToProvider();
     const body = withRequestSignal(res, req.body);
     const result = engine.sendCustom(body);
     if (body.isStream) {
@@ -358,6 +403,34 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Reject an empty prompt before opening the stream: a user message with
+    // no non-whitespace text otherwise reaches the provider and streams back
+    // nothing (Bug 82720).
+    if (!hasNonEmptyText(req.body.userMessage)) {
+      res.status(400).json({
+        error: "userMessage must contain non-empty text content",
+      });
+      return;
+    }
+    // A new thread (no threadId) is created implicitly here, so gate it like
+    // threads/create: a supplied entityId must be accessible and a profile
+    // must resolve, otherwise 404 (review #6).
+    if (!req.body.threadId) {
+      await assertThreadCreatable(req.body.entityId, req.body.profileId);
+    }
+    // When the request omits profileId, the engine resolves the Chat
+    // assignment (or the Default slot) and persists it onto the thread,
+    // silently overwriting the model the thread was created with (Bug 82860).
+    // Pre-fill profileId from the thread's stored value: a session-level
+    // profileId is honored for the request without mutating persisted state,
+    // so the thread keeps its own model. The proper fix lives in the engine's
+    // profile resolution; this is a proxy-side guard.
+    if (!req.body.profileId && req.body.threadId) {
+      const thread = await storage.threads.readById(req.body.threadId);
+      if (thread?.profileId) {
+        req.body.profileId = thread.profileId;
+      }
+    }
     const body = withContextPrompt(
       await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
     );

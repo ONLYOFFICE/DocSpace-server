@@ -163,7 +163,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; a été ajouté(e) à la salle : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
-    <value>Un nouvel utilisateur de DocSpace a été ajouté : &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>Un nouvel utilisateur a été ajouté : &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a été retiré de l'agent : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
@@ -175,7 +175,7 @@
     <value>&lt;b&gt;{0}&lt;/b&gt; a changé le niveau d'accès des utilisateurs &lt;b&gt;{1}&lt;/b&gt; en &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
-    <value>L'utilisateur de DocSpace mis à jour : &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+    <value>L'utilisateur mis à jour : &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>Bien à vous, l'équipe de support ${LetterLogoText}</value>
@@ -208,7 +208,7 @@
     <value>Configurer l'application d'authentification</value>
   </data>
   <data name="ButtonCollaborate" xml:space="preserve">
-    <value>Collaborer à DocSpace</value>
+    <value>Collaborer à ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Configurez maintenant</value>
@@ -217,7 +217,7 @@
     <value>Confirmer</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
-    <value>Confirmer l’invitation à DocSpace</value>
+    <value>Confirmer l’invitation à ${LetterLogoText}</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirmation de mise à jour du portail propriétaire</value>
@@ -262,7 +262,7 @@
     <value>Laisser des commentaires</value>
   </data>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
-    <value>Ouvrir DocSpace</value>
+    <value>Ouvrir ${LetterLogoText}</value>
   </data>
   <data name="ButtonPurchaseNow" xml:space="preserve">
     <value>Acheter maintenant</value>
@@ -1860,7 +1860,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Sauvegarde du poirtail ${__VirtualRootHost} créée</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">
-    <value>La sauvegarde de votre DocSpace a échoué</value>
+    <value>La sauvegarde a échoué</value>
   </data>
   <data name="subject_change_email_v115" xml:space="preserve">
     <value>Confirmez le changement de votre mail</value>
@@ -1881,76 +1881,76 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Changement du propriétaire du portail</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Période de grâce pour votre ${LetterLogoText} DocSpace Developer activé</value>
+    <value>Période de grâce pour ${LetterLogoText} Developer activé</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Votre licence ${LetterLogoText} DocSpace Developer expirera bientôt</value>
+    <value>Votre licence ${LetterLogoText} Developer expirera bientôt</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>La période de grâce pour votre ${LetterLogoText} DocSpace Developer expirera bientôt</value>
+    <value>La période de grâce pour votre ${LetterLogoText} Developer expirera bientôt</value>
   </data>
   <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Votre ${LetterLogoText} DocSpace Developer n'est plus disponible</value>
+    <value>Votre ${LetterLogoText} Developer n'est plus disponible</value>
   </data>
   <data name="subject_docs_tips" xml:space="preserve">
     <value>5 conseils pour travailler efficacement sur vos documents</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Période de grâce pour votre ${LetterLogoText} DocSpace Enterprise activé</value>
+    <value>Période de grâce pour ${LetterLogoText} Enterprise activé</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Votre licence ${LetterLogoText} DocSpace Enterprise expirera bientôt</value>
+    <value>Votre licence ${LetterLogoText} Enterprise expirera bientôt</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>La période de grâce pour votre ${LetterLogoText} DocSpace Enterprise expirera bientôt</value>
+    <value>La période de grâce pour votre ${LetterLogoText} Enterprise expirera bientôt</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
-    <value>Votre ${LetterLogoText} DocSpace Enterprise n'est plus disponible</value>
+    <value>Votre ${LetterLogoText} Enterprise n'est plus disponible</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
-    <value>Votre licence ${LetterLogoText} DocSpace Enterprise expirera bientôt</value>
+    <value>Votre licence ${LetterLogoText} Enterprise expirera bientôt</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
-    <value>Votre licence ${LetterLogoText} DocSpace Enterprise expire aujourd'hui</value>
+    <value>Votre licence ${LetterLogoText} Enterprise expire aujourd'hui</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Obtenez des applications ${LetterLogoText} gratuites</value>
   </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Découvrez l'abonnement business d’${LetterLogoText} DocSpace</value>
+    <value>Découvrez l'abonnement business d’${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Inscrivez-vous sur le portail ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
     <value>Obtenez des applications ${LetterLogoText} gratuites</value>
   </data>
   <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Découvrez l'abonnement business d’${LetterLogoText} DocSpace</value>
+    <value>Découvrez l'abonnement business d’${LetterLogoText}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>L'invitation à rejoindre le portail ${__VirtualRootHost}</value>
   </data>
   <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Obtenez des applications ${LetterLogoText} gratuites</value>
   </data>
   <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Le message d'utilisateur aux administrateurs</value>
@@ -1971,7 +1971,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Erreur lors de la migration du portail dans une autre région</value>
   </data>
   <data name="subject_migration_personal_to_docspace" xml:space="preserve">
-    <value>La migration des données vers ${LetterLogoText} DocSpace s'est achevée avec succès</value>
+    <value>La migration des données vers ${LetterLogoText} s'est achevée avec succès</value>
   </data>
   <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}. Migration du portail dans une autre région a commencé</value>
@@ -1980,22 +1980,22 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Migration du portail dans une autre région terminée avec succès</value>
   </data>
   <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Découvrez l'abonnement business d’${LetterLogoText} DocSpace</value>
+    <value>Découvrez l'abonnement business d’${LetterLogoText}</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>L'invitation à rejoindre le portail ${__VirtualRootHost}</value>
   </data>
   <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_opensource_user_activation_v1" xml:space="preserve">
     <value>Obtenez des applications ${LetterLogoText} gratuites</value>
   </data>
   <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Votre mot de passe a été modifié avec succès</value>
@@ -2007,10 +2007,10 @@ $TrulyYours</value>
     <value>Suppression du portail ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>DocSpace ${LetterLogoText} a été supprimé</value>
+    <value>L'espace de travail ${LetterLogoText} a été supprimé</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>DocSpace ${LetterLogoText} a été supprimé</value>
+    <value>L'espace de travail ${LetterLogoText} a été supprimé</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Changement de l'adresse du portail</value>
@@ -2037,7 +2037,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. La suppression des données utilisateur a échoué</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Action requise : Impossible de renouveler automatiquement le plan de service dans votre ${LetterLogoText} DocSpace</value>
+    <value>Action requise : Impossible de renouveler automatiquement le plan de service dans votre ${LetterLogoText}</value>
   </data>
   <data name="subject_request_license" xml:space="preserve">
     <value>Demande de licence Enterprise</value>
@@ -2055,73 +2055,70 @@ $TrulyYours</value>
     <value>Quoi de neuf sur votre portail ${__VirtualRootHost} au cours de la dernière heure</value>
   </data>
   <data name="subject_saas_admin_activation_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
-    <value>Découvrez les intégrations utiles pour ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
-    <value>Configurez votre ${LetterLogoText} DocSpace</value>
+    <value>Découvrez les intégrations utiles pour ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
-    <value>Votre ${LetterLogoText} DocSpace sera supprimé</value>
+    <value>Votre ${LetterLogoText} sera supprimé</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>Votre ${LetterLogoText} DocSpace sera supprimé</value>
+    <value>Votre ${LetterLogoText} sera supprimé</value>
   </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Obtenez des applications ${LetterLogoText} gratuites</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Découvrez l'abonnement business d’${LetterLogoText} DocSpace</value>
+    <value>Découvrez l'abonnement business d'${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite" xml:space="preserve">
-    <value>Rejoindre ${LetterLogoText} DocSpace</value>
+    <value>Rejoindre ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>Vous êtes invité à l'agent ${LetterLogoText} DocSpace</value>
+    <value>Vous êtes invité à l'agent ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
-    <value>Rejoindre ${LetterLogoText} DocSpace</value>
+    <value>Rejoindre ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace : complétez votre inscription</value>
+    <value>${LetterLogoText} : complétez votre inscription</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>L'invitation à rejoindre le portail ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
-    <value>Période de grâce pour votre ${LetterLogoText} DocSpace activé</value>
+    <value>Période de grâce pour votre ${LetterLogoText} activé</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Paiement à venir de l'abonnement pour votre ${LetterLogoText} DocSpace</value>
+    <value>Paiement à venir de l'abonnement pour ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
-    <value>Période de grâce pour votre ${LetterLogoText} DocSpace a expiré</value>
+    <value>Période de grâce pour ${LetterLogoText} a expiré</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
-    <value>La période de grâce pour votre ${LetterLogoText} DocSpace expire demain</value>
+    <value>La période de grâce pour votre ${LetterLogoText} expire demain</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
-    <value>Rejoindre ${LetterLogoText} DocSpace</value>
+    <value>Rejoindre ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
-    <value>Vous êtes invité à la salle d'${LetterLogoText} DocSpace</value>
+    <value>Vous êtes invité à la salle d'${LetterLogoText}</value>
   </data>
   <data name="subject_saas_user_activation_v1" xml:space="preserve">
     <value>Obtenez des applications ${LetterLogoText} gratuites</value>
   </data>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
-    <value>Bienvenue sur ${LetterLogoText} DocSpace !</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
-    <value>Maîtrisez ${LetterLogoText} DocSpace avec des guides vidéo</value>
+    <value>Maîtrisez ${LetterLogoText} avec des guides vidéo</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>La sauvegarde automatique de votre DocSpace a échoué</value>
+    <value>La sauvegarde automatique de votre espace de travail a échoué</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>Notification sur la modification du profil sur le portail ${__VirtualRootHost}</value>
@@ -2130,7 +2127,7 @@ $TrulyYours</value>
     <value>Quoi de neuf sur votre portail ${__VirtualRootHost} pour le $Date</value>
   </data>
   <data name="subject_set_password" xml:space="preserve">
-    <value>Créer un mot de passe pour ${LetterLogoText} DocSpace</value>
+    <value>Configurez un mot de passe pour le compte ${LetterLogoText}</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Message de test de SMTP</value>
@@ -2163,13 +2160,13 @@ $TrulyYours</value>
     <value>Vous êtes invité à vous joindre à ${__VirtualRootHost}</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
-    <value>Votre rôle dans une salle DocSpace a changé</value>
+    <value>Votre rôle dans une salle a changé</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
-    <value>Votre type d'utilisateur DocSpace a changé</value>
+    <value>Votre type d'utilisateur a changé</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
-    <value>Bienvenue à ${LetterLogoText} DocSpace!</value>
+    <value>Bienvenue sur ${LetterLogoText} !</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Bien à vous, l'équipe ${LetterLogoText}</value>
@@ -2178,10 +2175,10 @@ $TrulyYours</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; a téléchargé un nouveau document : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; dans la base de connaissances de l'agent IA : &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace : Votre clé API a expiré</value>
+    <value>${LetterLogoText} : Votre clé API a expiré</value>
   </data>
   <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Votre rôle dans un agent IA DocSpace a changé</value>
+    <value>Votre rôle dans un agent IA a changé</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Bonjour, $UserName !
@@ -2212,5 +2209,11 @@ $TrulyYours</value>
   </data>
   <data name="ActionNewCommentInSharedForMe" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a ajouté un nouveau commentaire à la version du document : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; dans : &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
+    <value>Configurez votre espace de travail ${LetterLogoText}</value>
+  </data>
+  <data name="subject_low_wallet_balance" xml:space="preserve">
+    <value>Action requise : Le solde de votre portefeuille ${LetterLogoText} est faible</value>
   </data>
 </root>

@@ -241,7 +241,7 @@
     <value>Předplatné zákazníka aktualizováno: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Nastavení služeb s povolenou peněženkou zákazníka bylo aktualizováno</value>
+    <value>Nastavení služeb s povolenou peněženkou zákazníka bylo aktualizováno: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Peněženka zákazníka dobita: {0}</value>

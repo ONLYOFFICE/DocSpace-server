@@ -54,6 +54,7 @@ winston.stream = {
 };
 
 const port = config.get("app").port || 9899;
+const hostname = config.get("app").hostname;
 const app = express();
 
 const secret = config.get("core").machinekey + new Date().getTime();
@@ -153,7 +154,7 @@ const filesHub = require("./app/hubs/files.js")(io);
 app.use("/controller", require("./app/controllers")(filesHub));
 app.use("/", require("./app/controllers/healthCheck.js") ());
 
-httpServer.listen(port, () => winston.info(`Server started on port: ${port}`));
+httpServer.listen(port, hostname, () => winston.info(`Server started on port: ${port}`));
 
 process.on('unhandledRejection', (reason, p) => {
   winston.error('Unhandled rejection at:', p, 'reason:', reason);
