@@ -97,7 +97,15 @@ public class ProjectConfigurator(
         {
             project.WithEnvironment("$STORAGE_ROOT", AppPaths.GetTestStorageRoot(basePath))
                 .WithEnvironment("log__dir", AppPaths.GetTestLogsDirectory(basePath))
-                .WithEnvironment("web:temp", AppPaths.GetTestTempDirectory(basePath));
+                .WithEnvironment("web:temp", AppPaths.GetTestTempDirectory(basePath))
+
+                // Read by HostOptions.Initialize — the generic host's grace period for hosted services
+                // to observe their stopping token. The default is 30 s, and ASC.Files.Worker reaches it
+                // exactly: its ElasticSearch indexer is usually mid-IndexAll when the run ends, and that
+                // loop does not observe the token, so every Files run paid a measured 31.3 s of teardown.
+                // Nothing here needs a graceful stop — the portals and their storage are thrown away —
+                // and an honest shutdown takes ~0.5 s, so this only trims the hang.
+                .WithEnvironment("shutdownTimeoutSeconds", "3");
         }
 
         switch (builder.Configuration["APP_EDITION"])

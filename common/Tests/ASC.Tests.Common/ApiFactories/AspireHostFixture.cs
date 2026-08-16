@@ -305,13 +305,19 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     public async ValueTask DisposeAsync()
     {
         _apiSystemClient.Dispose();
-        await _app.StopAsync();
-        await _app.DisposeAsync();
+
+        // Teardown is a large, easily-overlooked share of a run's wall clock — it is Aspire/DCP
+        // stopping every project process, and one service that ignores its shutdown token holds up
+        // all of them. Measured separately so a regression there is visible instead of invisible.
+        await Timing.Measure("teardown.stop", async () => await _app.StopAsync());
+        await Timing.Measure("teardown.dispose", async () => await _app.DisposeAsync());
+
         _sharedHandler.Dispose();
 
         // Only after the services are gone: while they run they hold handles inside the folder.
         // For the AppHost itself Aspire generates ProjectPath as the project *directory*.
-        var cleanupFailure = await TestArtifacts.DeleteStorageAsync(Projects.ASC_AppHost.ProjectPath);
+        var cleanupFailure = await Timing.Measure("teardown.storage",
+            () => TestArtifacts.DeleteStorageAsync(Projects.ASC_AppHost.ProjectPath));
 
         if (cleanupFailure is not null)
         {
