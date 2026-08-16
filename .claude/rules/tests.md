@@ -4,6 +4,27 @@ Applies to `products/*/Tests/` and `common/Tests/ASC.Core.Common.Tests`. Style r
 (`csharp-style.md`) apply here too — including the mandatory `dotnet format style` check
 after editing any `.cs` file.
 
+## The shared harness lives in `common/Tests/ASC.Tests.Common`
+
+Everything that is not specific to one product is there, and every suite references it:
+
+| Type | Role |
+|---|---|
+| `AspireHostFixture<TClients>` | starts the Aspire host once per assembly, registers portals, disables start docs, warms up |
+| `PortalClientsBase` / `PortalContext` | the per-portal HTTP clients, `Origin` binding, disposal |
+| `Initializer` | owner credentials, client-side password hashing, `HttpClient.Authenticate(user)`, `FakerMember` |
+| `RawApiClient` / `RawApiResponse<T>` | raw JSON access for endpoints the SDK does not expose |
+| `User`, `Timing`, `RegisterPortalModel` … | the small shared data types |
+
+A suite adds only its own two files: an `AspireAppFixture` (naming the Aspire resources it needs in
+`Resources`, building its bundle in `CreateClients`, touching its hot path in `WarmUpAsync`) and a
+`PortalClients` deriving from `PortalClientsBase`, which calls `CreateClient(ResourceNames.X)` per
+service and wires the typed SDK clients onto it. ApiSystem and Web.Api are always started — portal
+registration and authentication — so `WebApiHttpClient` and `WebApi` come from the base.
+
+Do not copy any of this back into a suite. If a suite needs something the base does not do, extend
+the base.
+
 ## The SDK is the source of truth for signatures
 
 Tests call the API through the generated `DocSpace.API.SDK` (pinned in

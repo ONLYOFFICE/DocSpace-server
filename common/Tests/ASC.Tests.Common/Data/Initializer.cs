@@ -31,24 +31,27 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-extern alias ASCPeople;
-using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
+namespace ASC.Tests.Common.Data;
 
-namespace ASC.People.Tests.Data;
-
+/// <summary>
+/// The portal-independent pieces every suite needs: the owner credentials a test portal is
+/// registered with, the client-side password hashing, and signing an <see cref="HttpClient"/> in.
+/// </summary>
 public static class Initializer
 {
     public const string OwnerEmail = "test@example.com";
     public const string OwnerPassword = "11111111";
 
-    private static PasswordHasher _passwordHasherSettings = null!;
+    private static PasswordHasherSettings _passwordHasherSettings = null!;
 
-    // Maps each per-test HttpClient to the AuthenticationApi of the portal it belongs to, so the
+    // Maps each per-test HttpClient to the WebApi client of the portal it belongs to, so the
     // HttpClient.Authenticate(user) extension can sign in without any shared/ambient state. Entries
     // are weakly held and removed when a test disposes its PortalClients.
-    private static readonly ConditionalWeakTable<HttpClient, AuthenticationApi> _authApis = new();
+    private static readonly ConditionalWeakTable<HttpClient, RawApiClient> _authApis = new();
 
-    public static readonly Faker<MemberRequestDto> FakerMember = new Faker<MemberRequestDto>()
+    public static readonly Faker Faker = new("en");
+
+    public static readonly Faker<FakeMember> FakerMember = new Faker<FakeMember>()
         .RuleFor(x => x.FirstName, f => f.Person.FirstName)
         .RuleFor(x => x.LastName, f => f.Person.LastName)
         .RuleFor(x => x.Email, f => f.Person.Email)
@@ -58,14 +61,14 @@ public static class Initializer
     /// Stores the (machine-key-derived, portal-independent) password-hash settings used to compute
     /// client-side password hashes. Called once by the fixture before any test runs.
     /// </summary>
-    internal static void InitializePasswordHasher(PasswordHasher settings)
+    internal static void InitializePasswordHasher(PasswordHasherSettings settings)
     {
         _passwordHasherSettings = settings;
     }
 
-    internal static void RegisterAuthApi(HttpClient client, AuthenticationApi authApi)
+    internal static void RegisterAuthApi(HttpClient client, RawApiClient webApi)
     {
-        _authApis.AddOrUpdate(client, authApi);
+        _authApis.AddOrUpdate(client, webApi);
     }
 
     internal static void UnregisterAuthApi(HttpClient client)
@@ -73,36 +76,57 @@ public static class Initializer
         _authApis.Remove(client);
     }
 
-    public static async ValueTask Authenticate(this HttpClient client, User? user)
+    /// <summary>
+    /// Signs the client in as <paramref name="user"/>, or clears the authorization header when it is null.
+    /// The bearer token is cached on the <see cref="User"/> instance, so switching back and forth between
+    /// identities inside a single test issues only one <c>authenticate</c> request per user.
+    /// </summary>
+    /// <param name="forceRefresh">Discards the cached token and signs in again.</param>
+    public static async ValueTask Authenticate(this HttpClient client, User? user, bool forceRefresh = false)
     {
-        if (user == null)
+        if (user is null)
         {
             client.DefaultRequestHeaders.Authorization = null;
             return;
         }
 
-        if (!_authApis.TryGetValue(client, out var authApi))
+        if (forceRefresh)
         {
-            throw new InvalidOperationException(
-                "The HttpClient is not associated with a portal. Create clients via AspireAppFixture.CreatePortalAsync.");
+            user.Token = null;
         }
 
-        if (user.PasswordHash == null)
+        if (user.Token is null)
         {
-            var hashSw = Stopwatch.StartNew();
-            user.PasswordHash = GetClientPassword(user.Password);
-            Timing.Write($"hash({user.Email})", hashSw.ElapsedMilliseconds);
+            if (!_authApis.TryGetValue(client, out var webApi))
+            {
+                throw new InvalidOperationException(
+                    "The HttpClient is not associated with a portal. Create clients via AspireHostFixture.CreatePortalAsync.");
+            }
+
+            if (user.PasswordHash is null)
+            {
+                var hashSw = Stopwatch.StartNew();
+                user.PasswordHash = GetClientPassword(user.Password);
+                Timing.Write($"hash({user.Email})", hashSw.ElapsedMilliseconds);
+            }
+
+            var authSw = Stopwatch.StartNew();
+            using var response = await webApi.PostAsync(
+                "/api/2.0/authentication",
+                new
+                {
+                    userName = user.Email,
+                    passwordHash = user.PasswordHash
+                },
+                TestContext.Current.CancellationToken);
+
+            var token = await webApi.ReadAsync<AuthTokenResponse>(response, TestContext.Current.CancellationToken);
+            Timing.Write($"auth({user.Email})", authSw.ElapsedMilliseconds);
+
+            user.Token = token.Token;
         }
 
-        var authSw = Stopwatch.StartNew();
-        var authMe = await authApi.AuthenticateMeAsync(new AuthRequestsDto
-        {
-            UserName = user.Email,
-            PasswordHash = user.PasswordHash
-        }, TestContext.Current.CancellationToken);
-        Timing.Write($"auth({user.Email})", authSw.ElapsedMilliseconds);
-
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", user.Token);
     }
 
     public static string GetClientPassword(string password)
@@ -121,7 +145,7 @@ public static class Initializer
             _passwordHasherSettings.Iterations,
             _passwordHasherSettings.Size / 8);
 
-        return BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLower();
+        return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
 
     private static string Password(
@@ -130,8 +154,8 @@ public static class Initializer
         int maxLength,
         bool includeUppercase = true,
         bool includeNumber = false,
-        bool includeSymbol = false) {
-
+        bool includeSymbol = false)
+    {
         ArgumentNullException.ThrowIfNull(internet);
         ArgumentOutOfRangeException.ThrowIfLessThan(minLength, 1);
         ArgumentOutOfRangeException.ThrowIfLessThan(maxLength, minLength);
@@ -174,7 +198,7 @@ public static class Initializer
             s += r.String2(r.Number(0, maxLength - s.Length));   // random extra padding in range min..max
         }
 
-        var chars         = s.ToArray();
+        var chars = s.ToArray();
         var charsShuffled = r.Shuffle(chars).ToArray();
 
         return new string(charsShuffled);

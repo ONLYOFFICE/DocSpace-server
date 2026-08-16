@@ -59,7 +59,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected User Owner => _clients.Owner;
 
     protected HttpClient _aiClient = null!;
-    protected AiApiClient _ai = null!;
+    protected RawApiClient _ai = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -166,7 +166,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<Guid?>>(
+        var wrapper = await response.Content.ReadFromJsonAsync<RawApiResponse<Guid?>>(
             _readJsonOptions,
             TestContext.Current.CancellationToken);
         return wrapper?.Response;
@@ -286,7 +286,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<PreferencesDto>>(
+        var wrapper = await response.Content.ReadFromJsonAsync<RawApiResponse<PreferencesDto>>(
             _readJsonOptions,
             TestContext.Current.CancellationToken);
         return wrapper?.Response;

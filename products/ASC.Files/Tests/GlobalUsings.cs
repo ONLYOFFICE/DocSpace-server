@@ -40,7 +40,6 @@ global using System.Diagnostics;
 global using System.IO.Compression;
 global using System.Net;
 global using System.Net.Http.Headers;
-global using System.Runtime.CompilerServices;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
@@ -50,12 +49,8 @@ global using ASC.Files.Core.Text;
 global using ASC.Files.Tests.ApiFactories;
 global using ASC.Files.Tests.Data;
 global using ASC.Files.Tests.Tests._03_Rooms;
-
-global using Aspire.Hosting;
-global using Aspire.Hosting.Testing;
-
-global using Bogus;
-global using Bogus.DataSets;
+global using ASC.Tests.Common.ApiFactories;
+global using ASC.Tests.Common.Data;
 
 global using DocSpace.API.SDK.Api.Authentication;
 global using DocSpace.API.SDK.Api.Files;
@@ -68,10 +63,7 @@ global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
-global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 global using Microsoft.Extensions.DependencyInjection;
-
-global using MySqlConnector;
 
 global using Xunit;
 
@@ -86,6 +78,4 @@ global using FolderType = DocSpace.API.SDK.Model.FolderType;
 global using LinkType = DocSpace.API.SDK.Model.LinkType;
 global using RoomType = DocSpace.API.SDK.Model.RoomType;
 global using Task = System.Threading.Tasks.Task;
-// Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
-global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;
-global using User = ASC.Files.Tests.Data.User;
+global using User = ASC.Tests.Common.Data.User;

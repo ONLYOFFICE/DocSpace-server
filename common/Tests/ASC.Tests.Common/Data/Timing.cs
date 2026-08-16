@@ -31,13 +31,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Tests.Data;
+namespace ASC.Tests.Common.Data;
 
 /// <summary>
 /// Temporary per-phase stopwatch instrumentation. Writes elapsed ms to the test output so we can
 /// see where a test's wall-clock time actually goes. Remove once the profiling is done.
 /// </summary>
-internal static class Timing
+public static class Timing
 {
     public static async Task<T> Measure<T>(string name, Func<Task<T>> action)
     {

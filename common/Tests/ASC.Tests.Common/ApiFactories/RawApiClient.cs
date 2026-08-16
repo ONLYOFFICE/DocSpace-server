@@ -31,9 +31,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.ApiFactories;
+namespace ASC.Tests.Common.ApiFactories;
 
-public class AiApiClient(HttpClient client)
+/// <summary>
+/// A thin JSON wrapper over an <see cref="HttpClient"/> for endpoints the generated SDK does not
+/// expose (and for suites that do not use the SDK at all). Reads unwrap the <see cref="RawApiResponse{T}"/>
+/// envelope; anything the SDK can express should still go through the SDK.
+/// </summary>
+public class RawApiClient(HttpClient client)
 {
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -92,7 +97,7 @@ public class AiApiClient(HttpClient client)
     {
         response.EnsureSuccessStatusCode();
 
-        var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<T>>(_jsonOptions, cancellationToken);
+        var wrapper = await response.Content.ReadFromJsonAsync<RawApiResponse<T>>(_jsonOptions, cancellationToken);
         if (wrapper is null || wrapper.Response is null)
         {
             throw new InvalidOperationException($"Empty response body for {response.RequestMessage?.Method} {response.RequestMessage?.RequestUri}.");

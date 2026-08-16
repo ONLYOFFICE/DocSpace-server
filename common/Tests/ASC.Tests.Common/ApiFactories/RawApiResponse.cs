@@ -31,54 +31,37 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Data;
+namespace ASC.Tests.Common.ApiFactories;
 
 /// <summary>
-/// Temporary per-phase stopwatch instrumentation. Writes elapsed ms to the test output so we can
-/// see where a test's wall-clock time actually goes. Remove once the profiling is done.
+/// The envelope every DocSpace API action wraps its payload in.
 /// </summary>
-internal static class Timing
+public class RawApiResponse<T>
 {
-    public static async Task<T> Measure<T>(string name, Func<Task<T>> action)
-    {
-        var sw = Stopwatch.StartNew();
-        try
-        {
-            return await action();
-        }
-        finally
-        {
-            Write(name, sw.ElapsedMilliseconds);
-        }
-    }
+    [JsonPropertyName("response")]
+    public T? Response { get; init; }
 
-    public static async ValueTask Measure(string name, Func<ValueTask> action)
-    {
-        var sw = Stopwatch.StartNew();
-        try
-        {
-            await action();
-        }
-        finally
-        {
-            Write(name, sw.ElapsedMilliseconds);
-        }
-    }
+    [JsonPropertyName("status")]
+    public int Status { get; init; }
 
-    public static void Write(string name, long elapsedMs)
-    {
-        var message = $"[timing] {name}: {elapsedMs} ms";
-        var ctx = TestContext.Current;
+    [JsonPropertyName("statusCode")]
+    public int StatusCode { get; init; }
+}
 
-        // TestOutputHelper is attached per-test (shows under the test node in the IDE). During
-        // InitializeAsync it can be null, so fall back to the diagnostic sink.
-        if (ctx.TestOutputHelper != null)
-        {
-            ctx.TestOutputHelper.WriteLine(message);
-        }
-        else
-        {
-            ctx.SendDiagnosticMessage(message);
-        }
-    }
+public class WizardSettingsResponse
+{
+    public string? WizardToken { get; init; }
+    public PasswordHasherSettings? PasswordHash { get; init; }
+}
+
+public class PasswordHasherSettings
+{
+    public int Size { get; init; }
+    public int Iterations { get; init; }
+    public string Salt { get; init; } = "";
+}
+
+public class AuthTokenResponse
+{
+    public string Token { get; init; } = "";
 }

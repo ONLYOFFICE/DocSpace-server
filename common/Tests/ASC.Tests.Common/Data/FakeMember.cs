@@ -31,10 +31,17 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Data;
+namespace ASC.Tests.Common.Data;
 
-public record User(string Email, string Password)
+/// <summary>
+/// Generated credentials for a member a test invites into its portal. Deliberately not one of the
+/// products' request DTOs: those live behind extern aliases and differ per suite, so the shared
+/// generator stays a plain record and each suite maps it onto whatever DTO its API expects.
+/// </summary>
+public sealed class FakeMember
 {
-    public Guid Id { get; init; }
-    public string? PasswordHash { get; set; }
+    public string FirstName { get; set; } = null!;
+    public string LastName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string Password { get; set; } = null!;
 }

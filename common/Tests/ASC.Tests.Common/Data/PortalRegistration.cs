@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Data;
+namespace ASC.Tests.Common.Data;
 
 /// <summary>
 /// The request payload for the ASC.ApiSystem <c>portal/register</c> endpoint.
