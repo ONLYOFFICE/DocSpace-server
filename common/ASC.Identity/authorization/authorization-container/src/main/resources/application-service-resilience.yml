@@ -24,8 +24,8 @@ resilience4j:
         exponentialBackoffMultiplier: ${RETRY_GRPC_CLIENT_MULTIPLIER:1.625}
         retryExceptions:
           - io.grpc.StatusRuntimeException
+          - com.asc.authorization.application.exception.client.GrpcDeadlineExceededException
         ignoreExceptions:
           - com.asc.authorization.application.exception.client.RegisteredClientPermissionException
           - com.asc.authorization.application.exception.client.NonRetryableGrpcException
-          - com.asc.authorization.application.exception.client.GrpcDeadlineExceededException
           - io.github.resilience4j.circuitbreaker.CallNotPermittedException

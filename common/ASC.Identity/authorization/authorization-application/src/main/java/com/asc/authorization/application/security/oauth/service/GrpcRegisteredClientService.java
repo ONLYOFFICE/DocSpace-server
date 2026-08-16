@@ -65,7 +65,7 @@ public class GrpcRegisteredClientService {
   private final long deadlineMs;
 
   public GrpcRegisteredClientService(
-      @Value("${GRPC_CLIENT_REGISTRATION_DEADLINE_MS:400}") long deadlineMs) {
+      @Value("${GRPC_CLIENT_REGISTRATION_DEADLINE_MS:800}") long deadlineMs) {
     this.deadlineMs = deadlineMs;
   }
 
