@@ -5501,17 +5501,92 @@ public class FileStorageService //: IFileStorageService
 
     public async Task DeleteGroup(int groupId)
     {
-        await daoFactory.GetRoomGroupDao<int>().DeleteGroup(groupId);
+        var roomGroupDao = daoFactory.GetRoomGroupDao<int>();
+        var group = await roomGroupDao.GetGroupInfoAsync(groupId);
+
+        if (group == null)
+        {
+            throw new ItemNotFoundException(Resource.ErrorGroupNotFound);
+        }
+
+        if (group.UserID != authContext.CurrentAccount.ID)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        await roomGroupDao.DeleteGroup(groupId);
     }
 
     public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
     {
         var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(roomGroupId);
-        if (group == null)
+        if (group == null || group.UserID != authContext.CurrentAccount.ID)
         {
             throw new ItemNotFoundException(Resource.ErrorGroupNotFound);
         }
         return group;
+    }
+
+    /// <summary>
+    /// Resolves the rooms a group operation refers to before anything is written: every id is
+    /// classified as available, missing or inaccessible. When nothing at all could be resolved the
+    /// operation is refused outright — 404 when the ids simply do not exist, 403 when at least one
+    /// of them exists but the caller may not read it — so that a rejected request never leaves a
+    /// half-built group behind.
+    /// </summary>
+    public async Task<(List<int> InternalRooms, List<string> ThirdpartyRooms, bool AnyRejected)> ResolveGroupRoomsAsync(List<int> intIds, List<string> stringIds)
+    {
+        var (internalRooms, internalNotFound, internalDenied) = await ResolveRoomsAsync(intIds);
+        var (thirdpartyRooms, thirdpartyNotFound, thirdpartyDenied) = await ResolveRoomsAsync(stringIds);
+
+        var notFound = internalNotFound + thirdpartyNotFound;
+        var denied = internalDenied + thirdpartyDenied;
+
+        if (internalRooms.Count == 0 && thirdpartyRooms.Count == 0)
+        {
+            if (denied > 0)
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+            }
+
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        return (internalRooms, thirdpartyRooms, notFound + denied > 0);
+    }
+
+    private async Task<(List<T> Available, int NotFound, int Denied)> ResolveRoomsAsync<T>(List<T> roomIds)
+    {
+        var available = new List<T>();
+        var notFound = 0;
+        var denied = 0;
+
+        if (roomIds.Count == 0)
+        {
+            return (available, notFound, denied);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        foreach (var roomId in roomIds)
+        {
+            var room = await folderDao.GetFolderAsync(roomId);
+
+            if (room == null)
+            {
+                notFound++;
+            }
+            else if (!room.FolderType.IsRoom() || !await fileSecurity.CanReadAsync(room))
+            {
+                denied++;
+            }
+            else
+            {
+                available.Add(roomId);
+            }
+        }
+
+        return (available, notFound, denied);
     }
 
     public IAsyncEnumerable<RoomGroup> GetGroupsAsync()
@@ -5521,13 +5596,11 @@ public class FileStorageService //: IFileStorageService
 
     public async Task AddRoomToGroupAsync<T>(T roomId, int groupId)
     {
-        await CheckRoomAvailability(roomId);
         await daoFactory.GetRoomGroupDao<T>().AddRoomToGroupAsync(roomId, groupId);
     }
 
     public async Task RemoveRoomFromGroupAsync<T>(T roomId, int groupId)
     {
-        await CheckRoomAvailability(roomId);
         await daoFactory.GetRoomGroupDao<T>().RemoveRoomFromGroupAsync(roomId, groupId);
     }
 
@@ -5763,19 +5836,6 @@ public class FileStorageService //: IFileStorageService
         return await externalDbSyncService.GetTaskAsync(roomId);
     }
 
-    private async Task CheckRoomAvailability<T>(T roomId)
-    {
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var room = await folderDao.GetFolderAsync(roomId);
-        if (room == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-        if (!room.FolderType.IsRoom() || !await fileSecurity.CanReadAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
-        }
-    }
     private async Task ValidateChangeRolesPermission<T>(File<T> form)
     {
         if (form == null)
