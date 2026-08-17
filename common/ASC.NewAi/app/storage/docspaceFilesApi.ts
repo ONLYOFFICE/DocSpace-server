@@ -33,7 +33,7 @@
 
 import { proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { getForwardedHeaders } from "../requestContext.js";
-import { isObject, getNumber, getObject, getString } from "../narrow.js";
+import { isObject, getNumber, getObject, getString, getEntityId } from "../narrow.js";
 import logger from "../log.js";
 import { sanitizeInstruction } from "../sanitizeInstruction.js";
 
@@ -75,7 +75,7 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   if (!envelope) {
     return undefined;
   }
-  if (getNumber(envelope, "id") === undefined) {
+  if (getEntityId(envelope, "id") === undefined) {
     return undefined;
   }
   const folderType = getNumber(envelope, "type");
