@@ -79,10 +79,14 @@ function withRequestSignal<T>(res: Response, body: T): T {
   if (!isObject(body)) {
     return body;
   }
-  const actionArgs = body["actionArgs"];
-  if (!isObject(actionArgs)) {
-    return body;
-  }
+  // Always wire the abort signal, even when the request carries no
+  // `actionArgs`. The UI sends an `actionArgs` object (with a signal that
+  // collapses to `{}` over JSON), but a direct API client omits it entirely
+  // — and without the signal a client disconnect never reaches the provider,
+  // so generation runs to completion and keeps burning tokens after the user
+  // has stopped waiting. Create the object when missing so cancellation works
+  // for every caller.
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
   return {
     ...body,
     actionArgs: { ...actionArgs, signal: responseAbortSignal(res) },
