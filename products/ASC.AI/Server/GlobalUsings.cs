@@ -36,6 +36,7 @@ global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Utils;
 
+global using ASC.AI.Models.ResponseDto;
 global using ASC.AI.Integration.Assignments;
 global using ASC.AI.Integration.Attachments;
 global using ASC.AI.Integration.Messages;
@@ -65,8 +66,6 @@ global using ASC.AI.Integration.McpServers;
 global using ASC.AI.Integration.WebSearch;
 global using ASC.AI.Service;
 global using ASC.AI.Tools.Core;
-global using ASC.Core;
-global using ASC.Core.Common.AI;
 
 global using ASC.Common;
 global using ASC.Common.Log;
@@ -80,7 +79,6 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
-
 global using ASC.Files.Core;
 global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.ApiModels.ResponseDto;
@@ -106,9 +104,18 @@ global using ASC.Web.Files.Helpers;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
 
+global using System.Text.Json;
+global using System.Security;
+global using System.Net.Http.Headers;
+global using System.ComponentModel.DataAnnotations;
+global using System.Text;
+global using System.ComponentModel;
+global using System.Text.Json.Serialization;
+
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.Extensions.AI;
 
 global using Riok.Mapperly.Abstractions;
+
 global using Swashbuckle.AspNetCore.Annotations;

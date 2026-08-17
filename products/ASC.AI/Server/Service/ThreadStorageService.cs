@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Integration.Threads;
-
 using Thread = ASC.AI.Integration.Threads.Thread;
 
 namespace ASC.AI.Service;
