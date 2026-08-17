@@ -3084,15 +3084,29 @@ public class FileStorageService //: IFileStorageService
     #endregion
 
 
-    public async Task<(List<int>, List<int>)> GetTrashContentAsync()
+    public async Task<(List<int>, List<int>)> GetTrashContentAsync(List<FolderType> folderType = null)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
         var trashId = await folderDao.GetFolderIDTrashAsync(true);
-        var foldersIdTask = await folderDao.GetFoldersAsync(trashId).Select(f => f.Id).ToListAsync();
-        var filesIdTask = await fileDao.GetFilesAsync(trashId).ToListAsync();
 
-        return (foldersIdTask, filesIdTask);
+        if (folderType is not { Count: > 0 })
+        {
+            var allFoldersId = await folderDao.GetFoldersAsync(trashId).Select(f => f.Id).ToListAsync();
+            var allFilesId = await fileDao.GetFilesAsync(trashId).ToListAsync();
+
+            return (allFoldersId, allFilesId);
+        }
+
+        var foldersId = await folderDao.GetFoldersAsync(trashId, null, FilterType.None, false, Guid.Empty, string.Empty, folderType: folderType)
+            .Select(f => f.Id)
+            .ToListAsync();
+
+        var filesId = await fileDao.GetFilesAsync(trashId, null, FilterType.None, false, Guid.Empty, string.Empty, null, false, folderType: folderType)
+            .Select(f => f.Id)
+            .ToListAsync();
+
+        return (foldersId, filesId);
     }
 
     public async IAsyncEnumerable<FileOperationResult> CheckConversionAsync<T>(List<CheckConversionRequestDto<T>> filesInfoJson, bool sync = false)
