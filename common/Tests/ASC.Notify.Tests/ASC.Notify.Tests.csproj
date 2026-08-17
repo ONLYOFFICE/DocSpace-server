@@ -15,6 +15,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="FluentAssertions" />
+    <!-- The MailPit inbox is talked to over SMTP: MailKit for the client, MimeKit (its own dependency)
+         for the message. Referenced here rather than inherited through ASC.Web.Core, so that moving
+         that reference cannot turn this into an unexplained "type not found". -->
+    <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
