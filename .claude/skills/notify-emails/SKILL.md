@@ -146,6 +146,13 @@ letter tests (§9):
   `${__VirtualRootPath}` / `${__SupportLink}`. A hard-coded `https://…` in a pattern breaks regional
   domains and white-labelling.
 
+**`${LetterLogoText} Docs` is a product name, not a phrase.** The editors carry that name in every
+culture, so `Docs` stays untranslated — including where the reference writes it bare, as in "Embed
+Docs into your ecosystem". The one exception is `zh-CN`, which may render the name as
+`${LetterLogoText} 文档`. Do not read the tariff table of `saas_admin_activation_v1` as a precedent:
+there `Docs` heads a list of app names (Files, Rooms, Forms, AI agents) and is translated along with
+them.
+
 `$Footer` selects the footer block in `TextileStyler`: `"common"`, `"social"`, `"opensource"`, or
 `null` for none.
 

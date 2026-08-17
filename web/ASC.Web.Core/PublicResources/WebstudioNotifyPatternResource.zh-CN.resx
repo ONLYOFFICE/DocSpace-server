@@ -1134,15 +1134,15 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_developer_tools_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;连接、集成、构建： &lt;span style="color: #FF6F3D; white-space: nowrap;"&gt;${LetterLogoText} Docs&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;连接、集成、构建： &lt;span style="color: #FF6F3D; white-space: nowrap;"&gt;${LetterLogoText} 文档&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您好，$UserName!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;想把强大的文档编辑能力引入您自己的平台吗？${LetterLogoText} 为此提供了三种简单的方式。&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&#8226; &lt;b&gt;连接&lt;/b&gt;：通过面向常用工具的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;50 多个现成连接器&lt;/a&gt; ，将 ${LetterLogoText} Docs 接入您的平台。&lt;br /&gt;&#8226; &lt;b&gt;集成&lt;/b&gt;：通过标准协议或我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL2"&gt;API&lt;/a&gt;，将 Docs 嵌入您的生态系统。&lt;br /&gt;&#8226; &lt;b&gt;构建&lt;/b&gt;：用灵活的模块化应用，搭建属于您自己的文档工作空间。&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&#8226; &lt;b&gt;连接&lt;/b&gt;：通过面向常用工具的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;50 多个现成连接器&lt;/a&gt; ，将 ${LetterLogoText} 文档接入您的平台。&lt;br /&gt;&#8226; &lt;b&gt;集成&lt;/b&gt;：通过标准协议或我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL2"&gt;API&lt;/a&gt;，将 ${LetterLogoText} 文档嵌入您的生态系统。&lt;br /&gt;&#8226; &lt;b&gt;构建&lt;/b&gt;：用灵活的模块化应用，搭建属于您自己的文档工作空间。&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;了解开发者工具&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;无论您在构建什么，我们都有相应的工具帮助您集成、扩展并自动化 ${LetterLogoText} Docs，包括 Embed 与 Plugin SDK、Webhook、OAuth 2.0 等。&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;了解开发者工具&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;无论您在构建什么，我们都有相应的工具帮助您集成、扩展并自动化 ${LetterLogoText} 文档，包括 Embed 与 Plugin SDK、Webhook、OAuth 2.0 等。&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1716,7 +1716,7 @@ $TrulyYours</value>
     <value>设置您的 ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_developer_tools_v1" xml:space="preserve">
-    <value>连接、集成、构建：${LetterLogoText} Docs</value>
+    <value>连接、集成、构建：${LetterLogoText} 文档</value>
   </data>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>探索 ${LetterLogoText} 中的 4 款实用应用</value>
