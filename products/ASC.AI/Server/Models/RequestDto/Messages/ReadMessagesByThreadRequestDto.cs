@@ -39,6 +39,7 @@ public class ReadMessagesByThreadRequestDto
     public required Guid ThreadId { get; init; }
 
     [FromQuery(Name = "count")]
+    [BindRequired]
     [Range(1, 1000)]
     public required int Count { get; init; } = 100;
 

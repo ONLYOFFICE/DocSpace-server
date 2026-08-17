@@ -39,12 +39,13 @@ public class ReadAllThreadsRequestDto
     public string? EntityId { get; init; }
 
     [FromQuery(Name = "count")]
+    [BindRequired]
     [Range(1, 1000)]
     public required int Count { get; init; } = 100;
 
-    [FromQuery(Name = "search")]
+    [FromQuery(Name = "query")]
     [MaxLength(255)]
-    public string? Search { get; init; }
+    public string? Query { get; init; }
 
     [FromQuery(Name = "cursor")]
     public ThreadsCursorDto? Cursor { get; init; }

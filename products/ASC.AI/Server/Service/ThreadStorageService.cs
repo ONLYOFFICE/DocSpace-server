@@ -84,7 +84,7 @@ public class ThreadStorageService(
         int count,
         ThreadsCursor? cursor = null,
         string? entityId = null,
-        string? searchText = null)
+        string? query = null)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
 
@@ -94,9 +94,9 @@ public class ThreadStorageService(
 
         var checkCount = count + 1;
 
-        var threads = string.IsNullOrWhiteSpace(searchText)
+        var threads = string.IsNullOrWhiteSpace(query)
             ? await storage.ReadAllAsync(tenantId, CurrentUserId, checkCount, entryId, cursor)
-            : await storage.SearchAsync(tenantId, CurrentUserId, searchText, checkCount, entryId, cursor);
+            : await storage.SearchAsync(tenantId, CurrentUserId, query, checkCount, entryId, cursor);
 
         if (threads.Count <= count)
         {

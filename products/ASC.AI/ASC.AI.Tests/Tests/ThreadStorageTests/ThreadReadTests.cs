@@ -94,7 +94,7 @@ public class ThreadReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadAll_WithoutCount_Returns400()
     {
-        using var response = await Ai.GetAsync(ThreadsPath, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(ThreadsPath, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

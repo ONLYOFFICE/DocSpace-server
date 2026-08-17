@@ -58,7 +58,7 @@ public class ThreadUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         await Task.Delay(1100, TestContext.Current.CancellationToken);
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ThreadsPath}/{created.Id}",
             new { title = "renamed" },
             TestContext.Current.CancellationToken);

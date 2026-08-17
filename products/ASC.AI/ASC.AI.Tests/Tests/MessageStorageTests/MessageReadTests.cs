@@ -100,7 +100,7 @@ public class MessageReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var thread = await CreateThreadAsync();
 
-        using var response = await Ai.GetAsync(
+        using var response = await _ai.GetAsync(
             $"{ThreadsPath}/{thread.Id}/messages",
             TestContext.Current.CancellationToken);
 

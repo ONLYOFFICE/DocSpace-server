@@ -44,7 +44,7 @@ public class ThreadSearchTests(AspireAppFixture fixture) : BaseTest(fixture)
         var report = await CreateThreadAsync("Annual report");
         await CreateThreadAsync("Meeting notes");
 
-        var page = await ReadThreadsPageAsync(10, search: "repo");
+        var page = await ReadThreadsPageAsync(10, query: "repo");
 
         page.Items.Should().ContainSingle(t => t.Id == report.Id);
     }
@@ -54,7 +54,7 @@ public class ThreadSearchTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var report = await CreateThreadAsync("Annual report");
 
-        var page = await ReadThreadsPageAsync(10, search: "REPORT");
+        var page = await ReadThreadsPageAsync(10, query: "REPORT");
 
         page.Items.Should().ContainSingle(t => t.Id == report.Id);
     }
@@ -65,7 +65,7 @@ public class ThreadSearchTests(AspireAppFixture fixture) : BaseTest(fixture)
         var matching = await CreateThreadAsync("Annual report 2026");
         await CreateThreadAsync("Annual report 2025");
 
-        var page = await ReadThreadsPageAsync(10, search: "2026 report");
+        var page = await ReadThreadsPageAsync(10, query: "2026 report");
 
         page.Items.Should().ContainSingle(t => t.Id == matching.Id);
     }
@@ -76,7 +76,7 @@ public class ThreadSearchTests(AspireAppFixture fixture) : BaseTest(fixture)
         var withPercent = await CreateThreadAsync("100% complete");
         await CreateThreadAsync("fully complete");
 
-        var page = await ReadThreadsPageAsync(10, search: "%");
+        var page = await ReadThreadsPageAsync(10, query: "%");
 
         page.Items.Should().ContainSingle(t => t.Id == withPercent.Id);
     }
@@ -86,7 +86,7 @@ public class ThreadSearchTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         await CreateThreadAsync("Annual report");
 
-        var page = await ReadThreadsPageAsync(10, search: "nonexistent");
+        var page = await ReadThreadsPageAsync(10, query: "nonexistent");
 
         page.Items.Should().BeEmpty();
     }
@@ -98,7 +98,7 @@ public class ThreadSearchTests(AspireAppFixture fixture) : BaseTest(fixture)
         await CreateThreadAsync("Annual report");
         var scoped = await CreateThreadAsync("Annual report", entityId: roomId.ToString());
 
-        var page = await ReadThreadsPageAsync(10, entityId: roomId.ToString(), search: "report");
+        var page = await ReadThreadsPageAsync(10, entityId: roomId.ToString(), query: "report");
 
         page.Items.Should().ContainSingle(t => t.Id == scoped.Id);
     }

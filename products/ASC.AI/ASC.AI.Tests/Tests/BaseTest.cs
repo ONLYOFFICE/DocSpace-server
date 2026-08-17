@@ -210,29 +210,29 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         string? entityId = null,
         long? cursorLastEditDate = null,
         Guid? cursorId = null,
-        string? search = null)
+        string? query = null)
     {
-        var query = new List<string> { $"count={count}" };
+        var queryParams = new List<string> { $"count={count}" };
 
         if (entityId is not null)
         {
-            query.Add($"entityId={entityId}");
+            queryParams.Add($"entityId={entityId}");
         }
-        if (search is not null)
+        if (query is not null)
         {
-            query.Add($"search={Uri.EscapeDataString(search)}");
+            queryParams.Add($"query={Uri.EscapeDataString(query)}");
         }
         if (cursorLastEditDate is not null)
         {
-            query.Add($"cursor.lastEditDate={cursorLastEditDate}");
+            queryParams.Add($"cursor.lastEditDate={cursorLastEditDate}");
         }
         if (cursorId is not null)
         {
-            query.Add($"cursor.id={cursorId}");
+            queryParams.Add($"cursor.id={cursorId}");
         }
 
         using var response = await _ai.GetAsync(
-            $"{ThreadsPath}?{string.Join("&", query)}",
+            $"{ThreadsPath}?{string.Join("&", queryParams)}",
             TestContext.Current.CancellationToken);
         return await _ai.ReadAsync<ThreadsPageDto>(response, TestContext.Current.CancellationToken);
     }
@@ -283,7 +283,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
         if (cursorCreatedAt is not null)
         {
-            query.Add($"cursor.createdAt={HttpUtility.UrlEncode(cursorCreatedAt.Value.ToString("O"))}");
+            query.Add($"cursor.createdAt={Uri.EscapeDataString(cursorCreatedAt.Value.ToString("O"))}");
         }
         if (cursorId is not null)
         {
