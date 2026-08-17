@@ -41,6 +41,7 @@ global using System.Text.Json;
 global using ASC.Common.Caching;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Security;
+global using ASC.Core.Data;
 global using ASC.Core.Tenants;
 global using ASC.Notify.Cron;
 
