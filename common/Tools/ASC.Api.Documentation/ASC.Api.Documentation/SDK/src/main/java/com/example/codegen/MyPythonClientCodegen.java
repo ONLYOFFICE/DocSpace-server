@@ -240,6 +240,20 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
 
     @Override
     public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
+        for (ModelsMap modelsMap : objs.values()) {
+            for (ModelMap m : modelsMap.getModels()) {
+                CodegenModel model = m.getModel();
+                if (model != null) {
+                    sanitizeNoneType(model.vars);
+                    sanitizeNoneType(model.allVars);
+                    sanitizeNoneType(model.requiredVars);
+                    sanitizeNoneType(model.optionalVars);
+                    sanitizeNoneType(model.readOnlyVars);
+                    sanitizeNoneType(model.readWriteVars);
+                }
+            }
+        }
+
         final Map<String, ModelsMap> processed = super.postProcessAllModels(objs);
 
         for (Map.Entry<String, ModelsMap> entry : processed.entrySet()) {
@@ -266,6 +280,40 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
         }
 
         return processed;
+    }
+
+    private void sanitizeNoneType(List<CodegenProperty> vars) {
+        if (vars == null) {
+            return;
+        }
+        for (CodegenProperty cp : vars) {
+            coerceNoneTypeToAny(cp);
+        }
+    }
+
+    private void coerceNoneTypeToAny(CodegenProperty cp) {
+        if (cp == null) {
+            return;
+        }
+        if (cp.isNull
+            || "none_type".equals(cp.dataType)
+            || "none_type".equals(cp.baseType)
+            || "none_type".equals(cp.complexType)) {
+            cp.isNull = false;
+            cp.isArray = false;
+            cp.isMap = false;
+            cp.isFreeFormObject = false;
+            cp.isModel = false;
+            cp.isPrimitiveType = false;
+            cp.isEnum = false;
+            cp.isAnyType = true;
+            cp.dataType = "object";
+            cp.datatypeWithEnum = "object";
+            cp.baseType = "object";
+            cp.complexType = null;
+        }
+        coerceNoneTypeToAny(cp.items);
+        coerceNoneTypeToAny(cp.additionalProperties);
     }
 
     @Override

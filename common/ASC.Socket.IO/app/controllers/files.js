@@ -123,7 +123,12 @@ module.exports = (files) => {
     files.topUpWallet(req.body);
     res.end();
   });
-  
+
+  router.post("/wallet-low-balance", (req, res) => {
+    files.walletLowBalance(req.body);
+    res.end();
+  });
+
   router.post("/update-history", (req, res) => {
     files.updateHistory(req.body);
     res.end();

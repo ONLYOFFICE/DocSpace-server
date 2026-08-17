@@ -48,7 +48,7 @@ const TSCONFIG = path.resolve(__dirname, "..", "..", "tsconfig.json");
 // with the .NET services' components when `OpenapiJoiner` merges the
 // documents — it throws on a same-name-different-content collision (e.g. the
 // generic `ProviderType` / `ActionType`).
-const SCHEMA_NAMESPACE = "NewAi";
+const SCHEMA_NAMESPACE = "Ai";
 
 function isOperationScoped(name: string): boolean {
   return name.startsWith("Req_") || name.startsWith("Res_");
@@ -114,7 +114,7 @@ export interface OpenApiSchemaBundle {
  * They are deliberately NOT emitted as components: most are degenerate
  * (a bare `$ref` alias, a primitive, an array or a nullable union), and SDK
  * generators turn every component into a model class — producing ~70 empty
- * or non-compiling classes (`ResNewAiToolsGetCustomServer` and friends).
+ * or non-compiling classes (`ResAiToolsGetCustomServer` and friends).
  * Inlined, they resolve to the referenced model, a plain `string`/`bool`,
  * or a `List<T>` — and only genuine inline objects become a model.
  */

@@ -31,7 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Api.Core.Convention;
 using ASC.Common.Threading.DistributedLock.Abstractions;
 using ASC.Core.Billing;
 using ASC.Core.Common;
@@ -53,9 +52,7 @@ namespace ASC.Data.Backup.Controllers;
 /// </remarks>
 /// <name>backup</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("backup")]
+[ApiEndpoint("backup")]
 public class BackupController(
     TenantManager tenantManager,
     AuthContext authContext,
@@ -243,17 +240,13 @@ public class BackupController(
             }
             catch (TenantQuotaException)
             {
-                var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(tenantId);
-                if (!backupServiceEnabled)
-                {
-                    throw;
-                }
-
                 billingSession = await backupService.OpenCustomerSessionForBackupAsync(tenantId);
                 if (billingSession == null)
                 {
                     throw new BillingException(Resource.ErrorNotAllowedOption);
                 }
+
+                await backupService.EnsureBackupServiceEnabledAsync(tenantId);
             }
 
             var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null

@@ -50,6 +50,13 @@ const HOP_BY_HOP = new Set<string>([
   "upgrade",
   "expect",
   "accept-encoding",
+  // A caller's `Mcp-Session-Id` must never be forwarded upstream. The shared
+  // docspace-mcp container binds the target portal + credentials to a session
+  // at `initialize`, so relaying a client-supplied session id makes a request
+  // attach to a foreign session and inherit its portal — a cross-tenant leak,
+  // and the cause of tool calls reaching a stale portal. The MCP client threads
+  // its own session id through its call arguments, so stripping this is safe.
+  "mcp-session-id",
 ]);
 
 const als = new AsyncLocalStorage<RequestContext>();

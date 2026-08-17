@@ -43,9 +43,6 @@ public interface IAccountingApi
     [Get("/customer/{portalId}/balance")]
     Task<Balance> GetCustomerBalanceAsync(string portalId);
 
-    [Get("/customer/{portalId}/balance/ai")]
-    Task<Balance> GetCustomerAiBalanceAsync(string portalId);
-
     [Post("/session/open")]
     Task<Session> OpenCustomerSessionAsync([Body] SessionOpenOperation data);
 
@@ -57,12 +54,6 @@ public interface IAccountingApi
 
     [Post("/operation/sessionComplete")]
     Task CompleteCustomerSessionAsync([Body] SessionCompleteOperation data);
-
-    [Post("/operation/AiCredit")]
-    Task<ServicePayment> MakeAiCreditAsync([Body] AiCreditOperation data);
-
-    [Get("/customer/{portalId}/operations/ai")]
-    Task<Report> GetCustomerAiOperationsAsync(string portalId, [Query] OperationFilter filter);
 
     [Get("/customer/{portalId}/operations")]
     Task<Report> GetCustomerOperationsAsync(string portalId, [Query] OperationFilter filter);

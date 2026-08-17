@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
 public class ThreadDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -43,13 +42,13 @@ public class ThreadDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreateThreadAsync();
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{ThreadsPath}/{created.Id}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        using var readResponse = await Ai.GetAsync(
+        using var readResponse = await _ai.GetAsync(
             $"{ThreadsPath}/{created.Id}",
             TestContext.Current.CancellationToken);
         readResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -58,7 +57,7 @@ public class ThreadDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Delete_NonExisting_Returns404()
     {
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{ThreadsPath}/{Guid.NewGuid()}",
             TestContext.Current.CancellationToken);
 

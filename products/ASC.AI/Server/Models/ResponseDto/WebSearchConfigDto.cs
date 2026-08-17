@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Integration.WebSearch;
-
 namespace ASC.AI.Models.ResponseDto;
 
 public class WebSearchConfigDto

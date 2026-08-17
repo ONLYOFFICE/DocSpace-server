@@ -298,11 +298,11 @@ public class S3Storage(TempStream tempStream,
                          string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5, CancellationToken token = default)
     {
         return await SaveAsync(domain, path, Guid.Empty, stream, contentType,
-                         contentDisposition, acl, contentEncoding, cacheDays, token);
+                         contentDisposition, acl, contentEncoding, cacheDays, token: token);
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
-                         string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5, CancellationToken token = default)
+                         string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5, bool allowQuotaGrace = false, CancellationToken token = default)
     {
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
@@ -310,7 +310,7 @@ public class S3Storage(TempStream tempStream,
         {
             if (EnableQuotaCheck(domain))
             {
-                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId, allowQuotaGrace);
             }
 
             var client = GetClient();
@@ -362,7 +362,7 @@ public class S3Storage(TempStream tempStream,
 
             //await InvalidateCloudFrontAsync(MakePath(domain, path));
 
-            await QuotaUsedAddAsync(domain, buffered.Length, ownerId);
+            await QuotaUsedAddAsync(domain, buffered.Length, ownerId, allowQuotaGrace: allowQuotaGrace);
 
             return await GetUriAsync(domain, path);
         }
@@ -1214,16 +1214,16 @@ public class S3Storage(TempStream tempStream,
 
     protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName, token);
+        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName, false, token);
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, bool allowQuotaGrace, CancellationToken token = default)
     {
         var contentDisposition = $"attachment; filename={HttpUtility.UrlPathEncode(attachmentFileName)};";
         if (attachmentFileName.Any(c => c >= 0 && c <= 127))
         {
             contentDisposition = $"attachment; filename*=utf-8''{HttpUtility.UrlPathEncode(attachmentFileName)};";
         }
-        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition, token);
+        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition, ACL.Auto, allowQuotaGrace: allowQuotaGrace, token: token);
     }
 
 

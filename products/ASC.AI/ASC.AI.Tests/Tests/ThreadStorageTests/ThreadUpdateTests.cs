@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
 public class ThreadUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -43,7 +42,7 @@ public class ThreadUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreateThreadAsync("original");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ThreadsPath}/{created.Id}",
             new { title = "renamed" },
             TestContext.Current.CancellationToken);
@@ -71,7 +70,7 @@ public class ThreadUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Update_NonExisting_Returns404()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ThreadsPath}/{Guid.NewGuid()}",
             new { title = "renamed" },
             TestContext.Current.CancellationToken);
@@ -84,7 +83,7 @@ public class ThreadUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreateThreadAsync("original");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ThreadsPath}/{created.Id}",
             new { title = (string?)null },
             TestContext.Current.CancellationToken);

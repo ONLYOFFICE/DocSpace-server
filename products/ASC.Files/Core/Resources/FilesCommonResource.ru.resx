@@ -500,7 +500,7 @@
     <value>Создатель контента</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Администратор DocSpace</value>
+    <value>Суперадминистратор</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
@@ -600,5 +600,8 @@
   </data>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Инструкция ИИ-агента не может превышать {0} символов</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Это действие доступно только в приватной комнате</value>
   </data>
 </root>

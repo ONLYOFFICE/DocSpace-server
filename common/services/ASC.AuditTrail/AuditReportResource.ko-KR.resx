@@ -241,7 +241,7 @@
     <value>고객 구독이 업데이트되었습니다: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>고객 지갑 활성화 서비스 설정이 업데이트되었습니다</value>
+    <value>고객 지갑 활성화 서비스 설정이 업데이트되었습니다: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>고객 지갑이 충전되었습니다: {0}</value>

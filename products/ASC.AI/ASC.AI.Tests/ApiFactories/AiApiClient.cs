@@ -35,7 +35,7 @@ namespace ASC.AI.Tests.ApiFactories;
 
 public class AiApiClient(HttpClient client)
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
@@ -44,7 +44,7 @@ public class AiApiClient(HttpClient client)
 
     public async Task<HttpResponseMessage> PostAsync(string path, object? body, CancellationToken cancellationToken)
     {
-        using var content = JsonContent.Create(body, options: JsonOptions);
+        using var content = JsonContent.Create(body, options: _jsonOptions);
         return await client.PostAsync(path, content, cancellationToken);
     }
 
@@ -56,7 +56,7 @@ public class AiApiClient(HttpClient client)
 
     public async Task<HttpResponseMessage> PutAsync(string path, object? body, CancellationToken cancellationToken)
     {
-        using var content = JsonContent.Create(body, options: JsonOptions);
+        using var content = JsonContent.Create(body, options: _jsonOptions);
         return await client.PutAsync(path, content, cancellationToken);
     }
 
@@ -64,7 +64,7 @@ public class AiApiClient(HttpClient client)
     {
         using var request = new HttpRequestMessage(HttpMethod.Patch, path)
         {
-            Content = JsonContent.Create(body, options: JsonOptions)
+            Content = JsonContent.Create(body, options: _jsonOptions)
         };
         return await client.SendAsync(request, cancellationToken);
     }
@@ -83,7 +83,7 @@ public class AiApiClient(HttpClient client)
     {
         using var request = new HttpRequestMessage(HttpMethod.Delete, path)
         {
-            Content = JsonContent.Create(body, options: JsonOptions)
+            Content = JsonContent.Create(body, options: _jsonOptions)
         };
         return await client.SendAsync(request, cancellationToken);
     }
@@ -92,7 +92,7 @@ public class AiApiClient(HttpClient client)
     {
         response.EnsureSuccessStatusCode();
 
-        var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<T>>(JsonOptions, cancellationToken);
+        var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<T>>(_jsonOptions, cancellationToken);
         if (wrapper is null || wrapper.Response is null)
         {
             throw new InvalidOperationException($"Empty response body for {response.RequestMessage?.Method} {response.RequestMessage?.RequestUri}.");
