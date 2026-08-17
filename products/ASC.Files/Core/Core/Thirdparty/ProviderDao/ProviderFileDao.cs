@@ -39,7 +39,10 @@ internal class ProviderFileDao(
     TenantManager tenantManager,
     CrossDao crossDao,
     SelectorFactory selectorFactory,
-    ISecurityDao<string> securityDao)
+    ISecurityDao<string> securityDao,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    IProviderDao providerDao,
+    TenantUtil tenantUtil)
     : ProviderDaoBase(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao), IFileDao<string>
 {
     public async Task InvalidateCacheAsync(string fileId)
@@ -144,6 +147,78 @@ internal class ProviderFileDao(
                 }
             }
         }
+    }
+
+    public override async IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
+    {
+        if (filterType == FilterType.FoldersOnly || location == Location.Link)
+        {
+            yield break;
+        }
+
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var taggedIds = await GetTaggedThirdPartyIdsAsync(filesDbContext, tagOwner, tagType, FileEntryType.File);
+        if (taggedIds.Count == 0)
+        {
+            yield break;
+        }
+
+        var providers = await providerDao.GetProvidersInfoAsync().ToDictionaryAsync(r => r.ProviderId);
+        var files = new List<File<string>>();
+
+        await foreach (var file in GetFilesFilteredAsync(taggedIds.Keys, null, filterType, subjectGroup, excludeSubject ? Guid.Empty : subjectId, searchText, extension, searchInContent))
+        {
+            if (!string.IsNullOrEmpty(file.Error) || !CheckTagEntryLocation(file, providers, location, folderType))
+            {
+                continue;
+            }
+
+            if (excludeSubject && subjectId != Guid.Empty && file.CreateBy == subjectId)
+            {
+                continue;
+            }
+
+            if (taggedIds.TryGetValue(file.Id, out var lastOpened) && lastOpened.HasValue)
+            {
+                file.LastOpened = tenantUtil.DateTimeFromUtc(lastOpened.Value);
+            }
+
+            if (providers.TryGetValue(file.ProviderId, out var provider) && !string.IsNullOrEmpty(provider.FolderId))
+            {
+                file.OriginRoomId = provider.FolderId;
+                file.OriginRoomTitle = provider.CustomerTitle;
+            }
+
+            files.Add(file);
+        }
+
+        foreach (var file in SortFiles(files, orderBy).Skip(Math.Max(offset, 0)).Take(count > 0 ? count : files.Count))
+        {
+            yield return file;
+        }
+    }
+
+    private static IEnumerable<File<string>> SortFiles(List<File<string>> files, OrderBy orderBy)
+    {
+        if (orderBy == null)
+        {
+            return files.OrderBy(r => r.Title);
+        }
+
+        return orderBy.SortedBy switch
+        {
+            SortedByType.Author => orderBy.IsAsc ? files.OrderBy(r => r.CreateBy) : files.OrderByDescending(r => r.CreateBy),
+            SortedByType.Size => orderBy.IsAsc ? files.OrderBy(r => r.ContentLength) : files.OrderByDescending(r => r.ContentLength),
+            SortedByType.DateAndTime => orderBy.IsAsc ? files.OrderBy(r => r.ModifiedOn) : files.OrderByDescending(r => r.ModifiedOn),
+            SortedByType.DateAndTimeCreation => orderBy.IsAsc ? files.OrderBy(r => r.CreateOn) : files.OrderByDescending(r => r.CreateOn),
+            SortedByType.Type => orderBy.IsAsc
+                ? files.OrderBy(r => FileUtility.GetFileExtension(r.Title))
+                : files.OrderByDescending(r => FileUtility.GetFileExtension(r.Title)),
+            SortedByType.LastOpened => orderBy.IsAsc ? files.OrderBy(r => r.LastOpened) : files.OrderByDescending(r => r.LastOpened),
+            _ => files.OrderBy(r => r.Title)
+        };
     }
 
     public async IAsyncEnumerable<string> GetFilesAsync(string parentId)
