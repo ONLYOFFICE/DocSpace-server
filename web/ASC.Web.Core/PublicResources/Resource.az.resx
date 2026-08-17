@@ -1168,7 +1168,7 @@
     <value>AI agentlərinin sayı {0}-dan çox olmamalıdır</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
-    <value>AI axtarış</value>
+    <value>Süni intellekt axtarışı</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI xüsusiyyətləri</value>
@@ -1321,7 +1321,7 @@
     <value>Veb axtarış</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Veb axtarış</value>
+    <value>Süni intellekt axtarışı</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI kreditləri</value>
