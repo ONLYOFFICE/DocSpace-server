@@ -608,7 +608,7 @@ Email: $UserEmail
 $Body</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
-    <value>h1.Mesajul de la "${__VirtualRootPath}": portalul "${__VirtualRootPath}"
+    <value>h1.Mesajul de la portalul "${__VirtualRootPath}":"${__VirtualRootPath}"
  
 Numele: $UserName
  
@@ -1586,7 +1586,7 @@ $TrulyYours</value>
     <value>Licența dvs ${LetterLogoText} Enterprise va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
-    <value>Perioadă de grație pentru ${LetterLogoText} Developer va expira în curând</value>
+    <value>Perioadă de grație pentru ${LetterLogoText} Enterprise va expira în curând</value>
   </data>
   <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>${LetterLogoText} Enterprise nu mai este disponibil pentru dvs</value>

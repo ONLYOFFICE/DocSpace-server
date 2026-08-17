@@ -142,7 +142,7 @@ Zaloguj się na swoje konto DocuSign, żeby uzyskać więcej informacji.</value>
   <data name="pattern_EditorMentions" xml:space="preserve">
     <value>h1. $__AuthorName wspomniał o Tobie w komentarzu do dokumentu
 
-$__AuthorName wspomniał o Tobie w komentarzu do dokumentu "$DocumentTitle":"$ DocumentURL" w pokoju "$RoomTitle":"$RoomURL":
+$__AuthorName wspomniał o Tobie w komentarzu do dokumentu "$DocumentTitle":"$DocumentURL" w pokoju "$RoomTitle":"$RoomURL":
 
 $Message</value>
   </data>
@@ -211,14 +211,14 @@ $__AuthorName usunął pokój: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Udzielono dostępu do dokumentu: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime: Użytkownik $__AuthorName udzielił ci dostępu do dokumentu: "$DocumentTitle":"$DocumentURL" z następującymi prawami dostępu: "$AccessRights". 
+$__DateTime: Użytkownik $__AuthorName udzielił ci dostępu do dokumentu: "$DocumentTitle":"$DocumentURL" z następującymi prawami dostępu: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Udzielono dostępu do folderu: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime: Użytkownik $__AuthorName udzielił ci dostępu do folderu "$DocumentTitle":"$DocumentURL" z następującymi prawami dostępu: "$AccessRights". 
+$__DateTime: Użytkownik $__AuthorName udzielił ci dostępu do folderu "$DocumentTitle":"$DocumentURL" z następującymi prawami dostępu: "$AccessRights".
 
 $Message</value>
   </data>

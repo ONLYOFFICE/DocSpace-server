@@ -501,7 +501,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} Developer licences derīguma termiņš beidzas šodien.
+Jūsu ${LetterLogoText} Enterprise licences derīguma termiņš beidzas šodien.
 
 Mēs aktivizējām *$PaymentDelay‎ ‎dienu pagarinājuma periodu*. Šajā laikā piekļuve ${LetterLogoText} tiek nodrošināta trīs nosauktajiem lietotājiem* (atbalsts un atjauninājumi vairs netiek nodrošināti).
 
@@ -556,7 +556,7 @@ Lai varētu izmantot visas pirkuma brīdī pieejamās funkcijas *neierobežotu l
 
 $OrangeButton
 
-Lai atjauninātu licenci, varat arī tieši sazināties ar savu tirdzniecības vadītāju. 
+Lai atjauninātu licenci, varat arī tieši sazināties ar savu tirdzniecības vadītāju.
 
 Ja jums ir jautājumi par maksājumu, sazinieties ar mums, rakstot e-pastu uz "${__SalesEmail}":"mailto:${__SalesEmail}". Tehnisku problēmu risināšanai izmantojiet "${__SupportLink}":"${__SupportLink}".
 
@@ -578,7 +578,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Jūsu ${LetterLogoText} Developer licences derīguma termiņš beidzas šodien. Tas nozīmē, ka atjauninājumi un atbalsts vairs nebūs pieejami.*
+Jūsu ${LetterLogoText} Enterprise licences derīguma termiņš beidzas šodien. Tas nozīmē, ka atjauninājumi un atbalsts vairs nebūs pieejami.*
 
 Lai atjauninātu licenci, sazinieties tieši ar savu īpašo pārdošanas vadītāju vai sazinieties ar mums, izmantojot "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -633,7 +633,7 @@ $Body</value>
 
 Sveicināti,
 
-Jūs lūdzāt pievienoties "${__VirtualRootPath}":"$InviteLink" portālam ${LetterLogoText} - platformā dokumentu un projektu pārvaldībai. Pievienojieties portālam un uzsāciet sadarbību ar kolēģiem vai draugiem. 
+Jūs lūdzāt pievienoties "${__VirtualRootPath}":"$InviteLink" portālam ${LetterLogoText} - platformā dokumentu un projektu pārvaldībai. Pievienojieties portālam un uzsāciet sadarbību ar kolēģiem vai draugiem.
 
 Lai pieņemtu uzaicinājumu, lūdzu, sekojiet šai saitei un ievadiet savu vārdu un uzvārdu:
 
@@ -661,12 +661,12 @@ Citiem e-pasta klientiem, izmantojiet šādus iestatījumus:
 Pieteikšanās: &lt;b&gt;$Login&lt;/b&gt;
       Parole: "&lt;b&gt;Uzstādīt paroli&lt;/b&gt;":"$MyStaffLink"
 
-      Ienākošais pasts (IMAP): 
+      Ienākošais pasts (IMAP):
       Serveris: &lt;b&gt;$Server&lt;/b&gt;
       Ports: &lt;b&gt;$ImapPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
-      Izejošais pasts (SMTP): 
+      Izejošais pasts (SMTP):
       Serveris: &lt;b&gt;$Server&lt;/b&gt;
       Ports: &lt;b&gt;$SmtpPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
@@ -820,7 +820,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} ir dzēsts.
 
 *Portāls:* ${PortalUrl}
-*Īpašnieks:* ${UserName} ${UserEmail} 
+*Īpašnieks:* ${UserName} ${UserEmail}
 *Klients:* ${OwnerName}
 
 Lūdzu, pārliecinieties, ka automātiskā rēķinu apmaksa ir izslēgta. Pārbaudiet automātiskās rēķinu apmaksas statusu klienta Stripe kontā.</value>
@@ -873,7 +873,7 @@ Jūsu $PortalUrl portāla adrese tika nomainīta uz jauno "${__VirtualRootPath}"
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>Konta atspējošana "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Jūs pieprasījāt atspējot savu kontu ${__VirtualRootPath}:${__VirtualRootPath}.
+Jūs pieprasījāt atspējot savu kontu "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Ja joprojām vēlies atspējot kontu, izmanto tālāk norādīto saiti, lai apstiprinātu darbību:
 
@@ -882,20 +882,20 @@ $OrangeButton
 *Piezīme*: šī saite ir derīga tikai septiņas dienas. Pabeidziet konta atspējošanas procesu šajā periodā.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
-    <value>Lietotājs "$FromUserName":"$ FromUserLink" izdzēsa savu profilu, un šis profils tagad ir bloķēts. Visi lietotāja faili joprojām ir piešķirti viņam/viņai un aizņem vietu diskā. 
+    <value>Lietotājs "$FromUserName":"$FromUserLink" izdzēsa savu profilu, un šis profils tagad ir bloķēts. Visi lietotāja faili joprojām ir piešķirti viņam/viņai un aizņem vietu diskā.
 
 Varat atkārtoti piešķirt citiem kopīgotos lietotāja dokumentus citam aktīvam lietotājam vai noņemt tos, lai atbrīvotu vietu portāla diskā.
 
 Lūdzu, dodieties uz lietotāja profilu, izmantojot "šo saiti":"$FromUserLink", lai atkārtoti piešķirtu dokumentus citam lietotājam vai noņemtu datus.</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
-    <value>h1.Jūsu"$__VirtualRootPath":"$__VirtualRootPath" profils ir mainīts
+    <value>h1.Jūsu "$__VirtualRootPath":"$__VirtualRootPath" profils ir mainīts
 
 Sveicināti, $UserName,
 
 Jūsu lietotāja "$__VirtualRootPath":"$__VirtualRootPath" datus mainīja "$__AuthorName":"$__AuthorUrl".
 
-Lai aplūkotu profilu, sekojiet zemāk esošajai saitei: 
+Lai aplūkotu profilu, sekojiet zemāk esošajai saitei:
 "$UserName":"$MyStaffLink"</value>
   </data>
   <data name="pattern_profile_updated_tg" xml:space="preserve">
@@ -1014,7 +1014,7 @@ Jūsu portāls ir atjaunots. Lai tai piekļūtu, ir jāiestata jauna parole:
 
 $OrangeButton
 
-*Piezīme*: šī saite ir derīga tikai septiņas dienas. 
+*Piezīme*: šī saite ir derīga tikai septiņas dienas.
 
 Ja šo e-pasta ziņojumu saņēmāt kļūdas dēļ, ignorējiet to vai sazinieties ar savu "${__VirtualRootPath}":"${__VirtualRootPath}" portāla administratoru, lai uzzinātu sīkāku informāciju.</value>
   </data>
@@ -1518,7 +1518,7 @@ $TrulyYours</value>
 
 Jūs esat uzaicināts pievienoties sava uzņēmuma drošajam tīmekļa birojam, kas uzlabos jūsu sadarbību. Tā adrese ir "${__VirtualRootPath}":"${__VirtualRootPath}". Šīs saites pievienošana grāmatzīmēm ir laba ideja, jūs, visticamāk, to bieži izmantosiet.
 
-Apstipriniet uzaicinājumu, noklikšķinot uz tālāk norādītās saites, un pierakstoties izmantojot uzņēmuma konta lietotājvārdu un paroli. 
+Apstipriniet uzaicinājumu, noklikšķinot uz tālāk norādītās saites, un pierakstoties izmantojot uzņēmuma konta lietotājvārdu un paroli.
 
 $OrangeButton
 

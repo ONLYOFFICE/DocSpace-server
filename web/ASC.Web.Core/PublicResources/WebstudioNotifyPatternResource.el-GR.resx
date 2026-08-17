@@ -1393,7 +1393,7 @@ $TrulyYours</value>
 Ο χρήστης [$__AuthorName]($__AuthorUrl) άλλαξε τα στοιχεία του προφίλ του στην πύλη [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Να τι νέο υπάρχει στο "${__VirtualRootPath}":"${__VirtualRootPath}" την τελευταία ώρα
+    <value>h1.Να τι νέο υπάρχει στο "${__VirtualRootPath}":"${__VirtualRootPath}" στις $Date
 
 #foreach($activity in $Activities)
 $activity

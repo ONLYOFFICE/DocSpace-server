@@ -365,9 +365,9 @@ Equipe ${LetterLogoText}
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Bonjour $UserName,
 
-Le processus de sauvegarde de votre ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" a échoué. 
+Le processus de sauvegarde de votre ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" a échoué.
 
-Si vous avez des questions ou besoin d'assistance, n'hésitez pas à nous contacter via "${__SupportLink}":"${__SupportLink}" 
+Si vous avez des questions ou besoin d'assistance, n'hésitez pas à nous contacter via "${__SupportLink}":"${__SupportLink}"
 
 $TrulyYours</value>
   </data>
@@ -378,7 +378,7 @@ Le processus de sauvegarde de votre ${LetterLogoText} [${__VirtualRootPath}](${_
 
 Si vous avez des questions ou besoin d'assistance, n'hésitez pas à nous contacter via [${__SupportLink}](${__SupportLink})
 
-Bien à vous, 
+Bien à vous,
 L'équipe support ${LetterLogoText}
 [${__SiteLink}](${__SiteLink})</value>
   </data>
@@ -405,7 +405,7 @@ Le lien est valable pendant 7 jours.
 Vous ne souhaitez pas modifier votre mot de passe ? Ignorez ce message</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
-    <value>h1.Demande de changement de téléphone mobile 
+    <value>h1.Demande de changement de téléphone mobile
 
 Vous avez demandé à changer votre téléphone mobile utilisé pour entrer au portail ${LetterLogoText}.
 
@@ -418,7 +418,7 @@ Si vous ne voulez pas changer votre téléphone mobile ou vous recevez ce messag
   <data name="pattern_change_tfa" xml:space="preserve">
     <value>h1.Notification de sécurité
 
-Les paramètres de l'application d'authentification que vous utilisez pour accéder au portail ${LetterLogoText}, ont été réinitialisés. 
+Les paramètres de l'application d'authentification que vous utilisez pour accéder au portail ${LetterLogoText}, ont été réinitialisés.
 
 Cliquez sur ce lien pour passer à la page de connexion du portail et configurer l'application d'authentification :
 
@@ -648,12 +648,12 @@ $TrulyYours</value>
       Login : &lt;b&gt;$Login&lt;/b&gt;
       Mot de passe : "&lt;b&gt;set password&lt;/b&gt;":"$MyStaffLink"
 
-      Incoming Mail (IMAP) : 
+      Incoming Mail (IMAP) :
       Server : &lt;b&gt;$Server&lt;/b&gt;
       Port : &lt;b&gt;$ImapPort&lt;/b&gt;
       SSL/TLS : &lt;b&gt;$Encryption&lt;/b&gt;
 
-      Outgoing Mail (SMTP) : 
+      Outgoing Mail (SMTP) :
       Server : &lt;b&gt;$Server&lt;/b&gt;
       Port : &lt;b&gt;$SmtpPort&lt;/b&gt;
       SSL/TLS : &lt;b&gt;$Encryption&lt;/b&gt;
@@ -714,13 +714,13 @@ $TrulyYours</value>
     <value>h1.Migration du portail
 h1."$PortalUrl":"$PortalUrl"
 
-Votre portail a été transféré vers un nouveau domaine. Veuillez récupérer vos accès en saisissant le mot de passe qui sera utilisé lors de la connexion. 
+Votre portail a été transféré vers un nouveau domaine. Veuillez récupérer vos accès en saisissant le mot de passe qui sera utilisé lors de la connexion.
 
 Suivez le lien ci-dessous pour paramétrer le mot de passe de votre compte :
 
 $OrangeButton
 
-*Note* : ce lien est valide pendant 7 jours seulement. Veuillez terminer le procès de restauration durant cette période. 
+*Note* : ce lien est valide pendant 7 jours seulement. Veuillez terminer le procès de restauration durant cette période.
 
 Si vous avez reçu ce courrile par erreur, ignorez-le ou contactez l'administrateur de votre "$PortalUrl":"$PortalUrl" portail pour de plus amples informations.</value>
   </data>
@@ -806,7 +806,7 @@ $TrulyYours</value>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} a été supprimé.
 
-*Portail :* ${PortalUrl} 
+*Portail :* ${PortalUrl}
 *Propriétaire :* ${UserName} ${UserEmail}*
 Client :* ${OwnerName}
 
@@ -896,7 +896,7 @@ Pour voir votre profil suivez ce lien :
 [$UserName]($MyStaffLink)</value>
   </data>
   <data name="pattern_reassigns_completed" xml:space="preserve">
-    <value>Cher $ UserName,
+    <value>Cher $UserName,
 
 Le processus de réaffectation des données de l'utilisateur "$FromUserName":"$FromUserLink" à l'utilisateur "$ToUserName":"$ToUserLink" a été complété avec succès.</value>
   </data>
@@ -1020,10 +1020,10 @@ $TrulyYours
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
     <value>h1.Voici ce qui s'est passé dans votre "${__VirtualRootPath}":"${__VirtualRootPath}" au cours de la dernière heure
- 
+
 #foreach($activity in $Activities)
 $activity
- 
+
 #end</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
@@ -1268,14 +1268,14 @@ $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_registration" xml:space="preserve">
     <value>h1. ${LetterLogoText} : complétez votre inscription
- 
- 
+
+
 Bonjour !
- 
-Vous êtes invité à compléter l'inscription à ${LetterLogoText} à "${__VirtualRootPath}" : "${__VirtualRootPath}". Entrez votre nom et définissez un mot de passe en cliquant sur le lien :
- 
+
+Vous êtes invité à compléter l'inscription à ${LetterLogoText} à "${__VirtualRootPath}":"${__VirtualRootPath}". Entrez votre nom et définissez un mot de passe en cliquant sur le lien :
+
 $OrangeButton
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
@@ -1375,7 +1375,7 @@ L'équipe d'assistance de ${LetterLogoText}
 ^Si vous ne voulez plus recevoir les notifications sur les modifications des profils, veuillez gérer vos "paramètres d'abonnement":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
-    <value>Notification sur la modification du profil du portail [${__VirtualRootPath}](${__VirtualRootPath}) 
+    <value>Notification sur la modification du profil du portail [${__VirtualRootPath}](${__VirtualRootPath})
 
 [$__AuthorName]($__AuthorUrl) a changé les détails de son profil sur le portail [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
@@ -1481,9 +1481,9 @@ $TrulyYours</value>
   <data name="pattern_user_ldap_activation" xml:space="preserve">
     <value>Cher (chère) $UserName,
 
-Vous avez été invité à rejoindre une plateforme sécurisée pour améliorer la collaboration au sein de votre entreprise. Son adresse est la suivante "${__VirtualRootPath}":"${__VirtualRootPath}". Ajoutez ce lien aux favoris pour accéder rapidement au portail. 
+Vous avez été invité à rejoindre une plateforme sécurisée pour améliorer la collaboration au sein de votre entreprise. Son adresse est la suivante "${__VirtualRootPath}":"${__VirtualRootPath}". Ajoutez ce lien aux favoris pour accéder rapidement au portail.
 
-Pour accepter l'invitation, cliquez sur le lien ci-dessous et saisissez l'identifiant et le mot de passe de votre compte professionnel. 
+Pour accepter l'invitation, cliquez sur le lien ci-dessous et saisissez l'identifiant et le mot de passe de votre compte professionnel.
 
 $OrangeButton
 
@@ -1522,18 +1522,18 @@ $TrulyYours</value>
   </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Bienvenue à &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
- 
- 
+
+
 Bonjour, $UserName!
- 
+
 Vous venez de créer ${LetterLogoText}, un centre documentaire où vous pouvez optimiser la collaboration avec votre équipe, vos clients, vos partenaires, et plus encore.  Son adresse est "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Votre plan tarifaire actuel est STARTUP.  Ce plan est totalement gratuit et comprend:
- 
+
 &lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 15%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administrateurs&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 15%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Jusqu'à 100 salles&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 15%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 Go espace de stockage&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
- 
+
 *Profitez d'un nouveau mode de collaboration documentaire!
- 
+
 $TrulyYours</value>
   </data>
   <data name="subject_admin_activation_v1" xml:space="preserve">

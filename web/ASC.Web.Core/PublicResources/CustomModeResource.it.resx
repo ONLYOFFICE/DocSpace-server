@@ -146,7 +146,7 @@ L'eliminazione dei dati personali ha permesso di liberare $DocsSpace</value>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Il nuovo portale è stato registrato
 
-# URL del portale: "${__VirtualRootPath}":"$ {__VirtualRootPath}"
+# URL del portale: "${__VirtualRootPath}":"${__VirtualRootPath}"
 # Nome: $UserName
 # Cognome: $UserLastName
 # Email: $UserEmail

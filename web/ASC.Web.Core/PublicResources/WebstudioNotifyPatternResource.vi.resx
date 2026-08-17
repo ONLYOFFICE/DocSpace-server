@@ -556,7 +556,7 @@ Thời gian ân hạn cho giấy phép ${LetterLogoText} Enterprise của bạn 
 
 $OrangeButton
 
-Bạn cũng có thể liên hệ trực tiếp với người quản lý bán hàng của mình để cập nhật giấy phép. 
+Bạn cũng có thể liên hệ trực tiếp với người quản lý bán hàng của mình để cập nhật giấy phép.
 
 Đối với các câu hỏi về thanh toán, xin hãy liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}". Để giải quyết bất kỳ vấn đề kỹ thuật nào, xin hãy truy cập "${__SupportLink}":"${__SupportLink}".
 
@@ -661,12 +661,12 @@ $TrulyYours</value>
       Đăng nhập: &lt;b&gt;$Login&lt;/b&gt;
       Mật khẩu: "&lt;b&gt;đặt mật khẩu&lt;/b&gt;":"$MyStaffLink"
 
-      Thư Đến (IMAP): 
+      Thư Đến (IMAP):
       Máy chủ: &lt;b&gt;$Server&lt;/b&gt;
       Cổng thông tin: &lt;b&gt;$ImapPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
-      Thư Đi (SMTP): 
+      Thư Đi (SMTP):
       Máy chủ: &lt;b&gt;$Server&lt;/b&gt;
       Cổng thông tin: &lt;b&gt;$SmtpPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
@@ -785,7 +785,7 @@ $OrangeButton
 _Lưu ý_: liên kết này chỉ có giá trị trong 7 ngày. Vui lòng hoàn tất quá trình vô hiệu hóa cổng thông tin trong khoảng thời gian đó.
 
 Bạn có thể kích hoạt lại cổng thông tin của mình bất cứ lúc nào bằng cách nhấp vào liên kết sau:
-[Kích hoạt lại cổng thông tin]($ ActivateUrl) (liên kết này không có giới hạn thời gian)
+[Kích hoạt lại cổng thông tin]($ActivateUrl) (liên kết này không có giới hạn thời gian)
 
 Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SalesEmail}](mailto:${__SalesEmail})
 
@@ -882,7 +882,7 @@ $OrangeButton
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Xin Vui lòng hoàn tất quy trình vô hiệu hóa tài khoản trong khoảng thời gian đó.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
-    <value>Người dùng "$FromUserName":"$FromUserLink" đã xóa hồ sơ của mình và hồ sơ này hiện đã bị chặn. Tất cả các tập tin của người dùng vẫn được phân cho anh/cô ấy và chiếm không gian đĩa. 
+    <value>Người dùng "$FromUserName":"$FromUserLink" đã xóa hồ sơ của mình và hồ sơ này hiện đã bị chặn. Tất cả các tập tin của người dùng vẫn được phân cho anh/cô ấy và chiếm không gian đĩa.
 
 Bạn có thể phân lại tài liệu của người dùng này được chia sẻ với những người khác cho một người dùng đang hoạt động khác hoặc xóa chúng để giải phóng dung lượng ổ đĩa cổng thông tin.
 
@@ -1014,7 +1014,7 @@ Cổng thông tin của bạn đã được khôi phục. Để truy cập vào 
 
 $OrangeButton
 
-*Lưu ý*: liên kết này chỉ có giá trị trong 7 ngày. 
+*Lưu ý*: liên kết này chỉ có giá trị trong 7 ngày.
 
 Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn để tìm hiểu thông tin.</value>
   </data>
@@ -1389,7 +1389,7 @@ Nhóm hỗ trợ ${LetterLogoText}
 ^Nếu bạn không muốn nhận thông báo về cập nhật hồ sơ, vui lòng điều chỉnh "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
-    <value>Thông báo thay đổi hồ sơ cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) 
+    <value>Thông báo thay đổi hồ sơ cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath})
 
 [$__AuthorName]($__AuthorUrl) đã thay đổi thông tin hồ sơ của mình tại cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
@@ -1519,7 +1519,7 @@ $TrulyYours</value>
 
 Bạn đã được mời tham gia văn phòng web an toàn và bảo mật của công ty bạn, điều này sẽ tăng cường sự hợp tác của bạn. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}". Bạn có thể cân nhắc việc thêm liên kết này vào dấu trang của bạn, bạn có thể sử dụng nó rất nhiều.
 
-Hãy chấp nhận lời mời bằng cách dùng liên kết bên dưới và sử dụng thông tin đăng nhập và mật khẩu của bạn từ tài khoản công ty để đăng nhập. 
+Hãy chấp nhận lời mời bằng cách dùng liên kết bên dưới và sử dụng thông tin đăng nhập và mật khẩu của bạn từ tài khoản công ty để đăng nhập.
 
 $OrangeButton
 

@@ -628,7 +628,7 @@ $Body</value>
 $Body</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
-    <value>h1.来自"${__VirtualRootPath}"的消息:"${__VirtualRootPath}"门户
+    <value>h1.来自 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户的消息
 
 姓名：$UserName
 
@@ -676,7 +676,7 @@ $TrulyYours</value>
 
       传出邮件（SMTP）：
       服务器：&lt;b&gt;$Server&lt;/b&gt;
-      端口：&lt;b&gt;$ImapPort&lt;/b&gt;
+      端口：&lt;b&gt;$SmtpPort&lt;/b&gt;
       SSL/TLS：&lt;b&gt;$Encryption&lt;/b&gt;
       需要身份认证： &lt;b&gt;是&lt;/b&gt;
 
@@ -875,7 +875,7 @@ ${LetterLogoText} 支持团队
 
 亲爱的$UserDisplayName,
 
-您的$PortalUrl门户地址已变更为新的 "${__VirtualRootPath}":"${__VirtualRootPath} "地址。
+您的$PortalUrl门户地址已变更为新的 "${__VirtualRootPath}":"${__VirtualRootPath}" 地址。
 
 *注意*：在您进行更改前，DNS 设置和单点登录选项停止工作。</value>
   </data>
@@ -934,7 +934,7 @@ $OrangeButton
 
 从用户 "$FromUserName":"$FromUserLink" 处移除数据的工作已成功完成。
 
-个人数据删除操作能够释放以下工具的空间</value>
+个人数据删除操作释放了 $DocsSpace</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>亲爱的 $UserName，

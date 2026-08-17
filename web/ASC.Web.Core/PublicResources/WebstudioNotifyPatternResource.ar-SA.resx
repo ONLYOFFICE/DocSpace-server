@@ -660,6 +660,7 @@ SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
       البريد الصادر (SMTP):
       الخادم: &lt;b&gt;$Server&lt;/b&gt;
+      المنفذ: &lt;b&gt;$SmtpPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
       يتطلب المصادقة: &lt;b&gt;نعم&lt;/b&gt;
 
@@ -784,7 +785,9 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 [${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>عزيزي $OwnerName،
+    <value>h1.حذف مساحة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
+
+عزيزي $OwnerName،
 
 لقد طلبت حذف مساحة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -794,13 +797,13 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 قبل حذف المساحة، يرجى التأكد من إيقاف الرسوم التلقائية. يمكنك التحقق من حالة الفوترة التلقائية في الحساب Stripe.
 #end
 
-إذا كنت لا تزال ترغب في حذف مساحة "$ "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"، فيرجى اتباع الرابط أدناه لتأكيد العملية:
+إذا كنت لا تزال ترغب في حذف مساحة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"، فيرجى اتباع الرابط أدناه لتأكيد العملية:
 
 $OrangeButton
 
 *ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية حذف البوابة خلال تلك الفترة.
 
-إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة ، فلا تتردد في الاتصال بنا على"${__SalesEmail}":"mailto:${__SalesEmail}"
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة ، فلا تتردد في الاتصال بنا على "${__SalesEmail}":"mailto:${__SalesEmail}"
 
 $TrulyYours</value>
   </data>
@@ -1336,7 +1339,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>مرحبا!
 
-تمت دعوتك بواسطة$__AuthorName للانضمام إلى الغرفة "$Message":"$InviteLink" على "${__VirtualRootPath}":${__VirtualRootPath}".
+تمت دعوتك بواسطة$__AuthorName للانضمام إلى الغرفة "$Message":"$InviteLink" على "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 

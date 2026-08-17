@@ -232,7 +232,7 @@ $Message</value>
 </value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
-    <value>文档。 所有签署者已完成$ DocumentTitle</value>
+    <value>文档。 所有签署者已完成 $DocumentTitle</value>
   </data>
   <data name="subject_DocuSignComplete_push" xml:space="preserve">
     <value>所有签署者均已签署 $DocumentTitle</value>

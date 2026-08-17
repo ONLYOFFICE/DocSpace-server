@@ -1475,7 +1475,9 @@ $TrulyYours</value>
 [$__AuthorName]($__AuthorUrl) është bashkuar portalit tuaj në [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_user_ldap_activation" xml:space="preserve">
-    <value>Ju jeni ftuar të bashkoheni në zyrën e internetit të sigurt të kompanisë suaj që do të përmirësonte bashkëpunimin tuaj. Adresa e tij është "${__VirtualRootPath}":"${__VirtualRootPath}". Shtimi i kësaj lidhjeje të faqeshënuesit tuaj është një ide e mirë, ka të ngjarë ta përdorni shumë.
+    <value>I/E dashur $UserName,
+
+Ju jeni ftuar të bashkoheni në zyrën e internetit të sigurt të kompanisë suaj që do të përmirësonte bashkëpunimin tuaj. Adresa e tij është "${__VirtualRootPath}":"${__VirtualRootPath}". Shtimi i kësaj lidhjeje të faqeshënuesit tuaj është një ide e mirë, ka të ngjarë ta përdorni shumë.
 
 Pranoni ftesën duke ndjekur lidhjen më poshtë dhe përdorni hyrjen dhe fjalëkalimin nga llogaria e korporatës për të u identifikuar.
 

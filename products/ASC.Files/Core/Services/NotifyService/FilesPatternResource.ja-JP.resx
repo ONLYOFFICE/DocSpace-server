@@ -301,7 +301,7 @@ $Message</value>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName がAIエージェントを削除しました
 
-$__AuthorName がAIエージェントを削除しました： RoomTitle</value>
+$__AuthorName がAIエージェントを削除しました： $RoomTitle</value>
   </data>
   <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
     <value>AIエージェント "$RoomTitle" におけるあなたの役割が "$RoomRole" に変更されました</value>

@@ -648,7 +648,7 @@ $TrulyYours</value>
 
      Koristite sledeća podešavanja za druge klijente email-a:
       Prijava: &lt;b&gt;$Login&lt;/b&gt;
-      Lozinka: "&lt;b&gt; postavi lozinku&lt;/b&gt;": "$MyStaffLink"
+      Lozinka: "&lt;b&gt; postavi lozinku&lt;/b&gt;":"$MyStaffLink"
 
 Dolazna pošta (IMAP):
       Server: &lt;b&gt;$Server&lt;/b&gt;
@@ -963,7 +963,7 @@ $Body
 
 
 h3.Adresa portala
-"${__VirtualRootPath}": "${__VirtualRootPath}"</value>
+"${__VirtualRootPath}":"${__VirtualRootPath}"</value>
   </data>
   <data name="pattern_request_tariff1" xml:space="preserve">
     <value>h1.SAAS tarifni zahtev za "${__VirtualRootPath}":"${__VirtualRootPath}"

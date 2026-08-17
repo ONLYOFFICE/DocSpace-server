@@ -710,7 +710,7 @@ $TrulyYours
 
 $TrulyYours
 
-^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL "を設定してください。^</value>
+^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL" を設定してください。^</value>
   </data>
   <data name="pattern_migration_start" xml:space="preserve">
     <value>h1.別の地域へのポータル移行が開始されました

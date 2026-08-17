@@ -457,7 +457,7 @@ ${LetterLogoText} Developer-lisenssisi päättyy tänään.
 
 Olemme aktivoineet sinulle $PaymentDelay päivän lisäajan. Tämän lisäajan aikana pääsy asiakirjojen muokkaamiseen on rajoitettu 20 samanaikaiseen yhteyteen (tuki ja päivitykset eivät ole enää tarjolla).
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
@@ -566,7 +566,7 @@ $TrulyYours</value>
 
 ${LetterLogoText} Enterprise- lisenssisi vanhenee 7 päivän päästä. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.* 
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -579,7 +579,7 @@ $TrulyYours</value>
 
 ${LetterLogoText} Enterprise- lisenssisi vanhenee tänään. Se tarkoittaa sitä, että päivitykset ja tuki eivät ole enää saatavilla.*
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -797,7 +797,7 @@ ${LetterLogoText} Support Team
 
 Hyvä $OwnerName,
 
-Olet pyytänyt [${__VirtualRootPath}](${__VirtualRootPath}) -portaalin lopullista poistamista.
+Olet pyytänyt "${__VirtualRootPath}":"${__VirtualRootPath}" -portaalin lopullista poistamista.
 
 *Tärkeää! Kaikki tilaasi tallennettu tieto mukaan lukien rekisteröintitiedot poistetaan eikä niitä voi palauttaa.*
 

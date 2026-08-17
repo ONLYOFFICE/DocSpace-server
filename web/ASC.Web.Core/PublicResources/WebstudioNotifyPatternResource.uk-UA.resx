@@ -444,7 +444,7 @@ $OrangeButton
 
 Шановний $OwnerName,
 
-Було подано запит на зміну власника порталу ${__VirtualRootPath}:"${__VirtualRootPath}" на $UserName.
+Було подано запит на зміну власника порталу "${__VirtualRootPath}":"${__VirtualRootPath}" на $UserName.
 
 Будь ласка, перейдіть за посиланням нижче, щоб підтвердити операцію:
 

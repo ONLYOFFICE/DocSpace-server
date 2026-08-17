@@ -459,7 +459,7 @@ Dnes končí platnosť vašej licencie ${LetterLogoText} Developer.
 
 Aktivovali sme pre vás dobu odkladu na $PaymentDelay dní. Počas tohto obdobia je prístup k úprave dokumentov obmedzený na 20 simultánnych pripojení (podpora a aktualizácie sa už nebudú poskytovať).
 
-Ak chcete aktualizovať licenciu, obráťte sa priamo na svojho obchodného manažéra alebo nás kontaktujte prostredníctvom "${__SalesEmail}": "mailto:${__SalesEmail}".
+Ak chcete aktualizovať licenciu, obráťte sa priamo na svojho obchodného manažéra alebo nás kontaktujte prostredníctvom "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 V prípade otázok ohľadom platieb nás kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}". Na riešenie akýchkoľvek technických problémov použite "${__SupportLink}":"${__SupportLink}".
 
