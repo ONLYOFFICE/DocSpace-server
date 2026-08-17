@@ -33,8 +33,10 @@
 
 namespace ASC.Data.Backup.Tasks.Modules;
 
-public class WebStudioModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
+public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helpers) : ModuleSpecificsBase(helpers)
 {
+    private const string EncryptedKeyProperty = "EncryptedKey";
+
     public override ModuleName ModuleName => ModuleName.WebStudio;
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => _relations;
@@ -52,6 +54,74 @@ public class WebStudioModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(hel
     [
         new("webhooks_config", "id", "webhooks_logs", "config_id")
     ];
+
+    public override void PrepareData(DataTable data, BackupCorrection backupCorrection)
+    {
+        if (data.TableName != "webstudio_settings")
+        {
+            return;
+        }
+
+        foreach (var row in data.Rows.Cast<DataRow>().Where(x => IsWebSearchSettings(x["ID"])))
+        {
+            row["Data"] = ConvertEncryptedKey(row["Data"] as string, Helpers.CreateHash2);
+        }
+    }
+
+    protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row)
+    {
+        var (prepared, preparedRow) = await base.TryPrepareRow(dump, connection, columnMapper, table, row);
+        if (!prepared || table.Name != "webstudio_settings" || !IsWebSearchSettings(row["ID"]))
+        {
+            return (prepared, preparedRow);
+        }
+
+        var dataColumn = preparedRow.Keys.FirstOrDefault(x => x.Equals("data", StringComparison.OrdinalIgnoreCase));
+        if (dataColumn != null)
+        {
+            preparedRow[dataColumn] = ConvertEncryptedKey(preparedRow[dataColumn] as string, Helpers.CreateHash);
+        }
+
+        return (true, preparedRow);
+    }
+
+    private static bool IsWebSearchSettings(object settingsId)
+    {
+        return Guid.TryParse(Convert.ToString(settingsId), out var id) && id == WebSearchSettings.ID;
+    }
+
+    private string ConvertEncryptedKey(string data, Func<string, string> convert)
+    {
+        if (string.IsNullOrEmpty(data))
+        {
+            return data;
+        }
+
+        try
+        {
+            if (JsonNode.Parse(data) is not JsonObject settings)
+            {
+                return data;
+            }
+
+            var property = settings.FirstOrDefault(x => x.Key.Equals(EncryptedKeyProperty, StringComparison.OrdinalIgnoreCase));
+            var encryptedKey = property.Value?.GetValue<string>();
+            if (string.IsNullOrEmpty(encryptedKey))
+            {
+                return data;
+            }
+
+            settings[property.Key] = convert(encryptedKey);
+
+            return settings.ToJsonString();
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorCanNotPrepareSettings(WebSearchSettings.ID, ex);
+
+            return data;
+        }
+    }
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {

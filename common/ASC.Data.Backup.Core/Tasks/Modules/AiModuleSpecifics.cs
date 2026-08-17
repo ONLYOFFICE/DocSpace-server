@@ -98,7 +98,7 @@ public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
     }
 }
 
-public class AiIntegrationModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
+public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helpers) : ModuleSpecificsBase(helpers)
 {
     public override ModuleName ModuleName => ModuleName.Ai;
     public override IEnumerable<TableInfo> Tables => _tables;
@@ -173,4 +173,77 @@ public class AiIntegrationModuleSpecifics(Helpers helpers) : ModuleSpecificsBase
         new("ai_integration_threads", "id", "ai_integration_messages", "thread_id"),
         new("ai_integration_messages", "id", "ai_integration_attachments", "message_id")
     ];
+
+    public override void PrepareData(DataTable data, BackupCorrection backupCorrection)
+    {
+        switch (data.TableName)
+        {
+            case "ai_integration_profiles":
+                PrepareEncryptedColumn(data, "key", false);
+                break;
+            case "ai_integration_mcp_servers":
+                PrepareEncryptedColumn(data, "config", true);
+                break;
+        }
+    }
+
+    protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
+    {
+        switch (table.Name)
+        {
+            case "ai_integration_profiles" when columnName == "key" && value != null:
+                try
+                {
+                    value = Helpers.CreateHash(value as string);
+                }
+                catch (Exception ex)
+                {
+                    logger.ErrorCanNotPrepareValue(value as string, ex);
+                    value = null;
+                }
+
+                return true;
+            case "ai_integration_mcp_servers" when columnName == "config" && value != null:
+                try
+                {
+                    value = Helpers.CreateHash(value as string);
+                }
+                catch (Exception ex)
+                {
+                    logger.ErrorCanNotPrepareValue(value as string, ex);
+
+                    return false;
+                }
+
+                return true;
+            default:
+                return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
+        }
+    }
+
+    private void PrepareEncryptedColumn(DataTable data, string columnName, bool removeOnFailure)
+    {
+        for (var i = 0; i < data.Rows.Count; i++)
+        {
+            var row = data.Rows[i];
+            try
+            {
+                row[columnName] = Helpers.CreateHash2(row[columnName] as string);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorCanNotPrepareValue(row[columnName] as string, ex);
+
+                if (removeOnFailure)
+                {
+                    data.Rows.Remove(row);
+                    i--;
+                }
+                else
+                {
+                    row[columnName] = null;
+                }
+            }
+        }
+    }
 }
