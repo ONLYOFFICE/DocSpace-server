@@ -324,11 +324,11 @@
 $TrulyYours</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
-    <value>h1.ポータル"${__VirtualRootPath}":"$InviteLink"用のメールをアクティブにしましょう
+    <value>h1.ポータル "${__VirtualRootPath}":"$InviteLink" 用のメールをアクティブにしましょう
 
 こんにちは！
 
-ポータル"${__VirtualRootPath}":"$InviteLink"への参加を開始するには、メールアドレスを有効化する必要があります。これはセキュリティ上の理由から行われます。
+ポータル "${__VirtualRootPath}":"$InviteLink" への参加を開始するには、メールアドレスを有効化する必要があります。これはセキュリティ上の理由から行われます。
 
 $OrangeButton
 
@@ -339,12 +339,12 @@ $OrangeButton
 
 $OwnerName 様
 
-$OwnerName様の"${__VirtualRootPath}":"${__VirtualRootPath}"ポータルのデータを含むバックアップファイルが作成されました。
+$OwnerName様の "${__VirtualRootPath}":"${__VirtualRootPath}" ポータルのデータを含むバックアップファイルが作成されました。
 
 バックアップ手順の詳細については、"「データのバックアップ」":"$URL1" ユーザーガイドをご参照ください。
 
 
-ご質問やサポートが必要な場合は、お気軽に "${__SupportLink}":"${__SupportLink}"までご連絡ください。
+ご質問やサポートが必要な場合は、お気軽に "${__SupportLink}":"${__SupportLink}" までご連絡ください。
 
 $TrulyYours</value>
   </data>
@@ -428,7 +428,7 @@ $OrangeButton
 &amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータル所有者変更
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータル所有者変更
 
 $OwnerName 様
 
@@ -606,7 +606,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからのメッセーぎがあります
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルからのメッセーぎがあります
 
 Email: $UserEmail
 
@@ -620,7 +620,7 @@ Email: $UserEmail
 $Body</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからのメッセージが届いています。
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルからのメッセージが届いています。
 
 名前：$UserName
 
@@ -633,7 +633,7 @@ $Body</value>
 
 こんにちは、
 
-${LetterLogoText}の"${__VirtualRootPath}":"$InviteLink"ポータルへの参加をリクエストされました。ポータルに参加して、同僚や友人とすぐに共同作業を始めましょう。
+${LetterLogoText}の "${__VirtualRootPath}":"$InviteLink" ポータルへの参加をリクエストされました。ポータルに参加して、同僚や友人とすぐに共同作業を始めましょう。
 
 招待を受けるには、このリンクから名前とパスワードを入力してください：
 
@@ -655,7 +655,7 @@ $TrulyYours</value>
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>$UserName 様
 
-      管理者は"${__VirtualRootPath}":"${__VirtualRootPath}"ポータルに新しい&lt;b&gt;$Address&lt;/b&gt;メールボックスを作成しました。
+      管理者は "${__VirtualRootPath}":"${__VirtualRootPath}" ポータルに新しい&lt;b&gt;$Address&lt;/b&gt;メールボックスを作成しました。
 
       他のメールクライアントには、以下の設定を使用してください：
       ログイン: &lt;b&gt;$Login&lt;/b&gt;
@@ -692,19 +692,19 @@ $TrulyYours</value>
     <value>h1.別の地域ポータルの移行エラー
 
 $RegionName地域への移行中にエラーが発生しました。後でもう一度お試しください。
-お客様のポータルは現在、旧アドレス"$PortalUrl":"$PortalUrl"で利用可能です。
+お客様のポータルは現在、旧アドレス "$PortalUrl":"$PortalUrl" で利用可能です。
 
 ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までお気軽にお問い合わせください。
 
 $TrulyYours
 
-^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL"を設定してください。^</value>
+^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL" を設定してください。^</value>
   </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.別の地域ポータルの移行エラー
 
 他の地域への移行中にエラーが発生しました。後でもう一度お試しください。
-お客様のポータルは現在、旧アドレス"$PortalUrl":"$PortalUrl"で利用可能です。
+お客様のポータルは現在、旧アドレス "$PortalUrl":"$PortalUrl" で利用可能です。
 
 ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までお気軽にお問い合わせください。
 
@@ -756,7 +756,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルの無効化
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルの無効化
 
 $OwnerName 様
 
@@ -794,7 +794,7 @@ ${LetterLogoText} サポートチーム
 [${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"スペースの削除
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" スペースの削除
 
 $OwnerName 様
 
@@ -857,7 +857,7 @@ ${LetterLogoText} サポートチーム
 
 $UserDisplayName 様
 
-$PortalUrl ポータルアドレスは、新しい"${__VirtualRootPath}":"${__VirtualRootPath}"アドレスに変更されました。
+$PortalUrl ポータルアドレスは、新しい "${__VirtualRootPath}":"${__VirtualRootPath}" アドレスに変更されました。
 
 *ご注意*： DNS設定とシングルサインオンオプションは、変更するまで機能しなくなります。</value>
   </data>
@@ -873,18 +873,18 @@ $OrangeButton
 *注意*：このリンクは7日間のみ有効です。期間内にアカウントの無効化プロセスを完了してください。</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
-    <value>"$FromUserName":"$FromUserLink"ユーザーがプロフィールを削除しました。すべてのユーザーのファイルはまだそのユーザーに割り当てられており、ディスク領域を占有しています。
+    <value>"$FromUserName":"$FromUserLink" ユーザーがプロフィールを削除しました。すべてのユーザーのファイルはまだそのユーザーに割り当てられており、ディスク領域を占有しています。
 
 他のユーザーと共有されている文書を他のアクティブなユーザーに割り当て直すか、削除してポータルのディスク領域を解放することができます。
 
-"このリンク":"$FromUserLink"を通じてユーザープロフィールに移動し、文書を別のユーザーに再割り当てするか、削除してください。</value>
+"このリンク":"$FromUserLink" を通じてユーザープロフィールに移動し、文書を別のユーザーに再割り当てするか、削除してください。</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
-    <value>h1."$__VirtualRootPath":"$__VirtualRootPath"のプロフィールが変更されました。
+    <value>h1."$__VirtualRootPath":"$__VirtualRootPath" のプロフィールが変更されました。
 
 $UserName 様
 
-"$__VirtualRootPath":"$__VirtualRootPath"にあるお客様のユーザープロフィールの詳細は、"$__AuthorName":"$__AuthorUrl"によって変更されました。
+"$__VirtualRootPath":"$__VirtualRootPath" にあるお客様のユーザープロフィールの詳細は、"$__AuthorName":"$__AuthorUrl" によって変更されました。
 
 お客様のプロフィールを確認するには、以下のリンクをたどってください："$UserName":"$MyStaffLink"</value>
   </data>
@@ -901,26 +901,26 @@ $UserName 様
   <data name="pattern_reassigns_completed" xml:space="preserve">
     <value>$UserName 様
 
-"$FromUserName":"$FromUserLink"ユーザーから"$ToUserName":"$ToUserLink"ユーザーへのデータ再割り当て処理は正常に完了しました。</value>
+"$FromUserName":"$FromUserLink" ユーザーから "$ToUserName":"$ToUserLink" ユーザーへのデータ再割り当て処理は正常に完了しました。</value>
   </data>
   <data name="pattern_reassigns_failed" xml:space="preserve">
     <value>$UserName 様
 
-"$FromUserName":"$FromUserLink"ユーザから"$ToUserName":"$ToUserLink"ユーザへのデータ再割り当て処理は失敗しました。
+"$FromUserName":"$FromUserLink" ユーザから "$ToUserName":"$ToUserLink" ユーザへのデータ再割り当て処理は失敗しました。
 
 例外メッセージ： $Message</value>
   </data>
   <data name="pattern_remove_user_data_completed" xml:space="preserve">
     <value>$UserName 様
 
-"$FromUserName":"$FromUserLink"ユーザーのデータ削除が完了しました。
+"$FromUserName":"$FromUserLink" ユーザーのデータ削除が完了しました。
 
 個人データの削除により、$DocsSpaceが解放されました</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>$UserName 様
 
-"$FromUserName":"$FromUserLink"ユーザーのデータ削除処理に失敗しました。
+"$FromUserName":"$FromUserLink" ユーザーのデータ削除処理に失敗しました。
 
 例外メッセージ： $Message</value>
   </data>
@@ -1015,11 +1015,11 @@ $OrangeButton
 
 *ご注意*：復元作業中はポータルをご利用いただけません。
 
-ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお気軽にお問い合わせください。
+ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}" までお気軽にお問い合わせください。
 
 $TrulyYours
 
-^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL"を管理してください。^</value>
+^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL" を管理してください。^</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">
     <value>h1.過去1時間の "${__VirtualRootPath}":"${__VirtualRootPath}" 新着情報です。
@@ -1385,42 +1385,42 @@ $TrulyYours</value>
   <data name="pattern_storage_decryption_error" xml:space="preserve">
     <value>$UserName 様
 
-"${PortalUrl}":"${PortalUrl}"ポータルのファイル復号化処理は失敗しました。
+"${PortalUrl}":"${PortalUrl}" ポータルのファイル復号化処理は失敗しました。
 
 一部のファイルが復号化できませんでした。"コントロールパネル":"${PortalUrl}/management/settings "で詳細をご確認ください。</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>$UserName 様
 
-"${PortalUrl}":"${PortalUrl}"ポータルでファイルの復号プロセスが開始されました。
+"${PortalUrl}":"${PortalUrl}" ポータルでファイルの復号プロセスが開始されました。
 
 復号化には時間がかかるため、ポータルは一時的に利用できなくなります。復号化が終わり次第、再びデータを操作できるようになります。</value>
   </data>
   <data name="pattern_storage_decryption_success" xml:space="preserve">
     <value>$UserName 様
 
-"${PortalUrl}":"${PortalUrl}"ポータルのファイル復号化処理が正常に完了しました。
+"${PortalUrl}":"${PortalUrl}" ポータルのファイル復号化処理が正常に完了しました。
 
 お客様のポータルは再び利用可能です。</value>
   </data>
   <data name="pattern_storage_encryption_error" xml:space="preserve">
     <value>$UserName 様
 
-"${PortalUrl}":"${PortalUrl}"ポータルでのファイル暗号化処理は失敗しました。
+"${PortalUrl}":"${PortalUrl}" ポータルでのファイル暗号化処理は失敗しました。
 
 一部のファイルを暗号化できませんでした。"管理パネル":"${PortalUrl}/management/settings "で詳細をご確認ください。</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>$UserName 様
 
-"${PortalUrl}":"${PortalUrl}"ポータルでファイル暗号化プロセスが開始されました。
+"${PortalUrl}":"${PortalUrl}" ポータルでファイル暗号化プロセスが開始されました。
 
 暗号化には時間がかかるため、ポータルは一時的に利用できなくなります。暗号化が終わり次第、再びデータを操作できるようになります。</value>
   </data>
   <data name="pattern_storage_encryption_success" xml:space="preserve">
     <value>$UserName 様
 
-"${PortalUrl}":"${PortalUrl}"ポータルのファイル暗号化処理が正常に完了しました。
+"${PortalUrl}":"${PortalUrl}" ポータルのファイル暗号化処理が正常に完了しました。
 
 お客様のポータルは再び利用可能です。</value>
   </data>
@@ -1447,7 +1447,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_user_has_join" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルに新しいユーザーが追加されました
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルに新しいユーザーが追加されました
 
 "$__AuthorName":"$__AuthorUrl" が "${__VirtualRootPath}":"${__VirtualRootPath}" のポータルに参加しました。
 

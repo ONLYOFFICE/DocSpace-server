@@ -344,7 +344,7 @@ $OrangeButton
 若想了解关于备份流程的详情，请参考我们的 "数据备份":"$URL1" 用户指南。
 
 
-若您有任何问题或需要帮助，请随时联系我们，网站为"${__SupportLink}":"${__SupportLink}"
+若您有任何问题或需要帮助，请随时联系我们，网站为 "${__SupportLink}":"${__SupportLink}"
 
 $TrulyYours</value>
   </data>
@@ -715,7 +715,7 @@ $TrulyYours
 迁移到另一个区域时发生错误。请再试一次。
 您的门户网站现已在旧地址 "$PortalUrl":"$PortalUrl" 可用
 
-如果您有任何问题或需要帮助，请随时与我们联系，网址为"${__SalesEmail}":"mailto:${__SalesEmail}"
+如果您有任何问题或需要帮助，请随时与我们联系，网址为 "${__SalesEmail}":"mailto:${__SalesEmail}"
 
 $TrulyYours
 
@@ -728,7 +728,7 @@ $TrulyYours
 
 *备注*：门户网站在迁移过程中将不可用。迁移完成后，门户网址将被更改，所有共享文档链接将无法访问。
 
-如果您有任何问题或需要帮助，请随时与我们联系，网址为"${__SalesEmail}":"mailto:${__SalesEmail}"
+如果您有任何问题或需要帮助，请随时与我们联系，网址为 "${__SalesEmail}":"mailto:${__SalesEmail}"
 
 $TrulyYours</value>
   </data>
@@ -778,7 +778,7 @@ $OrangeButton
 您可以随时点击以下链接重新激活门户：
 p=. "重新激活门户":"$ActivateUrl" （此链接无时间限制）
 
-如果您有任何问题或需要帮助，请随时联系"${__SalesEmail}":"mailto:${__SalesEmail}"
+如果您有任何问题或需要帮助，请随时联系 "${__SalesEmail}":"mailto:${__SalesEmail}"
 
 $TrulyYours</value>
   </data>
@@ -803,7 +803,7 @@ ${LetterLogoText} 支持团队
 [${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>h1.删除"${__VirtualRootPath}":"${__VirtualRootPath}" 门户
+    <value>h1.删除 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户
 
 亲爱的$OwnerName,
 
@@ -821,7 +821,7 @@ $OrangeButton
 
 *注意*：此链接仅7天有效。请在此期限内完成门户删除过程。
 
-如果您有任何问题或需要帮助，请随时联系"${__SalesEmail}":"mailto:${__SalesEmail}"
+如果您有任何问题或需要帮助，请随时联系 "${__SalesEmail}":"mailto:${__SalesEmail}"
 
 $TrulyYours</value>
   </data>
@@ -895,7 +895,7 @@ $OrangeButton
 
 您可将该用户已分享给他人的文档重新指派给另一活动用户，或将其移除以释放门户磁盘空间。
 
-请使用"此链接":"$FromUserLink"前往用户档案以将文档重新指派至另一用户或移除数据。</value>
+请使用 "此链接":"$FromUserLink" 前往用户档案以将文档重新指派至另一用户或移除数据。</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
     <value>h1.您在 "$__VirtualRootPath":"$__VirtualRootPath" 门户的档案已被修改
@@ -1034,7 +1034,7 @@ $OrangeButton
 
 *注意*门户在恢复过程中将不可用。
 
-如果您有任何问题或需要帮助，请随时联系"${__SalesEmail}":"mailto:${__SalesEmail}"
+如果您有任何问题或需要帮助，请随时联系 "${__SalesEmail}":"mailto:${__SalesEmail}"
 
 $TrulyYours
 
@@ -1430,7 +1430,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}" 门户上的文件解密流程失败。
 
-部分文件无法解密。请在"控制面板":"${PortalUrl}/management/settings"中了解更多详情。</value>
+部分文件无法解密。请在 "控制面板":"${PortalUrl}/management/settings" 中了解更多详情。</value>
   </data>
   <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>您好，$UserName！
@@ -1451,7 +1451,7 @@ $TrulyYours</value>
 
 "${PortalUrl}":"${PortalUrl}" 门户上的文件加密流程失败。
 
-部分文件无法加密。请在"控制面板":"${PortalUrl}/management/settings"中了解更多详情。</value>
+部分文件无法加密。请在 "控制面板":"${PortalUrl}/management/settings" 中了解更多详情。</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>您好，$UserName！
@@ -1492,7 +1492,7 @@ $TrulyYours</value>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.新用户添加至 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户
 
-"$__AuthorName":"$__AuthorUrl" 已加入您位于"${__VirtualRootPath}":"${__VirtualRootPath}" 的门户。
+"$__AuthorName":"$__AuthorUrl" 已加入您位于 "${__VirtualRootPath}":"${__VirtualRootPath}" 的门户。
 
 
 ^若想修改通知类型，请管理您的 "订阅设置":"$RecipientSubscriptionConfigURL"。^</value>

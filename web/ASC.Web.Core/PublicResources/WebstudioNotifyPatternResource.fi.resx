@@ -1260,7 +1260,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Hei!
 
-$__AuthorName kutsui sinut liittymään agenttiin "$Message":"$InviteLink"  "${__VirtualRootPath}":"${__VirtualRootPath}":ssa.
+$__AuthorName kutsui sinut liittymään agenttiin "$Message":"$InviteLink" osoitteessa "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 

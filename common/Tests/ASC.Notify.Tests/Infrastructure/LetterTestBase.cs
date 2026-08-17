@@ -50,6 +50,14 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// </summary>
 public abstract class LetterTestBase
 {
+    /// <summary>
+    /// What an unrecognised textile link looks like once the styler has run: the closing quotation mark
+    /// of the caption, the colon, the opening one of the address — straight or curled — and the address
+    /// itself. A rendered link never keeps that shape, since it becomes an <c>&lt;a href&gt;</c>.
+    /// </summary>
+    private static readonly Regex _unrenderedLink =
+        new("""(&#8221;|&#8220;|")\s*:\s*(&#8220;|&#8221;|")(https?://|mailto:)""", RegexOptions.Compiled);
+
     /// <summary>Action id / resource key suffix, e.g. <c>saas_admin_handy_apps_v1</c>.</summary>
     protected abstract string LetterId { get; }
 
@@ -123,6 +131,7 @@ public abstract class LetterTestBase
 
         AssertPatternIsPortable();
         AssertNoUnresolvedTags(letter);
+        AssertLinksRendered(letter);
         AssertTopImage(letter);
         AssertSignature(letter, culture);
 
@@ -266,6 +275,25 @@ public abstract class LetterTestBase
             letter.Subject.Should().NotContain($"${tag}", because).And.NotContain($"${{{tag}}}", because);
             letter.Body.Should().NotContain($"${tag}", because).And.NotContain($"${{{tag}}}", because);
         }
+    }
+
+    /// <summary>
+    /// A textile link is written <c>"caption":"address"</c> and is recognised only when nothing is glued
+    /// to it. A particle in Japanese or Korean, a case suffix in Finnish or Azerbaijani, a hyphen in
+    /// Armenian — any of them is enough for the parser to walk past, and it then leaves the caption, the
+    /// colon and the address standing in the text, merely curling the quotation marks. The letter still
+    /// renders and still contains the address, so a check that the address is present passes while the
+    /// reader is looking at <c>“Help Center”:”https://…”</c>.
+    /// </summary>
+    private static void AssertLinksRendered(RenderedLetter letter)
+    {
+        var raw = _unrenderedLink.Matches(letter.Body)
+            .Select(match => match.Value)
+            .ToArray();
+
+        raw.Should().BeEmpty("a textile link was not recognised and its address is printed to the reader; "
+            + "the translation most likely glues a particle or a suffix to the closing quotation mark — "
+            + "put a space there");
     }
 
     /// <summary>The signature the harness passes in, in the recipient's culture, plus the site it links to.</summary>

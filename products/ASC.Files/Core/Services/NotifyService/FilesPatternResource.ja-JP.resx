@@ -132,7 +132,7 @@
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. 全ての署名者は $DocumentTitle を完成しました
 
-これは"$DocumentTitle":"$DocumentURL"が完成されたについて知らせるメールです。</value>
+これは "$DocumentTitle":"$DocumentURL" が完成されたについて知らせるメールです。</value>
   </data>
   <data name="pattern_DocuSignStatus" xml:space="preserve">
     <value>h1. $Message: $DocumentTitle
@@ -142,7 +142,7 @@
   <data name="pattern_EditorMentions" xml:space="preserve">
     <value>h1. $__AuthorName さんに文書へのコメントでメンションされました
  
-$__AuthorName さんに"$RoomTitle":"$RoomURL"ルームの"$DocumentTitle":"$DocumentURL"文書へのコメントでメンションされました：
+$__AuthorName さんに "$RoomTitle":"$RoomURL" ルームの "$DocumentTitle":"$DocumentURL" 文書へのコメントでメンションされました：
  
 $Message</value>
   </data>
@@ -171,7 +171,7 @@ $OrangeButton
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. 「$Message」フォームが記入されました
 
-あなたは"$RoomTitle":"$RoomURL"ルームで"$DocumentTitle":"$DocumentURL"フォームを記入しました。
+あなたは "$RoomTitle":"$RoomURL" ルームで "$DocumentTitle":"$DocumentURL" フォームを記入しました。
 
 マネージャー："$ToUserName":"$ToUserLink"
 
@@ -195,7 +195,7 @@ $OrangeButton
 
 これは$MailsCount枚のメッセージの要求したメーリング過程が完了されたについて知らせるメールです。$Message
 
-成功に送信されたメールメッセージは”メール”モジュールの"Sent":"$__VirtualRootPath/addons/mail/#sent"フォルダで保存されています。</value>
+成功に送信されたメールメッセージは”メール”モジュールの "Sent":"$__VirtualRootPath/addons/mail/#sent" フォルダで保存されています。</value>
   </data>
   <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
     <value>$FromUserName は "$RoomTitle" のルームをアーカイブに移動しました</value>

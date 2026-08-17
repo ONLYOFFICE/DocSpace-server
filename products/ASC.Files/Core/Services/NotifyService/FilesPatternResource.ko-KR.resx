@@ -150,7 +150,7 @@ $__AuthorName 님이 AI 에이전트: $RoomTitle 를 삭제하셨습니다</valu
   <data name="pattern_EditorMentions" xml:space="preserve">
     <value>h1. $__AuthorName님이 문서 주석에서 귀하를 언급했습니다
 
-$__AuthorName님이 "$RoomTitle":"$RoomURL" 방의"$DocumentTitle":"$DocumentURL" 문서의 주석에서 귀하를 언급했습니다:
+$__AuthorName님이 "$RoomTitle":"$RoomURL" 방의 "$DocumentTitle":"$DocumentURL" 문서의 주석에서 귀하를 언급했습니다:
 
 $Message</value>
   </data>
@@ -229,7 +229,7 @@ $Message</value>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Access Granted to Folder: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime $__AuthorName 다음 액세스 권한을 당신에게 문서에 대한 액세스 권한을 부여"$DocumentTitle":"$DocumentURL" "$AccessRights". 
+$__DateTime $__AuthorName 다음 액세스 권한을 당신에게 문서에 대한 액세스 권한을 부여 "$DocumentTitle":"$DocumentURL" "$AccessRights". 
 
 $Message</value>
   </data>
