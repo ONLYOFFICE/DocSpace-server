@@ -124,11 +124,7 @@ public class AttachmentsStorageService(
         var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id)
             ?? throw new ItemNotFoundException();
 
-        var dataUrl = attachment.Kind == AttachmentKind.Image
-            ? await GetDataUrlAsync(attachment)
-            : null;
-
-        return ToResult(attachment, dataUrl);
+        return await ToResultAsync(attachment);
     }
 
     public async IAsyncEnumerable<AttachmentResult> ReadManyByIdsAsync(HashSet<Guid> ids)
@@ -139,11 +135,7 @@ public class AttachmentsStorageService(
 
         foreach (var attachment in attachments)
         {
-            var dataUrl = attachment.Kind == AttachmentKind.Image
-                ? await GetDataUrlAsync(attachment)
-                : null;
-
-            yield return ToResult(attachment, dataUrl);
+            yield return await ToResultAsync(attachment);
         }
     }
 
@@ -255,10 +247,33 @@ public class AttachmentsStorageService(
             ? await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration)
             : null;
 
-        return ToResult(attachment, dataUrl);
+        return ToResult(attachment, dataUrl, file is File<string> thirdpartyFile ? thirdpartyFile.Id : null);
     }
 
-    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl)
+    private async Task<AttachmentResult> ToResultAsync(Attachment attachment)
+    {
+        var thirdpartyEntryId = await ResolveThirdpartyEntryIdAsync(attachment.ThirdpartyEntryId);
+
+        var dataUrl = attachment.Kind == AttachmentKind.Image
+            ? await GetDataUrlAsync(attachment.EntryId, thirdpartyEntryId)
+            : null;
+
+        return ToResult(attachment, dataUrl, thirdpartyEntryId);
+    }
+
+    private async Task<string?> ResolveThirdpartyEntryIdAsync(string? hashId)
+    {
+        if (string.IsNullOrEmpty(hashId))
+        {
+            return null;
+        }
+
+        var (entryId, _) = await DaoFactory.GetMapping<string>().MappingIdAsync(hashId);
+
+        return string.IsNullOrEmpty(entryId) ? null : entryId;
+    }
+
+    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl, string? thirdpartyEntryId)
     {
         return new AttachmentResult
         {
@@ -268,24 +283,24 @@ public class AttachmentsStorageService(
             Content = attachment.Content,
             DataUrl = dataUrl,
             EntryId = attachment.EntryId,
-            ThirdpartyEntryId = attachment.ThirdpartyEntryId,
+            ThirdpartyEntryId = thirdpartyEntryId,
             CreatedAt = attachment.CreatedAt
         };
     }
 
-    private async Task<string?> GetDataUrlAsync(Attachment attachment)
+    private async Task<string?> GetDataUrlAsync(int? entryId, string? thirdpartyEntryId)
     {
-        if (attachment.EntryId.HasValue)
+        if (entryId.HasValue)
         {
             var fileDao = DaoFactory.GetFileDao<int>();
-            var file = await fileDao.GetFileAsync(attachment.EntryId.Value);
+            var file = await fileDao.GetFileAsync(entryId.Value);
             return file == null ? null : await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration);
         }
 
-        if (!string.IsNullOrEmpty(attachment.ThirdpartyEntryId))
+        if (!string.IsNullOrEmpty(thirdpartyEntryId))
         {
             var fileDao = DaoFactory.GetFileDao<string>();
-            var file = await fileDao.GetFileAsync(attachment.ThirdpartyEntryId);
+            var file = await fileDao.GetFileAsync(thirdpartyEntryId);
             return file == null ? null : await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration);
         }
 
