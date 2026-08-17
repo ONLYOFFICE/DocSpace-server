@@ -33,15 +33,49 @@
 
 import { ToolsEngine } from "@onlyoffice/ai-chat/core";
 import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
+import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { storage } from "../storage/index.js";
 import {
   systemToolsSource,
   getSystemServerConfig,
 } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { asString, isObject } from "../narrow.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
+
+// A custom MCP server name is used verbatim as a single URL path segment on
+// the read / update / delete routes (`/mcp-servers/{name}` on the .NET AI
+// service, and `/mcp-servers/${encodeURIComponent(name)}` on the way there).
+// `create` takes the name in the request body, so a name that isn't a safe
+// path segment registers fine but is then unreachable by name: a `/` becomes
+// `%2F` (rejected / mis-routed by the .NET host) and a `.`/`..` dot-segment is
+// normalised away, orphaning a stored-but-undeletable entry (Bug 82985).
+// Reject such names at the source with a 400 instead. Printable punctuation
+// and spaces survive URL-encoding and stay routable, so they are allowed.
+const UNSAFE_NAME_CHARS = /[\u0000-\u001f\u007f/\\]/;
+
+function assertRoutableServerName(rawName: unknown): string {
+  if (typeof rawName !== "string" || rawName.trim().length === 0) {
+    throw Object.assign(new Error("name is required"), {
+      status: 400,
+      expose: true,
+    });
+  }
+  if (
+    rawName === "." ||
+    rawName === ".." ||
+    UNSAFE_NAME_CHARS.test(rawName)
+  ) {
+    throw Object.assign(
+      new Error(
+        'name must not be ".", "..", or contain a path separator or control character',
+      ),
+      { status: 400, expose: true },
+    );
+  }
+  return rawName;
+}
 
 // Resolve the config to store for an entry. Entries named after a
 // configured system server are whitelist markers (see agentServerWhitelist
@@ -89,7 +123,11 @@ function redactSystemServer(
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
-    const name = args.name as string;
+    const name = assertRoutableServerName(args.name);
+    // Scope is resolved inside mcpServersStorage (create/readAll both run the
+    // entityId through resolveAgentEntityId), so a non-agent folder writes to
+    // and reads back from the global scope and the server stays visible
+    // (Bug 82863) — no 404 gate needed here.
     const result = await engine.addCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -100,7 +138,7 @@ export const toolsController = {
 
   updateCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
-    const name = args.name as string;
+    const name = assertRoutableServerName(args.name);
     const result = await engine.updateCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -137,6 +175,10 @@ export const toolsController = {
     const servers = await engine.listCustomServers(entityId);
     const redacted: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(servers)) {
+      // The portal MCP server is not user-manageable: legacy per-agent
+      // whitelist markers named after it must not surface as selectable
+      // entries (it is always enabled server-side, see systemTools).
+      if (name === PORTAL_MCP_SERVER_NAME) continue;
       redacted[name] = redactSystemServer(name, config);
     }
     res.json(redacted);
@@ -145,14 +187,31 @@ export const toolsController = {
   listSystemTools: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     const tools = await engine.listSystemTools(entityId);
+    // Hide the portal MCP server from every management surface (the MCP
+    // settings page's permission cards, the agent dialog's server picker):
+    // it is always enabled with all tools and cannot be configured. The
+    // chat engine's tool context does not go through this listing, so the
+    // tools themselves stay available everywhere.
+    if (isObject(tools)) {
+      delete (tools as Record<string, unknown>)[PORTAL_MCP_SERVER_NAME];
+    }
     res.json(tools);
   }),
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["map", "entityId"] as const);
-    const map = (args.map as Record<string, McpServerConfig>) ?? {};
+    // `map` is required. Without it the loop below yields an empty map and
+    // replaceAll wipes every registered MCP server for the scope, silently
+    // destroying the configuration on a malformed request (Bug 82864). Reject
+    // a missing/invalid map with a 400 instead.
+    if (!isObject(args.map)) {
+      res.status(400).json({ error: "map is required and must be an object" });
+      return;
+    }
+    const map = args.map as Record<string, McpServerConfig>;
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
+      assertRoutableServerName(name);
       normalized[name] = await resolveConfig(name, config);
     }
     const result = await engine.replaceAllCustomServers(

@@ -52,7 +52,10 @@ export const textToDocxController = {
     const content = typeof body["content"] === "string" ? body["content"] : "";
     const folderId = body["folderId"];
 
-    if (!title || !content) {
+    // Whitespace-only content is still truthy, so `!content` misses it: check
+    // the trimmed length for emptiness while forwarding the ORIGINAL untrimmed
+    // `content` below (trimming would alter the document body).
+    if (!title || content.trim().length === 0) {
       res.status(400).json({ error: "title and content are required" });
       return;
     }

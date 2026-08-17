@@ -68,7 +68,7 @@ public class EnumCleaner
             {
                 var targetType = preferredEnumType ?? obj["x-enum-type"]?.GetValue<string>() ?? "integer";
 
-                var preferred = arr.OfType<JsonObject>().FirstOrDefault(o => (o["x-enum-type"]?.GetValue<string>() ?? o["type"]?.GetValue<string>()) == targetType);
+                var preferred = arr.OfType<JsonObject>().FirstOrDefault(o => (o["x-enum-type"]?.GetValue<string>() ?? GetScalarType(o["type"])) == targetType);
 
                 if (preferred != null)
                 {
@@ -79,9 +79,17 @@ public class EnumCleaner
 
                     obj["type"] = targetType;
 
+                    // Both spellings are carried: openapi 3.1 states a schema's examples in an `examples`
+                    // array, 3.0 in a singular `example`, and this collapse runs before or after the
+                    // rewrite between them depending on which document is being produced.
                     if (preferred["example"] != null)
                     {
                         obj["example"] = preferred["example"]!.DeepClone();
+                    }
+
+                    if (preferred["examples"] != null)
+                    {
+                        obj["examples"] = preferred["examples"]!.DeepClone();
                     }
 
                     if (preferred["x-enum-varnames"] != null)
@@ -114,6 +122,29 @@ public class EnumCleaner
 
     private static bool IsEnumAnyOf(JsonArray arr)
     {
-        return arr.All(item => item is JsonObject o && o["$ref"] == null && (o["type"]?.GetValue<string>() == "string" || o["type"]?.GetValue<string>() == "integer") && o["enum"] is JsonArray);
+        return arr.All(item => item is JsonObject o && o["$ref"] == null && (GetScalarType(o["type"]) == "string" || GetScalarType(o["type"]) == "integer") && o["enum"] is JsonArray);
+    }
+
+    private static string? GetScalarType(JsonNode? typeNode)
+    {
+        if (typeNode is JsonValue value)
+        {
+            return value.TryGetValue<string>(out var single) ? single : null;
+        }
+
+        // Openapi 3.1 spells a nullable enum as `"type": ["string", "null"]`. The null branch says nothing about
+        // the value type, so the union is matched by the one type left next to it.
+        if (typeNode is JsonArray types)
+        {
+            var named = types
+                .OfType<JsonValue>()
+                .Select(t => t.TryGetValue<string>(out var name) ? name : null)
+                .Where(name => name is not null and not "null")
+                .ToArray();
+
+            return named.Length == 1 ? named[0] : null;
+        }
+
+        return null;
     }
 }

@@ -39,9 +39,7 @@ namespace ASC.Web.Api.Controllers;
 /// Modules API.
 /// </remarks>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("modules")]
+[ApiEndpoint("modules")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : ControllerBase
 {

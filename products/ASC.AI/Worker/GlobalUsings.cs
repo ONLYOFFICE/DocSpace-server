@@ -31,12 +31,10 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using ASC.AI.Integration.Database;
 global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Core;
-global using ASC.AI.Core.Chat.Data;
-global using ASC.AI.Core.Chat.Deletion;
 global using ASC.Api.Core.Extensions;
-global using ASC.AI.Core.Export;
 global using ASC.AI.Worker;
 global using ASC.AI.Worker.BackgroundServices;
 global using ASC.AI.Worker.Extensions;
@@ -73,6 +71,7 @@ global using Microsoft.EntityFrameworkCore;
 
 global using NLog;
 
+global using System.Globalization;
 global using System.Text;
 global using System.Threading.Channels;
 

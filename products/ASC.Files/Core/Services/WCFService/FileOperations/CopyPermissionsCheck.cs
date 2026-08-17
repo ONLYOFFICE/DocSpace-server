@@ -1,49 +1,73 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class CopyPermissionsCheck<T>(IFileDao<T> fileDao, PermissionCheckStarter<T, int> intPermissionManager, PermissionCheckStarter<T, string> stringPermissionManager)
+public class CopyPermissionsCheck<T>(IDaoFactory daoFactory, PermissionCheckStarter<T, int> intPermissionManager, PermissionCheckStarter<T, string> stringPermissionManager)
     : IPermissionsChecker<FileMoveCopyOperationData<T>, T>,  IPermissionsChecker<FileOperationData<T>, T>
 {
+    private readonly IFileDao<T> _fileDao = daoFactory.GetCacheFileDao<T>();
+    private readonly IFolderDao<T> _folderDao = daoFactory.GetCacheFolderDao<T>();
+
     public async Task RunPermissionCheckAsync(FileOperationData<T> data)
     {
+        var folders = data.Folders?.ToList() ?? [];
+        foreach (var id in folders)
+        {
+            var folder = await _folderDao.GetFolderAsync(id);
+
+            if (folder == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+
+            var copyOperationData = new FileMoveCopyOperationData<T>([id], [], data.TenantId, data.UserId, JsonSerializer.SerializeToElement(folder.ParentId), true, FileConflictResolveType.Duplicate, false, true, data.Headers, data.SessionSnapshot);
+
+            await RunPermissionCheckAsync(copyOperationData);
+        }
+
         var files = data.Files?.ToList() ?? [];
         foreach (var id in files)
         {
-            var file = await fileDao.GetFilesAsync([id]).FirstOrDefaultAsync();
+            var file = await _fileDao.GetFileAsync(id);
+
+            if (file == null)
+            {
+                throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
             var copyOperationData = new FileMoveCopyOperationData<T>([], [id], data.TenantId, data.UserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, false, true, data.Headers, data.SessionSnapshot);
 
             await RunPermissionCheckAsync(copyOperationData);
@@ -68,8 +92,7 @@ public class CopyPermissionsCheck<T>(IFileDao<T> fileDao, PermissionCheckStarter
 [Scope(GenericArguments = [typeof(string), typeof(int)])]
 [Scope(GenericArguments = [typeof(string), typeof(string)])]
 public class PermissionCheckStarter<T, TTo>(
-    IFileDao<T> fileDao,
-    IFolderDao<T> folderDao,
+    IDaoFactory daoFactory,
     IFileDao<TTo> ttoFileDao,
     IFolderDao<TTo> ttoFolderDao,
     FileSecurity security,
@@ -83,6 +106,9 @@ public class PermissionCheckStarter<T, TTo>(
     Global global,
     VectorizationGlobalSettings vectorizationSettings)
 {
+    private readonly IFileDao<T> _fileDao = daoFactory.GetCacheFileDao<T>();
+    private readonly IFolderDao<T> _folderDao = daoFactory.GetCacheFolderDao<T>();
+
     public async Task CheckCopyDataAsync(FileMoveCopyOperationData<T> data, TTo tto)
     {
         var copy = data.Copy;
@@ -97,13 +123,13 @@ public class PermissionCheckStarter<T, TTo>(
 
         foreach (var folderId in folderIds)
         {
-            var folder = await folderDao.GetFolderAsync(folderId);
+            var folder = await _folderDao.GetFolderAsync(folderId);
             await CheckFoldersPermissionsAsync(folder, toFolder, copy, resolveType, true);
         }
 
         foreach (var fileId in fileIds)
         {
-            var file = await fileDao.GetFileAsync(fileId);
+            var file = await _fileDao.GetFileAsync(fileId);
             await CheckFilesPermissionsAsync(file, toFolder, copy, resolveType, true);
         }
     }
@@ -157,12 +183,12 @@ public class PermissionCheckStarter<T, TTo>(
             var fromRoomId = default(T);
             var toRoom = parentFolders.FirstOrDefault(parent => parent.FolderType == FolderType.FillingFormsRoom);
 
-            FileEntry<T> fileEntry = folders.Count > 0 ? await folderDao.GetFolderAsync(folders.FirstOrDefault()) :
-                files.Count > 1 ? await fileDao.GetFileAsync(files.FirstOrDefault()) : null;
+            FileEntry<T> fileEntry = folders.Count > 0 ? await _folderDao.GetFolderAsync(folders.FirstOrDefault()) :
+                files.Count > 1 ? await _fileDao.GetFileAsync(files.FirstOrDefault()) : null;
 
             if (fileEntry != null)
             {
-                (fromRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fileEntry);
+                (fromRoomId, _, _) = await _folderDao.GetParentRoomInfoFromFileEntryAsync(fileEntry);
             }
 
             if (int.TryParse(fromRoomId?.ToString(), out var frId) &&
@@ -197,7 +223,7 @@ public class PermissionCheckStarter<T, TTo>(
 
         if (0 < folders.Count)
         {
-            var firstFolder = await folderDao.GetFolderAsync(folders[0]);
+            var firstFolder = await _folderDao.GetFolderAsync(folders[0]);
             isRoom = firstFolder.IsRoom;
 
             if (copy && !await security.CanCopyAsync(firstFolder))
@@ -240,7 +266,7 @@ public class PermissionCheckStarter<T, TTo>(
 
         if (0 < files.Count)
         {
-            var firstFile = await fileDao.GetFileAsync(files[0]);
+            var firstFile = await _fileDao.GetFileAsync(files[0]);
 
             if (firstFile == null)
             {
@@ -322,7 +348,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        var (rId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+        var (rId, _, _) = await _folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
         var parentRoomId = rId.ToString();
         var parentFolders = await ttoFolderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
 
@@ -506,14 +532,14 @@ public class PermissionCheckStarter<T, TTo>(
 
         if (copy || conflictFolder != null)
         {
-            if (toFolder.ProviderId == folder.ProviderId && folderDao.UseRecursiveOperation(folder.Id, toFolder.Id))
+            if (toFolder.ProviderId == folder.ProviderId && _folderDao.UseRecursiveOperation(folder.Id, toFolder.Id))
             {
-                if (!copy && checkPermissions && !await security.CanMoveAsync(folder))
+                if (!copy && !await security.CanMoveAsync(folder))
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
                 }
             }
-            else if (conflictFolder != null && resolveType != FileConflictResolveType.Overwrite && !copy && checkPermissions && !await security.CanMoveAsync(folder))
+            else if (conflictFolder != null && resolveType != FileConflictResolveType.Overwrite && !copy && !await security.CanMoveAsync(folder))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
             }
@@ -523,9 +549,9 @@ public class PermissionCheckStarter<T, TTo>(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
         }
 
-        var files = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
+        var files = await _fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
 
-        errorMsg = await CheckFilesSecurityPermissionsAsync(files, checkPermissions);
+        errorMsg = await CheckFilesSecurityPermissionsAsync(files, false);
         if (errorMsg != null)
         {
             throw new SecurityException(errorMsg);
@@ -777,7 +803,7 @@ public class PermissionCheckStarter<T, TTo>(
 
     private async Task<bool> CompliesPrivateRoomRulesAsync(bool copy, FileEntry<T> entry, IEnumerable<Folder<TTo>> toFolderParents)
     {
-        var entryParentRoom = await folderDao.GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => f.SettingsPrivate && f.IsRoom);
+        var entryParentRoom = await _folderDao.GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => f.SettingsPrivate && f.IsRoom);
 
         var toFolderParentRoom = toFolderParents.FirstOrDefault(f => f.SettingsPrivate && f.IsRoom);
 

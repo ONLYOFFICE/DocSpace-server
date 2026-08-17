@@ -33,7 +33,7 @@
 
 namespace ASC.AI.Core.Settings;
 
-public class AiUserSettings : ISettings<AiUserSettings>
+public record AiUserSettings : ISettings<AiUserSettings>
 {
     public static Guid ID { get; } = new("A1F3C2D4-7B8E-4F9A-B6C1-3D5E2A0F1B7C");
 

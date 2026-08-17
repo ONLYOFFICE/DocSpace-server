@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
 public class ThreadReadTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -52,7 +51,7 @@ public class ThreadReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadById_NonExisting_Returns404()
     {
-        using var response = await Ai.GetAsync(
+        using var response = await _ai.GetAsync(
             $"{ThreadsPath}/{Guid.NewGuid()}",
             TestContext.Current.CancellationToken);
 

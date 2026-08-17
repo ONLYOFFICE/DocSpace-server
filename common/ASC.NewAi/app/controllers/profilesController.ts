@@ -111,13 +111,13 @@ interface ListProviderModelsBody {
 
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
-    assertSafeBaseUrl(req.body?.baseUrl);
+    await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.create(req.body);
     res.json(result);
   }),
 
   update: asyncHandler<Profile>(async (req, res) => {
-    assertSafeBaseUrl(req.body?.baseUrl);
+    await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.update(req.body);
     res.json(result);
   }),
@@ -139,7 +139,7 @@ export const profilesController = {
       res.status(400).json({ error: "providerType and baseUrl required" });
       return;
     }
-    assertSafeBaseUrl(baseUrl);
+    await assertSafeBaseUrl(baseUrl);
     try {
       const models = await engine.listProviderModels({
         providerType,
@@ -164,8 +164,18 @@ export const profilesController = {
       res.status(400).json({ error: "profileId required" });
       return;
     }
-    const models = await engine.listModels(profileId);
-    res.json(models);
+    try {
+      const models = await engine.listModels(profileId);
+      res.json(models);
+    } catch (err) {
+      const { status, message } = describeProviderError(err);
+      logger.warn(
+        `listModels failed (profileId=${profileId}) -> ${status}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      res.status(status).json({ error: message });
+    }
   }),
 
   testConnection: asyncHandler(async (req, res) => {
@@ -186,7 +196,17 @@ export const profilesController = {
       return;
     }
     const profile = await engine.getById(id);
-    res.json(profile ?? null);
+    if (!profile) {
+      res.status(404).json({ error: "Profile not found" });
+      return;
+    }
+    // Return the full profile (same shape as `list`): the doceditor AI
+    // passthrough (packages/doceditor .../ai/passthrough) resolves the
+    // profile through this endpoint and needs baseUrl/key/headers to reach
+    // the provider. get-by-id is caller-scoped (a user reads their own
+    // profile), so this is not a cross-user leak — the earlier redaction
+    // (Bug 82821) broke the passthrough and is reverted.
+    res.json(profile);
   }),
 
   list: asyncHandler(async (_req, res) => {

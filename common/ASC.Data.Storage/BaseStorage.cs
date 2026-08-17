@@ -176,19 +176,19 @@ public abstract class BaseStorage(TempStream tempStream,
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return await SaveAsync(domain, path, Guid.Empty, stream, attachmentFileName, token);
+        return await SaveAsync(domain, path, Guid.Empty, stream, attachmentFileName, token: token);
     }
 
-    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
+    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, bool allowQuotaGrace = false, CancellationToken token = default)
     {
         if (!string.IsNullOrEmpty(attachmentFileName))
         {
-            return await SaveWithAutoAttachmentAsync(domain, path, ownerId, stream, attachmentFileName, token);
+            return await SaveWithAutoAttachmentAsync(domain, path, ownerId, stream, attachmentFileName, allowQuotaGrace, token);
         }
         return await SaveAsync(domain, path, stream, ownerId, token);
     }
 
-    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default);
+    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, bool allowQuotaGrace, CancellationToken token = default);
 
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                             string contentDisposition, CancellationToken token = default);
@@ -380,17 +380,17 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract string GetPostParams(string domain, string directoryPath, long maxUploadSize, string contentType,
                                          string contentDisposition);
 
-    internal async Task QuotaUsedAddAsync(string domain, long size, bool quotaCheckFileSize = true)
+    internal async Task QuotaUsedAddAsync(string domain, long size, bool quotaCheckFileSize = true, bool allowQuotaGrace = false)
     {
-        await QuotaUsedAddAsync(domain, size, Guid.Empty, quotaCheckFileSize);
+        await QuotaUsedAddAsync(domain, size, Guid.Empty, quotaCheckFileSize, allowQuotaGrace);
     }
-    internal async Task QuotaUsedAddAsync(string domain, long size, Guid ownerId, bool quotaCheckFileSize = true)
+    internal async Task QuotaUsedAddAsync(string domain, long size, Guid ownerId, bool quotaCheckFileSize = true, bool allowQuotaGrace = false)
     {
         if (QuotaController != null)
         {
             ownerId = ownerId == Guid.Empty ? Core.Configuration.Constants.CoreSystem.ID : ownerId;
 
-            await QuotaController.QuotaUsedAddAsync(Modulename, domain, DataList.GetData(domain), size, ownerId, quotaCheckFileSize);
+            await QuotaController.QuotaUsedAddAsync(Modulename, domain, DataList.GetData(domain), size, ownerId, quotaCheckFileSize, allowQuotaGrace);
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
             await NotifyChangeUserQuota(ownerId);

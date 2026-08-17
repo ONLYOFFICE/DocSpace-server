@@ -1321,7 +1321,7 @@
     <value>Căutare web</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Căutare web</value>
+    <value>Căutare IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Credite IA</value>

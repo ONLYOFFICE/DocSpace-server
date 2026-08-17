@@ -37,6 +37,7 @@ import type { QueryValue } from "../storage/httpClient.js";
 import { asyncHandler } from "./_helpers.js";
 import { isObject, getString, getNumber, getObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
+import { sanitizeInstruction } from "../sanitizeInstruction.js";
 
 // The agent's profile is stored as an assignment scoped to the agent's
 // entry id. `Chat` is the action an agent room serves; fall back to
@@ -128,7 +129,7 @@ export const agentsController = {
     // agent id is read out of `response` for the assignment.
     const envelope = await aiService.post(
       "/agents",
-      { ...rest, chatSettings: { prompt } },
+      { ...rest, chatSettings: { prompt: sanitizeInstruction(prompt) } },
       { raw: true },
     );
     const created = isObject(envelope) ? getObject(envelope, "response") : undefined;
@@ -205,6 +206,17 @@ export const agentsController = {
       badRequest("profileId must be a UUID");
     }
     const { profileId: _profileId, ...rest } = body;
+
+    // The instruction (chatSettings.prompt) is untrusted: strip markup before
+    // forwarding so stored HTML can't round-trip into another user's reply
+    // (Bug 82726). Mirrors createAgent and the read-side in safeGetAgentInstruction.
+    const chatSettings = getObject(rest, "chatSettings");
+    if (chatSettings) {
+      const prompt = getString(chatSettings, "prompt");
+      if (prompt !== undefined) {
+        chatSettings["prompt"] = sanitizeInstruction(prompt);
+      }
+    }
 
     const agent = await aiService.put(`/agents/${id}`, rest, { raw: true });
 

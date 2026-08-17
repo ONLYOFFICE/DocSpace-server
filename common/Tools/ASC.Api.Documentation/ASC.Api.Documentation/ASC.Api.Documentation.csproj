@@ -46,4 +46,42 @@
     <Exec Command="yarn openapi" WorkingDirectory="$(NewAiServiceDir)" />
   </Target>
 
+  <!--
+    Render the Markdown API reference as part of building the documentation
+    solution, so that Build/Rebuild refreshes the per-service `json/*.md` the same way it
+    refreshes the `json/*_2.0.json` OpenAPI documents.
+
+    These references exist purely to order the build: the Markdown is rendered
+    from the joined `json/*_2.0.json` documents, which the service projects emit
+    during their own Build. Without them MSBuild is free to build this project
+    first and would silently render last build's documents. ReferenceOutputAssembly
+    keeps it an ordering constraint only - no service assembly is referenced.
+
+    Gated on OpenApiGenerateDocuments so that building this project on its own
+    stays a few seconds and does not drag in the whole service graph.
+  -->
+  <ItemGroup Condition="'$(OpenApiGenerateDocuments)' == 'true'">
+    <ProjectReference Include="..\..\..\..\web\ASC.Web.Api\ASC.Web.Api.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\..\products\ASC.Files\Server\ASC.Files.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\..\products\ASC.People\Server\ASC.People.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\..\products\ASC.AI\Server\ASC.AI.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\services\ASC.Data.Backup\ASC.Data.Backup.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\services\ASC.ApiSystem\ASC.ApiSystem.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <!--
+    The tool resolves the paths from appsettings.json against the current
+    directory, so it has to run from its own output directory. The `Markdown`
+    command renders through the `my-markdown` custom generator, so this step also
+    rebuilds the generator jar with Maven - budget for that on top of the
+    generation itself. Requires openapi-generator-cli, Maven and a JDK on the
+    build agent.
+  -->
+  <Target Name="GenerateMarkdownApiDocs"
+          AfterTargets="Build"
+          Condition="'$(OpenApiGenerateDocuments)' == 'true'">
+    <Message Importance="high" Text="Rendering Markdown API documentation (json/*.md, one document per service)..." />
+    <Exec Command="dotnet &quot;$(TargetPath)&quot; Markdown" WorkingDirectory="$(TargetDir)" />
+  </Target>
+
 </Project>

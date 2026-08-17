@@ -33,59 +33,22 @@
 
 namespace ASC.People.Tests.PeopleController;
 
-[Collection("Test Collection")]
 public class GuestTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
     [Fact]
     public async Task CreateGuest_ShouldCreateGuestSuccessfully()
     {
-        await _apiClient.Authenticate(Initializer.Owner);
-        var fakeMember = Initializer.FakerMember.Generate();
-        
         // Act
-        var shortLink = (await _portalUsersApi.GetInvitationLinkAsync(EmployeeType.Guest, TestContext.Current.CancellationToken)).Response;
-        var fullLink = await _apiClient.GetAsync(shortLink, TestContext.Current.CancellationToken);
-        var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
-        
-        await _peopleClient.Authenticate(Initializer.Owner);
-        _peopleClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
-        
-        var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
-        if(!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
-        {
-            parsedEmployeeType = EmployeeType.Guest;
-        }
-        
-        var response = await _profilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
-        {
-            FromInviteLink = true,
-            CultureName = "en-US",
-            Spam = false,
-            
-            Email = fakeMember.Email,
-            Password = fakeMember.Password,
-            FirstName = fakeMember.FirstName,
-            LastName = fakeMember.LastName,
-            
-            Type = parsedEmployeeType,
-            Key = parsedQuery["key"],
-        }, TestContext.Current.CancellationToken);
-        
-        _peopleClient.DefaultRequestHeaders.Remove("confirm");
-        
-        // Arrange
-        await _peopleClient.Authenticate(Initializer.Owner);
-        
-        
+        var guest = await InviteGuest();
+
         // Assert
-        response.Should().NotBeNull();
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        var createdGuest = response.Data.Response;
+        await _peopleClient.Authenticate(Owner);
+
+        var createdGuest = (await _profilesApi.GetProfileByUserIdAsync(guest.Id.ToString(), TestContext.Current.CancellationToken)).Response;
+
         createdGuest.Should().NotBeNull();
-        createdGuest.Email.Should().Be(fakeMember.Email);
-        createdGuest.FirstName.Should().Be(fakeMember.FirstName);
-        createdGuest.LastName.Should().Be(fakeMember.LastName);
+        createdGuest.Id.Should().Be(guest.Id);
+        createdGuest.Email.Should().Be(guest.Email);
         createdGuest.IsVisitor.Should().BeTrue();
     }
     
@@ -94,12 +57,12 @@ public class GuestTest(AspireAppFixture fixture) : BaseTest(fixture)
     // [Trait("Bug", "79419")]
     // public async Task CreateUser_AsRoomAdmin_ShouldCreateUserSuccessfully()
     // {
-    //     await _apiClient.Authenticate(Initializer.Owner);
-    //     var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
-    //     var guestFromOwner = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+    //     await _apiClient.Authenticate(Owner);
+    //     var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+    //     var guestFromOwner = await InviteContact(EmployeeType.Guest, roomAdmin);
     //     
     //     await _peopleClient.Authenticate(roomAdmin);
-    //     var guestFromRoomAdmin = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+    //     var guestFromRoomAdmin = await InviteContact(EmployeeType.Guest, roomAdmin);
     //     
     //     var updateUserTypeResponse = (await _userTypeApi.UpdateUserTypeAsync(EmployeeType.User, new UpdateMembersRequestDto([guestFromOwner.Id]), TestContext.Current.CancellationToken)).Response;
     //     updateUserTypeResponse.Should().BeEmpty();

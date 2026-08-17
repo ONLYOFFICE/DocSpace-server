@@ -1321,7 +1321,7 @@
     <value>Webzoekopdracht</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Webzoekopdracht</value>
+    <value>AI-zoeken</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI-credits</value>
