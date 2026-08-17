@@ -476,9 +476,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.48.tgz::locator=asc-new-ai%40workspace%3A.":
-  version: 0.5.48
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.48.tgz#onlyoffice-ai-chat-0.5.48.tgz::hash=88c4e4&locator=asc-new-ai%40workspace%3A."
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.49.tgz::locator=asc-new-ai%40workspace%3A.":
+  version: 0.5.49
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.49.tgz#onlyoffice-ai-chat-0.5.49.tgz::hash=8f3236&locator=asc-new-ai%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -571,7 +571,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/56650c4b3d5c1176df00c13b6d0fe923473d41ea8afe0456787ff2d8ba44e10310d377924d4ff6d226f6f41e354b4cc180b525a63774ed7ad1afc114c3ad6fb9
+  checksum: 10/dfc5ae1fef8d57afc408790ecce93b18dc004d239e645d17325a9f17950775c45c4c61426afcd68cae7e4546e373f79d98875df93971abb4f4ccb99cb6b1f8fc
   languageName: node
   linkType: hard
 
@@ -942,7 +942,7 @@ __metadata:
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
     "@google/genai": "npm:^1.30.0"
     "@mistralai/mistralai": "npm:^1.11.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.5.48.tgz"
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.5.49.tgz"
     "@types/body-parser": "npm:^1.19.5"
     "@types/cookie-parser": "npm:^1.4.7"
     "@types/cors": "npm:^2.8.17"
