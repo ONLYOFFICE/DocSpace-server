@@ -69,13 +69,13 @@ internal class Target<TFolder>(IFolderDao<TFolder> folderDao, TFolder folderId) 
 
         if (_folder == null)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (_folder.FolderType is FolderType.AiRoom)
         {
             var folder = await folderDao.GetFoldersAsync(_folder.Id, FolderType.ResultStorage)
-                .FirstOrDefaultAsync() ?? throw new Exception(FilesCommonResource.ErrorMessage_FolderNotFound);
+                .FirstOrDefaultAsync() ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
 
             _folder = folder;
         }

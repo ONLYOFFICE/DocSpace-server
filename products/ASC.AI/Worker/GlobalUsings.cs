@@ -31,6 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using ASC.AI.Integration.Database;
 global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
@@ -70,6 +71,7 @@ global using Microsoft.EntityFrameworkCore;
 
 global using NLog;
 
+global using System.Globalization;
 global using System.Text;
 global using System.Threading.Channels;
 

@@ -31,18 +31,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.Settings;
+namespace ASC.AI.Integration.Attachments;
 
-public record AiUserSettings : ISettings<AiUserSettings>
+/// <summary>
+/// The key of an attachment that was never bound to a message. Deliberately holds no payload:
+/// the cleanup sweep reads these in batches and <see cref="Attachment.Content"/> can be megabytes.
+/// </summary>
+public class OrphanAttachment
 {
-    public static Guid ID { get; } = new("A1F3C2D4-7B8E-4F9A-B6C1-3D5E2A0F1B7C");
-
-    /// <summary>
-    /// Indicates whether the recommended model banner is visible in the AI chat.
-    /// </summary>
-    public bool ChatRecommendedModelVisible { get; init; }
-
-    public DateTime LastModified { get; set; }
-
-    public AiUserSettings GetDefault() => new() { ChatRecommendedModelVisible = true };
+    public int TenantId { get; init; }
+    public Guid Id { get; init; }
 }

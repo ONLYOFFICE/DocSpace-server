@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>The required folder was not found</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Invalid folder id</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Invalid provider</value>
   </data>

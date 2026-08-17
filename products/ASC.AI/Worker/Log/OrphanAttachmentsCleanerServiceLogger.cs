@@ -31,18 +31,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.Settings;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-public record AiUserSettings : ISettings<AiUserSettings>
+namespace ASC.AI.Worker.Log;
+
+internal static partial class OrphanAttachmentsCleanerServiceLogger
 {
-    public static Guid ID { get; } = new("A1F3C2D4-7B8E-4F9A-B6C1-3D5E2A0F1B7C");
+    [LoggerMessage(LogLevel.Information, "Deleted {Count} orphan attachments older than {CutoffDate}")]
+    public static partial void InformationDeletedOrphanAttachments(this ILogger logger, int count, DateTime cutoffDate);
 
-    /// <summary>
-    /// Indicates whether the recommended model banner is visible in the AI chat.
-    /// </summary>
-    public bool ChatRecommendedModelVisible { get; init; }
-
-    public DateTime LastModified { get; set; }
-
-    public AiUserSettings GetDefault() => new() { ChatRecommendedModelVisible = true };
+    [LoggerMessage(LogLevel.Error, "Failed to clean up orphan attachments")]
+    public static partial void ErrorCleanUpOrphanAttachments(this ILogger logger, Exception exception);
 }

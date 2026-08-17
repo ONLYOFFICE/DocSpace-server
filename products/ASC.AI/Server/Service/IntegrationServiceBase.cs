@@ -41,6 +41,8 @@ public abstract class IntegrationServiceBase(
     AiGateway aiGateway)
 {
     protected Guid CurrentUserId => authContext.CurrentAccount.ID;
+    protected IDaoFactory DaoFactory => daoFactory;
+    protected FileSecurity FileSecurity => fileSecurity;
 
     protected async Task<int?> AssertUserHasAccessAsync(IEnumerable<EmployeeType> types, string? entityId = null)
     {

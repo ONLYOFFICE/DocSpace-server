@@ -31,18 +31,50 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Core.Settings;
+namespace ASC.AI.Tests.Tests.TextToDocxTests;
 
-public record AiUserSettings : ISettings<AiUserSettings>
+[Trait("Category", "API")]
+[Trait("Feature", "AI/TextToDocx")]
+public class TextToDocxPublishTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    public static Guid ID { get; } = new("A1F3C2D4-7B8E-4F9A-B6C1-3D5E2A0F1B7C");
+    private const string TextToDocxStartPath = "/internal/ai/text-to-docx/start";
 
-    /// <summary>
-    /// Indicates whether the recommended model banner is visible in the AI chat.
-    /// </summary>
-    public bool ChatRecommendedModelVisible { get; init; }
+    [Fact]
+    public async Task Publish_MyDocuments_ReturnsNoContent()
+    {
+        var folderId = await GetMyDocumentsFolderIdAsync();
 
-    public DateTime LastModified { get; set; }
+        using var response = await PublishAsync(folderId);
 
-    public AiUserSettings GetDefault() => new() { ChatRecommendedModelVisible = true };
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task Publish_NonPositiveFolderId_ReturnsBadRequest(int folderId)
+    {
+        using var response = await PublishAsync(folderId);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Publish_NonexistentFolderId_ReturnsNotFound()
+    {
+        using var response = await PublishAsync(999999999);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    private Task<HttpResponseMessage> PublishAsync(int folderId) =>
+        _ai.PostAsync(
+            TextToDocxStartPath,
+            new
+            {
+                title = $"document-{Guid.NewGuid():N}",
+                content = "# Heading\n\nGenerated content.",
+                folderId
+            },
+            TestContext.Current.CancellationToken);
 }

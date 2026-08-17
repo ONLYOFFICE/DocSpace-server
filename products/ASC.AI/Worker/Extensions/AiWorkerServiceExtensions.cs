@@ -51,6 +51,7 @@ public static class AiWorkerServiceExtensions
         services.RegisterQueue<AsyncTaskData<string>>();
 
         services.AddActivePassiveHostedService<OrphanVectorsCleanerService>(configuration);
+        services.AddActivePassiveHostedService<OrphanAttachmentsCleanerService>(configuration);
 
         services.AddSingleton(Channel.CreateBounded<VectorsDeletionIntegrationEvent>(new BoundedChannelOptions(1000)
         {

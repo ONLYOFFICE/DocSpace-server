@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20260815183312_MigrationContext_Upgrade93")]
+    partial class MigrationContext_Upgrade93
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -211,12 +214,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("created_by")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
                     b.Property<int?>("EntryId")
                         .HasColumnType("int")
                         .HasColumnName("entry_id");
@@ -248,9 +245,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
-
-                    b.HasIndex("MessageId", "CreatedAt")
-                        .HasDatabaseName("IX_message_id_created_at");
 
                     b.HasIndex("TenantId", "EntryId")
                         .HasDatabaseName("IX_tenant_id_entry_id");

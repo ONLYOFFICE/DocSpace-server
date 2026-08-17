@@ -47,17 +47,24 @@ public class AttachmentResult
 
 [Scope]
 public class AttachmentsStorageService(
+    UserManager userManager,
+    AuthContext authContext,
     TenantManager tenantManager,
     AttachmentsStorage storage,
+    MessageStorageService messageStorageService,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
-    VectorizationGlobalSettings vectorizationGlobalSettings)
+    VectorizationGlobalSettings vectorizationGlobalSettings,
+    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly TimeSpan _downloadUrlExpiration = TimeSpan.FromHours(1);
+    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async IAsyncEnumerable<AttachmentResult> CreateManyAsync(HashSet<string> entryIds)
     {
+        await AssertUserHasAccessAsync(_allowedTypes);
+
         if (entryIds.Count == 0)
         {
             yield break;
@@ -78,8 +85,8 @@ public class AttachmentsStorageService(
             }
         }
 
-        var intDao = daoFactory.GetFileDao<int>();
-        var strDao = daoFactory.GetFileDao<string>();
+        var intDao = DaoFactory.GetFileDao<int>();
+        var strDao = DaoFactory.GetFileDao<string>();
 
         var internalFiles = await LoadFilesAsync(intDao, internalIds);
         var thirdpartyFiles = await LoadFilesAsync(strDao, thirdpartyIds);
@@ -96,7 +103,7 @@ public class AttachmentsStorageService(
             createParams.Add(await BuildParamAsync(strDao, file));
         }
 
-        var created = await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), createParams);
+        var created = await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, createParams);
         var index = 0;
 
         foreach (var file in internalFiles)
@@ -112,7 +119,9 @@ public class AttachmentsStorageService(
 
     public async Task<AttachmentResult> ReadByIdAsync(Guid id)
     {
-        var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id)
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id)
             ?? throw new ItemNotFoundException();
 
         var dataUrl = attachment.Kind == AttachmentKind.Image
@@ -124,7 +133,9 @@ public class AttachmentsStorageService(
 
     public async IAsyncEnumerable<AttachmentResult> ReadManyByIdsAsync(HashSet<Guid> ids)
     {
-        var attachments = await storage.ReadManyByIdsAsync(tenantManager.GetCurrentTenantId(), ids);
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        var attachments = await storage.ReadManyByIdsAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids);
 
         foreach (var attachment in attachments)
         {
@@ -138,17 +149,25 @@ public class AttachmentsStorageService(
 
     public async Task UpdateManyAsync(HashSet<Guid> ids, Guid messageId)
     {
-        await storage.UpdateManyAsync(tenantManager.GetCurrentTenantId(), ids, messageId);
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        var message = await messageStorageService.ReadByIdAsync(messageId);
+
+        await storage.UpdateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids, message.Id);
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), id);
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id);
     }
 
     public async Task DeleteManyAsync(HashSet<Guid> ids)
     {
-        await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), ids);
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids);
     }
 
     private async Task<List<File<T>>> LoadFilesAsync<T>(IFileDao<T> fileDao, IReadOnlyCollection<T> entryIds)
@@ -166,7 +185,7 @@ public class AttachmentsStorageService(
                 continue;
             }
 
-            if (!await fileSecurity.CanReadAsync(file))
+            if (!await FileSecurity.CanReadAsync(file))
             {
                 throw new SecurityException();
             }
@@ -191,7 +210,7 @@ public class AttachmentsStorageService(
                 internalEntryId = intFile.Id;
                 break;
             case File<string> strFile:
-                var (hashId, _) = await daoFactory.GetMapping<string>().MappingIdAsync(strFile.Id, saveIfNotExist: true);
+                var (hashId, _) = await DaoFactory.GetMapping<string>().MappingIdAsync(strFile.Id, saveIfNotExist: true);
                 thirdpartyEntryId = hashId;
                 break;
         }
@@ -258,14 +277,14 @@ public class AttachmentsStorageService(
     {
         if (attachment.EntryId.HasValue)
         {
-            var fileDao = daoFactory.GetFileDao<int>();
+            var fileDao = DaoFactory.GetFileDao<int>();
             var file = await fileDao.GetFileAsync(attachment.EntryId.Value);
             return file == null ? null : await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration);
         }
 
         if (!string.IsNullOrEmpty(attachment.ThirdpartyEntryId))
         {
-            var fileDao = daoFactory.GetFileDao<string>();
+            var fileDao = DaoFactory.GetFileDao<string>();
             var file = await fileDao.GetFileAsync(attachment.ThirdpartyEntryId);
             return file == null ? null : await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration);
         }
