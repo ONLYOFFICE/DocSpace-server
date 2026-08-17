@@ -35,7 +35,10 @@ package com.asc.authorization.application.security.oauth.service;
 
 import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
 import com.asc.authorization.application.mapper.ClientMapper;
+import com.asc.authorization.data.client.cache.CachedRegisteredClient;
 import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
+import com.asc.common.utilities.concurrent.SingleFlight;
+import java.time.Duration;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,10 +58,44 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class RegisteredClientService
-    implements RegisteredClientRepository, RegisteredClientAccessibilityService {
+    implements RegisteredClientRepository,
+        RegisteredClientAccessibilityService,
+        RegisteredClientOwnerService {
+  private static final Duration RESOLUTION_WAIT = Duration.ofMillis(1500);
+  private final SingleFlight<String, CachedRegisteredClient> calls =
+      new SingleFlight<>(RESOLUTION_WAIT);
+
   private final RegisteredClientCacheService registeredClientCacheService;
   private final GrpcRegisteredClientService grpcRegisteredClientService;
   private final ClientMapper clientMapper;
+
+  /**
+   * Fetches a client from the gRPC service and caches it for subsequent lookups.
+   *
+   * @param clientId the client ID to fetch.
+   * @return the fetched snapshot of the client.
+   */
+  private CachedRegisteredClient fetchAndCache(String clientId) {
+    var client = grpcRegisteredClientService.getClient(clientId);
+    var cachedClient = clientMapper.toCachedRegisteredClient(client);
+    registeredClientCacheService.put(cachedClient);
+
+    return cachedClient;
+  }
+
+  /**
+   * Resolves a client from the cache, falling back to the gRPC service and populating the cache on
+   * a miss.
+   *
+   * @param clientId the client ID to resolve.
+   * @return the cached snapshot of the client.
+   */
+  private CachedRegisteredClient resolveCachedClient(String clientId) {
+    var cachedClient = registeredClientCacheService.get(clientId).orElse(null);
+    if (cachedClient != null) return cachedClient;
+
+    return calls.execute(clientId, () -> fetchAndCache(clientId));
+  }
 
   /**
    * Saves a registered client.
@@ -89,13 +126,7 @@ public class RegisteredClientService
       MDC.put("client_id", id);
       log.info("Trying to find registered client by id");
 
-      var cachedClient = registeredClientCacheService.get(id).orElse(null);
-      if (cachedClient == null) {
-        var client = grpcRegisteredClientService.getClient(id);
-        cachedClient = clientMapper.toCachedRegisteredClient(client);
-        registeredClientCacheService.put(cachedClient);
-      }
-
+      var cachedClient = resolveCachedClient(id);
       if (!cachedClient.isEnabled())
         throw new RegisteredClientPermissionException(
             String.format("Client with id %s is disabled", id));
@@ -140,18 +171,28 @@ public class RegisteredClientService
    */
   public Optional<RegisteredClient> findAccessibleClient(String clientId) {
     try {
-      var cachedClient = registeredClientCacheService.get(clientId).orElse(null);
-      if (cachedClient == null) {
-        var client = grpcRegisteredClientService.getClient(clientId);
-        cachedClient = clientMapper.toCachedRegisteredClient(client);
-        registeredClientCacheService.put(cachedClient);
-      }
-
+      var cachedClient = resolveCachedClient(clientId);
       if (!cachedClient.isPublicClient() || !cachedClient.isEnabled()) return Optional.empty();
 
       return Optional.of(clientMapper.toRegisteredClient(cachedClient));
     } catch (Exception e) {
       log.warn("Registered client not found for client ID: {}", clientId);
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Resolves the owner of a client from the cache, falling back to the gRPC service on a miss.
+   *
+   * @param clientId the client ID whose owner to resolve.
+   * @return the owner, or empty if the client could not be resolved.
+   */
+  public Optional<Owner> findClientOwner(String clientId) {
+    try {
+      var cachedClient = resolveCachedClient(clientId);
+      return Optional.of(new Owner(cachedClient.getTenantId(), cachedClient.getCreatedBy()));
+    } catch (Exception e) {
+      log.warn("Could not resolve the owner of client ID: {}", clientId);
       return Optional.empty();
     }
   }

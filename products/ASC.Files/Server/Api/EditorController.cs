@@ -38,7 +38,7 @@ using EditorToolCallStateMapper = ASC.Files.ApiModels.ResponseDto.EditorToolCall
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-[DefaultRoute("file")]
+[ApiEndpoint(Template = "file")]
 public class EditorControllerInternal(
     FileStorageService fileStorageService,
     DocumentServiceHelper documentServiceHelper,
@@ -62,7 +62,7 @@ public class EditorControllerInternal(
         httpContextAccessor,
         editorToolCallStateStore);
 
-[DefaultRoute("file")]
+[ApiEndpoint(Template = "file")]
 public class EditorControllerThirdparty(
     FileStorageService fileStorageService,
     DocumentServiceHelper documentServiceHelper,

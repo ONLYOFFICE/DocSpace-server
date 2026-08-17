@@ -38,9 +38,8 @@ import com.asc.authorization.application.exception.authentication.Authentication
 import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.application.security.authentication.TenantAuthority;
 import com.asc.authorization.application.security.oauth.error.AuthenticationError;
-import com.asc.authorization.application.security.oauth.service.GrpcRegisteredClientService;
+import com.asc.authorization.application.security.oauth.service.RegisteredClientService;
 import com.asc.authorization.application.security.service.SignatureService;
-import com.asc.common.application.proto.ClientResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,8 +47,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -66,20 +63,19 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 /**
  * Custom Authentication Provider for authenticating users using a signature.
  *
- * <p>This provider validates the ASC signature token, fetches client information from a gRPC
- * service, validates the client, and constructs an authenticated token with user and tenant
- * details. It also publishes audit logs for successful authentications.
+ * <p>This provider validates the ASC signature token, loads the registered client from cache then
+ * gRPC, and constructs an authenticated token with user and tenant details.
  */
 @Slf4j
 @Component("authorizationSignatureAuthenticationProvider")
 public class SignatureAuthenticationProvider implements AuthenticationProvider {
   private final SignatureService signatureService;
-  private final GrpcRegisteredClientService registeredClientService;
+  private final RegisteredClientService registeredClientService;
   private final SecurityConfigurationProperties configurationProperties;
 
   public SignatureAuthenticationProvider(
       @Qualifier("authorizationSignatureService") SignatureService signatureService,
-      GrpcRegisteredClientService registeredClientService,
+      RegisteredClientService registeredClientService,
       SecurityConfigurationProperties configurationProperties) {
     this.signatureService = signatureService;
     this.registeredClientService = registeredClientService;
@@ -134,61 +130,23 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
           "Authentication failed due to missing asc signature");
 
     try (var ignored = MDC.putCloseable("client_id", clientId)) {
-      var clientFuture = requestClient(clientId);
       var signature = signatureService.validate(token, BasicSignature.class);
-      var client = clientFuture.get();
+      var client =
+          registeredClientService
+              .findAccessibleClient(clientId)
+              .orElseThrow(
+                  () ->
+                      new AuthenticationProcessingException(
+                          AuthenticationError.CLIENT_NOT_FOUND_ERROR,
+                          "Authentication failed: client not found"));
 
-      validateClient(client);
       setRequestAttributes(request, signature);
-
-      return buildAuthentication(signature, client);
-    } catch (InterruptedException | ExecutionException e) {
-      throw new AuthenticationProcessingException(
-          AuthenticationError.SOMETHING_WENT_WRONG_ERROR, "Authentication failed", e);
+      return buildAuthentication(signature, client.getClientId());
     }
   }
 
   /**
-   * Asynchronously requests client information from the gRPC service.
-   *
-   * @param clientId the client ID to fetch information for.
-   * @return a {@link CompletableFuture} with the {@link ClientResponse}.
-   */
-  private CompletableFuture<ClientResponse> requestClient(String clientId) {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          try {
-            return registeredClientService.getClient(clientId);
-          } catch (Exception e) {
-            return null;
-          }
-        });
-  }
-
-  /**
-   * Validates the client information to ensure it is enabled, public, and accessible.
-   *
-   * @param client the {@link ClientResponse} containing client details.
-   * @throws AuthenticationProcessingException if the client is invalid or not accessible.
-   */
-  private void validateClient(ClientResponse client) {
-    if (client == null)
-      throw new AuthenticationProcessingException(
-          AuthenticationError.CLIENT_NOT_FOUND_ERROR, "Authentication failed: client not found");
-
-    if (!client.getEnabled())
-      throw new AuthenticationProcessingException(
-          AuthenticationError.CLIENT_DISABLED_ERROR, "Client is disabled");
-
-    if (!client.getIsPublic())
-      throw new AuthenticationProcessingException(
-          AuthenticationError.CLIENT_PERMISSION_DENIED_ERROR, "Client is not public");
-  }
-
-  /**
    * Sets request attributes with signature details.
-   *
-   * <p>Attributes include the tenant, user, and ASC signature for downstream processing.
    *
    * @param request the {@link HttpServletRequest}.
    * @param signature the {@link BasicSignature} object containing user and tenant details.
@@ -201,11 +159,11 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
    * Builds an authenticated token with user and tenant details.
    *
    * @param signature the {@link BasicSignature}.
-   * @param client the {@link ClientResponse}.
+   * @param clientId the registered client ID.
    * @return a {@link UsernamePasswordAuthenticationToken}.
    */
   private UsernamePasswordAuthenticationToken buildAuthentication(
-      BasicSignature signature, ClientResponse client) {
+      BasicSignature signature, String clientId) {
     var authenticationToken =
         new UsernamePasswordAuthenticationToken(
             signature.getUserId(),
@@ -213,7 +171,7 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
             List.of(
                 new TenantAuthority(signature.getTenantId(), signature.getTenantUrl()),
                 FactorGrantedAuthority.withFactor("signature").issuedAt(Instant.now()).build()));
-    authenticationToken.setDetails(client.getClientId());
+    authenticationToken.setDetails(clientId);
     return authenticationToken;
   }
 

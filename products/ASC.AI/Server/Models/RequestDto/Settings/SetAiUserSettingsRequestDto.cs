@@ -39,8 +39,8 @@ namespace ASC.AI.Models.RequestDto.Settings;
 public class SetAiUserSettingsRequestDto
 {
     /// <summary>
-    /// Indicates whether the recommended model banner is visible in the AI chat.
+    /// Indicates whether the recommended model banner is visible in the AI chat. If not specified, the current value is preserved.
     /// </summary>
     /// <example>true</example>
-    public bool ChatRecommendedModelVisible { get; init; }
+    public bool? ChatRecommendedModelVisible { get; init; }
 }

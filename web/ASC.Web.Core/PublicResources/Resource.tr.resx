@@ -1168,7 +1168,7 @@
     <value>Yapay zekâ ajanı sayısı {0} değerini aşmamalı</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
-    <value>Yapay Zeka araması</value>
+    <value>AI araması</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Yapay Zeka özellikleri</value>
@@ -1321,7 +1321,7 @@
     <value>Web araması</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Web araması</value>
+    <value>AI araması</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI kredileri</value>

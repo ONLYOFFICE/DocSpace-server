@@ -37,7 +37,7 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("docscloud")]
+[ApiEndpoint(Template = "docscloud")]
 public class DocsCloudController(
     PermissionContext permissionContext,
     TenantManager tenantManager,

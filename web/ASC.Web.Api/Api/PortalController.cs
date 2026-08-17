@@ -44,9 +44,7 @@ namespace ASC.Web.Api.Controllers;
 ///</remarks>
 ///<name>portal</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("portal")]
+[ApiEndpoint("portal")]
 public class PortalController(
     ILogger<PortalController> logger,
     UserManager userManager,

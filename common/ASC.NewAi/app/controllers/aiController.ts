@@ -79,10 +79,14 @@ function withRequestSignal<T>(res: Response, body: T): T {
   if (!isObject(body)) {
     return body;
   }
-  const actionArgs = body["actionArgs"];
-  if (!isObject(actionArgs)) {
-    return body;
-  }
+  // Always wire the abort signal, even when the request carries no
+  // `actionArgs`. The UI sends an `actionArgs` object (with a signal that
+  // collapses to `{}` over JSON), but a direct API client omits it entirely
+  // — and without the signal a client disconnect never reaches the provider,
+  // so generation runs to completion and keeps burning tokens after the user
+  // has stopped waiting. Create the object when missing so cancellation works
+  // for every caller.
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
   return {
     ...body,
     actionArgs: { ...actionArgs, signal: responseAbortSignal(res) },
@@ -90,10 +94,10 @@ function withRequestSignal<T>(res: Response, body: T): T {
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt
-// override. The fragment ships alongside the tool list from
-// `tools/list`; the engine's own `getTools` reuses the cached fetch, so
-// this adds no extra round-trip. An existing client override is kept and
-// the fragment appended to its text; otherwise an `append` override is set.
+// override. The fragment ships alongside the tool list from the .NET
+// `tools/list`; nothing along this path is cached (deliberate — see
+// SystemToolsSource), so the prompt fetch is its own round-trip next to
+// the engine's `getTools`.
 // Append `fragment` to the action's system-prompt override (the engine
 // folds it onto the baked-in default via `resolveSystemPrompt`). Keeps an
 // existing override's text and adds the fragment after a blank line;

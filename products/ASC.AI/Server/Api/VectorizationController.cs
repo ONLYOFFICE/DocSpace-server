@@ -34,10 +34,8 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[InternalRoute]
-[ApiController]
+[ApiEndpoint("ai", Internal = true)]
 [AiFeature]
-[ControllerName("ai")]
 public class VectorizationController(
     VectorizationTaskPublisher vectorizationTaskPublisher) : ControllerBase
 {

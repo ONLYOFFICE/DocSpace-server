@@ -36,12 +36,20 @@ using System.Xml.XPath;
 
 using Scalar.AspNetCore;
 
+using Swashbuckle.AspNetCore.Swagger;
+
 namespace ASC.Api.Core.Extensions;
 
 public static class OpenApiExtension
 {
+    private const string BinaryContentMediaType = "application/octet-stream";
+
     public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration, string docVersion = "2.0")
     {
+        // Drives the documents written at build time, which read SwaggerOptions from DI and never touch the
+        // middleware. Not a duplicate of the version set in UseOpenApi: that one only serves the http endpoint.
+        services.Configure<SwaggerOptions>(o => o.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1);
+
         return services.AddSwaggerGen(c =>
         {
             var entryAssembly = Assembly.GetEntryAssembly();
@@ -111,6 +119,17 @@ public static class OpenApiExtension
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
+            // Must stay last: it rewrites what the filters above have produced into openapi 3.1 form.
+            c.DocumentFilter<OpenApi31SchemaDocumentFilter>();
+            // In openapi 3.1 `format` no longer affects the encoding - the content type does, so a file part is
+            // described by `contentMediaType` alone, without `type`.
+            c.MapType<IFormFile>(() => new OpenApiSchema
+            {
+                Extensions = new Dictionary<string, IOpenApiExtension>
+                {
+                    ["contentMediaType"] = new JsonNodeExtension(JsonValue.Create(BinaryContentMediaType))
+                }
+            });
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
 
@@ -250,7 +269,7 @@ public static class OpenApiExtension
 
             app.UseSwagger(options =>
             {
-                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
                 options.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
             });
 
