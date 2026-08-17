@@ -880,7 +880,7 @@ ${LetterLogoText} 支持团队
 *注意*：在您进行更改前，DNS 设置和单点登录选项停止工作。</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.禁用"${__VirtualRootPath}":"${__VirtualRootPath}"的帐户
+    <value>h1.禁用 "${__VirtualRootPath}":"${__VirtualRootPath}" 的帐户
 
 您已申请禁用您在 "${__VirtualRootPath}":"${__VirtualRootPath}" 的帐户。
 

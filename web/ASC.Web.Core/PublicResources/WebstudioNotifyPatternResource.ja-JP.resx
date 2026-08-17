@@ -862,7 +862,7 @@ $PortalUrl ポータルアドレスは、新しい"${__VirtualRootPath}":"${__Vi
 *ご注意*： DNS設定とシングルサインオンオプションは、変更するまで機能しなくなります。</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"でのアカウントの無効化
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" でのアカウントの無効化
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" のアカウントを無効にするようリクエストを受け付けました。
 
