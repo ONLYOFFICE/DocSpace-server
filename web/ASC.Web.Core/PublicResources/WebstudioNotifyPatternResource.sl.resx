@@ -846,7 +846,7 @@ Zahtevali ste trajni izbris portala [${__VirtualRootPath}](${__VirtualRootPath})
 _Pomembno! Vsi podatki, shranjeni na vašem portalu, kot tudi vaši podatki o registraciji, bodo izgubljeni in jih ni mogoče obnoviti._
 
 #if($AutoRenew == "True")
-Preden izbrišete portal, se prepričajte, da je samodejno zaračunavanje izklopljeno. Stanje samodejnega zaračunavanja lahko preverite v svojem Stripe račun.
+Preden izbrišete portal, se prepričajte, da je samodejno zaračunavanje izklopljeno. Stanje samodejnega zaračunavanja lahko preverite v svojem Stripe računu.
 #end
 
 Če še vedno želite izbrisati svoj portal [${__VirtualRootPath}](${__VirtualRootPath}), sledite spodnji povezavi, da potrdite operacijo:

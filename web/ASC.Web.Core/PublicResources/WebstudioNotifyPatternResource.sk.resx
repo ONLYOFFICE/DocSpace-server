@@ -846,7 +846,7 @@ požiadali ste o trvalé vymazanie vášho portálu [${__VirtualRootPath}](${__V
 _Dôležité! Všetky údaje uložené na vašom portáli, ako aj vaše registračné údaje budú stratené a nebude možné ich obnoviť._
 
 #if($AutoRenew == "True")
-Pred vymazaním portálu sa uistite, že je vypnutá automatická fakturácia. Stav automatickej fakturácie si môžete skontrolovať vo svojom Stripe account.
+Pred vymazaním portálu sa uistite, že je vypnutá automatická fakturácia. Stav automatickej fakturácie si môžete skontrolovať vo svojom Stripe účte.
 #end
 
 Ak aj napriek tomu chcete vymazať svoj portál [${__VirtualRootPath}](${__VirtualRootPath}), prejdite na nižšie uvedený odkaz a potvrďte operáciu:

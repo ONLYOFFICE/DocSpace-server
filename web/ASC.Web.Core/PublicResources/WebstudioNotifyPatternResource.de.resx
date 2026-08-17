@@ -833,7 +833,7 @@ Sie haben das dauerhaft Löschen Ihres Portals [${__VirtualRootPath}](${__Virtua
 _Wichtig! Alle im Portal gespeicherten Daten und alle Registrierungs-Details werden dadurch verloren gehen und können nicht wieder hergestellt werden._
 
 #if($AutoRenew == "True")
-Bitte stelle Sie vor dem Löschen des Portals sicher, dass die automatische Rechnungsstellung ausgeschaltet ist. Sie können den Status der automatischen Rechnungsstellung in Ihrem Stripe Account kontrollieren.
+Bitte stelle Sie vor dem Löschen des Portals sicher, dass die automatische Rechnungsstellung ausgeschaltet ist. Sie können den Status der automatischen Rechnungsstellung in Ihrem Stripe-Konto kontrollieren.
 #end
 
 Wenn Sie Ihr Portal [${__VirtualRootPath}](${__VirtualRootPath}) wirklich löschen wollen, bestätigen Sie bitte die Operation mit folgendem Link:

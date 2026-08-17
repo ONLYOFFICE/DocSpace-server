@@ -834,7 +834,7 @@ Ați solicitat ștergerea definitivă a portalului dvs [${__VirtualRootPath}](${
 _ Important! Toate datele stocate pe portalul dvs, inclusiv detaliile de înregistrare, se vor pierde nerecuperabil._
 
 #if($AutoRenew == "True")
-Înainte să ştergeţi portalul, asiguraţi-vă că opţiunea de facturare automată este dezactivată. Puteţi verifica starea facturării automate în Stripe account.
+Înainte să ştergeţi portalul, asiguraţi-vă că opţiunea de facturare automată este dezactivată. Puteţi verifica starea facturării automate în contul dvs Stripe.
 #end
 
 Dacă doriți totuși să ștergeți portalul [${__VirtualRootPath}](${__VirtualRootPath}), urmăriți linkul de mai jos pentru a confirma acțiunea:

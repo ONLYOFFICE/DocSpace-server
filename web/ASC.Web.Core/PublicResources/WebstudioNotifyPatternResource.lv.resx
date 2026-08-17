@@ -846,7 +846,7 @@ Jūs pieprasījāt neatgriezeniski izdzēst savu [${__VirtualRootPath}](${__Virt
 _Important! Visi jūsu portālā saglabātie dati, kā arī jūsu reģistrācijas dati tiks zaudēti un tos nevarēs atgūt._
 
 #if($AutoRenew == "True")
-Pirms izdzēst portālu, pārliecinieties, vai automātiska norēķināšanās ir izslēgta. You may check the status of automatic billing in your Stripe account.
+Pirms izdzēst portālu, pārliecinieties, vai automātiska norēķināšanās ir izslēgta. Jūs varat pārbaudīt automātiskā rēķina statusu savā Stripe kontā.
 #end
 
 Ja joprojām vēlies izdzēst savu [${__VirtualRootPath}](${__VirtualRootPath}) portālu, izmantojiet tālāk norādīto saiti, lai apstiprinātu darbību:

@@ -833,7 +833,7 @@ Hai richiesto di eliminare definitivamente il tuo portale [${__VirtualRootPath}]
 _Importante! Tutti i dati memorizzati sul tuo portale, così come i tuoi dati di registrazione andranno persi e non potranno essere recuperati._
 
 #if($AutoRenew == "True")
-Prima di eliminare il portale, assicurati che la fatturazione automatica sia disattivata. Puoi controllare lo stato della fatturazione automatica nel tuo Stripe account.
+Prima di eliminare il portale, assicurati che la fatturazione automatica sia disattivata. Puoi controllare lo stato della fatturazione automatica nel tuo account Stripe.
 #end
 
 Se desideri comunque eliminare il tuo portale [${__VirtualRootPath}](${__VirtualRootPath}), segui il link sottostante per confermare l'operazione:
