@@ -90,10 +90,10 @@ function withRequestSignal<T>(res: Response, body: T): T {
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt
-// override. The fragment ships alongside the tool list from
-// `tools/list`; the engine's own `getTools` reuses the cached fetch, so
-// this adds no extra round-trip. An existing client override is kept and
-// the fragment appended to its text; otherwise an `append` override is set.
+// override. The fragment ships alongside the tool list from the .NET
+// `tools/list`; nothing along this path is cached (deliberate — see
+// SystemToolsSource), so the prompt fetch is its own round-trip next to
+// the engine's `getTools`.
 // Append `fragment` to the action's system-prompt override (the engine
 // folds it onto the baked-in default via `resolveSystemPrompt`). Keeps an
 // existing override's text and adds the fragment after a blank line;
