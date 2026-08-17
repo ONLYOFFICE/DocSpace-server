@@ -241,6 +241,40 @@ public class FilesModuleSpecificsTests
         preparedRow["thirdparty_room_id"].Should().Be($"drive-{newProviderId}");
     }
 
+    [Theory]
+    // entry_type as stored in the database: 1 = folder, 2 = file.
+    [InlineData(1)]
+    [InlineData(2)]
+    public async Task TryPrepareRow_FilesOrder_RemapsEntryAndParentFolder(int entryType)
+    {
+        // Arrange — the manual position of an entry inside its parent folder
+        const int oldParentId = 100;
+        const int newParentId = 500;
+
+        var specifics = CreateSpecifics();
+        var columnMapper = CreateColumnMapper();
+        columnMapper.SetMapping(entryType == 1 ? "files_folder" : "files_file", "id", OldFolderId, NewFolderId);
+        columnMapper.SetMapping("files_folder", "id", oldParentId, newParentId);
+        columnMapper.Commit();
+
+        var row = new DataRowInfo("files_order");
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("entry_id", OldFolderId);
+        row.SetValue("entry_type", entryType);
+        row.SetValue("parent_folder_id", oldParentId);
+        row.SetValue("order", 3);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(columnMapper, DeclaredTable(specifics, "files_order"), row);
+
+        // Assert — both the ordered entry and the folder it is ordered in have to follow their new ids
+        prepared.Should().BeTrue();
+        preparedRow.Should().NotBeNull();
+        Convert.ToInt32(preparedRow!["entry_id"]).Should().Be(NewFolderId);
+        Convert.ToInt32(preparedRow["parent_folder_id"]).Should().Be(newParentId);
+        Convert.ToInt32(preparedRow["order"]).Should().Be(3);
+    }
+
     /// <summary>
     /// Takes the table definition from the module instead of restating it, so these tests also fail when
     /// the declaration itself is missing rather than only when the id relations are.

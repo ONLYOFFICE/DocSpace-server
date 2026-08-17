@@ -72,7 +72,8 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
             new("files_thirdparty_id_mapping", "tenant_id"),
             new("files_room_settings", "tenant_id"),
             new("files_group", "tenant_id", "id") { UserIDColumns = ["user_id"] },
-            new("files_roomgroup", "tenant_id", "id")
+            new("files_roomgroup", "tenant_id", "id"),
+            new("files_order", "tenant_id")
     ];
 
     private readonly RelationInfo[] _tableRelations =
@@ -116,7 +117,13 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
             // files_thirdparty_account.folder_id — "{selector}-{providerId}" — and neither of those has a
             // ColumnMapper entry of its own. The only thing that can be remapped is the provider id
             // embedded in the string, so the account is the parent here.
-            new("files_thirdparty_account", "id", "files_roomgroup", "thirdparty_room_id", HasThirdPartyRoom)
+            new("files_thirdparty_account", "id", "files_roomgroup", "thirdparty_room_id", HasThirdPartyRoom),
+
+            // files_order.entry_id is an int column, so unlike files_security there is no third-party
+            // variant to guard against — only the entry type tells a file from a folder.
+            new("files_file", "id", "files_order", "entry_id", x => Convert.ToInt32(x["entry_type"]) == 2),
+            new("files_folder", "id", "files_order", "entry_id", x => Convert.ToInt32(x["entry_type"]) == 1),
+            new("files_folder", "id", "files_order", "parent_folder_id")
     ];
 
     private static readonly Regex _regexThirdPartyProviderId = new(

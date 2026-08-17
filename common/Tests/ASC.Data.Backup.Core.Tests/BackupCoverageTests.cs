@@ -76,7 +76,10 @@ public class BackupCoverageTests
         ["hosting_instance_registration"] = "Instance registry of the source installation; also in _ignoredTables.",
         ["identity_shedlock"] = "Distributed lock state.",
         ["dbip_lookup"] = "GeoIP reference data, rebuilt from its own source.",
-        ["webstudio_index"] = "Search index bookkeeping, rebuilt on demand."
+        ["webstudio_index"] = "Search index bookkeeping, rebuilt on demand.",
+        ["files_properties"] = "Data is an EntryProperties JSON blob carrying room, folder and file ids " +
+                               "inside it, which relations cannot remap; restoring it would point form " +
+                               "filling at the source portal's entries."
     };
 
     /// <summary>
@@ -86,8 +89,6 @@ public class BackupCoverageTests
     /// </summary>
     private static readonly Dictionary<string, string> _knownGaps = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["files_order"] = "T2 — manual ordering",
-        ["files_properties"] = "T2 — file properties",
         ["files_form_role_mapping"] = "T3 — form filling roles",
         ["files_link"] = "T3 — linked files",
         ["files_chat_message_attachment"] = "T4 — AI chat attachments",
