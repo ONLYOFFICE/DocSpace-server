@@ -41,8 +41,9 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// <list type="bullet">
 /// <item><see cref="Letter_Renders"/> — renders the letter, runs the checks that hold for every letter
 /// plus the letter's own, and saves the HTML next to the test binaries for a browser.</item>
-/// <item><see cref="Letter_IsDeliveredToMailPit"/> — additionally delivers it to the MailPit inbox of the
-/// local Aspire stack and prints the message URL; skipped when MailPit is not running.</item>
+/// <item><see cref="Letter_IsDeliveredToMailPit"/> — additionally delivers it to the MailPit the test
+/// run started (<see cref="MailPitFixture"/>), prints the message URL, and asserts how much of the
+/// letter's markup real mail clients support.</item>
 /// </list>
 ///
 /// Everything about the surroundings (portal address, image folder, external links, branding) comes from
@@ -57,6 +58,21 @@ public abstract class LetterTestBase
     /// </summary>
     private static readonly Regex _unrenderedLink =
         new("""(&#8221;|&#8220;|")\s*:\s*(&#8220;|&#8221;|")(https?://|mailto:)""", RegexOptions.Compiled);
+
+    /// <summary>
+    /// The inbox started for the whole assembly. Read from the ambient test context rather than taken
+    /// through a constructor: xUnit hands assembly fixtures to test classes as constructor arguments,
+    /// and threading one through would mean a constructor on every letter test that only passes it on.
+    /// </summary>
+    private static async ValueTask<MailPitInbox> GetInboxAsync()
+    {
+        var fixture = await TestContext.Current.GetFixture<MailPitFixture>();
+
+        return fixture?.Inbox
+            ?? throw new InvalidOperationException(
+                $"No MailPit inbox in the test context. {nameof(MailPitFixture)} is registered with "
+                + "[assembly: AssemblyFixture] and starts before any letter test runs.");
+    }
 
     /// <summary>Action id / resource key suffix, e.g. <c>saas_admin_handy_apps_v1</c>.</summary>
     protected abstract string LetterId { get; }
@@ -121,6 +137,19 @@ public abstract class LetterTestBase
     /// </summary>
     protected virtual string SignatureKey => "TrulyYoursText";
 
+    /// <summary>
+    /// The smallest share of mail clients that must fully render this letter's markup, as MailPit's
+    /// html-check scores it against the caniemail support matrix. The rest is nearly all *partial*
+    /// support — the CSS that every table-based email leans on — and under 3% is unsupported outright.
+    ///
+    /// Every letter is built from the same <c>HtmlMaster</c> template and they measure 78.5% to 91.5%,
+    /// so this floor sits just below the lowest of them: low enough that a caniemail data update does
+    /// not turn the suite red on its own, high enough that markup which costs a letter more than a few
+    /// points has to be justified. A letter overrides it only when it genuinely needs markup the others
+    /// do not, and the override says why.
+    /// </summary>
+    protected virtual double MinimumHtmlSupport => 75;
+
     [Theory]
     [MemberData(nameof(LetterCultures.All), MemberType = typeof(LetterCultures))]
     public async Task Letter_Renders(string cultureName)
@@ -151,35 +180,54 @@ public abstract class LetterTestBase
     {
         var cancellationToken = TestContext.Current.CancellationToken;
 
-        var endpoint = await MailPitEndpoint.ResolveAsync(cancellationToken);
-
-        if (endpoint == null)
-        {
-            Assert.Skip("MailPit is not running. Start the stack with "
-                + "`dotnet run --project common/ASC.AppHost --launch-profile development`, "
-                + "or point MAILPIT_SMTP=host:port and MAILPIT_HTTP=http://host:port at an existing instance.");
-
-            return;
-        }
-
         var culture = CultureInfo.GetCultureInfo(cultureName);
         var letter = await LetterPreview.RenderAsync(Pattern, BuildTags(culture), culture);
 
         // A unique address per run, so the assertion below finds this letter and not one left over from
         // an earlier run, another culture or the portal itself.
-        var address = $"{LetterId}-{cultureName}-{Guid.NewGuid():N}@preview.onlyoffice.io";
+        var address = $"{LetterId}-{cultureName}-{Guid.NewGuid():N}@preview.onlyoffice.com";
 
-        var inbox = new MailPitInbox(endpoint);
+        var inbox = await GetInboxAsync();
 
         await inbox.SendAsync(address, letter.Subject, letter.Body, cancellationToken);
 
-        var delivered = await inbox.WaitForMessageAsync(address, TimeSpan.FromSeconds(15), cancellationToken);
+        var delivered = await inbox.WaitForMessageAsync(address, TimeSpan.FromSeconds(30), cancellationToken);
 
         delivered.Should().NotBeNull("the letter should show up in the MailPit inbox");
-        delivered!.Subject.Should().Be(letter.Subject);
+
+        // Trimmed, because a mail header cannot carry surrounding whitespace and none of it survives
+        // transport. A couple of translations end their subject with a space (zh-CN, for two), and the
+        // reader never sees the difference — asserting on it would only test MIME, not the letter.
+        delivered!.Subject.Should().Be(letter.Subject.Trim());
+
+        var check = await inbox.CheckHtmlAsync(delivered.Id, cancellationToken);
 
         Write($"Letter delivered to {address}");
         Write($"Open it in MailPit: {inbox.GetMessageUrl(delivered)}");
+        Write($"HTML support: {check.Total.Supported:F1}% supported, {check.Total.Partial:F1}% partial, "
+            + $"{check.Total.Unsupported:F1}% unsupported "
+            + $"({check.Total.Tests} tests over {check.Total.Nodes} nodes)");
+
+        check.Total.Supported.Should().BeGreaterThanOrEqualTo(MinimumHtmlSupport, DescribeWarnings(check));
+    }
+
+    /// <summary>
+    /// What the letter uses that mail clients struggle with, worst first. Without it a failure reads
+    /// "expected at least 90, found 84" and says nothing about which markup to stop using.
+    /// </summary>
+    private static string DescribeWarnings(HtmlCheck check)
+    {
+        var worst = (check.Warnings ?? [])
+            .OrderByDescending(warning => (warning.Score.Unsupported + warning.Score.Partial) * warning.Score.Found)
+            .Take(5)
+            .Select(warning => $"{Environment.NewLine}  - {warning.Slug} ({warning.Category}): "
+                + $"unsupported in {warning.Score.Unsupported:F1}% of clients, "
+                + $"partial in {warning.Score.Partial:F1}%, used by {warning.Score.Found} node(s)")
+            .ToArray();
+
+        return worst.Length == 0
+            ? "MailPit reported no offending markup, so the letter is below the bar for another reason"
+            : "MailPit blames this markup:" + string.Concat(worst);
     }
 
     /// <summary>A resource string in the recipient's culture — button captions, the signature, …</summary>

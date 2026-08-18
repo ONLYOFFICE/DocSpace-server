@@ -66,6 +66,7 @@ switch (launchProfile)
             .AddRabbitMq()
             .AddRedis()
             .AddOpensearch(withDashboard: false, isProxied: false)
+            .AddMailPit()
             .AllowPortalRegistration();
 
         configurator

@@ -31,31 +31,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.Globalization;
-global using System.Text.Json;
-global using System.Text.Json.Serialization;
-global using System.Text.RegularExpressions;
 
-global using ASC.Core;
-global using ASC.Core.Common.WhiteLabel;
-global using ASC.Notify.Messages;
-global using ASC.Notify.Patterns;
-global using ASC.Notify.Recipients;
-global using ASC.Notify.Tests.Infrastructure;
-global using ASC.Notify.Textile;
-global using ASC.Security.Cryptography;
-global using ASC.Web.Core.PublicResources;
-global using ASC.Web.Core.WhiteLabel;
-global using ASC.Web.Studio.Core.Notify;
-
-global using Aspire.Hosting;
-global using Aspire.Hosting.Testing;
-
-global using FluentAssertions;
-
-global using MailKit.Net.Smtp;
-global using MailKit.Security;
-
-global using Microsoft.Extensions.Configuration;
-
-global using MimeKit;
+// One MailPit for the whole assembly, not one per test class: the container costs seconds to start
+// and every letter test does the same thing with it — deliver a message and read its score back.
+// The unique recipient address each test generates is what keeps them from seeing each other's mail,
+// so the classes still run in parallel.
+[assembly: AssemblyFixture(typeof(MailPitFixture))]

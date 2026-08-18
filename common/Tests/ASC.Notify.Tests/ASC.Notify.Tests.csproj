@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -28,6 +29,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The letter tests start MailPit through the AppHost itself (see MailPitFixture); the reference
+         is what makes Projects.ASC_AppHost available, not an Aspire resource declaration. -->
+    <ProjectReference Include="..\..\ASC.AppHost\ASC.AppHost.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\..\..\web\ASC.Web.Core\ASC.Web.Core.csproj" />
   </ItemGroup>
 

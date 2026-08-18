@@ -287,19 +287,25 @@ the diff then covers the whole file and buries the one line that actually change
 artifact); confirm real trailing whitespace with a grep before chasing it.
 
 Runtime check: MailPit catches outgoing mail in local dev (the Aspire dashboard shows the port it
-was published on); `../Logs/notify.log` shows what the notify service did.
+was published on); `../Logs/notify.log` shows what the notify service did. The letter tests (§9) no
+longer piggyback on that stack — they start a MailPit of their own.
 
 ## 9. Look at the letter (preview test)
 
 **Every new letter gets a test in `common/Tests/ASC.Notify.Tests`.** The harness renders it through the
-real pipeline (resources → `NVelocityPatternFormatter` → `TextileStyler` → `HtmlMaster`), saves the HTML
-and — when MailPit is running — delivers it to the inbox. It is a rule for new letters, not a statement
-about the old ones: some sixty letters have a test against a hundred-odd `pattern_*` keys, so a green
-run means the covered letters are fine, not all of them.
+real pipeline (resources → `NVelocityPatternFormatter` → `TextileStyler` → `HtmlMaster`), saves the HTML,
+delivers it to MailPit and asks MailPit how many mail clients can render it. It is a rule for new
+letters, not a statement about the old ones: some sixty letters have a test against a hundred-odd
+`pattern_*` keys, so a green run means the covered letters are fine, not all of them.
 
 ```bash
 dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
 ```
+
+**Docker has to be running.** The suite boots the Aspire AppHost itself on the `integration-test` launch
+profile, like the Files/People/AI suites, and then throws every resource but `mailpit` out of the graph
+before starting it — no databases, no queues, no services. That trim is what keeps the full sweep at
+under two minutes for ~3400 cases.
 
 **That run covers every culture the portal offers** — `LetterCultures.Names` reads `web:cultures` from
 `appsettings.json` (falling back to the cultures whose `ASC.Web.Core.resources.dll` satellite sits next
@@ -308,8 +314,8 @@ switched on. Checking English alone would be close to useless: the defects these
 a translated tag name, a lost `$`, a textile link glued to the next character — cannot occur in the
 default culture at all.
 
-Every culture multiplies the case count, so the default sweep takes a few minutes. `LETTER_CULTURES`
-**narrows** it for one run while you iterate:
+Every culture multiplies the case count, so the default sweep runs ~3400 cases in about two minutes.
+`LETTER_CULTURES` **narrows** it for one run while you iterate:
 
 ```bash
 LETTER_CULTURES=en-US,de,ru,zh-CN dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
@@ -359,11 +365,15 @@ Two tests are generated per culture:
   image / letter logo, the signature. Then your `AssertContent`, and
   `AssertDefaultCultureText` for `en-US` only (another culture may carry a translation). Saves
   `bin/Debug/net10.0/letter-preview/<letter-id>.<culture>.html`.
-- **`Letter_IsDeliveredToMailPit`** — sends over SMTP, asserts arrival, prints the message URL. **Skips**
-  when MailPit is unreachable, so it is harmless in `dotnet test ASC.Tests.slnx`. Start the stack with
-  `dotnet run --project common/ASC.AppHost --launch-profile development`; the SMTP/web ports are read
-  from the running `mailpit` container (Aspire publishes them on random host ports), or set
-  `MAILPIT_SMTP=host:port` / `MAILPIT_HTTP=http://host:port`.
+- **`Letter_IsDeliveredToMailPit`** — sends the letter over SMTP, asserts it arrived, prints the message
+  URL, then calls MailPit's `html-check` and asserts the share of mail clients that render the markup
+  (`MinimumHtmlSupport`, 75% by default). The letters measure 78.5–91.5%; nearly all of the remainder is
+  *partial* support, the CSS every table-based email leans on, and under 3% is unsupported outright. The
+  floor sits just below the lowest letter — low enough that a caniemail data update alone cannot turn the
+  suite red, high enough that markup costing a letter more than a few points has to be justified. A
+  letter may raise or lower it with `protected override double MinimumHtmlSupport`, and the override says
+  why. When it fails, the message names the offending constructs (`css-margin`, `css-display`, …), so
+  read those before touching the threshold.
 
 `Infrastructure/LetterEnvironment.cs` is the only place that knows the surroundings, and they match the
 local Aspire stack: portal at `http://localhost:8092` (`PORTAL_URL` overrides), notification images at
