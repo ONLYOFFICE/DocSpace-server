@@ -38,17 +38,11 @@ namespace ASC.Notify.Tests;
 /// letters it has a Telegram twin of its own, <c>pattern_scheduled_backup_failed_tg</c>, so the two are
 /// checked to stay in step — see <see cref="EmailAndTelegram_AgreeOnLinks"/>.
 /// </summary>
-public class ScheduledBackupFailedLetterTests : LetterTestBase
+public class ScheduledBackupFailedLetterTests : LetterTestBase<ScheduledBackupFailedNotifyAction>
 {
     /// <summary>The two settings pages the letter points at, relative to the portal root.</summary>
     private const string BackupPath = "/portal-settings/backup/data-backup";
     private const string AddonsPath = "/billing/addons";
-
-    protected override string LetterId => "scheduled_backup_failed";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_scheduled_backup_failed,
-        () => WebstudioNotifyPatternResource.pattern_scheduled_backup_failed);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

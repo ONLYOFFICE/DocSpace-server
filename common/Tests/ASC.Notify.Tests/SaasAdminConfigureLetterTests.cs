@@ -37,7 +37,7 @@ namespace ASC.Notify.Tests;
 /// The "Configure your ONLYOFFICE" letter (<c>saas_admin_configure_v1</c>), sent in SaaS on day 3 after
 /// portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminConfigureLetterTests : LetterTestBase
+public class SaasAdminConfigureLetterTests : LetterTestBase<SaasAdminConfigureV1NotifyAction>
 {
     private static string SettingsUrl => LetterEnvironment.PortalLink("portal-settings");
     private static string TariffUrl => LetterEnvironment.PortalLink("billing/tariff-plan");
@@ -46,12 +46,6 @@ public class SaasAdminConfigureLetterTests : LetterTestBase
     {
         return LetterEnvironment.ExternalDomain(LetterEnvironment.ExternalResources.Helpcenter, culture, "https://helpcenter.onlyoffice.com");
     }
-
-    protected override string LetterId => "saas_admin_configure_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_configure_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_configure_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("configure_docspace.gif");

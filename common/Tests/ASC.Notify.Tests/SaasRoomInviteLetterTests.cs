@@ -37,16 +37,10 @@ namespace ASC.Notify.Tests;
 /// The room invitation for someone who has no account yet (<c>saas_room_invite</c>) — a plain textile
 /// letter with no heading, whose link doubles as the sign-up flow.
 /// </summary>
-public class SaasRoomInviteLetterTests : LetterTestBase
+public class SaasRoomInviteLetterTests : LetterTestBase<SaasRoomInviteNotifyAction>
 {
     /// <summary>The confirmation link, passed into <c>Init</c> by the caller.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/LinkInvite");
-
-    protected override string LetterId => "saas_room_invite";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_room_invite,
-        () => WebstudioNotifyPatternResource.pattern_saas_room_invite);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

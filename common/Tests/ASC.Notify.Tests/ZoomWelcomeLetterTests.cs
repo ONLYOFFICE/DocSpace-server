@@ -38,13 +38,8 @@ namespace ASC.Notify.Tests;
 /// HTML table dropped in for the plan list, and a plan of its own — 100 admins, not the SaaS STARTUP
 /// numbers.
 /// </summary>
-public class ZoomWelcomeLetterTests : LetterTestBase
+public class ZoomWelcomeLetterTests : LetterTestBase<ZoomWelcomeNotifyAction>
 {
-    protected override string LetterId => "zoom_welcome";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_zoom_welcome,
-        () => WebstudioNotifyPatternResource.pattern_zoom_welcome);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");

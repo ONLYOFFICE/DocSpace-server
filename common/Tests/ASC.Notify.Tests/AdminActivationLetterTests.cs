@@ -38,18 +38,12 @@ namespace ASC.Notify.Tests;
 /// for Enterprise, Enterprise whitelabel and Opensource, which differ only in the footer. It is the SaaS
 /// letter (<see cref="SaasAdminActivationLetterTests"/>) without the STARTUP plan block.
 /// </summary>
-public class AdminActivationLetterTests : LetterTestBase
+public class AdminActivationLetterTests : LetterTestBase<EnterpriseAdminActivationV1NotifyAction>
 {
     private const string RecipientEmail = "owner@preview.onlyoffice.com";
 
     /// <summary>The email confirmation link, built from <c>ConfirmType.EmailActivation</c>.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/EmailActivation");
-
-    protected override string LetterId => "admin_activation_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_admin_activation_v1,
-        () => WebstudioNotifyPatternResource.pattern_admin_activation_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");

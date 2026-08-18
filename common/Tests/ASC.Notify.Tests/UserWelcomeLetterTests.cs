@@ -38,16 +38,10 @@ namespace ASC.Notify.Tests;
 /// serves all five editions — SaaS, Enterprise, Enterprise whitelabel, its custom mode and Opensource —
 /// which differ only in the footer flavour they pass in.
 /// </summary>
-public class UserWelcomeLetterTests : LetterTestBase
+public class UserWelcomeLetterTests : LetterTestBase<SaasUserWelcomeV1NotifyAction>
 {
     /// <summary>The button target: the portal root, as every edition sets it.</summary>
     private static string PortalRoot => LetterEnvironment.PortalUrl;
-
-    protected override string LetterId => "user_welcome_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_user_welcome_v1,
-        () => WebstudioNotifyPatternResource.pattern_user_welcome_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");

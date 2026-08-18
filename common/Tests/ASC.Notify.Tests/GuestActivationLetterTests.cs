@@ -39,19 +39,10 @@ namespace ASC.Notify.Tests;
 /// <see cref="UserActivationLetterTests"/>: it holds the place for the guest wording and starts failing
 /// the day the two letters diverge.
 /// </summary>
-public class GuestActivationLetterTests : LetterTestBase
+public class GuestActivationLetterTests : LetterTestBase<SaasGuestActivationV115NotifyAction>
 {
     /// <summary>The confirmation link, built by the sending code from <c>ConfirmType.Activation</c>.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Activation");
-
-    /// <summary>
-    /// Only names the preview file and the MailPit address — the template comes from <see cref="Pattern"/>.
-    /// </summary>
-    protected override string LetterId => "guest_activation_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_user_activation_v1,
-        () => WebstudioNotifyPatternResource.pattern_user_activation_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("join_docspace.gif");

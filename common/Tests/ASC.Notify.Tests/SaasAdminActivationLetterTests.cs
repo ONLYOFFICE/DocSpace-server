@@ -38,18 +38,12 @@ namespace ASC.Notify.Tests;
 /// Enterprise letter (<see cref="AdminActivationLetterTests"/>) plus the STARTUP plan block, and it
 /// carries two mutually exclusive buttons — confirm the email, or change the generated password.
 /// </summary>
-public class SaasAdminActivationLetterTests : LetterTestBase
+public class SaasAdminActivationLetterTests : LetterTestBase<SaasAdminActivationV1NotifyAction>
 {
     private const string RecipientEmail = "owner@preview.onlyoffice.com";
 
     /// <summary>The password change link, built from <c>ConfirmType.PasswordChange</c>.</summary>
     private static string PasswordChangeUrl => LetterEnvironment.PortalLink("confirm/PasswordChange");
-
-    protected override string LetterId => "saas_admin_activation_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_activation_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_activation_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");

@@ -37,16 +37,10 @@ namespace ASC.Notify.Tests;
 /// The invitation to the portal itself (<c>saas_docspace_invite</c>). Unlike its room and agent
 /// siblings this one is still HTML table markup rather than textile.
 /// </summary>
-public class SaasDocSpaceInviteLetterTests : LetterTestBase
+public class SaasDocSpaceInviteLetterTests : LetterTestBase<SaasDocSpaceInviteNotifyAction>
 {
     /// <summary>The confirmation link, passed into <c>Init</c> by the caller.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/LinkInvite");
-
-    protected override string LetterId => "saas_docspace_invite";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_docspace_invite,
-        () => WebstudioNotifyPatternResource.pattern_saas_docspace_invite);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

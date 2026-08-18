@@ -38,15 +38,9 @@ namespace ASC.Notify.Tests;
 /// (<c>saas_owner_payment_warning_grace_period_before_activation</c>). The only letter of the four that
 /// carries no button — it links the payment method and the support desk inline instead.
 /// </summary>
-public class SaasGracePeriodBeforeActivationLetterTests : LetterTestBase
+public class SaasGracePeriodBeforeActivationLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>
 {
     private static string PaymentMethodUrl => LetterEnvironment.PortalLink("billing/payment-method");
-
-    protected override string LetterId => "saas_owner_payment_warning_grace_period_before_activation";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_before_activation,
-        () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_before_activation);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

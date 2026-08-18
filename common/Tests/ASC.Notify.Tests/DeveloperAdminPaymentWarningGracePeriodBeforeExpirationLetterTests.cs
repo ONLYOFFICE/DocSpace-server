@@ -36,19 +36,13 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The Developer licence warning <c>developer_admin_payment_warning_grace_period_before_expiration</c>, sent to the portal admins.
 /// </summary>
-public class DeveloperAdminPaymentWarningGracePeriodBeforeExpirationLetterTests : LetterTestBase
+public class DeveloperAdminPaymentWarningGracePeriodBeforeExpirationLetterTests : LetterTestBase<DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction>
 {
     /// <summary>The pricing page the sending code appends its campaign parameters to.</summary>
     private static string PricesUrl(CultureInfo culture)
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "docspaceprices", culture, "https://www.onlyoffice.com/docspace-prices.aspx");
     }
-
-    protected override string LetterId => "developer_admin_payment_warning_grace_period_before_expiration";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_developer_admin_payment_warning_grace_period_before_expiration,
-        () => WebstudioNotifyPatternResource.pattern_developer_admin_payment_warning_grace_period_before_expiration);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

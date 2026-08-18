@@ -325,18 +325,12 @@ Only `AssertContent` (tags resolved, links and buttons present) runs per culture
 `AssertDefaultCultureText` checks wording and stays on `en-US`, since any other culture may legitimately
 translate it. A culture with no resx of its own falls back to the default one, exactly as production does.
 
-A letter test derives from `LetterTestBase` and describes only its own letter; everything shared lives in
-`Infrastructure/`:
+A letter test names the notify action it covers and describes only what that action's `Init` sets;
+everything shared lives in `Infrastructure/`:
 
 ```csharp
-public class SaasAdminConfigureLetterTests : LetterTestBase
+public class SaasAdminConfigureLetterTests : LetterTestBase<SaasAdminConfigureV1NotifyAction>
 {
-    protected override string LetterId => "saas_admin_configure_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_configure_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_configure_v1);
-
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("configure_docspace.gif");
 
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture) =>
@@ -351,6 +345,17 @@ public class SaasAdminConfigureLetterTests : LetterTestBase
     protected override void AssertDefaultCultureText(RenderedLetter letter) { /* English wording */ }
 }
 ```
+
+**The template is never named in the test.** `LetterTestBase<TAction>` reads it off the action itself —
+`Patterns.Find(SenderName == "email.sender")`, the same lookup `NotifyEngine` does — and takes the
+preview name from `TAction.ID`. Since the pattern XML was removed the action is the only place a
+letter's `subject_`/`pattern_` keys are written down, so repeating them in the test would let it keep
+rendering an old template after the action moved to a new one, and stay green. The action is built with
+`RuntimeHelpers.GetUninitializedObject`: `ID` and `Patterns` are plain expressions in all 101 actions and
+touch no constructor dependency, so no DI, tenant or security context is needed to read them.
+
+Where one template serves several actions — the activation and welcome letters, one per edition — the
+test names the edition it renders, and its `<summary>` says which others share the template.
 
 `BuildLetterTags` and `TopGif` must mirror that letter's block in `StudioPeriodicNotify` one-to-one —
 same resource keys, same links, and the top image included whenever the sending code sets `topGif`

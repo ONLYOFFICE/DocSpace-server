@@ -34,9 +34,9 @@
 namespace ASC.Notify.Tests.Infrastructure;
 
 /// <summary>
-/// Shared harness for letter tests. A derived class only describes ONE letter — its id, its pattern,
-/// the tags the sending code sets for it and what its text must say — and gets two tests per culture
-/// from <see cref="LetterCultures"/>:
+/// Shared harness for letter tests. A derived class names the notify action it covers, describes the
+/// tags that action's <c>Init</c> sets and says what the text must contain — and gets two tests per
+/// culture from <see cref="LetterCultures"/>:
 ///
 /// <list type="bullet">
 /// <item><see cref="Letter_Renders"/> — renders the letter, runs the checks that hold for every letter
@@ -46,10 +46,16 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// letter's markup real mail clients support.</item>
 /// </list>
 ///
+/// The template is taken from <typeparamref name="TAction"/> itself rather than named again here. Since
+/// the pattern XML was removed the action *is* the only place a letter's <c>subject_</c>/<c>pattern_</c>
+/// keys are written down, so a test that repeated them could keep rendering an old template after the
+/// action moved to a new one, and stay green while doing it.
+///
 /// Everything about the surroundings (portal address, image folder, external links, branding) comes from
 /// <see cref="LetterEnvironment"/> — a letter test must not hard-code URLs.
 /// </summary>
-public abstract class LetterTestBase
+/// <typeparam name="TAction">The notify action that sends this letter in production.</typeparam>
+public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 {
     /// <summary>
     /// What an unrecognised textile link looks like once the styler has run: the closing quotation mark
@@ -74,11 +80,28 @@ public abstract class LetterTestBase
                 + "[assembly: AssemblyFixture] and starts before any letter test runs.");
     }
 
-    /// <summary>Action id / resource key suffix, e.g. <c>saas_admin_handy_apps_v1</c>.</summary>
-    protected abstract string LetterId { get; }
+    /// <summary>
+    /// The production action, built without running its constructor. Every action declares its
+    /// <see cref="NotifyAction.ID"/> and <see cref="NotifyAction.Patterns"/> as plain expressions over
+    /// string literals and resource properties — none of the 101 of them reads a constructor dependency
+    /// — so an uninitialised instance answers both truthfully. Resolving them through DI instead would
+    /// mean standing up <c>StudioNotifyHelper</c>, <c>CommonLinkUtility</c>, a tenant and a security
+    /// context to read two properties. If an action ever does start reading a dependency here, this
+    /// throws a <see cref="NullReferenceException"/> — loudly, not silently.
+    /// </summary>
+    private static readonly TAction _action = (TAction)RuntimeHelpers.GetUninitializedObject(typeof(TAction));
 
-    /// <summary>The pattern under test: the <c>subject_*</c> and <c>pattern_*</c> pair.</summary>
-    protected abstract IPattern Pattern { get; }
+    /// <summary>Action id, which is also the letter's resource key suffix in almost every case.</summary>
+    private static string LetterId => _action.ID;
+
+    /// <summary>
+    /// The pattern under test, picked from the action the way <c>NotifyEngine.PrepareRequestFillPatterns</c>
+    /// picks it — by sender name. An action may also carry a telegram twin; this is the email one.
+    /// </summary>
+    private static IPattern Pattern =>
+        _action.Patterns.Find(pattern => pattern.SenderName == Constants.NotifyEMailSenderSysName)
+        ?? throw new InvalidOperationException(
+            $"Action '{_action.ID}' carries no email pattern, so there is no letter to render.");
 
     /// <summary>
     /// The tags the sending code sets for this letter specifically (the orange button, <c>URL1</c>…),

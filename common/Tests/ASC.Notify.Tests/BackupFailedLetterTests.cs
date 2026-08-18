@@ -38,13 +38,8 @@ namespace ASC.Notify.Tests;
 /// sibling of <see cref="ScheduledBackupFailedLetterTests"/>: no settings links, just the support one.
 /// It has a Telegram twin of its own, checked by <see cref="EmailAndTelegram_AgreeOnText"/>.
 /// </summary>
-public class BackupFailedLetterTests : LetterTestBase
+public class BackupFailedLetterTests : LetterTestBase<BackupFailedNotifyAction>
 {
-    protected override string LetterId => "backup_failed";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_backup_failed,
-        () => WebstudioNotifyPatternResource.pattern_backup_failed);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

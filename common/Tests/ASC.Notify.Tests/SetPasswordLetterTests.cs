@@ -37,16 +37,10 @@ namespace ASC.Notify.Tests;
 /// The password setup link (<c>set_password</c>). The shortest letter in the set: no greeting by name
 /// and no signature, just the button and the seven-day notice.
 /// </summary>
-public class SetPasswordLetterTests : LetterTestBase
+public class SetPasswordLetterTests : LetterTestBase<PasswordSetNotifyAction>
 {
     /// <summary>The password change link, built from <c>ConfirmType.PasswordChange</c>.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/PasswordChange");
-
-    protected override string LetterId => "set_password";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_set_password,
-        () => WebstudioNotifyPatternResource.pattern_set_password);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

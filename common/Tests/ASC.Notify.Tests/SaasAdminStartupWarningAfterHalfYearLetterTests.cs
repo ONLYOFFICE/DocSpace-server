@@ -37,7 +37,7 @@ namespace ASC.Notify.Tests;
 /// The last warning before a free portal is removed (<c>saas_admin_startup_warning_after_half_year_v1</c>),
 /// sent to the owner after six months without activity. The portal goes a week later.
 /// </summary>
-public class SaasAdminStartupWarningAfterHalfYearLetterTests : LetterTestBase
+public class SaasAdminStartupWarningAfterHalfYearLetterTests : LetterTestBase<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>
 {
     private static string FeedbackUrl(CultureInfo culture)
     {
@@ -48,12 +48,6 @@ public class SaasAdminStartupWarningAfterHalfYearLetterTests : LetterTestBase
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Common, "legalterms", culture, "https://docspace.onlyoffice.com/s/Fj-fVY--ZhHHnv7");
     }
-
-    protected override string LetterId => "saas_admin_startup_warning_after_half_year_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_half_year_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_half_year_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("docspace_deleted.gif");

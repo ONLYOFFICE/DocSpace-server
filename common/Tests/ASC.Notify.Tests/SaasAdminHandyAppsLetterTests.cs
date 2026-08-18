@@ -37,13 +37,8 @@ namespace ASC.Notify.Tests;
 /// The "Discover 4 handy apps" letter (<c>saas_admin_handy_apps_v1</c>), sent in SaaS on day 2 after
 /// portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminHandyAppsLetterTests : LetterTestBase
+public class SaasAdminHandyAppsLetterTests : LetterTestBase<SaasAdminHandyAppsV1NotifyAction>
 {
-    protected override string LetterId => "saas_admin_handy_apps_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_handy_apps_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_handy_apps_v1);
 
     /// <summary>Mirrors the day-2 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)

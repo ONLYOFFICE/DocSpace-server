@@ -38,18 +38,12 @@ namespace ASC.Notify.Tests;
 /// (<c>saas_agent_invite_existing_user</c>). Unlike the sign-up invitations it names both the inviter and
 /// the agent, so it is the one letter that exercises the <c>__AuthorName</c> and <c>$Message</c> tags.
 /// </summary>
-public class SaasAgentInviteExistingUserLetterTests : LetterTestBase
+public class SaasAgentInviteExistingUserLetterTests : LetterTestBase<SaasAgentInviteExistingUserNotifyAction>
 {
     private const string AgentTitle = "Agent title";
 
     /// <summary>The agent page, passed into <c>Init</c> by the caller.</summary>
     private static string AgentUrl => LetterEnvironment.PortalLink("ai/agents/1");
-
-    protected override string LetterId => "saas_agent_invite_existing_user";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_agent_invite_existing_user,
-        () => WebstudioNotifyPatternResource.pattern_saas_agent_invite_existing_user);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

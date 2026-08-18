@@ -36,7 +36,7 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The Enterprise licence warning <c>enterprise_admin_payment_warning_grace_period_activation</c>, sent to the portal admins.
 /// </summary>
-public class EnterpriseAdminPaymentWarningGracePeriodActivationLetterTests : LetterTestBase
+public class EnterpriseAdminPaymentWarningGracePeriodActivationLetterTests : LetterTestBase<EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction>
 {
     private const string PaymentDelay = "30";
 
@@ -45,12 +45,6 @@ public class EnterpriseAdminPaymentWarningGracePeriodActivationLetterTests : Let
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "docspaceprices", culture, "https://www.onlyoffice.com/docspace-prices.aspx");
     }
-
-    protected override string LetterId => "enterprise_admin_payment_warning_grace_period_activation";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_grace_period_activation,
-        () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_grace_period_activation);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

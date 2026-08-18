@@ -32,6 +32,8 @@
     <!-- The letter tests start MailPit through the AppHost itself (see MailPitFixture); the reference
          is what makes Projects.ASC_AppHost available, not an Aspire resource declaration. -->
     <ProjectReference Include="..\..\ASC.AppHost\ASC.AppHost.csproj" IsAspireProjectResource="false" />
+    <!-- Most notify actions live in ASC.Web.Core; the two backup letters have theirs here. -->
+    <ProjectReference Include="..\..\ASC.Data.Backup.Core\ASC.Data.Backup.Core.csproj" />
     <ProjectReference Include="..\..\..\web\ASC.Web.Core\ASC.Web.Core.csproj" />
   </ItemGroup>
 

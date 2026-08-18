@@ -37,18 +37,12 @@ namespace ASC.Notify.Tests;
 /// The letter that opens the grace period (<c>saas_owner_payment_warning_grace_period_activation</c>),
 /// sent to the owner and the payer the day after the subscription fell due.
 /// </summary>
-public class SaasGracePeriodActivationLetterTests : LetterTestBase
+public class SaasGracePeriodActivationLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>
 {
     private const string PaymentDelay = "30";
 
     /// <summary>The billing page the button leads to.</summary>
     private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
-
-    protected override string LetterId => "saas_owner_payment_warning_grace_period_activation";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_activation,
-        () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_activation);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

@@ -37,15 +37,9 @@ namespace ASC.Notify.Tests;
 /// The "Work faster with AI agents" letter (<c>saas_admin_ai_agents_v1</c>), sent in SaaS on day 7 after
 /// portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminAiAgentsLetterTests : LetterTestBase
+public class SaasAdminAiAgentsLetterTests : LetterTestBase<SaasAdminAiAgentsV1NotifyAction>
 {
     private static string AiSettingsUrl => LetterEnvironment.PortalLink("portal-settings/ai-settings/ai-models");
-
-    protected override string LetterId => "saas_admin_ai_agents_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_ai_agents_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_ai_agents_v1);
 
     /// <summary>Mirrors the day-7 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)

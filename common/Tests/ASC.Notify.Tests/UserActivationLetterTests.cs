@@ -38,16 +38,10 @@ namespace ASC.Notify.Tests;
 /// editions — SaaS, Enterprise, Enterprise whitelabel and Opensource — which differ only in the footer
 /// flavour they pass in; this class renders the SaaS one.
 /// </summary>
-public class UserActivationLetterTests : LetterTestBase
+public class UserActivationLetterTests : LetterTestBase<SaasUserActivationV1NotifyAction>
 {
     /// <summary>The confirmation link, built by the sending code from <c>ConfirmType.Activation</c>.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Activation");
-
-    protected override string LetterId => "user_activation_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_user_activation_v1,
-        () => WebstudioNotifyPatternResource.pattern_user_activation_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("join_docspace.gif");

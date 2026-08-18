@@ -32,13 +32,17 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using System.Globalization;
+global using System.Runtime.CompilerServices;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
 global using ASC.Core;
 global using ASC.Core.Common.WhiteLabel;
+global using ASC.Core.Configuration;
+global using ASC.Data.Backup;
 global using ASC.Notify.Messages;
+global using ASC.Notify.Model;
 global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
 global using ASC.Notify.Tests.Infrastructure;

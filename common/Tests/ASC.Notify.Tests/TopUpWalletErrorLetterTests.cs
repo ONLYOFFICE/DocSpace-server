@@ -37,16 +37,10 @@ namespace ASC.Notify.Tests;
 /// What the payer gets when the wallet could not be topped up automatically
 /// (<c>top_up_wallet_error</c>). Also goes out over Telegram, from the same pattern.
 /// </summary>
-public class TopUpWalletErrorLetterTests : LetterTestBase
+public class TopUpWalletErrorLetterTests : LetterTestBase<TopUpWalletErrorNotifyAction>
 {
     /// <summary>The wallet page the button leads to.</summary>
     private static string WalletUrl => LetterEnvironment.PortalLink("billing/wallet");
-
-    protected override string LetterId => "top_up_wallet_error";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_top_up_wallet_error,
-        () => WebstudioNotifyPatternResource.pattern_top_up_wallet_error);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

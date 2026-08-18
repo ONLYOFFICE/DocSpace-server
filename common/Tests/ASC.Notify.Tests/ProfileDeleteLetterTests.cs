@@ -38,16 +38,10 @@ namespace ASC.Notify.Tests;
 /// (<c>profile_delete</c>). Nothing happens until they follow the button, so a letter that arrives
 /// without a working link leaves the reader with no way to finish what they started.
 /// </summary>
-public class ProfileDeleteLetterTests : LetterTestBase
+public class ProfileDeleteLetterTests : LetterTestBase<ProfileDeleteNotifyAction>
 {
     /// <summary>What <c>CommonLinkUtility.GetConfirmationEmailUrl</c> builds for <c>ProfileRemove</c>.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/ProfileRemove");
-
-    protected override string LetterId => "profile_delete";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_profile_delete,
-        () => WebstudioNotifyPatternResource.pattern_profile_delete);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

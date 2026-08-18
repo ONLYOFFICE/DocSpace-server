@@ -38,16 +38,10 @@ namespace ASC.Notify.Tests;
 /// (<c>upcoming_subscription_payment</c>) — the sibling of <see cref="LowWalletBalanceLetterTests"/>,
 /// sent ahead of the charge rather than when the balance is already too low. Email only.
 /// </summary>
-public class UpcomingSubscriptionPaymentLetterTests : LetterTestBase
+public class UpcomingSubscriptionPaymentLetterTests : LetterTestBase<UpcomingSubscriptionPaymentNotifyAction>
 {
     /// <summary>The wallet page both links point at.</summary>
     private static string WalletUrl => LetterEnvironment.PortalLink("billing/wallet");
-
-    protected override string LetterId => "upcoming_subscription_payment";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_upcoming_subscription_payment,
-        () => WebstudioNotifyPatternResource.pattern_upcoming_subscription_payment);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

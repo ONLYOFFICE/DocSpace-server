@@ -37,16 +37,10 @@ namespace ASC.Notify.Tests;
 /// The "Get more with useful add-ons" letter (<c>saas_admin_addons_v1</c>), sent in SaaS on day 4 after
 /// portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminAddonsLetterTests : LetterTestBase
+public class SaasAdminAddonsLetterTests : LetterTestBase<SaasAdminAddonsV1NotifyAction>
 {
     private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
     private static string WalletUrl => LetterEnvironment.PortalLink("billing/wallet");
-
-    protected override string LetterId => "saas_admin_addons_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_addons_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_addons_v1);
 
     /// <summary>Mirrors the day-4 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)

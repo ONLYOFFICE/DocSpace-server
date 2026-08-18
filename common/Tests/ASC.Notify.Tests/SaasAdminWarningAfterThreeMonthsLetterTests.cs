@@ -38,7 +38,7 @@ namespace ASC.Notify.Tests;
 /// portal owner three months after the subscription expired. The portal is removed three months later,
 /// a week after <c>saas_admin_warning_after_half_year_v1</c>.
 /// </summary>
-public class SaasAdminWarningAfterThreeMonthsLetterTests : LetterTestBase
+public class SaasAdminWarningAfterThreeMonthsLetterTests : LetterTestBase<SaasAdminWarningAfterThreeMonthsV1NotifyAction>
 {
     private static string DashboardUrl => LetterEnvironment.PortalLink("dashboard");
 
@@ -46,12 +46,6 @@ public class SaasAdminWarningAfterThreeMonthsLetterTests : LetterTestBase
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Common, "legalterms", culture, "https://docspace.onlyoffice.com/s/Fj-fVY--ZhHHnv7");
     }
-
-    protected override string LetterId => "saas_admin_warning_after_three_months_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_warning_after_three_months_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_warning_after_three_months_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("docspace_deleted.gif");

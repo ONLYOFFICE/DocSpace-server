@@ -38,7 +38,7 @@ namespace ASC.Notify.Tests;
 /// event behind the change, so it carries the widest set of tags of any letter — who, when, from which
 /// IP, device and browser.
 /// </summary>
-public class PasswordChangedLetterTests : LetterTestBase
+public class PasswordChangedLetterTests : LetterTestBase<PasswordChangedNotifyAction>
 {
     private const string RecipientEmail = "owner@preview.onlyoffice.com";
     private const string ChangedOn = "14.08.2026 11:20";
@@ -49,12 +49,6 @@ public class PasswordChangedLetterTests : LetterTestBase
 
     /// <summary>The sign-in link, built from <c>ConfirmType.Auth</c>.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Auth");
-
-    protected override string LetterId => "password_changed";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_password_changed,
-        () => WebstudioNotifyPatternResource.pattern_password_changed);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

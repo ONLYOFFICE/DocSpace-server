@@ -37,16 +37,10 @@ namespace ASC.Notify.Tests;
 /// What the payer gets when a subscription could not be renewed automatically
 /// (<c>renew_subscription_error</c>). Also goes out over Telegram, from the same pattern.
 /// </summary>
-public class RenewSubscriptionErrorLetterTests : LetterTestBase
+public class RenewSubscriptionErrorLetterTests : LetterTestBase<RenewSubscriptionErrorNotifyAction>
 {
     /// <summary>The billing page the button leads to.</summary>
     private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
-
-    protected override string LetterId => "renew_subscription_error";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_renew_subscription_error,
-        () => WebstudioNotifyPatternResource.pattern_renew_subscription_error);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

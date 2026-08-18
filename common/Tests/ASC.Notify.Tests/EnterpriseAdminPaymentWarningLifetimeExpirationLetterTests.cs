@@ -36,19 +36,13 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The Enterprise licence warning <c>enterprise_admin_payment_warning_lifetime_expiration</c>, sent to the portal admins.
 /// </summary>
-public class EnterpriseAdminPaymentWarningLifetimeExpirationLetterTests : LetterTestBase
+public class EnterpriseAdminPaymentWarningLifetimeExpirationLetterTests : LetterTestBase<EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction>
 {
     /// <summary>The pricing page the sending code appends its campaign parameters to.</summary>
     private static string PricesUrl(CultureInfo culture)
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "docspaceprices", culture, "https://www.onlyoffice.com/docspace-prices.aspx");
     }
-
-    protected override string LetterId => "enterprise_admin_payment_warning_lifetime_expiration";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_lifetime_expiration,
-        () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_lifetime_expiration);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

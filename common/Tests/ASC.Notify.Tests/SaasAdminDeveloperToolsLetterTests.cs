@@ -37,7 +37,7 @@ namespace ASC.Notify.Tests;
 /// The "Connect, integrate, and build" letter (<c>saas_admin_developer_tools_v1</c>), sent in SaaS on day
 /// 10 after portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminDeveloperToolsLetterTests : LetterTestBase
+public class SaasAdminDeveloperToolsLetterTests : LetterTestBase<SaasAdminDeveloperToolsV1NotifyAction>
 {
     private static string DeveloperToolsUrl => LetterEnvironment.PortalLink("developer-tools/overview");
 
@@ -50,12 +50,6 @@ public class SaasAdminDeveloperToolsLetterTests : LetterTestBase
     {
         return LetterEnvironment.ExternalDomain(LetterEnvironment.ExternalResources.Api, culture, "https://api.onlyoffice.com");
     }
-
-    protected override string LetterId => "saas_admin_developer_tools_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_developer_tools_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_developer_tools_v1);
 
     /// <summary>Mirrors the day-10 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)

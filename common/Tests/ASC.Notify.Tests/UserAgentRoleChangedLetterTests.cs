@@ -36,25 +36,18 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// What a member gets when their role in an AI agent changes (<c>user_agent_role_changed</c>).
 /// </summary>
-public class UserAgentRoleChangedLetterTests : LetterTestBase
+public class UserAgentRoleChangedLetterTests : LetterTestBase<UserAgentRoleChangedNotifyAction>
 {
     private const string AgentTitle = "Agent title";
     private const string UserRole = "Editor";
 
     private static string AgentUrl => LetterEnvironment.PortalLink("ai/agents/1");
 
-
     /// <summary>The access rights article the letter points at.</summary>
     private static string HelpCenterUrl(CultureInfo culture)
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Helpcenter, "accessrights", culture, "https://helpcenter.onlyoffice.com");
     }
-
-    protected override string LetterId => "user_agent_role_changed";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_user_agent_role_changed,
-        () => WebstudioNotifyPatternResource.pattern_user_agent_role_changed);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

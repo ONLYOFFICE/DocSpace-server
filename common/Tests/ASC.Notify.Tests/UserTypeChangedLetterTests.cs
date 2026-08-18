@@ -36,22 +36,15 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// What a user gets when an admin changes their type (<c>user_type_changed</c>).
 /// </summary>
-public class UserTypeChangedLetterTests : LetterTestBase
+public class UserTypeChangedLetterTests : LetterTestBase<UserTypeChangedNotifyAction>
 {
     private const string UserType = "Room admin";
-
 
     /// <summary>The access rights article the letter points at.</summary>
     private static string HelpCenterUrl(CultureInfo culture)
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Helpcenter, "accessrights", culture, "https://helpcenter.onlyoffice.com");
     }
-
-    protected override string LetterId => "user_type_changed";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_user_type_changed,
-        () => WebstudioNotifyPatternResource.pattern_user_type_changed);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

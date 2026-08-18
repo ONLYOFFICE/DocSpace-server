@@ -37,16 +37,10 @@ namespace ASC.Notify.Tests;
 /// What the payer gets when the wallet is running out (<c>low_wallet_balance</c>) — the sibling of
 /// <see cref="TopUpWalletErrorLetterTests"/>, sent before the top-up rather than after it failed.
 /// </summary>
-public class LowWalletBalanceLetterTests : LetterTestBase
+public class LowWalletBalanceLetterTests : LetterTestBase<LowWalletBalanceNotifyAction>
 {
     /// <summary>The wallet page the button leads to.</summary>
     private static string WalletUrl => LetterEnvironment.PortalLink("billing/wallet");
-
-    protected override string LetterId => "low_wallet_balance";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_low_wallet_balance,
-        () => WebstudioNotifyPatternResource.pattern_low_wallet_balance);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

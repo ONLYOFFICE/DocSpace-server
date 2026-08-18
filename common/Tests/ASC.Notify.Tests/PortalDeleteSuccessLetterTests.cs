@@ -37,7 +37,7 @@ namespace ASC.Notify.Tests;
 /// The goodbye letter (<c>portal_delete_success_v1</c>), sent to the owner once the portal has actually
 /// been removed. Unlike the warning letters, this one is event-driven, not periodic.
 /// </summary>
-public class PortalDeleteSuccessLetterTests : LetterTestBase
+public class PortalDeleteSuccessLetterTests : LetterTestBase<PortalDeleteSuccessV1NotifyAction>
 {
     /// <summary>The feedback form, passed into <c>Init</c> by the caller.</summary>
     private static string FeedbackUrl(CultureInfo culture)
@@ -49,12 +49,6 @@ public class PortalDeleteSuccessLetterTests : LetterTestBase
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Common, "legalterms", culture, "https://docspace.onlyoffice.com/s/Fj-fVY--ZhHHnv7");
     }
-
-    protected override string LetterId => "portal_delete_success_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_portal_delete_success_v1,
-        () => WebstudioNotifyPatternResource.pattern_portal_delete_success_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("docspace_deactivated.gif");

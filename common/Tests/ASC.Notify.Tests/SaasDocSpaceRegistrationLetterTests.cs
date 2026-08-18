@@ -38,16 +38,10 @@ namespace ASC.Notify.Tests;
 /// letters this one is plain textile — an <c>h1.</c> heading and a <c>"text":"url"</c> link — so it
 /// exercises the other half of <c>TextileStyler</c>.
 /// </summary>
-public class SaasDocSpaceRegistrationLetterTests : LetterTestBase
+public class SaasDocSpaceRegistrationLetterTests : LetterTestBase<SaasDocSpaceRegistrationNotifyAction>
 {
     /// <summary>The confirmation link, passed into <c>Init</c> by the caller.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/EmpInvite");
-
-    protected override string LetterId => "saas_docspace_registration";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_docspace_registration,
-        () => WebstudioNotifyPatternResource.pattern_saas_docspace_registration);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

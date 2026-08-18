@@ -37,16 +37,10 @@ namespace ASC.Notify.Tests;
 /// The AI agent invitation for someone who has no account yet (<c>saas_agent_invite</c>) — the agent
 /// counterpart of <see cref="SaasRoomInviteLetterTests"/>, whose link doubles as the sign-up flow.
 /// </summary>
-public class SaasAgentInviteLetterTests : LetterTestBase
+public class SaasAgentInviteLetterTests : LetterTestBase<SaasAgentInviteNotifyAction>
 {
     /// <summary>The confirmation link, passed into <c>Init</c> by the caller.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/LinkInvite");
-
-    protected override string LetterId => "saas_agent_invite";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_agent_invite,
-        () => WebstudioNotifyPatternResource.pattern_saas_agent_invite);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

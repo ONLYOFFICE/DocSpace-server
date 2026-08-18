@@ -38,18 +38,12 @@ namespace ASC.Notify.Tests;
 /// Where <see cref="SaasRoomInviteLetterTests"/> starts a sign-up, this one names the inviter and the
 /// room and links straight into it.
 /// </summary>
-public class SaasRoomInviteExistingUserLetterTests : LetterTestBase
+public class SaasRoomInviteExistingUserLetterTests : LetterTestBase<SaasRoomInviteExistingUserNotifyAction>
 {
     private const string RoomTitle = "Room title";
 
     /// <summary>The room page, passed into <c>Init</c> by the caller.</summary>
     private static string RoomUrl => LetterEnvironment.PortalLink("rooms/shared/1");
-
-    protected override string LetterId => "saas_room_invite_existing_user";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_room_invite_existing_user,
-        () => WebstudioNotifyPatternResource.pattern_saas_room_invite_existing_user);
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;

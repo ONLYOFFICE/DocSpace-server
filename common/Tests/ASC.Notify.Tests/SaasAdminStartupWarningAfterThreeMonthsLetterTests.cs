@@ -37,15 +37,9 @@ namespace ASC.Notify.Tests;
 /// The first warning a free portal gets (<c>saas_admin_startup_warning_after_three_months_v1</c>), sent to
 /// the owner after three months without activity. The six-month letter and the removal follow.
 /// </summary>
-public class SaasAdminStartupWarningAfterThreeMonthsLetterTests : LetterTestBase
+public class SaasAdminStartupWarningAfterThreeMonthsLetterTests : LetterTestBase<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>
 {
     private static string DashboardUrl => LetterEnvironment.PortalLink("dashboard");
-
-    protected override string LetterId => "saas_admin_startup_warning_after_three_months_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_three_months_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_three_months_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("docspace_deleted.gif");

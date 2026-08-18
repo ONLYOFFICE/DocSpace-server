@@ -39,7 +39,7 @@ namespace ASC.Notify.Tests;
 /// (<c>enterprise_admin_user_apps_tips_v1</c>) must carry the very same text — see
 /// <see cref="Letters_AreIdentical"/>.
 /// </summary>
-public class SaasAdminUserAppsTipsLetterTests : LetterTestBase
+public class SaasAdminUserAppsTipsLetterTests : LetterTestBase<SaasAdminUserAppsTipsV1NotifyAction>
 {
     private static string DesktopUrl(CultureInfo culture)
     {
@@ -50,12 +50,6 @@ public class SaasAdminUserAppsTipsLetterTests : LetterTestBase
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "downloadmobile", culture, "https://www.onlyoffice.com/download-desktop.aspx#mobile");
     }
-
-    protected override string LetterId => "saas_admin_user_apps_tips_v1";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_user_apps_tips_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_user_apps_tips_v1);
 
     /// <summary>The sending code sets a top image for this letter.</summary>
     protected override string? TopGif => LetterEnvironment.NotificationImageUrl("free_apps.gif");
