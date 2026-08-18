@@ -50,12 +50,12 @@ public class DeleteKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
 
         await SetFakeKeys();
 
-        var status = await StatusOf(() => _privacyRoomApi.DeleteKeysWithHttpInfoAsync(Guid.Empty, TestContext.Current.CancellationToken));
+        var response = await _privacyRoomApi.DeleteKeysWithHttpInfoAsync(Guid.Empty, TestContext.Current.CancellationToken);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().BeNullOrEmpty();
 
-        status.Should().Be(204);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
@@ -66,9 +66,10 @@ public class DeleteKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
         // syntactically valid GUID whether or not the key exists (a silent idempotent no-op).
         await _filesClient.Authenticate(Owner);
 
-        var status = await StatusOf(() => _privacyRoomApi.DeleteKeysWithHttpInfoAsync(Guid.NewGuid(), TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.DeleteKeysAsync(Guid.NewGuid(), TestContext.Current.CancellationToken));
 
-        status.Should().Be(404);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
@@ -108,12 +109,13 @@ public class DeleteKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
         await SetFakeKeys();
         await _privacyRoomApi.DeleteKeysAsync(Guid.Empty, TestContext.Current.CancellationToken);
 
-        var status = await StatusOf(() => _privacyRoomApi.DeleteKeysWithHttpInfoAsync(Guid.Empty, TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.DeleteKeysAsync(Guid.Empty, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(404);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().BeNullOrEmpty();
-
-        status.Should().Be(404);
     }
 
     [Fact]
@@ -129,12 +131,12 @@ public class DeleteKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
         await SetFakeKeys(idB);
         await SetFakeKeys(idC);
 
-        var status = await StatusOf(() => _privacyRoomApi.DeleteKeysWithHttpInfoAsync(idB, TestContext.Current.CancellationToken));
+        var response = await _privacyRoomApi.DeleteKeysWithHttpInfoAsync(idB, TestContext.Current.CancellationToken);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().HaveCount(2);
         after.Select(k => k.Id).Should().BeEquivalentTo([idA, idC]);
 
-        status.Should().Be(204);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 }

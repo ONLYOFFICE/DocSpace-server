@@ -62,22 +62,23 @@ public class SetKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fixtur
     public async Task SetKeys_DuplicateId_RejectedWithConflict()
     {
         // BUG 82544: re-POSTing an id that already exists silently no-ops with 200 instead of
-        // rejecting the conflict. The stored key must survive unchanged either way, so that
-        // side-effect check runs first; only the status assertion is expected to fail today.
+        // rejecting the conflict, so no exception is thrown today. The stored key must survive
+        // unchanged either way, which is asserted once the call fails as it should.
         await _filesClient.Authenticate(Owner);
 
         var id = Guid.NewGuid();
         var original = await SetFakeKeys(id, "pk-orig");
 
-        var status = await StatusOf(() => _privacyRoomApi.SetKeysWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(id, "pk-new", "prv-new"),
-            TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.SetKeysAsync(
+                new EncryptionKeyRequestDto(id, "pk-new", "prv-new"),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(409);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().ContainSingle(k => k.Id == id);
         after.Single(k => k.Id == id).PublicKey.Should().Be(original.PublicKey);
-
-        status.Should().Be(409);
     }
 
     [Theory]
@@ -90,14 +91,15 @@ public class SetKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fixtur
         // whitespace-only value is accepted (200) and stored instead of being rejected with 400.
         await _filesClient.Authenticate(Owner);
 
-        var status = await StatusOf(() => _privacyRoomApi.SetKeysWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(publicKey: publicKey, privateKeyEnc: "prv-enc"),
-            TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.SetKeysAsync(
+                new EncryptionKeyRequestDto(publicKey: publicKey, privateKeyEnc: "prv-enc"),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().BeNullOrEmpty();
-
-        status.Should().Be(400);
     }
 
     public static TheoryData<string, string, string> InvalidSetKeysInputs => new()
@@ -119,14 +121,15 @@ public class SetKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fixtur
         _ = label;
         await _filesClient.Authenticate(Owner);
 
-        var status = await StatusOf(() => _privacyRoomApi.SetKeysWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(publicKey: publicKey, privateKeyEnc: privateKeyEnc),
-            TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.SetKeysAsync(
+                new EncryptionKeyRequestDto(publicKey: publicKey, privateKeyEnc: privateKeyEnc),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().BeNullOrEmpty();
-
-        status.Should().Be(400);
     }
 
     [Fact]
@@ -136,13 +139,14 @@ public class SetKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fixtur
         // BUG 82554: an entirely absent DTO binds to defaults and is still accepted (200).
         await _filesClient.Authenticate(Owner);
 
-        var status = await StatusOf(() => _privacyRoomApi.SetKeysWithHttpInfoAsync(
-            cancellationToken: TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.SetKeysAsync(
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().BeNullOrEmpty();
-
-        status.Should().Be(400);
     }
 
     [Fact]
@@ -174,14 +178,15 @@ public class SetKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fixtur
         // answers 200 with a success-shaped body, yet nothing is stored.
         await _filesClient.Authenticate(Owner);
 
-        var status = await StatusOf(() => _privacyRoomApi.SetKeysWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(publicKey: new string('x', 65536), privateKeyEnc: "prv"),
-            TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.SetKeysAsync(
+                new EncryptionKeyRequestDto(publicKey: new string('x', 65536), privateKeyEnc: "prv"),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().BeNullOrEmpty();
-
-        status.Should().Be(400);
     }
 
     [Fact]

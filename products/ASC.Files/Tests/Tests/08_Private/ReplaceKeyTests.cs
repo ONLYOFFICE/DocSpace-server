@@ -120,14 +120,15 @@ public class ReplaceKeyTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
         // rather than silently succeeding with a no-op.
         await _filesClient.Authenticate(Owner);
 
-        var status = await StatusOf(() => _privacyRoomApi.ReplaceKeyWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(publicKey: "pk", privateKeyEnc: "prv"),
-            TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.ReplaceKeyAsync(
+                new EncryptionKeyRequestDto(publicKey: "pk", privateKeyEnc: "prv"),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(404);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().BeNullOrEmpty();
-
-        status.Should().Be(404);
     }
 
     public static TheoryData<string, string, string> DestructivePutInputs => new()
@@ -154,16 +155,17 @@ public class ReplaceKeyTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
 
         var original = await SetFakeKeys(publicKeyPrefix: "orig");
 
-        var status = await StatusOf(() => _privacyRoomApi.ReplaceKeyWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(publicKey: publicKey, privateKeyEnc: privateKeyEnc),
-            TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.ReplaceKeyAsync(
+                new EncryptionKeyRequestDto(publicKey: publicKey, privateKeyEnc: privateKeyEnc),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().ContainSingle();
         after[0].PublicKey.Should().Be(original.PublicKey);
         after[0].PrivateKeyEnc.Should().Be(original.PrivateKeyEnc);
-
-        status.Should().Be(400);
     }
 
     [Fact]
@@ -176,15 +178,16 @@ public class ReplaceKeyTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
 
         var original = await SetFakeKeys(publicKeyPrefix: "orig");
 
-        var status = await StatusOf(() => _privacyRoomApi.ReplaceKeyWithHttpInfoAsync(
-            cancellationToken: TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.ReplaceKeyAsync(
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().ContainSingle();
         after[0].PublicKey.Should().Be(original.PublicKey);
         after[0].PrivateKeyEnc.Should().Be(original.PrivateKeyEnc);
-
-        status.Should().Be(400);
     }
 
     [Fact]
@@ -199,11 +202,11 @@ public class ReplaceKeyTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
         var original = await SetFakeKeys(publicKeyPrefix: "orig");
         var newPublicKey = $"pk-rotated-{Guid.NewGuid():N}";
 
-        var status = await StatusOf(() => _privacyRoomApi.ReplaceKeyWithHttpInfoAsync(
+        var response = await _privacyRoomApi.ReplaceKeyWithHttpInfoAsync(
             new EncryptionKeyRequestDto(publicKey: newPublicKey),
-            TestContext.Current.CancellationToken));
+            TestContext.Current.CancellationToken);
 
-        status.Should().Be(200);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().ContainSingle();
@@ -223,15 +226,16 @@ public class ReplaceKeyTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
         var otherId = Guid.NewGuid();
         var otherKey = await SetFakeKeys(otherId, "other");
 
-        var status = await StatusOf(() => _privacyRoomApi.ReplaceKeyWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(Guid.Empty, new string('x', 65536), "bp"),
-            TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.ReplaceKeyAsync(
+                new EncryptionKeyRequestDto(Guid.Empty, new string('x', 65536), "bp"),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().HaveCount(2);
         after.Single(k => k.Id == otherId).PublicKey.Should().Be(otherKey.PublicKey);
         after.Single(k => k.Id == Guid.Empty).PublicKey.Should().Be(zeroKey.PublicKey);
-
-        status.Should().Be(400);
     }
 }

@@ -143,11 +143,11 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
         var guest = await InviteGuest();
         await _filesClient.Authenticate(guest);
 
-        var status = await StatusOf(() => _privacyRoomApi.SetKeysWithHttpInfoAsync(
+        var response = await _privacyRoomApi.SetKeysWithHttpInfoAsync(
             new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
-            TestContext.Current.CancellationToken));
+            TestContext.Current.CancellationToken);
 
-        status.Should().Be(200);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
@@ -204,11 +204,11 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
         var guest = await InviteGuest();
         await _filesClient.Authenticate(guest);
 
-        var status = await StatusOf(() => _privacyRoomApi.SetKeysWithHttpInfoAsync(
+        var response = await _privacyRoomApi.SetKeysWithHttpInfoAsync(
             new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
-            TestContext.Current.CancellationToken));
+            TestContext.Current.CancellationToken);
 
-        status.Should().Be(200);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
@@ -253,12 +253,12 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
         await _filesClient.Authenticate(user);
         await SetFakeKeys();
 
-        var status = await StatusOf(() => _privacyRoomApi.DeleteKeysWithHttpInfoAsync(Guid.Empty, TestContext.Current.CancellationToken));
+        var response = await _privacyRoomApi.DeleteKeysWithHttpInfoAsync(Guid.Empty, TestContext.Current.CancellationToken);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().BeNullOrEmpty();
 
-        status.Should().Be(204);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
@@ -270,11 +270,11 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
         var guest = await InviteGuest();
         await _filesClient.Authenticate(guest);
 
-        var status = await StatusOf(() => _privacyRoomApi.SetKeysWithHttpInfoAsync(
+        var response = await _privacyRoomApi.SetKeysWithHttpInfoAsync(
             new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
-            TestContext.Current.CancellationToken));
+            TestContext.Current.CancellationToken);
 
-        status.Should().Be(200);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]

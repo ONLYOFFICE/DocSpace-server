@@ -60,28 +60,6 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
     }
 
     /// <summary>
-    /// Runs a privacyroom call that may either return normally or throw <see cref="ApiException"/>,
-    /// and reduces both outcomes to a single HTTP status code. Several bugs ported from the
-    /// TypeScript suite's <c>test.fail</c> cases describe an endpoint that answers 200 today but
-    /// must answer a 4xx once fixed; fixing it turns the same call from "returns a response" into
-    /// "throws", so the assertion needs to see through both shapes to read red before the fix and
-    /// green after it.
-    /// </summary>
-    protected static async Task<int> StatusOf<T>(Func<Task<ApiResponse<T>>> call)
-    {
-        try
-        {
-            var response = await call();
-
-            return (int)response.StatusCode;
-        }
-        catch (ApiException ex)
-        {
-            return ex.ErrorCode;
-        }
-    }
-
-    /// <summary>
     /// Polls <paramref name="probe"/> on a deadline until <paramref name="until"/> is satisfied, for
     /// state that is written asynchronously (key deletion propagating to room-access checks). Never
     /// throws on timeout — it returns the last observed value so the caller's own assertion message
