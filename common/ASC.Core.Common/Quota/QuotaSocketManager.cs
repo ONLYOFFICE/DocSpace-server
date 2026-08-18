@@ -107,6 +107,13 @@ public class QuotaSocketManager(
         await MakeRequest("change-ai-config", new { room });
     }
 
+    public async Task ChangeAiAccessSettingsAsync(bool enabled)
+    {
+        var room = GetQuotaRoom();
+
+        await MakeRequest("change-ai-access-settings", new { room, enabled });
+    }
+
     public async Task ChangeExternalSharingSettingsAsync(
         bool externalShare,
         bool defaultShareLinkInternal,
