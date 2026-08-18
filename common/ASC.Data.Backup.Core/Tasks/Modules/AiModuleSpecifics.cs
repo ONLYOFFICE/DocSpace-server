@@ -198,7 +198,7 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
                 }
                 catch (Exception ex)
                 {
-                    logger.ErrorCanNotPrepareValue(value as string, ex);
+                    logger.ErrorCanNotPrepareColumn(table.Name, columnName, ex);
                     value = null;
                 }
 
@@ -210,7 +210,7 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
                 }
                 catch (Exception ex)
                 {
-                    logger.ErrorCanNotPrepareValue(value as string, ex);
+                    logger.ErrorCanNotPrepareColumn(table.Name, columnName, ex);
 
                     return false;
                 }
@@ -232,7 +232,7 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
             }
             catch (Exception ex)
             {
-                logger.ErrorCanNotPrepareValue(row[columnName] as string, ex);
+                logger.ErrorCanNotPrepareColumn(data.TableName, columnName, ex);
 
                 if (removeOnFailure)
                 {
