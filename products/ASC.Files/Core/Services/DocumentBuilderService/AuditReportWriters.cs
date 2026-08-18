@@ -137,6 +137,8 @@ public class AuditXlsxReportWriter(
                 dateGenerated = header.DateGenerated
             },
             logoSrc = header.LogoSrc,
+            logoWidthMm = header.LogoWidthMm,
+            logoHeightMm = header.LogoHeightMm,
             themeColors = new
             {
                 mainBgColor = header.MainBgColor,

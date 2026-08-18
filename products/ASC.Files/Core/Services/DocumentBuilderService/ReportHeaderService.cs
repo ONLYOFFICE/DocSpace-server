@@ -37,9 +37,12 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 /// The shared report header: the portal logo, theme colors, the company/generation-date values
 /// printed above every generated report, and the single date cell format reports use. The reporting
 /// period is report-specific and is therefore assembled by the caller rather than carried here.
+/// <see cref="LogoWidthMm"/>/<see cref="LogoHeightMm"/> are the box the scripts draw the logo into.
 /// </summary>
 public sealed record ReportHeader(
     string LogoSrc,
+    double LogoWidthMm,
+    double LogoHeightMm,
     int[] MainBgColor,
     int[] LightBgColor,
     int[] MainFontColor,
@@ -53,6 +56,15 @@ public class ReportHeaderService(
     TenantLogoManager tenantLogoManager,
     TenantUtil tenantUtil)
 {
+    // The logo is drawn into a fixed box, so the box has to keep the proportions the logo was
+    // authored at or it comes out stretched. Both logos are laid out at the same 10 mm height, so
+    // the width follows from the source size:
+    //   built-in    177 x 24 px (client's logo/lightsmall.svg)          -> 177 * 10 / 24
+    //   white-label 422 x 48 px (TenantWhiteLabelSettings.LogoLightSmallSize) -> 422 * 10 / 48
+    private const double DefaultLogoWidthMm = 73.8;
+    private const double BrandedLogoWidthMm = 87.9;
+    private const double LogoHeightMm = 10;
+
     public async Task<ReportHeader> BuildAsync(CultureInfo culture)
     {
         var logoText = await tenantLogoManager.GetLogoTextAsync();
@@ -62,6 +74,8 @@ public class ReportHeaderService(
         var logoSrc = await tenantLogoManager.GetTopLogoDataUriAsync()
                       ?? await tenantLogoManager.GetTopLogoAbsoluteUrlAsync();
 
+        var logoWidthMm = await tenantLogoManager.IsDefaultTopLogoAsync() ? DefaultLogoWidthMm : BrandedLogoWidthMm;
+
         var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
 
@@ -70,6 +84,8 @@ public class ReportHeaderService(
         // and ar-lb portals that means Arabic-Indic digits, which the document builder parses.
         return new ReportHeader(
             logoSrc,
+            logoWidthMm,
+            LogoHeightMm,
             DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1),
             DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08),
             DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1),

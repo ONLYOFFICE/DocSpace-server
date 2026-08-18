@@ -169,6 +169,8 @@ public abstract class CustomerReportBuilderBase(
                 dateGenerated = header.DateGenerated
             },
             logoSrc = header.LogoSrc,
+            logoWidthMm = header.LogoWidthMm,
+            logoHeightMm = header.LogoHeightMm,
             themeColors = new
             {
                 mainBgColor = header.MainBgColor,
