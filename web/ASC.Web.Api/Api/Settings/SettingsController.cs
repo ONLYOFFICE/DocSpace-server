@@ -1327,6 +1327,8 @@ public partial class SettingsController(
 
         await settingsManager.SaveAsync(settings);
 
+        await quotaSocketManager.ChangeAiAccessSettingsAsync(inDto.Enabled);
+
         messageService.Send(inDto.Enabled ? MessageAction.AIAccessEnabled : MessageAction.AIAccessDisabled);
 
         return settings;

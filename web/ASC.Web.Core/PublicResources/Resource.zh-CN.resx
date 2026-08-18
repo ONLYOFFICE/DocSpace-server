@@ -1315,7 +1315,7 @@
     <value>网络搜索</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>网络搜索</value>
+    <value>AI 搜索</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI 积分</value>

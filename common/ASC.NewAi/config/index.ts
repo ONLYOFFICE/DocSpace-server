@@ -86,6 +86,20 @@ export function mcpPortalBaseUrl(): string | undefined {
     return process.env["AI__MCP_PORTAL_BASE_URL"] || undefined;
 }
 
+// SSRF egress policy for user-supplied provider / web-search `baseUrl`s.
+// By default loopback and RFC1918 private ranges are rejected before any
+// outbound call (see `assertSafeBaseUrl` in app/security.ts), mirroring the
+// C# `UrlValidator` default blacklist. On-prem installs that run a model
+// server on an internal address — a local Ollama at 127.0.0.1, an inference
+// box on 10.x — opt those ranges back in by setting
+// `AI__ALLOW_PRIVATE_BASE_URL=true`. Cloud-metadata / link-local
+// (169.254.0.0/16, fe80::/10) and the unspecified 0.0.0.0/8 stay blocked
+// regardless — they are never a legitimate endpoint.
+export function allowPrivateBaseUrl(): boolean {
+    const value = process.env["AI__ALLOW_PRIVATE_BASE_URL"];
+    return value === "true" || value === "1";
+}
+
 // The portal's own MCP server (docspace-mcp, the `ai.mcp` entry named
 // below). It is always enabled everywhere — global chat, agents, the
 // editor plugin — and its tools cannot be disabled: the agent whitelist

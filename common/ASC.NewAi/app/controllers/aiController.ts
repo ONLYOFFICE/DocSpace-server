@@ -79,10 +79,14 @@ function withRequestSignal<T>(res: Response, body: T): T {
   if (!isObject(body)) {
     return body;
   }
-  const actionArgs = body["actionArgs"];
-  if (!isObject(actionArgs)) {
-    return body;
-  }
+  // Always wire the abort signal, even when the request carries no
+  // `actionArgs`. The UI sends an `actionArgs` object (with a signal that
+  // collapses to `{}` over JSON), but a direct API client omits it entirely
+  // — and without the signal a client disconnect never reaches the provider,
+  // so generation runs to completion and keeps burning tokens after the user
+  // has stopped waiting. Create the object when missing so cancellation works
+  // for every caller.
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
   return {
     ...body,
     actionArgs: { ...actionArgs, signal: responseAbortSignal(res) },
@@ -90,10 +94,10 @@ function withRequestSignal<T>(res: Response, body: T): T {
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt
-// override. The fragment ships alongside the tool list from
-// `tools/list`; the engine's own `getTools` reuses the cached fetch, so
-// this adds no extra round-trip. An existing client override is kept and
-// the fragment appended to its text; otherwise an `append` override is set.
+// override. The fragment ships alongside the tool list from the .NET
+// `tools/list`; nothing along this path is cached (deliberate — see
+// SystemToolsSource), so the prompt fetch is its own round-trip next to
+// the engine's `getTools`.
 // Append `fragment` to the action's system-prompt override (the engine
 // folds it onto the baked-in default via `resolveSystemPrompt`). Keeps an
 // existing override's text and adds the fragment after a blank line;
@@ -142,18 +146,19 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
 }
 
 // Build the context fragment that tells the agent where it is operating and
-// how to scope tool calls. The workspace lines are emitted only when an
-// `entityId` (the agent/room scope) is present.
+// how to scope tool calls. The location lines are emitted only when an
+// `entityId` (the folder/room the chat is opened from) is present.
 function buildContextFragment(entityId: string | undefined): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
     "Context:",
-    "- You are an AI agent operating inside a workspace, not a generic standalone assistant.",
+    "- You are an AI agent operating inside a DocSpace workspace, not a generic standalone assistant.",
   ];
   if (entityId) {
     lines.push(
-      `- This conversation is scoped to a single agent workspace (id: ${entityId}). Any tool you call reads or modifies data within the current user's workspace, on their behalf and with their permissions — never assume access beyond that scope.`,
-      `- When a tool needs a workspace, folder, or scope identifier and the user did not specify one, use this workspace id (${entityId}) — e.g. scope searches and listings to it.`,
+      `- You are currently in the folder or room with id ${entityId} — this is the user's current location. Any tool you call reads or modifies data on the user's behalf and with their permissions — never assume access beyond that.`,
+      `- When a tool needs a folder, room, or scope identifier and the user did not specify one, use this folder/room id (${entityId}) — e.g. scope searches and listings to it.`,
+      `- To see what is in the current location (its files and subfolders), call the get_folder_content tool with this id (${entityId}); use get_folder_info for the location's own properties. Do this when the user refers to "this folder/room", "these files", or asks what is here.`,
     );
   }
   lines.push(

@@ -1168,7 +1168,7 @@
     <value>Количество ИИ-агентов не должно превышать {0}</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
-    <value>Поиск на базе ИИ</value>
+    <value>ИИ-поиск</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Функции ИИ</value>
@@ -1324,7 +1324,7 @@
     <value>Веб-поиск</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Веб-поиск</value>
+    <value>ИИ-поиск</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Кредиты ИИ</value>

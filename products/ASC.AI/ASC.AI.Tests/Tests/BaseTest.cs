@@ -277,6 +277,18 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return room.Id;
     }
 
+    /// <summary>
+    /// Returns the id of the owner's "My documents" root folder in the current test's portal.
+    /// </summary>
+    protected async Task<int> GetMyDocumentsFolderIdAsync()
+    {
+        await _clients.FilesHttpClient.Authenticate(Owner);
+
+        using var response = await _clients.FilesApi.GetAsync("/api/2.0/files/@my", TestContext.Current.CancellationToken);
+        var content = await _clients.FilesApi.ReadAsync<FolderContentDto>(response, TestContext.Current.CancellationToken);
+        return content.Current.Id;
+    }
+
     protected async Task<PreferencesDto?> ReadPreferencesAsync(string? entityId = null)
     {
         var path = entityId is null
@@ -371,6 +383,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     }
 
     private sealed record RoomFolderDto(int Id);
+
+    private sealed record FolderContentDto(RoomFolderDto Current);
 
     private sealed record CreatedUserDto(Guid Id);
 }

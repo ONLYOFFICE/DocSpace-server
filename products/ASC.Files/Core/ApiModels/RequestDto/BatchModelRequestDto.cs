@@ -262,6 +262,13 @@ public class EmptyTrashRequestDto
     /// <example>false</example>
     [FromQuery]
     public bool Single { get; set; }
+
+    /// <summary>
+    /// The parent folder types used to empty the trash only from the items originally located in the sections of the specified types.
+    /// </summary>
+    /// <example>[2]</example>
+    [FromQuery(Name = "folderType")]
+    public List<FolderType> FolderType { get; set; }
 }
 
 /// <summary>

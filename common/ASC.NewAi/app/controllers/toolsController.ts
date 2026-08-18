@@ -44,6 +44,39 @@ import { asString, isObject } from "../narrow.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
 
+// A custom MCP server name is used verbatim as a single URL path segment on
+// the read / update / delete routes (`/mcp-servers/{name}` on the .NET AI
+// service, and `/mcp-servers/${encodeURIComponent(name)}` on the way there).
+// `create` takes the name in the request body, so a name that isn't a safe
+// path segment registers fine but is then unreachable by name: a `/` becomes
+// `%2F` (rejected / mis-routed by the .NET host) and a `.`/`..` dot-segment is
+// normalised away, orphaning a stored-but-undeletable entry (Bug 82985).
+// Reject such names at the source with a 400 instead. Printable punctuation
+// and spaces survive URL-encoding and stay routable, so they are allowed.
+const UNSAFE_NAME_CHARS = /[\u0000-\u001f\u007f/\\]/;
+
+function assertRoutableServerName(rawName: unknown): string {
+  if (typeof rawName !== "string" || rawName.trim().length === 0) {
+    throw Object.assign(new Error("name is required"), {
+      status: 400,
+      expose: true,
+    });
+  }
+  if (
+    rawName === "." ||
+    rawName === ".." ||
+    UNSAFE_NAME_CHARS.test(rawName)
+  ) {
+    throw Object.assign(
+      new Error(
+        'name must not be ".", "..", or contain a path separator or control character',
+      ),
+      { status: 400, expose: true },
+    );
+  }
+  return rawName;
+}
+
 // Resolve the config to store for an entry. Entries named after a
 // configured system server are whitelist markers (see agentServerWhitelist
 // in tools/systemTools.ts): they are pinned to the canonical system config
@@ -90,7 +123,7 @@ function redactSystemServer(
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
-    const name = args.name as string;
+    const name = assertRoutableServerName(args.name);
     // Scope is resolved inside mcpServersStorage (create/readAll both run the
     // entityId through resolveAgentEntityId), so a non-agent folder writes to
     // and reads back from the global scope and the server stays visible
@@ -105,7 +138,7 @@ export const toolsController = {
 
   updateCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
-    const name = args.name as string;
+    const name = assertRoutableServerName(args.name);
     const result = await engine.updateCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -178,6 +211,7 @@ export const toolsController = {
     const map = args.map as Record<string, McpServerConfig>;
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
+      assertRoutableServerName(name);
       normalized[name] = await resolveConfig(name, config);
     }
     const result = await engine.replaceAllCustomServers(

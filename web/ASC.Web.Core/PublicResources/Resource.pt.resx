@@ -1321,7 +1321,7 @@
     <value>Pesquisa web</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Pesquisa web</value>
+    <value>Pesquisa com IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Créditos de IA</value>

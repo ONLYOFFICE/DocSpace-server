@@ -211,6 +211,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<int?>("EntryId")
                         .HasColumnType("int")
                         .HasColumnName("entry_id");
@@ -242,6 +248,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("MessageId", "CreatedAt")
+                        .HasDatabaseName("IX_message_id_created_at");
 
                     b.HasIndex("TenantId", "EntryId")
                         .HasDatabaseName("IX_tenant_id_entry_id");
@@ -286,8 +295,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("varchar(128)")
                         .HasColumnName("name")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -427,8 +436,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("name")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.Property<string>("ProviderType")
                         .IsRequired()
@@ -668,8 +677,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("varchar(128)")
                         .HasColumnName("server_type")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -7042,7 +7051,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasOne("ASC.Files.Core.EF.DbFolder", "InternalRoom")
                         .WithMany()
-                        .HasForeignKey("InternalRoomId");
+                        .HasForeignKey("InternalRoomId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

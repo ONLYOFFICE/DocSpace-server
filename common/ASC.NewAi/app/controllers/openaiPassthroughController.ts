@@ -52,18 +52,13 @@ import { asyncHandler } from "./_helpers.js";
 //
 // The request body is intentionally NOT parsed: `app.ts` skips the JSON
 // body parser for this path so the raw bytes (which can be megabytes for
-// vision/OCR data URLs) stream through untouched.
+// vision/OCR data URLs) pass through untouched.
 
 // Only the endpoints the plugin actually reaches through the connector.
 // `models` / `embeddings` / `responses` never travel this way: model
 // listing bypasses `externalFetch` in the plugin, `useResponsesApi` is
 // dropped for external profiles, and embeddings have no call site.
-const openAiError = (
-  res: Response,
-  status: number,
-  message: string,
-  type: string,
-) =>
+const openAiError = (res: Response, status: number, message: string, type: string) =>
   res.status(status).json({
     error: { message, type, code: null, param: null },
   });
@@ -81,9 +76,7 @@ function providerHeaders(
     "Content-Type": contentType ?? "application/json",
     ...(profile.headers ?? {}),
   };
-  const hasAuthHeader = Object.keys(headers).some(
-    (name) => name.toLowerCase() === "authorization",
-  );
+  const hasAuthHeader = Object.keys(headers).some((name) => name.toLowerCase() === "authorization");
   if (profile.key && !hasAuthHeader) {
     headers["Authorization"] = `Bearer ${profile.key}`;
   }
@@ -104,11 +97,29 @@ function upstreamAbortSignal(res: Response): AbortSignal {
   return controller.signal;
 }
 
-// The request body is streamed to the provider, never buffered, so memory
-// use is independent of the body size. This cap only rejects declared
-// oversizes up front (the nginx `location ~* /ai` enforces the same limit
-// for undeclared ones) — legitimate vision/OCR data URLs stay well below.
+// Hard cap on the buffered body, enforced both up front (declared
+// Content-Length) and while reading (the nginx `location ~* /ai` enforces
+// the same limit) — legitimate vision/OCR data URLs stay well below.
 const MAX_BODY_BYTES = 100 * 1024 * 1024;
+
+class BodyTooLargeError extends Error {}
+
+// Read the raw request body into a single buffer, rejecting anything over
+// MAX_BODY_BYTES as it arrives (the declared-length check upstream only
+// catches honest clients).
+async function readRequestBody(req: Readable): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let total = 0;
+  for await (const chunk of req) {
+    const buf: Buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
+    total += buf.length;
+    if (total > MAX_BODY_BYTES) {
+      throw new BodyTooLargeError();
+    }
+    chunks.push(buf);
+  }
+  return Buffer.concat(chunks);
+}
 
 function passthrough(subPath: string) {
   return asyncHandler(async (req, res) => {
@@ -124,9 +135,7 @@ function passthrough(subPath: string) {
       return;
     }
 
-    const base = profile.baseUrl.endsWith("/")
-      ? profile.baseUrl.slice(0, -1)
-      : profile.baseUrl;
+    const base = profile.baseUrl.endsWith("/") ? profile.baseUrl.slice(0, -1) : profile.baseUrl;
     const queryIndex = req.originalUrl.indexOf("?");
     const search = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
     const target = `${base}/${subPath}${search}`;
@@ -137,26 +146,38 @@ function passthrough(subPath: string) {
       return;
     }
 
-    // Stream the body through. fetch() strips `Content-Length` (a
-    // forbidden header per the spec), so the upload goes chunked — fine
-    // for OpenAI-compatible providers and the internal gateway alike.
-    // `duplex: "half"` is mandatory for a stream body in Node's fetch.
+    // Buffer the body and send it whole, exactly like the OpenAI SDK does.
+    // A stream body is not an option here: fetch() strips `Content-Length`
+    // for streams (a forbidden header per the spec) and uploads chunked,
+    // and the internal gateway proxy (AiGatewayProxyController) attaches
+    // the body only when `Request.ContentLength is > 0` — a chunked upload
+    // arrives at the provider empty ("unexpected end of JSON input").
+    // A buffer body gets an automatic `Content-Length`, matching the SDK's
+    // serialized-JSON requests byte for byte.
+    let body: Buffer;
+    try {
+      body = await readRequestBody(req);
+    } catch (err) {
+      if (err instanceof BodyTooLargeError) {
+        openAiError(res, 413, "Request body too large", "invalid_request_error");
+        return;
+      }
+      // Client disconnected mid-upload; nothing to answer.
+      logger.warn(`openai passthrough: reading request body failed: ${err}`);
+      return;
+    }
+
     let upstream: globalThis.Response;
     try {
       upstream = await fetch(target, {
         method: "POST",
         headers: providerHeaders(req.headers["content-type"], profile),
-        body: Readable.toWeb(req) as unknown as RequestInit["body"],
-        duplex: "half",
+        body,
         signal: upstreamAbortSignal(res),
-      } as RequestInit);
+      });
     } catch (err) {
-      if (
-        (err instanceof Error && err.name === "AbortError") ||
-        res.destroyed
-      ) {
-        // Client is gone (abort, or a disconnect mid-upload that errored
-        // the piped body stream); nothing to answer.
+      if ((err instanceof Error && err.name === "AbortError") || res.destroyed) {
+        // Client is gone; nothing to answer.
         return;
       }
       // Detail stays in the log — the error can carry the provider URL.
