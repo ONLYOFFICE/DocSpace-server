@@ -90,8 +90,9 @@ Two styles coexist; match the neighbouring letters:
   write no space around a link, and the parser needs a boundary: with a particle glued to the
   closing quote — `"決済方法":"$URL1"に`, `"결제 수단":"$URL1"의`, `"付款方式":"$URL1"中` — the link is
   not recognized and the letter prints the raw quotes and the URL instead. A slightly loose space
-  before the particle is the lesser evil. Textile links inside these three cultures are worth
-  eyeballing in the rendered preview (§9) rather than trusting the source.
+  before the particle is the lesser evil. The three are only the usual suspects — a Finnish or
+  Azerbaijani case suffix and an Armenian hyphen break a link the same way. `AssertLinksRendered` (§9)
+  catches all of it in every culture, so the preview run is the check, not eyeballing the source.
 
   **ar-SA opens such a caption with `{white-space: nowrap}` — keep it.** Textile reads a leading
   `{…}` as inline CSS for the phrase, and the Arabic file uses it in 29 places, always where the
@@ -122,7 +123,8 @@ Two styles coexist; match the neighbouring letters:
 > `== "Verdadeiro"` instead of `== "True"`.
 >
 > The same goes for a lost `$`: `"{__VirtualRootPath}/billing/addons"` prints the path literally.
-> The letter tests (§9) catch this only for the cultures they are run with — see `LETTER_CULTURES`.
+> The letter tests (§9) run over every culture by default, so they catch this — unless you narrowed
+> the run with `LETTER_CULTURES`.
 
 Per-letter tags are set in `Init` (`new TagValue("URL1", …)`), plus helpers from `TagValues`:
 `OrangeButton(text, url, tag)`, `TrulyYours(helper, text, asTableRow)`, `Image(...)`,
@@ -192,8 +194,10 @@ await studioNotifyServiceHelper.SendNoticeToAsync(action, [recipient], [EMailSen
 `StudioNotifyServiceSender.RegisterSendMethod` with `core:notify:cron` (default 5am daily) and
 disabled entirely by `core:notify:tariff=false`:
 
-- `SendSaasLettersAsync` (SaaS), `SendEnterpriseLettersAsync` (Enterprise/Developer, trial letters
-  additionally require `defaultRebranding`), `SendOpensourceLettersAsync`.
+- `SendSaasLettersAsync` (SaaS) and `SendEnterpriseLettersAsync` (Enterprise/Developer, trial letters
+  additionally require `defaultRebranding`) — the only two. `RegisterSendMethod` picks **one** of them
+  per installation, `tenantExtraConfig.Enterprise` first, then `.Saas`; there is no opensource sender
+  (the old `SendOpensourceLettersAsync` went away with its last letter).
 
 Each method loops tenants, picks **one** `action` per tenant per run, then sends it to the computed
 recipient list. Add a block with the date condition and the flags:
@@ -275,16 +279,21 @@ and — when MailPit is running — delivers it to the inbox:
 dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
 ```
 
-**That run covers `en-US` only** — `LetterCultures.Names` holds just the default culture, so a letter
-that renders fine in English and is broken in twenty others still passes. Whenever you touch localized
-resx, run the cultures too:
+**That run covers every culture the portal offers** — `LetterCultures.Names` reads `web:cultures` from
+`appsettings.json` (falling back to the cultures whose `ASC.Web.Core.resources.dll` satellite sits next
+to the binaries, and throwing if neither answers). A new language is therefore covered the day it is
+switched on. Checking English alone would be close to useless: the defects these tests exist to catch —
+a translated tag name, a lost `$`, a textile link glued to the next character — cannot occur in the
+default culture at all.
+
+Every culture multiplies the case count, so the default sweep takes a few minutes. `LETTER_CULTURES`
+**narrows** it for one run while you iterate:
 
 ```bash
 LETTER_CULTURES=en-US,de,ru,zh-CN dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
 ```
 
-Every culture multiplies the case count, and the full sweep takes a few minutes — worth it after a
-translation import. Only `AssertContent` (tags resolved, links and buttons present) runs per culture;
+Only `AssertContent` (tags resolved, links and buttons present) runs per culture;
 `AssertDefaultCultureText` checks wording and stays on `en-US`, since any other culture may legitimately
 translate it. A culture with no resx of its own falls back to the default one, exactly as production does.
 
@@ -323,7 +332,9 @@ Two tests are generated per culture:
 
 - **`Letter_Renders`** — always runs. Checks, for free: no raw `$Tag`/`${Tag}` survived (tag list taken
   from the pattern itself), the product name is not hard-coded, no `http(s)://` is hard-coded in the
-  pattern, the top image / letter logo, the signature. Then your `AssertContent`, and
+  pattern, **every textile link actually became an `<a href>`** (`AssertLinksRendered` — an unrecognised
+  `"caption":"url"` still renders and still contains the address, so nothing else catches it), the top
+  image / letter logo, the signature. Then your `AssertContent`, and
   `AssertDefaultCultureText` for `en-US` only (another culture may carry a translation). Saves
   `bin/Debug/net10.0/letter-preview/<letter-id>.<culture>.html`.
 - **`Letter_IsDeliveredToMailPit`** — sends over SMTP, asserts arrival, prints the message URL. **Skips**
@@ -343,12 +354,8 @@ links from `buildtools/config/externalresources.json` when it is there (with fal
 applies typographic replacements, so a straight `'` in the pattern arrives as `&#8217;` and an assertion
 on `haven't` fails. Pick expected substrings without apostrophes or quotes.
 
-Cultures come from `Infrastructure/LetterCultures.cs` (`en-US` by default). Add them there permanently,
-or per run:
-
-```bash
-LETTER_CULTURES=en-US,ru-RU,de-DE dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
-```
+`Infrastructure/LetterCultures.cs` derives the culture list from `web:cultures`, so a new language needs
+no edit there — only `LETTER_CULTURES` narrows a single run.
 
 The preview supplies the tag *values* itself, so it verifies the template, the markup and the
 substitutions — not the recipient selection or the schedule condition.
