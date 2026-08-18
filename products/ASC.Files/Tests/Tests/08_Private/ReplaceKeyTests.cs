@@ -194,23 +194,24 @@ public class ReplaceKeyTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fix
     [Trait("Bug", "82802")]
     public async Task ReplaceKey_OnlyPublicKeySupplied_MustNotEraseStoredPrivateKey()
     {
-        // BUG 82802: rotating only the public half loses the private half — the endpoint must
-        // merge (leaving privateKeyEnc intact) or reject a partial body with 400; silently
-        // discarding the private key is neither.
+        // BUG 82802: rotating only the public half used to lose the private half. A partial body is
+        // now rejected outright — replaceKey writes both halves or neither — so the stored key
+        // is left exactly as it was.
         await _filesClient.Authenticate(Owner);
 
         var original = await SetFakeKeys(publicKeyPrefix: "orig");
         var newPublicKey = $"pk-rotated-{Guid.NewGuid():N}";
 
-        var response = await _privacyRoomApi.ReplaceKeyWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(publicKey: newPublicKey),
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.ReplaceKeyAsync(
+                new EncryptionKeyRequestDto(publicKey: newPublicKey),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        exception.ErrorCode.Should().Be(400);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().ContainSingle();
-        after[0].PublicKey.Should().Be(newPublicKey);
+        after[0].PublicKey.Should().Be(original.PublicKey);
         after[0].PrivateKeyEnc.Should().Be(original.PrivateKeyEnc);
     }
 

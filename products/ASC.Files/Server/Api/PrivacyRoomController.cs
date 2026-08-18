@@ -54,9 +54,13 @@ public class PrivacyRoomControllerCommon(
     /// <param name="inDto">The request object containing public and private key information.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpPost("keys")]
-    public Task<IEnumerable<EncryptionKeyDto>> SetKeys(EncryptionKeyRequestDto inDto)
+    public async Task<ActionResult<IEnumerable<EncryptionKeyDto>>> SetKeys([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] EncryptionKeyRequestDto inDto)
     {
-        return CreateKeysAsync([inDto], false);
+        await Demand();
+
+        var keys = await encryptionKeyPairHelper.CreateKeyPairAsync(inDto?.Map());
+
+        return Created(Request.Path.Value, keys);
     }
 
     /// <summary>
@@ -69,9 +73,11 @@ public class PrivacyRoomControllerCommon(
     /// <param name="inDto">The request object containing the public and private key information to replace the existing key.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpPut("keys")]
-    public Task<IEnumerable<EncryptionKeyDto>> ReplaceKey(EncryptionKeyRequestDto inDto)
+    public async Task<IEnumerable<EncryptionKeyDto>> ReplaceKey([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] EncryptionKeyRequestDto inDto)
     {
-        return CreateKeysAsync([inDto], true);
+        await Demand();
+
+        return await encryptionKeyPairHelper.ReplaceKeyPairAsync(inDto?.Map());
     }
 
     /// <summary>
@@ -114,24 +120,19 @@ public class PrivacyRoomControllerCommon(
     /// Deletes an encryption key and removes it from the system based on the provided key identifier.
     /// </remarks>
     /// <path>api/2.0/privacyroom/keys/{id}</path>
-    /// <returns>The task result contains a collection of remaining encryption key data transfer objects after the deletion.</returns>
-    [HttpDelete("keys/{id:guid}")]
-    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(DeleteEncryptionKeyRequestDto inDto)
+    /// <returns>A task that represents the asynchronous operation. No content is returned.</returns>
+    [HttpDelete("keys/{id}")]
+    public async Task<IActionResult> DeleteKeys(DeleteEncryptionKeyRequestDto inDto)
     {
         await Demand();
 
-        return await encryptionKeyPairHelper.DeleteAsync(inDto.Id);
+        await encryptionKeyPairHelper.DeleteAsync(inDto.Id);
+
+        return NoContent();
     }
 
     private async Task Demand()
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
-    }
-
-    private async Task<IEnumerable<EncryptionKeyDto>> CreateKeysAsync(IEnumerable<EncryptionKeyRequestDto> inDto, bool replace)
-    {
-        await Demand();
-
-        return await encryptionKeyPairHelper.SetKeyPairAsync(inDto.Select(r=> r.Map()), replace);
     }
 }

@@ -135,19 +135,19 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
     }
 
     [Fact]
-    [Trait("Bug", "82524")]
-    public async Task SetKeys_Guest_CanSetKeys()
+    public async Task SetKeys_Guest_Denied()
     {
-        // BUG 82524: guests should be able to manage their own encryption keys, but the API
-        // currently denies them.
+        // Guests hold no encryption keys by design, which is also what makes them uninvitable to a
+        // private room — see RoomAccessKeysPermissionsTests.Invite_GuestToPrivateRoom_AlwaysRefused.
         var guest = await InviteGuest();
         await _filesClient.Authenticate(guest);
 
-        var response = await _privacyRoomApi.SetKeysWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.SetKeysAsync(
+                new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]
@@ -196,19 +196,19 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
     }
 
     [Fact]
-    [Trait("Bug", "82524")]
-    public async Task ReplaceKey_Guest_ReplaceOwnKeyFlowIsBlockedByGuestSetKeysBug()
+    public async Task ReplaceKey_Guest_Denied()
     {
-        // Replacing requires an existing key, but a guest cannot create one because setKeys is
-        // denied today (BUG 82524), so the replace-own-key flow cannot be exercised.
+        // A guest is refused before the request is even looked at, so the missing key that would
+        // otherwise make this a 404 never comes into play.
         var guest = await InviteGuest();
         await _filesClient.Authenticate(guest);
 
-        var response = await _privacyRoomApi.SetKeysWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.ReplaceKeyAsync(
+                new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]
@@ -262,19 +262,17 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
     }
 
     [Fact]
-    [Trait("Bug", "82524")]
-    public async Task DeleteKeys_Guest_DeleteOwnKeyFlowIsBlockedByGuestSetKeysBug()
+    public async Task DeleteKeys_Guest_Denied()
     {
-        // A guest cannot create a key because setKeys is denied today (BUG 82524), so there is
-        // never a real key to delete.
+        // Refused for being a guest, not for holding no key: the answer is 403 and not the 404 an
+        // ordinary member would get for the same call.
         var guest = await InviteGuest();
         await _filesClient.Authenticate(guest);
 
-        var response = await _privacyRoomApi.SetKeysWithHttpInfoAsync(
-            new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.DeleteKeysAsync(Guid.Empty, TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]

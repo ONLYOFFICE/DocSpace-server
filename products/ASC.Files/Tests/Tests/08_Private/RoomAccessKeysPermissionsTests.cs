@@ -164,8 +164,8 @@ public class RoomAccessKeysPermissionsTests(AspireAppFixture fixture) : PrivacyR
     [Fact]
     public async Task Invite_GuestToPrivateRoom_AlwaysRefused()
     {
-        // Membership requires an encryption key and a guest cannot create one (BUG 82524), so
-        // every invitation of a guest to a private room is refused. The plain room is the positive
+        // Membership requires an encryption key and a guest cannot hold one by design, so every
+        // invitation of a guest to a private room is refused. The plain room is the positive
         // control: the same guest, the same access level and the same call succeed there, so the
         // 403 is about the private room's key requirement and not about guests being uninvitable.
         var (room, _) = await CreatePrivateRoomAsOwner();

@@ -146,17 +146,22 @@ public class RoomAccessKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase
     [Trait("Bug", "82804")]
     public async Task GetUserKeysForRoom_WipedKey_MustNotBeReportedAsRoomAccess()
     {
-        // BUG 82804: after an empty-body replaceKey erases the key material, the row still exists,
-        // so the endpoint answers 200 with an entry that carries NO publicKey — the caller is told
-        // it has access to a room it can no longer decrypt.
+        // BUG 82804: an empty-body replaceKey used to erase the key material while leaving the row
+        // in place, and the endpoint then answered 200 with an entry carrying NO publicKey — the
+        // caller was told it has access to a room it can no longer decrypt. The wipe is now
+        // rejected at the door, and an entry without a public key is never reported as access.
         await _filesClient.Authenticate(Owner);
         await SetFakeKeys();
         var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
 
-        await _privacyRoomApi.ReplaceKeyAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _privacyRoomApi.ReplaceKeyAsync(cancellationToken: TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
 
         var keys = (await _privacyRoomApi.GetUserKeysForRoomAsync(room.Id, TestContext.Current.CancellationToken)).Response;
 
+        keys.Should().NotBeEmpty();
         keys.Should().OnlyContain(k => !string.IsNullOrEmpty(k.PublicKey));
     }
 

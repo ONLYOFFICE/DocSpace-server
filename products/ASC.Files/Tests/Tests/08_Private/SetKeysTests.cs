@@ -163,7 +163,7 @@ public class SetKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fixtur
             new EncryptionKeyRequestDto(publicKey: publicKey, privateKeyEnc: "prv"),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
         after.Should().ContainSingle();
