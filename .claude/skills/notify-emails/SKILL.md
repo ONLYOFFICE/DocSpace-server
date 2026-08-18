@@ -1,6 +1,6 @@
 ---
 name: notify-emails
-description: "Adding or changing a DocSpace notification letter (email/telegram): notify Action, subject_/pattern_ resource keys, tag substitutions, textile/HTML markup, periodic after-registration and tariff letters. USE FOR: add a new email, new letter, new notification, change email text, send letter N days after registration, add tags to a letter. DO NOT USE FOR: SMTP/sender configuration, whats-new digest data collection, push/socket notifications."
+description: "Adding or changing a DocSpace notification letter (email/telegram/push text): notify Action, subject_/pattern_ resource keys, tag substitutions, textile/HTML markup, periodic after-registration and tariff letters, and the Files module's own letters. USE FOR: add a new email, new letter, new notification, change email text, send letter N days after registration, add tags to a letter, wording of an editor-mention / document-shared / room-activity / form-filling notification. DO NOT USE FOR: SMTP/sender configuration, whats-new digest data collection, push delivery plumbing or socket notifications."
 ---
 
 # Notification Letters
@@ -22,6 +22,10 @@ is enough for DI.
 | Cron registration | `web/ASC.Web.Core/Notify/StudioNotifyServiceSender.cs` |
 | Master HTML template | `common/ASC.Core.Common/Notify/Stylers/Resources/NotifyTemplateResource.resx`, key `HtmlMaster` |
 | Email styler + markup | `common/ASC.Core.Common/Notify/Stylers/TextileStyler.cs`, `common/ASC.Core.Common/Notify/Textile/` |
+
+**Files has a second, parallel set of letters** — mentions, sharing, room activity, form filling — with
+its own notify source, its own resx and its own conventions. If the letter you are after is about a
+document or a room, go to §10 first; §2–§5 (resources, markup, substitutions, culture) apply to both.
 
 ## 1. Action
 
@@ -378,6 +382,70 @@ no edit there — only `LETTER_CULTURES` narrows a single run.
 The preview supplies the tag *values* itself, so it verifies the template, the markup and the
 substitutions — not the recipient selection or the schedule condition.
 
+## 10. The Files module's own letters
+
+Everything above describes the studio source in `web/ASC.Web.Core`. Files runs a **second notify source**
+for anything about a document or a room — mentions, sharing, room removal, form filling, the push feed:
+
+| What | Where |
+| --- | --- |
+| Actions **and** the tag-name constants | `products/ASC.Files/Core/Services/NotifyService/NotifyConstants.cs` (one file — `NotifyConstants` itself sits at the bottom) |
+| Texts | `products/ASC.Files/Core/Services/NotifyService/FilesPatternResource.resx` + hand-written `.Designer.cs` |
+| Source (its own GUID) | `.../NotifyService/NotifySource.cs` |
+| Call sites, one method per event | `.../NotifyService/NotifyClient.cs` |
+| Per-room debouncing | `.../NotifyService/NotifyEventQueue.cs`, `RoomNotifyEventQueue.cs` — what turns several uploads into one `DocumentsUploadedTo` with `$Count` |
+
+What carries over unchanged: the styler and `HtmlMaster`, textile markup, the alphabetical resx (49 keys,
+currently sorted exactly), the hand-edited `Designer.cs`, `${LetterLogoText}`, and the never-translate-a-
+substitution rule of §4. What differs:
+
+- **IDs are PascalCase here**, not snake_case: `EditorMentions`, `DocuSignComplete`, `FormSubmitted` →
+  `subject_EditorMentions`, `pattern_EditorMentions`, `pattern_EditorMentions_push`.
+- **Three patterns per action is the norm**, and the telegram one **reuses the email body**:
+  `new TelegramPattern(() => FilesPatternResource.pattern_EditorMentions)`. So no `_tg` twin to keep in
+  sync here — but the body has to survive `MarkDownStyler` too.
+- Three `subject_*_tg` keys (`DocuSignComplete`, `ShareDocument`, `ShareFolder`) are **dead** — translated
+  into every culture, referenced by nothing. Don't copy them as a template.
+- **The push key suffix is inconsistent**: some letters use `pattern_X_push`, others `subject_X_push`.
+  Copy whichever the neighbouring action uses rather than deriving it.
+- Tag names come from `NotifyConstants`, and one of them is spelled loudly: `$DocumentURL` and `$RoomURL`
+  are all-caps `URL`, while it is `$FolderID` / `$FolderParentId`. The rest: `$DocumentTitle`,
+  `$DocumentExtension`, `$AccessRights`, `$Message`, `$MailsCount`, `$RoomTitle`, `$FolderTitle`.
+- **Common tags and the interceptors still arrive for free.** `NotifyConfiguration` hooks
+  `WorkContext.NotifyClientRegistration` *globally*, so a Files letter also gets `${__VirtualRootPath}`,
+  `${__AuthorName}`, the URL absolutizer and `WhiteLabelInterceptor` — nothing to register per source.
+
+**The mention letter shows the trap worth remembering.** `pattern_EditorMentions` names the author with
+the global `$__AuthorName`, while `pattern_EditorMentions_push` names the same person with `$ToUserName`,
+which `Init` sets by hand. Two tags, one human. Read the pattern you are editing before assuming which.
+
+Sending, from `NotifyClient`:
+
+```csharp
+var client = notifyContext.RegisterClient(serviceProvider, notifySource);
+var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(userId.ToString());
+
+var action = serviceProvider.GetService<EditorMentionsNotifyAction>();
+action.Init(file, plainText, currentUser, documentUrl, folderTitle, folderUrl);
+
+await client.SendNoticeAsync(action, file.UniqID, recipient);   // + bool checkSubscription overload
+```
+
+**The gates are hand-written in `NotifyClient`, not in the action** — a new room letter that omits them
+reaches people who muted the room:
+
+- `fileSecurity.CanReadAsync(file, recipientId)` — never notify about something the reader cannot open;
+- `studioNotifyHelper.IsSubscribedToNotifyAsync(recipientId, RoomsActivityNotifyAction)` — note the
+  subscription is checked against **`RoomsActivityNotifyAction`**, a studio action, not against the letter
+  being sent;
+- `roomsNotificationSettingsHelper.CheckMuteForRoomAsync(roomId, recipientId)` for `VirtualRooms`.
+
+**None of these letters has a test.** `ASC.Notify.Tests` does not reference `FilesPatternResource` at all,
+so the §9 harness — unresolved tags, hard-coded URLs, unrendered textile links, every culture — covers the
+studio letters only. Editing one of these means previewing it by hand through MailPit (§8). Pointing
+`LetterTestBase` at a `FilesPatternResource` key is the obvious way to close that, and nothing in the
+harness is studio-specific except the resource class it reads.
+
 ## Reference letters to copy from
 
 - **HTML marketing letter, tariff-independent, day N after registration**:
@@ -389,6 +457,8 @@ substitutions — not the recipient selection or the schedule condition.
 - **HTML letter with images (`$IMG1`…) and per-image links**: `saas_admin_user_apps_tips_v1`,
   `enterprise_admin_user_apps_tips_v1`.
 - **Plain textile transactional letter**: `low_wallet_balance`, `password_changed`.
+- **Files letter, email + telegram + push off one action** (§10): `EditorMentions` — heading, two textile
+  links, a quoted message; `FormSubmitted` for the two-`Init`-overloads case (one per recipient role).
 - **Same letter for several editions**: nothing is shared right now — SaaS and Enterprise keep separate
   clones (`saas_admin_user_apps_tips_v1` / `enterprise_admin_user_apps_tips_v1`). When the text really is
   identical, prefer resolving one action from both senders over cloning it.
