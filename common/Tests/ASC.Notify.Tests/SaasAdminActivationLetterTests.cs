@@ -40,7 +40,7 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasAdminActivationLetterTests : LetterTestBase
 {
-    private const string RecipientEmail = "owner@preview.onlyoffice.io";
+    private const string RecipientEmail = "owner@preview.onlyoffice.com";
 
     /// <summary>The password change link, built from <c>ConfirmType.PasswordChange</c>.</summary>
     private static string PasswordChangeUrl => LetterEnvironment.PortalLink("confirm/PasswordChange");

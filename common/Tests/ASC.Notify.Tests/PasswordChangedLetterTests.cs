@@ -40,7 +40,7 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class PasswordChangedLetterTests : LetterTestBase
 {
-    private const string RecipientEmail = "owner@preview.onlyoffice.io";
+    private const string RecipientEmail = "owner@preview.onlyoffice.com";
     private const string ChangedOn = "14.08.2026 11:20";
     private const string Ip = "203.0.113.7";
     private const string Device = "Windows";

@@ -40,7 +40,7 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class AdminActivationLetterTests : LetterTestBase
 {
-    private const string RecipientEmail = "owner@preview.onlyoffice.io";
+    private const string RecipientEmail = "owner@preview.onlyoffice.com";
 
     /// <summary>The email confirmation link, built from <c>ConfirmType.EmailActivation</c>.</summary>
     private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/EmailActivation");
