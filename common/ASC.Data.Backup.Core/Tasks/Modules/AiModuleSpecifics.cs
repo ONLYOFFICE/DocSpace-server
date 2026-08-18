@@ -119,7 +119,7 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
         {
             DateColumns = new Dictionary<string, bool> { { "timestamp", false } }
         },
-        new("ai_integration_attachments", "tenant_id", "id", IdType.GuidV7)
+        new("ai_integration_attachments", "tenant_id")
         {
             UserIDColumns = ["created_by"],
             DateColumns = new Dictionary<string, bool> { { "created_at", false } }
