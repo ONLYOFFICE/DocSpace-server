@@ -392,43 +392,33 @@ for anything about a document or a room — mentions, sharing, room removal, for
 | Actions **and** the tag-name constants | `products/ASC.Files/Core/Services/NotifyService/NotifyConstants.cs` (one file — `NotifyConstants` itself sits at the bottom) |
 | Texts | `products/ASC.Files/Core/Services/NotifyService/FilesPatternResource.resx` + hand-written `.Designer.cs` |
 | Source (its own GUID) | `.../NotifyService/NotifySource.cs` |
-| Call sites | `.../NotifyService/NotifyClient.cs` — usually one method per event, but not always (see below) |
-| Per-room debouncing | `.../NotifyService/NotifyEventQueue.cs`, `RoomNotifyEventQueue.cs` — what turns several uploads into one `DocumentsUploadedTo` with `$Count` |
+| Call sites | `.../NotifyService/NotifyClient.cs` |
+| Per-room debouncing | `.../NotifyService/NotifyEventQueue.cs`, `RoomNotifyEventQueue.cs` — what collapses a burst of uploads into one letter with a `$Count` |
 
-What carries over unchanged: the styler and `HtmlMaster`, textile markup, the alphabetical resx (49 keys,
-currently sorted exactly), the hand-edited `Designer.cs`, `${LetterLogoText}`, and the never-translate-a-
-substitution rule of §4. What differs:
+Everything in §2–§5 applies unchanged: same styler and `HtmlMaster`, same textile, same alphabetically
+sorted resx with a hand-edited `Designer.cs`, same `${LetterLogoText}`, same never-translate-a-substitution
+rule. What you have to do differently:
 
-- **IDs are PascalCase here**, not snake_case: `EditorMentions`, `DocuSignComplete`, `FormSubmitted` →
-  `subject_EditorMentions`, `pattern_EditorMentions`, `pattern_EditorMentions_push`.
-- **The pattern count varies — copy the neighbour, don't build three by default.** Of the 24 actions,
-  four carry all three channels (`ShareDocument`, `ShareFolder`, `EditorMentions`, `FormSubmitted`),
-  seven pair email with telegram (room removal, the four form-filling states, `FormReceived`), and
-  twelve carry exactly one: push alone for the room-activity feed (invited, access changed, document
-  created/uploaded, folder created, moved to archive) and email alone for `DocuSignComplete`,
-  `DocuSignStatus`, `MailMergeEnd`. `ShareEncryptedDocument` declares an empty list and inherits only
-  the tags.
-- **A pattern alone does not send anything — the call site names the senders.** `SendNoticeToAsync`
-  takes them explicitly (`[NotifyEMailSenderSysName, NotifyTelegramSenderSysName]`), and push goes out
-  through a separate `SendNoticeAsync(..., NotifyPushSenderSysName)` call. Adding a `PushPattern` to an
-  action without touching `NotifyClient` changes nothing.
-- Where a telegram pattern exists it **reuses the email body**:
-  `new TelegramPattern(() => FilesPatternResource.pattern_EditorMentions)`. So no `_tg` twin to keep in
-  sync here — but the body has to survive `MarkDownStyler` too.
-- Three `subject_*_tg` keys (`DocuSignComplete`, `ShareDocument`, `ShareFolder`) are **dead** — translated
-  into every culture, referenced by nothing. Don't copy them as a template.
-- **The push key suffix is inconsistent**: some letters use `pattern_X_push`, others `subject_X_push`.
-  Copy whichever the neighbouring action uses rather than deriving it.
-- Tag names come from `NotifyConstants`, and one of them is spelled loudly: `$DocumentURL` and `$RoomURL`
-  are all-caps `URL`, while it is `$FolderID` / `$FolderParentId`. The rest: `$DocumentTitle`,
-  `$DocumentExtension`, `$AccessRights`, `$Message`, `$MailsCount`, `$RoomTitle`, `$FolderTitle`.
-- **Common tags and the interceptors still arrive for free.** `NotifyConfiguration` hooks
-  `WorkContext.NotifyClientRegistration` *globally*, so a Files letter also gets `${__VirtualRootPath}`,
-  `${__AuthorName}`, the URL absolutizer and `WhiteLabelInterceptor` — nothing to register per source.
-
-**The mention letter shows the trap worth remembering.** `pattern_EditorMentions` names the author with
-the global `$__AuthorName`, while `pattern_EditorMentions_push` names the same person with `$ToUserName`,
-which `Init` sets by hand. Two tags, one human. Read the pattern you are editing before assuming which.
+- **Name the id in PascalCase**, not snake_case — `EditorMentions`, not `editor_mentions`. The resource
+  keys follow it: `subject_<Id>`, `pattern_<Id>`, and a push body under `<Id>_push`.
+- **Check the neighbouring action for the push key's prefix.** Both `pattern_X_push` and `subject_X_push`
+  are in use; there is no rule to derive it from, so copy rather than guess.
+- **Declare only the channels your letter needs.** One pattern is as normal as three — a quiet room event
+  is push only, a report is mail only. Nothing has to be filled in for symmetry.
+- **Then name the senders at the call site**, or the pattern is inert: `SendNoticeToAsync` takes the
+  sender list explicitly and push goes out through its own `SendNoticeAsync(..., NotifyPushSenderSysName)`.
+  Adding a `PushPattern` and stopping there sends nothing.
+- **Point a telegram pattern at the email body** — `new TelegramPattern(() => …pattern_<Id>)` — the way
+  the existing ones do. That spares you the `_tg` twin of §1, at the cost of a body that has to survive
+  `MarkDownStyler` as well. (Some orphaned `subject_*_tg` keys are still lying around from an older
+  arrangement; they are referenced by nothing, so don't take them as a model.)
+- **Take tag names from `NotifyConstants`, never spell them yourself.** The casing is not guessable —
+  `$DocumentURL` and `$RoomURL` shout the URL, `$FolderID` and `$FolderParentId` disagree with each other.
+- **Don't re-register anything for common tags.** `NotifyConfiguration` hooks
+  `WorkContext.NotifyClientRegistration` globally, so `${__VirtualRootPath}`, `${__AuthorName}`, the URL
+  absolutizer and `WhiteLabelInterceptor` reach this source too.
+- **Read the pattern before assuming which tag names a person.** An action can hand the same human to its
+  mail body and its push body under different tags — one from the global set, one set by `Init`.
 
 Sending, from `NotifyClient`:
 
@@ -442,16 +432,11 @@ action.Init(file, plainText, currentUser, documentUrl, folderTitle, folderUrl);
 await client.SendNoticeAsync(action, file.UniqID, recipient);   // + bool checkSubscription overload
 ```
 
-**One method does not always mean one letter.** Two shapes break the rule, and both explain something
-about the actions they drive:
-
-- `SendFormSubmittedAsync` fires **three** notices from one event — `FormSubmitted` by mail and telegram
-  to whoever filled the form, `FormReceived` the same way to the form's owner, then `FormSubmitted`
-  *again* as push to both. That is why `FormSubmittedNotifyAction` carries two `Init` overloads: the
-  long one for the mail letter, the short one for the push line.
-- `SendFormFillingEvent` takes a `Type actionType`, resolves it and casts to `FormStartedFillingNotifyAction`
-  — one method for all four form-filling states, which is why those four share a base class and a single
-  `Init`. A fifth state means a new subclass and a new resource pair, not a new send method.
+A send method is not obliged to map to one letter, and before writing a new one, check whether an
+existing method already covers your case. One event may owe notices to several parties — each its own
+action, in its own culture, on its own channels — and a family of near-identical events is served by a
+single method that takes the action type as a parameter, so a new member of that family needs a subclass
+and a resource pair rather than any new sending code.
 
 **The gates are hand-written in `NotifyClient`, not in the action** — a new room letter that omits them
 reaches people who muted the room:
@@ -479,9 +464,8 @@ harness is studio-specific except the resource class it reads.
 - **HTML letter with images (`$IMG1`…) and per-image links**: `saas_admin_user_apps_tips_v1`,
   `enterprise_admin_user_apps_tips_v1`.
 - **Plain textile transactional letter**: `low_wallet_balance`, `password_changed`.
-- **Files letter, email + telegram + push off one action** (§10): `EditorMentions` — heading, two textile
-  links, a quoted message. For the awkward case — one action, two `Init` overloads, one per channel —
-  `FormSubmitted`. For the plainest possible one, a push-only room event: `FolderCreatedInRoom`.
+- **Files letter** (§10): `EditorMentions` for all three channels off one action, `FolderCreatedInRoom`
+  for the push-only minimum.
 - **Same letter for several editions**: nothing is shared right now — SaaS and Enterprise keep separate
   clones (`saas_admin_user_apps_tips_v1` / `enterprise_admin_user_apps_tips_v1`). When the text really is
   identical, prefer resolving one action from both senders over cloning it.
