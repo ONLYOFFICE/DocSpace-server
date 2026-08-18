@@ -49,10 +49,21 @@ Pattern → styler mapping is fixed in `common/ASC.Core.Common/Notify/Patterns/P
 `JabberPattern` → `JabberStyler`. A telegram variant needs its own `pattern_*_tg` key — the same
 body rarely survives both stylers.
 
+**A `pattern_*_tg` twin is yours to keep in sync, by hand, in every culture.** `LetterTestBase` takes
+an `EmailPattern` and nothing else, so none of the nine telegram keys is rendered by any test: a twin
+can sit untranslated for years and every check stays green. Whenever you touch a letter, grep the resx
+for its `_tg` sibling and carry the same edit across — including into the localized files, which is the
+one case where hand-editing a translation is right, because the wording is already there in the
+sibling key of that same culture.
+
 For periodic letters inherit `BasePeriodicNotifyAction` instead and declare **only** `ID` +
 `Patterns`: the tags come from the shared `Init` overloads that `StudioPeriodicNotify` calls
 (`$UserName`, `$OrangeButton`…`$OrangeButton5`, `$IMG1`…`$IMG7`, `$URL1`…`$URL14`, `$TopGif`,
 `$TrulyYours`, `$Footer`, price/quota tags).
+
+That full list is the **SaaS** overload. `SendEnterpriseLettersAsync` calls a shorter one — one button,
+`$IMG1`…`$IMG5`, `$URL1`…`$URL6`. An enterprise letter that reaches for `$URL9` gets no value and
+prints the raw tag.
 
 ## 2. Resource keys
 
@@ -95,11 +106,13 @@ Two styles coexist; match the neighbouring letters:
   catches all of it in every culture, so the preview run is the check, not eyeballing the source.
 
   **ar-SA opens such a caption with `{white-space: nowrap}` — keep it.** Textile reads a leading
-  `{…}` as inline CSS for the phrase, and the Arabic file uses it in 29 places, always where the
-  caption *is* the portal address: `"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"`.
-  It stops the long URL from breaking across lines in right-to-left text. It looks like stray markup
-  and is easy to drop while rewriting a sentence; no other culture has it, so a diff that removes it
-  from one Arabic key will not look wrong on its own.
+  `{…}` as inline CSS for the phrase, and the Arabic file uses it in some thirty places, always where
+  the caption *is* the portal address:
+  `"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"`. It stops the long URL from
+  breaking across lines in right-to-left text. It looks like stray markup and is easy to drop while
+  rewriting a sentence; **ar-SA is the only culture that uses this textile form**, so a diff that
+  removes it from one Arabic key will not look wrong on its own. (Plain `white-space: nowrap` inside an
+  HTML `style="…"` attribute is a different thing and is common everywhere — grep for the braces.)
 - **Raw HTML table rows** (all marketing / after-registration letters) — a sequence of
   `<tr border="0" cellspacing="0" cellpadding="0"><td class="fol" style="…">…</td></tr>` blocks
   separated by blank lines, injected into `HtmlMaster`. There are no `<ul>`/`<li>` anywhere in the
@@ -133,8 +146,10 @@ Per-letter tags are set in `Init` (`new TagValue("URL1", …)`), plus helpers fr
 Common tags come free from `NotifyConfiguration` — exact names in
 `web/ASC.Web.Core/Notify/CommonTags.cs`, note that only some carry the `__` prefix:
 `${__VirtualRootPath}`, `${__VirtualRootHost}`, `${__HelpLink}`, `${__SupportLink}`,
-`${__SalesEmail}`, `${__SupportEmail}`, `${__SiteLink}`, `${__DateTime}`, `${LetterLogoText}`,
-`$ProfileUrl`, `$ImagePath`, `$RecipientSubscriptionConfigURL`.
+`${__SalesEmail}`, `${__SupportEmail}`, `${__SiteLink}`, `${__DateTime}`, `${__AuthorName}`,
+`${LetterLogoText}`, `$Culture`, `$ProfileUrl`, `$ImagePath`, `$RecipientSubscriptionConfigURL`.
+`${__AuthorName}` is whoever triggered the notification — the inviter in the room and agent letters —
+and is filled for every letter, not only those.
 
 **Never write the product name or a URL into the pattern text.** Two hard rules, both enforced by the
 letter tests (§9):
@@ -235,6 +250,7 @@ letters set it to `false`.
 | --- | --- |
 | `(true, false, false)` | `GroupAdmin` members = DocSpace admins **incl. the portal owner** |
 | `(true, true, false)` | `EmployeeType.RoomAdmin` only — **DocSpace admins are excluded** (easy to get wrong) |
+| `(true, false, true)` | `GroupAdmin` members ∪ `EmployeeType.Guest` |
 | `(false, true, false)` | room admins minus `GroupAdmin` |
 | `(true, true, true)` | everybody |
 
@@ -273,7 +289,9 @@ was published on); `../Logs/notify.log` shows what the notify service did.
 
 **Every new letter gets a test in `common/Tests/ASC.Notify.Tests`.** The harness renders it through the
 real pipeline (resources → `NVelocityPatternFormatter` → `TextileStyler` → `HtmlMaster`), saves the HTML
-and — when MailPit is running — delivers it to the inbox:
+and — when MailPit is running — delivers it to the inbox. It is a rule for new letters, not a statement
+about the old ones: some sixty letters have a test against a hundred-odd `pattern_*` keys, so a green
+run means the covered letters are fine, not all of them.
 
 ```bash
 dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
