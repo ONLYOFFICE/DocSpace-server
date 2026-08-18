@@ -364,7 +364,7 @@ public class PermissionCheckStarter<T, TTo>(
         var toFolderRoom = parentFolders.FirstOrDefault(f => f.IsRoom);
 
         if (!isRoom &&
-            toFolderRoom != null &&
+            toFolderRoom is { ProviderEntry: false } &&
             !string.Equals(parentRoomId, toFolderRoom.Id.ToString()))
         {
             TenantEntityQuotaSettings quotaSettings = toFolderRoom.FolderType is FolderType.AiRoom
