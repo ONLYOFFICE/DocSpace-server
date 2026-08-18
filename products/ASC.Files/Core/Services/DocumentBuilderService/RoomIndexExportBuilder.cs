@@ -87,6 +87,8 @@ public class RoomIndexExportBuilder(
             },
 
             logoSrc = header.LogoSrc,
+            logoWidthMm = header.LogoWidthMm,
+            logoHeightMm = header.LogoHeightMm,
 
             themeColors = new
             {
