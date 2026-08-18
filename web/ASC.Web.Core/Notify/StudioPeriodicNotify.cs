@@ -66,6 +66,16 @@ public class StudioPeriodicNotify(
 
     private static string GetCspKey(string domain) => $"csp:{domain}";
 
+    /// <summary>
+    /// True when <paramref name="date"/> is the monthly anniversary of a portal created on
+    /// <paramref name="creationDay"/>. The day is clamped to the length of the month, so a portal
+    /// created on the 29th-31st still gets its check in February and in the 30-day months instead of
+    /// silently skipping them - the inactivity warnings are one-month-wide windows, and a skipped
+    /// month means a warning is never sent at all.
+    /// </summary>
+    private static bool IsAnniversaryDay(DateTime date, int creationDay) =>
+        date.Day == Math.Min(creationDay, DateTime.DaysInMonth(date.Year, date.Month));
+
     public async ValueTask SendSaasLettersAsync(string senderName, DateTime scheduleDate)
     {
         _log.InformationStartSendSaasTariffLetters();
@@ -75,6 +85,7 @@ public class StudioPeriodicNotify(
         if (activeTenants.Count <= 0)
         {
             _log.InformationEndSendSaasTariffLetters();
+            return;
         }
 
         var nowDate = scheduleDate.Date;
@@ -285,7 +296,7 @@ public class StudioPeriodicNotify(
                 {
                     #region without activity to owner SAAS Free
 
-                    if (nowDate.Day == tenant.CreationDateTime.Day || nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
+                    if (IsAnniversaryDay(nowDate, createdDate.Day) || IsAnniversaryDay(nowDate.AddDays(-7), createdDate.Day))
                     {
                         var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
                         var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
@@ -305,7 +316,7 @@ public class StudioPeriodicNotify(
 
                         var lastActivityDate = lastAuditEventDate > lastLoginEventDate ? lastAuditEventDate : lastLoginEventDate;
 
-                        if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
+                        if (nowDate >= startDateToNotifyUnusedPortals && IsAnniversaryDay(nowDate, createdDate.Day))
                         {
                             // This runs once a month, so each one-month-wide window warns the owner exactly
                             // once and an idle portal is not spammed on the following checks.
@@ -337,7 +348,7 @@ public class StudioPeriodicNotify(
                             }
                         }
 
-                        if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day
+                        if (nowDate >= startDateToRemoveUnusedPortals && IsAnniversaryDay(nowDate.AddDays(-7), createdDate.Day)
                             && lastActivityDate.AddMonths(6).AddDays(7) <= nowDate)
                         {
                             if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
@@ -349,18 +360,30 @@ public class StudioPeriodicNotify(
 
                             _log.InformationStartRemovingInactiveTenant(tenant.Id, tenantDomain);
 
-                            await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
-                            await identityClient.DeleteTenantClientsAsync(false);
-                            await tenantManager.RemoveTenantAsync(tenant, true);
-
-                            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+                            try
                             {
-                                await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
+                                await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+                                await identityClient.DeleteTenantClientsAsync(false);
+                                await tenantManager.RemoveTenantAsync(tenant, true);
+
+                                if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+                                {
+                                    await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
+                                }
+
+                                await hybridCache.RemoveAsync(GetCspKey(tenantDomain));
+
+                                await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                            }
+                            finally
+                            {
+                                // the owner was authenticated only to remove the portal: keep that identity
+                                // out of the tenants processed after this one
+                                securityContext.Logout();
                             }
 
-                            await hybridCache.RemoveAsync(GetCspKey(tenantDomain));
-
-                            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                            // the portal is gone - no letter of any kind may follow for it
+                            continue;
                         }
                     }
 
@@ -470,18 +493,30 @@ public class StudioPeriodicNotify(
 
                         _log.InformationStartRemovingUnpaidTenant(tenant.Id, tenantDomain);
 
-                        await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
-                        await identityClient.DeleteTenantClientsAsync(false);
-                        await tenantManager.RemoveTenantAsync(tenant, true);
-
-                        if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+                        try
                         {
-                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
+                            await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+                            await identityClient.DeleteTenantClientsAsync(false);
+                            await tenantManager.RemoveTenantAsync(tenant, true);
+
+                            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+                            {
+                                await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
+                            }
+
+                            await hybridCache.RemoveAsync(GetCspKey(tenantDomain));
+
+                            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                        }
+                        finally
+                        {
+                            // the owner was authenticated only to remove the portal: keep that identity
+                            // out of the tenants processed after this one
+                            securityContext.Logout();
                         }
 
-                        await hybridCache.RemoveAsync(GetCspKey(tenantDomain));
-
-                        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                        // the portal is gone - the add-on payment reminder below must not fire for it
+                        continue;
                     }
 
                     #endregion
