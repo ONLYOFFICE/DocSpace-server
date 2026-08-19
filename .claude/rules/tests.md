@@ -1,3 +1,9 @@
+---
+paths:
+  - "products/*/Tests/**/*.cs"
+  - "common/Tests/**/*.cs"
+---
+
 # Integration Tests
 
 Applies to `products/*/Tests/` and `common/Tests/ASC.Core.Common.Tests`. Style rules
