@@ -39,6 +39,7 @@ public class AttachmentDto
 {
     public required Guid Id { get; init; }
     public required string Kind { get; init; }
+    public required FileType Type { get; init; }
     public required string Title { get; init; }
     public string? Content { get; init; }
     public string? DataUrl { get; init; }
@@ -52,10 +53,14 @@ public static partial class AttachmentMapper
 {
     [MapperIgnoreSource(nameof(AttachmentResult.ThirdpartyEntryId))]
     [MapPropertyFromSource(nameof(AttachmentDto.EntryId), Use = nameof(MapEntryId))]
+    [MapPropertyFromSource(nameof(AttachmentDto.Type), Use = nameof(MapType))]
     public static partial AttachmentDto MapToDto(AttachmentResult result);
 
     private static string? MapEntryId(AttachmentResult result) =>
         result.EntryId?.ToString() ?? result.ThirdpartyEntryId;
+
+    private static FileType MapType(AttachmentResult result) =>
+        FileUtility.GetFileTypeByFileName(result.Title);
 
     private static string MapKindToString(AttachmentKind kind) => kind.ToStringLowerFast();
 
