@@ -209,6 +209,7 @@ public class RoomGroupCreateTests(
         created.Name.Should().Be(name);
     }
 
+    //
     /// <summary>
     /// Contract: leading/trailing spaces in the name must be trimmed. The server currently stores
     /// the name verbatim (no trim).
