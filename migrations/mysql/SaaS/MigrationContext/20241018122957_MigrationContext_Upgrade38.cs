@@ -58,7 +58,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                  value: null);
             */
 
-            migrationBuilder.Sql("UPDATE core_user JOIN tenants_tenants ON core_user.id = tenants_tenants.owner_id SET core_user.spam = tenants_tenants.spam;");
+            migrationBuilder.Sql("UPDATE core_user JOIN tenants_tenants ON core_user.id = tenants_tenants.owner_id SET core_user.spam = tenants_tenants.spam");
 
             migrationBuilder.DropColumn(
                 name: "spam",

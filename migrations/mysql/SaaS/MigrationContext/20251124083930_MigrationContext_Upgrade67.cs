@@ -55,7 +55,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 table: "files_security",
                 columns: new[] { "tenant_id", "internal_entry_id" });
 
-            migrationBuilder.Sql("update ignore files_security set internal_entry_id = CAST(entry_id AS signed);");
+            migrationBuilder.Sql("update ignore files_security set internal_entry_id = CAST(entry_id AS signed)");
             // migrationBuilder.UpdateData(
             //     table: "files_security",
             //     keyColumn: "internal_entry_id",
