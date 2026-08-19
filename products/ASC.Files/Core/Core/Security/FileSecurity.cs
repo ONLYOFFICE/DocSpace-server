@@ -626,6 +626,18 @@ public class FileSecurity(
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.Vectorization);
     }
 
+    public async Task<VectorizationAvailability> GetVectorizationAvailabilityAsync<T>(File<T> file)
+    {
+        if (file.VectorizationStatus != null && !await IsVectorizationPendingAsync(file))
+        {
+            return VectorizationAvailability.AlreadyProcessed;
+        }
+
+        return await CanVectorizationAsync(file)
+            ? VectorizationAvailability.Available
+            : VectorizationAvailability.AccessDenied;
+    }
+
     public async Task<bool> CanUseChatAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
@@ -653,6 +665,17 @@ public class FileSecurity(
     public async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanReadSeparatelyAsync<T>(FileEntry<T> entry)
     {
         return await WhoCanAsync(entry, FilesSecurityActions.Read, true);
+    }
+
+    private async Task<bool> IsVectorizationPendingAsync<T>(File<T> file)
+    {
+        return file.VectorizationStatus switch
+        {
+            null => false,
+            VectorizationStatus.Completed => false,
+            VectorizationStatus.InProgress => !await vectorizationHelper.InProcessAsync(file.Id),
+            _ => true
+        };
     }
 
     private async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
@@ -1266,19 +1289,9 @@ public class FileSecurity(
             }
         }
 
-        if (action == FilesSecurityActions.Vectorization)
+        if (action == FilesSecurityActions.Vectorization && (file == null || !await IsVectorizationPendingAsync(file)))
         {
-            if (file?.VectorizationStatus == null)
-            {
-                return false;
-            }
-
-            switch (file.VectorizationStatus)
-            {
-                case VectorizationStatus.Completed:
-                case VectorizationStatus.InProgress when await vectorizationHelper.InProcessAsync(file.Id):
-                    return false;
-            }
+            return false;
         }
 
         if (file != null && room is { FolderType: FolderType.AiRoom } && parentFolders.Any(x => x.FolderType == FolderType.Knowledge))

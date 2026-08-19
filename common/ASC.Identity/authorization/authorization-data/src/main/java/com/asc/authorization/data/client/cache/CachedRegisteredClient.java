@@ -58,6 +58,7 @@ public class CachedRegisteredClient implements Serializable {
   private Set<String> redirectUris;
   private Set<String> scopes;
   private Instant createdOn;
+  private String createdBy;
   private long tenantId;
   private boolean enabled;
   private boolean publicClient;

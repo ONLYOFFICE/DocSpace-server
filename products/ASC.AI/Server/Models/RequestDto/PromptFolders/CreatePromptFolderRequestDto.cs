@@ -35,5 +35,6 @@ namespace ASC.AI.Models.RequestDto.PromptFolders;
 
 public class CreatePromptFolderRequestDto
 {
+    [MaxLength(AiIntegrationLimits.MaxNameLength)]
     public required string Name { get; init; }
 }

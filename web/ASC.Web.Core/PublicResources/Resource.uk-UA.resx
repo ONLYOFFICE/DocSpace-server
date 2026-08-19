@@ -1168,7 +1168,7 @@
     <value>Кількість агентів AІ не повинна перевищувати {0}</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
-    <value>Пошук AI</value>
+    <value>AI-пошук</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Функції AІ</value>
@@ -1333,7 +1333,7 @@
     <value>Business</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Веб-пошук</value>
+    <value>AI-пошук</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Результати</value>

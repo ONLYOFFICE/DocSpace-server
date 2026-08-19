@@ -34,11 +34,18 @@
 namespace ASC.AI.Models.RequestDto;
 
 /// <summary>
-/// Upper bounds for the free-form, app-encrypted profile/MCP fields that are persisted as
-/// unbounded <c>text</c> columns (<c>DbProfile.Key</c>, <c>DbProfile.BaseUrl</c>,
-/// <c>DbMcpServer.Config</c>). Enforced at the request-validation layer on the plaintext value,
-/// before encryption, so oversized payloads are rejected with a 400 instead of reaching the
-/// database. The column type stays <c>text</c> on purpose, since encryption inflates the size.
+/// Upper bounds for the persisted AI integration fields, enforced at the request-validation
+/// layer so oversized payloads are rejected with a 400 instead of reaching the database.
+/// <para>
+/// The free-form profile/MCP fields (<c>DbProfile.Key</c>, <c>DbProfile.BaseUrl</c>,
+/// <c>DbMcpServer.Config</c>) are validated on the plaintext value, before encryption; their
+/// column type stays <c>text</c> on purpose, since encryption inflates the size.
+/// </para>
+/// <para>
+/// The name/title fields mirror the <c>varchar(255)</c> columns behind them. Validating them
+/// here is what makes the bulk-update paths (<c>ExecuteUpdateAsync</c>) behave like the
+/// change-tracked ones, which get their check from <c>BaseDbContext.SaveChangesAsync</c>.
+/// </para>
 /// </summary>
 internal static class AiIntegrationLimits
 {
@@ -50,4 +57,7 @@ internal static class AiIntegrationLimits
 
     /// <summary>Maximum length of an MCP server config payload (plaintext, before encryption).</summary>
     public const int MaxConfigLength = 32768;
+
+    /// <summary>Maximum length of a prompt, prompt folder or thread name.</summary>
+    public const int MaxNameLength = 255;
 }

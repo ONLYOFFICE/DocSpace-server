@@ -39,7 +39,8 @@ public class EditorToolsFactory(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     FileStorageService fileStorageService,
-    GlobalFolderHelper globalFolderHelper) : IAiToolFactory
+    GlobalFolderHelper globalFolderHelper,
+    FileUtility fileUtility) : IAiToolFactory
 {
     private const string GenerateDocxName = "docspace_generate_docx";
     private const string GeneratePresentationName = "docspace_generate_presentation";
@@ -141,7 +142,7 @@ public class EditorToolsFactory(
             [Description("Short description of the document to generate")] string description,
             CancellationToken cancellationToken)
         {
-            return target.CreateFile(fileName, cancellationToken);
+            return target.CreateFile(BuildFileName(fileName, FileType.Document), cancellationToken);
         }
     }
 
@@ -160,7 +161,7 @@ public class EditorToolsFactory(
             [Description("Visual style - modern, classic, minimal, corporate")] string? style,
             CancellationToken cancellationToken)
         {
-            return target.CreateFile(fileName, cancellationToken);
+            return target.CreateFile(BuildFileName(fileName, FileType.Presentation), cancellationToken);
         }
     }
 
@@ -177,8 +178,27 @@ public class EditorToolsFactory(
             [Description("Detailed description of the form or template to generate, including purpose, structure")] string description,
             CancellationToken cancellationToken)
         {
-            return target.CreateFile(fileName, cancellationToken);
+            return target.CreateFile(BuildFileName(fileName, FileType.Pdf), cancellationToken);
         }
+    }
+
+    private string BuildFileName(string? fileName, FileType fileType)
+    {
+        var extension = fileUtility.InternalExtension[fileType];
+        var title = (fileName ?? string.Empty).Trim();
+        var currentExtension = FileUtility.GetFileExtension(title);
+
+        if (currentExtension.Equals(extension, StringComparison.OrdinalIgnoreCase))
+        {
+            return title;
+        }
+
+        if (FileUtility.GetFileTypeByExtention(currentExtension) != FileType.Unknown)
+        {
+            return FileUtility.ReplaceFileExtension(title, extension);
+        }
+
+        return title.TrimEnd('.') + extension;
     }
 
     private async Task<ToolResponse<GeneratedFileResult>> CreateFileAsync<T>(

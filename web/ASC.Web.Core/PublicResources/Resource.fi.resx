@@ -1168,7 +1168,7 @@
     <value>Tekoälyagenttien määrän ei tulisi ylittää {0}</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
-    <value>Tekoälyhaku</value>
+    <value>AI-haku</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Tekoälyominaisuudet</value>
@@ -1321,7 +1321,7 @@
     <value>Verkkohaku</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Verkkohaku</value>
+    <value>AI-haku</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Tekoälykrediipit</value>

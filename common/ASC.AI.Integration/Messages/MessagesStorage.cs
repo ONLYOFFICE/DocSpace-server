@@ -81,7 +81,7 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.UpdateMessageContentsAsync(tenantId, messageId, contents, DateTime.UtcNow);
+        await context.UpdateMessageContentsAsync(tenantId, messageId, contents);
     }
 
     public async Task DeleteAsync(int tenantId, Guid messageId)

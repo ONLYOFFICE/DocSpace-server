@@ -583,6 +583,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid folder id.
+        /// </summary>
+        public static string ErrorMessage_InvalidFolderId {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InvalidFolderId", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Invalid provider.
         /// </summary>
         public static string ErrorMessage_InvalidProvider {

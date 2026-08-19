@@ -197,6 +197,9 @@ export async function streamNdjson(
   res: Response,
   generator: AsyncIterable<unknown>,
 ): Promise<void> {
+  const iterator = generator[Symbol.asyncIterator]();
+  const first = await iterator.next();
+
   res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
   res.setHeader("Cache-Control", "no-cache, no-transform");
   res.setHeader("X-Accel-Buffering", "no");
@@ -206,9 +209,12 @@ export async function streamNdjson(
   // skipped by the lib's `readNdjson` parser.
   const heartbeat = startStreamHeartbeat(res, "\n");
   try {
-    for await (const event of generator) {
+    let current = first;
+    while (!current.done) {
+      const event = current.value;
       res.write(`${JSON.stringify(event)}\n`);
       heartbeat.touch();
+      current = await iterator.next();
     }
   } catch (err) {
     logger.error(`stream aborted: ${errorDetails(err)}`);
@@ -231,6 +237,9 @@ export async function streamOpenAiSse(
   res: Response,
   generator: AsyncIterable<unknown>,
 ): Promise<void> {
+  const iterator = generator[Symbol.asyncIterator]();
+  const first = await iterator.next();
+
   res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
   res.setHeader("Cache-Control", "no-cache, no-transform");
   res.setHeader("Connection", "keep-alive");
@@ -240,9 +249,12 @@ export async function streamOpenAiSse(
   // SSE comment line: ignored by any SSE consumer, keeps the connection warm.
   const heartbeat = startStreamHeartbeat(res, ": ping\n\n");
   try {
-    for await (const chunk of generator) {
+    let current = first;
+    while (!current.done) {
+      const chunk = current.value;
       res.write(`data: ${JSON.stringify(chunk)}\n\n`);
       heartbeat.touch();
+      current = await iterator.next();
     }
     res.write("data: [DONE]\n\n");
   } catch (err) {
