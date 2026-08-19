@@ -34,43 +34,46 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The password setup link (<c>set_password</c>). The shortest letter in the set: no greeting by name
-/// and no signature, just the button and the seven-day notice.
+/// The welcome letter as a guest receives it. The four guest actions currently render the very same
+/// <c>user_welcome_v1</c> template as the five user ones, so this class is a deliberate duplicate of
+/// <see cref="SaasUserWelcomeLetterTests"/>: it holds the place for the guest wording and starts failing the
+/// day the two letters diverge.
 /// </summary>
-public class SetPasswordLetterTests : LetterTestBase<PasswordSetNotifyAction>
+public class SaasGuestWelcomeLetterTests : LetterTestBase<SaasGuestWelcomeV1NotifyAction>
 {
-    /// <summary>The password change link, built from <c>ConfirmType.PasswordChange</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/PasswordChange");
+    private static string PortalRoot => LetterEnvironment.PortalUrl;
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
+    /// <summary>The sending code sets a top image for this letter.</summary>
+    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");
 
-    /// <summary>The letter ends on the seven-day notice, it carries no <c>$TrulyYours</c>.</summary>
-    protected override bool HasSignature => false;
+    /// <summary>The SaaS footer; Enterprise passes <c>null</c> and Opensource <c>opensource</c>.</summary>
+    protected override string Footer => "social";
 
-    /// <summary>Mirrors <c>PasswordSetNotifyAction.Init</c>, which sets the button and nothing else.</summary>
+    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
+    protected override bool TrulyYoursAsTableRow => false;
+
+    /// <summary>Mirrors <c>Init</c>, which is now the same in all four guest actions.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
-        return [OrangeButton("ButtonSetPassword", culture, ConfirmUrl)];
+        return [OrangeButton("ButtonGetStarted", culture, PortalRoot)];
     }
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
-        letter.Body.Should().Contain(Resource("ButtonSetPassword", culture))
-            .And.Contain(ConfirmUrl);
+        letter.Body.Should().Contain(RecipientName)
+            .And.Contain(Resource("ButtonGetStarted", culture))
+            .And.Contain(PortalRoot)
+            .And.Contain(LetterEnvironment.HelpUrl)
+            .And.Contain(LetterEnvironment.SupportUrl);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter)
     {
-        var logoText = LetterEnvironment.LogoText;
+        letter.Subject.Should().Be($"Welcome to {LetterEnvironment.LogoText}!");
 
-        letter.Subject.Should().Be($"Set up a password for {logoText}");
-
-        letter.Body.Should().Contain($"Please set up a password for your {logoText}.")
-            .And.Contain("Just click the button below:")
-            .And.Contain("The link is valid for 7 days.");
-
-        // The brand no longer carries the DocSpace suffix, and the letter no longer says "account".
-        letter.Body.Should().NotContain("DocSpace").And.NotContain("account");
+        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+            .And.Contain("Your profile has been successfully added to")
+            .And.Contain("Help Center")
+            .And.Contain("support team");
     }
 }

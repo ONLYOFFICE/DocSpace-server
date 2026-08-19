@@ -34,54 +34,51 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What the owner of a brand new portal gets outside SaaS (<c>admin_activation_v1</c>) — one template
-/// for Enterprise, Enterprise whitelabel and Opensource, which differ only in the footer. It is the SaaS
-/// letter (<see cref="SaasAdminActivationLetterTests"/>) without the STARTUP plan block.
+/// The last-day reminder (<c>saas_owner_payment_warning_grace_period_last_day</c>), sent to the owner
+/// and the payer one day before the grace period runs out.
 /// </summary>
-public class AdminActivationLetterTests : LetterTestBase<EnterpriseAdminActivationV1NotifyAction>
+public class SaasOwnerPaymentWarningGracePeriodLastDayLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction>
 {
-    private const string RecipientEmail = "owner@preview.onlyoffice.com";
+    private const string PaymentDelay = "30";
 
-    /// <summary>The email confirmation link, built from <c>ConfirmType.EmailActivation</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/EmailActivation");
+    /// <summary>The billing page the button leads to.</summary>
+    private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
 
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");
+    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
+    protected override string? TopGif => null;
 
-    /// <summary>Mirrors <c>Init</c>, which is now the same in all three non-SaaS activation actions.</summary>
+    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
+    protected override bool TrulyYoursAsTableRow => false;
+
+    /// <summary>Mirrors the grace period last day block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
         return
         [
-            OrangeButton("ButtonConfirm", culture, ConfirmUrl),
-            new TagValue(CommonTags.UserEmail, RecipientEmail)
+            OrangeButton("ButtonVisitBillingSection", culture, BillingUrl),
+            new TagValue(CommonTags.PaymentDelay, PaymentDelay)
         ];
     }
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
         letter.Body.Should().Contain(RecipientName)
-            .And.Contain(RecipientEmail)
-            .And.Contain(Resource("ButtonConfirm", culture))
-            .And.Contain(ConfirmUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+            .And.Contain(PaymentDelay)
+            .And.Contain(Resource("ButtonVisitBillingSection", culture))
+            .And.Contain(BillingUrl);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter)
     {
         var logoText = LetterEnvironment.LogoText;
 
-        letter.Subject.Should().Be($"Welcome to {logoText}!");
+        letter.Subject.Should().Be($"Grace period for your {logoText} expires tomorrow");
 
-        // No apostrophes in the expected strings: TextileStyler turns "You've" into "You&#8217;ve".
         letter.Body.Should().Contain($"Hello, {RecipientName}!")
-            .And.Contain($"just created your {logoText}")
-            .And.Contain($"Your {logoText} address")
-            .And.Contain("Your login")
-            .And.Contain("Please confirm your email (the link is valid for 7 days):")
-            .And.Contain("Enjoy your private document collaboration infrastructure!");
+            .And.Contain($"grace period of {PaymentDelay}")
+            .And.Contain("Make sure to pay your Business subscription today.");
 
-        // The STARTUP plan block belongs to the SaaS letter only.
-        letter.Body.Should().NotContain("STARTUP");
+        // The brand no longer carries the DocSpace suffix.
+        letter.Body.Should().NotContain("DocSpace");
     }
 }

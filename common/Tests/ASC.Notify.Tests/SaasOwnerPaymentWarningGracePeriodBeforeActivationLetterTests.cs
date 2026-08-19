@@ -34,44 +34,47 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The invitation as a guest receives it. The four guest actions currently render the very same
-/// <c>user_activation_v1</c> template as the four user ones, so this class is a deliberate duplicate of
-/// <see cref="UserActivationLetterTests"/>: it holds the place for the guest wording and starts failing
-/// the day the two letters diverge.
+/// The heads-up three days before the subscription is debited
+/// (<c>saas_owner_payment_warning_grace_period_before_activation</c>). The only letter of the four that
+/// carries no button — it links the payment method and the support desk inline instead.
 /// </summary>
-public class GuestActivationLetterTests : LetterTestBase<SaasGuestActivationV115NotifyAction>
+public class SaasOwnerPaymentWarningGracePeriodBeforeActivationLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>
 {
-    /// <summary>The confirmation link, built by the sending code from <c>ConfirmType.Activation</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Activation");
+    private static string PaymentMethodUrl => LetterEnvironment.PortalLink("billing/payment-method");
 
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("join_docspace.gif");
-
-    /// <summary>The SaaS footer; Enterprise passes <c>null</c> and Opensource <c>opensource</c>.</summary>
-    protected override string Footer => "social";
+    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
+    protected override string? TopGif => null;
 
     /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
     protected override bool TrulyYoursAsTableRow => false;
 
-    /// <summary>Mirrors <c>Init</c>, which is now the same in all four guest activation actions.</summary>
+    /// <summary>Mirrors the three-days-before block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
-        return [OrangeButton("ButtonAccept", culture, ConfirmUrl)];
+        return [new TagValue("URL1", PaymentMethodUrl)];
     }
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
-        letter.Body.Should().Contain(Resource("ButtonAccept", culture))
-            .And.Contain(ConfirmUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        // The payment method link belongs to the new copy, which so far exists only in the default
+        // culture — the translations still carry the previous sentence. It is asserted below instead.
+        letter.Body.Should().Contain(RecipientName)
+            .And.Contain(LetterEnvironment.SupportUrl);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter)
     {
-        letter.Subject.Should().Be($"You are invited to {LetterEnvironment.LogoText}");
+        letter.Subject.Should().Be($"Upcoming subscription payment for your {LetterEnvironment.LogoText} tariff plan");
 
-        letter.Body.Should().Contain("Hello!")
-            .And.Contain("Accept the invitation by clicking the link:")
-            .And.Contain("After clicking on the invitation link, please set a new password.");
+        // No apostrophes in the expected strings: TextileStyler rewrites them.
+        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+            .And.Contain("Business subscription payment for the chosen number of admins")
+            .And.Contain("will be automatically debited in 3 days")
+            .And.Contain("payment method")
+            .And.Contain(PaymentMethodUrl)
+            .And.Contain("support team");
+
+        // The brand no longer carries the DocSpace suffix.
+        letter.Body.Should().NotContain("DocSpace");
     }
 }

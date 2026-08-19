@@ -34,51 +34,43 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The last-day reminder (<c>saas_owner_payment_warning_grace_period_last_day</c>), sent to the owner
-/// and the payer one day before the grace period runs out.
+/// The password setup link (<c>set_password</c>). The shortest letter in the set: no greeting by name
+/// and no signature, just the button and the seven-day notice.
 /// </summary>
-public class SaasGracePeriodLastDayLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction>
+public class PasswordSetLetterTests : LetterTestBase<PasswordSetNotifyAction>
 {
-    private const string PaymentDelay = "30";
-
-    /// <summary>The billing page the button leads to.</summary>
-    private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
+    /// <summary>The password change link, built from <c>ConfirmType.PasswordChange</c>.</summary>
+    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/PasswordChange");
 
     /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
     protected override string? TopGif => null;
 
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
+    /// <summary>The letter ends on the seven-day notice, it carries no <c>$TrulyYours</c>.</summary>
+    protected override bool HasSignature => false;
 
-    /// <summary>Mirrors the grace period last day block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
+    /// <summary>Mirrors <c>PasswordSetNotifyAction.Init</c>, which sets the button and nothing else.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
-        return
-        [
-            OrangeButton("ButtonVisitBillingSection", culture, BillingUrl),
-            new TagValue(CommonTags.PaymentDelay, PaymentDelay)
-        ];
+        return [OrangeButton("ButtonSetPassword", culture, ConfirmUrl)];
     }
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(PaymentDelay)
-            .And.Contain(Resource("ButtonVisitBillingSection", culture))
-            .And.Contain(BillingUrl);
+        letter.Body.Should().Contain(Resource("ButtonSetPassword", culture))
+            .And.Contain(ConfirmUrl);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter)
     {
         var logoText = LetterEnvironment.LogoText;
 
-        letter.Subject.Should().Be($"Grace period for your {logoText} expires tomorrow");
+        letter.Subject.Should().Be($"Set up a password for {logoText}");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
-            .And.Contain($"grace period of {PaymentDelay}")
-            .And.Contain("Make sure to pay your Business subscription today.");
+        letter.Body.Should().Contain($"Please set up a password for your {logoText}.")
+            .And.Contain("Just click the button below:")
+            .And.Contain("The link is valid for 7 days.");
 
-        // The brand no longer carries the DocSpace suffix.
-        letter.Body.Should().NotContain("DocSpace");
+        // The brand no longer carries the DocSpace suffix, and the letter no longer says "account".
+        letter.Body.Should().NotContain("DocSpace").And.NotContain("account");
     }
 }

@@ -37,7 +37,7 @@ namespace ASC.Notify.Tests;
 /// The letter that closes the grace period (<c>saas_owner_payment_warning_grace_period_expired</c>),
 /// sent to the owner and the payer on the day it runs out.
 /// </summary>
-public class SaasGracePeriodExpiredLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>
+public class SaasOwnerPaymentWarningGracePeriodExpiredLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>
 {
     private const string PaymentDelay = "30";
 

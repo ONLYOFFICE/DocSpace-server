@@ -34,33 +34,35 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The invitation a new user gets (<c>user_activation_v1</c>). One textile template serves all four
-/// editions — SaaS, Enterprise, Enterprise whitelabel and Opensource — which differ only in the footer
-/// flavour they pass in; this class renders the SaaS one.
+/// What the owner of a brand new portal gets outside SaaS (<c>admin_activation_v1</c>) — one template
+/// for Enterprise, Enterprise whitelabel and Opensource, which differ only in the footer. It is the SaaS
+/// letter (<see cref="SaasAdminActivationLetterTests"/>) without the STARTUP plan block.
 /// </summary>
-public class UserActivationLetterTests : LetterTestBase<SaasUserActivationV1NotifyAction>
+public class EnterpriseAdminActivationLetterTests : LetterTestBase<EnterpriseAdminActivationV1NotifyAction>
 {
-    /// <summary>The confirmation link, built by the sending code from <c>ConfirmType.Activation</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Activation");
+    private const string RecipientEmail = "owner@preview.onlyoffice.com";
+
+    /// <summary>The email confirmation link, built from <c>ConfirmType.EmailActivation</c>.</summary>
+    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/EmailActivation");
 
     /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("join_docspace.gif");
+    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");
 
-    /// <summary>The SaaS footer; Enterprise passes <c>null</c> and Opensource <c>opensource</c>.</summary>
-    protected override string Footer => "social";
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>Init</c>, which is now the same in all four activation actions.</summary>
+    /// <summary>Mirrors <c>Init</c>, which is now the same in all three non-SaaS activation actions.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
-        return [OrangeButton("ButtonAccept", culture, ConfirmUrl)];
+        return
+        [
+            OrangeButton("ButtonConfirm", culture, ConfirmUrl),
+            new TagValue(CommonTags.UserEmail, RecipientEmail)
+        ];
     }
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
-        letter.Body.Should().Contain(Resource("ButtonAccept", culture))
+        letter.Body.Should().Contain(RecipientName)
+            .And.Contain(RecipientEmail)
+            .And.Contain(Resource("ButtonConfirm", culture))
             .And.Contain(ConfirmUrl)
             .And.Contain(LetterEnvironment.PortalUrl);
     }
@@ -69,11 +71,17 @@ public class UserActivationLetterTests : LetterTestBase<SaasUserActivationV1Noti
     {
         var logoText = LetterEnvironment.LogoText;
 
-        letter.Subject.Should().Be($"You are invited to {logoText}");
+        letter.Subject.Should().Be($"Welcome to {logoText}!");
 
-        letter.Body.Should().Contain("Hello!")
-            .And.Contain($"You are invited to join {logoText} at")
-            .And.Contain("Accept the invitation by clicking the link:")
-            .And.Contain("After clicking on the invitation link, please set a new password.");
+        // No apostrophes in the expected strings: TextileStyler turns "You've" into "You&#8217;ve".
+        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+            .And.Contain($"just created your {logoText}")
+            .And.Contain($"Your {logoText} address")
+            .And.Contain("Your login")
+            .And.Contain("Please confirm your email (the link is valid for 7 days):")
+            .And.Contain("Enjoy your private document collaboration infrastructure!");
+
+        // The STARTUP plan block belongs to the SaaS letter only.
+        letter.Body.Should().NotContain("STARTUP");
     }
 }

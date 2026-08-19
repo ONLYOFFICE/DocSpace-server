@@ -38,7 +38,7 @@ namespace ASC.Notify.Tests;
 /// serves all five editions — SaaS, Enterprise, Enterprise whitelabel, its custom mode and Opensource —
 /// which differ only in the footer flavour they pass in.
 /// </summary>
-public class UserWelcomeLetterTests : LetterTestBase<SaasUserWelcomeV1NotifyAction>
+public class SaasUserWelcomeLetterTests : LetterTestBase<SaasUserWelcomeV1NotifyAction>
 {
     /// <summary>The button target: the portal root, as every edition sets it.</summary>
     private static string PortalRoot => LetterEnvironment.PortalUrl;

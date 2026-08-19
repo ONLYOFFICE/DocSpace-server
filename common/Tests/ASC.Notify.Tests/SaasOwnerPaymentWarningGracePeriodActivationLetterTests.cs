@@ -34,46 +34,51 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The welcome letter as a guest receives it. The four guest actions currently render the very same
-/// <c>user_welcome_v1</c> template as the five user ones, so this class is a deliberate duplicate of
-/// <see cref="UserWelcomeLetterTests"/>: it holds the place for the guest wording and starts failing the
-/// day the two letters diverge.
+/// The letter that opens the grace period (<c>saas_owner_payment_warning_grace_period_activation</c>),
+/// sent to the owner and the payer the day after the subscription fell due.
 /// </summary>
-public class GuestWelcomeLetterTests : LetterTestBase<SaasGuestWelcomeV1NotifyAction>
+public class SaasOwnerPaymentWarningGracePeriodActivationLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>
 {
-    private static string PortalRoot => LetterEnvironment.PortalUrl;
+    private const string PaymentDelay = "30";
 
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");
+    /// <summary>The billing page the button leads to.</summary>
+    private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
 
-    /// <summary>The SaaS footer; Enterprise passes <c>null</c> and Opensource <c>opensource</c>.</summary>
-    protected override string Footer => "social";
+    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
+    protected override string? TopGif => null;
 
     /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
     protected override bool TrulyYoursAsTableRow => false;
 
-    /// <summary>Mirrors <c>Init</c>, which is now the same in all four guest actions.</summary>
+    /// <summary>Mirrors the grace period activation block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
     protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
     {
-        return [OrangeButton("ButtonGetStarted", culture, PortalRoot)];
+        return
+        [
+            OrangeButton("ButtonVisitBillingSection", culture, BillingUrl),
+            new TagValue(CommonTags.PaymentDelay, PaymentDelay)
+        ];
     }
 
     protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
     {
         letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonGetStarted", culture))
-            .And.Contain(PortalRoot)
-            .And.Contain(LetterEnvironment.HelpUrl)
-            .And.Contain(LetterEnvironment.SupportUrl);
+            .And.Contain(PaymentDelay)
+            .And.Contain(Resource("ButtonVisitBillingSection", culture))
+            .And.Contain(BillingUrl);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter)
     {
-        letter.Subject.Should().Be($"Welcome to {LetterEnvironment.LogoText}!");
+        var logoText = LetterEnvironment.LogoText;
+
+        letter.Subject.Should().Be($"Grace period for your {logoText} activated");
 
         letter.Body.Should().Contain($"Hello, {RecipientName}!")
-            .And.Contain("Your profile has been successfully added to")
-            .And.Contain("Help Center")
-            .And.Contain("support team");
+            .And.Contain($"grace period of {PaymentDelay}")
+            .And.Contain("Make sure to pay your Business subscription before the grace period is due.");
+
+        // The brand no longer carries the DocSpace suffix.
+        letter.Body.Should().NotContain("DocSpace");
     }
 }

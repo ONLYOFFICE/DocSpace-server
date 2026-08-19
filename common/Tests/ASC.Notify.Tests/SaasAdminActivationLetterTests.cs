@@ -35,7 +35,7 @@ namespace ASC.Notify.Tests;
 
 /// <summary>
 /// What the owner of a brand new SaaS portal gets (<c>saas_admin_activation_v1</c>). It is the
-/// Enterprise letter (<see cref="AdminActivationLetterTests"/>) plus the STARTUP plan block, and it
+/// Enterprise letter (<see cref="EnterpriseAdminActivationLetterTests"/>) plus the STARTUP plan block, and it
 /// carries two mutually exclusive buttons — confirm the email, or change the generated password.
 /// </summary>
 public class SaasAdminActivationLetterTests : LetterTestBase<SaasAdminActivationV1NotifyAction>
