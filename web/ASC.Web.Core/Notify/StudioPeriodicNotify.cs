@@ -54,7 +54,6 @@ public class StudioPeriodicNotify(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
-    TenantExtra tenantExtra,
     ApiSystemHelper apiSystemHelper,
     CoreBaseSettings coreBaseSettings,
     CoreSettings coreSettings,
@@ -225,8 +224,6 @@ public class StudioPeriodicNotify(
             Tenant = tenant,
             Tariff = tariff,
             Quota = quota,
-            // Depends on the portal, not on the recipient - it used to be fetched once per addressee.
-            RightQuota = await tenantExtra.GetRightQuota() ?? TenantQuota.Default,
             NowDate = nowDate,
             CreatedDate = tenant.CreationDateTime.Date,
             DueDate = actualEndDate.Date,

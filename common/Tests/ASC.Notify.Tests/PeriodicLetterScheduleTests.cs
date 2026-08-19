@@ -59,7 +59,6 @@ public class PeriodicLetterScheduleTests
         Tenant = new Tenant(1, "test"),
         Tariff = new Tariff { Quotas = [], State = TariffState.Trial, DueDate = DateTime.MaxValue, DelayDueDate = DateTime.MaxValue },
         Quota = Quota(),
-        RightQuota = Quota(),
         NowDate = Today,
         CreatedDate = Today,
         DueDate = DateTime.MaxValue.Date,

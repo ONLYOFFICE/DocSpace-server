@@ -50,12 +50,6 @@ public sealed record PeriodicLetterContext
 
     public required TenantQuota Quota { get; init; }
 
-    /// <summary>
-    /// The quota this portal would need for what it actually uses, i.e. <c>TenantExtra.GetRightQuota</c>
-    /// — the source of the price shown in the payment letters.
-    /// </summary>
-    public required TenantQuota RightQuota { get; init; }
-
     /// <summary>The day the run is for: the scheduler's timestamp, truncated.</summary>
     public required DateTime NowDate { get; init; }
 

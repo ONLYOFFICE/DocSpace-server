@@ -2078,6 +2078,9 @@ public abstract class BasePeriodicNotifyAction(
     /// </summary>
     protected StudioNotifyHelper NotifyHelper { get; } = studioNotifyHelper;
 
+    /// <summary>Billing, for the letters that quote how long the grace period lasts.</summary>
+    protected ITariffService TariffService { get; } = tariffService;
+
     /// <summary>Is today this letter's day for this portal?</summary>
     /// <remarks>
     /// Letters judge themselves independently, so a predicate must carry every condition its old branch
@@ -2153,7 +2156,7 @@ public abstract class BasePeriodicNotifyAction(
 
         if (ToPayer)
         {
-            var customerInfo = await tariffService.GetCustomerInfoAsync(context.Tenant.Id);
+            var customerInfo = await TariffService.GetCustomerInfoAsync(context.Tenant.Id);
             var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
             if (payer.Id != ASC.Core.Users.Constants.LostUser.Id && users.All(u => u.Id != payer.Id))
@@ -2166,9 +2169,9 @@ public abstract class BasePeriodicNotifyAction(
     }
 
     /// <summary>
-    /// What every periodic letter carries: who it greets, what the portal costs, the signature and the
-    /// footer flavour. A letter that shows no price still renders these harmlessly, and the master
-    /// template needs the signature and the footer from all of them.
+    /// What every periodic letter carries: the culture, who it greets, the signature and the footer
+    /// flavour. The last two are read by the styler rather than by the pattern text, which is why every
+    /// letter needs them whether or not it mentions them.
     /// </summary>
     protected virtual async Task<List<ITagValue>> BuildCommonTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture)
     {
@@ -2176,10 +2179,6 @@ public abstract class BasePeriodicNotifyAction(
         [
             new TagValue(CommonTags.Culture, culture.Name),
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
-            new TagValue(CommonTags.Price, context.RightQuota.Price),
-            new TagValue(CommonTags.PricePeriod, context.RightQuota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
-            new TagValue(CommonTags.PaymentDelay, tariffService.GetPaymentDelay()),
             TagValues.TrulyYours(NotifyHelper, Resource("TrulyYoursText", culture), TrulyYoursAsTableRow),
             new TagValue(CommonTags.Footer, await userManager.IsDocSpaceAdminAsync(user) ? "common" : "social")
         ];
@@ -2676,6 +2675,8 @@ public sealed class SaasOwnerPaymentWarningGracePeriodActivationNotifyAction(
     {
         tags.Add(TagValues.OrangeButton(Resource("ButtonVisitBillingSection", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
 
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
+
         return Task.CompletedTask;
     }
 }
@@ -2714,6 +2715,8 @@ public sealed class SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction(
     {
         tags.Add(TagValues.OrangeButton(Resource("ButtonVisitBillingSection", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
 
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
+
         return Task.CompletedTask;
     }
 }
@@ -2751,6 +2754,8 @@ public sealed class SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction(
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
         tags.Add(TagValues.OrangeButton(Resource("ButtonVisitBillingSection", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
 
         return Task.CompletedTask;
     }
@@ -2858,6 +2863,8 @@ public sealed class EnterpriseAdminPaymentWarningGracePeriodActivationNotifyActi
         tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
             externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
             + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period"));
+
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
 
         return Task.CompletedTask;
     }
@@ -3092,6 +3099,8 @@ public sealed class DeveloperAdminPaymentWarningGracePeriodActivationNotifyActio
         tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
             externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
             + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period"));
+
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
 
         return Task.CompletedTask;
     }
