@@ -53,16 +53,34 @@ public class VectorizationTaskPublisher(
         var userId = authContext.CurrentAccount.ID;
         
         var fileDao = daoFactory.GetFileDao<int>();
-        
-        await foreach (var file in fileDao.GetFilesAsync(filesIds))
+
+        var files = await fileDao.GetFilesAsync(filesIds).ToListAsync();
+
+        if (files.Count != filesIds.Count)
         {
-            if (!await fileSecurity.CanVectorizationAsync(file))
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var toPublish = new List<File<int>>(files.Count);
+
+        foreach (var file in files)
+        {
+            switch (await fileSecurity.GetVectorizationAvailabilityAsync(file))
             {
-                continue;
+                case VectorizationAvailability.AccessDenied:
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+                case VectorizationAvailability.AlreadyProcessed:
+                    continue;
+                case VectorizationAvailability.Available:
+                    toPublish.Add(file);
+                    break;
             }
-            
+        }
+
+        foreach (var file in toPublish)
+        {
             file.VectorizationStatus = VectorizationStatus.InProgress;
-            
+
             await fileDao.SetVectorizationStatusAsync(file.Id, VectorizationStatus.InProgress, async () =>
             {
                 await eventBus.PublishAsync(new VectorizationIntegrationEvent(userId, tenantId)
@@ -70,7 +88,7 @@ public class VectorizationTaskPublisher(
                     FileId = file.Id
                 });
             });
-            
+
             await socketManager.UpdateFileAsync(file);
         }
     }
