@@ -52,6 +52,8 @@ public class AiGatewayProxyController(
         "contents"
     };
 
+    private static readonly string[] _forwardedHeaders = ["x-session-id"];
+
     [HttpGet("gateway/{*path}")]
     [HttpPost("gateway/{*path}")]
     public async Task<IActionResult> ProxyRequest([FromRoute] string path)
@@ -92,6 +94,14 @@ public class AiGatewayProxyController(
 
         using var request = new HttpRequestMessage(new HttpMethod(Request.Method), uri);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
+
+        foreach (var header in _forwardedHeaders)
+        {
+            if (Request.Headers.TryGetValue(header, out var values))
+            {
+                request.Headers.TryAddWithoutValidation(header, (IEnumerable<string>)values);
+            }
+        }
 
         if (Request.ContentLength is > 0)
         {
