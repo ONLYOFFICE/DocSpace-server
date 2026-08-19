@@ -52,10 +52,18 @@ public static class AuditReportColumns
         nameof(BaseEvent.Country),
         nameof(BaseEvent.City),
         nameof(BaseEvent.Page),
-        nameof(AuditEvent.Action)
+        nameof(AuditEvent.Action),
+        nameof(AuditEvent.Context),
     ];
 
-    public static List<AuditReportColumn> Resolve<T>(AuditReportKind kind) where T : BaseEvent
+    private static readonly string[] _clientColumns =
+    [
+        nameof(BaseEvent.IP),
+        nameof(BaseEvent.Browser),
+        nameof(BaseEvent.Platform)
+    ];
+
+    public static List<AuditReportColumn> Resolve<T>(AuditReportKind kind, bool isDocSpaceAdmin) where T : BaseEvent
     {
         var columns = typeof(T).GetProperties()
             .Select(p => new { Property = p, Attribute = p.GetCustomAttribute<EventAttribute>() })
@@ -66,6 +74,11 @@ public static class AuditReportColumns
         if (kind == AuditReportKind.FolderHistory)
         {
             columns = columns.Where(c => !_excludedFromFolderHistory.Contains(c.Property.Name));
+
+            if (!isDocSpaceAdmin)
+            {
+                columns = columns.Where(c => !_clientColumns.Contains(c.Property.Name));
+            }
         }
 
         return [.. columns];
