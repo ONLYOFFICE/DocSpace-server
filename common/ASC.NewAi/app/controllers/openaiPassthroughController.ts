@@ -37,7 +37,10 @@ import type { Response } from "express";
 import logger from "../log.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
+import { safeGetAgentEntity } from "../storage/docspaceFilesApi.js";
+import type { AgentEntityMeta } from "../storage/docspaceFilesApi.js";
 import { asyncHandler } from "./_helpers.js";
+import { isObject } from "../narrow.js";
 
 // OpenAI-compatible passthrough for the document editor's AI plugin.
 //
@@ -58,6 +61,193 @@ import { asyncHandler } from "./_helpers.js";
 // `models` / `embeddings` / `responses` never travel this way: model
 // listing bypasses `externalFetch` in the plugin, `useResponsesApi` is
 // dropped for external profiles, and embeddings have no call site.
+// Query parameters the plugin uses to describe the round: the host entity
+// (agent room) it is chatting with, and the conversation the round belongs to.
+// Both are consumed here and never forwarded — the rest of the query string is
+// relayed to the provider verbatim, and an unknown parameter is at best
+// ignored and at worst a 400.
+const ENTITY_ID_PARAM = "entityId";
+const SESSION_ID_PARAM = "sessionId";
+
+// The conversation-correlation header the ONLYOFFICE route reads, and the
+// Anthropic-style cache breakpoint the Claude backend behind it looks for.
+// Both mirror `OnlyOfficeProvider` in `@onlyoffice/ai-chat`.
+const SESSION_HEADER = "x-session-id";
+const CACHE_CONTROL = { type: "ephemeral" } as const;
+
+// Ceiling for parsing the body. Above it the request is still forwarded and
+// still carries `metadata` (spliced without parsing), but the cache
+// breakpoints are skipped and logged — a vision/OCR payload of that size is a
+// one-off image round, where an ephemeral cache write costs more than the
+// reuse it would ever earn.
+const MAX_PARSE_BYTES = 2 * 1024 * 1024;
+
+// Attach the round's session id as `x-session-id`, mirroring
+// `OnlyOfficeProvider`'s constructor. A header configured on the profile
+// itself still wins, as it does in the library. What can NOT reach this point
+// is the caller's own `x-session-id`: it is dropped from the forwarded set in
+// `requestContext` precisely so a client cannot pick the upstream session, so
+// the only source here is the query parameter this route consumes explicitly.
+function withSessionHeader(
+  headers: Record<string, string>,
+  sessionId: string | undefined,
+): Record<string, string> {
+  if (!sessionId) {
+    return headers;
+  }
+  if (Object.keys(headers).some((name) => name.toLowerCase() === SESSION_HEADER)) {
+    return headers;
+  }
+  return { ...headers, [SESSION_HEADER]: sessionId };
+}
+
+// Mark one message as a cache breakpoint, mirroring the library exactly: a
+// string content becomes a single text part carrying `cache_control`, an array
+// content gets it on its LAST text part, and a message with no text at all is
+// left alone (nothing to cache). Unlike the library — whose input is typed —
+// this runs on untrusted JSON, so non-object content parts are skipped instead
+// of dereferenced.
+function withCacheControl(message: Record<string, unknown>): Record<string, unknown> {
+  const content = message["content"];
+  if (typeof content === "string") {
+    if (!content) {
+      return message;
+    }
+    return {
+      ...message,
+      content: [{ type: "text", text: content, cache_control: CACHE_CONTROL }],
+    };
+  }
+  if (!Array.isArray(content)) {
+    return message;
+  }
+  let lastText = -1;
+  for (let i = content.length - 1; i >= 0; i--) {
+    const part = content[i];
+    if (isObject(part) && part["type"] === "text") {
+      lastText = i;
+      break;
+    }
+  }
+  if (lastText === -1) {
+    return message;
+  }
+  return {
+    ...message,
+    content: content.map((part, i) =>
+      i === lastText && isObject(part) ? { ...part, cache_control: CACHE_CONTROL } : part,
+    ),
+  };
+}
+
+// Anthropic-style prompt-caching breakpoints on the message list: the leading
+// system prompt and the last message of the history, the static prefix the
+// Claude backend behind the ONLYOFFICE route can reuse across turns. Same two
+// positions the library marks in `OnlyOfficeProvider.getStream`.
+function markCacheBreakpoints(messages: unknown[]): unknown[] {
+  if (messages.length === 0) {
+    return messages;
+  }
+  const last = messages.length - 1;
+  return messages.map((message, i) => {
+    if (!isObject(message)) {
+      return message;
+    }
+    const isLeadingSystem = i === 0 && message["role"] === "system";
+    return i === last || isLeadingSystem ? withCacheControl(message) : message;
+  });
+}
+
+// Splice a `metadata` object into a JSON request body without parsing it.
+//
+// The body is deliberately never deserialized on this path (vision/OCR data
+// URLs reach megabytes, and the wire format is owned by the plugin's SDK on
+// one end and the provider on the other), so the pair is inserted right after
+// the opening brace and every other byte survives untouched. Inserting first
+// also means a `metadata` the plugin sent itself parses last and wins, on
+// every JSON parser that takes the last duplicate key (Node, System.Text.Json).
+//
+// Returns the body unchanged when it is not a JSON object — an empty body, a
+// top-level array, anything non-JSON — so a malformed request still reaches
+// the provider as-is and fails there, not here.
+function spliceMetadata(
+  body: Buffer,
+  contentType: string | undefined,
+  entity: AgentEntityMeta,
+): Buffer {
+  if (!contentType || !contentType.toLowerCase().includes("json")) {
+    return body;
+  }
+  const metadata: Record<string, string> = {};
+  if (entity.entityId) {
+    metadata["agent_id"] = entity.entityId;
+  }
+  if (entity.entityTitle) {
+    metadata["agent_title"] = entity.entityTitle;
+  }
+  if (Object.keys(metadata).length === 0) {
+    return body;
+  }
+  const text = body.toString("utf8");
+  const open = text.indexOf("{");
+  // Only leading whitespace may precede the brace; anything else means this
+  // is not a JSON object body.
+  if (open === -1 || text.slice(0, open).trim().length > 0) {
+    return body;
+  }
+  const rest = text.slice(open + 1);
+  // `{}` — an object with no members takes no separator.
+  const separator = rest.trimStart().startsWith("}") ? "" : ",";
+  const field = `"metadata":${JSON.stringify(metadata)}${separator}`;
+  return Buffer.from(`${text.slice(0, open + 1)}${field}${rest}`, "utf8");
+}
+
+// Add everything the ONLYOFFICE route expects on top of the plugin's own
+// request: the `metadata` object describing the agent, and (streaming chat
+// only) the prompt-caching breakpoints. Parsing is the accurate path — it can
+// place breakpoints inside the message list — but the body on this route is
+// occasionally megabytes of vision data, so above `MAX_PARSE_BYTES` we fall
+// back to splicing `metadata` in and say in the log what was dropped.
+//
+// `stream: true` gates the breakpoints, matching the library: a one-shot round
+// has no follow-up turn to reuse the cache, so the write would be pure cost.
+// A body that is not a JSON object, or that fails to parse, is forwarded
+// untouched and fails at the provider, exactly as it did before.
+function withOnlyofficeExtras(
+  body: Buffer,
+  contentType: string | undefined,
+  entity: AgentEntityMeta,
+  cacheBreakpoints: boolean,
+  route: string,
+): Buffer {
+  if (!contentType || !contentType.toLowerCase().includes("json")) {
+    return body;
+  }
+  if (!cacheBreakpoints) {
+    return spliceMetadata(body, contentType, entity);
+  }
+  if (body.length > MAX_PARSE_BYTES) {
+    logger.info(
+      `${route}: body ${body.length}B over ${MAX_PARSE_BYTES}B — prompt-cache breakpoints skipped, metadata still sent`,
+    );
+    return spliceMetadata(body, contentType, entity);
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body.toString("utf8"));
+  } catch {
+    return body;
+  }
+  if (!isObject(parsed)) {
+    return body;
+  }
+  const next: Record<string, unknown> = { ...parsed };
+  if (parsed["stream"] === true && Array.isArray(parsed["messages"])) {
+    next["messages"] = markCacheBreakpoints(parsed["messages"]);
+  }
+  return spliceMetadata(Buffer.from(JSON.stringify(next), "utf8"), contentType, entity);
+}
+
 const openAiError = (res: Response, status: number, message: string, type: string) =>
   res.status(status).json({
     error: { message, type, code: null, param: null },
@@ -71,11 +261,15 @@ const openAiError = (res: Response, status: number, message: string, type: strin
 function providerHeaders(
   contentType: string | undefined,
   profile: { key?: string; headers?: Record<string, string> },
+  sessionId?: string,
 ): Record<string, string> {
-  const headers: Record<string, string> = {
-    "Content-Type": contentType ?? "application/json",
-    ...(profile.headers ?? {}),
-  };
+  const headers: Record<string, string> = withSessionHeader(
+    {
+      "Content-Type": contentType ?? "application/json",
+      ...(profile.headers ?? {}),
+    },
+    sessionId,
+  );
   const hasAuthHeader = Object.keys(headers).some((name) => name.toLowerCase() === "authorization");
   if (profile.key && !hasAuthHeader) {
     headers["Authorization"] = `Bearer ${profile.key}`;
@@ -121,7 +315,7 @@ async function readRequestBody(req: Readable): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-function passthrough(subPath: string) {
+function passthrough(subPath: string, cacheBreakpoints = false) {
   return asyncHandler(async (req, res) => {
     // Forwarded auth headers must be marked before the profile resolve so
     // `onlyoffice`-provider profiles get the caller's credentials merged
@@ -137,7 +331,15 @@ function passthrough(subPath: string) {
 
     const base = profile.baseUrl.endsWith("/") ? profile.baseUrl.slice(0, -1) : profile.baseUrl;
     const queryIndex = req.originalUrl.indexOf("?");
-    const search = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+    const params = new URLSearchParams(
+      queryIndex >= 0 ? req.originalUrl.slice(queryIndex + 1) : "",
+    );
+    const entityIdParam = params.get(ENTITY_ID_PARAM) ?? undefined;
+    const sessionIdParam = params.get(SESSION_ID_PARAM) ?? undefined;
+    params.delete(ENTITY_ID_PARAM);
+    params.delete(SESSION_ID_PARAM);
+    const remaining = params.toString();
+    const search = remaining.length > 0 ? `?${remaining}` : "";
     const target = `${base}/${subPath}${search}`;
 
     const declaredLength = Number(req.headers["content-length"]);
@@ -167,11 +369,29 @@ function passthrough(subPath: string) {
       return;
     }
 
+    // Everything `OnlyOfficeProvider` adds on the engine paths, added here by
+    // the host instead — the engine is not involved on this route. Only for the
+    // ONLYOFFICE provider: a third-party OpenAI-compatible backend has no use
+    // for these fields and may reject an unknown one. The agent title is
+    // resolved server-side from the Files API under the caller's credentials,
+    // so the plugin can only name an entity, never describe one it does not
+    // own; a non-agent scope yields no metadata.
+    if (profile.providerType === "onlyoffice") {
+      const entity = entityIdParam ? await safeGetAgentEntity(entityIdParam) : {};
+      body = withOnlyofficeExtras(
+        body,
+        req.headers["content-type"],
+        entity,
+        cacheBreakpoints,
+        `openai passthrough ${subPath}`,
+      );
+    }
+
     let upstream: globalThis.Response;
     try {
       upstream = await fetch(target, {
         method: "POST",
-        headers: providerHeaders(req.headers["content-type"], profile),
+        headers: providerHeaders(req.headers["content-type"], profile, sessionIdParam),
         body,
         signal: upstreamAbortSignal(res),
       });
@@ -217,6 +437,8 @@ function passthrough(subPath: string) {
 }
 
 export const openaiPassthroughController = {
-  chatCompletions: passthrough("chat/completions"),
+  // Prompt-cache breakpoints are chat-only: image generation carries no
+  // message list, and the library marks them in `getStream` alone.
+  chatCompletions: passthrough("chat/completions", true),
   imagesGenerations: passthrough("images/generations"),
 };

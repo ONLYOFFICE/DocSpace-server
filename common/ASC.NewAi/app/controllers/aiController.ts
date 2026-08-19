@@ -54,7 +54,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
-import { safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
+import { safeGetAgentEntity, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -193,6 +193,29 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
   }
   const instruction = await safeGetAgentInstruction(contextScopeOf(body));
   return instruction ? appendActionPrompt(body, instruction) : body;
+}
+
+// Describe the host entity the round runs for — the agent whose chat this
+// is — in `actionArgs`. `@onlyoffice/ai-chat` (>= 0.5.50) turns the pair into
+// the ONLYOFFICE request's `metadata` object (`agent_id` / `agent_title`),
+// including on tool-call resume rounds, so the backend can attribute usage to
+// the agent. Server-resolved on purpose: the title comes from the Files API
+// under the caller's credentials, so a client cannot claim someone else's
+// agent. A plain chat (no agent room in scope) contributes nothing and the
+// field stays absent.
+async function withEntityMetadata<T>(body: T): Promise<T> {
+  if (!isObject(body)) {
+    return body;
+  }
+  const entity = await safeGetAgentEntity(contextScopeOf(body));
+  if (!entity.entityId) {
+    return body;
+  }
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
+  return {
+    ...body,
+    actionArgs: { ...actionArgs, ...entity },
+  } as T;
 }
 
 const toolsAdapter = new HttpToolsAdapter();
@@ -381,7 +404,7 @@ export const aiController = {
     // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
     // Mirrors sendWithStream.
     markForwardHeadersToProvider();
-    const result = await engine.send(req.body);
+    const result = await engine.send(await withEntityMetadata(req.body));
     res.json(result);
   }),
 
@@ -437,7 +460,9 @@ export const aiController = {
       }
     }
     const body = withContextPrompt(
-      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+      await withToolsPrompt(
+        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+      ),
     );
     await streamNdjson(
       res,
@@ -451,7 +476,9 @@ export const aiController = {
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
     const body = withContextPrompt(
-      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+      await withToolsPrompt(
+        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+      ),
     );
     await streamOpenAiSse(
       res,
@@ -464,7 +491,9 @@ export const aiController = {
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
     const body = withContextPrompt(
-      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+      await withToolsPrompt(
+        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+      ),
     );
     await streamNdjson(
       res,
@@ -474,7 +503,7 @@ export const aiController = {
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withRequestSignal(res, req.body);
+    const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       logStreamErrors("ai/approve-tool-call", engine.approveToolCall(body)),
@@ -483,7 +512,7 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withRequestSignal(res, req.body);
+    const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       logStreamErrors("ai/deny-tool-call", engine.denyToolCall(body)),

@@ -44,5 +44,6 @@ public class UpdateThreadRequestDto
 
 public class UpdateThreadBody
 {
+    [MaxLength(AiIntegrationLimits.MaxNameLength)]
     public string? Title { get; init; }
 }

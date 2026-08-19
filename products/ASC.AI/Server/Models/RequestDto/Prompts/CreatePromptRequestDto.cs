@@ -35,6 +35,7 @@ namespace ASC.AI.Models.RequestDto.Prompts;
 
 public class CreatePromptRequestDto
 {
+    [MaxLength(AiIntegrationLimits.MaxNameLength)]
     public required string Name { get; init; }
     public required string Text { get; init; }
     public Guid? FolderId { get; init; }
