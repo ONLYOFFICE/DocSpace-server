@@ -46,3 +46,10 @@ public class VectorizationHelper(IHeartBeatMonitor heartBeatMonitor)
         return $"vectorization_{fileId}";
     }
 }
+
+public enum VectorizationAvailability
+{
+    Available,
+    AccessDenied,
+    AlreadyProcessed
+}
