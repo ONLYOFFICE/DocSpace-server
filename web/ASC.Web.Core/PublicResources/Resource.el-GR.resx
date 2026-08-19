@@ -211,7 +211,7 @@
     <value>Έγινε υπέρβαση ορίου χώρου εκπροσώπου AI</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Αποτυχία ρύθμισης ορίου ανά εκπρόσωπο AI. Η τιμή που εισήχθη είναι μεγαλύτερη από τον συνολικό χώρο αποθήκευσης DocSpace.</value>
+    <value>Αποτυχία ρύθμισης ορίου ανά εκπρόσωπο AI. Η τιμή που εισήχθη είναι μεγαλύτερη από τον συνολικό χώρο αποθήκευσης.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Αυτόματη ανανέωση</value>
@@ -1120,7 +1120,7 @@
     <value>Υπέρβαση της ποσόστωσης χώρου δωματίου</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Αποτυχία ορισμού ποσόστωσης ανά δωμάτιο. Η εισαχθείσα τιμή είναι μεγαλύτερη από το συνολικό χώρο αποθήκευσης του DocSpace.</value>
+    <value>Αποτυχία ορισμού ποσόστωσης ανά δωμάτιο. Η εισαχθείσα τιμή είναι μεγαλύτερη από το συνολικό χώρο αποθήκευσης.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Δημοκρατία της Σιγκαπούρης</value>
@@ -1285,7 +1285,7 @@
     <value>Παρουσιάστηκε ένα απροσδόκητο σφάλμα. Προσπαθήστε ξανά.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Έχετε συνδεθεί με επιτυχία στο Telegram για να λαμβάνετε ειδοποιήσεις από το DocSpace.</value>
+    <value>Έχετε συνδεθεί με επιτυχία στο Telegram για να λαμβάνετε ειδοποιήσεις από τον χώρο εργασίας.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Λανθασμένος κωδικός</value>
@@ -1300,7 +1300,7 @@
     <value>Υπέρβαση της ποσόστωσης χώρου χρήστη</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Αποτυχία ορισμού ποσόστωσης ανά χρήστη. Η εισαχθείσα τιμή είναι μεγαλύτερη από τον συνολικό αποθηκευτικό χώρο του DocSpace.</value>
+    <value>Αποτυχία ορισμού ποσόστωσης ανά χρήστη. Η εισαχθείσα τιμή είναι μεγαλύτερη από τον συνολικό αποθηκευτικό χώρο.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Περιφέρεια Δυτικής Αμερικής (Όρεγκον)</value>

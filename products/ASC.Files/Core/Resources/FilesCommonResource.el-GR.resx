@@ -500,7 +500,7 @@
     <value>Δημιουργός περιεχομένου</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Διαχειριστής DocSpace</value>
+    <value>Πλήρης διαχειριστής</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Επεξεργαστής</value>

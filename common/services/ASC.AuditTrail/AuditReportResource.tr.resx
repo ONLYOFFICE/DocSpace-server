@@ -910,7 +910,7 @@
     <value>Gönder</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Kullanıcı {0}, {1} kullanıcısına bu DocSpace'e katılması için bir davet gönderdi</value>
+    <value>Kullanıcı {0}, {1} kullanıcısına bir davet gönderdi</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Davet Kılavuzları Gönderildi: {0}</value>

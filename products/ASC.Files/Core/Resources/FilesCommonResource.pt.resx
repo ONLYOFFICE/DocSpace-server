@@ -500,7 +500,7 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
     <value>Criador de conteúdo</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Administrador do DocSpace</value>
+    <value>Administrador completo</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>

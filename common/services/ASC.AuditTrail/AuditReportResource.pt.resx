@@ -910,7 +910,7 @@
     <value>Enviar</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>O usuário {0} enviou um convite para {1} para ingressar neste DocSpace</value>
+    <value>O usuário {0} enviou um convite para {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>As Instruções de Convite foram Enviadas: {0}</value>

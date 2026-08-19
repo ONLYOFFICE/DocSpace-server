@@ -769,10 +769,10 @@
     <value>Onemogočena privzeta kvota prostora za shranjevanje</value>
   </data>
   <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Nastavitev privzete kvote prostora za shranjevanje: {0}</value>
+    <value>Nastavitev privzete kvote prostora za shranjevanje za sobe: {0}</value>
   </data>
   <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Onemogočena privzeta kvota prostora za shranjevanje</value>
+    <value>Onemogočena privzeta kvota prostora za shranjevanje za sobe</value>
   </data>
   <data name="QuotaPerUserChanged" xml:space="preserve">
     <value>Nastavitev privzete kvote prostora za shranjevanje za uporabnike: {0}</value>
@@ -904,7 +904,7 @@
     <value>Pošlji</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Uporabnik {0} je poslal povabilo na {1} za pridružitev temu prostoru DocSpace</value>
+    <value>Uporabnik {0} je poslal povabilo na {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Navodila povabila poslana: {0}</value>

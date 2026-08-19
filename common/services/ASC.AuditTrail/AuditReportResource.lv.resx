@@ -910,7 +910,7 @@
     <value>Nosūtīt</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Lietotājs (-a) {0} nosūtīja uzaicinājumu {1} pievienoties šim DocSpace</value>
+    <value>Lietotājs (-a) {0} nosūtīja uzaicinājumu {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Nosūtītas ielūguma instrukcijas: {0}</value>

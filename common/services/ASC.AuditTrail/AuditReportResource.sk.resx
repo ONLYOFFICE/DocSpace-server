@@ -910,7 +910,7 @@
     <value>Poslať</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Používateľ {0} poslal pozvánku {1}, aby sa pripojil k tomuto priestoru DocSpace</value>
+    <value>Používateľ {0} poslal pozvánku {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Pokyny k pozvánke boli odoslané: {0}</value>
