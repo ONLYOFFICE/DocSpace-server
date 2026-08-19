@@ -127,7 +127,7 @@
     <value>U moet een licentiesleutel invoeren</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Licentieconflict. Zorg ervoor dat u de juiste editie van {0} DocSpace (Enterprise of Developer) hebt geïnstalleerd. Als u vragen heeft, neem dan contact op met uw verkoopmanager.</value>
+    <value>Licentieconflict. Zorg ervoor dat u de juiste editie van {0} Docs (Enterprise of Developer) hebt geïnstalleerd. Als u vragen heeft, neem dan contact op met uw verkoopmanager.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Nieuw document</value>

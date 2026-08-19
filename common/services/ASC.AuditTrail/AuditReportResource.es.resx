@@ -901,7 +901,7 @@
     <value>Enviar</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>El usuario {0} ha enviado una invitación a {1} para que se una a este DocSpace</value>
+    <value>El usuario {0} ha enviado una invitación a {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instrucción de invitación enviada: {0}</value>

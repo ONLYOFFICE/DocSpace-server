@@ -700,7 +700,7 @@
     <value>Pronari [{0}]. Udhëzime për çaktivizimin e portalit të dërguar</value>
   </data>
   <data name="OwnerSentPortalDeleteInstructions" xml:space="preserve">
-    <value>Pronari [{0}]. Udhëzime për çaktivizimin e portalit të dërguar</value>
+    <value>Pronari [{0}]. Udhëzime për fshirjen e portalit të dërguar</value>
   </data>
   <data name="PageCol" xml:space="preserve">
     <value>Faqe</value>
@@ -886,7 +886,7 @@
     <value>Dërgoni</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Përdoruesi {0} dërgoi një ftesë {1} për të ju bashkuar me këtë DocSpace</value>
+    <value>Përdoruesi {0} dërgoi një ftesë {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Udhëzimet e ftesës u dërguan: {0}</value>

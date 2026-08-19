@@ -901,7 +901,7 @@
     <value>Αποστολή</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Ο χρήστης {0} έστειλε πρόσκληση στον {1} να συμμετάσχει σε αυτό το DocSpace</value>
+    <value>Ο χρήστης {0} έστειλε πρόσκληση στον {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Οδηγίες πρόσκλησης που εστάλησαν: {0}</value>

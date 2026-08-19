@@ -248,19 +248,19 @@ $Message</value>
     <value>Signierstatus geändert</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace-Benachrichtigung. Erwähnt im Dokument</value>
+    <value>${LetterLogoText}-Benachrichtigung. Erwähnt im Dokument</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace-Benachrichtigung. Das Formular ist ausgefüllt</value>
+    <value>${LetterLogoText}-Benachrichtigung. Das Formular ist ausgefüllt</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace-Benachrichtigung.</value>
+    <value>${LetterLogoText}-Benachrichtigung.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace-Benachrichtigung. Das Formular ist ausgefüllt</value>
+    <value>${LetterLogoText}-Benachrichtigung. Das Formular ist ausgefüllt</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace-Benachrichtigung.</value>
+    <value>${LetterLogoText}-Benachrichtigung.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Dokumente. Mailing ist abgeschlossen.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Mailing ist abgeschlossen.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace-Benachrichtigung. Raum gelöscht</value>
+    <value>${LetterLogoText}-Benachrichtigung. Raum gelöscht</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Dokumente. Zugriff auf das Dokument $DocumentTitle erteilt</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Dokumente. Zugriff auf das Verzeichnis [$DocumentTitle]($DocumentURL) erteilt</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace-Benachrichtigung.</value>
+    <value>${LetterLogoText}-Benachrichtigung.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace-Benachrichtigung.</value>
+    <value>${LetterLogoText}-Benachrichtigung.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName hat einen KI-Agenten gelöscht
@@ -310,6 +310,6 @@ $__AuthorName hat den KI-Agenten gelöscht: $RoomTitle</value>
     <value>Sie wurden zum KI-Agenten "$RoomTitle" eingeladen</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace-Benachrichtigung. KI-Agent gelöscht</value>
+    <value>${LetterLogoText}-Benachrichtigung. KI-Agent gelöscht</value>
   </data>
 </root>

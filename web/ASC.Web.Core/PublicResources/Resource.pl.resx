@@ -211,7 +211,7 @@
     <value>Limit pamięci asystenta AI został przekroczony</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nie udało się skonfigurować limitu na asystenta AI. Wprowadzona wartość jest większa niż całkowita pamięć DocSpace.</value>
+    <value>Nie udało się skonfigurować limitu na asystenta AI. Wprowadzona wartość jest większa niż całkowita pamięć.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatyczne odnawianie</value>
@@ -1120,7 +1120,7 @@
     <value>Przekroczono limit pamięci pokoju</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nie udało się skonfigurować limitu na pokój. Wprowadzona wartość jest większa niż całkowita pamięć DocSpace.</value>
+    <value>Nie udało się skonfigurować limitu na pokój. Wprowadzona wartość jest większa niż całkowita pamięć.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Azja Pacyfik (Singapur)</value>
@@ -1285,7 +1285,7 @@
     <value>Wystąpił nieoczekiwany błąd. Spróbuj ponownie.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Aplikacja Telegram została podłączona. Od teraz będziesz otrzymywać powiadomienia z DocSpace.</value>
+    <value>Aplikacja Telegram została podłączona. Od teraz będziesz otrzymywać powiadomienia z przestrzeni roboczej.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Błędny kod</value>
@@ -1300,7 +1300,7 @@
     <value>Przekroczono limit pamięci użytkownika</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nie udało się skonfigurować limitu na użytkownika. Wprowadzona wartość jest większa niż całkowita pamięć DocSpace.</value>
+    <value>Nie udało się skonfigurować limitu na użytkownika. Wprowadzona wartość jest większa niż całkowita pamięć.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Region Stanów Zjednoczonych (Oregon)</value>
