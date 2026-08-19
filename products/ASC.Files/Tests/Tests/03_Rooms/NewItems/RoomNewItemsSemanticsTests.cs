@@ -112,8 +112,12 @@ public class RoomNewItemsSemanticsTests(
         var (room, member) = await CreateRoomWithVisitor("Autotest News Re-Visit", FileShare.Read);
         await CreateFile("Autotest News Re-Visit File.docx", room.Id);
 
-        // Act - the member opens the room again, which should mark everything as read
+        // The badge is written asynchronously: re-visiting before it lands would clear nothing and
+        // the assertion below would race the marker instead of testing the re-visit.
         await _filesClient.Authenticate(member);
+        await PollNewsTitles(room.Id, t => t.Contains("Autotest News Re-Visit File.docx"));
+
+        // Act - the member opens the room again, which should mark everything as read
         await VisitRoom(room.Id);
 
         // Assert

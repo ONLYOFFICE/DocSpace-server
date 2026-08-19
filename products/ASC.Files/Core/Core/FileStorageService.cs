@@ -74,7 +74,6 @@ public class FileStorageService //: IFileStorageService
     ConsumerFactory consumerFactory,
     EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
     SettingsManager settingsManager,
-    FileMarkAsReadOperationsManager fileOperationsManager,
     TenantManager tenantManager,
     FileTrackerHelper fileTracker,
     IEventBus eventBus,
@@ -197,6 +196,22 @@ public class FileStorageService //: IFileStorageService
         folder.Tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
 
         return folder;
+    }
+
+    /// <summary>
+    /// Reads a room the way opening it does: the caller sees the room and everything that was new
+    /// in it up to this moment stops being new for them. The clearing is deliberately synchronous
+    /// so that the very next read of the room news already reflects the visit.
+    /// </summary>
+    public async Task<Folder<T>> GetRoomInfoAsync<T>(T roomId)
+    {
+        var room = await GetFolderAsync(roomId);
+
+        await fileMarker.RemoveMarkAsNewAsync(room);
+
+        room.NewForMe = 0;
+
+        return room;
     }
 
     public async Task<IEnumerable<FileEntry>> GetFoldersAsync<T>(T parentId)
@@ -2101,6 +2116,12 @@ public class FileStorageService //: IFileStorageService
             {
                 //await entryManager.MarkAsRecent(file);
 
+                // A rename is a change like any other: the file becomes new for everybody else who
+                // can read it, and stops being new for whoever renamed it - the same pair of calls
+                // the content-save path makes in EntryManager.
+                await fileMarker.MarkAsNewAsync(file);
+                await fileMarker.RemoveMarkAsNewAsync(file);
+
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
                 await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
@@ -2556,11 +2577,12 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
+            // Reading the news does not repair the counters. It used to: an empty list published a
+            // mark-as-read over the whole section, which destroyed every tag written between the
+            // read and the operation - and marking is asynchronous, so that window is hit routinely
+            // by anything created moments earlier. A stale counter is a cosmetic defect; losing the
+            // items behind it is not.
             var newFiles = await fileMarker.GetRootGroupedNewItemsAsync(rootId);
-            if (newFiles.Count == 0)
-            {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(rootId)], []);
-            }
 
             return newFiles
                 .OrderByDescending(x => x.Key)
@@ -2582,13 +2604,10 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
+            // No counter repair here either - see GetNewRootFilesAsync.
             var newFiles = await fileMarker.MarkedItemsAsync(folder)
                 .Where(x => folder.FolderType == FolderType.SHARE || x.FileEntryType == FileEntryType.File)
                 .ToListAsync();
-            if (newFiles.Count == 0)
-            {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folder.Id)], []);
-            }
 
             return newFiles
                 .GroupBy(x => x.ModifiedOn.Date)
@@ -2613,11 +2632,6 @@ public class FileStorageService //: IFileStorageService
             var result = await fileMarker.MarkedItemsAsync(folder).ToListAsync();
 
             result = [.. await entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
-
-            if (result.Count == 0)
-            {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folderId)], []);
-            }
 
             return result;
         }

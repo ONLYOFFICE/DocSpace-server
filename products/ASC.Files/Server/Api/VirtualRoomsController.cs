@@ -332,7 +332,7 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("{id}")]
     public async Task<FolderDto<T>> GetRoomInfo(RoomIdRequestDto<T> inDto)
     {
-        var folder = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
+        var folder = await _fileStorageService.GetRoomInfoAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
         return await _folderDtoHelper.GetAsync(folder);
     }
