@@ -38,8 +38,10 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
 global using ASC.Core;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Configuration;
+global using ASC.Core.Tenants;
 global using ASC.Data.Backup;
 global using ASC.Notify.Messages;
 global using ASC.Notify.Model;
