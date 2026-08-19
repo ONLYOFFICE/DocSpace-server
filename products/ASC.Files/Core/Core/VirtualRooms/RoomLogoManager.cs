@@ -285,7 +285,9 @@ public class RoomLogoManager(
         var maxFileSize = setupInfo.MaxImageUploadSize;
         if (roomLogo.Length > maxFileSize)
         {
-            throw new Exception(fileSizeComment.FileImageSizeExceptionString);
+            // An oversized upload is the caller's mistake: ArgumentException makes it a 400 instead
+            // of the 500 a bare Exception would produce.
+            throw new ArgumentException(fileSizeComment.FileImageSizeExceptionString);
         }
 
         byte[] data;
@@ -543,6 +545,16 @@ public class RoomLogoManager(
         {
             using var imageStream = new MemoryStream(imageData);
             using var img = new MagickImage(imageStream);
+
+            // A crop rectangle that starts outside the image selects nothing at all: ImageMagick
+            // silently produces an empty or clamped result, so the room ends up with a logo the
+            // caller never asked for. CustomHttpException rather than ArgumentException, because the
+            // catch below turns every ArgumentException into "unknown image format".
+            if (position.X >= img.Width || position.Y >= img.Height)
+            {
+                throw new CustomHttpException(HttpStatusCode.BadRequest, "The crop area lies outside the image");
+            }
+
             foreach (var size in sizes)
             {
                 if (size.Item2.Width != img.Width || size.Item2.Height != img.Height)

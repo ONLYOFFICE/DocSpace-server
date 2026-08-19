@@ -298,16 +298,20 @@ public class RoomLogoDeleteTests(
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        const string title = "Autotest Logo Del In List Room";
-        var room = await CreateRoomWithLogo(title);
+        var room = await CreateRoomWithLogo("Autotest Logo Del In List Room");
 
         // Act
         await _roomsApi.DeleteRoomLogoAsync(room.Id, TestContext.Current.CancellationToken);
 
         // Assert: the typed SDK's FolderContentDto only exposes the fields common to every entry
-        // type (FileEntryBaseDto), which drops id/logo — read the raw JSON instead.
+        // type (FileEntryBaseDto), which drops id/logo — read the raw JSON instead. That is an SDK
+        // defect worth reporting, not a preference.
+        //
+        // The list is deliberately unfiltered: a filterValue query is served from the search index
+        // (FolderDao -> factoryIndexer.TrySelectIdsAsync), so a room created moments ago may not be
+        // in it yet. The portal belongs to this test alone and holds exactly one room.
         using var response = await _filesClient.GetAsync(
-            $"api/2.0/files/rooms?filterValue={Uri.EscapeDataString(title)}",
+            "api/2.0/files/rooms",
             TestContext.Current.CancellationToken);
         var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         using var json = JsonDocument.Parse(body);

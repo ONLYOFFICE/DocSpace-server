@@ -1052,6 +1052,7 @@ public class VirtualRoomsCommonController(
     /// <path>api/2.0/files/logos</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Upload result", typeof(UploadResultDto))]
+    [SwaggerResponse(400, "The request carries no image, or the image cannot be used as a logo")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("logos")]
     public async Task<UploadResultDto> UploadRoomLogo(UploadRoomLogoRequestDto inDto)
@@ -1063,26 +1064,28 @@ public class VirtualRoomsCommonController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
+        if (!Request.HasFormContentType)
+        {
+            throw new ArgumentException("The room logo must be sent as a multipart form");
+        }
+
+        if (inDto.FormCollection.Files.Count == 0)
+        {
+            throw new ArgumentException("No image file was sent");
+        }
+
         var result = new UploadResultDto();
 
         try
         {
-            if (inDto.FormCollection.Files.Count != 0)
-            {
-                var roomLogo = inDto.FormCollection.Files[0];
-
-                result.Data = await roomLogoManager.SaveTempAsync(roomLogo);
-                result.Success = true;
-            }
-            else
-            {
-                result.Success = false;
-            }
+            result.Data = await roomLogoManager.SaveTempAsync(inDto.FormCollection.Files[0]);
+            result.Success = true;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is UnknownImageFormatException or ImageWeightLimitException or ImageSizeLimitException)
         {
-            result.Success = false;
-            result.Message = ex.Message;
+            // The image exceptions derive from plain Exception, so without this they would surface
+            // as 500; every one of them means the caller sent something unusable.
+            throw new ArgumentException(ex.Message, ex);
         }
 
         return result;

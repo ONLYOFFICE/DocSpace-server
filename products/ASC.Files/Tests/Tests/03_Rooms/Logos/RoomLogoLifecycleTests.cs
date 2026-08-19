@@ -60,16 +60,16 @@ public class RoomLogoLifecycleTests(
 
     [Fact]
     [Trait("Bug", "81679")]
-    public async Task CreateLogo_NonImageContentAsTmpFile_ShouldBeForbidden()
+    public async Task CreateLogo_TmpFileTheCallerNeverUploaded_ShouldBeForbidden()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var room = await CreateCustomRoom("Autotest Logo Non Image Room");
+        var room = await CreateCustomRoom("Autotest Logo Foreign TmpFile Room");
 
-        var result = (await _roomsApi.UploadRoomLogoAsync(
-            new FileParameter("logo.png", "image/png", new MemoryStream(Encoding.UTF8.GetBytes("this is not a valid image"))),
-            TestContext.Current.CancellationToken)).Response;
-        var tmpFile = result.Data?.ToString() ?? string.Empty;
+        // A tmpFile the caller was never issued: the name encodes the uploader's user id, and this
+        // one belongs to nobody. Uploading garbage to obtain such a path is no longer possible —
+        // the upload endpoint now rejects invalid image content with 400 (BUG 82518).
+        var tmpFile = $"{Guid.NewGuid()}_{Guid.NewGuid()}.png";
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(

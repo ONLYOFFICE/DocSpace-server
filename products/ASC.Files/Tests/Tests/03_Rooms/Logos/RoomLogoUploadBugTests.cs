@@ -66,6 +66,10 @@ public class RoomLogoUploadBugTests(
     [Trait("Bug", "82518")]
     public async Task Upload_JpegDeclaredAsPng_ShouldBeRejected()
     {
+        // Rejected for its content, not for the declared MIME type: JPEG is an accepted logo format,
+        // but this fixture is a malformed one ("Invalid component ID 2 in SOS"), so the decoder
+        // refuses it. A valid JPEG mislabelled as PNG is still accepted, the same way
+        // RoomLogoUploadContractTests.Upload_OctetStreamMimeWithValidPng_Accepted is.
         // Arrange
         await _filesClient.Authenticate(Owner);
 
