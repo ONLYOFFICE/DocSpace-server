@@ -52,9 +52,11 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
         var publicKey = $"{publicKeyPrefix}-{Guid.NewGuid():N}";
         var privateKey = $"prv-{Guid.NewGuid():N}";
 
+        var sw = Stopwatch.StartNew();
         var keys = (await _privacyRoomApi.SetKeysAsync(
             new EncryptionKeyRequestDto(id, publicKey, privateKey),
             TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"setKeys({id})", sw.ElapsedMilliseconds);
 
         return keys.Single(k => k.Id == id);
     }
@@ -67,14 +69,19 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
     /// </summary>
     protected static async Task<T> PollUntil<T>(Func<Task<T>> probe, Func<T, bool> until, TimeSpan? timeout = null)
     {
+        var sw = Stopwatch.StartNew();
         var deadline = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(15));
         var last = await probe();
+        var satisfied = until(last);
 
-        while (!until(last) && DateTime.UtcNow < deadline)
+        while (!satisfied && DateTime.UtcNow < deadline)
         {
             await Task.Delay(500, TestContext.Current.CancellationToken);
             last = await probe();
+            satisfied = until(last);
         }
+
+        Timing.Write($"pollUntil(satisfied: {satisfied})", sw.ElapsedMilliseconds);
 
         return last;
     }

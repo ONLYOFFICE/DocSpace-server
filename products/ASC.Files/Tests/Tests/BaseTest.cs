@@ -274,32 +274,47 @@ public class BaseTest(
 
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, int folderId)
     {
-        return (await _foldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
+        var sw = Stopwatch.StartNew();
+        var result = (await _foldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"createFolder({folderName})", sw.ElapsedMilliseconds);
+        return result;
     }
 
     protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, bool indexing = true)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: indexing, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, indexing: indexing, roomType: RoomType.VirtualDataRoom));
     }
 
     protected async Task<FolderDtoInteger> CreateCustomRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.CustomRoom));
     }
 
     protected async Task<FolderDtoInteger> CreateCollaborationRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.EditingRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.EditingRoom));
     }
 
     protected async Task<FolderDtoInteger> CreateFillingFormsRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.FillingFormsRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.FillingFormsRoom));
     }
 
     protected async Task<FolderDtoInteger> CreatePublicRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom));
+    }
+
+    /// <summary>
+    /// The single place every room is created through, so that room creation - one of the slowest
+    /// calls in the suite - is measured the same way whatever type the caller asked for.
+    /// </summary>
+    private async Task<FolderDtoInteger> CreateRoom(CreateRoomRequestDto request)
+    {
+        var sw = Stopwatch.StartNew();
+        var result = (await _roomsApi.CreateRoomAsync(request, TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"createRoom({request.RoomType})", sw.ElapsedMilliseconds);
+        return result;
     }
 
     /// <summary>
@@ -315,7 +330,7 @@ public class BaseTest(
 
     protected async Task<FolderDtoInteger> CreateVDRRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom));
     }
 
     /// <summary>
@@ -324,16 +339,18 @@ public class BaseTest(
     /// </summary>
     protected async Task EnsureEncryptionKeys()
     {
+        var sw = Stopwatch.StartNew();
+
         var keys = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
 
-        if (keys != null)
+        if (keys == null)
         {
-            return;
+            await _privacyRoomApi.SetKeysAsync(
+                new EncryptionKeyRequestDto(Guid.Empty, $"pk-{Guid.NewGuid():N}", $"prv-{Guid.NewGuid():N}"),
+                TestContext.Current.CancellationToken);
         }
 
-        await _privacyRoomApi.SetKeysAsync(
-            new EncryptionKeyRequestDto(Guid.Empty, $"pk-{Guid.NewGuid():N}", $"prv-{Guid.NewGuid():N}"),
-            TestContext.Current.CancellationToken);
+        Timing.Write("ensureEncryptionKeys", sw.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -343,9 +360,7 @@ public class BaseTest(
     {
         await EnsureEncryptionKeys();
 
-        return (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto(title, roomType: roomType, @private: true),
-            TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(title, roomType: roomType, @private: true));
     }
 
     /// <summary>
@@ -353,6 +368,8 @@ public class BaseTest(
     /// </summary>
     protected async Task<int> WaitForRoomTemplate()
     {
+        var sw = Stopwatch.StartNew();
+
         using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
             timeoutCts.Token,
@@ -364,6 +381,7 @@ public class BaseTest(
 
             if (status is { IsCompleted: true })
             {
+                Timing.Write("waitRoomTemplate", sw.ElapsedMilliseconds);
                 return status.TemplateId;
             }
 
@@ -374,6 +392,8 @@ public class BaseTest(
     protected async Task<List<FileOperationDto>?> WaitLongOperation(string? operationId = null)
     {
         List<FileOperationDto>? statuses;
+
+        var sw = Stopwatch.StartNew();
 
         using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
@@ -391,6 +411,8 @@ public class BaseTest(
 
             await Task.Delay(100, linkedCts.Token);
         }
+
+        Timing.Write($"waitOperation({operationId ?? "all"})", sw.ElapsedMilliseconds);
 
         return statuses;
     }
@@ -414,7 +436,9 @@ public class BaseTest(
             initialLinkParams.ExpirationDate = new ApiDateTime { UtcTime = expirationDate.Value };
         }
 
+        var linkSw = Stopwatch.StartNew();
         var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"createExternalLink({file.Id})", linkSw.ElapsedMilliseconds);
 
         return (initialLink.SharedLink.RequestToken, file.Id);
     }
@@ -439,7 +463,10 @@ public class BaseTest(
             return null!;
         }
 
+        var openSw = Stopwatch.StartNew();
         var openEditResult = (await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"openEdit({fileId})", openSw.ElapsedMilliseconds);
+
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
         return openEditResult.File;
     }
