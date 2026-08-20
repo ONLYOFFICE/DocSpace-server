@@ -71,7 +71,17 @@ public class AiGatewayProxyController(
 
         var isModelsPath = path == "models";
 
-        var key = await aiGateway.GetKeyAsync(isModelsPath);
+        string key;
+
+        try
+        {
+            key = await aiGateway.GetKeyAsync(isModelsPath);
+        }
+        catch (AiServiceDisabledException)
+        {
+            throw new CustomHttpException(HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_AiServicesDisabled);
+        }
+
         if (isModelsPath && !string.IsNullOrEmpty(key))
         {
             path = "customer/models";
