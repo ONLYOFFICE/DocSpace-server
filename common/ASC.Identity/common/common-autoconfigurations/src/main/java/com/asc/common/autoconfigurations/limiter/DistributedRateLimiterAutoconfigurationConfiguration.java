@@ -79,7 +79,7 @@ public class DistributedRateLimiterAutoconfigurationConfiguration {
   @Bean
   public RedisClient redisClient() {
     var redis = bucket4jConfiguration.getRedis();
-    var timeout = redis.getTimeout() != null ? redis.getTimeout() : Duration.ofSeconds(1);
+    var timeout = redis.getTimeout() != null ? redis.getTimeout() : Duration.ofSeconds(10);
     return RedisClient.create(
         RedisURI.builder()
             .withHost(redis.getHost())
