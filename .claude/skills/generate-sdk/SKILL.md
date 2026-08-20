@@ -9,16 +9,13 @@ The skill does exactly three things, and nothing else:
 
 1. **Delete the `*.json` OpenAPI documents** in the resolved documents directory — only when asked.
 2. **Re-emit those documents** by rebuilding `ASC.Api.Documentation.slnx` — only when asked, and
-   always together with 1, in that order. Steps 1 + 2 are **stage A**. That rebuild also renders the
-   Markdown API reference as a side effect (see stage A) — it is not a separate step you invoke.
+   always together with 1, in that order. Steps 1 + 2 are **stage A**.
 3. **Run the generator tool** for the requested languages with the requested parameters — **stage B**.
 
 Step 1 without step 2 leaves no documents to generate from, so the two are never split: the build of
 the service projects is what writes the documents back. Stage B alone is fine when the API surface has
 not changed. Measured on a warm machine (16 GB, .NET 10 / Maven 3.9 / generator 7.24): stage A
-**~4 min plus a full stage-B-sized generator run** — the `GenerateMarkdownApiDocs` target re-enters
-the tool, so a Maven build and one generator pass are inside stage A; budget ~5–6 min. Stage B is
-**~35–48 s for one language, ~70–95 s for two, ~2 min 30 s for all eleven**. The
+**~4 min**; stage B **~35–48 s for one language, ~70–95 s for two, ~2 min 30 s for all eleven**. The
 per-language cost collapses in a batch because the `mvn clean package` and the joiner run are paid
 once per invocation, not once per language. Run both stages in the background rather than blocking
 on them.
@@ -71,9 +68,9 @@ on them.
    (`AskUserQuestion`, multiSelect) out of the commands registered in `Program.cs`: `CSharp`,
    `Python`, `PostmanCollection`, `TypeScript`, `Java`, `Kotlin`, `Php`, `Swift6`, `Go`, `Ruby`,
    `Markdown` — plus an "all" option. Names are case-sensitive. `Markdown` is not an SDK: it renders
-   the API reference into `sdk/docspace-api-spec`, and stage A already runs it, so asking for it
-   separately is only useful when the documents are current and the reference is not. Pass through
-   any extra parameters the user gives.
+   the API reference into `sdk/docspace-api-spec`. It is a normal stage-B command like the others —
+   the build no longer runs it, so it has to be asked for explicitly whenever the reference needs
+   refreshing. Pass through any extra parameters the user gives.
 2. **Always ask whether to regenerate the OpenAPI documents** (`AskUserQuestion`, yes/no) — never
    assume. Yes when controllers/DTOs/Swagger annotations changed since the last regeneration; no
    when only generator configs or templates changed.
@@ -149,15 +146,11 @@ dotnet build common/Tools/ASC.Api.Documentation/ASC.Api.Documentation.slnx -t:Re
   mashed-together segment, that is the cause, and the fix belongs in the csproj, not here: do not
   work around it by running yarn by hand, because then `newai_2.0.json` is emitted outside the
   build and nothing guarantees `ASC.AI` ran first.
-- **The build also renders the Markdown API reference.** The `GenerateMarkdownApiDocs` target in
-  the tool's csproj (`AfterTargets="Build"`, gated on the same `OpenApiGenerateDocuments`) runs
-  `dotnet <TargetPath> Markdown` from `TargetDir` — that is the tool re-entering itself, so the
-  joiner, a full `mvn clean package` and one generator pass all happen inside stage A. Consequences:
-  stage A needs the *whole* toolchain, not just Node (JDK, Maven and `openapi-generator-cli` too);
-  it takes longer than the .NET build alone; and it writes into the `sdk/docspace-api-spec`
-  submodule. The command stages `*.md` and `json/split/` inside the documents directory and deletes
-  them again once the bundle is written, so an aborted run can leave those behind — they are staging,
-  not output. Do not run `Markdown` again by hand after stage A; it has already run.
+- **The build does not render the Markdown API reference.** It only emits the `json/*.json`
+  documents. The reference is produced by the `Markdown` command in stage B like any other target,
+  so run it there when the reference has to follow the documents. That command stages `*.md` and
+  `json/split/` inside the documents directory and deletes them again once the bundle is written, so
+  an aborted run can leave those behind — they are staging, not output.
 
 4. Verify the directory came back with the same set of documents you recorded in step 1. A missing one
    means that project's build (or yarn) failed: do not continue to stage B — build that project alone
@@ -229,8 +222,8 @@ duplicated Maven build is the price of not encoding that knowledge here.
 ## Prerequisites
 
 `dotnet`, a JDK, `mvn`, `openapi-generator-cli` (`npm i -g @openapitools/openapi-generator-cli`), and
-Node + Yarn. **Stage A needs all of them, not just Node** — it shells out to yarn for the AI document
-*and* re-enters the tool for the Markdown reference, which is a Maven + generator run. Individual
+Node + Yarn. **Stage A needs `dotnet` plus Node + Yarn** — it shells out to yarn for the AI document;
+the JDK, Maven and `openapi-generator-cli` are stage B's. Individual
 commands may need more — `TypeScript` also validates `npm` — and each one checks what it needs up front, failing with `Tool '<name>' was not found in PATH` before it
 does any work.
 
@@ -272,8 +265,8 @@ single-language stage B, even a run that then failed on an unknown option:
 | the published contract (YAML, without the generator workarounds) | `publish` | the **`sdk/docspace-api-spec` submodule** |
 
 Report both. The second one is easy to miss precisely because nothing asked for it: `git status` here
-shows only a moved submodule pointer, and the actual change is one level down. Stage A adds to the
-same submodule through the Markdown bundle (`markdown.bundle`).
+shows only a moved submodule pointer, and the actual change is one level down. The `Markdown`
+command adds to the same submodule through the Markdown bundle (`markdown.bundle`).
 
 **Post-generation steps write packages outside the SDK directory, into places `git status` in this
 repo will not show you.** Verified destinations, both of which are *tracked* files that a run leaves
@@ -297,10 +290,9 @@ instead of trusting this table if anything looks off.
   DTO / Swagger attributes and redo stage A; never patch a document by hand.
 - `Swagger file not found: ...json` — a document listed in `appsettings.json` → `join` is missing;
   stage A did not produce it.
-- `'<opId>' and '<opId>' both publish as <file>.md` — the `Markdown` command (so: during stage A).
-  Two operation ids differ only in case or punctuation and would overwrite each other as files. The
-  joiner's duplicate check does not catch this; fix the operation ids on the controllers and redo
-  stage A.
+- `'<opId>' and '<opId>' both publish as <file>.md` — the `Markdown` command. Two operation ids
+  differ only in case or punctuation and would overwrite each other as files. The joiner's duplicate
+  check does not catch this; fix the operation ids on the controllers and redo stage A.
 - Stage A "succeeded" but no document changed — `GenerateApiDocs=true` was missing, or the build was
   incremental instead of `-t:Rebuild`.
 - The tool exits with a config or path error, or the joiner reports documents missing that stage A
