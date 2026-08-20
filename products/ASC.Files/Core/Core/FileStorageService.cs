@@ -5583,6 +5583,38 @@ public class FileStorageService //: IFileStorageService
         return (internalRooms, thirdpartyRooms, notFound + denied > 0);
     }
 
+    /// <summary>
+    /// Resolves the rooms a removal refers to. A room that is already linked to the group can always
+    /// be detached from it: the link is the caller's own data, and a room they lost access to - or
+    /// that no longer exists at all - must not stay in their group forever. Ids that are not linked
+    /// go through the usual resolution, so removing something that never existed is still refused.
+    /// </summary>
+    public async Task<(List<int> InternalRooms, List<string> ThirdpartyRooms, bool AnyRejected)> ResolveGroupRoomsForRemovalAsync(int groupId, List<int> intIds, List<string> stringIds)
+    {
+        var refs = await daoFactory.GetRoomGroupDao<int>().GetRoomsByGroupAsync(groupId).ToListAsync();
+
+        var linkedInternal = refs.Where(r => r.InternalRoomId.HasValue).Select(r => r.InternalRoomId.Value).ToHashSet();
+        var linkedThirdparty = refs.Where(r => r.ThirdpartyRoomId != null).Select(r => r.ThirdpartyRoomId).ToHashSet();
+
+        var internalRooms = intIds.Where(linkedInternal.Contains).ToList();
+        var thirdpartyRooms = stringIds.Where(linkedThirdparty.Contains).ToList();
+
+        var unlinkedInt = intIds.Where(r => !linkedInternal.Contains(r)).ToList();
+        var unlinkedString = stringIds.Where(r => !linkedThirdparty.Contains(r)).ToList();
+
+        if (unlinkedInt.Count == 0 && unlinkedString.Count == 0)
+        {
+            return (internalRooms, thirdpartyRooms, false);
+        }
+
+        var (resolvedInt, resolvedString, anyRejected) = await ResolveGroupRoomsAsync(unlinkedInt, unlinkedString);
+
+        internalRooms.AddRange(resolvedInt);
+        thirdpartyRooms.AddRange(resolvedString);
+
+        return (internalRooms, thirdpartyRooms, anyRejected);
+    }
+
     private async Task<(List<T> Available, int NotFound, int Denied)> ResolveRoomsAsync<T>(List<T> roomIds)
     {
         var available = new List<T>();

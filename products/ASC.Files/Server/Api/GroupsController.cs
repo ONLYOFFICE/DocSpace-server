@@ -133,7 +133,7 @@ public class GroupsController(
         if (update.RoomsToRemove is { Count: > 0 })
         {
             var (removeInt, removeString) = ParseRoomIds(update.RoomsToRemove);
-            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(removeInt, removeString);
+            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsForRemovalAsync(group.Id, removeInt, removeString);
 
             await RemoveRoomsFromGroupAsync(intIds, stringIds, group);
             rejected |= anyRejected;
