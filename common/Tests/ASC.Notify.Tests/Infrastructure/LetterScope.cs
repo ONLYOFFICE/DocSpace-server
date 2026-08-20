@@ -117,10 +117,11 @@ public sealed class LetterScope : IDisposable
             //
             // It does NOT reach the test that awaited us: an async method's AsyncLocal writes - and
             // CultureInfo.CurrentCulture is AsyncLocal-backed on .NET Core - are discarded with its
-            // execution context when it returns. Measured, not assumed: opening a scope for ja-JP on a
-            // en-US machine leaves the caller on en-US. Nothing may rely on this leaking outwards. What
-            // the letter is actually rendered in is set by LetterPreview.RenderAsync, and everything
-            // else - the tags, the recipient - carries its culture explicitly.
+            // execution context when it returns. Measured, not assumed: opening a scope for a culture
+            // the machine does not itself run in leaves the caller on the machine's own. Nothing may
+            // rely on this leaking outwards. What the letter is actually rendered in is set by
+            // LetterPreview.RenderAsync, and everything else - the tags, the recipient - carries its
+            // culture explicitly.
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
 

@@ -132,6 +132,38 @@ public class PeriodicLetterDeliveryTests
     }
 
     /// <summary>
+    /// The letter leaves <c>SendAsync</c> carrying the recipient's culture as a tag. That tag is not
+    /// decoration: <c>SendNoticeToAsync</c> only queues the request, and by the time
+    /// <c>NotifyEngine</c> resolves the pattern it is on its own thread with its own ambient culture —
+    /// <c>NotifyRequest.GetCulture</c> reads this tag to put the right one back. Lose it and every
+    /// periodic letter silently renders in whatever culture the sender process happens to be in.
+    /// </summary>
+    [Fact]
+    public async Task TheLetterCarriesTheRecipientsCultureAsATag()
+    {
+        var stack = await GetStackAsync();
+
+        using var scope = await OpenScopeAsync(stack);
+
+        var action = scope.Services.GetRequiredService<SaasAdminWarningAfterThreeMonthsV1NotifyAction>();
+        var client = new RecordingNotifyClient();
+
+        await action.SendAsync(PeriodicLetterContexts.Paid(scope.Tenant), client, _senderName);
+
+        client.Sent.Should().NotBeEmpty();
+
+        var culture = action.Tags.Should().ContainSingle(tag => tag.Tag == CommonTags.Culture).Subject;
+
+        // The owner as the database has them, not scope.Recipient: SendAsync resolves its own
+        // recipients, and the scope's copy carries the culture the test asked for.
+        var owner = await scope.Services.GetRequiredService<UserManager>().GetUsersAsync(stack.Portal.OwnerId);
+
+        var expected = owner.CultureName is { Length: > 0 } ? owner.GetCulture() : scope.Tenant.GetCulture();
+
+        culture.Value.Should().Be(expected.Name);
+    }
+
+    /// <summary>
     /// A recipient who is subscribed gets both kinds of letter. That is the half of
     /// <c>RequiresSubscription</c> this stack can answer: the other half — that an unsubscribed recipient
     /// is dropped from the marketing letter and kept on the payment notice — is asserted in

@@ -2126,10 +2126,11 @@ public abstract class BasePeriodicNotifyAction(
                 continue;
             }
 
-            // The letter is rendered from resources, which resolve against the ambient culture.
+            // Carried on the letter as the Culture tag rather than set on the thread. Nothing here
+            // renders: SendNoticeToAsync queues the request, and NotifyEngine re-establishes the culture
+            // from NotifyRequest.GetCulture - which reads that very tag - before it resolves the pattern.
+            // The tags below take their culture as an argument, and so does everything they call.
             var culture = string.IsNullOrEmpty(user.CultureName) ? context.Tenant.GetCulture() : user.GetCulture();
-            CultureInfo.CurrentCulture = culture;
-            CultureInfo.CurrentUICulture = culture;
 
             Tags = await BuildTagsAsync(context, user, culture);
 
