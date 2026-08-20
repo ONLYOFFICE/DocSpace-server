@@ -163,7 +163,7 @@
     <value>Default AI provider set: Name: {0}, Default Model: {1}</value>
   </data>
   <data name="AiAgentProfileAssigned" xml:space="preserve">
-    <value>AI profile assigned to AI agent {0} for action: {1}</value>
+    <value>AI profile assigned to AI agent for action: {0}</value>
   </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI profile assigned to action: {0}</value>

@@ -163,7 +163,7 @@ public class AssignmentsStorageService(
         }
         else
         {
-            await filesMessageService.SendAsync(MessageAction.AiAgentProfileAssigned, folder, folder.Title, actionType.ToStringFast());
+            await filesMessageService.SendAsync(MessageAction.AiAgentProfileAssigned, folder, actionType.ToStringFast());
         }
     }
 

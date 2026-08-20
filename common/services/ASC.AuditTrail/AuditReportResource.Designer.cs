@@ -214,7 +214,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI profile assigned to AI agent {0} for action: {1}.
+        ///   Looks up a localized string similar to AI profile assigned to AI agent for action: {0}.
         /// </summary>
         public static string AiAgentProfileAssigned {
             get {
