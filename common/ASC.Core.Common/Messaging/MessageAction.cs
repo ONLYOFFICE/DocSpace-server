@@ -624,7 +624,6 @@ public enum MessageAction
     [Description("AI agent deleted")]
     AgentDeleted = 5156,
 
-    // Legacy AI implementation actions, no longer sent. Kept only to render old audit records.
     [Description("MCP server added to AI agent")]
     AddedServerToAgent = 5157,
 
@@ -1033,6 +1032,9 @@ public enum MessageAction
 
     [Description("AI model profile assigned to AI agent action")]
     AiAgentProfileAssigned = 6108,
+
+    [Description("MCP server of AI agent updated")]
+    UpdatedServerOfAgent = 6109,
 
     #endregion
 

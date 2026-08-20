@@ -3029,6 +3029,15 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("UpdateClient", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Updated MCP server {0} of AI agent.
+        /// </summary>
+        public static string UpdatedServerOfAgent {
+            get {
+                return ResourceManager.GetString("UpdatedServerOfAgent", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Upload.

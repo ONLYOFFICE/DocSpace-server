@@ -1065,6 +1065,9 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Client {0} updated</value>
   </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Updated MCP server {0} of AI agent</value>
+  </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Upload</value>
   </data>
