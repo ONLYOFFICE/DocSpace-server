@@ -118,7 +118,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.AIAccessEnabled,
                     MessageAction.AIAccessDisabled,
                     MessageAction.UserUpdatedAiSettings,
-                    MessageAction.DocsCloudConfigUpdated
+                    MessageAction.DocsCloudConfigUpdated,
+                    MessageAction.AiProfileUpdated
                 ]
             },
             {
@@ -131,7 +132,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.AIProviderCreated,
                     MessageAction.ServerCreated,
                     MessageAction.SetWebSearchSettings,
-                    MessageAction.SetVectorizationSettings
+                    MessageAction.SetVectorizationSettings,
+                    MessageAction.AiProfileCreated
                 ]
             },
             {
@@ -149,6 +151,7 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.ServerDeleted,
                     MessageAction.ResetWebSearchSettings,
                     MessageAction.ResetVectorizationSettings,
+                    MessageAction.AiProfileDeleted,
                     MessageAction.WebpluginDeleted,
                     MessageAction.ScheduledBackupDeleted
                 ]

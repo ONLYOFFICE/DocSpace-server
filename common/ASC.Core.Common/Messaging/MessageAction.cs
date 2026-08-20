@@ -1012,6 +1012,15 @@ public enum MessageAction
     [Description("Docs Cloud quota report downloaded")]
     DocsCloudQuotaReportDownloaded = 6102,
 
+    [Description("AI model profile created")]
+    AiProfileCreated = 6103,
+
+    [Description("AI model profile updated")]
+    AiProfileUpdated = 6104,
+
+    [Description("AI model profile deleted")]
+    AiProfileDeleted = 6105,
+
     #endregion
 
     #region others

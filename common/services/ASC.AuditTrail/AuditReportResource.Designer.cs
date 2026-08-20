@@ -214,6 +214,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI model profile created: {0}.
+        /// </summary>
+        public static string AiProfileCreated {
+            get {
+                return ResourceManager.GetString("AiProfileCreated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to AI model profile deleted: {0}.
+        /// </summary>
+        public static string AiProfileDeleted {
+            get {
+                return ResourceManager.GetString("AiProfileDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to AI model profile updated: {0}.
+        /// </summary>
+        public static string AiProfileUpdated {
+            get {
+                return ResourceManager.GetString("AiProfileUpdated", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to AI provider created: {0}.
         /// </summary>
         public static string AIProviderCreated {
