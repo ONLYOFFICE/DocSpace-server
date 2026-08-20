@@ -339,7 +339,7 @@ That is not gold-plating: a notify action is a `[Scope]` service whose `Init` re
 current tenant and shortens them through the database, so there is no calling it without a portal. Start
 to first test is about 50 s; the full sweep of ~3400 cases takes some two and a half minutes.
 
-When the whole suite goes red, `LetterStackSpikeTests` is the test that says whether the stack broke or
+When the whole suite goes red, `LetterStackSmokeTests` is the test that says whether the stack broke or
 the letters did — it registers a portal, resolves one action and calls `Init`, and nothing else.
 
 **That run covers every culture the portal offers** — `LetterCultures.Names` reads `web:cultures` from
