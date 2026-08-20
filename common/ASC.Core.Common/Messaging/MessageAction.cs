@@ -624,6 +624,7 @@ public enum MessageAction
     [Description("AI agent deleted")]
     AgentDeleted = 5156,
 
+    // Legacy AI implementation actions, no longer sent. Kept only to render old audit records.
     [Description("MCP server added to AI agent")]
     AddedServerToAgent = 5157,
 
@@ -922,6 +923,7 @@ public enum MessageAction
     [Description("Custom quota per AI agent disabled")]
     CustomQuotaPerAiAgentDisabled = 6072,
 
+    // Legacy AI implementation actions, no longer sent. Kept only to render old audit records.
     [Description("AI provider created")]
     AIProviderCreated = 6073,
 
@@ -937,6 +939,7 @@ public enum MessageAction
     [Description("MCP server updated")]
     ServerUpdated = 6077,
 
+    // Legacy AI implementation actions, no longer sent. Kept only to render old audit records.
     [Description("MCP server enabled")]
     ServerEnabled = 6078,
 
@@ -991,6 +994,7 @@ public enum MessageAction
     [Description("Login settings updated")]
     LoginSettingsUpdated = 6095,
 
+    // Legacy AI implementation action, no longer sent (replaced by AiProfileAssigned). Kept only to render old audit records.
     [Description("AI default provider set")]
     AIDefaultProviderSet = 6096,
 
