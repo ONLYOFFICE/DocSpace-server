@@ -38,8 +38,6 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class DeveloperAdminPaymentWarningGracePeriodActivationLetterTests : PeriodicLetterTestBase<DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction>
 {
-    private const string PaymentDelay = "30";
-
     /// <summary>The pricing page the sending code appends its campaign parameters to.</summary>
     private static string PricesUrl(CultureInfo culture)
     {
@@ -49,7 +47,7 @@ public class DeveloperAdminPaymentWarningGracePeriodActivationLetterTests : Peri
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should().Contain(scope.Recipient.FirstName)
-            .And.Contain(PaymentDelay)
+            .And.Contain(scope.PaymentDelay)
             .And.Contain(LetterEnvironment.SupportUrl)
             .And.Contain(LetterEnvironment.SalesEmail);
     }

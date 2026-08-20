@@ -41,7 +41,7 @@ namespace ASC.Notify.Tests;
 /// letter does — a missing service registration, a connection string, an unreachable portal. When the
 /// whole suite goes red, this is the test that says whether the problem is the stack or the letters.
 /// </summary>
-public class LetterStackSpikeTests
+public class LetterStackSmokeTests
 {
     private static async ValueTask<LetterStackFixture> GetStackAsync()
     {

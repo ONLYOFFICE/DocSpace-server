@@ -49,7 +49,7 @@ namespace ASC.Notify.Tests;
 public class PeriodicLetterScheduleTests
 {
     /// <summary>An unremarkable Tuesday. Nothing about the cases depends on which day it is.</summary>
-    private static readonly DateTime Today = new(2026, 6, 16);
+    private static readonly DateTime _today = new(2026, 6, 16);
 
     // The portal states themselves live in PeriodicLetterContexts, because the letter tests render
     // against the same ones: a lapsed tariff described in two places is a lapsed tariff that can be
@@ -59,7 +59,7 @@ public class PeriodicLetterScheduleTests
     /// A portal nothing is due for: created today, on a paid-for-nothing trial with no dates set. Each
     /// case moves only what its own letter looks at.
     /// </summary>
-    private static PeriodicLetterContext Fresh => PeriodicLetterContexts.Fresh(new Tenant(1, "test"), Today);
+    private static PeriodicLetterContext Fresh => PeriodicLetterContexts.Fresh(new Tenant(1, "test"), _today);
 
     private static TenantQuota Quota(bool free = false, bool trial = false, bool lifetime = false, bool customization = false)
     {
@@ -89,6 +89,12 @@ public class PeriodicLetterScheduleTests
         return PeriodicLetterContexts.Lapsed(context, due);
     }
 
+    /// <summary>A portal on a trial running out on <paramref name="due"/>.</summary>
+    private static PeriodicLetterContext Trial(PeriodicLetterContext context, DateTime due)
+    {
+        return PeriodicLetterContexts.Trial(context, due);
+    }
+
     /// <summary>
     /// A portal nobody has touched for <paramref name="months"/> months, checked on the anniversary of
     /// its creation - the only day the inactivity warnings look at.
@@ -96,6 +102,27 @@ public class PeriodicLetterScheduleTests
     private static PeriodicLetterContext Idle(PeriodicLetterContext context, int months)
     {
         return PeriodicLetterContexts.Idle(context, months);
+    }
+
+    /// <summary>
+    /// A free portal created on <paramref name="created"/> and untouched since <paramref name="lastActivity"/>,
+    /// looked at on <paramref name="now"/>. Unlike <see cref="Idle"/> it does not move the creation date
+    /// to a day that is bound to be an anniversary, which is the whole point of the cases that use it.
+    /// </summary>
+    private static PeriodicLetterContext FreeIdleSince(string created, string now, DateTime lastActivity)
+    {
+        return PeriodicLetterContexts.Fresh(new Tenant(1, "test"), Date(now)) with
+        {
+            Quota = Quota(free: true),
+            CreatedDate = Date(created),
+            LastActivity = Activity(lastActivity)
+        };
+    }
+
+    /// <summary>Inline data cannot carry a <see cref="DateTime"/>, so the cases spell their dates out.</summary>
+    private static DateTime Date(string value)
+    {
+        return DateTime.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
     private static Task<bool> AsksToSendAsync<TAction>(PeriodicLetterContext context) where TAction : BasePeriodicNotifyAction
@@ -111,10 +138,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasAdminHandyAppsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-2) }))
+        (await AsksToSendAsync<SaasAdminHandyAppsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-2) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminHandyAppsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-3) }))
+        (await AsksToSendAsync<SaasAdminHandyAppsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-3) }))
             .Should().BeFalse("the window is the day itself, not everything after it");
     }
 
@@ -123,10 +150,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasAdminConfigureV1NotifyAction>(context with { CreatedDate = Today.AddDays(-3) }))
+        (await AsksToSendAsync<SaasAdminConfigureV1NotifyAction>(context with { CreatedDate = _today.AddDays(-3) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminConfigureV1NotifyAction>(context with { CreatedDate = Today.AddDays(-4) }))
+        (await AsksToSendAsync<SaasAdminConfigureV1NotifyAction>(context with { CreatedDate = _today.AddDays(-4) }))
             .Should().BeFalse("a day late");
     }
 
@@ -135,10 +162,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasAdminAddonsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-4) }))
+        (await AsksToSendAsync<SaasAdminAddonsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-4) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminAddonsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-5) }))
+        (await AsksToSendAsync<SaasAdminAddonsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-5) }))
             .Should().BeFalse("a day late");
     }
 
@@ -147,10 +174,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasAdminAiAgentsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-7) }))
+        (await AsksToSendAsync<SaasAdminAiAgentsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-7) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminAiAgentsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-8) }))
+        (await AsksToSendAsync<SaasAdminAiAgentsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-8) }))
             .Should().BeFalse("a day late");
     }
 
@@ -159,10 +186,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasAdminDeveloperToolsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-10) }))
+        (await AsksToSendAsync<SaasAdminDeveloperToolsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-10) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminDeveloperToolsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-11) }))
+        (await AsksToSendAsync<SaasAdminDeveloperToolsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-11) }))
             .Should().BeFalse("a day late");
     }
 
@@ -171,10 +198,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasAdminUserAppsTipsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-14) }))
+        (await AsksToSendAsync<SaasAdminUserAppsTipsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-14) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminUserAppsTipsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-15) }))
+        (await AsksToSendAsync<SaasAdminUserAppsTipsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-15) }))
             .Should().BeFalse("a day late");
     }
 
@@ -219,10 +246,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: Today.AddDays(3))))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: _today.AddDays(3))))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: Today.AddDays(4))))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: _today.AddDays(4))))
             .Should().BeFalse("four days is too early");
     }
 
@@ -231,10 +258,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: Today.AddDays(3))))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: _today.AddDays(3))))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: Today.AddDays(3)) with { Quota = Quota(free: true) }))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: _today.AddDays(3)) with { Quota = Quota(free: true) }))
             .Should().BeFalse("a free portal has nothing to pay");
     }
 
@@ -243,10 +270,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: Today.AddDays(-1), delay: Today.AddDays(30))))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: _today.AddDays(-1), delay: _today.AddDays(30))))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: Today.AddDays(-1))))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: _today.AddDays(-1))))
             .Should().BeFalse("without a grace period there is nothing to announce");
     }
 
@@ -255,10 +282,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction>(Delayed(context, delay: Today.AddDays(1))))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction>(Delayed(context, delay: _today.AddDays(1))))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction>(Delayed(context, delay: Today.AddDays(2))))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction>(Delayed(context, delay: _today.AddDays(2))))
             .Should().BeFalse("two days out is too early");
     }
 
@@ -267,10 +294,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>(Delayed(context, delay: Today)))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>(Delayed(context, delay: _today)))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>(Delayed(context, delay: Today.AddDays(1))))
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>(Delayed(context, delay: _today.AddDays(1))))
             .Should().BeFalse("it has not run out yet");
     }
 
@@ -279,10 +306,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasAdminWarningAfterThreeMonthsV1NotifyAction>(Lapsed(context, due: Today.AddMonths(-3))))
+        (await AsksToSendAsync<SaasAdminWarningAfterThreeMonthsV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-3))))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminWarningAfterThreeMonthsV1NotifyAction>(Lapsed(context, due: Today.AddMonths(-4))))
+        (await AsksToSendAsync<SaasAdminWarningAfterThreeMonthsV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-4))))
             .Should().BeFalse("the window is that day only");
     }
 
@@ -291,10 +318,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<SaasAdminWarningAfterHalfYearV1NotifyAction>(Lapsed(context, due: Today.AddMonths(-6))))
+        (await AsksToSendAsync<SaasAdminWarningAfterHalfYearV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-6))))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminWarningAfterHalfYearV1NotifyAction>(Lapsed(context, due: Today.AddMonths(-3))))
+        (await AsksToSendAsync<SaasAdminWarningAfterHalfYearV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-3))))
             .Should().BeFalse("at three months the other warning speaks");
     }
 
@@ -303,10 +330,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<EnterpriseAdminUserAppsTipsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-14), Quota = Quota(trial: true) }))
+        (await AsksToSendAsync<EnterpriseAdminUserAppsTipsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-14), Quota = Quota(trial: true) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<EnterpriseAdminUserAppsTipsV1NotifyAction>(context with { CreatedDate = Today.AddDays(-14), Quota = Quota(trial: true), DefaultRebranding = false }))
+        (await AsksToSendAsync<EnterpriseAdminUserAppsTipsV1NotifyAction>(context with { CreatedDate = _today.AddDays(-14), Quota = Quota(trial: true), DefaultRebranding = false }))
             .Should().BeFalse("a white-labelled portal must not advertise our apps");
     }
 
@@ -315,10 +342,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyAction>(Paid(context, due: Today.AddDays(7)) with { Quota = Quota(lifetime: true) }))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyAction>(Paid(context, due: _today.AddDays(7)) with { Quota = Quota(lifetime: true) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyAction>(Paid(context, due: Today.AddDays(7))))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyAction>(Paid(context, due: _today.AddDays(7))))
             .Should().BeFalse("an ordinary licence is the Enterprise letter");
     }
 
@@ -327,10 +354,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: Today.AddDays(7)) with { Quota = Quota(customization: true) }))
+        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: _today.AddDays(7)) with { Quota = Quota(customization: true) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: Today.AddDays(7)) with { Quota = Quota(customization: true, lifetime: true) }))
+        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: _today.AddDays(7)) with { Quota = Quota(customization: true, lifetime: true) }))
             .Should().BeFalse("a lifetime licence is the Enterprise letter");
     }
 
@@ -339,10 +366,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: Today.AddDays(7))))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: _today.AddDays(7))))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: Today.AddDays(7)) with { Quota = Quota(customization: true) }))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNotifyAction>(Paid(context, due: _today.AddDays(7)) with { Quota = Quota(customization: true) }))
             .Should().BeFalse("a Developer licence has its own letter");
     }
 
@@ -351,10 +378,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction>(Paid(context, due: Today) with { Quota = Quota(lifetime: true) }))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction>(Paid(context, due: _today) with { Quota = Quota(lifetime: true) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction>(Paid(context, due: Today.AddDays(1)) with { Quota = Quota(lifetime: true) }))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction>(Paid(context, due: _today.AddDays(1)) with { Quota = Quota(lifetime: true) }))
             .Should().BeFalse("not yet");
     }
 
@@ -363,10 +390,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: Today) with { Quota = Quota(customization: true) }))
+        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: _today) with { Quota = Quota(customization: true) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: Today) with { Quota = Quota(customization: true, lifetime: true) }))
+        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: _today) with { Quota = Quota(customization: true, lifetime: true) }))
             .Should().BeFalse("a lifetime licence is the Enterprise letter");
     }
 
@@ -375,10 +402,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: Today)))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: _today)))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: Today) with { Quota = Quota(customization: true) }))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction>(Paid(context, due: _today) with { Quota = Quota(customization: true) }))
             .Should().BeFalse("a Developer licence has its own letter");
     }
 
@@ -387,10 +414,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction>(Delayed(context, delay: Today.AddDays(7)) with { Quota = Quota(customization: true) }))
+        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction>(Delayed(context, delay: _today.AddDays(7)) with { Quota = Quota(customization: true) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction>(Delayed(context, delay: Today.AddDays(7))))
+        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction>(Delayed(context, delay: _today.AddDays(7))))
             .Should().BeFalse("without customization it is the Enterprise letter");
     }
 
@@ -399,10 +426,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction>(Delayed(context, delay: Today.AddDays(7))))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction>(Delayed(context, delay: _today.AddDays(7))))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction>(Delayed(context, delay: Today.AddDays(7)) with { Quota = Quota(customization: true) }))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction>(Delayed(context, delay: _today.AddDays(7)) with { Quota = Quota(customization: true) }))
             .Should().BeFalse("a Developer licence has its own letter");
     }
 
@@ -411,10 +438,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction>(Delayed(context, delay: Today) with { Quota = Quota(customization: true) }))
+        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction>(Delayed(context, delay: _today) with { Quota = Quota(customization: true) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction>(Delayed(context, delay: Today)))
+        (await AsksToSendAsync<DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction>(Delayed(context, delay: _today)))
             .Should().BeFalse("without customization it is the Enterprise letter");
     }
 
@@ -423,10 +450,10 @@ public class PeriodicLetterScheduleTests
     {
         var context = Fresh;
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction>(Delayed(context, delay: Today)))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction>(Delayed(context, delay: _today)))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction>(Delayed(context, delay: Today) with { Quota = Quota(customization: true) }))
+        (await AsksToSendAsync<EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction>(Delayed(context, delay: _today) with { Quota = Quota(customization: true) }))
             .Should().BeFalse("a Developer licence has its own letter");
     }
 
@@ -440,7 +467,7 @@ public class PeriodicLetterScheduleTests
     [InlineData(false, true)]
     public async Task OnlyOneEnterpriseLetterClaimsAPortal(bool lifetime, bool customization)
     {
-        var context = Paid(Fresh, Today.AddDays(7)) with { Quota = Quota(lifetime: lifetime, customization: customization) };
+        var context = Paid(Fresh, _today.AddDays(7)) with { Quota = Quota(lifetime: lifetime, customization: customization) };
 
         var claimed = new[]
         {
@@ -489,7 +516,7 @@ public class PeriodicLetterScheduleTests
     [InlineData(14)]
     public async Task ExactlyOneRegistrationLetterPerDay(int age)
     {
-        var context = Fresh with { CreatedDate = Today.AddDays(-age) };
+        var context = Fresh with { CreatedDate = _today.AddDays(-age) };
 
         var claimed = new[]
         {
@@ -502,5 +529,183 @@ public class PeriodicLetterScheduleTests
         };
 
         claimed.Count(fires => fires).Should().Be(1);
+    }
+
+    /// <summary>
+    /// Which letters honour an unsubscribe. <c>RequiresSubscription</c> defaults to false — the letter
+    /// goes out whatever the recipient switched off — which is right for a notice about their money or
+    /// their portal being deleted, and wrong for every letter that is advertising something. Nothing but
+    /// this test says which is which: a marketing letter that forgets to override it compiles, renders
+    /// and sends, and only the reader who unsubscribed finds out.
+    /// </summary>
+    [Fact]
+    public void OnlyTheMarketingLettersHonourTheUnsubscribe()
+    {
+        var honouring = typeof(BasePeriodicNotifyAction).Assembly.GetTypes()
+            .Where(type => type.IsSubclassOf(typeof(BasePeriodicNotifyAction)) && !type.IsAbstract)
+            .Where(RequiresSubscription)
+            .Select(type => type.Name)
+            .Order()
+            .ToArray();
+
+        honouring.Should().BeEquivalentTo(
+        [
+            nameof(EnterpriseAdminUserAppsTipsV1NotifyAction),
+            nameof(SaasAdminAddonsV1NotifyAction),
+            nameof(SaasAdminAiAgentsV1NotifyAction),
+            nameof(SaasAdminConfigureV1NotifyAction),
+            nameof(SaasAdminDeveloperToolsV1NotifyAction),
+            nameof(SaasAdminHandyAppsV1NotifyAction),
+            nameof(SaasAdminUserAppsTipsV1NotifyAction)
+        ],
+        "these are the letters that advertise something; the rest are about a payment falling due or a "
+        + "portal being deleted, which a reader does not get to switch off");
+    }
+
+    /// <summary>Reads the letter's own answer, which is protected because only its base ever asks.</summary>
+    private static bool RequiresSubscription(Type letter)
+    {
+        var property = letter.GetProperty("RequiresSubscription", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException(
+                $"{letter.Name} has no RequiresSubscription: the base class was renamed and this test went blind.");
+
+        return (bool)property.GetValue(RuntimeHelpers.GetUninitializedObject(letter))!;
+    }
+
+    /// <summary>
+    /// The inactivity warnings are asked once a month, on the day of the month the portal was created.
+    /// A portal created on the 29th-31st has no such day in February and in the 30-day months, so the
+    /// anniversary is clamped to the last day the month has. Without that clamp the warning for that
+    /// month is not delayed - it is never sent at all, because the window it belongs to has passed by
+    /// the time the next anniversary comes round.
+    /// </summary>
+    [Theory]
+    [InlineData("2026-01-31", "2026-02-28", true, "February has no 31st, so the last day of it is the anniversary")]
+    [InlineData("2026-01-31", "2026-04-30", true, "April has no 31st either")]
+    [InlineData("2026-01-31", "2026-03-31", true, "March has a 31st of its own and needs no clamping")]
+    [InlineData("2026-01-30", "2026-02-28", true, "the 30th clamps in February too")]
+    [InlineData("2026-01-31", "2026-04-29", false, "the day before the clamped anniversary is not it")]
+    [InlineData("2026-01-31", "2026-03-30", false, "March has a 31st, so the 30th is an ordinary day")]
+    public async Task InactivityWarning_FindsTheAnniversaryInAMonthTooShortForIt(
+        string created, string now, bool expected, string because)
+    {
+        // Idle for exactly six months on the day it is looked at, which is this warning's window.
+        var context = FreeIdleSince(created, now, Date(now).AddMonths(-6));
+
+        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(context))
+            .Should().Be(expected, because);
+    }
+
+    /// <summary>
+    /// The installation stamps the day it started counting towards deleting unused portals, and the
+    /// warnings say nothing before it. Otherwise an upgrade mails every portal that has been idle since
+    /// long before anybody was watching - and deletes them a week later.
+    /// </summary>
+    [Fact]
+    public async Task InactivityWarnings_StaySilentUntilTheInstallationStartedCounting()
+    {
+        var idle = Idle(Fresh, months: 6) with { Quota = Quota(free: true) };
+
+        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(idle))
+            .Should().BeTrue();
+
+        var counting = idle with { UnusedPortalNotifyFrom = _today.AddDays(1) };
+
+        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(counting))
+            .Should().BeFalse("the installation only starts counting tomorrow");
+
+        (await AsksToSendAsync<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>(
+            Idle(Fresh, months: 3) with { Quota = Quota(free: true), UnusedPortalNotifyFrom = _today.AddDays(1) }))
+            .Should().BeFalse("and the other warning carries the same guard, separately written");
+    }
+
+    /// <summary>
+    /// A trial is not a subscription that lapses: the SaaS payment warnings are guarded on
+    /// <c>State &gt;= TariffState.Paid</c>, and a trial sits below it. The dates are identical to a paid
+    /// tariff's, so nothing but the state keeps these letters away from a portal that owes nothing.
+    /// </summary>
+    [Fact]
+    public async Task SaasPaymentWarnings_IgnoreATrialThatWasNeverPaidFor()
+    {
+        var context = Fresh;
+
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(
+            Paid(context, due: _today.AddDays(3))))
+            .Should().BeTrue();
+
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>(
+            Trial(context, due: _today.AddDays(3))))
+            .Should().BeFalse("a trial running out is not a payment falling due");
+
+        (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>(
+            Trial(context, due: _today.AddDays(-1)) with { DelayDueDate = _today.AddDays(30), DelayDueDateIsNotMax = true })
+            ).Should().BeFalse("nor does a trial open a grace period to announce");
+    }
+
+    /// <summary>
+    /// When a portal has run out of chances. This is the one predicate here that does not send a letter
+    /// but deletes the portal, which is why it is worth asking directly rather than only through the
+    /// deletion it triggers.
+    /// </summary>
+    [Fact]
+    public async Task AbandonedPortal_FreeOneIsRemovedAWeekAfterTheLastWarning()
+    {
+        // 2026-06-09 is a week before _today, so that day is the anniversary the last warning went out on.
+        var context = FreeIdleSince("2024-06-09", "2026-06-16", Date("2025-12-09"));
+
+        (await context.GetAbandonedReasonAsync()).Should().Be(AbandonedPortalReason.Inactive,
+            "six months and a week of silence, checked a week after the warning");
+
+        (await (context with { LastActivity = Activity(Date("2025-12-10")) }).GetAbandonedReasonAsync())
+            .Should().BeNull("a day short of six months and a week is not yet");
+    }
+
+    [Fact]
+    public async Task AbandonedPortal_FreeOneIsOnlyLookedAtAWeekAfterAnAnniversary()
+    {
+        var context = FreeIdleSince("2024-06-09", "2026-06-16", Date("2025-12-09"));
+
+        (await (context with { CreatedDate = Date("2024-06-10") }).GetAbandonedReasonAsync())
+            .Should().BeNull("a week ago was not this portal's anniversary, so nothing was warned then");
+    }
+
+    [Fact]
+    public async Task AbandonedPortal_FreeOneWaitsForTheInstallationToStartCounting()
+    {
+        var context = FreeIdleSince("2024-06-09", "2026-06-16", Date("2025-12-09"));
+
+        (await (context with { UnusedPortalNotifyFrom = Date("2026-06-10") }).GetAbandonedReasonAsync())
+            .Should().BeNull("the warning week has not passed since the installation started counting");
+
+        (await (context with { UnusedPortalNotifyFrom = Date("2026-06-09") }).GetAbandonedReasonAsync())
+            .Should().Be(AbandonedPortalReason.Inactive, "a week to the day is a week");
+    }
+
+    [Fact]
+    public async Task AbandonedPortal_PaidOneIsRemovedSixMonthsAndAWeekAfterTheTariffLapsed()
+    {
+        var lapsed = Lapsed(Fresh, due: _today.AddMonths(-6).AddDays(-7));
+
+        (await lapsed.GetAbandonedReasonAsync()).Should().Be(AbandonedPortalReason.Unpaid);
+
+        (await Lapsed(Fresh, due: _today.AddMonths(-6).AddDays(-6)).GetAbandonedReasonAsync())
+            .Should().BeNull("a day short of the six months and a week");
+
+        // No anniversary anywhere in it: a lapsed tariff is counted from its own due date, and _today is
+        // not the anniversary of this portal's creation.
+        (await (lapsed with { CreatedDate = _today.AddDays(3) }).GetAbandonedReasonAsync())
+            .Should().Be(AbandonedPortalReason.Unpaid);
+    }
+
+    [Fact]
+    public async Task AbandonedPortal_PaidOneStillOnItsTariffIsLeftAlone()
+    {
+        (await Paid(Fresh, due: _today.AddYears(1)).GetAbandonedReasonAsync()).Should().BeNull();
+
+        (await Delayed(Fresh, delay: _today.AddDays(3)).GetAbandonedReasonAsync())
+            .Should().BeNull("a grace period is not a lapsed tariff");
+
+        (await (Lapsed(Fresh, due: _today.AddMonths(-12)) with { DueDateIsNotMax = false }).GetAbandonedReasonAsync())
+            .Should().BeNull("with no due date there is nothing to count six months from");
     }
 }

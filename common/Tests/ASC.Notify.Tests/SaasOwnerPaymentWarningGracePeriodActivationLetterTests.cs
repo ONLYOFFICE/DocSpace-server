@@ -39,15 +39,13 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasOwnerPaymentWarningGracePeriodActivationLetterTests : PeriodicLetterTestBase<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>
 {
-    private const string PaymentDelay = "30";
-
     /// <summary>The billing page the button leads to.</summary>
     private static string BillingUrl(LetterScope scope) => $"{scope.PortalUrl}/billing/overview";
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should().Contain(scope.Recipient.FirstName)
-            .And.Contain(PaymentDelay)
+            .And.Contain(scope.PaymentDelay)
             .And.Contain(Resource("ButtonVisitBillingSection", scope.Culture))
             .And.Contain(BillingUrl(scope));
     }
@@ -59,7 +57,7 @@ public class SaasOwnerPaymentWarningGracePeriodActivationLetterTests : PeriodicL
         letter.Subject.Should().Be($"Grace period for your {logoText} activated");
 
         letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
-            .And.Contain($"grace period of {PaymentDelay}")
+            .And.Contain($"grace period of {scope.PaymentDelay}")
             .And.Contain("Make sure to pay your Business subscription before the grace period is due.");
 
         // The brand no longer carries the DocSpace suffix.

@@ -38,8 +38,6 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class EnterpriseAdminPaymentWarningGracePeriodActivationLetterTests : PeriodicLetterTestBase<EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction>
 {
-    private const string PaymentDelay = "30";
-
     /// <summary>The pricing page the sending code appends its campaign parameters to.</summary>
     private static string PricesUrl(CultureInfo culture)
     {
@@ -51,7 +49,7 @@ public class EnterpriseAdminPaymentWarningGracePeriodActivationLetterTests : Per
         letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(Resource("ButtonPurchaseNow", scope.Culture))
             .And.Contain(PricesUrl(scope.Culture))
-            .And.Contain(PaymentDelay)
+            .And.Contain(scope.PaymentDelay)
             .And.Contain(LetterEnvironment.SupportUrl)
             .And.Contain(LetterEnvironment.SalesEmail);
     }

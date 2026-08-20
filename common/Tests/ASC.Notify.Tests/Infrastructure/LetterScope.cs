@@ -82,6 +82,15 @@ public sealed class LetterScope : IDisposable
     public string DisplayName => Recipient.DisplayUserName(
         _scope.ServiceProvider.GetRequiredService<DisplayUserSettingsHelper>());
 
+    /// <summary>
+    /// How many days the grace period lasts, as the grace-period letters quote it. Read off the same
+    /// service the letters read it off rather than written down as a number: it is configuration
+    /// (<c>core:payment:delay</c>), and a test that hard-codes today's value fails the day it changes
+    /// while the letter it is checking is perfectly correct.
+    /// </summary>
+    public string PaymentDelay => _scope.ServiceProvider.GetRequiredService<ITariffService>()
+        .GetPaymentDelay().ToString(CultureInfo.InvariantCulture);
+
     public static async Task<LetterScope> OpenAsync(LetterStackFixture fixture, CultureInfo culture)
     {
         var scope = fixture.Host.CreateScope();

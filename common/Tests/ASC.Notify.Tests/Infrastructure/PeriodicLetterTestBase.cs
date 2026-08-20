@@ -46,18 +46,17 @@ namespace ASC.Notify.Tests.Infrastructure;
 public abstract class PeriodicLetterTestBase<TAction> : LetterTestBase<TAction>
     where TAction : BasePeriodicNotifyAction
 {
+    /// <remarks>
+    /// One portal state for every periodic letter, because none of them quotes anything off the context.
+    /// What a letter says about a date - how long the grace period lasts - it reads from the tariff
+    /// service; the dates in the context are what its <c>ShouldSendAsync</c> is asked about, and that is
+    /// <c>PeriodicLetterScheduleTests</c>'s business rather than this harness's. A letter that starts
+    /// rendering one of them needs a context of its own here, and a reason written down.
+    /// </remarks>
     protected override async Task InitAsync(TAction action, LetterScope scope)
     {
-        action.Tags = await action.BuildTagsAsync(BuildContext(scope), scope.Recipient, scope.Culture);
-    }
+        var context = PeriodicLetterContexts.Paid(scope.Tenant);
 
-    /// <summary>
-    /// The portal this letter goes out for. The default is a portal on a paid tariff with nothing unusual
-    /// about it; a letter that quotes a date — how long the grace period has left, when the tariff lapsed
-    /// — overrides this with the state it is actually sent for.
-    /// </summary>
-    protected virtual PeriodicLetterContext BuildContext(LetterScope scope)
-    {
-        return PeriodicLetterContexts.Paid(scope.Tenant);
+        action.Tags = await action.BuildTagsAsync(context, scope.Recipient, scope.Culture);
     }
 }

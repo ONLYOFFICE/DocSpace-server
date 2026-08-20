@@ -69,7 +69,7 @@ public sealed record PeriodicLetterContext
     /// Whether the portal still shows ONLYOFFICE branding. Only the Enterprise trial letter asks: a
     /// white-labelled portal must not send letters about our own apps.
     /// </summary>
-    public bool DefaultRebranding { get; init; } = true;
+    public required bool DefaultRebranding { get; init; }
 
     /// <summary>
     /// The day the installation started counting towards deleting unused portals. Warnings are silent
@@ -102,4 +102,44 @@ public sealed record PeriodicLetterContext
 
         return date.Day == Math.Min(CreatedDate.Day, DateTime.DaysInMonth(date.Year, date.Month));
     }
+
+    /// <summary>
+    /// Why this portal has run out of chances today, or null when it has not: a free one left idle for
+    /// six months and a week, or a paid one whose tariff lapsed that long ago.
+    /// </summary>
+    /// <remarks>
+    /// This is not a letter, which is why it does not live among them - deleting a portal is
+    /// <see cref="StudioPeriodicNotify"/>'s own job. It is a predicate over this context all the same,
+    /// and it is the most destructive one there is, so it is kept where it can be asked in a test
+    /// instead of only through the deletion it triggers.
+    /// </remarks>
+    public async Task<AbandonedPortalReason?> GetAbandonedReasonAsync()
+    {
+        if (Quota.Free)
+        {
+            // The check runs a week after the anniversary the last warning was sent on.
+            if (NowDate < UnusedPortalNotifyFrom.AddDays(7) || !IsCreationAnniversary(-7))
+            {
+                return null;
+            }
+
+            var lastActivity = await GetLastActivityDateAsync();
+
+            return lastActivity.AddMonths(6).AddDays(7) <= NowDate ? AbandonedPortalReason.Inactive : null;
+        }
+
+        return Tariff.State == TariffState.NotPaid && DueDateIsNotMax && DueDate.AddMonths(6).AddDays(7) <= NowDate
+            ? AbandonedPortalReason.Unpaid
+            : null;
+    }
+}
+
+/// <summary>What a portal ran out of before it is deleted. Only the wording of the log line differs.</summary>
+public enum AbandonedPortalReason
+{
+    /// <summary>A free portal nobody has touched for six months and a week.</summary>
+    Inactive,
+
+    /// <summary>A portal whose paid tariff lapsed six months and a week ago.</summary>
+    Unpaid
 }

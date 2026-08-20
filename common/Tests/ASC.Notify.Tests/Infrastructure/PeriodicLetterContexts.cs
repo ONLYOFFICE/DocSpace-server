@@ -34,10 +34,12 @@
 namespace ASC.Notify.Tests.Infrastructure;
 
 /// <summary>
-/// The portal states a periodic letter can be asked about, built in memory. Shared by the tests that
-/// check <em>when</em> a letter goes out and the ones that render <em>what</em> it says: both feed the
-/// same <see cref="PeriodicLetterContext"/> to the same action, so describing a lapsed tariff twice
-/// would be describing it once too many.
+/// The portal states a periodic letter can be asked about, built in memory.
+///
+/// <see cref="Fresh"/> and <see cref="Paid(Tenant)"/> are shared: the schedule tests start every case
+/// from a portal nothing is due for, and the letter tests render every letter against a portal on a
+/// paid tariff. The rest — a lapsed tariff, a grace period, an idle portal — only the schedule tests
+/// ask for, and they live here so that the two suites cannot describe the same state differently.
 ///
 /// A context is an input rather than a tag, which is what keeps the letter tests cheap — a letter about
 /// an expiring tariff does not need a portal whose tariff actually expires.
@@ -87,6 +89,20 @@ internal static class PeriodicLetterContexts
             DueDateIsNotMax = true,
             DelayDueDate = (delay ?? DateTime.MaxValue).Date,
             DelayDueDateIsNotMax = delay.HasValue
+        };
+    }
+
+    /// <summary>
+    /// A portal on a trial running out on <paramref name="due"/>. Every date a payment warning looks at
+    /// is the same as <see cref="Paid(PeriodicLetterContext, DateTime, DateTime?)"/>; only the state
+    /// differs, which is exactly what the <c>&gt;= TariffState.Paid</c> guards are there for.
+    /// </summary>
+    public static PeriodicLetterContext Trial(PeriodicLetterContext context, DateTime due)
+    {
+        return Paid(context, due) with
+        {
+            Tariff = new Tariff { Quotas = [], State = TariffState.Trial, DueDate = due, DelayDueDate = DateTime.MaxValue },
+            Quota = Quota(trial: true)
         };
     }
 

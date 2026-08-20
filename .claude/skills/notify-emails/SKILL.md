@@ -75,7 +75,7 @@ public sealed class MyPeriodicLetterNotifyAction(
     public override List<Pattern> Patterns { get => [ /* EmailPattern */ ]; }
 
     protected override bool ToAdmins => true;                 // + ToOwner / ToUsers / ToGuests / ToPayer
-    protected override bool RequiresSubscription => true;      // false only for billing and legal notices
+    protected override bool RequiresSubscription => true;      // must be set: the base defaults to false
     protected override bool TrulyYoursAsTableRow => true;      // true for the HTML letters
 
     /// <summary>Is today this letter's day for this portal?</summary>
@@ -268,8 +268,10 @@ The flip side is that the mutual exclusion the chain gave away is gone too: two 
 the same portal on the same day. `PeriodicLetterScheduleTests.OnlyOneEnterpriseLetterClaimsAPortal` is
 where that is checked, and a new letter belongs in it.
 
-`RequiresSubscription => false` bypasses the recipient's "Tips and Tricks" subscription — only for
-billing and legal notices. Marketing letters leave it `true`.
+**The base default is `RequiresSubscription => false`**, i.e. the letter goes out whatever the recipient
+has switched off — right for billing and legal notices, wrong for everything else. A marketing letter
+has to override it to `true`, and forgetting to is not a compile error: the letter simply ignores an
+unsubscribe.
 
 ## 7. Recipients (`StudioNotifyHelper.GetRecipientsAsync(toadmins, tousers, toguests)`)
 

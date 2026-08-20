@@ -137,7 +137,7 @@ public class StudioPeriodicNotify(
                 var context = await BuildContextAsync(tenant, nowDate, notifyUnusedFrom);
 
                 // Before any letter: a portal removed here must not be written to afterwards.
-                if (await TryRemoveAbandonedPortalAsync(context, notifyUnusedFrom))
+                if (await TryRemoveAbandonedPortalAsync(context))
                 {
                     continue;
                 }
@@ -198,7 +198,7 @@ public class StudioPeriodicNotify(
     {
         foreach (var type in letters)
         {
-            var letter = (BasePeriodicNotifyAction)serviceProvider.GetService(type);
+            var letter = (BasePeriodicNotifyAction)serviceProvider.GetRequiredService(type);
 
             if (await letter.ShouldSendAsync(context))
             {
@@ -276,39 +276,15 @@ public class StudioPeriodicNotify(
     /// </summary>
     /// <remarks>
     /// This is not a notification, which is why it does not live among the letters. It runs first so that
-    /// nothing can be sent to a portal that is about to disappear.
+    /// nothing can be sent to a portal that is about to disappear. Whether a portal has run out of
+    /// chances is <see cref="PeriodicLetterContext.GetAbandonedReasonAsync"/>'s answer, so it can be
+    /// asked without any of the deleting below.
     /// </remarks>
-    private async Task<bool> TryRemoveAbandonedPortalAsync(PeriodicLetterContext context, DateTime notifyUnusedFrom)
+    private async Task<bool> TryRemoveAbandonedPortalAsync(PeriodicLetterContext context)
     {
         var tenant = context.Tenant;
-        var nowDate = context.NowDate;
-        var removeUnusedFrom = notifyUnusedFrom.AddDays(7);
 
-        bool unpaid;
-
-        if (context.Quota.Free)
-        {
-            // The check runs a week after the anniversary the last warning was sent on.
-            if (nowDate < removeUnusedFrom || !context.IsCreationAnniversary(-7))
-            {
-                return false;
-            }
-
-            var lastActivity = await context.GetLastActivityDateAsync();
-
-            if (lastActivity.AddMonths(6).AddDays(7) > nowDate)
-            {
-                return false;
-            }
-
-            unpaid = false;
-        }
-        else if (context.Tariff.State == TariffState.NotPaid && context.DueDateIsNotMax
-                 && context.DueDate.AddMonths(6).AddDays(7) <= nowDate)
-        {
-            unpaid = true;
-        }
-        else
+        if (await context.GetAbandonedReasonAsync() is not { } reason)
         {
             return false;
         }
@@ -321,7 +297,7 @@ public class StudioPeriodicNotify(
 
         var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
-        if (unpaid)
+        if (reason == AbandonedPortalReason.Unpaid)
         {
             _log.InformationStartRemovingUnpaidTenant(tenant.Id, tenantDomain);
         }

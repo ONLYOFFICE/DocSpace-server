@@ -75,18 +75,32 @@ public sealed class LetterStackFixture : IAsyncLifetime
 
     private static readonly JsonSerializerOptions _apiSystemJson = new(JsonSerializerDefaults.Web);
 
-    private DistributedApplication _app = null!;
-    private HttpClient _apiSystem = null!;
-    private HttpClient _mailPitApi = null!;
+    // Nullable, and disposed as such: InitializeAsync builds these one after another over minutes of
+    // containers and migrations, and xUnit disposes the fixture even when it threw halfway. Declaring
+    // them null-forgiving would turn any startup failure into an NRE out of DisposeAsync, which is the
+    // exception the run then reports instead of the one that actually broke the stack.
+    private DistributedApplication? _app;
+    private HttpClient? _apiSystem;
+    private HttpClient? _mailPitApi;
+    private MailPitInbox? _inbox;
+    private LetterHost? _host;
+    private LetterPortal? _portal;
 
     /// <summary>The inbox every letter test delivers to and reads its score back from.</summary>
-    internal MailPitInbox Inbox { get; private set; } = null!;
+    internal MailPitInbox Inbox => _inbox ?? throw NotStarted();
 
     /// <summary>The service graph a letter test resolves its notify action from.</summary>
-    internal LetterHost Host { get; private set; } = null!;
+    internal LetterHost Host => _host ?? throw NotStarted();
 
     /// <summary>The portal the letters are rendered for.</summary>
-    internal LetterPortal Portal { get; private set; } = null!;
+    internal LetterPortal Portal => _portal ?? throw NotStarted();
+
+    private static InvalidOperationException NotStarted([CallerMemberName] string member = "")
+    {
+        return new InvalidOperationException(
+            $"The letter stack has no {member}: InitializeAsync did not get that far. The failure that "
+            + "stopped it is the one to read, not this.");
+    }
 
     public async ValueTask InitializeAsync()
     {
@@ -119,17 +133,17 @@ public sealed class LetterStackFixture : IAsyncLifetime
 
         _mailPitApi = _app.CreateHttpClient(MailPitResource, "http");
 
-        Inbox = new MailPitInbox(smtp.Host, smtp.Port, _mailPitApi);
+        _inbox = new MailPitInbox(smtp.Host, smtp.Port, _mailPitApi);
 
         _apiSystem = _app.CreateHttpClient(ApiSystemResource);
 
-        Portal = await RegisterPortalAsync(startUp.Token);
+        _portal = await RegisterPortalAsync(_apiSystem, startUp.Token);
 
         var connectionString = await _app.GetConnectionStringAsync(DatabaseResource, startUp.Token)
             ?? throw new InvalidOperationException(
                 $"Aspire published no connection string for '{DatabaseResource}'.");
 
-        Host = await LetterHost.BuildAsync(connectionString, Portal.Url);
+        _host = await LetterHost.BuildAsync(connectionString, _portal.Url);
     }
 
     /// <summary>
@@ -153,7 +167,7 @@ public sealed class LetterStackFixture : IAsyncLifetime
     /// real owner: an action reads the recipient's email and name, and the tenant the migrations seed
     /// has an owner with no email at all.
     /// </summary>
-    private async Task<LetterPortal> RegisterPortalAsync(CancellationToken cancellationToken)
+    private static async Task<LetterPortal> RegisterPortalAsync(HttpClient apiSystem, CancellationToken cancellationToken)
     {
         // Lowercase, starts with a letter, 13 chars — a valid portal alias, which is also the host the
         // portal answers on while `core:base-domain` is empty.
@@ -175,7 +189,7 @@ public sealed class LetterStackFixture : IAsyncLifetime
         }, _apiSystemJson);
 
         using var content = new StringContent(payload, Encoding.UTF8, "application/json");
-        using var response = await _apiSystem.PostAsync("portal/register", content, cancellationToken);
+        using var response = await apiSystem.PostAsync("portal/register", content, cancellationToken);
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
@@ -201,14 +215,20 @@ public sealed class LetterStackFixture : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        await Host.DisposeAsync();
+        if (_host != null)
+        {
+            await _host.DisposeAsync();
+        }
 
-        Inbox.Dispose();
-        _mailPitApi.Dispose();
-        _apiSystem.Dispose();
+        _inbox?.Dispose();
+        _mailPitApi?.Dispose();
+        _apiSystem?.Dispose();
 
-        await _app.StopAsync();
-        await _app.DisposeAsync();
+        if (_app != null)
+        {
+            await _app.StopAsync();
+            await _app.DisposeAsync();
+        }
     }
 }
 
