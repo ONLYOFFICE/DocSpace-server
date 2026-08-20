@@ -2736,7 +2736,7 @@ public class FileSecurity(
 
         if (searchArea is not (SearchArea.Templates or SearchArea.FormTemplates) || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
         {
-            currentUserOrderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
+            currentUserOrderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any or SearchArea.Forms && !isAdmin);
         }
 
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserOrderedSubjects.Select(x => x.Subject))
