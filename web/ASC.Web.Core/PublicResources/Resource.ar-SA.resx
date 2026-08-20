@@ -211,7 +211,7 @@
     <value>تم تجاوز حصة مساحة وكيل الذكاء الاصطناعي</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل تعيين الحصة لكل وكيل ذكاء اصطناعي. القيمة المدخلة أكبر من إجمالي تخزين DocSpace.</value>
+    <value>فشل تعيين الحصة لكل وكيل ذكاء اصطناعي. القيمة المدخلة أكبر من إجمالي مساحة التخزين.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>التجديد التلقائي</value>
@@ -769,7 +769,7 @@
     <value>تم تعليق ملفك الشخصي</value>
   </data>
   <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>{!المستخدم} صاحب هذا البريد الإلكتروني مسجل بالفعل</value>
+    <value>{!User} صاحب هذا البريد الإلكتروني مسجل بالفعل</value>
   </data>
   <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
     <value>رسائل البريد الإلكتروني من هذا المجال غير مسموح لها التسجيل</value>
@@ -1120,7 +1120,7 @@
     <value>تم تجاوز حصة مساحة الغرفة</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
+    <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية للتخزين.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>آسيا والمحيط الهادئ (سنغافورة)</value>
@@ -1285,7 +1285,7 @@
     <value>حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>لقد تم توصيل Telegram بنجاح لتلقي الإشعارات من DocSpace الخاص بكم.</value>
+    <value>لقد تم توصيل Telegram بنجاح لتلقي الإشعارات من مساحة العمل.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>رمز غير صحيح</value>
@@ -1300,7 +1300,7 @@
     <value>تم تجاوز حصة مساحة المستخدم</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
+    <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية للتخزين.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>منطقة غرب الولايات المتحدة (أوريغون)</value>

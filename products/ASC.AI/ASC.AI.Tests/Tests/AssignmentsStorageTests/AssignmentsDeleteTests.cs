@@ -50,6 +50,75 @@ public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     }
 
     [Fact]
+    public async Task Delete_Existing_NotReturnedByReadAll()
+    {
+        var profile = await CreateProfileAsync();
+        await CreateAssignmentAsync("Chat", profile.Id);
+
+        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await ReadAllAssignmentsAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Delete_Twice_KeepsUnassigned()
+    {
+        var profile = await CreateProfileAsync();
+        await CreateAssignmentAsync("Chat", profile.Id);
+
+        using var first = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+        using var second = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+
+        first.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        second.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await ReadAssignmentAsync("Chat")).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Delete_ThenAssignAgain_Persists()
+    {
+        var profile = await CreateProfileAsync();
+        var anotherProfile = await CreateProfileAsync();
+        await CreateAssignmentAsync("Chat", profile.Id);
+
+        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        await CreateAssignmentAsync("Chat", anotherProfile.Id);
+
+        (await ReadAssignmentAsync("Chat")).Should().Be(anotherProfile.Id);
+    }
+
+    [Fact]
+    public async Task Delete_TypeWithDefault_NotReturnedByReadAll()
+    {
+        var profile = await CreateProfileAsync();
+        await CreateAssignmentAsync("ImageGeneration", profile.Id);
+
+        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/ImageGeneration", TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await ReadAssignmentAsync("ImageGeneration")).Should().BeNull();
+        (await ReadAllAssignmentsAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Delete_TypeWithDefault_ThenAssignAgain_Persists()
+    {
+        var profile = await CreateProfileAsync();
+        var anotherProfile = await CreateProfileAsync();
+        await CreateAssignmentAsync("ImageGeneration", profile.Id);
+
+        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/ImageGeneration", TestContext.Current.CancellationToken);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        await CreateAssignmentAsync("ImageGeneration", anotherProfile.Id);
+
+        (await ReadAssignmentAsync("ImageGeneration")).Should().Be(anotherProfile.Id);
+    }
+
+    [Fact]
     public async Task Delete_NonExisting_Succeeds()
     {
         using var response = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
@@ -77,6 +146,26 @@ public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
 
         var all = await ReadAllAssignmentsAsync();
         all.Should().HaveCount(1).And.ContainKey("Summarization");
+    }
+
+    [Fact]
+    public async Task DeleteMany_ThenAssignAgain_Persists()
+    {
+        var chatProfile = await CreateProfileAsync();
+        var codeProfile = await CreateProfileAsync();
+
+        await CreateAssignmentAsync("Chat", chatProfile.Id);
+
+        using var response = await _ai.DeleteAsync(
+            AssignmentsPath,
+            new { actionTypes = new[] { "Chat" } },
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        await CreateAssignmentAsync("Chat", codeProfile.Id);
+
+        (await ReadAssignmentAsync("Chat")).Should().Be(codeProfile.Id);
     }
 
     [Fact]

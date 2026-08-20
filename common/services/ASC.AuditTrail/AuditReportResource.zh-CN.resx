@@ -511,7 +511,7 @@
     <value>文件夹[{0}]。 访问已更新</value>
   </data>
   <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>文件夹[{0}]。外部链接已更新：{1}。角色：{2}</value>
+    <value>文件夹[{0}]。{1}的访问权限已更新。角色：{2}</value>
   </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>关注</value>
@@ -901,7 +901,7 @@
     <value>发送</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>用户 {0} 向 {1} 发送邀请加入此协作空间</value>
+    <value>用户 {0} 向 {1} 发送邀请</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>邀请说明已发送：{0}</value>

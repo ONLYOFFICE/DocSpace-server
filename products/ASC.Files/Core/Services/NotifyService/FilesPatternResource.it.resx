@@ -248,19 +248,19 @@ $Message</value>
     <value>Lo stato della firma è cambiato</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Notifica di DocSpace. Menzionato nel documento</value>
+    <value>Notifica di ${LetterLogoText}. Menzionato nel documento</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Notifica di DocSpace. Il modulo è compilato</value>
+    <value>Notifica di ${LetterLogoText}. Il modulo è compilato</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Notifica DocSpace.</value>
+    <value>Notifica di ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Notifica di DocSpace. Il modulo è compilato</value>
+    <value>Notifica di ${LetterLogoText}. Il modulo è compilato</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Notifica DocSpace.</value>
+    <value>Notifica di ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Documenti. L'invio è stato completato.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>L'invio è completato.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Notifica di DocSpace. La stanza e stata eliminata</value>
+    <value>Notifica di ${LetterLogoText}. La stanza e stata eliminata</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Documenti. Accesso concesso al documento: $DocumentTitle</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Documenti. Accesso concesso alla cartella: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Notifica DocSpace.</value>
+    <value>Notifica di ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Notifica DocSpace.</value>
+    <value>Notifica di ${LetterLogoText}.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName ha eliminato un agente IA
@@ -310,6 +310,6 @@ $__AuthorName ha eliminato l'agente IA: $RoomTitle</value>
     <value>Sei stato invitato all'agente IA "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Notifica DocSpace. Agente IA eliminato</value>
+    <value>Notifica di ${LetterLogoText}. Agente IA eliminato</value>
   </data>
 </root>

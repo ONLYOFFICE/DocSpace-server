@@ -60,8 +60,18 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
         }
     ];
 
+    public static bool HasDefault(ActionType actionType)
+    {
+        return Array.Exists(_policies, p => p.ActionType == actionType);
+    }
+
     public async Task<Guid?> ResolveByTypeAsync(ActionType actionType, Guid? stored, bool applyDefaults)
     {
+        if (stored == AssignmentsStorage.UnassignedProfileId)
+        {
+            return null;
+        }
+
         if (!gateway.Configured)
         {
             return stored;
@@ -90,20 +100,29 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
 
     public async Task<Dictionary<ActionType, Guid>> ResolveAsync(Dictionary<ActionType, Guid> stored, bool applyDefaults)
     {
+        var unassigned = stored
+            .Where(a => a.Value == AssignmentsStorage.UnassignedProfileId)
+            .Select(a => a.Key)
+            .ToHashSet();
+
+        var assigned = unassigned.Count == 0
+            ? stored
+            : stored.Where(a => !unassigned.Contains(a.Key)).ToDictionary(a => a.Key, a => a.Value);
+
         if (!gateway.Configured)
         {
-            return stored;
+            return assigned;
         }
 
         var models = await GetModelsAsync();
         if (models == null)
         {
-            return stored;
+            return assigned;
         }
 
         var alive = models.Select(m => m.RevisionId).ToHashSet();
 
-        var resolved = stored
+        var resolved = assigned
             .Where(a => alive.Contains(a.Value))
             .ToDictionary(a => a.Key, a => a.Value);
 
@@ -114,7 +133,7 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
 
         foreach (var policy in _policies)
         {
-            if (resolved.ContainsKey(policy.ActionType))
+            if (resolved.ContainsKey(policy.ActionType) || unassigned.Contains(policy.ActionType))
             {
                 continue;
             }

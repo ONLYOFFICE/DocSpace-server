@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -476,18 +476,9 @@ public class StudioNotifyService(
             throw new ArgumentException("User is not activated yet!");
         }
 
-        if (tenantExtra.Enterprise)
+        if (!tenantExtra.Saas)
         {
             return;
-            //var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(_settingsManager);
-            //notifyAction = defaultRebranding ? Actions.EnterpriseAdminWelcomeV1 : Actions.EnterpriseWhitelabelAdminWelcomeV1;
-        }
-
-        if (tenantExtra.Opensource)
-        {
-            return;
-            //notifyAction = Actions.OpensourceAdminWelcomeV1;
-            //tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
         }
 
         var saasAdminWelcomeV1NotifyAction = serviceProvider.GetService<SaasAdminWelcomeV1NotifyAction>();
@@ -908,34 +899,6 @@ public class StudioNotifyService(
 
     #endregion
 
-
-    #region Migration Personal to Docspace
-
-    public async Task MigrationPersonalToDocspaceAsync(UserInfo userInfo)
-    {
-        var auditEventDate = DateTime.UtcNow;
-
-        auditEventDate = new DateTime(
-            auditEventDate.Year,
-            auditEventDate.Month,
-            auditEventDate.Day,
-            auditEventDate.Hour,
-            auditEventDate.Minute,
-            auditEventDate.Second,
-            0,
-            DateTimeKind.Utc);
-
-        var migrationPersonalToDocspaceNotifyAction = serviceProvider.GetService<MigrationPersonalToDocspaceNotifyAction>();
-        await migrationPersonalToDocspaceNotifyAction.Init(userInfo, auditEventDate);
-
-        await studioNotifyServiceHelper.SendNoticeToAsync(migrationPersonalToDocspaceNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
-
-        var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
-
-        messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
-    }
-
-    #endregion
 
 
     #region API Keys

@@ -500,7 +500,7 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
     <value>Satura veidotājs</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace administrators</value>
+    <value>Pilns administrators</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktors</value>
