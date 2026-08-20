@@ -509,13 +509,56 @@ public class BaseTest(
                     Timing.Write($"getForms({user.Email})", rootSw.ElapsedMilliseconds);
                     return recentFolder.Response.Current.Id;
                 }
+            case FolderType.SHARE:
+                {
+                    var shareFolderId = await GetSectionRootIdAsync("api/2.0/files/@share");
+                    Timing.Write($"getShare({user.Email})", rootSw.ElapsedMilliseconds);
+                    return shareFolderId;
+                }
+            case FolderType.VirtualRooms:
+                {
+                    var rooms = await _roomsApi.GetRoomsFolderAsync(count: 1, cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getRooms({user.Email})", rootSw.ElapsedMilliseconds);
+                    return rooms.Response.Current.Id;
+                }
+            case FolderType.Archive:
+                {
+                    var archive = await _roomsApi.GetRoomsFolderAsync(searchArea: SearchArea.Archive, count: 1, cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getArchive({user.Email})", rootSw.ElapsedMilliseconds);
+                    return archive.Response.Current.Id;
+                }
         }
 
+        // The fallback is by far the most expensive call in the suite: @root builds the full content of
+        // every section just to hand back one folder id. Every type that has a cheaper way to its root
+        // is handled above; anything landing here has none.
         var rootFolder = (await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         Timing.Write($"getRoot({user.Email})", rootSw.ElapsedMilliseconds);
 
         var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
 
         return folderId;
+    }
+
+    /// <summary>
+    /// Reads the id of a section's root folder straight from its endpoint, for sections the generated
+    /// SDK has no method for. <c>@share</c>, <c>@common</c>, <c>@projects</c> and <c>@templates</c> are
+    /// all marked <c>[ApiExplorerSettings(IgnoreApi = true)]</c>, so they never made it into Swagger and
+    /// therefore not into the client either.
+    /// </summary>
+    private async Task<int> GetSectionRootIdAsync(string path)
+    {
+        using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
+
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Unable to read {path} ({(int)response.StatusCode}): {body}");
+        }
+
+        using var json = JsonDocument.Parse(body);
+
+        return json.RootElement.GetProperty("response").GetProperty("current").GetProperty("id").GetInt32();
     }
 }
