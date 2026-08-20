@@ -1,6 +1,6 @@
 ---
 name: generate-sdk
-description: "Generating the DocSpace API SDKs: running the generator for the chosen languages, and on request re-emitting the OpenAPI documents first (rebuild of ASC.Api.Documentation.slnx). USE FOR: generate SDK, regenerate SDK, update SDK, regenerate openapi json, api-docs.json, openapi-generator, postman collection. DO NOT USE FOR: hand-editing generated code in the generated SDK directories, changing controllers/DTOs to fix the spec, writing custom generator templates."
+description: "Generating the DocSpace API SDKs: running the generator for the chosen languages, and on request re-emitting the OpenAPI documents first (rebuild of ASC.Api.Documentation.slnx). USE FOR: generate SDK, regenerate SDK, update SDK, regenerate openapi json, api-docs.json, openapi-generator, postman collection, markdown api reference. DO NOT USE FOR: hand-editing generated code in the generated SDK directories, changing controllers/DTOs to fix the spec, writing custom generator templates."
 ---
 
 # Generating SDKs
@@ -9,13 +9,16 @@ The skill does exactly three things, and nothing else:
 
 1. **Delete the `*.json` OpenAPI documents** in the resolved documents directory — only when asked.
 2. **Re-emit those documents** by rebuilding `ASC.Api.Documentation.slnx` — only when asked, and
-   always together with 1, in that order. Steps 1 + 2 are **stage A**.
+   always together with 1, in that order. Steps 1 + 2 are **stage A**. That rebuild also renders the
+   Markdown API reference as a side effect (see stage A) — it is not a separate step you invoke.
 3. **Run the generator tool** for the requested languages with the requested parameters — **stage B**.
 
 Step 1 without step 2 leaves no documents to generate from, so the two are never split: the build of
 the service projects is what writes the documents back. Stage B alone is fine when the API surface has
 not changed. Measured on a warm machine (16 GB, .NET 10 / Maven 3.9 / generator 7.24): stage A
-**~4 min**, stage B **~35–48 s for one language, ~70–95 s for two, ~2 min 15 s for all ten**. The
+**~4 min plus a full stage-B-sized generator run** — the `GenerateMarkdownApiDocs` target re-enters
+the tool, so a Maven build and one generator pass are inside stage A; budget ~5–6 min. Stage B is
+**~35–48 s for one language, ~70–95 s for two, ~2 min 30 s for all eleven**. The
 per-language cost collapses in a batch because the `mvn clean package` and the joiner run are paid
 once per invocation, not once per language. Run both stages in the background rather than blocking
 on them.
@@ -66,8 +69,11 @@ on them.
 
 1. **Languages** — take them from the user's request. If it does not name any, ask
    (`AskUserQuestion`, multiSelect) out of the commands registered in `Program.cs`: `CSharp`,
-   `Python`, `PostmanCollection`, `TypeScript`, `Java`, `Kotlin`, `Php`, `Swift6`, `Go`, `Ruby` —
-   plus an "all" option. Names are case-sensitive. Pass through any extra parameters the user gives.
+   `Python`, `PostmanCollection`, `TypeScript`, `Java`, `Kotlin`, `Php`, `Swift6`, `Go`, `Ruby`,
+   `Markdown` — plus an "all" option. Names are case-sensitive. `Markdown` is not an SDK: it renders
+   the API reference into `sdk/docspace-api-spec`, and stage A already runs it, so asking for it
+   separately is only useful when the documents are current and the reference is not. Pass through
+   any extra parameters the user gives.
 2. **Always ask whether to regenerate the OpenAPI documents** (`AskUserQuestion`, yes/no) — never
    assume. Yes when controllers/DTOs/Swagger annotations changed since the last regeneration; no
    when only generator configs or templates changed.
@@ -82,9 +88,11 @@ on them.
 | OpenAPI documents directory | `OpenApiDocumentsDirectory` in each service csproj | `dotnet msbuild <service csproj> -getProperty:OpenApiDocumentsDirectory -p:GenerateApiDocs=true` |
 | Document file name per service | `OpenApiGenerateDocumentsOptions` (`--file-name …`) in the same csproj | same command with `-getProperty:OpenApiGenerateDocumentsOptions`, or Grep the csprojs |
 | Documents the joiner consumes, and the joined spec it writes | the tool's `appsettings.json` — `join` section and `pathToFile` | Read the file; entries are path segment arrays, resolved relative to the **current working directory** the tool was started in (`Path.GetFullPath` with no base) |
+| The published contract the joiner also writes on **every** run | `publish` in the same `appsettings.json` | Read it. Same segment-array form. Today it lands inside the `sdk/docspace-api-spec` submodule, so every invocation of the tool dirties that submodule — see *Reporting the result* |
+| Where the Markdown reference is rendered and bundled | `outputDir` in `SDK/tools/toolsMarkdown.json` (staging) and `markdown.bundle` in `appsettings.json` (the durable output) | Read both. `Markdown` is the exception to the row below: it has no `outputFolder`, so its `outputDir` *is* honoured — but only as staging, which `RemoveStaging` deletes once the bundle is written |
 | The tool's build output directory (where stage B must run) | MSBuild, from the tool csproj | `dotnet msbuild <tool csproj> -getProperty:TargetDir` — never spell out `bin/Debug/net10.0`: the configuration varies and the TFM is set centrally in `Directory.Packages.props` |
 | SDK output directory per language | `outputFolder` in `SDK/src/main/java/com/example/codegen/My<Lang>ClientCodegen.java`, relative to `SDK/` | Read/Grep that file. The file name is not always the command name — PHP is `MyPHPClientCodegen.java`, not `MyPhpClientCodegen.java`. List the `codegen/` directory instead of guessing |
-| Package name/version per language | `SDK/tools/tools<Lang>.json` | Read it. Note `outputDir` there does **not** decide the location — the codegen's `outputFolder` overrides it |
+| Package name/version per language | `SDK/tools/tools<Lang>.json` | Read it. Note `outputDir` there does **not** decide the location — the codegen's `outputFolder` overrides it. `Markdown` is the exception (no codegen `outputFolder`; see the row above) |
 
 `dotnet msbuild -getProperty:` only evaluates, it builds nothing — safe to run first. The services all
 point at one shared documents directory; read it from any of them rather than assuming.
@@ -119,10 +127,12 @@ the joined output, and `appsettings.json` is what says so.
 dotnet build common/Tools/ASC.Api.Documentation/ASC.Api.Documentation.slnx -t:Rebuild -p:GenerateApiDocs=true
 ```
 
-- `-p:GenerateApiDocs=true` is mandatory: it is what flips `OpenApiGenerateDocuments`
-  (`Directory.Build.props`), which every service csproj defaults to `false`. Pass it explicitly; do
-  not rely on the `<Properties Name="MSBuild">` block inside the slnx. Without it the build succeeds
-  and emits nothing.
+- `-p:GenerateApiDocs=true` — pass it explicitly, always. It flips `OpenApiGenerateDocuments`
+  (`Directory.Build.props`), which every service csproj defaults to `false`. The property group there
+  also keys on `SolutionName`/`SolutionFileName`, so building *this* slnx may well set it anyway —
+  but that is incidental, it does not hold for building a single service csproj, and relying on it
+  (or on the `<Properties Name="MSBuild">` block inside the slnx) means a build that silently emits
+  nothing the moment either condition changes.
 - `-t:Rebuild` (not a plain build) — forces the document tool to re-run.
 - One document is not .NET: the `EmitNewAiOpenApi` target in the tool's csproj runs
   `yarn install --immutable` + `yarn openapi` in the Node service under `common/ASC.NewAi`, writing
@@ -139,6 +149,15 @@ dotnet build common/Tools/ASC.Api.Documentation/ASC.Api.Documentation.slnx -t:Re
   mashed-together segment, that is the cause, and the fix belongs in the csproj, not here: do not
   work around it by running yarn by hand, because then `newai_2.0.json` is emitted outside the
   build and nothing guarantees `ASC.AI` ran first.
+- **The build also renders the Markdown API reference.** The `GenerateMarkdownApiDocs` target in
+  the tool's csproj (`AfterTargets="Build"`, gated on the same `OpenApiGenerateDocuments`) runs
+  `dotnet <TargetPath> Markdown` from `TargetDir` — that is the tool re-entering itself, so the
+  joiner, a full `mvn clean package` and one generator pass all happen inside stage A. Consequences:
+  stage A needs the *whole* toolchain, not just Node (JDK, Maven and `openapi-generator-cli` too);
+  it takes longer than the .NET build alone; and it writes into the `sdk/docspace-api-spec`
+  submodule. The command stages `*.md` and `json/split/` inside the documents directory and deletes
+  them again once the bundle is written, so an aborted run can leave those behind — they are staging,
+  not output. Do not run `Markdown` again by hand after stage A; it has already run.
 
 4. Verify the directory came back with the same set of documents you recorded in step 1. A missing one
    means that project's build (or yarn) failed: do not continue to stage B — build that project alone
@@ -210,8 +229,9 @@ duplicated Maven build is the price of not encoding that knowledge here.
 ## Prerequisites
 
 `dotnet`, a JDK, `mvn`, `openapi-generator-cli` (`npm i -g @openapitools/openapi-generator-cli`), and
-Node + Yarn for stage A. Individual commands may need more — `TypeScript` also validates `npm` — and
-each one checks what it needs up front, failing with `Tool '<name>' was not found in PATH` before it
+Node + Yarn. **Stage A needs all of them, not just Node** — it shells out to yarn for the AI document
+*and* re-enters the tool for the Markdown reference, which is a Maven + generator run. Individual
+commands may need more — `TypeScript` also validates `npm` — and each one checks what it needs up front, failing with `Tool '<name>' was not found in PATH` before it
 does any work.
 
 Do not verify `openapi-generator-cli` from the repo root: `openapi-generator-cli version` **writes an
@@ -241,8 +261,19 @@ generating them (or `all`) leaves plain untracked directories in this repo, and 
 `rev-parse` check distinguishes that case from a submodule with no changes.
 
 A directory that is a submodule has to be reviewed and committed inside it, after which the submodule
-pointer is bumped here. Also report the joined spec written by the joiner (its path is `pathToFile`
-in `appsettings.json`).
+pointer is bumped here.
+
+**The joiner writes two files on every invocation, whatever languages followed** — even a
+single-language stage B, even a run that then failed on an unknown option:
+
+| File | Configured as | Where it lands |
+| --- | --- | --- |
+| the joined spec | `pathToFile` | `SDK/json/api-docs.json`, inside this repo |
+| the published contract (YAML, without the generator workarounds) | `publish` | the **`sdk/docspace-api-spec` submodule** |
+
+Report both. The second one is easy to miss precisely because nothing asked for it: `git status` here
+shows only a moved submodule pointer, and the actual change is one level down. Stage A adds to the
+same submodule through the Markdown bundle (`markdown.bundle`).
 
 **Post-generation steps write packages outside the SDK directory, into places `git status` in this
 repo will not show you.** Verified destinations, both of which are *tracked* files that a run leaves
@@ -253,9 +284,10 @@ modified:
 | `CSharp` | `DocSpace.API.SDK.<ver>.nupkg` | `.nuget/packages/` at this repo's root | **this** repo — a generation run dirties a tracked binary here |
 | `TypeScript` | `onlyoffice-docspace-api-sdk-<ver>.tgz` | `client/libs/ui-kit/`, a sibling of `server/` | the **client** repo, inside its own `ui-kit` submodule |
 
-So a `CSharp`/`TypeScript` run touches up to three indexes: the SDK submodule, this repo, and a
-neighbouring repository. Say so when reporting. These destinations are the tool's business and can
-change: re-read them out of the matching `Commands/Generate<Lang>SdkCommand.cs` (`CopyPackages`)
+So a `CSharp`/`TypeScript` run touches up to **four** indexes: the language's own SDK submodule,
+`sdk/docspace-api-spec` (the joiner's published contract — unavoidable, every run), this repo (the
+`.nupkg`, plus the submodule pointers), and a neighbouring repository (the `.tgz`). Say so when
+reporting. These destinations are the tool's business and can change: re-read them out of the matching `Commands/Generate<Lang>SdkCommand.cs` (`CopyPackages`)
 instead of trusting this table if anything looks off.
 
 ## Failure modes
@@ -265,6 +297,10 @@ instead of trusting this table if anything looks off.
   DTO / Swagger attributes and redo stage A; never patch a document by hand.
 - `Swagger file not found: ...json` — a document listed in `appsettings.json` → `join` is missing;
   stage A did not produce it.
+- `'<opId>' and '<opId>' both publish as <file>.md` — the `Markdown` command (so: during stage A).
+  Two operation ids differ only in case or punctuation and would overwrite each other as files. The
+  joiner's duplicate check does not catch this; fix the operation ids on the controllers and redo
+  stage A.
 - Stage A "succeeded" but no document changed — `GenerateApiDocs=true` was missing, or the build was
   incremental instead of `-t:Rebuild`.
 - The tool exits with a config or path error, or the joiner reports documents missing that stage A
