@@ -43,7 +43,8 @@ public class McpServerStorageService(
     McpServersStorage storage,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
+    AiGateway gateway,
+    MessageService messageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
@@ -56,6 +57,8 @@ public class McpServerStorageService(
         {
             throw new InvalidOperationException($"MCP server with name '{name}' already exists");
         }
+
+        messageService.Send(MessageAction.ServerCreated, MessageTarget.Create(name), name);
     }
 
     public async Task<McpServer> ReadByNameAsync(string name, string? entityId = null)
@@ -81,19 +84,51 @@ public class McpServerStorageService(
         {
             throw new ItemNotFoundException($"MCP server with name '{name}' was not found");
         }
+
+        messageService.Send(MessageAction.ServerUpdated, MessageTarget.Create(name), name);
     }
 
     public async Task ReplaceAllAsync(IReadOnlyDictionary<string, string> servers, string? entityId = null)
     {
         var entryId = await AssertUserHasAccessAsync(_writeTypes, entityId);
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        await storage.ReplaceAllAsync(tenantManager.GetCurrentTenantId(), servers, entryId);
+        var existing = await storage.ReadAllAsync(tenantId, entryId);
+
+        await storage.ReplaceAllAsync(tenantId, servers, entryId);
+
+        var existingConfigs = existing.ToDictionary(s => s.Name, s => s.Config);
+
+        foreach (var (name, config) in servers)
+        {
+            if (!existingConfigs.TryGetValue(name, out var oldConfig))
+            {
+                messageService.Send(MessageAction.ServerCreated, MessageTarget.Create(name), name);
+            }
+            else if (oldConfig != config)
+            {
+                messageService.Send(MessageAction.ServerUpdated, MessageTarget.Create(name), name);
+            }
+        }
+
+        foreach (var name in existingConfigs.Keys.Where(n => !servers.ContainsKey(n)))
+        {
+            messageService.Send(MessageAction.ServerDeleted, MessageTarget.Create(name), name);
+        }
     }
 
     public async Task DeleteAsync(string name, string? entityId = null)
     {
         var entryId = await AssertUserHasAccessAsync(_writeTypes, entityId);
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), name, entryId);
+        var existing = await storage.ReadByNameAsync(tenantId, name, entryId);
+
+        await storage.DeleteAsync(tenantId, name, entryId);
+
+        if (existing is not null)
+        {
+            messageService.Send(MessageAction.ServerDeleted, MessageTarget.Create(name), name);
+        }
     }
 }
