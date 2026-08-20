@@ -237,8 +237,10 @@ public class PeriodicLetterScheduleTests
         (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(Idle(context, months: 6) with { Quota = Quota(free: true) }))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(Idle(context, months: 3) with { Quota = Quota(free: true) }))
-            .Should().BeFalse("at three months the other warning speaks");
+        // Five, not three: three is where the other warning speaks, and a window that opened a month
+        // early would still be silent there. The month below the threshold is the one that pins it.
+        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(Idle(context, months: 5) with { Quota = Quota(free: true) }))
+            .Should().BeFalse("five months of quiet is not six");
     }
 
     [Fact]
@@ -321,8 +323,8 @@ public class PeriodicLetterScheduleTests
         (await AsksToSendAsync<SaasAdminWarningAfterHalfYearV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-6))))
             .Should().BeTrue();
 
-        (await AsksToSendAsync<SaasAdminWarningAfterHalfYearV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-3))))
-            .Should().BeFalse("at three months the other warning speaks");
+        (await AsksToSendAsync<SaasAdminWarningAfterHalfYearV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-5))))
+            .Should().BeFalse("the window is that day only, and five months is not six");
     }
 
     [Fact]
