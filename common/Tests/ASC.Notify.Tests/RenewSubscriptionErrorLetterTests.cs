@@ -34,41 +34,33 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What the payer gets when a subscription could not be renewed automatically
-/// (<c>renew_subscription_error</c>). Also goes out over Telegram, from the same pattern.
+/// What the owner and the payer get when a purchased tariff or service could not be renewed
+/// automatically (<c>renew_subscription_error</c>). Email only.
 /// </summary>
 public class RenewSubscriptionErrorLetterTests : LetterTestBase<RenewSubscriptionErrorNotifyAction>
 {
-    /// <summary>The billing page the button leads to.</summary>
-    private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>RenewSubscriptionErrorNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(RenewSubscriptionErrorNotifyAction action, LetterScope scope)
     {
-        return [OrangeButton("ButtonVisitBillingSection", culture, BillingUrl)];
+        action.Init(scope.Recipient);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonVisitBillingSection", culture))
-            .And.Contain(BillingUrl);
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonVisitBillingSection", scope.Culture))
+            .And.Contain($"{scope.PortalUrl}/billing/overview");
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Action required: Unable to auto-renew the purchased services in your {logoText}");
 
         // No apostrophes in the expected strings: TextileStyler rewrites them.
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain("automatic renewal of your purchased tariff plan or services")
             .And.Contain("We kindly ask you to renew it manually.");
 

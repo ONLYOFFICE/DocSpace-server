@@ -34,53 +34,32 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The confirmation a member gets after asking for their account to be disabled
-/// (<c>profile_delete</c>). Nothing happens until they follow the button, so a letter that arrives
-/// without a working link leaves the reader with no way to finish what they started.
+/// The confirmation a user asks for when disabling their own account (<c>profile_delete</c>). The
+/// confirmation link is shortened by <c>Init</c>, so what is asserted is the button and the two places
+/// the portal address is linked.
 /// </summary>
 public class ProfileDeleteLetterTests : LetterTestBase<ProfileDeleteNotifyAction>
 {
-    /// <summary>What <c>CommonLinkUtility.GetConfirmationEmailUrl</c> builds for <c>ProfileRemove</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/ProfileRemove");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>
-    /// The pattern carries no <c>$TrulyYours</c> — it ends on the note about how long the link lives —
-    /// even though <c>Init</c> passes the signature in.
-    /// </summary>
-    protected override bool HasSignature => false;
-
-    /// <summary>Mirrors <c>ProfileDeleteNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(ProfileDeleteNotifyAction action, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonRemoveProfile", culture, ConfirmUrl)
-        ];
+        return action.Init(scope.Recipient);
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should()
-            .Contain(Resource("ButtonRemoveProfile", culture))
-            .And.Contain(ConfirmUrl);
+        letter.Body.Should().Contain(Resource("ButtonRemoveProfile", scope.Culture));
 
         // The portal address is a textile link twice: in the heading and in the sentence recalling
         // what was requested. A translation that drops a quotation mark around it still renders —
         // as the bare address in the middle of the text, which is what lv used to print. Counting
         // the anchors catches that, where merely looking for the address would not.
-        Regex.Matches(letter.Body, $"href=\"{Regex.Escape(LetterEnvironment.PortalUrl)}\"")
+        Regex.Matches(letter.Body, $"href=\"{Regex.Escape(scope.PortalUrl)}\"")
             .Should().HaveCount(2, "the portal address is linked in the heading and in the request line");
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"Disabling account on {LetterEnvironment.PortalHost}");
+        letter.Subject.Should().Be($"Disabling account on {new Uri(scope.PortalUrl).Host}");
 
         letter.Body.Should().Contain("Disabling account on")
             .And.Contain("You have requested to disable your account in")

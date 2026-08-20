@@ -39,36 +39,27 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasAdminWelcomeLetterTests : LetterTestBase<SaasAdminWelcomeV1NotifyAction>
 {
-    /// <summary>The billing page, used both as the button target and as the <c>$PricingPage</c> tag.</summary>
-    private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
-
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("discover_business_subscription.gif");
-
-    /// <summary>Mirrors <c>SaasAdminWelcomeV1NotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(SaasAdminWelcomeV1NotifyAction action, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonUpgrade", culture, BillingUrl),
-            new TagValue(CommonTags.PricingPage, BillingUrl)
-        ];
+        action.Init(scope.Recipient);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonUpgrade", culture))
-            .And.Contain(BillingUrl);
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonUpgrade", scope.Culture))
+            .And.Contain($"{scope.PortalUrl}/billing/overview");
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Discover business subscription of {logoText}");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain("three simple questions")
             .And.Contain($"collaborate with in your {logoText}?")
             .And.Contain($"use {logoText} under your own brand?")

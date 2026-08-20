@@ -34,39 +34,24 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The invitation as a guest receives it. The four guest actions currently render the very same
-/// <c>user_activation_v1</c> template as the four user ones, so this class is a deliberate duplicate of
-/// <see cref="SaasUserActivationLetterTests"/>: it holds the place for the guest wording and starts failing
-/// the day the two letters diverge.
+/// The invitation a guest gets (<c>saas_guest_activation_v115</c>). The guest twin of
+/// <see cref="SaasUserActivationLetterTests"/>: same shape, its own subject and wording.
 /// </summary>
 public class SaasGuestActivationLetterTests : LetterTestBase<SaasGuestActivationV115NotifyAction>
 {
-    /// <summary>The confirmation link, built by the sending code from <c>ConfirmType.Activation</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Activation");
-
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("join_docspace.gif");
-
-    /// <summary>The SaaS footer; Enterprise passes <c>null</c> and Opensource <c>opensource</c>.</summary>
-    protected override string Footer => "social";
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>Init</c>, which is now the same in all four guest activation actions.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(SaasGuestActivationV115NotifyAction action, LetterScope scope)
     {
-        return [OrangeButton("ButtonAccept", culture, ConfirmUrl)];
+        return action.Init(scope.Recipient);
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonAccept", culture))
-            .And.Contain(ConfirmUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        // Not the invitation link itself: Init shortens it, so the short key differs on every call.
+        letter.Body.Should().Contain(Resource("ButtonAccept", scope.Culture))
+            .And.Contain(scope.PortalUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"You are invited to {LetterEnvironment.LogoText}");
 

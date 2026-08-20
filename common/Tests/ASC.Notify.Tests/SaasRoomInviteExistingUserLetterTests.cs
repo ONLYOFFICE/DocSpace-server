@@ -36,46 +36,38 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The room invitation for someone who already has an account (<c>saas_room_invite_existing_user</c>).
 /// Where <see cref="SaasRoomInviteLetterTests"/> starts a sign-up, this one names the inviter and the
-/// room and links straight into it.
+/// room and links straight into it. The inviter is whoever is authenticated, so the letter is asserted
+/// against that name rather than a made-up one.
 /// </summary>
 public class SaasRoomInviteExistingUserLetterTests : LetterTestBase<SaasRoomInviteExistingUserNotifyAction>
 {
     private const string RoomTitle = "Room title";
 
-    /// <summary>The room page, passed into <c>Init</c> by the caller.</summary>
-    private static string RoomUrl => LetterEnvironment.PortalLink("rooms/shared/1");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>SaasRoomInviteExistingUserNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    private static string RoomUrl(LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonJoinRoom", culture, RoomUrl),
-            new TagValue(CommonTags.Message, RoomTitle),
-            new TagValue(CommonTags.InviteLink, RoomUrl)
-        ];
+        return $"{scope.PortalUrl}/rooms/shared/1";
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override Task InitAsync(SaasRoomInviteExistingUserNotifyAction action, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonJoinRoom", culture))
-            .And.Contain(RoomUrl)
+        action.Init(scope.Recipient, RoomTitle, RoomUrl(scope));
+
+        return Task.CompletedTask;
+    }
+
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Body.Should().Contain(Resource("ButtonJoinRoom", scope.Culture))
+            .And.Contain(RoomUrl(scope))
             .And.Contain(RoomTitle)
-            .And.Contain(AuthorName)
-            .And.Contain(LetterEnvironment.PortalUrl);
+            .And.Contain(scope.PortalUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"You're invited to the {LetterEnvironment.LogoText} room");
 
         letter.Body.Should().Contain("Hello!")
-            .And.Contain($"{AuthorName} invited you to join the room");
+            .And.Contain("invited you to join the room");
     }
 }

@@ -37,28 +37,19 @@ namespace ASC.Notify.Tests;
 /// The first warning a free portal gets (<c>saas_admin_startup_warning_after_three_months_v1</c>), sent to
 /// the owner after three months without activity. The six-month letter and the removal follow.
 /// </summary>
-public class SaasAdminStartupWarningAfterThreeMonthsLetterTests : LetterTestBase<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>
+public class SaasAdminStartupWarningAfterThreeMonthsLetterTests : PeriodicLetterTestBase<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>
 {
     private static string DashboardUrl => LetterEnvironment.PortalLink("dashboard");
 
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("docspace_deleted.gif");
-
-    /// <summary>Mirrors the three-months-without-activity block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
-    {
-        return [OrangeButton("ButtonLogIn", culture, DashboardUrl)];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should()
-            .Contain(Resource("ButtonLogIn", culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
+            .Contain(Resource("ButtonLogIn", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
             .And.Contain(DashboardUrl)
             .And.Contain(LetterEnvironment.PortalUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

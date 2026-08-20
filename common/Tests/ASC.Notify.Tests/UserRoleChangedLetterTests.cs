@@ -34,14 +34,13 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What a member gets when their role in a room changes (<c>user_role_changed</c>).
+/// What a member gets when their role in a room changes (<c>user_role_changed</c>). The room and the role
+/// are inputs the sending code passes in; the help-center link is resolved by <c>Init</c> itself.
 /// </summary>
 public class UserRoleChangedLetterTests : LetterTestBase<UserRoleChangedNotifyAction>
 {
     private const string RoomTitle = "Room title";
     private const string UserRole = "Editor";
-
-    private static string RoomUrl => LetterEnvironment.PortalLink("rooms/shared/1");
 
     /// <summary>The access rights article the letter points at.</summary>
     private static string HelpCenterUrl(CultureInfo culture)
@@ -49,34 +48,28 @@ public class UserRoleChangedLetterTests : LetterTestBase<UserRoleChangedNotifyAc
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Helpcenter, "accessrights", culture, "https://helpcenter.onlyoffice.com");
     }
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>UserRoleChangedNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    private static string RoomUrl(LetterScope scope)
     {
-        return
-        [
-            new TagValue("RoomTitle", RoomTitle),
-            new TagValue("RoomUrl", RoomUrl),
-            new TagValue("UserRole", UserRole),
-            new TagValue("HelpCenterUrl", HelpCenterUrl(culture))
-        ];
+        return $"{scope.PortalUrl}/rooms/shared/1";
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override Task InitAsync(UserRoleChangedNotifyAction action, LetterScope scope)
+    {
+        action.Init(scope.Recipient, RoomTitle, RoomUrl(scope), UserRole);
+
+        return Task.CompletedTask;
+    }
+
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should()
             .Contain(RoomTitle)
-            .And.Contain(RoomUrl)
+            .And.Contain(RoomUrl(scope))
             .And.Contain(UserRole)
-            .And.Contain(HelpCenterUrl(culture));
+            .And.Contain(HelpCenterUrl(scope.Culture));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

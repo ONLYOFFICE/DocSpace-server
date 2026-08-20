@@ -39,8 +39,9 @@ namespace ASC.Notify.Tests;
 /// These conditions used to be an <c>else if</c> chain inside <c>StudioPeriodicNotify</c>, where nothing
 /// could reach them: the chain needed a tenant, a tariff service and a database. Now each letter answers
 /// from a <see cref="PeriodicLetterContext"/> alone, so the schedule is testable without any of that -
-/// the action is built the same way <see cref="LetterTestBase{TAction}"/> builds it, without a
-/// constructor, since a predicate reads nothing but the context.
+/// the action is built without a constructor at all, since a predicate reads nothing but the context.
+/// That is what separates these tests from the letter ones: rendering what a letter *says* needs the
+/// real action out of the container, but asking *when* it goes out needs nothing.
 ///
 /// The letters judge themselves independently, so the mutual exclusion the chain used to give for free
 /// now has to be written down. <see cref="OnlyOneEnterpriseLetterClaimsAPortal"/> is where that is checked.

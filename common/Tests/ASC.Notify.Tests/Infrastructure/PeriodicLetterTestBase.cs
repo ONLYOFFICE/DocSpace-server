@@ -43,7 +43,7 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// about an expiring tariff does not need a portal whose tariff actually expires.
 /// </summary>
 /// <typeparam name="TAction">The periodic notify action that sends this letter in production.</typeparam>
-public abstract class PeriodicLetterTestBase<TAction> : PortalLetterTestBase<TAction>
+public abstract class PeriodicLetterTestBase<TAction> : LetterTestBase<TAction>
     where TAction : BasePeriodicNotifyAction
 {
     protected override async Task InitAsync(TAction action, LetterScope scope)

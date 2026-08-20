@@ -34,38 +34,31 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What the owner of a portal created from the Zoom app gets (<c>zoom_welcome</c>). Textile with an
-/// HTML table dropped in for the plan list, and a plan of its own — 100 admins, not the SaaS STARTUP
-/// numbers.
+/// The welcome letter for a portal created from the Zoom app (<c>zoom_welcome</c>). It carries no tags of
+/// its own beyond the ones every letter gets, which is why <c>Init</c> takes nothing but the recipient.
 /// </summary>
 public class ZoomWelcomeLetterTests : LetterTestBase<ZoomWelcomeNotifyAction>
 {
-
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>ZoomWelcomeNotifyAction.Init</c>, which sets no letter-specific tags.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(ZoomWelcomeNotifyAction action, LetterScope scope)
     {
-        return [];
+        action.Init(scope.Recipient);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(scope.PortalUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Welcome to {logoText}!");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"You have just created {logoText},")
             .And.Contain("Your current tariff plan is STARTUP")
             .And.Contain("100 admins")

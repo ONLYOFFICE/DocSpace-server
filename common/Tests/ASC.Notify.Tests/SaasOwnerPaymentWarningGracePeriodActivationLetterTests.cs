@@ -37,44 +37,28 @@ namespace ASC.Notify.Tests;
 /// The letter that opens the grace period (<c>saas_owner_payment_warning_grace_period_activation</c>),
 /// sent to the owner and the payer the day after the subscription fell due.
 /// </summary>
-public class SaasOwnerPaymentWarningGracePeriodActivationLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>
+public class SaasOwnerPaymentWarningGracePeriodActivationLetterTests : PeriodicLetterTestBase<SaasOwnerPaymentWarningGracePeriodActivationNotifyAction>
 {
     private const string PaymentDelay = "30";
 
     /// <summary>The billing page the button leads to.</summary>
     private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors the grace period activation block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonVisitBillingSection", culture, BillingUrl),
-            new TagValue(CommonTags.PaymentDelay, PaymentDelay)
-        ];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(RecipientName)
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(PaymentDelay)
-            .And.Contain(Resource("ButtonVisitBillingSection", culture))
+            .And.Contain(Resource("ButtonVisitBillingSection", scope.Culture))
             .And.Contain(BillingUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Grace period for your {logoText} activated");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"grace period of {PaymentDelay}")
             .And.Contain("Make sure to pay your Business subscription before the grace period is due.");
 

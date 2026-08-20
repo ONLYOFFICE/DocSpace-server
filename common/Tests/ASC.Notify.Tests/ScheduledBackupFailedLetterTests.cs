@@ -34,50 +34,40 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What the owner gets when a scheduled backup fails (<c>scheduled_backup_failed</c>). Unlike most
-/// letters it has a Telegram twin of its own, <c>pattern_scheduled_backup_failed_tg</c>, so the two are
-/// checked to stay in step — see <see cref="EmailAndTelegram_AgreeOnLinks"/>.
+/// What the owner gets when the nightly backup fails (<c>scheduled_backup_failed</c>). Unlike the manual
+/// one it points at the backup settings and at the add-ons page, since the usual cause is a full quota.
 /// </summary>
 public class ScheduledBackupFailedLetterTests : LetterTestBase<ScheduledBackupFailedNotifyAction>
 {
-    /// <summary>The two settings pages the letter points at, relative to the portal root.</summary>
     private const string BackupPath = "/portal-settings/backup/data-backup";
     private const string AddonsPath = "/billing/addons";
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
+    /// <summary>The failure the sending code passes in — a real one, from a full disk.</summary>
+    private const string ErrorMessage = "Disk quota exceeded";
 
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>The backup letters sign off with "Best regards", not "Truly Yours".</summary>
-    protected override string SignatureKey => "BestRegardsText";
-
-    /// <summary>
-    /// Mirrors <c>ScheduledBackupFailedNotifyAction.Init</c>. Both settings links and the support one
-    /// come from common tags, so the letter needs no tags of its own.
-    /// </summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(ScheduledBackupFailedNotifyAction action, LetterScope scope)
     {
-        return [new TagValue(CommonTags.Message, "Disk quota exceeded")];
+        action.Init(scope.Recipient, ErrorMessage);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(LetterEnvironment.PortalUrl + BackupPath)
-            .And.Contain(LetterEnvironment.PortalUrl + AddonsPath)
+        letter.Body.Should().Contain(scope.DisplayName)
+            .And.Contain(scope.PortalUrl + BackupPath)
+            .And.Contain(scope.PortalUrl + AddonsPath)
             .And.Contain(LetterEnvironment.SupportUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Auto backup for your {logoText} failed");
 
         // No apostrophes in the expected strings: TextileStyler rewrites them.
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.DisplayName}!")
             .And.Contain($"The scheduled backup process for your {logoText}")
             .And.Contain("has failed.")
             .And.Contain("Backup")
@@ -88,8 +78,8 @@ public class ScheduledBackupFailedLetterTests : LetterTestBase<ScheduledBackupFa
     }
 
     /// <summary>
-    /// The Telegram copy is a separate resource, so it can drift. It must point at the same two settings
-    /// pages and carry no leftover brand either.
+    /// The Telegram copy is a separate resource, so it can drift. Both settings links have to be in it,
+    /// and the payments page it used to point at must not come back.
     /// </summary>
     [Fact]
     public void EmailAndTelegram_AgreeOnLinks()

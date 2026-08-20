@@ -73,6 +73,15 @@ public sealed class LetterScope : IDisposable
 
     public CultureInfo Culture { get; }
 
+    /// <summary>
+    /// The recipient as <c>DisplayUserName</c> renders them. Worth having next to
+    /// <see cref="UserInfo.FirstName"/>, because letters disagree about which of the two they greet with:
+    /// the welcome ones use the first name, the backup ones the full display name. A harness that filled
+    /// the <c>UserName</c> tag itself could not tell the difference.
+    /// </summary>
+    public string DisplayName => Recipient.DisplayUserName(
+        _scope.ServiceProvider.GetRequiredService<DisplayUserSettingsHelper>());
+
     public static async Task<LetterScope> OpenAsync(LetterStackFixture fixture, CultureInfo culture)
     {
         var scope = fixture.Host.CreateScope();

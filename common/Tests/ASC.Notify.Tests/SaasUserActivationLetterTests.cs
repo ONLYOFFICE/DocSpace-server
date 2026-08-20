@@ -41,7 +41,7 @@ namespace ASC.Notify.Tests;
 /// Nothing about the tags is stated here: the letter's button, footer, top image and signature all come
 /// from <c>SaasUserActivationV1NotifyAction.Init</c>, which is the point of the exercise.
 /// </summary>
-public class SaasUserActivationLetterTests : PortalLetterTestBase<SaasUserActivationV1NotifyAction>
+public class SaasUserActivationLetterTests : LetterTestBase<SaasUserActivationV1NotifyAction>
 {
     protected override Task InitAsync(SaasUserActivationV1NotifyAction action, LetterScope scope)
     {

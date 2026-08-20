@@ -34,14 +34,13 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What a member gets when their role in an AI agent changes (<c>user_agent_role_changed</c>).
+/// What a member gets when their role in an AI agent changes (<c>user_agent_role_changed</c>). It reuses
+/// the room letter's tags, which is why the agent arrives under <c>RoomTitle</c> and <c>RoomUrl</c>.
 /// </summary>
 public class UserAgentRoleChangedLetterTests : LetterTestBase<UserAgentRoleChangedNotifyAction>
 {
     private const string AgentTitle = "Agent title";
     private const string UserRole = "Editor";
-
-    private static string AgentUrl => LetterEnvironment.PortalLink("ai/agents/1");
 
     /// <summary>The access rights article the letter points at.</summary>
     private static string HelpCenterUrl(CultureInfo culture)
@@ -49,34 +48,28 @@ public class UserAgentRoleChangedLetterTests : LetterTestBase<UserAgentRoleChang
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Helpcenter, "accessrights", culture, "https://helpcenter.onlyoffice.com");
     }
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>UserAgentRoleChangedNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    private static string AgentUrl(LetterScope scope)
     {
-        return
-        [
-            new TagValue("RoomTitle", AgentTitle),
-            new TagValue("RoomUrl", AgentUrl),
-            new TagValue("UserRole", UserRole),
-            new TagValue("HelpCenterUrl", HelpCenterUrl(culture))
-        ];
+        return $"{scope.PortalUrl}/ai/agents/1";
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override Task InitAsync(UserAgentRoleChangedNotifyAction action, LetterScope scope)
+    {
+        action.Init(scope.Recipient, AgentTitle, AgentUrl(scope), UserRole);
+
+        return Task.CompletedTask;
+    }
+
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should()
             .Contain(AgentTitle)
-            .And.Contain(AgentUrl)
+            .And.Contain(AgentUrl(scope))
             .And.Contain(UserRole)
-            .And.Contain(HelpCenterUrl(culture));
+            .And.Contain(HelpCenterUrl(scope.Culture));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

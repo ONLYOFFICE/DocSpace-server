@@ -34,123 +34,57 @@
 namespace ASC.Notify.Tests.Infrastructure;
 
 /// <summary>
-/// Shared harness for letter tests. A derived class names the notify action it covers, describes the
-/// tags that action's <c>Init</c> sets and says what the text must contain — and gets two tests per
-/// culture from <see cref="LetterCultures"/>:
+/// Shared harness for letter tests. A derived class says how the production action's <c>Init</c> is
+/// called and what the text must contain — and gets two tests per culture from
+/// <see cref="LetterCultures"/>:
 ///
 /// <list type="bullet">
 /// <item><see cref="Letter_Renders"/> — renders the letter, runs the checks that hold for every letter
 /// plus the letter's own, and saves the HTML next to the test binaries for a browser.</item>
-/// <item><see cref="Letter_IsDeliveredToMailPit"/> — additionally delivers it to the MailPit the test
-/// run started (<see cref="LetterStackFixture"/>), prints the message URL, and asserts how much of the
-/// letter's markup real mail clients support.</item>
+/// <item><see cref="Letter_IsDeliveredToMailPit"/> — additionally delivers it to MailPit, prints the
+/// message URL, and asserts how much of the letter's markup real mail clients support.</item>
 /// </list>
 ///
-/// The template is taken from <typeparamref name="TAction"/> itself rather than named again here. Since
-/// the pattern XML was removed the action *is* the only place a letter's <c>subject_</c>/<c>pattern_</c>
-/// keys are written down, so a test that repeated them could keep rendering an old template after the
-/// action moved to a new one, and stay green while doing it.
+/// The tag values come from the action itself. A test used to restate them — the orange button, the
+/// footer flavour, the top image, whether the signature is a table row — which was a copy of <c>Init</c>
+/// free to fall out of step with it silently: the test stayed green while rendering a letter the sending
+/// code no longer produces.
 ///
-/// Everything about the surroundings (portal address, image folder, external links, branding) comes from
-/// <see cref="LetterEnvironment"/> — a letter test must not hard-code URLs.
+/// That is why this harness needs the whole stack (<see cref="LetterStackFixture"/>): <c>Init</c> resolves
+/// links against the current tenant and shortens them through the database, so there is no calling it
+/// without a portal.
 /// </summary>
 /// <typeparam name="TAction">The notify action that sends this letter in production.</typeparam>
 public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 {
-    /// <summary>
-    /// The inbox started for the whole assembly. Read from the ambient test context rather than taken
-    /// through a constructor: xUnit hands assembly fixtures to test classes as constructor arguments,
-    /// and threading one through would mean a constructor on every letter test that only passes it on.
-    /// </summary>
-    private static async ValueTask<MailPitInbox> GetInboxAsync()
+    private static async ValueTask<LetterStackFixture> GetStackAsync()
     {
-        var fixture = await TestContext.Current.GetFixture<LetterStackFixture>();
-
-        return fixture?.Inbox
+        return await TestContext.Current.GetFixture<LetterStackFixture>()
             ?? throw new InvalidOperationException(
-                $"No MailPit inbox in the test context. {nameof(LetterStackFixture)} is registered with "
+                $"No stack in the test context. {nameof(LetterStackFixture)} is registered with "
                 + "[assembly: AssemblyFixture] and starts before any letter test runs.");
     }
 
     /// <summary>
-    /// The production action, built without running its constructor. Every action declares its
-    /// <see cref="NotifyAction.ID"/> and <see cref="NotifyAction.Patterns"/> as plain expressions over
-    /// string literals and resource properties — none of the 101 of them reads a constructor dependency
-    /// — so an uninitialised instance answers both truthfully. Resolving them through DI instead would
-    /// mean standing up <c>StudioNotifyHelper</c>, <c>CommonLinkUtility</c>, a tenant and a security
-    /// context to read two properties. If an action ever does start reading a dependency here, this
-    /// throws a <see cref="NullReferenceException"/> — loudly, not silently.
+    /// How the sending code calls this letter's <c>Init</c>. This is the whole of what a letter test has
+    /// to say about its tags: there is no <c>Init</c> on <see cref="INotifyAction"/> — every action
+    /// declares its own signature — so the call itself is the one thing that cannot be shared.
     /// </summary>
-    private static readonly TAction _action = (TAction)RuntimeHelpers.GetUninitializedObject(typeof(TAction));
-
-    /// <summary>Action id, which is also the letter's resource key suffix in almost every case.</summary>
-    private static string LetterId => _action.ID;
-
-    /// <summary>
-    /// The pattern under test, picked from the action the way <c>NotifyEngine.PrepareRequestFillPatterns</c>
-    /// picks it — by sender name. An action may also carry a telegram twin; this is the email one.
-    /// </summary>
-    private static IPattern Pattern =>
-        _action.Patterns.Find(pattern => pattern.SenderName == ASC.Core.Configuration.Constants.NotifyEMailSenderSysName)
-        ?? throw new InvalidOperationException(
-            $"Action '{_action.ID}' carries no email pattern, so there is no letter to render.");
-
-    /// <summary>
-    /// The tags the sending code sets for this letter specifically (the orange button, <c>URL1</c>…),
-    /// mirroring its block in <c>StudioPeriodicNotify</c>. The tags every letter gets are added by the
-    /// harness.
-    /// </summary>
-    protected abstract IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture);
+    protected abstract Task InitAsync(TAction action, LetterScope scope);
 
     /// <summary>
     /// What this letter must carry in every culture — the links, the button target, the images. Wording
     /// belongs in <see cref="AssertDefaultCultureText"/>, since another culture may carry a translation.
+    /// Optional: a letter whose <c>Init</c> shortens its link has nothing stable to assert on, because
+    /// the short key is minted by the database on every call.
     /// </summary>
-    protected abstract void AssertContent(RenderedLetter letter, CultureInfo culture);
+    protected virtual void AssertContent(RenderedLetter letter, LetterScope scope) { }
 
     /// <summary>
     /// The wording of the default-culture resources, checked only for
     /// <see cref="LetterCultures.DefaultCultureName"/>.
     /// </summary>
-    protected virtual void AssertDefaultCultureText(RenderedLetter letter) { }
-
-    /// <summary>
-    /// The top image the sending code sets for this letter (<c>topGif = studioNotifyHelper.GetNotificationImageUrl(...)</c>),
-    /// or <c>null</c> when it sets none and the letter logo is shown instead. When set, the harness both
-    /// passes it in and asserts it survived into the letter.
-    /// </summary>
-    protected virtual string? TopGif => null;
-
-    /// <summary>The first name the letter greets, i.e. the value of the <c>UserName</c> tag.</summary>
-    protected virtual string RecipientName => "FirstName";
-
-    /// <summary>
-    /// Who triggered the notification, i.e. the value of the <c>__AuthorName</c> tag — the inviter in
-    /// the room and agent letters. Filled for every letter by <c>NotifyConfiguration</c> in production.
-    /// </summary>
-    protected virtual string AuthorName => "AuthorName";
-
-    /// <summary>
-    /// Footer flavour, as chosen in <c>BasePeriodicNotifyAction.Init</c>: <c>common</c> for an
-    /// owner/admin recipient, <c>social</c> for everybody else.
-    /// </summary>
-    protected virtual string Footer => "common";
-
-    /// <summary>Whether <c>$TrulyYours</c> is a top-level table row (true for the HTML letters).</summary>
-    protected virtual bool TrulyYoursAsTableRow => true;
-
-    /// <summary>
-    /// Whether the letter signs off at all. A handful of short transactional letters — the password
-    /// setup link, for one — deliberately carry no <c>$TrulyYours</c>, so the signature check is skipped
-    /// for them.
-    /// </summary>
-    protected virtual bool HasSignature => true;
-
-    /// <summary>
-    /// Which resource the sending code signs off with. Almost every letter uses
-    /// <c>TrulyYoursText</c>; the backup ones pass <c>BestRegardsText</c> instead.
-    /// </summary>
-    protected virtual string SignatureKey => "TrulyYoursText";
+    protected virtual void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope) { }
 
     /// <summary>
     /// The smallest share of mail clients that must fully render this letter's markup, as MailPit's
@@ -171,23 +105,29 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
     {
         var culture = CultureInfo.GetCultureInfo(cultureName);
 
-        var letter = await LetterPreview.RenderAsync(Pattern, BuildTags(culture), culture);
+        var stack = await GetStackAsync();
 
-        LetterAssertions.PatternIsPortable(Pattern);
-        LetterAssertions.NoUnresolvedTags(Pattern, letter, $"{GetType().Name}.BuildLetterTags");
+        using var scope = await LetterScope.OpenAsync(stack, culture);
+
+        var (action, pattern, tags) = await PrepareAsync(scope);
+
+        var letter = await LetterPreview.RenderAsync(pattern, tags, culture);
+
+        LetterAssertions.PatternIsPortable(pattern);
+        LetterAssertions.NoUnresolvedTags(pattern, letter, $"the tags {typeof(TAction).Name}.Init sets");
         LetterAssertions.LinksRendered(letter);
 
-        AssertTopImage(letter);
-        AssertSignature(letter, culture);
+        AssertTopImage(letter, tags);
+        AssertSignature(letter, tags);
 
-        AssertContent(letter, culture);
+        AssertContent(letter, scope);
 
         if (cultureName == LetterCultures.DefaultCultureName)
         {
-            AssertDefaultCultureText(letter);
+            AssertDefaultCultureText(letter, scope);
         }
 
-        await SaveForReviewAsync(letter, culture);
+        await SaveForReviewAsync(letter, action.ID, culture);
     }
 
     [Theory]
@@ -197,13 +137,20 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
         var cancellationToken = TestContext.Current.CancellationToken;
 
         var culture = CultureInfo.GetCultureInfo(cultureName);
-        var letter = await LetterPreview.RenderAsync(Pattern, BuildTags(culture), culture);
+
+        var stack = await GetStackAsync();
+
+        using var scope = await LetterScope.OpenAsync(stack, culture);
+
+        var (action, pattern, tags) = await PrepareAsync(scope);
+
+        var letter = await LetterPreview.RenderAsync(pattern, tags, culture);
 
         // A unique address per run, so the assertion below finds this letter and not one left over from
         // an earlier run, another culture or the portal itself.
-        var address = $"{LetterId}-{cultureName}-{Guid.NewGuid():N}@preview.onlyoffice.com";
+        var address = $"{action.ID}-{cultureName}-{Guid.NewGuid():N}@preview.onlyoffice.com";
 
-        var inbox = await GetInboxAsync();
+        var inbox = stack.Inbox;
 
         await inbox.SendAsync(address, letter.Subject, letter.Body, cancellationToken);
 
@@ -212,8 +159,8 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
         delivered.Should().NotBeNull("the letter should show up in the MailPit inbox");
 
         // Trimmed, because a mail header cannot carry surrounding whitespace and none of it survives
-        // transport. A couple of translations end their subject with a space (zh-CN, for two), and the
-        // reader never sees the difference — asserting on it would only test MIME, not the letter.
+        // transport. A couple of translations end their subject with a space, and the reader never sees
+        // the difference — asserting on it would only test MIME, not the letter.
         delivered!.Subject.Should().Be(letter.Subject.Trim());
 
         var check = await inbox.CheckHtmlAsync(delivered.Id, cancellationToken);
@@ -225,6 +172,122 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
             + $"({check.Total.Tests} tests over {check.Total.Nodes} nodes)");
 
         check.Total.Supported.Should().BeGreaterThanOrEqualTo(MinimumHtmlSupport, DescribeWarnings(check));
+    }
+
+    /// <summary>
+    /// Resolves the action, runs the letter's own <c>Init</c> and assembles what the renderer needs.
+    /// </summary>
+    private async Task<(TAction Action, IPattern Pattern, List<ITagValue> Tags)> PrepareAsync(LetterScope scope)
+    {
+        var action = scope.Services.GetRequiredService<TAction>();
+
+        await InitAsync(action, scope);
+
+        var pattern = action.Patterns.Find(p => p.SenderName == ASC.Core.Configuration.Constants.NotifyEMailSenderSysName)
+            ?? throw new InvalidOperationException(
+                $"Action '{action.ID}' carries no email pattern, so there is no letter to render.");
+
+        var tags = await BuildCommonTagsAsync(scope);
+
+        // The action's own tags last, so that a letter which sets one of the common tags for itself wins
+        // — the same order the engine ends up in, where Init runs before the request is transferred.
+        tags.AddRange(action.Tags ?? []);
+
+        return (action, pattern, tags);
+    }
+
+    /// <summary>
+    /// The tags production does NOT get from an action: exactly the set
+    /// <c>NotifyTransferRequest.BeforeTransferRequestAsync</c> appends to every request. Keeping the two
+    /// lists identical is what makes the boundary meaningful — anything this list holds that the transfer
+    /// does not is a value the test invented, and anything it misses is a tag a letter could reference
+    /// while the test renders it blank.
+    ///
+    /// The portal-derived values come from the portal; the external links and the branding still come
+    /// from <see cref="LetterEnvironment"/> rather than from the settings the transfer step reads. The
+    /// step that closes that gap is to run <c>NotifyTransferRequest</c> itself and delete this method;
+    /// until then two things it does are knowingly not reproduced — the <c>LetterLogo</c> attachment it
+    /// adds to letters without a top image, and its removal of <c>TopGif</c> from a white-labelled portal.
+    /// </summary>
+    private static async Task<List<ITagValue>> BuildCommonTagsAsync(LetterScope scope)
+    {
+        var logoText = LetterEnvironment.LogoText;
+
+        // The portal-relative addresses come from the same helper the sending code uses. Spelling the
+        // paths out here instead would be a second implementation of CommonLinkUtility, free to disagree
+        // with the one that built the links inside the letter.
+        var links = scope.Services.GetRequiredService<CommonLinkUtility>();
+        var author = scope.Services.GetRequiredService<AuthContext>().CurrentAccount.ID;
+
+        return
+        [
+            new TagValue(CommonTags.AuthorID, author),
+            new TagValue(CommonTags.AuthorName, scope.Recipient.DisplayUserName(
+                false, scope.Services.GetRequiredService<DisplayUserSettingsHelper>())),
+            new TagValue(CommonTags.AuthorUrl, links.GetFullAbsolutePath(await links.GetUserProfileAsync(author))),
+
+            new TagValue(CommonTags.VirtualRootPath, scope.PortalUrl),
+            new TagValue(CommonTags.VirtualRootHost, new Uri(scope.PortalUrl).Host),
+
+            // Empty in a letter: the product a notification belongs to is ambient request state
+            // (`asc.web.product_id`), which a scheduled or event-driven send does not have either.
+            new TagValue(CommonTags.ProductID, Guid.Empty),
+
+            new TagValue(CommonTags.DateTime, DateTime.UtcNow),
+            new TagValue(CommonTags.RecipientID, Context.SysRecipient),
+
+            new TagValue(CommonTags.ProfileUrl, links.GetFullAbsolutePath(links.GetMyStaff())),
+            new TagValue(CommonTags.RecipientSubscriptionConfigURL, links.GetFullAbsolutePath(links.GetUnsubscribe())),
+
+            new TagValue(CommonTags.HelpLink, LetterEnvironment.HelpUrl),
+            new TagValue(CommonTags.SalesEmail, LetterEnvironment.SalesEmail),
+            new TagValue(CommonTags.SiteLink, LetterEnvironment.SiteUrl),
+            new TagValue(CommonTags.SupportLink, LetterEnvironment.SupportUrl),
+            new TagValue(CommonTags.SupportEmail, LetterEnvironment.SupportEmail),
+
+            new TagValue(CommonTags.LetterLogoText, logoText),
+            new TagValue(CommonTags.SendFrom, logoText),
+            new TagValue(CommonTags.MailWhiteLabelSettings, new MailWhiteLabelSettings().GetDefault()),
+
+            new TagValue(CommonTags.ImagePath, LetterEnvironment.NotificationImagePath)
+        ];
+    }
+
+    /// <summary>
+    /// The top image, as the action decided it. A letter that sets none is shown the tenant letter logo
+    /// instead — see the note on <see cref="BuildCommonTags"/> about how production reaches that logo.
+    /// </summary>
+    private static void AssertTopImage(RenderedLetter letter, List<ITagValue> tags)
+    {
+        var topGif = tags.Find(tag => tag.Tag == CommonTags.TopGif)?.Value as string;
+
+        if (string.IsNullOrEmpty(topGif))
+        {
+            letter.Body.Should().Contain("mail_logo.png", "without a top image the letter logo is shown instead");
+
+            return;
+        }
+
+        letter.Body.Should().Contain(topGif, "the top image the action sets must reach the letter");
+    }
+
+    /// <summary>
+    /// That the letter signed off, when the action signed it. Whether a letter has a signature at all,
+    /// which resource it uses and whether it is a table row of its own are the action's decisions, so
+    /// there is nothing here for a test to declare — only that what the action produced survived
+    /// rendering. The wording itself belongs to <see cref="AssertDefaultCultureText"/>.
+    /// </summary>
+    private static void AssertSignature(RenderedLetter letter, List<ITagValue> tags)
+    {
+        var signature = tags.Find(tag => tag.Tag == "TrulyYours")?.Value as string;
+
+        if (string.IsNullOrEmpty(signature))
+        {
+            return;
+        }
+
+        letter.Body.Should().Contain(LetterEnvironment.SiteUrl,
+            "the signature links to the site, so that link has to survive rendering");
     }
 
     /// <summary>
@@ -253,88 +316,16 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
             ?? throw new InvalidOperationException($"Resource key '{key}' is missing.");
     }
 
-    /// <summary>The orange button, with its caption taken from the resource key the sending code uses.</summary>
-    /// <summary>
-    /// The orange button. <paramref name="tag"/> names it — letters that carry two buttons render the
-    /// second one under its own tag, e.g. <c>$OrangeButtonPwd</c>.
-    /// </summary>
-    protected static ITagValue OrangeButton(string captionKey, CultureInfo culture, string url, string tag = "OrangeButton")
-    {
-        return TagValues.OrangeButton(Resource(captionKey, culture), url, tag);
-    }
-
-    /// <summary>
-    /// The tags every letter gets: from <c>BasePeriodicNotifyAction.Init</c> (user name, button,
-    /// signature, images) and from <c>NotifyConfiguration</c> (portal paths, branding, footer settings).
-    /// </summary>
-    private List<ITagValue> BuildTags(CultureInfo culture)
-    {
-        var tags = new List<ITagValue>
-        {
-            new TagValue(CommonTags.Culture, culture.Name),
-            new TagValue(CommonTags.UserName, RecipientName),
-            TagValues.TrulyYours(LetterEnvironment.SiteUrl, Resource(SignatureKey, culture), TrulyYoursAsTableRow),
-
-            new TagValue(CommonTags.TopGif, TopGif ?? string.Empty),
-            new TagValue(CommonTags.ImagePath, LetterEnvironment.NotificationImagePath),
-            new TagValue(CommonTags.LetterLogoText, LetterEnvironment.LogoText),
-
-            new TagValue(CommonTags.Footer, Footer),
-            new TagValue(CommonTags.MailWhiteLabelSettings, new MailWhiteLabelSettings().GetDefault()),
-
-            new TagValue(CommonTags.VirtualRootPath, LetterEnvironment.PortalUrl),
-            new TagValue(CommonTags.VirtualRootHost, LetterEnvironment.PortalHost),
-            new TagValue(CommonTags.RecipientSubscriptionConfigURL, LetterEnvironment.PortalLink("unsubscribe")),
-
-            new TagValue(CommonTags.AuthorName, AuthorName),
-            new TagValue(CommonTags.HelpLink, LetterEnvironment.HelpUrl),
-            new TagValue(CommonTags.SupportLink, LetterEnvironment.SupportUrl),
-            new TagValue(CommonTags.SiteLink, LetterEnvironment.SiteUrl),
-            new TagValue(CommonTags.SalesEmail, LetterEnvironment.SalesEmail),
-            new TagValue(CommonTags.SupportEmail, LetterEnvironment.SupportEmail)
-        };
-
-        tags.AddRange(BuildLetterTags(culture));
-
-        return tags;
-    }
-
-    /// <summary>The signature the harness passes in, in the recipient's culture, plus the site it links to.</summary>
-    private void AssertSignature(RenderedLetter letter, CultureInfo culture)
-    {
-        if (!HasSignature)
-        {
-            return;
-        }
-
-        var signature = Resource(SignatureKey, culture)
-            .Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText);
-
-        letter.Body.Should().Contain(signature).And.Contain(LetterEnvironment.SiteUrl);
-    }
-
-    private void AssertTopImage(RenderedLetter letter)
-    {
-        if (TopGif != null)
-        {
-            letter.Body.Should().Contain(TopGif, "the top image the sending code sets must reach the letter");
-        }
-        else
-        {
-            letter.Body.Should().Contain("mail_logo.png", "without a top image the letter logo is shown instead");
-        }
-    }
-
     /// <summary>
     /// Drops the rendered letter next to the test binaries, so it can be opened in a browser when MailPit
     /// is not running.
     /// </summary>
-    private async Task SaveForReviewAsync(RenderedLetter letter, CultureInfo culture)
+    private static async Task SaveForReviewAsync(RenderedLetter letter, string letterId, CultureInfo culture)
     {
         var directory = Path.Combine(AppContext.BaseDirectory, "letter-preview");
         Directory.CreateDirectory(directory);
 
-        var path = Path.Combine(directory, $"{LetterId}.{culture.Name}.html");
+        var path = Path.Combine(directory, $"{letterId}.{culture.Name}.html");
 
         await File.WriteAllTextAsync(path, letter.Body, TestContext.Current.CancellationToken);
 

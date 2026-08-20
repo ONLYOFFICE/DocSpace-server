@@ -39,34 +39,28 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasRoomInviteLetterTests : LetterTestBase<SaasRoomInviteNotifyAction>
 {
-    /// <summary>The confirmation link, passed into <c>Init</c> by the caller.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/LinkInvite");
+    private const string RoomTitle = "Room title";
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>SaasRoomInviteNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    private static string ConfirmUrl(LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonAccept", culture, ConfirmUrl),
-            new TagValue(CommonTags.Message, "Room title"),
-            new TagValue(CommonTags.InviteLink, ConfirmUrl)
-        ];
+        return $"{scope.PortalUrl}/confirm/LinkInvite";
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override Task InitAsync(SaasRoomInviteNotifyAction action, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonAccept", culture))
-            .And.Contain(ConfirmUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        action.Init(scope.Culture.Name, RoomTitle, ConfirmUrl(scope));
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Body.Should().Contain(Resource("ButtonAccept", scope.Culture))
+            .And.Contain(ConfirmUrl(scope))
+            .And.Contain(scope.PortalUrl);
+    }
+
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"{LetterEnvironment.LogoText}: You are invited to the room");
 

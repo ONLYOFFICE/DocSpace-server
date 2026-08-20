@@ -39,6 +39,7 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
 global using ASC.Api.Core.Extensions;
+global using ASC.AuditTrail.Models;
 global using ASC.Common.DependencyInjection;
 global using ASC.Core;
 global using ASC.Core.Billing;
@@ -55,6 +56,7 @@ global using ASC.Notify.Tests.Infrastructure;
 global using ASC.Notify.Textile;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.PublicResources;
+global using ASC.Web.Core.Users;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;

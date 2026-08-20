@@ -34,39 +34,33 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The AI agent invitation for someone who has no account yet (<c>saas_agent_invite</c>) — the agent
-/// counterpart of <see cref="SaasRoomInviteLetterTests"/>, whose link doubles as the sign-up flow.
+/// The AI agent invitation for someone who has no account yet (<c>saas_agent_invite</c>). The agent twin
+/// of <see cref="SaasRoomInviteLetterTests"/>, with its own wording and subject.
 /// </summary>
 public class SaasAgentInviteLetterTests : LetterTestBase<SaasAgentInviteNotifyAction>
 {
-    /// <summary>The confirmation link, passed into <c>Init</c> by the caller.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/LinkInvite");
+    private const string AgentTitle = "Agent title";
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>SaasAgentInviteNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    private static string ConfirmUrl(LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonAccept", culture, ConfirmUrl),
-            new TagValue(CommonTags.Message, "Agent title"),
-            new TagValue(CommonTags.InviteLink, ConfirmUrl)
-        ];
+        return $"{scope.PortalUrl}/confirm/LinkInvite";
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override Task InitAsync(SaasAgentInviteNotifyAction action, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonAccept", culture))
-            .And.Contain(ConfirmUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        action.Init(scope.Culture.Name, AgentTitle, ConfirmUrl(scope));
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Body.Should().Contain(Resource("ButtonAccept", scope.Culture))
+            .And.Contain(ConfirmUrl(scope))
+            .And.Contain(scope.PortalUrl);
+    }
+
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"Join {LetterEnvironment.LogoText}");
 

@@ -39,7 +39,7 @@ namespace ASC.Notify.Tests;
 /// (<c>enterprise_admin_user_apps_tips_v1</c>) must carry the very same text — see
 /// <see cref="Letters_AreIdentical"/>.
 /// </summary>
-public class SaasAdminUserAppsTipsLetterTests : LetterTestBase<SaasAdminUserAppsTipsV1NotifyAction>
+public class SaasAdminUserAppsTipsLetterTests : PeriodicLetterTestBase<SaasAdminUserAppsTipsV1NotifyAction>
 {
     private static string DesktopUrl(CultureInfo culture)
     {
@@ -51,41 +51,24 @@ public class SaasAdminUserAppsTipsLetterTests : LetterTestBase<SaasAdminUserApps
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "downloadmobile", culture, "https://www.onlyoffice.com/download-desktop.aspx#mobile");
     }
 
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("free_apps.gif");
-
-    /// <summary>Mirrors the day-14 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return
-        [
-            new TagValue("IMG1", LetterEnvironment.NotificationImageUrl("windows.png")),
-            new TagValue("IMG2", LetterEnvironment.NotificationImageUrl("apple.png")),
-            new TagValue("IMG3", LetterEnvironment.NotificationImageUrl("linux.png")),
-            new TagValue("IMG4", LetterEnvironment.NotificationImageUrl("android.png")),
-            new TagValue("URL1", DesktopUrl(culture)),
-            new TagValue("URL2", MobileUrl(culture))
-        ];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(DesktopUrl(culture))
-            .And.Contain(MobileUrl(culture))
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(DesktopUrl(scope.Culture))
+            .And.Contain(MobileUrl(scope.Culture))
             .And.Contain(LetterEnvironment.NotificationImageUrl("windows.png"))
             .And.Contain(LetterEnvironment.NotificationImageUrl("apple.png"))
             .And.Contain(LetterEnvironment.NotificationImageUrl("linux.png"))
             .And.Contain(LetterEnvironment.NotificationImageUrl("android.png"));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Get free {logoText} apps");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"Get free {logoText} apps to work on documents from any of your devices.")
             .And.Contain($"To work on documents offline, get {logoText} Desktop Editors")
             .And.Contain($"To edit documents on mobile devices, get {logoText} Documents app")

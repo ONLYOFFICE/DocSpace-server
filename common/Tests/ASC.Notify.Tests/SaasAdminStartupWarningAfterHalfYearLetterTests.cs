@@ -37,7 +37,7 @@ namespace ASC.Notify.Tests;
 /// The last warning before a free portal is removed (<c>saas_admin_startup_warning_after_half_year_v1</c>),
 /// sent to the owner after six months without activity. The portal goes a week later.
 /// </summary>
-public class SaasAdminStartupWarningAfterHalfYearLetterTests : LetterTestBase<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>
+public class SaasAdminStartupWarningAfterHalfYearLetterTests : PeriodicLetterTestBase<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>
 {
     private static string FeedbackUrl(CultureInfo culture)
     {
@@ -49,28 +49,15 @@ public class SaasAdminStartupWarningAfterHalfYearLetterTests : LetterTestBase<Sa
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Common, "legalterms", culture, "https://docspace.onlyoffice.com/s/Fj-fVY--ZhHHnv7");
     }
 
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("docspace_deleted.gif");
-
-    /// <summary>Mirrors the six-months-without-activity block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonLeaveFeedback", culture, FeedbackUrl(culture)),
-            new TagValue("URL1", LegalTermsUrl(culture))
-        ];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(Resource("ButtonLeaveFeedback", culture))
-            .And.Contain(FeedbackUrl(culture))
-            .And.Contain(LegalTermsUrl(culture))
+        letter.Body.Should().Contain(Resource("ButtonLeaveFeedback", scope.Culture))
+            .And.Contain(FeedbackUrl(scope.Culture))
+            .And.Contain(LegalTermsUrl(scope.Culture))
             .And.Contain(LetterEnvironment.PortalUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

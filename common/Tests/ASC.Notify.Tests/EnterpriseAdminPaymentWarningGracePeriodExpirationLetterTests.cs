@@ -36,7 +36,7 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The Enterprise licence warning <c>enterprise_admin_payment_warning_grace_period_expiration</c>, sent to the portal admins.
 /// </summary>
-public class EnterpriseAdminPaymentWarningGracePeriodExpirationLetterTests : LetterTestBase<EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction>
+public class EnterpriseAdminPaymentWarningGracePeriodExpirationLetterTests : PeriodicLetterTestBase<EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction>
 {
     /// <summary>The pricing page the sending code appends its campaign parameters to.</summary>
     private static string PricesUrl(CultureInfo culture)
@@ -44,37 +44,22 @@ public class EnterpriseAdminPaymentWarningGracePeriodExpirationLetterTests : Let
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "docspaceprices", culture, "https://www.onlyoffice.com/docspace-prices.aspx");
     }
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors the matching block of <c>StudioPeriodicNotify.SendEnterpriseLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonPurchaseNow", culture, PricesUrl(culture))
-        ];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonPurchaseNow", culture))
-            .And.Contain(PricesUrl(culture))
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonPurchaseNow", scope.Culture))
+            .And.Contain(PricesUrl(scope.Culture))
             .And.Contain(LetterEnvironment.SupportUrl)
             .And.Contain(LetterEnvironment.SalesEmail);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Your {logoText} Enterprise no longer available");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"The grace period for your {logoText} Enterprise license expires today");
 
         // The brand no longer carries the DocSpace suffix.

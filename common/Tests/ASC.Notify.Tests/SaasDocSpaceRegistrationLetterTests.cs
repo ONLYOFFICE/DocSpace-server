@@ -40,33 +40,26 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasDocSpaceRegistrationLetterTests : LetterTestBase<SaasDocSpaceRegistrationNotifyAction>
 {
-    /// <summary>The confirmation link, passed into <c>Init</c> by the caller.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/EmpInvite");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>SaasDocSpaceRegistrationNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    private static string ConfirmUrl(LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonRegister", culture, ConfirmUrl),
-            new TagValue(CommonTags.InviteLink, ConfirmUrl)
-        ];
+        return $"{scope.PortalUrl}/confirm/EmpInvite";
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override Task InitAsync(SaasDocSpaceRegistrationNotifyAction action, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonRegister", culture))
-            .And.Contain(ConfirmUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        action.Init(ConfirmUrl(scope), scope.Culture.Name);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Body.Should().Contain(Resource("ButtonRegister", scope.Culture))
+            .And.Contain(ConfirmUrl(scope))
+            .And.Contain(scope.PortalUrl);
+    }
+
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

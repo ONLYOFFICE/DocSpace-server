@@ -34,41 +34,34 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What the payer gets when the wallet is running out (<c>low_wallet_balance</c>) — the sibling of
-/// <see cref="TopUpWalletErrorLetterTests"/>, sent before the top-up rather than after it failed.
+/// What the owner and the payer get when the wallet is nearly empty (<c>low_wallet_balance</c>) — the
+/// sibling of <see cref="UpcomingSubscriptionPaymentLetterTests"/>, sent on the balance rather than
+/// ahead of a charge. Email only.
 /// </summary>
 public class LowWalletBalanceLetterTests : LetterTestBase<LowWalletBalanceNotifyAction>
 {
-    /// <summary>The wallet page the button leads to.</summary>
-    private static string WalletUrl => LetterEnvironment.PortalLink("billing/wallet");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>LowWalletBalanceNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(LowWalletBalanceNotifyAction action, LetterScope scope)
     {
-        return [OrangeButton("ButtonGoToWalletSettings", culture, WalletUrl)];
+        action.Init(scope.Recipient);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonGoToWalletSettings", culture))
-            .And.Contain(WalletUrl);
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonGoToWalletSettings", scope.Culture))
+            .And.Contain($"{scope.PortalUrl}/billing/wallet");
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Action required: Your {logoText} Wallet balance is running low");
 
         // No apostrophes in the expected strings: TextileStyler rewrites them.
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"your {logoText} Wallet balance is running low")
             .And.Contain("to avoid any interruption of paid services.");
 

@@ -37,7 +37,7 @@ namespace ASC.Notify.Tests;
 /// The "Configure your ONLYOFFICE" letter (<c>saas_admin_configure_v1</c>), sent in SaaS on day 3 after
 /// portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminConfigureLetterTests : LetterTestBase<SaasAdminConfigureV1NotifyAction>
+public class SaasAdminConfigureLetterTests : PeriodicLetterTestBase<SaasAdminConfigureV1NotifyAction>
 {
     private static string SettingsUrl => LetterEnvironment.PortalLink("portal-settings");
     private static string TariffUrl => LetterEnvironment.PortalLink("billing/tariff-plan");
@@ -47,34 +47,20 @@ public class SaasAdminConfigureLetterTests : LetterTestBase<SaasAdminConfigureV1
         return LetterEnvironment.ExternalDomain(LetterEnvironment.ExternalResources.Helpcenter, culture, "https://helpcenter.onlyoffice.com");
     }
 
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("configure_docspace.gif");
-
-    /// <summary>Mirrors the day-3 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonConfigureRightNow", culture, SettingsUrl),
-            new TagValue("URL1", HelpCenterUrl(culture)),
-            new TagValue("URL2", TariffUrl)
-        ];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonConfigureRightNow", culture))
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonConfigureRightNow", scope.Culture))
             .And.Contain(SettingsUrl)
             .And.Contain(TariffUrl)
-            .And.Contain(HelpCenterUrl(culture));
+            .And.Contain(HelpCenterUrl(scope.Culture));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"Configure your {LetterEnvironment.LogoText}");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"Adjust the settings of your {LetterEnvironment.LogoText}")
             .And.Contain("Set password strength")
             .And.Contain("Enable two-factor authentication and Single Sign-On")

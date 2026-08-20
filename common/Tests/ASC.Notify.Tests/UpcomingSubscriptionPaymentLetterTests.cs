@@ -37,45 +37,38 @@ namespace ASC.Notify.Tests;
 /// What the owner and the payer get three days before the wallet is charged for an add-on
 /// (<c>upcoming_subscription_payment</c>) — the sibling of <see cref="LowWalletBalanceLetterTests"/>,
 /// sent ahead of the charge rather than when the balance is already too low. Email only.
+///
+/// The subscription name arrives as a delegate, because <c>Init</c> resolves it in the recipient's
+/// culture. Naming the features stays with the caller in production too, which is why it stays here.
 /// </summary>
 public class UpcomingSubscriptionPaymentLetterTests : LetterTestBase<UpcomingSubscriptionPaymentNotifyAction>
 {
-    /// <summary>The wallet page both links point at.</summary>
-    private static string WalletUrl => LetterEnvironment.PortalLink("billing/wallet");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>UpcomingSubscriptionPaymentNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(UpcomingSubscriptionPaymentNotifyAction action, LetterScope scope)
     {
-        return [new TagValue("SubscriptionName", SubscriptionName(culture))];
+        action.Init(scope.Recipient, SubscriptionName);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Contain(SubscriptionName(culture));
+        letter.Subject.Should().Contain(SubscriptionName(scope.Culture));
 
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(SubscriptionName(culture))
-            .And.Contain(WalletUrl)
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(SubscriptionName(scope.Culture))
+            .And.Contain($"{scope.PortalUrl}/billing/wallet")
             .And.Contain(LetterEnvironment.SupportUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
-        var culture = CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName);
-
         letter.Subject.Should().Be(
-            $"Upcoming subscription payment for \"{SubscriptionName(culture)}\" in your {logoText}");
+            $"Upcoming subscription payment for \"{SubscriptionName(scope.Culture)}\" in your {logoText}");
 
         // No apostrophes in the expected strings: TextileStyler rewrites them.
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain("will be automatically debited from your")
             .And.Contain($"{logoText} Wallet</a> in 3 days.")
             .And.Contain("please confirm that sufficient funds are available")

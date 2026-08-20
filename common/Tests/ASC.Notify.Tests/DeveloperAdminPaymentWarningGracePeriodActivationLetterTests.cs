@@ -36,7 +36,7 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The Developer licence warning <c>developer_admin_payment_warning_grace_period_activation</c>, sent to the portal admins.
 /// </summary>
-public class DeveloperAdminPaymentWarningGracePeriodActivationLetterTests : LetterTestBase<DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction>
+public class DeveloperAdminPaymentWarningGracePeriodActivationLetterTests : PeriodicLetterTestBase<DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction>
 {
     private const string PaymentDelay = "30";
 
@@ -46,36 +46,21 @@ public class DeveloperAdminPaymentWarningGracePeriodActivationLetterTests : Lett
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "docspaceprices", culture, "https://www.onlyoffice.com/docspace-prices.aspx");
     }
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors the matching block of <c>StudioPeriodicNotify.SendEnterpriseLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return
-        [
-            new TagValue(CommonTags.PaymentDelay, PaymentDelay)
-        ];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(RecipientName)
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(PaymentDelay)
             .And.Contain(LetterEnvironment.SupportUrl)
             .And.Contain(LetterEnvironment.SalesEmail);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Grace period for your {logoText} Developer activated");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"Your license for {logoText} Developer expires today");
 
         // The brand no longer carries the DocSpace suffix.

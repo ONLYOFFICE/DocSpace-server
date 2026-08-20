@@ -38,36 +38,24 @@ namespace ASC.Notify.Tests;
 /// (<c>saas_owner_payment_warning_grace_period_before_activation</c>). The only letter of the four that
 /// carries no button — it links the payment method and the support desk inline instead.
 /// </summary>
-public class SaasOwnerPaymentWarningGracePeriodBeforeActivationLetterTests : LetterTestBase<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>
+public class SaasOwnerPaymentWarningGracePeriodBeforeActivationLetterTests : PeriodicLetterTestBase<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>
 {
     private static string PaymentMethodUrl => LetterEnvironment.PortalLink("billing/payment-method");
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors the three-days-before block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
-    {
-        return [new TagValue("URL1", PaymentMethodUrl)];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         // The payment method link belongs to the new copy, which so far exists only in the default
-        // culture — the translations still carry the previous sentence. It is asserted below instead.
-        letter.Body.Should().Contain(RecipientName)
+        // scope.Culture — the translations still carry the previous sentence. It is asserted below instead.
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(LetterEnvironment.SupportUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"Upcoming subscription payment for your {LetterEnvironment.LogoText} tariff plan");
 
         // No apostrophes in the expected strings: TextileStyler rewrites them.
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain("Business subscription payment for the chosen number of admins")
             .And.Contain("will be automatically debited in 3 days")
             .And.Contain("payment method")

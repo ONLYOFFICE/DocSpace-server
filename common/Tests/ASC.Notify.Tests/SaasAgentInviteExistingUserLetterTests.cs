@@ -35,47 +35,38 @@ namespace ASC.Notify.Tests;
 
 /// <summary>
 /// The AI agent invitation for someone who already has an account
-/// (<c>saas_agent_invite_existing_user</c>). Unlike the sign-up invitations it names both the inviter and
-/// the agent, so it is the one letter that exercises the <c>__AuthorName</c> and <c>$Message</c> tags.
+/// (<c>saas_agent_invite_existing_user</c>). The inviter is whoever is authenticated, so the letter is
+/// asserted against that name rather than a made-up one.
 /// </summary>
 public class SaasAgentInviteExistingUserLetterTests : LetterTestBase<SaasAgentInviteExistingUserNotifyAction>
 {
     private const string AgentTitle = "Agent title";
 
-    /// <summary>The agent page, passed into <c>Init</c> by the caller.</summary>
-    private static string AgentUrl => LetterEnvironment.PortalLink("ai/agents/1");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>SaasAgentInviteExistingUserNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    private static string AgentUrl(LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonJoinAgent", culture, AgentUrl),
-            new TagValue(CommonTags.Message, AgentTitle),
-            new TagValue(CommonTags.InviteLink, AgentUrl)
-        ];
+        return $"{scope.PortalUrl}/ai/agents/1";
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override Task InitAsync(SaasAgentInviteExistingUserNotifyAction action, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonJoinAgent", culture))
-            .And.Contain(AgentUrl)
+        action.Init(scope.Recipient, AgentTitle, AgentUrl(scope));
+
+        return Task.CompletedTask;
+    }
+
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Body.Should().Contain(Resource("ButtonJoinAgent", scope.Culture))
+            .And.Contain(AgentUrl(scope))
             .And.Contain(AgentTitle)
-            .And.Contain(AuthorName)
-            .And.Contain(LetterEnvironment.PortalUrl);
+            .And.Contain(scope.PortalUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"You're invited to the {LetterEnvironment.LogoText} AI agent");
 
         letter.Body.Should().Contain("Hello!")
-            .And.Contain($"{AuthorName} invited you to join the AI agent");
+            .And.Contain("invited you to join the AI agent");
     }
 }

@@ -34,7 +34,8 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What a user gets when an admin changes their type (<c>user_type_changed</c>).
+/// What a user gets when an admin changes their type (<c>user_type_changed</c>). The new type is an input
+/// the sending code passes in; the help-center link the letter carries is resolved by <c>Init</c> itself.
 /// </summary>
 public class UserTypeChangedLetterTests : LetterTestBase<UserTypeChangedNotifyAction>
 {
@@ -46,31 +47,22 @@ public class UserTypeChangedLetterTests : LetterTestBase<UserTypeChangedNotifyAc
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Helpcenter, "accessrights", culture, "https://helpcenter.onlyoffice.com");
     }
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>UserTypeChangedNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(UserTypeChangedNotifyAction action, LetterScope scope)
     {
-        return
-        [
-            new TagValue("UserType", UserType),
-            new TagValue("HelpCenterUrl", HelpCenterUrl(culture))
-        ];
+        action.Init(scope.Recipient, UserType);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should()
             .Contain(UserType)
-            .And.Contain(LetterEnvironment.PortalUrl)
-            .And.Contain(HelpCenterUrl(culture));
+            .And.Contain(scope.PortalUrl)
+            .And.Contain(HelpCenterUrl(scope.Culture));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

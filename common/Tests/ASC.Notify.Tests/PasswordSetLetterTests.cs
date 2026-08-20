@@ -34,33 +34,24 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The password setup link (<c>set_password</c>). The shortest letter in the set: no greeting by name
-/// and no signature, just the button and the seven-day notice.
+/// The link that lets a new account set its first password (<c>set_password</c>). One of the few letters
+/// that deliberately carries no signature, which is now simply what its <c>Init</c> does rather than
+/// something the test has to declare.
 /// </summary>
 public class PasswordSetLetterTests : LetterTestBase<PasswordSetNotifyAction>
 {
-    /// <summary>The password change link, built from <c>ConfirmType.PasswordChange</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/PasswordChange");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>The letter ends on the seven-day notice, it carries no <c>$TrulyYours</c>.</summary>
-    protected override bool HasSignature => false;
-
-    /// <summary>Mirrors <c>PasswordSetNotifyAction.Init</c>, which sets the button and nothing else.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(PasswordSetNotifyAction action, LetterScope scope)
     {
-        return [OrangeButton("ButtonSetPassword", culture, ConfirmUrl)];
+        return action.Init(scope.Recipient, DateTime.UtcNow);
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonSetPassword", culture))
-            .And.Contain(ConfirmUrl);
+        // Not the link itself: Init shortens it, so the short key differs on every call.
+        letter.Body.Should().Contain(Resource("ButtonSetPassword", scope.Culture));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

@@ -34,54 +34,43 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What the owner of a brand new SaaS portal gets (<c>saas_admin_activation_v1</c>). It is the
-/// Enterprise letter (<see cref="EnterpriseAdminActivationLetterTests"/>) plus the STARTUP plan block, and it
-/// carries two mutually exclusive buttons — confirm the email, or change the generated password.
+/// The letter a brand-new SaaS owner gets (<c>saas_admin_activation_v1</c>): the portal address, the
+/// login and the offer to replace the generated password. The password-change link is shortened by
+/// <c>Init</c>, so the letter is asserted on the button and the address, not on the link.
 /// </summary>
 public class SaasAdminActivationLetterTests : LetterTestBase<SaasAdminActivationV1NotifyAction>
 {
-    private const string RecipientEmail = "owner@preview.onlyoffice.com";
-
-    /// <summary>The password change link, built from <c>ConfirmType.PasswordChange</c>.</summary>
-    private static string PasswordChangeUrl => LetterEnvironment.PortalLink("confirm/PasswordChange");
-
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");
-
-    /// <summary>
-    /// Mirrors the branch of <c>SaasAdminActivationV1NotifyAction.Init</c> taken for an already
-    /// activated owner: the confirm button stays empty and only the password one is rendered.
-    /// </summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(SaasAdminActivationV1NotifyAction action, LetterScope scope)
     {
-        return
-        [
-            new TagValue("OrangeButton", string.Empty),
-            OrangeButton("ButtonChangePassword", culture, PasswordChangeUrl, "OrangeButtonPwd"),
-            new TagValue(CommonTags.UserEmail, RecipientEmail)
-        ];
+        // This letter has two shapes and Init picks between them: an unactivated owner is asked to
+        // confirm their email (that is EnterpriseAdminActivationLetterTests), and an activated one whose
+        // password was generated for them is offered the change. Both conditions have to be met for the
+        // second, so the recipient is activated here and an audit date is passed in.
+        var owner = (UserInfo)scope.Recipient.Clone();
+        owner.ActivationStatus = EmployeeActivationStatus.Activated;
+
+        return action.Init(owner, DateTime.UtcNow);
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(RecipientEmail)
-            .And.Contain(Resource("ButtonChangePassword", culture))
-            .And.Contain(PasswordChangeUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(scope.Recipient.Email)
+            .And.Contain(Resource("ButtonChangePassword", scope.Culture))
+            .And.Contain(scope.PortalUrl);
 
         // The confirm-email branch is switched off, so neither its text nor an empty button shows up.
         letter.Body.Should().NotContain("Please confirm your email");
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Welcome to {logoText}!");
 
         // No apostrophes in the expected strings: TextileStyler turns "You've" into "You&#8217;ve".
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"just created your {logoText}")
             .And.Contain($"Your {logoText} address")
             .And.Contain("Your login")

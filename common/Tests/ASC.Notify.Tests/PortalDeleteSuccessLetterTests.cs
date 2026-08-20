@@ -34,12 +34,12 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The goodbye letter (<c>portal_delete_success_v1</c>), sent to the owner once the portal has actually
-/// been removed. Unlike the warning letters, this one is event-driven, not periodic.
+/// What the owner gets once the portal is gone (<c>portal_delete_success_v1</c>). The feedback page is an
+/// input the sending code resolves per culture; the legal-terms link the letter carries comes from
+/// <c>Init</c> itself.
 /// </summary>
 public class PortalDeleteSuccessLetterTests : LetterTestBase<PortalDeleteSuccessV1NotifyAction>
 {
-    /// <summary>The feedback form, passed into <c>Init</c> by the caller.</summary>
     private static string FeedbackUrl(CultureInfo culture)
     {
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "registrationcanceled", culture, "https://www.onlyoffice.com/registration-canceled.aspx");
@@ -50,28 +50,21 @@ public class PortalDeleteSuccessLetterTests : LetterTestBase<PortalDeleteSuccess
         return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Common, "legalterms", culture, "https://docspace.onlyoffice.com/s/Fj-fVY--ZhHHnv7");
     }
 
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("docspace_deactivated.gif");
-
-    /// <summary>Mirrors <c>PortalDeleteSuccessV1NotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(PortalDeleteSuccessV1NotifyAction action, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonLeaveFeedback", culture, FeedbackUrl(culture)),
-            new TagValue("URL1", LegalTermsUrl(culture)),
-            new TagValue(CommonTags.OwnerName, RecipientName)
-        ];
+        action.Init(scope.Recipient, FeedbackUrl(scope.Culture));
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonLeaveFeedback", culture))
-            .And.Contain(FeedbackUrl(culture))
-            .And.Contain(LegalTermsUrl(culture));
+        letter.Body.Should().Contain(Resource("ButtonLeaveFeedback", scope.Culture))
+            .And.Contain(FeedbackUrl(scope.Culture))
+            .And.Contain(LegalTermsUrl(scope.Culture));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

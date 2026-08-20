@@ -40,37 +40,31 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class BackupFailedLetterTests : LetterTestBase<BackupFailedNotifyAction>
 {
+    /// <summary>The failure the sending code passes in — a real one, from a full disk.</summary>
+    private const string ErrorMessage = "Disk quota exceeded";
 
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>The backup letters sign off with "Best regards", not "Truly Yours".</summary>
-    protected override string SignatureKey => "BestRegardsText";
-
-    /// <summary>Mirrors <c>BackupFailedNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(BackupFailedNotifyAction action, LetterScope scope)
     {
-        return [new TagValue(CommonTags.Message, "Disk quota exceeded")];
+        action.Init(scope.Recipient, ErrorMessage);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(LetterEnvironment.PortalUrl)
+        letter.Body.Should().Contain(scope.DisplayName)
+            .And.Contain(scope.PortalUrl)
             .And.Contain(LetterEnvironment.SupportUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Backup for your {logoText} failed");
 
         // No apostrophes in the expected strings: TextileStyler rewrites them.
-        letter.Body.Should().Contain(RecipientName)
+        letter.Body.Should().Contain(scope.DisplayName)
             .And.Contain($"The backup process for your {logoText}")
             .And.Contain("has failed.")
             .And.Contain("hesitate to contact us via");

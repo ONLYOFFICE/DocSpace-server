@@ -34,35 +34,32 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The invitation to the portal itself (<c>saas_docspace_invite</c>). Unlike its room and agent
-/// siblings this one is still HTML table markup rather than textile.
+/// The invitation to the portal itself (<c>saas_docspace_invite</c>). Unlike its room and agent siblings
+/// this one is still HTML table markup rather than textile. The confirmation link is an input: the
+/// sending code builds it before calling <c>Init</c>.
 /// </summary>
 public class SaasDocSpaceInviteLetterTests : LetterTestBase<SaasDocSpaceInviteNotifyAction>
 {
-    /// <summary>The confirmation link, passed into <c>Init</c> by the caller.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/LinkInvite");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Mirrors <c>SaasDocSpaceInviteNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    private static string ConfirmUrl(LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonAccept", culture, ConfirmUrl),
-            new TagValue(CommonTags.InviteLink, ConfirmUrl)
-        ];
+        return $"{scope.PortalUrl}/confirm/LinkInvite";
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override Task InitAsync(SaasDocSpaceInviteNotifyAction action, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonAccept", culture))
-            .And.Contain(ConfirmUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        action.Init(ConfirmUrl(scope), scope.Culture.Name);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Body.Should().Contain(Resource("ButtonAccept", scope.Culture))
+            .And.Contain(ConfirmUrl(scope))
+            .And.Contain(scope.PortalUrl);
+    }
+
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

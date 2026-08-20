@@ -34,47 +34,34 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What the owner of a brand new portal gets outside SaaS (<c>admin_activation_v1</c>) — one template
-/// for Enterprise, Enterprise whitelabel and Opensource, which differ only in the footer. It is the SaaS
-/// letter (<see cref="SaasAdminActivationLetterTests"/>) without the STARTUP plan block.
+/// The letter a brand-new Enterprise owner gets (<c>enterprise_admin_activation_v1</c>). The Enterprise
+/// counterpart of <see cref="SaasAdminActivationLetterTests"/>: it asks for the email to be confirmed
+/// instead of offering a password change, and carries no tariff block. The confirmation link is
+/// shortened by <c>Init</c>, so the letter is asserted on the button and the address.
 /// </summary>
 public class EnterpriseAdminActivationLetterTests : LetterTestBase<EnterpriseAdminActivationV1NotifyAction>
 {
-    private const string RecipientEmail = "owner@preview.onlyoffice.com";
-
-    /// <summary>The email confirmation link, built from <c>ConfirmType.EmailActivation</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/EmailActivation");
-
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");
-
-    /// <summary>Mirrors <c>Init</c>, which is now the same in all three non-SaaS activation actions.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(EnterpriseAdminActivationV1NotifyAction action, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonConfirm", culture, ConfirmUrl),
-            new TagValue(CommonTags.UserEmail, RecipientEmail)
-        ];
+        return action.Init(scope.Recipient);
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(RecipientEmail)
-            .And.Contain(Resource("ButtonConfirm", culture))
-            .And.Contain(ConfirmUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(scope.Recipient.Email)
+            .And.Contain(Resource("ButtonConfirm", scope.Culture))
+            .And.Contain(scope.PortalUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Welcome to {logoText}!");
 
         // No apostrophes in the expected strings: TextileStyler turns "You've" into "You&#8217;ve".
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"just created your {logoText}")
             .And.Contain($"Your {logoText} address")
             .And.Contain("Your login")

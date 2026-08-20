@@ -34,64 +34,61 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// The security notice sent after a password change (<c>password_changed</c>). It reports the audit
-/// event behind the change, so it carries the widest set of tags of any letter — who, when, from which
-/// IP, device and browser.
+/// The receipt a user gets after their password changed (<c>password_changed</c>): when it happened, from
+/// which device and where, and a link to lock the session out if it was not them. The audit event is the
+/// input the sending code passes in — everything the letter says about it is formatted by <c>Init</c>.
 /// </summary>
 public class PasswordChangedLetterTests : LetterTestBase<PasswordChangedNotifyAction>
 {
-    private const string RecipientEmail = "owner@preview.onlyoffice.com";
-    private const string ChangedOn = "14.08.2026 11:20";
+    private static readonly DateTime _changedOn = new(2026, 8, 14, 11, 20, 0, DateTimeKind.Utc);
+
     private const string Ip = "203.0.113.7";
     private const string Device = "Windows";
     private const string Browser = "Chrome 140";
-    private const string Location = "Latvia, Riga";
+    private const string Country = "Latvia";
+    private const string City = "Riga";
 
-    /// <summary>The sign-in link, built from <c>ConfirmType.Auth</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Auth");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>PasswordChangedNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(PasswordChangedNotifyAction action, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonOpenDocSpace", culture, ConfirmUrl),
-            new TagValue(CommonTags.UserEmail, RecipientEmail),
-            new TagValue(CommonTags.Date, ChangedOn),
-            new TagValue(CommonTags.Device, Device),
-            new TagValue(CommonTags.Location, Location),
-            new TagValue(CommonTags.Browser, Browser),
-            new TagValue(CommonTags.IP, Ip)
-        ];
+        action.Init(scope.Recipient, new AuditEvent
+        {
+            Date = _changedOn,
+            IP = Ip,
+            Platform = Device,
+            Browser = Browser,
+            Country = Country,
+            City = City
+        });
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(RecipientEmail)
-            .And.Contain(ChangedOn)
+        // Init writes the moment with ToShortDateString/ToShortTimeString, i.e. in the recipient's
+        // culture — so the expected text has to be built the same way rather than spelled out. A test
+        // that spelled it out would be asserting a format no culture actually produces.
+        var changedOn = _changedOn.ToShortDateString() + " " + _changedOn.ToShortTimeString();
+
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(scope.Recipient.Email)
+            .And.Contain(changedOn)
             .And.Contain(Ip)
             .And.Contain(Device)
             .And.Contain(Browser)
-            .And.Contain(Location)
-            .And.Contain(Resource("ButtonOpenDocSpace", culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
-            .And.Contain(ConfirmUrl);
+            .And.Contain($"{Country}, {City}")
+            .And.Contain(Resource("ButtonOpenDocSpace", scope.Culture)
+                .Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be("Your password was changed successfully");
 
         letter.Body.Should().Contain("Password changed successfully")
-            .And.Contain($"was successfully changed on")
+            .And.Contain("was successfully changed on")
             .And.Contain($"in {logoText}:")
             .And.Contain("no further steps are required")
             .And.Contain($"disable access to {logoText} for this device");

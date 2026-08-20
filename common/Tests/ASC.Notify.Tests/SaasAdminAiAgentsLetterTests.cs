@@ -37,30 +37,24 @@ namespace ASC.Notify.Tests;
 /// The "Work faster with AI agents" letter (<c>saas_admin_ai_agents_v1</c>), sent in SaaS on day 7 after
 /// portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminAiAgentsLetterTests : LetterTestBase<SaasAdminAiAgentsV1NotifyAction>
+public class SaasAdminAiAgentsLetterTests : PeriodicLetterTestBase<SaasAdminAiAgentsV1NotifyAction>
 {
     private static string AiSettingsUrl => LetterEnvironment.PortalLink("portal-settings/ai-settings/ai-models");
 
-    /// <summary>Mirrors the day-7 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return [OrangeButton("ButtonActivateAiFeatures", culture, AiSettingsUrl)];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonActivateAiFeatures", culture))
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonActivateAiFeatures", scope.Culture))
             .And.Contain(AiSettingsUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Work faster in {logoText} with AI agents");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"{logoText} comes with built-in AI*")
             .And.Contain("not activated by default for security reasons")
             .And.Contain("One AI across all your document work")

@@ -34,41 +34,33 @@
 namespace ASC.Notify.Tests;
 
 /// <summary>
-/// What the payer gets when the wallet could not be topped up automatically
-/// (<c>top_up_wallet_error</c>). Also goes out over Telegram, from the same pattern.
+/// What the owner and the payer get when the wallet could not be topped up automatically
+/// (<c>top_up_wallet_error</c>). Email only.
 /// </summary>
 public class TopUpWalletErrorLetterTests : LetterTestBase<TopUpWalletErrorNotifyAction>
 {
-    /// <summary>The wallet page the button leads to.</summary>
-    private static string WalletUrl => LetterEnvironment.PortalLink("billing/wallet");
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>TopUpWalletErrorNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(TopUpWalletErrorNotifyAction action, LetterScope scope)
     {
-        return [OrangeButton("ButtonGoToWalletSettings", culture, WalletUrl)];
+        action.Init(scope.Recipient);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonGoToWalletSettings", culture))
-            .And.Contain(WalletUrl);
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonGoToWalletSettings", scope.Culture))
+            .And.Contain($"{scope.PortalUrl}/billing/wallet");
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Action required: Unable to auto top up the Wallet balance in your {logoText}");
 
         // No apostrophes in the expected strings: TextileStyler rewrites them.
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"automatic top-up of the {logoText} Wallet balance was unsuccessful")
             .And.Contain("We kindly ask you to manually check and update your wallet balance.");
 

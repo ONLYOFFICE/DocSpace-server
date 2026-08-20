@@ -36,42 +36,32 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The welcome letter as a guest receives it. The four guest actions currently render the very same
 /// <c>user_welcome_v1</c> template as the five user ones, so this class is a deliberate duplicate of
-/// <see cref="SaasUserWelcomeLetterTests"/>: it holds the place for the guest wording and starts failing the
-/// day the two letters diverge.
+/// <see cref="SaasUserWelcomeLetterTests"/>: it holds the place for the guest wording and starts failing
+/// the day the two letters diverge.
 /// </summary>
 public class SaasGuestWelcomeLetterTests : LetterTestBase<SaasGuestWelcomeV1NotifyAction>
 {
-    private static string PortalRoot => LetterEnvironment.PortalUrl;
-
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("welcome.gif");
-
-    /// <summary>The SaaS footer; Enterprise passes <c>null</c> and Opensource <c>opensource</c>.</summary>
-    protected override string Footer => "social";
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>Init</c>, which is now the same in all four guest actions.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(SaasGuestWelcomeV1NotifyAction action, LetterScope scope)
     {
-        return [OrangeButton("ButtonGetStarted", culture, PortalRoot)];
+        action.Init(scope.Recipient);
+
+        return Task.CompletedTask;
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonGetStarted", culture))
-            .And.Contain(PortalRoot)
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonGetStarted", scope.Culture))
+            .And.Contain(scope.PortalUrl)
             .And.Contain(LetterEnvironment.HelpUrl)
             .And.Contain(LetterEnvironment.SupportUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"Welcome to {LetterEnvironment.LogoText}!");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain("Your profile has been successfully added to")
             .And.Contain("Help Center")
             .And.Contain("support team");

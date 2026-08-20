@@ -37,7 +37,7 @@ namespace ASC.Notify.Tests;
 /// The "Connect, integrate, and build" letter (<c>saas_admin_developer_tools_v1</c>), sent in SaaS on day
 /// 10 after portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminDeveloperToolsLetterTests : LetterTestBase<SaasAdminDeveloperToolsV1NotifyAction>
+public class SaasAdminDeveloperToolsLetterTests : PeriodicLetterTestBase<SaasAdminDeveloperToolsV1NotifyAction>
 {
     private static string DeveloperToolsUrl => LetterEnvironment.PortalLink("developer-tools/overview");
 
@@ -51,33 +51,22 @@ public class SaasAdminDeveloperToolsLetterTests : LetterTestBase<SaasAdminDevelo
         return LetterEnvironment.ExternalDomain(LetterEnvironment.ExternalResources.Api, culture, "https://api.onlyoffice.com");
     }
 
-    /// <summary>Mirrors the day-10 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonGetStarted", culture, DeveloperToolsUrl),
-            new TagValue("URL1", ConnectorsUrl(culture)),
-            new TagValue("URL2", ApiUrl(culture))
-        ];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonGetStarted", culture))
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonGetStarted", scope.Culture))
             .And.Contain(DeveloperToolsUrl)
-            .And.Contain(ConnectorsUrl(culture))
-            .And.Contain(ApiUrl(culture));
+            .And.Contain(ConnectorsUrl(scope.Culture))
+            .And.Contain(ApiUrl(scope.Culture));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Connect, integrate, and build with {logoText} Docs");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain("three simple ways to make it happen")
             .And.Contain("50+ ready connectors")
             .And.Contain("Explore Developer Tools")

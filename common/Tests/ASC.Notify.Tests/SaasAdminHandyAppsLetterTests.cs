@@ -37,29 +37,23 @@ namespace ASC.Notify.Tests;
 /// The "Discover 4 handy apps" letter (<c>saas_admin_handy_apps_v1</c>), sent in SaaS on day 2 after
 /// portal registration to the owner and the DocSpace admins, regardless of the tariff.
 /// </summary>
-public class SaasAdminHandyAppsLetterTests : LetterTestBase<SaasAdminHandyAppsV1NotifyAction>
+public class SaasAdminHandyAppsLetterTests : PeriodicLetterTestBase<SaasAdminHandyAppsV1NotifyAction>
 {
 
-    /// <summary>Mirrors the day-2 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return [OrangeButton("ButtonGoToDocSpace", culture, LetterEnvironment.PortalUrl)];
-    }
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonGoToDocSpace", culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonGoToDocSpace", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
             .And.Contain(LetterEnvironment.PortalUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Discover 4 handy apps inside your {logoText}");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"{logoText} Files")
             .And.Contain($"{logoText} Rooms")
             .And.Contain($"{logoText} Forms")
