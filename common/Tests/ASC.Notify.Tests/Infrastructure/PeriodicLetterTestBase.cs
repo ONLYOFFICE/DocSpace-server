@@ -31,10 +31,33 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+namespace ASC.Notify.Tests.Infrastructure;
 
-// One stack for the whole assembly, not one per test class: a database, a registered portal, the
-// service graph and a MailPit cost minutes to stand up, and every letter test asks the same things of
-// them. What keeps the classes safe to run in parallel is per-test isolation inside that stack — a
-// service scope of its own for the tenant and the recipient, and a unique recipient address so no test
-// reads another's mail.
-[assembly: AssemblyFixture(typeof(LetterStackFixture))]
+/// <summary>
+/// A letter the daily tariff job sends. These have no <c>Init</c>: a periodic letter is handed the portal
+/// state it goes out for and builds its tags from that, so the equivalent call is
+/// <see cref="BasePeriodicNotifyAction.BuildTagsAsync"/>.
+///
+/// The portal state is an input rather than a tag, which is what keeps this cheap: it is assembled in
+/// memory by <see cref="PeriodicLetterContexts"/> instead of being arranged in the database, so a letter
+/// about an expiring tariff does not need a portal whose tariff actually expires.
+/// </summary>
+/// <typeparam name="TAction">The periodic notify action that sends this letter in production.</typeparam>
+public abstract class PeriodicLetterTestBase<TAction> : PortalLetterTestBase<TAction>
+    where TAction : BasePeriodicNotifyAction
+{
+    protected override async Task InitAsync(TAction action, LetterScope scope)
+    {
+        action.Tags = await action.BuildTagsAsync(BuildContext(scope), scope.Recipient, scope.Culture);
+    }
+
+    /// <summary>
+    /// The portal this letter goes out for. The default is a portal on a paid tariff with nothing unusual
+    /// about it; a letter that quotes a date — how long the grace period has left, when the tariff lapsed
+    /// — overrides this with the state it is actually sent for.
+    /// </summary>
+    protected virtual PeriodicLetterContext BuildContext(LetterScope scope)
+    {
+        return PeriodicLetterContexts.Paid(scope.Tenant);
+    }
+}

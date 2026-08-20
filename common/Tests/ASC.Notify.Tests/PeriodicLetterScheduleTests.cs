@@ -50,71 +50,42 @@ public class PeriodicLetterScheduleTests
     /// <summary>An unremarkable Tuesday. Nothing about the cases depends on which day it is.</summary>
     private static readonly DateTime Today = new(2026, 6, 16);
 
+    // The portal states themselves live in PeriodicLetterContexts, because the letter tests render
+    // against the same ones: a lapsed tariff described in two places is a lapsed tariff that can be
+    // described differently in two places. What stays here is only the shorthand these cases read in.
+
     /// <summary>
     /// A portal nothing is due for: created today, on a paid-for-nothing trial with no dates set. Each
     /// case moves only what its own letter looks at.
     /// </summary>
-    private static PeriodicLetterContext Fresh => new()
-    {
-        Tenant = new Tenant(1, "test"),
-        Tariff = new Tariff { Quotas = [], State = TariffState.Trial, DueDate = DateTime.MaxValue, DelayDueDate = DateTime.MaxValue },
-        Quota = Quota(),
-        NowDate = Today,
-        CreatedDate = Today,
-        DueDate = DateTime.MaxValue.Date,
-        DueDateIsNotMax = false,
-        DelayDueDate = DateTime.MaxValue.Date,
-        DelayDueDateIsNotMax = false,
-        DefaultRebranding = true,
-        UnusedPortalNotifyFrom = Today.AddYears(-1),
-        LastActivity = Activity(Today)
-    };
+    private static PeriodicLetterContext Fresh => PeriodicLetterContexts.Fresh(new Tenant(1, "test"), Today);
 
     private static TenantQuota Quota(bool free = false, bool trial = false, bool lifetime = false, bool customization = false)
     {
-        return new TenantQuota { Free = free, Trial = trial, Lifetime = lifetime, Customization = customization };
+        return PeriodicLetterContexts.Quota(free, trial, lifetime, customization);
     }
 
     private static Lazy<Task<DateTime>> Activity(DateTime date)
     {
-        return new Lazy<Task<DateTime>>(() => Task.FromResult(date));
+        return PeriodicLetterContexts.Activity(date);
     }
 
     /// <summary>A portal on a paid tariff running out on <paramref name="due"/>.</summary>
     private static PeriodicLetterContext Paid(PeriodicLetterContext context, DateTime due, DateTime? delay = null)
     {
-        return context with
-        {
-            Tariff = new Tariff { Quotas = [], State = TariffState.Paid, DueDate = due, DelayDueDate = delay ?? DateTime.MaxValue },
-            DueDate = due.Date,
-            DueDateIsNotMax = true,
-            DelayDueDate = (delay ?? DateTime.MaxValue).Date,
-            DelayDueDateIsNotMax = delay.HasValue
-        };
+        return PeriodicLetterContexts.Paid(context, due, delay);
     }
 
     /// <summary>A portal inside its grace period, which runs out on <paramref name="delay"/>.</summary>
     private static PeriodicLetterContext Delayed(PeriodicLetterContext context, DateTime delay)
     {
-        return context with
-        {
-            Tariff = new Tariff { Quotas = [], State = TariffState.Delay, DueDate = Today.AddDays(-30), DelayDueDate = delay },
-            DueDate = Today.AddDays(-30),
-            DueDateIsNotMax = true,
-            DelayDueDate = delay.Date,
-            DelayDueDateIsNotMax = true
-        };
+        return PeriodicLetterContexts.Delayed(context, delay);
     }
 
     /// <summary>A portal whose paid tariff lapsed on <paramref name="due"/> and was never renewed.</summary>
     private static PeriodicLetterContext Lapsed(PeriodicLetterContext context, DateTime due)
     {
-        return context with
-        {
-            Tariff = new Tariff { Quotas = [], State = TariffState.NotPaid, DueDate = due, DelayDueDate = DateTime.MaxValue },
-            DueDate = due.Date,
-            DueDateIsNotMax = true
-        };
+        return PeriodicLetterContexts.Lapsed(context, due);
     }
 
     /// <summary>
@@ -123,11 +94,7 @@ public class PeriodicLetterScheduleTests
     /// </summary>
     private static PeriodicLetterContext Idle(PeriodicLetterContext context, int months)
     {
-        return context with
-        {
-            CreatedDate = Today.AddYears(-2),
-            LastActivity = Activity(Today.AddMonths(-months))
-        };
+        return PeriodicLetterContexts.Idle(context, months);
     }
 
     private static Task<bool> AsksToSendAsync<TAction>(PeriodicLetterContext context) where TAction : BasePeriodicNotifyAction

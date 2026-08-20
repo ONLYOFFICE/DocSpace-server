@@ -32,9 +32,17 @@
     <!-- The letter tests start MailPit through the AppHost itself (see MailPitFixture); the reference
          is what makes Projects.ASC_AppHost available, not an Aspire resource declaration. -->
     <ProjectReference Include="..\..\ASC.AppHost\ASC.AppHost.csproj" IsAspireProjectResource="false" />
-    <!-- Most notify actions live in ASC.Web.Core; the two backup letters have theirs here. -->
+    <!-- Most notify actions live in ASC.Web.Core; the two backup letters have theirs here.
+         Keep this reference: DIHelper.Scan registers an assembly only when it is reachable through the
+         reference graph, and ASC.Studio.Notify does not reference backup - dropping it would leave the
+         backup letters unresolvable in the in-process host. -->
     <ProjectReference Include="..\..\ASC.Data.Backup.Core\ASC.Data.Backup.Core.csproj" />
     <ProjectReference Include="..\..\..\web\ASC.Web.Core\ASC.Web.Core.csproj" />
+    <!-- The in-process host (LetterHost) is the Studio.Notify service's own service graph: its Startup
+         is what registers the notify stack, and ASC.Api.Core is where BaseWorkerStartup lives.
+         ASC.Web.Core does not reference ASC.Api.Core, so neither is reachable without these. -->
+    <ProjectReference Include="..\..\ASC.Api.Core\ASC.Api.Core.csproj" />
+    <ProjectReference Include="..\..\services\ASC.Studio.Notify\ASC.Studio.Notify.csproj" />
   </ItemGroup>
 
   <ItemGroup>

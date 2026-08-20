@@ -2131,14 +2131,24 @@ public abstract class BasePeriodicNotifyAction(
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
 
-            var tags = await BuildCommonTagsAsync(context, user, culture);
-
-            await AddTagsAsync(context, user, culture, tags);
-
-            Tags = tags;
+            Tags = await BuildTagsAsync(context, user, culture);
 
             await client.SendNoticeToAsync(this, user, senderName);
         }
+    }
+
+    /// <summary>
+    /// Everything this letter substitutes for one recipient: the tags every periodic letter carries plus
+    /// the ones the subclass adds. Public because it is also the only honest way to ask a letter what it
+    /// would say without sending it - a letter test renders exactly these tags instead of restating them.
+    /// </summary>
+    public async Task<List<ITagValue>> BuildTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture)
+    {
+        var tags = await BuildCommonTagsAsync(context, user, culture);
+
+        await AddTagsAsync(context, user, culture, tags);
+
+        return tags;
     }
 
     /// <summary>

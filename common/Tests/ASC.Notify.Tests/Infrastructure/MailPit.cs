@@ -38,7 +38,7 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// test can drop a letter into the inbox for a human to look at, assert that it arrived, and ask
 /// MailPit how well real mail clients would cope with its markup.
 ///
-/// Both endpoints come from <see cref="MailPitFixture"/>, i.e. from the Aspire host the test run
+/// Both endpoints come from <see cref="LetterStackFixture"/>, i.e. from the Aspire host the test run
 /// started — nothing here discovers or guesses where MailPit is.
 /// </summary>
 /// <param name="smtpHost">Host of the container's SMTP endpoint.</param>

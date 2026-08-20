@@ -36,38 +36,28 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The "Get more with useful add-ons" letter (<c>saas_admin_addons_v1</c>), sent in SaaS on day 4 after
 /// portal registration to the owner and the DocSpace admins, regardless of the tariff.
+///
+/// Its two links and its button come from the action's own <c>AddTagsAsync</c>, so the test only says
+/// which pages they are meant to point at — not what the tag values are. Which day the letter goes out on
+/// is checked separately, in <see cref="PeriodicLetterScheduleTests"/>.
 /// </summary>
-public class SaasAdminAddonsLetterTests : LetterTestBase<SaasAdminAddonsV1NotifyAction>
+public class SaasAdminAddonsLetterTests : PeriodicLetterTestBase<SaasAdminAddonsV1NotifyAction>
 {
-    private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
-    private static string WalletUrl => LetterEnvironment.PortalLink("billing/wallet");
-
-    /// <summary>Mirrors the day-4 block of <c>StudioPeriodicNotify.SendSaasLettersAsync</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return
-        [
-            OrangeButton("ButtonGetStarted", culture, BillingUrl),
-            new TagValue("URL1", BillingUrl),
-            new TagValue("URL2", WalletUrl)
-        ];
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonGetStarted", scope.Culture))
+            .And.Contain($"{scope.PortalUrl}/billing/overview")
+            .And.Contain($"{scope.PortalUrl}/billing/wallet");
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
-    {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonGetStarted", culture))
-            .And.Contain(BillingUrl)
-            .And.Contain(WalletUrl);
-    }
-
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Get more from {logoText} with useful add-ons");
 
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain($"Want to do even more with {logoText}?")
             .And.Contain("Docs Connect.")
             .And.Contain("AI features.")

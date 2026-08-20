@@ -66,6 +66,21 @@ internal static class LetterEnvironment
     /// </summary>
     public static IConfiguration Configuration { get; } = BuildConfiguration();
 
+    /// <summary>
+    /// The buildtools configuration directory: <c>pathToConf</c> when it is set, otherwise
+    /// <c>buildtools/config</c> next to the repository. <see cref="LetterHost"/> needs the folder rather
+    /// than a single file - <c>AddDefaultConfiguration</c> loads <c>appsettings.json</c>,
+    /// <c>storage.json</c> and <c>externalresources.json</c> from it and treats them as required.
+    /// </summary>
+    public static string ConfigDirectory =>
+        _configDirectory
+        ?? throw new InvalidOperationException(
+            "No buildtools configuration found. The letter tests need the config directory the local "
+            + "stack runs on: set 'pathToConf', or check out buildtools next to the server repository "
+            + "so that buildtools/config/appsettings.json exists.");
+
+    private static readonly string? _configDirectory = FindConfigDirectory();
+
     public static ExternalResourceSettingsHelper ExternalResources { get; } = new(Configuration);
 
     /// <summary>The site the signature links to — <c>CommonLinkUtility.GetSiteLink</c>.</summary>
@@ -94,6 +109,18 @@ internal static class LetterEnvironment
     public static string NotificationImageUrl(string fileName)
     {
         return $"{NotificationImagePath}/{fileName}";
+    }
+
+    /// <summary>
+    /// The notification image folder on a given portal. The registered portal answers on its own alias
+    /// rather than on <see cref="PortalUrl"/>, so the images a letter carries have to be pinned to the
+    /// same host as its links — otherwise the letter points at two portals at once.
+    /// </summary>
+    public static string NotificationImagePathFor(string portalUrl)
+    {
+        var images = Configuration["web:images"] ?? "static/images";
+
+        return $"{portalUrl.TrimEnd('/')}/{images.Trim('~', '/')}/notifications";
     }
 
     /// <summary>A portal link, the equivalent of <c>CommonLinkUtility.GetFullAbsolutePath("~/...")</c>.</summary>
@@ -159,26 +186,42 @@ internal static class LetterEnvironment
         return builder.Build();
     }
 
-    /// <summary>
-    /// Looks for a buildtools config file: under <c>pathToConf</c> when the variable is set, otherwise
-    /// in <c>buildtools/config</c> next to the repository — the layout every local checkout has.
-    /// </summary>
+    /// <summary>A buildtools config file, or <c>null</c> when there is no config directory to take it from.</summary>
     private static string? FindConfigFile(string fileName)
+    {
+        var directory = FindConfigDirectory();
+
+        if (directory == null)
+        {
+            return null;
+        }
+
+        var path = Path.Combine(directory, fileName);
+
+        return File.Exists(path) ? path : null;
+    }
+
+    /// <summary>
+    /// Looks for the buildtools config directory: <c>pathToConf</c> when the variable is set, otherwise
+    /// <c>buildtools/config</c> next to the repository — the layout every local checkout has. Recognised
+    /// by <c>appsettings.json</c>, the one file every consumer of the folder needs.
+    /// </summary>
+    private static string? FindConfigDirectory()
     {
         var pathToConf = Environment.GetEnvironmentVariable("pathToConf");
 
-        if (!string.IsNullOrEmpty(pathToConf) && File.Exists(Path.Combine(pathToConf, fileName)))
+        if (!string.IsNullOrEmpty(pathToConf) && File.Exists(Path.Combine(pathToConf, "appsettings.json")))
         {
-            return Path.Combine(pathToConf, fileName);
+            return pathToConf;
         }
 
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
 
         while (directory != null)
         {
-            var candidate = Path.Combine(directory.FullName, "buildtools", "config", fileName);
+            var candidate = Path.Combine(directory.FullName, "buildtools", "config");
 
-            if (File.Exists(candidate))
+            if (File.Exists(Path.Combine(candidate, "appsettings.json")))
             {
                 return candidate;
             }

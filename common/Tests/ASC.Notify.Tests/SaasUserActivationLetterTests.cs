@@ -36,36 +36,28 @@ namespace ASC.Notify.Tests;
 /// <summary>
 /// The invitation a new user gets (<c>user_activation_v1</c>). One textile template serves all four
 /// editions — SaaS, Enterprise, Enterprise whitelabel and Opensource — which differ only in the footer
-/// flavour they pass in; this class renders the SaaS one.
+/// flavour their <c>Init</c> passes in; this class renders the SaaS one.
+///
+/// Nothing about the tags is stated here: the letter's button, footer, top image and signature all come
+/// from <c>SaasUserActivationV1NotifyAction.Init</c>, which is the point of the exercise.
 /// </summary>
-public class SaasUserActivationLetterTests : LetterTestBase<SaasUserActivationV1NotifyAction>
+public class SaasUserActivationLetterTests : PortalLetterTestBase<SaasUserActivationV1NotifyAction>
 {
-    /// <summary>The confirmation link, built by the sending code from <c>ConfirmType.Activation</c>.</summary>
-    private static string ConfirmUrl => LetterEnvironment.PortalLink("confirm/Activation");
-
-    /// <summary>The sending code sets a top image for this letter.</summary>
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("join_docspace.gif");
-
-    /// <summary>The SaaS footer; Enterprise passes <c>null</c> and Opensource <c>opensource</c>.</summary>
-    protected override string Footer => "social";
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>Init</c>, which is now the same in all four activation actions.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    protected override Task InitAsync(SaasUserActivationV1NotifyAction action, LetterScope scope)
     {
-        return [OrangeButton("ButtonAccept", culture, ConfirmUrl)];
+        return action.Init(scope.Recipient);
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonAccept", culture))
-            .And.Contain(ConfirmUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        // Not the invitation link itself: Init shortens it, and the short key is minted by the database
+        // on every call. What can be asserted is that the button the action built arrived — its caption,
+        // and a target on the portal, which is what the shortener guarantees.
+        letter.Body.Should().Contain(Resource("ButtonAccept", scope.Culture))
+            .And.Contain(scope.PortalUrl);
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 

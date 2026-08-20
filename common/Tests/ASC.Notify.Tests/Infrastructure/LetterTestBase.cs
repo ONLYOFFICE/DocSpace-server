@@ -42,7 +42,7 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// <item><see cref="Letter_Renders"/> — renders the letter, runs the checks that hold for every letter
 /// plus the letter's own, and saves the HTML next to the test binaries for a browser.</item>
 /// <item><see cref="Letter_IsDeliveredToMailPit"/> — additionally delivers it to the MailPit the test
-/// run started (<see cref="MailPitFixture"/>), prints the message URL, and asserts how much of the
+/// run started (<see cref="LetterStackFixture"/>), prints the message URL, and asserts how much of the
 /// letter's markup real mail clients support.</item>
 /// </list>
 ///
@@ -58,25 +58,17 @@ namespace ASC.Notify.Tests.Infrastructure;
 public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 {
     /// <summary>
-    /// What an unrecognised textile link looks like once the styler has run: the closing quotation mark
-    /// of the caption, the colon, the opening one of the address — straight or curled — and the address
-    /// itself. A rendered link never keeps that shape, since it becomes an <c>&lt;a href&gt;</c>.
-    /// </summary>
-    private static readonly Regex _unrenderedLink =
-        new("""(&#8221;|&#8220;|")\s*:\s*(&#8220;|&#8221;|")(https?://|mailto:)""", RegexOptions.Compiled);
-
-    /// <summary>
     /// The inbox started for the whole assembly. Read from the ambient test context rather than taken
     /// through a constructor: xUnit hands assembly fixtures to test classes as constructor arguments,
     /// and threading one through would mean a constructor on every letter test that only passes it on.
     /// </summary>
     private static async ValueTask<MailPitInbox> GetInboxAsync()
     {
-        var fixture = await TestContext.Current.GetFixture<MailPitFixture>();
+        var fixture = await TestContext.Current.GetFixture<LetterStackFixture>();
 
         return fixture?.Inbox
             ?? throw new InvalidOperationException(
-                $"No MailPit inbox in the test context. {nameof(MailPitFixture)} is registered with "
+                $"No MailPit inbox in the test context. {nameof(LetterStackFixture)} is registered with "
                 + "[assembly: AssemblyFixture] and starts before any letter test runs.");
     }
 
@@ -99,7 +91,7 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
     /// picks it — by sender name. An action may also carry a telegram twin; this is the email one.
     /// </summary>
     private static IPattern Pattern =>
-        _action.Patterns.Find(pattern => pattern.SenderName == Constants.NotifyEMailSenderSysName)
+        _action.Patterns.Find(pattern => pattern.SenderName == ASC.Core.Configuration.Constants.NotifyEMailSenderSysName)
         ?? throw new InvalidOperationException(
             $"Action '{_action.ID}' carries no email pattern, so there is no letter to render.");
 
@@ -181,9 +173,10 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 
         var letter = await LetterPreview.RenderAsync(Pattern, BuildTags(culture), culture);
 
-        AssertPatternIsPortable();
-        AssertNoUnresolvedTags(letter);
-        AssertLinksRendered(letter);
+        LetterAssertions.PatternIsPortable(Pattern);
+        LetterAssertions.NoUnresolvedTags(Pattern, letter, $"{GetType().Name}.BuildLetterTags");
+        LetterAssertions.LinksRendered(letter);
+
         AssertTopImage(letter);
         AssertSignature(letter, culture);
 
@@ -304,67 +297,6 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
         tags.AddRange(BuildLetterTags(culture));
 
         return tags;
-    }
-
-    /// <summary>
-    /// Nothing environment-specific may be baked into the pattern text:
-    /// <list type="bullet">
-    /// <item>the product name is <c>${LetterLogoText}</c>, so a white-labelled portal sends its own
-    /// branding;</item>
-    /// <item>links arrive as tags (<c>$URL1</c>, <c>${__VirtualRootPath}</c>, …) whose values the sending
-    /// code resolves from <c>externalresources.json</c> and from the portal address.</item>
-    /// </list>
-    /// </summary>
-    private void AssertPatternIsPortable()
-    {
-        foreach (var text in new[] { Pattern.Subject(), Pattern.Body() })
-        {
-            text.Should().NotContain(LetterEnvironment.LogoText,
-                $"the letter must carry ${{{CommonTags.LetterLogoText}}} instead of the product name, so "
-                + "white-labelled portals send their own branding");
-
-            text.Should().NotContain("http://", "links must come from tags, not be hard-coded in the pattern")
-                .And.NotContain("https://", "links must come from tags, not be hard-coded in the pattern");
-        }
-    }
-
-    /// <summary>
-    /// Every tag the pattern references must have been given a value: a forgotten one leaves the raw
-    /// <c>$Tag</c> / <c>${Tag}</c> in the letter, which is exactly what the reader would see.
-    /// </summary>
-    private void AssertNoUnresolvedTags(RenderedLetter letter)
-    {
-        var tags = new NVelocityPatternFormatter().GetTags(Pattern);
-
-        tags.Should().NotBeEmpty("every letter substitutes at least the user name; an empty list means the "
-            + "pattern was not found and this check would silently pass");
-
-        foreach (var tag in tags)
-        {
-            var because = $"tag '{tag}' has no value in {GetType().Name}.BuildLetterTags";
-
-            letter.Subject.Should().NotContain($"${tag}", because).And.NotContain($"${{{tag}}}", because);
-            letter.Body.Should().NotContain($"${tag}", because).And.NotContain($"${{{tag}}}", because);
-        }
-    }
-
-    /// <summary>
-    /// A textile link is written <c>"caption":"address"</c> and is recognised only when nothing is glued
-    /// to it. A particle in Japanese or Korean, a case suffix in Finnish or Azerbaijani, a hyphen in
-    /// Armenian — any of them is enough for the parser to walk past, and it then leaves the caption, the
-    /// colon and the address standing in the text, merely curling the quotation marks. The letter still
-    /// renders and still contains the address, so a check that the address is present passes while the
-    /// reader is looking at <c>“Help Center”:”https://…”</c>.
-    /// </summary>
-    private static void AssertLinksRendered(RenderedLetter letter)
-    {
-        var raw = _unrenderedLink.Matches(letter.Body)
-            .Select(match => match.Value)
-            .ToArray();
-
-        raw.Should().BeEmpty("a textile link was not recognised and its address is printed to the reader; "
-            + "the translation most likely glues a particle or a suffix to the closing quotation mark — "
-            + "put a space there");
     }
 
     /// <summary>The signature the harness passes in, in the recipient's culture, plus the site it links to.</summary>
