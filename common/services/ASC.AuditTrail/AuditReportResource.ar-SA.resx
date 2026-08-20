@@ -901,7 +901,7 @@
     <value>أرسل</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>أرسل المستخدم {0} دعوة إلى {1} للانضمام إلى DocSpace</value>
+    <value>أرسل المستخدم {0} دعوة إلى {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات الدعوة: {0}</value>

@@ -159,6 +159,9 @@ public class RestoreDbModuleTask : PortalTaskBase
                             case IdType.Guid:
                                 newIdValue = Guid.NewGuid().ToString("D");
                                 break;
+                            case IdType.GuidV7:
+                                newIdValue = Guid.CreateVersion7().ToString("D");
+                                break;
                             case IdType.Integer:
                                 {
                                     var command = connection.CreateCommand();

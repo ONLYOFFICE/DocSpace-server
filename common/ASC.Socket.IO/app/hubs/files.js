@@ -617,6 +617,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-ai-config");
   }
 
+  function changeAiAccessSettings({ room, enabled } = {}) {
+    logger.info(`change ai access settings in room ${room}, enabled: ${enabled}`);
+    filesIO.to(room).emit("s:change-ai-access-settings", { enabled });
+  }
+
   function changeExternalSharingSettings({
     room,
     externalShare,
@@ -689,6 +694,7 @@ module.exports = (io) => {
     changeAccessRightsForFolder,
     quotaExceeded,
     changeAiConfig,
+    changeAiAccessSettings,
     changeExternalSharingSettings,
     externalDbSettings
   };

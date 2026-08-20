@@ -99,6 +99,23 @@ public class TenantLogoManager(
     }
 
     /// <summary>
+    /// Whether the portal top logo (LogoLightSmall) is the built-in one rather than an uploaded
+    /// white-label logo. The two are authored at different proportions, so consumers that lay the
+    /// logo out into a box of their own have to tell them apart.
+    /// </summary>
+    public async Task<bool> IsDefaultTopLogoAsync()
+    {
+        if (!WhiteLabelEnabled)
+        {
+            return true;
+        }
+
+        var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
+        return tenantWhiteLabelSettings.GetIsDefault(WhiteLabelLogoType.LightSmall);
+    }
+
+    /// <summary>
     /// Returns the portal top logo (LogoLightSmall) as a self-contained base64 data URI
     /// (e.g. "data:image/svg+xml;base64,..."), for consumers that must embed the image rather than
     /// reference it by URL. The built-in default logo never changes, so it is cached.

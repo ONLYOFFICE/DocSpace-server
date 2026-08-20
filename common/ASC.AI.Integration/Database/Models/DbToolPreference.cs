@@ -99,8 +99,8 @@ public static class DbToolPrefsExtension
             entity.Property(e => e.ServerType)
                 .HasColumnName("server_type")
                 .HasColumnType("varchar(128)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasCharSet("utf8mb4")
+                .UseCollation("utf8mb4_general_ci");
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")

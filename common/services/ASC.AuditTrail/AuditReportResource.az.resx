@@ -886,7 +886,7 @@
     <value>Göndər</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>İstifadəçi {0} bu DocSpace-ə qoşulmaq üçün {1} ünvanına dəvət göndərdi</value>
+    <value>İstifadəçi {0} {1} ünvanına dəvət göndərdi</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Dəvət Təlimatları Göndərildi: {0}</value>

@@ -34,3 +34,7 @@
 	path = common/resources/DocStore
 	url = https://github.com/ONLYOFFICE/document-templates
 	branch = main/community-server
+[submodule "sdk/docspace-api-spec"]
+	path = sdk/docspace-api-spec
+	url = https://github.com/ONLYOFFICE/docspace-api-spec.git
+	branch = release/v4.0.0

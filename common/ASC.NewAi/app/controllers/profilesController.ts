@@ -111,13 +111,13 @@ interface ListProviderModelsBody {
 
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
-    assertSafeBaseUrl(req.body?.baseUrl);
+    await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.create(req.body);
     res.json(result);
   }),
 
   update: asyncHandler<Profile>(async (req, res) => {
-    assertSafeBaseUrl(req.body?.baseUrl);
+    await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.update(req.body);
     res.json(result);
   }),
@@ -139,7 +139,7 @@ export const profilesController = {
       res.status(400).json({ error: "providerType and baseUrl required" });
       return;
     }
-    assertSafeBaseUrl(baseUrl);
+    await assertSafeBaseUrl(baseUrl);
     try {
       const models = await engine.listProviderModels({
         providerType,

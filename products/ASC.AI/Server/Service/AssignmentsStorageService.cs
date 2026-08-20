@@ -50,6 +50,8 @@ public class AssignmentsStorageService(
 
     public async Task CreateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
+        AssertProfileIdIsValid(profileId);
+
         var userTypes = !string.IsNullOrEmpty(entityId) ? _writeLocalTypes : _writeGlobalTypes;
 
         var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
@@ -80,6 +82,8 @@ public class AssignmentsStorageService(
 
     public async Task UpdateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
+        AssertProfileIdIsValid(profileId);
+
         var userTypes = !string.IsNullOrEmpty(entityId) ? _writeLocalTypes : _writeGlobalTypes;
 
         var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
@@ -92,6 +96,11 @@ public class AssignmentsStorageService(
 
     public async Task UpsertManyAsync(IReadOnlyDictionary<ActionType, Guid> assignments, string? entityId = null)
     {
+        foreach (var profileId in assignments.Values)
+        {
+            AssertProfileIdIsValid(profileId);
+        }
+
         var userTypes = !string.IsNullOrEmpty(entityId) ? _writeLocalTypes : _writeGlobalTypes;
 
         var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
@@ -99,17 +108,40 @@ public class AssignmentsStorageService(
         await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments, entryId);
     }
 
-    public async Task DeleteAsync(ActionType actionType)
+    public async Task UnassignAsync(ActionType actionType)
     {
         await AssertUserHasAccessAsync(_writeGlobalTypes);
 
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), actionType);
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        if (AssignmentsResolver.HasDefault(actionType))
+        {
+            await storage.UnassignAsync(tenantId, actionType);
+        }
+        else
+        {
+            await storage.DeleteAsync(tenantId, actionType);
+        }
     }
 
-    public async Task DeleteManyAsync(IReadOnlyCollection<ActionType> actionTypes)
+    public async Task UnassignManyAsync(IReadOnlyCollection<ActionType> actionTypes)
     {
         await AssertUserHasAccessAsync(_writeGlobalTypes);
 
-        await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), actionTypes);
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var withDefaults = actionTypes.Where(AssignmentsResolver.HasDefault).ToArray();
+        var withoutDefaults = actionTypes.Where(x => !AssignmentsResolver.HasDefault(x)).ToArray();
+
+        await storage.UnassignManyAsync(tenantId, withDefaults);
+        await storage.DeleteManyAsync(tenantId, withoutDefaults);
+    }
+
+    private static void AssertProfileIdIsValid(Guid profileId)
+    {
+        if (profileId == AssignmentsStorage.UnassignedProfileId)
+        {
+            throw new ArgumentException(@"profileId must not be empty", nameof(profileId));
+        }
     }
 }

@@ -500,7 +500,7 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
     <value>Ustvarjalec vsebine</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace Skrbnik</value>
+    <value>Polni administrator</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Urednik</value>

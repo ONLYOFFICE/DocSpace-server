@@ -274,8 +274,14 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public int deleteUserClients(DeleteUserClientsCommand command) {
     validate(command);
+
+    clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
     userClientsMessagePublisher.publish(
-        UserClientsRemovedEvent.builder().userId(command.getUserId()).build());
+        UserClientsRemovedEvent.builder()
+            .userId(command.getUserId())
+            .tenantId(command.getTenantId())
+            .build());
+
     return clientUpdateCommandHandler.deleteUserClients(command);
   }
 

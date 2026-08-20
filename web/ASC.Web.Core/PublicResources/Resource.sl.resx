@@ -211,7 +211,7 @@
     <value>Presežena je bila kvota prostora za AI agente</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Kvote za AI agenta ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupne shrambe DocSpace.</value>
+    <value>Kvote za AI agenta ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupne shrambe.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Samodejno podaljšanje</value>
@@ -763,7 +763,7 @@
     <value>Slabi ključi</value>
   </data>
   <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>O último espaço de acesso completo não pode ser excluído</value>
+    <value>Zadnjega prostora s polnim dostopom ni mogoče izbrisati</value>
   </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>Vaš profil je onemogočen</value>
@@ -880,34 +880,34 @@
     <value>URL Webhook ni na voljo. Zahteva HEAD ni odgovor na 200 http status.</value>
   </data>
   <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>Arquivo de plugin errado</value>
+    <value>Napačen arhiv vtičnika</value>
   </data>
   <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>O plug-in já existe</value>
+    <value>Vtičnik že obstaja</value>
   </data>
   <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>Extensão de arquivo errada</value>
+    <value>Napačna končnica datoteke</value>
   </data>
   <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>O tamanho do arquivo excede o limite</value>
+    <value>Velikost datoteke presega omejitev</value>
   </data>
   <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>São proibidas alterações nos plugins do sistema</value>
+    <value>Spremembe sistemskih vtičnikov niso dovoljene</value>
   </data>
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>Število vtičnikov presega omejitev</value>
   </data>
   <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>Nome de plug-in errado</value>
+    <value>Napačno ime vtičnika</value>
   </data>
   <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>Nenhum arquivo de entrada</value>
+    <value>Ni vhodne datoteke</value>
   </data>
   <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>Plug-in não encontrado</value>
+    <value>Vtičnika ni mogoče najti</value>
   </data>
   <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>Para muitos arquivos de entrada</value>
+    <value>Preveč vhodnih datotek</value>
   </data>
   <data name="EuServerRegion" xml:space="preserve">
     <value>Območje EU (Frankfurt)</value>
@@ -1120,7 +1120,7 @@
     <value>Kvota prostora v sobi je presežena</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Kvote na sobo ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje DocSpace.</value>
+    <value>Kvote na sobo ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Azija Pacifik (Singapur)</value>
@@ -1285,7 +1285,7 @@
     <value>Prišlo je do nepričakovane napake. Poskusite znova.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Uspešno ste se povezali Telegram za prejemanje obvestil iz vašega DocSpace.</value>
+    <value>Uspešno ste se povezali Telegram za prejemanje obvestil iz vašega delovnega prostora.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Neveljavna koda</value>
@@ -1300,7 +1300,7 @@
     <value>Kvota uporabniškega prostora je presežena</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Kvote na uporabnika ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje DocSpace.</value>
+    <value>Kvote na uporabnika ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>US Zahodna (Oregonska) Regija</value>
@@ -1315,13 +1315,13 @@
     <value>Klepet</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_fetch" xml:space="preserve">
-    <value>Spletno iskanje</value>
+    <value>Pregledovanje spleta</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Spletno iskanje</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Spletno iskanje</value>
+    <value>Iskanje z AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI krediti</value>

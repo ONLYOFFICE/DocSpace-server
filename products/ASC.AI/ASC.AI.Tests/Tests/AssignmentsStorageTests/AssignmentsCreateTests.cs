@@ -88,6 +88,17 @@ public class AssignmentsCreateTests(AspireAppFixture fixture) : BaseTest(fixture
     }
 
     [Fact]
+    public async Task Create_EmptyProfileId_Returns400()
+    {
+        using var response = await _ai.PostAsync(
+            AssignmentsPath,
+            new { actionType = "Chat", profileId = Guid.Empty },
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task Create_InvalidJson_Returns400()
     {
         const string invalidJson = """{ "actionType": "Chat" }""";

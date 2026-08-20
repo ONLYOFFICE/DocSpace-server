@@ -127,7 +127,7 @@
     <value>Musíte vložiť licenčný kľúč</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Konflikt licencií. Uistite sa, že ste nainštalovali správnu edíciu {0} DocSpace (Enterprise alebo Developer). Ak máte akékoľvek otázky, neváhajte sa obrátiť na svojho obchodného manažéra.</value>
+    <value>Konflikt licencií. Uistite sa, že ste nainštalovali správnu edíciu {0} Docs (Enterprise alebo Developer). Ak máte akékoľvek otázky, neváhajte sa obrátiť na svojho obchodného manažéra.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Nový dokument</value>

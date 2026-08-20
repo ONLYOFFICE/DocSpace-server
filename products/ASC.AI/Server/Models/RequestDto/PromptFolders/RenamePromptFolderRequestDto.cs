@@ -44,5 +44,6 @@ public class RenamePromptFolderRequestDto
 
 public class RenamePromptFolderBody
 {
+    [MaxLength(AiIntegrationLimits.MaxNameLength)]
     public required string Name { get; init; }
 }

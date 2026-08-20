@@ -116,7 +116,7 @@ public class AuthorizationServerConfiguration {
   private final AuthenticationFailureHandler authenticationFailureHandler;
 
   /**
-   * Configures a dedicated security filter chain for the liveness and readiness probe endpoints.
+   * Configures a dedicated security filter chain for actuator health endpoints.
    *
    * @param http the HttpSecurity object for configuring security
    * @return the SecurityFilterChain object representing the configured security filter chain
@@ -126,7 +126,7 @@ public class AuthorizationServerConfiguration {
   @Bean("authorizationHealthProbeSecurityFilterChain")
   SecurityFilterChain authorizationHealthProbeSecurityFilterChain(HttpSecurity http)
       throws Exception {
-    return http.securityMatcher("/health/readiness", "/health/liveness")
+    return http.securityMatcher("/health", "/health/**")
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
         .csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)
