@@ -214,6 +214,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI profile assigned to action: {0}.
+        /// </summary>
+        public static string AiProfileAssigned {
+            get {
+                return ResourceManager.GetString("AiProfileAssigned", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to AI model profile created: {0}.
         /// </summary>
         public static string AiProfileCreated {
@@ -228,6 +237,15 @@ namespace ASC.AuditTrail {
         public static string AiProfileDeleted {
             get {
                 return ResourceManager.GetString("AiProfileDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to AI profile unassigned from action: {0}.
+        /// </summary>
+        public static string AiProfileUnassigned {
+            get {
+                return ResourceManager.GetString("AiProfileUnassigned", resourceCulture);
             }
         }
 

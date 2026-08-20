@@ -162,11 +162,17 @@
   <data name="AIDefaultProviderSet" xml:space="preserve">
     <value>Default AI provider set: Name: {0}, Default Model: {1}</value>
   </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI profile assigned to action: {0}</value>
+  </data>
   <data name="AiProfileCreated" xml:space="preserve">
     <value>AI model profile created: {0}</value>
   </data>
   <data name="AiProfileDeleted" xml:space="preserve">
     <value>AI model profile deleted: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI profile unassigned from action: {0}</value>
   </data>
   <data name="AiProfileUpdated" xml:space="preserve">
     <value>AI model profile updated: {0}</value>

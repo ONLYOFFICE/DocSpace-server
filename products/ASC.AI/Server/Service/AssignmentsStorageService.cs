@@ -42,7 +42,8 @@ public class AssignmentsStorageService(
     AssignmentsResolver resolver,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
+    AiGateway gateway,
+    MessageService messageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _writeGlobalTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _writeLocalTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
@@ -60,6 +61,8 @@ public class AssignmentsStorageService(
         {
             throw new InvalidOperationException($"Assignment for action type '{actionType.ToStringFast()}' already exists");
         }
+
+        messageService.Send(MessageAction.AiProfileAssigned, MessageTarget.Create(profileId), actionType.ToStringFast());
     }
 
     public async Task<Guid?> ReadByTypeAsync(ActionType actionType, string? entityId = null)
@@ -92,6 +95,8 @@ public class AssignmentsStorageService(
         {
             throw new ItemNotFoundException($"Assignment for action type '{actionType.ToStringFast()}' was not found");
         }
+
+        messageService.Send(MessageAction.AiProfileAssigned, MessageTarget.Create(profileId), actionType.ToStringFast());
     }
 
     public async Task UpsertManyAsync(IReadOnlyDictionary<ActionType, Guid> assignments, string? entityId = null)
@@ -106,6 +111,11 @@ public class AssignmentsStorageService(
         var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
 
         await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments, entryId);
+
+        foreach (var (actionType, profileId) in assignments)
+        {
+            messageService.Send(MessageAction.AiProfileAssigned, MessageTarget.Create(profileId), actionType.ToStringFast());
+        }
     }
 
     public async Task UnassignAsync(ActionType actionType)
@@ -122,6 +132,8 @@ public class AssignmentsStorageService(
         {
             await storage.DeleteAsync(tenantId, actionType);
         }
+
+        messageService.Send(MessageAction.AiProfileUnassigned, actionType.ToStringFast());
     }
 
     public async Task UnassignManyAsync(IReadOnlyCollection<ActionType> actionTypes)
@@ -135,6 +147,11 @@ public class AssignmentsStorageService(
 
         await storage.UnassignManyAsync(tenantId, withDefaults);
         await storage.DeleteManyAsync(tenantId, withoutDefaults);
+
+        foreach (var actionType in actionTypes)
+        {
+            messageService.Send(MessageAction.AiProfileUnassigned, actionType.ToStringFast());
+        }
     }
 
     private static void AssertProfileIdIsValid(Guid profileId)

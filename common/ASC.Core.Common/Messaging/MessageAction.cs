@@ -1021,6 +1021,12 @@ public enum MessageAction
     [Description("AI model profile deleted")]
     AiProfileDeleted = 6105,
 
+    [Description("AI model profile assigned to action")]
+    AiProfileAssigned = 6106,
+
+    [Description("AI model profile unassigned from action")]
+    AiProfileUnassigned = 6107,
+
     #endregion
 
     #region others
