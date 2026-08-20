@@ -34,9 +34,11 @@
 global using ASC.Data.Backup.Tasks;
 global using ASC.Data.Backup.Tasks.Data;
 global using ASC.Data.Backup.Tasks.Modules;
+global using ASC.Migrations.Core;
 global using ASC.Security.Cryptography;
 
 global using FluentAssertions;
 
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging.Abstractions;

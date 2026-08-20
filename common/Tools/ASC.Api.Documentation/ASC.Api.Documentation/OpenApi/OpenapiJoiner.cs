@@ -42,7 +42,13 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
             {
                 var task = ctx.AddTask("Joining [green]openapi files[/]");
 
-                await JoinAsync(settings.Output, [.. settings.Files!], progress: percent => task.Value = percent, cancellationToken);
+                await JoinAsync(
+                    settings.Output,
+                    settings.PublishOutput,
+                    settings.ServerUrl,
+                    [.. settings.Files!],
+                    progress: percent => task.Value = percent,
+                    cancellationToken);
 
                 task.Value = 100;
             });
@@ -50,7 +56,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         return 0;
     }
 
-    private static async Task JoinAsync(string outputPath, string[] inputFiles, Action<double>? progress = null, CancellationToken cancellationToken = default)
+    private static async Task JoinAsync(string outputPath, string? publishPath, string? serverUrl, string[] inputFiles, Action<double>? progress = null, CancellationToken cancellationToken = default)
     {
         if (inputFiles == null || inputFiles.Length == 0)
         {
@@ -93,14 +99,22 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
             throw new Exception("Nothing to merge.");
         }
 
-        SortTagGroups(result);
-        // Runs first so that everything below sees the keyword spellings openapi-generator understands - collapsing
-        // an enum union, for one, carries the example over and would drop a 3.1 `examples` array.
-        NormalizeNullableTypes(result);
-        EnumCleaner.Clean(result);
-        FixMultipartFormData(result);
-        RemoveFormCollectionSchema(result);
-        ApplyDeepObjectStyle(result);
+        // Two documents come out of the one merge, and they are not the same document. The SDK input
+        // carries workarounds for openapi-generator's incomplete openapi 3.1 support, and those
+        // workarounds change what the schemas say: `additionalProperties: false` is dropped and the
+        // examples move to a keyword 3.1 does not define. Publishing that as the API contract would
+        // hand everyone else a description the server does not actually implement.
+        if (!string.IsNullOrWhiteSpace(publishPath))
+        {
+            var published = result.DeepClone().AsObject();
+            Rewrite(published, applyGeneratorWorkarounds: false);
+            OpenApiServer.ApplyBaseUrlDefault(published, serverUrl);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(publishPath)!);
+            await File.WriteAllTextAsync(publishPath, YamlWriter.Write(published), cancellationToken);
+        }
+
+        Rewrite(result, applyGeneratorWorkarounds: true);
 
         var options = new JsonSerializerOptions
         {
@@ -111,6 +125,26 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         await File.WriteAllTextAsync(outputPath, result.ToJsonString(options), cancellationToken);
 
         progress?.Invoke(100);
+    }
+
+    /// <summary>
+    /// The passes every joined document goes through, with the openapi-generator workarounds applied
+    /// only to the document that openapi-generator reads.
+    /// </summary>
+    private static void Rewrite(JsonObject document, bool applyGeneratorWorkarounds)
+    {
+        SortTagGroups(document);
+
+        // Runs first so that everything below sees the keyword spellings openapi-generator understands.
+        if (applyGeneratorWorkarounds)
+        {
+            NormalizeNullableTypes(document);
+        }
+
+        EnumCleaner.Clean(document);
+        FixMultipartFormData(document);
+        RemoveFormCollectionSchema(document);
+        ApplyDeepObjectStyle(document);
     }
 
     private static JsonObject LoadJson(string path)

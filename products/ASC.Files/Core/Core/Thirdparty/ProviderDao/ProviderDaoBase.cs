@@ -71,6 +71,55 @@ internal class ProviderDaoBase(IServiceProvider serviceProvider,
         }
     }
 
+    /// <summary>
+    /// Returns the third-party entries marked with the specified tags: the real provider id and the date when the tag was linked.
+    /// Tag links store the hashed id of a third-party entry, so they have to be resolved through the mapping table.
+    /// </summary>
+    protected async Task<Dictionary<string, DateTime?>> GetTaggedThirdPartyIdsAsync(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, FileEntryType entryType)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var tagTypes = tagType.ToList();
+
+        var result = await filesDbContext.Tag
+            .Where(t => t.TenantId == tenantId && t.Owner == tagOwner && tagTypes.Contains(t.Type))
+            .Join(filesDbContext.TagLink, t => t.Id, l => l.TagId, (t, l) => l)
+            .Where(l => l.TenantId == tenantId && l.EntryType == entryType)
+            .Join(filesDbContext.ThirdpartyIdMapping.Where(m => m.TenantId == tenantId), l => l.EntryId, m => m.HashId, (l, m) => new { m.Id, l.CreateOn })
+            .GroupBy(x => x.Id)
+            .Select(g => new { Id = g.Key, CreateOn = g.Max(x => x.CreateOn) })
+            .ToListAsync();
+
+        return result.ToDictionary(x => x.Id, x => x.CreateOn);
+    }
+
+    /// <summary>
+    /// Checks that a third-party entry belongs to the requested location and to a room of the requested type.
+    /// Mirrors the filters applied to the internal entries by the tag queries of <see cref="FileDao"/> and <see cref="FolderDao"/>.
+    /// </summary>
+    protected static bool CheckTagEntryLocation(FileEntry<string> entry, Dictionary<int, IProviderInfo> providers, Location? location, List<FolderType> folderType)
+    {
+        if (entry.RootFolderType == FolderType.TRASH)
+        {
+            return false;
+        }
+
+        providers.TryGetValue(entry.ProviderId, out var provider);
+
+        switch (location)
+        {
+            case Location.Documents when entry.RootFolderType != FolderType.USER:
+            case Location.Room when provider == null || !provider.FolderType.IsRoom():
+                return false;
+        }
+
+        if (folderType is not { Count: > 0 })
+        {
+            return true;
+        }
+
+        return provider != null && folderType.Contains(provider.FolderType);
+    }
+
     protected internal Task<File<string>> PerformCrossDaoFileCopyAsync(string fromFileId, string toFolderId, bool deleteSourceFile)
     {
         var fromSelector = _selectorFactory.GetSelector(fromFileId);

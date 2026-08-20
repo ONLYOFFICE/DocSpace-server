@@ -54,7 +54,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
-import { safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
+import { safeGetAgentEntity, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -79,10 +79,14 @@ function withRequestSignal<T>(res: Response, body: T): T {
   if (!isObject(body)) {
     return body;
   }
-  const actionArgs = body["actionArgs"];
-  if (!isObject(actionArgs)) {
-    return body;
-  }
+  // Always wire the abort signal, even when the request carries no
+  // `actionArgs`. The UI sends an `actionArgs` object (with a signal that
+  // collapses to `{}` over JSON), but a direct API client omits it entirely
+  // — and without the signal a client disconnect never reaches the provider,
+  // so generation runs to completion and keeps burning tokens after the user
+  // has stopped waiting. Create the object when missing so cancellation works
+  // for every caller.
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
   return {
     ...body,
     actionArgs: { ...actionArgs, signal: responseAbortSignal(res) },
@@ -90,10 +94,10 @@ function withRequestSignal<T>(res: Response, body: T): T {
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt
-// override. The fragment ships alongside the tool list from
-// `tools/list`; the engine's own `getTools` reuses the cached fetch, so
-// this adds no extra round-trip. An existing client override is kept and
-// the fragment appended to its text; otherwise an `append` override is set.
+// override. The fragment ships alongside the tool list from the .NET
+// `tools/list`; nothing along this path is cached (deliberate — see
+// SystemToolsSource), so the prompt fetch is its own round-trip next to
+// the engine's `getTools`.
 // Append `fragment` to the action's system-prompt override (the engine
 // folds it onto the baked-in default via `resolveSystemPrompt`). Keeps an
 // existing override's text and adds the fragment after a blank line;
@@ -142,18 +146,19 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
 }
 
 // Build the context fragment that tells the agent where it is operating and
-// how to scope tool calls. The workspace lines are emitted only when an
-// `entityId` (the agent/room scope) is present.
+// how to scope tool calls. The location lines are emitted only when an
+// `entityId` (the folder/room the chat is opened from) is present.
 function buildContextFragment(entityId: string | undefined): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
     "Context:",
-    "- You are an AI agent operating inside a workspace, not a generic standalone assistant.",
+    "- You are an AI agent operating inside a DocSpace workspace, not a generic standalone assistant.",
   ];
   if (entityId) {
     lines.push(
-      `- This conversation is scoped to a single agent workspace (id: ${entityId}). Any tool you call reads or modifies data within the current user's workspace, on their behalf and with their permissions — never assume access beyond that scope.`,
-      `- When a tool needs a workspace, folder, or scope identifier and the user did not specify one, use this workspace id (${entityId}) — e.g. scope searches and listings to it.`,
+      `- You are currently in the folder or room with id ${entityId} — this is the user's current location. Any tool you call reads or modifies data on the user's behalf and with their permissions — never assume access beyond that.`,
+      `- When a tool needs a folder, room, or scope identifier and the user did not specify one, use this folder/room id (${entityId}) — e.g. scope searches and listings to it.`,
+      `- To see what is in the current location (its files and subfolders), call the get_folder_content tool with this id (${entityId}); use get_folder_info for the location's own properties. Do this when the user refers to "this folder/room", "these files", or asks what is here.`,
     );
   }
   lines.push(
@@ -188,6 +193,29 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
   }
   const instruction = await safeGetAgentInstruction(contextScopeOf(body));
   return instruction ? appendActionPrompt(body, instruction) : body;
+}
+
+// Describe the host entity the round runs for — the agent whose chat this
+// is — in `actionArgs`. `@onlyoffice/ai-chat` (>= 0.5.50) turns the pair into
+// the ONLYOFFICE request's `metadata` object (`agent_id` / `agent_title`),
+// including on tool-call resume rounds, so the backend can attribute usage to
+// the agent. Server-resolved on purpose: the title comes from the Files API
+// under the caller's credentials, so a client cannot claim someone else's
+// agent. A plain chat (no agent room in scope) contributes nothing and the
+// field stays absent.
+async function withEntityMetadata<T>(body: T): Promise<T> {
+  if (!isObject(body)) {
+    return body;
+  }
+  const entity = await safeGetAgentEntity(contextScopeOf(body));
+  if (!entity.entityId) {
+    return body;
+  }
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
+  return {
+    ...body,
+    actionArgs: { ...actionArgs, ...entity },
+  } as T;
 }
 
 const toolsAdapter = new HttpToolsAdapter();
@@ -376,7 +404,7 @@ export const aiController = {
     // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
     // Mirrors sendWithStream.
     markForwardHeadersToProvider();
-    const result = await engine.send(req.body);
+    const result = await engine.send(await withEntityMetadata(req.body));
     res.json(result);
   }),
 
@@ -432,7 +460,9 @@ export const aiController = {
       }
     }
     const body = withContextPrompt(
-      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+      await withToolsPrompt(
+        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+      ),
     );
     await streamNdjson(
       res,
@@ -446,7 +476,9 @@ export const aiController = {
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
     const body = withContextPrompt(
-      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+      await withToolsPrompt(
+        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+      ),
     );
     await streamOpenAiSse(
       res,
@@ -459,7 +491,9 @@ export const aiController = {
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
     const body = withContextPrompt(
-      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+      await withToolsPrompt(
+        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+      ),
     );
     await streamNdjson(
       res,
@@ -469,7 +503,7 @@ export const aiController = {
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withRequestSignal(res, req.body);
+    const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       logStreamErrors("ai/approve-tool-call", engine.approveToolCall(body)),
@@ -478,7 +512,7 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withRequestSignal(res, req.body);
+    const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       logStreamErrors("ai/deny-tool-call", engine.denyToolCall(body)),

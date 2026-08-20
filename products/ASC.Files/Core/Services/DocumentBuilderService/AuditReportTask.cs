@@ -149,7 +149,10 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 
     private async Task ProduceAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, string nameArg0, string nameArg1, CultureInfo culture) where T : BaseEvent
     {
-        var descriptor = new AuditReportDescriptor(reportNameFormat, nameArg0, nameArg1, _data.From, _data.To, culture);
+        var isDocSpaceAdmin = await serviceProvider.GetService<UserManager>().IsDocSpaceAdminAsync(_userId);
+
+        var descriptor = new AuditReportDescriptor(reportNameFormat, nameArg0, nameArg1, _data.From, _data.To, culture,
+            AuditReportColumns.Resolve<T>(_data.Kind, isDocSpaceAdmin));
 
         // Writers are resolved from the per-execution scope: the tenant and user context they rely
         // on is only established above, inside this job's own scope.

@@ -59,7 +59,6 @@ public class AiGateway(
     IFusionCache fusionCache)
 {
     public const int ProviderId = -1;
-    public const string ProviderTitle = "ONLYOFFICE AI";
 
     private const string ModelsCacheKey = "ai:gateway:models";
     private static readonly TimeSpan _modelsCacheDuration = TimeSpan.FromSeconds(60);
@@ -94,9 +93,14 @@ public class AiGateway(
 
     public async Task<string> GetKeyAsync(bool allowEmpty = false)
     {
+        if (!Configured)
+        {
+            return allowEmpty ? string.Empty : throw new AiGatewayNotConfiguredException();
+        }
+
         if (!await IsAiEnabledAsync())
         {
-            return allowEmpty ? string.Empty : throw new InvalidOperationException("AI Gateway is not enabled");
+            return allowEmpty ? string.Empty : throw new AiServiceDisabledException();
         }
 
         return await GenerateKeyAsync(allowEmpty);
@@ -197,6 +201,10 @@ public class AiGatewaySettings
     public TimeSpan ResponseTimeout { get; init; } = TimeSpan.FromMinutes(10);
 }
 
+public class AiGatewayNotConfiguredException(string message = "AI gateway is not configured") : Exception(message);
+
+public class AiServiceDisabledException(string message = "AI service is disabled") : Exception(message);
+
 public record CurrencyInfo
 {
     public required string Code { get; init; }
@@ -242,6 +250,7 @@ public record AiImageModelPricing : AiModelPricing<AiImagePrice>;
 public record AiImagePrice
 {
     public decimal Prompt { get; init; }
+    public decimal Completion { get; init; }
     public decimal Image { get; init; }
 }
 

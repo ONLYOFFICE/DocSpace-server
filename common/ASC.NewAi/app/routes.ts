@@ -51,6 +51,7 @@ import { textToDocxController } from "./controllers/textToDocxController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
+import { editorToolsController } from "./controllers/editorToolsController.js";
 import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
@@ -60,6 +61,7 @@ import { threadsController } from "./controllers/threadsController.js";
 import { toolsController } from "./controllers/toolsController.js";
 import { vectorizationController } from "./controllers/vectorizationController.js";
 import { webSearchController } from "./controllers/webSearchController.js";
+import { webSearchPassthroughController } from "./controllers/webSearchPassthroughController.js";
 
 export { API_PREFIX };
 
@@ -218,6 +220,24 @@ export default function registerRoutes(app: Application): void {
   router.post(
     "/openai/:profileId/v1/images/generations",
     openaiPassthroughController.imagesGenerations,
+  );
+
+  // DocSpace tools for the editor AI plugin: sanitized catalog of the same
+  // composed adapter the chat engine uses, plus server-side execution with
+  // the caller's forwarded credentials (see editorToolsController).
+  router.get("/editor-tools/list", editorToolsController.list);
+  router.post("/editor-tools/call", editorToolsController.call);
+
+  // Web-search passthrough for the editor AI plugin: the plugin holds a
+  // placeholder config, the portal's active provider and key are resolved
+  // here (see webSearchPassthroughController).
+  router.post(
+    "/websearch/v1/search",
+    webSearchPassthroughController.search,
+  );
+  router.post(
+    "/websearch/v1/contents",
+    webSearchPassthroughController.contents,
   );
 
   let total = 0;

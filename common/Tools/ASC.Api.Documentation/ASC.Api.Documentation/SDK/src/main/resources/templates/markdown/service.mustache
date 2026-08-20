@@ -1,0 +1,113 @@
+# {{appName}}
+{{#docsUrl}}
+
+The browsable version of this reference, with a request builder and code samples, is published at
+<{{{.}}}>.
+{{/docsUrl}}
+
+All URIs are relative to *{{{basePath}}}*, where the host is the address of your DocSpace instance.
+
+## Endpoints
+
+| Class | Method | HTTP request | Description |
+|------------ | ------------- | ------------- | -------------|
+{{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}| *{{classname}}* | [**{{operationId}}**](#{{vendorExtensions.x-anchor}}) | **{{httpMethod}}** {{path}} | {{{summary}}}{{^summary}}{{{notes}}}{{/summary}} |
+{{/operation}}{{/operations}}{{/apis}}{{/apiInfo}}
+
+{{#apiInfo}}{{#apis}}{{#operations}}
+## {{classname}}
+{{#operation}}
+
+<!--op:{{operationId}}-->
+### {{operationId}}
+
+> {{#returnType}}{{.}} {{/returnType}}{{operationId}}({{#allParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/allParams}})
+
+`{{httpMethod}} {{path}}`
+
+{{summary}}{{#notes}}
+
+{{.}}{{/notes}}
+
+#### Parameters
+{{^allParams}}
+This endpoint does not need any parameter.
+{{/allParams}}{{#allParams}}{{#-first}}
+|Name | In | Type | Description | Notes |
+|------------- | ------------- | ------------- | ------------- | -------------|
+{{/-first}}| **{{paramName}}** | {{vendorExtensions.x-param-in}} | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}} |
+{{/allParams}}
+
+#### Responses
+
+| Status code | Description | Type | Response headers |
+|------------- | ------------- | ------------- | -------------|
+{{#responses}}| **{{code}}** | {{message}} | {{#dataType}}{{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{/dataType}}{{^dataType}}-{{/dataType}} | {{#headers}}`{{baseName}}`{{^-last}}, {{/-last}}{{/headers}}{{^headers}}-{{/headers}} |
+{{/responses}}
+
+#### Return type
+
+{{#returnType}}{{#vendorExtensions.x-return-model-anchor}}[**{{returnType}}**](#{{vendorExtensions.x-return-model-anchor}}){{/vendorExtensions.x-return-model-anchor}}{{^vendorExtensions.x-return-model-anchor}}**{{returnType}}**{{/vendorExtensions.x-return-model-anchor}}{{/returnType}}{{^returnType}}null (empty response body){{/returnType}}
+
+#### Authorization
+
+{{^authMethods}}No authorization required{{/authMethods}}{{#authMethods}}[{{name}}](#{{vendorExtensions.x-anchor}}){{#vendorExtensions.x-scopes}} (scopes: {{vendorExtensions.x-scopes}}){{/vendorExtensions.x-scopes}}{{^-last}}, {{/-last}}{{/authMethods}}
+
+#### HTTP request headers
+
+- **Content-Type**: {{#consumes}}{{{mediaType}}}{{^-last}}, {{/-last}}{{/consumes}}{{^consumes}}Not defined{{/consumes}}
+- **Accept**: {{#produces}}{{{mediaType}}}{{^-last}}, {{/-last}}{{/produces}}{{^produces}}Not defined{{/produces}}
+{{/operation}}
+{{/operations}}{{/apis}}{{/apiInfo}}
+<!--/ops-->
+
+## Models
+{{#models}}{{#model}}
+
+### Model {{{vendorExtensions.x-title}}}
+{{#description}}
+{{.}}
+{{/description}}
+{{#vendorExtensions.x-enum-doc}}
+
+Possible values:
+
+{{#values}}
+- `{{enumValue}}`{{#enumLabel}} — {{.}}{{/enumLabel}}{{#enumConstant}} (`{{.}}`){{/enumConstant}}
+{{/values}}
+{{/vendorExtensions.x-enum-doc}}
+{{#vendorExtensions.x-has-properties}}
+
+| Name | Type | Description | Notes |
+|------------ | ------------- | ------------- | -------------|
+{{#parent}}{{#parentVars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
+{{/parentVars}}{{/parent}}{{#vars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
+{{/vars}}
+{{/vendorExtensions.x-has-properties}}
+{{/model}}{{/models}}
+
+## Authorization
+{{^authMethods}}
+
+All endpoints do not require authorization.
+{{/authMethods}}{{#authMethods}}
+
+### {{name}}
+{{#isApiKey}}
+- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}
+{{/isApiKey}}{{#isBasicBasic}}
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}{{#isBasicBearer}}
+- **Type**: HTTP Bearer Token authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}{{#isHttpSignature}}
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}{{#isOAuth}}
+- **Type**: OAuth
+- **Flow**: {{flow}}
+- **Authorization URL**: {{authorizationUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOAuth}}{{/authMethods}}

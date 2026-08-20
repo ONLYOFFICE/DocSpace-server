@@ -173,21 +173,6 @@ public class DocsCloudController(
     }
 
     /// <remarks>
-    /// Checks whether the DocsCloud server is reachable.
-    /// </remarks>
-    /// <summary>Check the DocsCloud server health</summary>
-    /// <path>api/2.0/settings/docscloud/healthcheck</path>
-    [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "DocsCloud server is reachable")]
-    [HttpGet("healthcheck")]
-    public async Task CheckHealth()
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        await docsCloudClient.CheckHealthAsync();
-    }
-
-    /// <remarks>
     /// Returns the DocsCloud tenant of the current portal.
     /// </remarks>
     /// <summary>Get the DocsCloud tenant</summary>

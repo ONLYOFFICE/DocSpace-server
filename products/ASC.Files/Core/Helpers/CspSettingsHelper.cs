@@ -246,7 +246,7 @@ public class CspSettingsHelper(
 
         options.Add(defaultOptions);
 
-        var docServiceUrl = filesLinkUtility.GetDocServiceUrl();
+        var docServiceUrl = filesLinkUtility.GetDocServiceUrl(true);
 
         if (Uri.IsWellFormedUriString(docServiceUrl, UriKind.Absolute))
         {

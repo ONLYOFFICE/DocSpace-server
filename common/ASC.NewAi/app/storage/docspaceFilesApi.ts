@@ -32,8 +32,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { proxyBaseUrl, withTimeout } from "./httpClient.js";
-import { getForwardedHeaders } from "../requestContext.js";
-import { isObject, getNumber, getObject, getString } from "../narrow.js";
+import { getForwardedHeaders, getFolderInfoCache } from "../requestContext.js";
+import { isObject, getNumber, getObject, getString, getEntityId } from "../narrow.js";
 import logger from "../log.js";
 import { sanitizeInstruction } from "../sanitizeInstruction.js";
 
@@ -43,6 +43,8 @@ import { sanitizeInstruction } from "../sanitizeInstruction.js";
 export interface DocspaceFolderInfo {
   /** Whether the folder is an AI agent room (`FolderType.AiRoom` on the C# side). */
   isAgent: boolean;
+  /** The folder's display name (`FolderDto.Title`) — the agent name for an agent room. */
+  title?: string;
   /**
    * The agent room's stored instruction (`chatSettings.prompt`), when set.
    * Only agent rooms carry one — `undefined` for a regular folder.
@@ -75,7 +77,7 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   if (!envelope) {
     return undefined;
   }
-  if (getNumber(envelope, "id") === undefined) {
+  if (getEntityId(envelope, "id") === undefined) {
     return undefined;
   }
   const folderType = getNumber(envelope, "type");
@@ -84,6 +86,7 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   const prompt = chatSettings ? getString(chatSettings, "prompt") : undefined;
   return {
     isAgent: folderType === FOLDER_TYPE_AI_ROOM || roomType === ROOM_TYPE_AI_ROOM,
+    title: getString(envelope, "title"),
     prompt,
   };
 }
@@ -120,6 +123,69 @@ export async function getFolderInfo(
 }
 
 /**
+ * Request-scoped memoization of {@link getFolderInfo}. A single chat round
+ * reads the same folder more than once — the agent instruction, the entity
+ * metadata — and the DTO cannot change mid-request, so the second reader
+ * joins the first fetch instead of issuing its own. Falls through to a plain
+ * fetch outside a request context. Rejections are not cached: the entry is
+ * dropped so a later reader can retry.
+ */
+function getFolderInfoOnce(folderId: string): Promise<DocspaceFolderInfo | undefined> {
+  const cache = getFolderInfoCache();
+  if (!cache) {
+    return getFolderInfo(folderId);
+  }
+  const cached = cache.get(folderId);
+  if (cached) {
+    return cached;
+  }
+  const pending = getFolderInfo(folderId);
+  cache.set(folderId, pending);
+  pending.catch(() => cache.delete(folderId));
+  return pending;
+}
+
+/**
+ * The host entity behind a chat round, in the shape `@onlyoffice/ai-chat`
+ * expects in `actionArgs` (`entityId` / `entityTitle`) — the ONLYOFFICE
+ * provider turns the pair into the request's `metadata` object
+ * (`agent_id` / `agent_title`).
+ */
+export interface AgentEntityMeta {
+  entityId?: string;
+  entityTitle?: string;
+}
+
+/**
+ * Best-effort resolution of the agent room a round runs for. Only agent
+ * rooms describe an entity — a regular folder, an absent scope, or a failed
+ * fetch all yield an empty object, which the provider renders as no
+ * `metadata` at all. Never throws (mirrors {@link safeGetAgentInstruction}):
+ * metadata is telemetry for the backend, never a reason to fail a chat.
+ */
+export async function safeGetAgentEntity(
+  entityId: string | undefined,
+): Promise<AgentEntityMeta> {
+  if (!entityId) {
+    return {};
+  }
+  try {
+    const info = await getFolderInfoOnce(entityId);
+    if (!info?.isAgent) {
+      return {};
+    }
+    return { entityId, entityTitle: info.title };
+  } catch (err) {
+    logger.warn(
+      `agent entity fetch failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return {};
+  }
+}
+
+/**
  * Best-effort fetch of an agent room's stored instruction
  * (`chatSettings.prompt`). Never throws — a failed fetch, an absent scope,
  * or a non-agent folder simply yields an empty string, leaving the system
@@ -132,7 +198,7 @@ export async function safeGetAgentInstruction(
     return "";
   }
   try {
-    const info = await getFolderInfo(entityId);
+    const info = await getFolderInfoOnce(entityId);
     // Untrusted: strip markup before the instruction reaches the model prompt
     // so stored HTML can't round-trip into another user's reply (Bug 82726).
     return sanitizeInstruction(info?.prompt ?? "");

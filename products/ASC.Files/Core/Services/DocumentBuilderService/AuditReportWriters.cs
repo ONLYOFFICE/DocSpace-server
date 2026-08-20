@@ -33,14 +33,57 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-/// Identifies one audit report: how its file is named and which period it covers.
+/// Identifies one audit report: how its file is named, which period it covers and which columns it shows.
 public sealed record AuditReportDescriptor(
     string NameFormat,
     string NameArg0,
     string NameArg1,
     DateTime? From,
     DateTime? To,
-    CultureInfo Culture);
+    CultureInfo Culture,
+    IReadOnlyList<AuditReportColumn> Columns);
+
+public sealed record AuditReportColumn(string ResourceKey, PropertyInfo Property);
+
+public static class AuditReportColumns
+{
+    private static readonly string[] _excludedFromFolderHistory =
+    [
+        nameof(BaseEvent.Country),
+        nameof(BaseEvent.City),
+        nameof(BaseEvent.Page),
+        nameof(AuditEvent.Action),
+        nameof(AuditEvent.Context),
+    ];
+
+    private static readonly string[] _clientColumns =
+    [
+        nameof(BaseEvent.IP),
+        nameof(BaseEvent.Browser),
+        nameof(BaseEvent.Platform)
+    ];
+
+    public static List<AuditReportColumn> Resolve<T>(AuditReportKind kind, bool isDocSpaceAdmin) where T : BaseEvent
+    {
+        var columns = typeof(T).GetProperties()
+            .Select(p => new { Property = p, Attribute = p.GetCustomAttribute<EventAttribute>() })
+            .Where(x => x.Attribute != null)
+            .OrderBy(x => x.Attribute.Order)
+            .Select(x => new AuditReportColumn(x.Attribute.Resource, x.Property));
+
+        if (kind == AuditReportKind.FolderHistory)
+        {
+            columns = columns.Where(c => !_excludedFromFolderHistory.Contains(c.Property.Name));
+
+            if (!isDocSpaceAdmin)
+            {
+                columns = columns.Where(c => !_clientColumns.Contains(c.Property.Name));
+            }
+        }
+
+        return [.. columns];
+    }
+}
 
 /// What a writer produced, mirrored back onto the task so the client can pick the file up.
 public sealed record AuditReportResult(int FileId, string FileName, string FileUrl);
@@ -72,7 +115,13 @@ public class AuditXlsxReportWriter(
         Func<int, Task> onProgressAsync,
         CancellationToken cancellationToken) where T : BaseEvent
     {
-        var (headers, props) = GetColumns<T>();
+        var headers = descriptor.Columns
+            .Select(c => AuditReportResource.ResourceManager.GetString(c.ResourceKey))
+            .ToList();
+
+        var props = descriptor.Columns
+            .Select(c => c.Property)
+            .ToList();
 
         var header = await reportHeaderService.BuildAsync(descriptor.Culture);
 
@@ -101,6 +150,8 @@ public class AuditXlsxReportWriter(
                 dateGenerated = header.DateGenerated
             },
             logoSrc = header.LogoSrc,
+            logoWidthMm = header.LogoWidthMm,
+            logoHeightMm = header.LogoHeightMm,
             themeColors = new
             {
                 mainBgColor = header.MainBgColor,
@@ -174,29 +225,6 @@ public class AuditXlsxReportWriter(
         {
             DocumentBuilderScriptHelper.DeleteScriptFile(scriptFilePath);
         }
-    }
-
-    private static (List<string> Headers, List<PropertyInfo> Props) GetColumns<T>() where T : BaseEvent
-    {
-        var columns = typeof(T).GetProperties()
-            .Select(p => new
-            {
-                Property = p,
-                Attribute = p.GetCustomAttribute<EventAttribute>()
-            })
-            .Where(x => x.Attribute != null)
-            .OrderBy(x => x.Attribute!.Order)
-            .ToList();
-
-        var headers = columns
-            .Select(c => AuditReportResource.ResourceManager.GetString(c.Attribute!.Resource))
-            .ToList();
-
-        var props = columns
-            .Select(x => x.Property)
-            .ToList();
-
-        return (headers, props);
     }
 
     private static string GetReportTitle(string reportNameFormat)

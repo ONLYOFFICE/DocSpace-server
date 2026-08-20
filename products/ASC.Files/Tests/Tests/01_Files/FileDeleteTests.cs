@@ -341,6 +341,92 @@ public class FileDeleteTests(
         trash.Files.Should().NotContain(f => f.Title == publicRoomFile.Title);
     }
 
+    [Fact]
+    public async Task EmptyTrash_FilterByMyDocuments_RemovesOnlyMyDocumentsItems()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var myId = await GetUserFolderIdAsync(Owner);
+        var myFile = await CreateFileInMy("empty_trash_my.docx", Owner);
+        var myFolder = await CreateFolder("empty_trash_my_folder", myId);
+
+        var room = await CreateCustomRoom("empty_trash_room");
+        var roomFile = await CreateFile("empty_trash_room.docx", room.Id);
+        var roomFolder = await CreateFolder("empty_trash_room_folder", room.Id);
+
+        await MoveToTrashAndWait([myFile, roomFile], [myFolder, roomFolder]);
+
+        // Act
+        await EmptyTrashAndWait([FolderType.USER]);
+
+        // Assert - only the items originally located in "My documents" are gone
+        var trash = await GetTrashAsync();
+
+        trash.Files.Should().NotContain(f => f.Title == myFile.Title);
+        trash.Folders.Should().NotContain(f => f.Title == myFolder.Title);
+        trash.Files.Should().Contain(f => f.Title == roomFile.Title);
+        trash.Folders.Should().Contain(f => f.Title == roomFolder.Title);
+    }
+
+    [Fact]
+    public async Task EmptyTrash_FilterByRooms_RemovesOnlyRoomItems()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var myId = await GetUserFolderIdAsync(Owner);
+        var myFile = await CreateFileInMy("empty_trash_my.docx", Owner);
+        var myFolder = await CreateFolder("empty_trash_my_folder", myId);
+
+        var customRoom = await CreateCustomRoom("empty_trash_custom_room");
+        var customRoomFile = await CreateFile("empty_trash_custom.docx", customRoom.Id);
+        var customRoomFolder = await CreateFolder("empty_trash_custom_folder", customRoom.Id);
+
+        var publicRoom = await CreatePublicRoom("empty_trash_public_room");
+        var publicRoomFile = await CreateFile("empty_trash_public.docx", publicRoom.Id);
+
+        await MoveToTrashAndWait([myFile, customRoomFile, publicRoomFile], [myFolder, customRoomFolder]);
+
+        // Act - VirtualRooms is the common ancestor of every room, so it selects everything originally from rooms
+        await EmptyTrashAndWait([FolderType.VirtualRooms]);
+
+        // Assert
+        var trash = await GetTrashAsync();
+
+        trash.Files.Should().NotContain(f => f.Title == customRoomFile.Title);
+        trash.Files.Should().NotContain(f => f.Title == publicRoomFile.Title);
+        trash.Folders.Should().NotContain(f => f.Title == customRoomFolder.Title);
+        trash.Files.Should().Contain(f => f.Title == myFile.Title);
+        trash.Folders.Should().Contain(f => f.Title == myFolder.Title);
+    }
+
+    [Fact]
+    public async Task EmptyTrash_WithoutFolderTypeFilter_RemovesAllItems()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var myId = await GetUserFolderIdAsync(Owner);
+        var myFile = await CreateFileInMy("empty_trash_my.docx", Owner);
+        var myFolder = await CreateFolder("empty_trash_my_folder", myId);
+
+        var room = await CreateCustomRoom("empty_trash_room");
+        var roomFile = await CreateFile("empty_trash_room.docx", room.Id);
+        var roomFolder = await CreateFolder("empty_trash_room_folder", room.Id);
+
+        await MoveToTrashAndWait([myFile, roomFile], [myFolder, roomFolder]);
+
+        // Act
+        await EmptyTrashAndWait();
+
+        // Assert - without the filter the whole trash is cleared, as before
+        var trash = await GetTrashAsync();
+
+        trash.Files.Should().BeEmpty();
+        trash.Folders.Should().BeEmpty();
+    }
+
     public static TheoryData<RoomType, FolderType> RoomTypeFilterCases =>
         new()
         {
@@ -363,6 +449,89 @@ public class FileDeleteTests(
         {
             await DeleteFileAndWaitForCompletion(file);
         }
+    }
+
+    private async Task MoveToTrashAndWait(FileDtoInteger[] files, FolderDtoInteger[] folders)
+    {
+        foreach (var file in files)
+        {
+            var results = (await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = false }, true, TestContext.Current.CancellationToken)).Response;
+
+            await WaitOperation(results.FirstOrDefault()?.Id, $"delete file {file.Title}");
+        }
+
+        foreach (var folder in folders)
+        {
+            var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { Immediately = false }, TestContext.Current.CancellationToken)).Response;
+
+            await WaitOperation(results.FirstOrDefault()?.Id, $"delete folder {folder.Title}");
+        }
+    }
+
+    /// <summary>
+    /// Empties the trash, optionally only for the items originally located in the sections of the given types.
+    /// The generated SDK client has no folderType parameter yet, so the request is issued directly.
+    /// </summary>
+    private async Task EmptyTrashAndWait(List<FolderType>? folderType = null)
+    {
+        var url = "api/2.0/files/fileops/emptytrash?single=true";
+
+        if (folderType != null)
+        {
+            url = folderType.Aggregate(url, (current, type) => current + $"&folderType={(int)type}");
+        }
+
+        using var response = await _filesClient.PutAsync(url, null, TestContext.Current.CancellationToken);
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        response.IsSuccessStatusCode.Should().BeTrue(body);
+
+        using var json = JsonDocument.Parse(body);
+        var operations = json.RootElement.GetProperty("response");
+
+        if (operations.GetArrayLength() == 0)
+        {
+            return;
+        }
+
+        await WaitOperation(operations[0].GetProperty("id").GetString(), "empty trash");
+    }
+
+    /// <summary>
+    /// Waits for a file operation to finish. These tests trash several trees before the assertions,
+    /// which takes longer than the budget of the shared helper, so the polling is done here.
+    /// </summary>
+    private async Task WaitOperation(string? operationId, string what)
+    {
+        if (operationId == null)
+        {
+            return;
+        }
+
+        var sw = Stopwatch.StartNew();
+
+        while (sw.Elapsed < TimeSpan.FromMinutes(2))
+        {
+            var statuses = (await _filesOperationsApi.GetOperationStatusesAsync(id: operationId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+            // a finished operation is eventually dropped from the queue, so an empty answer
+            // means it is over - any error it reported was visible while it was still listed
+            if (statuses.Count == 0)
+            {
+                return;
+            }
+
+            statuses.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+
+            if (statuses.TrueForAll(r => r.Finished))
+            {
+                return;
+            }
+
+            await Task.Delay(100, TestContext.Current.CancellationToken);
+        }
+
+        Assert.Fail($"The operation '{what}' has not finished in time");
     }
 
     private async Task<FolderDtoInteger> CreateRoom(RoomType roomType, string title) => roomType switch

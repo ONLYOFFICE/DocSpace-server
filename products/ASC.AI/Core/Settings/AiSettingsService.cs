@@ -155,11 +155,18 @@ public class AiSettingsService(
         return await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
     }
 
-    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool chatRecommendedModelVisible)
+    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool? chatRecommendedModelVisible)
     {
-        var settings = new AiUserSettings
+        var current = await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+
+        if (chatRecommendedModelVisible is null)
         {
-            ChatRecommendedModelVisible = chatRecommendedModelVisible,
+            return current;
+        }
+
+        var settings = current with
+        {
+            ChatRecommendedModelVisible = chatRecommendedModelVisible.Value
         };
 
         await settingsManager.SaveForCurrentUserAsync(settings);

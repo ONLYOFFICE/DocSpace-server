@@ -199,7 +199,7 @@ function writeImg() {
     if (!inputData.logoSrc) {
         return;
     }
-    oWorksheet.AddImage(inputData.logoSrc, 87 * 36000, 10 * 36000, 7, -87 * 36000, 0, 10 * 36000);
+    oWorksheet.AddImage(inputData.logoSrc, inputData.logoWidthMm * 36000, inputData.logoHeightMm * 36000, 7, -inputData.logoWidthMm * 36000, 0, inputData.logoHeightMm * 36000);
 }
 
 function setColumnWidths() {
