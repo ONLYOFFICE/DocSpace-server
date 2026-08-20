@@ -219,14 +219,11 @@ public class FormFillingRoomTemplateSectionTests(
             return status.TemplateId;
         }
 
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            timeoutCts.Token,
-            TestContext.Current.CancellationToken);
+        var deadline = DateTime.UtcNow.AddSeconds(60);
 
         while (true)
         {
-            status = (await _roomsApi.GetRoomTemplateCreatingStatusAsync(linkedCts.Token)).Response;
+            status = (await _roomsApi.GetRoomTemplateCreatingStatusAsync(TestContext.Current.CancellationToken)).Response;
 
             if (status is { IsCompleted: true })
             {
@@ -234,7 +231,16 @@ public class FormFillingRoomTemplateSectionTests(
                 return status.TemplateId;
             }
 
-            await Task.Delay(100, linkedCts.Token);
+            if (DateTime.UtcNow >= deadline)
+            {
+                // The deadline ends the loop with an assertion carrying the last status. Cancelling
+                // the call itself would kill the test with TaskCanceledException instead.
+                status.Should().NotBeNull("the room template creation status must be reported within 60 seconds");
+                status.IsCompleted.Should().BeTrue(
+                    "the room template must be created within 60 seconds (progress {0}, error '{1}')", status.Progress, status.Error);
+            }
+
+            await Task.Delay(100, TestContext.Current.CancellationToken);
         }
     }
 
@@ -250,14 +256,11 @@ public class FormFillingRoomTemplateSectionTests(
             return status.RoomId;
         }
 
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            timeoutCts.Token,
-            TestContext.Current.CancellationToken);
+        var deadline = DateTime.UtcNow.AddSeconds(60);
 
         while (true)
         {
-            status = (await _roomsApi.GetRoomCreatingStatusAsync(linkedCts.Token)).Response;
+            status = (await _roomsApi.GetRoomCreatingStatusAsync(TestContext.Current.CancellationToken)).Response;
 
             if (status is { IsCompleted: true })
             {
@@ -265,7 +268,16 @@ public class FormFillingRoomTemplateSectionTests(
                 return status.RoomId;
             }
 
-            await Task.Delay(100, linkedCts.Token);
+            if (DateTime.UtcNow >= deadline)
+            {
+                // The deadline ends the loop with an assertion carrying the last status. Cancelling
+                // the call itself would kill the test with TaskCanceledException instead.
+                status.Should().NotBeNull("the room creation status must be reported within 60 seconds");
+                status.IsCompleted.Should().BeTrue(
+                    "the room must be created from the template within 60 seconds (progress {0}, error '{1}')", status.Progress, status.Error);
+            }
+
+            await Task.Delay(100, TestContext.Current.CancellationToken);
         }
     }
 }

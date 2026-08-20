@@ -72,21 +72,27 @@ public abstract class RoomsPermissionsTestBase(
     /// </summary>
     protected async Task<int> WaitForRoomFromTemplate()
     {
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            timeoutCts.Token,
-            TestContext.Current.CancellationToken);
+        var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {
-            var status = (await _roomsApi.GetRoomCreatingStatusAsync(linkedCts.Token)).Response;
+            var status = (await _roomsApi.GetRoomCreatingStatusAsync(TestContext.Current.CancellationToken)).Response;
 
             if (status is { IsCompleted: true })
             {
                 return status.RoomId;
             }
 
-            await Task.Delay(500, linkedCts.Token);
+            if (DateTime.UtcNow >= deadline)
+            {
+                // The deadline ends the loop with an assertion carrying the last status. Cancelling
+                // the call itself would kill the test with TaskCanceledException instead.
+                status.Should().NotBeNull("the room creation status must be reported within 30 seconds");
+                status.IsCompleted.Should().BeTrue(
+                    "the room must be created from the template within 30 seconds (progress {0}, error '{1}')", status.Progress, status.Error);
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
         }
     }
 

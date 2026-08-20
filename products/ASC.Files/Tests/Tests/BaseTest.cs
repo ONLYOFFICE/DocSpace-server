@@ -369,15 +369,11 @@ public class BaseTest(
     protected async Task<int> WaitForRoomTemplate()
     {
         var sw = Stopwatch.StartNew();
-
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            timeoutCts.Token,
-            TestContext.Current.CancellationToken);
+        var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {
-            var status = (await _roomsApi.GetRoomTemplateCreatingStatusAsync(linkedCts.Token)).Response;
+            var status = (await _roomsApi.GetRoomTemplateCreatingStatusAsync(TestContext.Current.CancellationToken)).Response;
 
             if (status is { IsCompleted: true })
             {
@@ -385,7 +381,16 @@ public class BaseTest(
                 return status.TemplateId;
             }
 
-            await Task.Delay(500, linkedCts.Token);
+            if (DateTime.UtcNow >= deadline)
+            {
+                // The deadline ends the loop with an assertion carrying the last status. Cancelling
+                // the call itself would kill the test with TaskCanceledException instead.
+                status.Should().NotBeNull("the room template creation status must be reported within 30 seconds");
+                status.IsCompleted.Should().BeTrue(
+                    "the room template must be created within 30 seconds (progress {0}, error '{1}')", status.Progress, status.Error);
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
         }
     }
 
@@ -394,22 +399,20 @@ public class BaseTest(
         List<FileOperationDto>? statuses;
 
         var sw = Stopwatch.StartNew();
-
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            timeoutCts.Token,
-            TestContext.Current.CancellationToken);
+        var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {
-            statuses = (await _filesOperationsApi.GetOperationStatusesAsync(id: operationId, cancellationToken: linkedCts.Token)).Response;
+            statuses = (await _filesOperationsApi.GetOperationStatusesAsync(id: operationId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-            if (statuses.Count > 0 && statuses.TrueForAll(r => r.Finished) || linkedCts.Token.IsCancellationRequested)
+            // On the deadline the last observed statuses are returned as they are, so the caller's
+            // own assertion reports what the operation was actually doing.
+            if (statuses.Count > 0 && statuses.TrueForAll(r => r.Finished) || DateTime.UtcNow >= deadline)
             {
                 break;
             }
 
-            await Task.Delay(100, linkedCts.Token);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
         }
 
         Timing.Write($"waitOperation({operationId ?? "all"})", sw.ElapsedMilliseconds);
