@@ -221,9 +221,10 @@ internal class AgentsActionMapper : ILocationActionMapper
                 {
                     { ActionType.Create, [MessageAction.AgentCreated] },
                     { ActionType.Update, [
-                        MessageAction.AgentRenamed, 
-                        MessageAction.AddedServerToAgent, 
-                        MessageAction.DeletedServerFromAgent
+                        MessageAction.AgentRenamed,
+                        MessageAction.AddedServerToAgent,
+                        MessageAction.DeletedServerFromAgent,
+                        MessageAction.AiAgentProfileAssigned
                     ] },
                     { ActionType.Delete, [MessageAction.AgentDeleted] }
                 }

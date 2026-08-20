@@ -1031,6 +1031,9 @@ public enum MessageAction
     [Description("AI model profile unassigned from action")]
     AiProfileUnassigned = 6107,
 
+    [Description("AI model profile assigned to AI agent action")]
+    AiAgentProfileAssigned = 6108,
+
     #endregion
 
     #region others
