@@ -40,7 +40,7 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasOwnerPaymentWarningGracePeriodBeforeActivationLetterTests : PeriodicLetterTestBase<SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction>
 {
-    private static string PaymentMethodUrl => LetterEnvironment.PortalLink("billing/payment-method");
+    private static string PaymentMethodUrl(LetterScope scope) => $"{scope.PortalUrl}/billing/payment-method";
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
@@ -59,7 +59,7 @@ public class SaasOwnerPaymentWarningGracePeriodBeforeActivationLetterTests : Per
             .And.Contain("Business subscription payment for the chosen number of admins")
             .And.Contain("will be automatically debited in 3 days")
             .And.Contain("payment method")
-            .And.Contain(PaymentMethodUrl)
+            .And.Contain(PaymentMethodUrl(scope))
             .And.Contain("support team");
 
         // The brand no longer carries the DocSpace suffix.

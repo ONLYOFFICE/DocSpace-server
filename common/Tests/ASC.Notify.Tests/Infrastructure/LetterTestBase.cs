@@ -152,7 +152,7 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 
         var inbox = stack.Inbox;
 
-        await inbox.SendAsync(address, letter.Subject, letter.Body, cancellationToken);
+        await inbox.SendAsync(address, letter.Subject, letter.Body, EmbeddedAttachments(tags), cancellationToken);
 
         var delivered = await inbox.WaitForMessageAsync(address, TimeSpan.FromSeconds(30), cancellationToken);
 
@@ -187,88 +187,80 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
             ?? throw new InvalidOperationException(
                 $"Action '{action.ID}' carries no email pattern, so there is no letter to render.");
 
-        var tags = await BuildCommonTagsAsync(scope);
-
-        // The action's own tags last, so that a letter which sets one of the common tags for itself wins
-        // — the same order the engine ends up in, where Init runs before the request is transferred.
-        tags.AddRange(action.Tags ?? []);
+        var tags = await BuildCommonTagsAsync(scope, action);
 
         return (action, pattern, tags);
     }
 
     /// <summary>
-    /// The tags production does NOT get from an action: exactly the set
-    /// <c>NotifyTransferRequest.BeforeTransferRequestAsync</c> appends to every request. Keeping the two
-    /// lists identical is what makes the boundary meaningful — anything this list holds that the transfer
-    /// does not is a value the test invented, and anything it misses is a tag a letter could reference
-    /// while the test renders it blank.
+    /// Everything the letter substitutes, assembled the way the engine assembles it: the action's own
+    /// tags, then the ones <c>NotifyTransferRequest</c> appends to every request on its way out — the
+    /// portal paths, the author, the external links, the branding and the letter logo.
     ///
-    /// The portal-derived values come from the portal; the external links and the branding still come
-    /// from <see cref="LetterEnvironment"/> rather than from the settings the transfer step reads. The
-    /// step that closes that gap is to run <c>NotifyTransferRequest</c> itself and delete this method;
-    /// until then two things it does are knowingly not reproduced — the <c>LetterLogo</c> attachment it
-    /// adds to letters without a top image, and its removal of <c>TopGif</c> from a white-labelled portal.
+    /// It runs the real transfer step rather than restating what it produces. That list is nineteen tags
+    /// long and reads white-label settings, the tenant logo and the notification image folder; a copy of
+    /// it here would be a second implementation, free to drift from the one that fills real letters.
     /// </summary>
-    private static async Task<List<ITagValue>> BuildCommonTagsAsync(LetterScope scope)
+    private static async Task<List<ITagValue>> BuildCommonTagsAsync(LetterScope scope, INotifyAction action)
     {
-        var logoText = LetterEnvironment.LogoText;
+        var services = scope.Services;
 
-        // The portal-relative addresses come from the same helper the sending code uses. Spelling the
-        // paths out here instead would be a second implementation of CommonLinkUtility, free to disagree
-        // with the one that built the links inside the letter.
-        var links = scope.Services.GetRequiredService<CommonLinkUtility>();
-        var author = scope.Services.GetRequiredService<AuthContext>().CurrentAccount.ID;
+        // The recipient the engine would have resolved. Only the address matters to the transfer step;
+        // the letter is delivered by the test itself.
+        var recipient = new DirectRecipient(scope.Recipient.Id.ToString(), scope.DisplayName, [scope.Recipient.Email]);
 
-        return
-        [
-            new TagValue(CommonTags.AuthorID, author),
-            new TagValue(CommonTags.AuthorName, scope.Recipient.DisplayUserName(
-                false, scope.Services.GetRequiredService<DisplayUserSettingsHelper>())),
-            new TagValue(CommonTags.AuthorUrl, links.GetFullAbsolutePath(await links.GetUserProfileAsync(author))),
+        var request = new NotifyRequest(
+            services.GetRequiredService<ILoggerFactory>(),
+            services.GetRequiredService<StudioNotifyHelper>().NotifySource,
+            action,
+            null,
+            recipient);
 
-            new TagValue(CommonTags.VirtualRootPath, scope.PortalUrl),
-            new TagValue(CommonTags.VirtualRootHost, new Uri(scope.PortalUrl).Host),
+        // Init's tags first, exactly as NotifyClientImpl.CreateRequest adds them before the engine runs
+        // any INotifyEngineAction — which is what lets the transfer step see a letter's TopGif and leave
+        // its logo alone.
+        request.Arguments.AddRange(action.Tags ?? []);
 
-            // Empty in a letter: the product a notification belongs to is ambient request state
-            // (`asc.web.product_id`), which a scheduled or event-driven send does not have either.
-            new TagValue(CommonTags.ProductID, Guid.Empty),
+        await services.GetRequiredService<ASC.Web.Studio.Core.Notify.NotifyTransferRequest>().BeforeTransferRequestAsync(request);
 
-            new TagValue(CommonTags.DateTime, DateTime.UtcNow),
-            new TagValue(CommonTags.RecipientID, Context.SysRecipient),
-
-            new TagValue(CommonTags.ProfileUrl, links.GetFullAbsolutePath(links.GetMyStaff())),
-            new TagValue(CommonTags.RecipientSubscriptionConfigURL, links.GetFullAbsolutePath(links.GetUnsubscribe())),
-
-            new TagValue(CommonTags.HelpLink, LetterEnvironment.HelpUrl),
-            new TagValue(CommonTags.SalesEmail, LetterEnvironment.SalesEmail),
-            new TagValue(CommonTags.SiteLink, LetterEnvironment.SiteUrl),
-            new TagValue(CommonTags.SupportLink, LetterEnvironment.SupportUrl),
-            new TagValue(CommonTags.SupportEmail, LetterEnvironment.SupportEmail),
-
-            new TagValue(CommonTags.LetterLogoText, logoText),
-            new TagValue(CommonTags.SendFrom, logoText),
-            new TagValue(CommonTags.MailWhiteLabelSettings, new MailWhiteLabelSettings().GetDefault()),
-
-            new TagValue(CommonTags.ImagePath, LetterEnvironment.NotificationImagePath)
-        ];
+        return request.Arguments;
     }
 
     /// <summary>
-    /// The top image, as the action decided it. A letter that sets none is shown the tenant letter logo
-    /// instead — see the note on <see cref="BuildCommonTags"/> about how production reaches that logo.
+    /// What the transfer step attached for this letter to reference by content id. Empty for a letter
+    /// that carries its own top image, since then no logo is attached.
+    /// </summary>
+    private static IReadOnlyCollection<NotifyMessageAttachment> EmbeddedAttachments(List<ITagValue> tags)
+    {
+        return tags.Find(tag => tag.Tag == CommonTags.EmbeddedAttachments)?.Value
+            as NotifyMessageAttachment[] ?? [];
+    }
+
+    /// <summary>
+    /// The picture at the top of the letter, whichever of the two it is. An action that sets a
+    /// <c>TopGif</c> gets it; one that does not is shown the tenant letter logo, which
+    /// <c>NotifyTransferRequest.AddLetterLogoAsync</c> attaches to the message and references as a
+    /// <c>cid:</c> — never as a file under the image folder, which is why nothing here looks for one.
     /// </summary>
     private static void AssertTopImage(RenderedLetter letter, List<ITagValue> tags)
     {
         var topGif = tags.Find(tag => tag.Tag == CommonTags.TopGif)?.Value as string;
 
-        if (string.IsNullOrEmpty(topGif))
+        if (!string.IsNullOrEmpty(topGif))
         {
-            letter.Body.Should().Contain("mail_logo.png", "without a top image the letter logo is shown instead");
+            letter.Body.Should().Contain(topGif, "the top image the action sets must reach the letter");
 
             return;
         }
 
-        letter.Body.Should().Contain(topGif, "the top image the action sets must reach the letter");
+        var logo = tags.Find(tag => tag.Tag == CommonTags.LetterLogo)?.Value as string;
+
+        logo.Should().StartWith("cid:", "a letter without a top image is sent the letter logo as an attachment");
+
+        letter.Body.Should().Contain(logo!, "the letter logo must be referenced by the content id it was attached under");
+
+        tags.Should().Contain(tag => tag.Tag == CommonTags.EmbeddedAttachments,
+            "the content id has to point at something, or the reader sees a broken image");
     }
 
     /// <summary>

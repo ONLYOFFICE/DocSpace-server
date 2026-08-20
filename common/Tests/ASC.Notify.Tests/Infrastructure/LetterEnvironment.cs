@@ -34,10 +34,15 @@
 namespace ASC.Notify.Tests.Infrastructure;
 
 /// <summary>
-/// Everything a letter needs from its surroundings, resolved the way the locally running Aspire stack
-/// resolves it: the portal address, the notification image folder, the branding text and the external
-/// resource links. Letter tests must not hard-code any of this — a link that differs from what the
-/// portal actually produces makes the preview lie.
+/// What a letter's surroundings ought to be, read from the configuration the locally running Aspire
+/// stack runs on: where the portal answers, the branding text and the external resource links.
+///
+/// These are no longer the values the letters are rendered with — those come from the portal itself, off
+/// the same services the sending code uses. What is left here is the *expected* side of the assertions,
+/// and keeping it independent is the point: a help-center link that the letter and this file disagree
+/// about is a finding, not a duplication. The two places a value is still an input rather than an
+/// expectation are <see cref="PortalUrl"/>, which seeds the request the sending code would have had, and
+/// <see cref="ConfigDirectory"/>, which the in-process host is configured from.
 /// </summary>
 internal static class LetterEnvironment
 {
@@ -49,8 +54,6 @@ internal static class LetterEnvironment
         Environment.GetEnvironmentVariable("PORTAL_URL")?.TrimEnd('/') is { Length: > 0 } url
             ? url
             : "http://localhost:8092";
-
-    public static string PortalHost { get; } = new Uri(PortalUrl).Host;
 
     /// <summary>
     /// The default branding text. Letters must never spell the product name out: they carry
@@ -95,15 +98,12 @@ internal static class LetterEnvironment
     /// <summary>The `__SalesEmail` tag — <c>CommonLinkUtility.GetSalesEmail</c>.</summary>
     public static string SalesEmail { get; } = Fallback(ExternalResources.Common.GetDefaultRegionalFullEntry("paymentemail"), "sales@onlyoffice.com");
 
-    /// <summary>The `__SupportEmail` tag — <c>CommonLinkUtility.GetSupportEmail</c>.</summary>
-    public static string SupportEmail { get; } = Fallback(ExternalResources.Common.GetDefaultRegionalFullEntry("supportemail"), "support@onlyoffice.com");
-
     /// <summary>
     /// What <c>StudioNotifyHelper.GetNotificationImageUrl</c> returns for an empty file name, i.e. the
     /// value of the <c>ImagePath</c> tag: <c>web:notification:image:path</c> when configured, the
     /// portal's own image folder otherwise — which is the case in the local stack.
     /// </summary>
-    public static string NotificationImagePath { get; } = BuildNotificationImagePath();
+    private static string NotificationImagePath { get; } = BuildNotificationImagePath();
 
     /// <summary>A single notification image, e.g. <c>configure_docspace.gif</c>.</summary>
     public static string NotificationImageUrl(string fileName)
@@ -121,12 +121,6 @@ internal static class LetterEnvironment
         var images = Configuration["web:images"] ?? "static/images";
 
         return $"{portalUrl.TrimEnd('/')}/{images.Trim('~', '/')}/notifications";
-    }
-
-    /// <summary>A portal link, the equivalent of <c>CommonLinkUtility.GetFullAbsolutePath("~/...")</c>.</summary>
-    public static string PortalLink(string relativePath)
-    {
-        return $"{PortalUrl}/{relativePath.TrimStart('~', '/')}".TrimEnd('/');
     }
 
     /// <summary>

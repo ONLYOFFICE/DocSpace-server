@@ -40,7 +40,7 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasAdminWarningAfterThreeMonthsLetterTests : PeriodicLetterTestBase<SaasAdminWarningAfterThreeMonthsV1NotifyAction>
 {
-    private static string DashboardUrl => LetterEnvironment.PortalLink("dashboard");
+    private static string DashboardUrl(LetterScope scope) => $"{scope.PortalUrl}/dashboard";
 
     private static string LegalTermsUrl(CultureInfo culture)
     {
@@ -51,7 +51,7 @@ public class SaasAdminWarningAfterThreeMonthsLetterTests : PeriodicLetterTestBas
     {
         letter.Body.Should()
             .Contain(Resource("ButtonLogIn", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
-            .And.Contain(DashboardUrl)
+            .And.Contain(DashboardUrl(scope))
             .And.Contain(LegalTermsUrl(scope.Culture))
             .And.Contain(LetterEnvironment.SupportUrl)
             .And.Contain(LetterEnvironment.PortalUrl);

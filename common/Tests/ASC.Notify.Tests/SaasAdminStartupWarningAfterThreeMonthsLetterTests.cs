@@ -39,13 +39,13 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasAdminStartupWarningAfterThreeMonthsLetterTests : PeriodicLetterTestBase<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>
 {
-    private static string DashboardUrl => LetterEnvironment.PortalLink("dashboard");
+    private static string DashboardUrl(LetterScope scope) => $"{scope.PortalUrl}/dashboard";
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should()
             .Contain(Resource("ButtonLogIn", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
-            .And.Contain(DashboardUrl)
+            .And.Contain(DashboardUrl(scope))
             .And.Contain(LetterEnvironment.PortalUrl);
     }
 

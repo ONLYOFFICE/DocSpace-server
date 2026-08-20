@@ -39,13 +39,13 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasAdminAiAgentsLetterTests : PeriodicLetterTestBase<SaasAdminAiAgentsV1NotifyAction>
 {
-    private static string AiSettingsUrl => LetterEnvironment.PortalLink("portal-settings/ai-settings/ai-models");
+    private static string AiSettingsUrl(LetterScope scope) => $"{scope.PortalUrl}/portal-settings/ai-settings/ai-models";
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(Resource("ButtonActivateAiFeatures", scope.Culture))
-            .And.Contain(AiSettingsUrl);
+            .And.Contain(AiSettingsUrl(scope));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)

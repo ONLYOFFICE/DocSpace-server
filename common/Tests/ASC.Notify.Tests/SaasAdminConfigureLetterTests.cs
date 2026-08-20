@@ -39,8 +39,8 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasAdminConfigureLetterTests : PeriodicLetterTestBase<SaasAdminConfigureV1NotifyAction>
 {
-    private static string SettingsUrl => LetterEnvironment.PortalLink("portal-settings");
-    private static string TariffUrl => LetterEnvironment.PortalLink("billing/tariff-plan");
+    private static string SettingsUrl(LetterScope scope) => $"{scope.PortalUrl}/portal-settings";
+    private static string TariffUrl(LetterScope scope) => $"{scope.PortalUrl}/billing/tariff-plan";
 
     private static string HelpCenterUrl(CultureInfo culture)
     {
@@ -51,8 +51,8 @@ public class SaasAdminConfigureLetterTests : PeriodicLetterTestBase<SaasAdminCon
     {
         letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(Resource("ButtonConfigureRightNow", scope.Culture))
-            .And.Contain(SettingsUrl)
-            .And.Contain(TariffUrl)
+            .And.Contain(SettingsUrl(scope))
+            .And.Contain(TariffUrl(scope))
             .And.Contain(HelpCenterUrl(scope.Culture));
     }
 

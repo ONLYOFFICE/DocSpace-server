@@ -39,7 +39,7 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class SaasAdminDeveloperToolsLetterTests : PeriodicLetterTestBase<SaasAdminDeveloperToolsV1NotifyAction>
 {
-    private static string DeveloperToolsUrl => LetterEnvironment.PortalLink("developer-tools/overview");
+    private static string DeveloperToolsUrl(LetterScope scope) => $"{scope.PortalUrl}/developer-tools/overview";
 
     private static string ConnectorsUrl(CultureInfo culture)
     {
@@ -55,7 +55,7 @@ public class SaasAdminDeveloperToolsLetterTests : PeriodicLetterTestBase<SaasAdm
     {
         letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(Resource("ButtonGetStarted", scope.Culture))
-            .And.Contain(DeveloperToolsUrl)
+            .And.Contain(DeveloperToolsUrl(scope))
             .And.Contain(ConnectorsUrl(scope.Culture))
             .And.Contain(ApiUrl(scope.Culture));
     }

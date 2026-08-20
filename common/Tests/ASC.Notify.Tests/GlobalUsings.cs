@@ -47,6 +47,7 @@ global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Backup;
+global using ASC.Notify.Engine;
 global using ASC.Notify.Extension;
 global using ASC.Notify.Messages;
 global using ASC.Notify.Model;
@@ -57,7 +58,6 @@ global using ASC.Notify.Textile;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Users;
-global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
 
@@ -75,5 +75,6 @@ global using MailKit.Security;
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
 
 global using MimeKit;

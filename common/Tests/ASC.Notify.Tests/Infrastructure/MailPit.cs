@@ -58,13 +58,34 @@ internal sealed class MailPitInbox(string smtpHost, int smtpPort, HttpClient api
     /// </summary>
     private readonly SemaphoreSlim _htmlCheck = new(1, 1);
 
-    public async Task SendAsync(string toAddress, string subject, string htmlBody, CancellationToken cancellationToken)
+    /// <param name="embedded">
+    /// What the letter references by content id — the tenant letter logo, for every letter that carries
+    /// no top image of its own. Delivering the body without them would leave the reader, and MailPit's
+    /// markup check, looking at a broken image that production never sends.
+    /// </param>
+    public async Task SendAsync(
+        string toAddress,
+        string subject,
+        string htmlBody,
+        IReadOnlyCollection<NotifyMessageAttachment> embedded,
+        CancellationToken cancellationToken)
     {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("ONLYOFFICE letter preview", "noreply@onlyoffice.com"));
         message.To.Add(MailboxAddress.Parse(toAddress));
         message.Subject = subject;
-        message.Body = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
+
+        var body = new BodyBuilder { HtmlBody = htmlBody };
+
+        foreach (var attachment in embedded)
+        {
+            var resource = body.LinkedResources.Add(attachment.FileName, attachment.Content);
+
+            // The cid the body was rendered against, not a fresh one MimeKit would invent.
+            resource.ContentId = attachment.ContentId;
+        }
+
+        message.Body = body.ToMessageBody();
 
         // A client per letter: MailKit's SmtpClient is not thread-safe and the tests are parallel.
         // MailPit itself takes the whole assembly delivering at once without complaint, so deliveries

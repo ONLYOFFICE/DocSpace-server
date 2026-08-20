@@ -42,14 +42,14 @@ public class SaasOwnerPaymentWarningGracePeriodActivationLetterTests : PeriodicL
     private const string PaymentDelay = "30";
 
     /// <summary>The billing page the button leads to.</summary>
-    private static string BillingUrl => LetterEnvironment.PortalLink("billing/overview");
+    private static string BillingUrl(LetterScope scope) => $"{scope.PortalUrl}/billing/overview";
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(PaymentDelay)
             .And.Contain(Resource("ButtonVisitBillingSection", scope.Culture))
-            .And.Contain(BillingUrl);
+            .And.Contain(BillingUrl(scope));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
