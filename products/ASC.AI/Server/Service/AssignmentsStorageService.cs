@@ -125,6 +125,8 @@ public class AssignmentsStorageService(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
+        var stored = await storage.ReadByTypeAsync(tenantId, actionType);
+
         if (AssignmentsResolver.HasDefault(actionType))
         {
             await storage.UnassignAsync(tenantId, actionType);
@@ -134,7 +136,10 @@ public class AssignmentsStorageService(
             await storage.DeleteAsync(tenantId, actionType);
         }
 
-        messageService.Send(MessageAction.AiProfileUnassigned, actionType.ToStringFast());
+        if (UnassignChangesState(actionType, stored))
+        {
+            messageService.Send(MessageAction.AiProfileUnassigned, actionType.ToStringFast());
+        }
     }
 
     public async Task UnassignManyAsync(IReadOnlyCollection<ActionType> actionTypes)
@@ -142,6 +147,8 @@ public class AssignmentsStorageService(
         await AssertUserHasAccessAsync(_writeGlobalTypes);
 
         var tenantId = tenantManager.GetCurrentTenantId();
+
+        var storedAll = await storage.ReadAllAsync(tenantId);
 
         var withDefaults = actionTypes.Where(AssignmentsResolver.HasDefault).ToArray();
         var withoutDefaults = actionTypes.Where(x => !AssignmentsResolver.HasDefault(x)).ToArray();
@@ -151,7 +158,12 @@ public class AssignmentsStorageService(
 
         foreach (var actionType in actionTypes)
         {
-            messageService.Send(MessageAction.AiProfileUnassigned, actionType.ToStringFast());
+            var stored = storedAll.TryGetValue(actionType, out var profileId) ? profileId : (Guid?)null;
+
+            if (UnassignChangesState(actionType, stored))
+            {
+                messageService.Send(MessageAction.AiProfileUnassigned, actionType.ToStringFast());
+            }
         }
     }
 
@@ -165,6 +177,13 @@ public class AssignmentsStorageService(
         {
             await filesMessageService.SendAsync(MessageAction.AiAgentProfileAssigned, folder, actionType.ToStringFast());
         }
+    }
+
+    private static bool UnassignChangesState(ActionType actionType, Guid? stored)
+    {
+        return AssignmentsResolver.HasDefault(actionType)
+            ? stored != AssignmentsStorage.UnassignedProfileId
+            : stored is not null && stored.Value != AssignmentsStorage.UnassignedProfileId;
     }
 
     private static void AssertProfileIdIsValid(Guid profileId)
