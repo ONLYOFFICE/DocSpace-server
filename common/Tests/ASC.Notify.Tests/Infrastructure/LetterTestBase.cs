@@ -113,8 +113,8 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 
         var letter = await LetterPreview.RenderAsync(pattern, tags, culture);
 
-        LetterAssertions.PatternIsPortable(pattern);
-        LetterAssertions.NoUnresolvedTags(pattern, letter, $"the tags {typeof(TAction).Name}.Init sets");
+        LetterAssertions.PatternIsPortable(letter);
+        LetterAssertions.NoUnresolvedTags(letter, $"the tags {typeof(TAction).Name}.Init sets");
         LetterAssertions.LinksRendered(letter);
 
         AssertTopImage(letter, tags);

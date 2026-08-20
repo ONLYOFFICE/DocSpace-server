@@ -48,7 +48,7 @@ internal static class LetterAssertions
         new("""(&#8221;|&#8220;|")\s*:\s*(&#8220;|&#8221;|")(https?://|mailto:)""", RegexOptions.Compiled);
 
     /// <summary>
-    /// Nothing environment-specific may be baked into the pattern text:
+    /// Nothing environment-specific may be baked into this culture's pattern text:
     /// <list type="bullet">
     /// <item>the product name is <c>${LetterLogoText}</c>, so a white-labelled portal sends its own
     /// branding;</item>
@@ -56,9 +56,9 @@ internal static class LetterAssertions
     /// code resolves from <c>externalresources.json</c> and from the portal address.</item>
     /// </list>
     /// </summary>
-    public static void PatternIsPortable(IPattern pattern)
+    public static void PatternIsPortable(RenderedLetter letter)
     {
-        foreach (var text in new[] { pattern.Subject(), pattern.Body() })
+        foreach (var text in new[] { letter.SubjectPattern, letter.BodyPattern })
         {
             text.Should().NotContain(LetterEnvironment.LogoText,
                 $"the letter must carry ${{{CommonTags.LetterLogoText}}} instead of the product name, so "
@@ -70,15 +70,16 @@ internal static class LetterAssertions
     }
 
     /// <summary>
-    /// Every tag the pattern references must have been given a value: a forgotten one leaves the raw
-    /// <c>$Tag</c> / <c>${Tag}</c> in the letter, which is exactly what the reader would see.
+    /// Every tag this culture's pattern references must have been given a value: a forgotten one leaves
+    /// the raw <c>$Tag</c> / <c>${Tag}</c> in the letter, which is exactly what the reader would see.
+    /// Reading the list from the culture under test is what catches a tag a translator introduced.
     /// </summary>
     /// <param name="whoOwesTheValue">
     /// Where a missing value should have come from, so the failure names the place to fix.
     /// </param>
-    public static void NoUnresolvedTags(IPattern pattern, RenderedLetter letter, string whoOwesTheValue)
+    public static void NoUnresolvedTags(RenderedLetter letter, string whoOwesTheValue)
     {
-        var tags = new NVelocityPatternFormatter().GetTags(pattern);
+        var tags = letter.ReferencedTags;
 
         tags.Should().NotBeEmpty("every letter substitutes at least the user name; an empty list means the "
             + "pattern was not found and this check would silently pass");
