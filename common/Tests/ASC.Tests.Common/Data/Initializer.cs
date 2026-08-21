@@ -1,0 +1,206 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Tests.Common.Data;
+
+/// <summary>
+/// The portal-independent pieces every suite needs: the owner credentials a test portal is
+/// registered with, the client-side password hashing, and signing an <see cref="HttpClient"/> in.
+/// </summary>
+public static class Initializer
+{
+    public const string OwnerEmail = "test@example.com";
+    public const string OwnerPassword = "11111111";
+
+    private static PasswordHasherSettings _passwordHasherSettings = null!;
+
+    // Maps each per-test HttpClient to the WebApi client of the portal it belongs to, so the
+    // HttpClient.Authenticate(user) extension can sign in without any shared/ambient state. Entries
+    // are weakly held and removed when a test disposes its PortalClients.
+    private static readonly ConditionalWeakTable<HttpClient, RawApiClient> _authApis = new();
+
+    public static readonly Faker Faker = new("en");
+
+    public static readonly Faker<FakeMember> FakerMember = new Faker<FakeMember>()
+        .RuleFor(x => x.FirstName, f => f.Person.FirstName)
+        .RuleFor(x => x.LastName, f => f.Person.LastName)
+        .RuleFor(x => x.Email, f => f.Person.Email)
+        .RuleFor(x => x.Password, f => f.Internet.Password(8, 10));
+
+    /// <summary>
+    /// Stores the (machine-key-derived, portal-independent) password-hash settings used to compute
+    /// client-side password hashes. Called once by the fixture before any test runs.
+    /// </summary>
+    internal static void InitializePasswordHasher(PasswordHasherSettings settings)
+    {
+        _passwordHasherSettings = settings;
+    }
+
+    internal static void RegisterAuthApi(HttpClient client, RawApiClient webApi)
+    {
+        _authApis.AddOrUpdate(client, webApi);
+    }
+
+    internal static void UnregisterAuthApi(HttpClient client)
+    {
+        _authApis.Remove(client);
+    }
+
+    /// <summary>
+    /// Signs the client in as <paramref name="user"/>, or clears the authorization header when it is null.
+    /// The bearer token is cached on the <see cref="User"/> instance, so switching back and forth between
+    /// identities inside a single test issues only one <c>authenticate</c> request per user.
+    /// </summary>
+    /// <param name="forceRefresh">Discards the cached token and signs in again.</param>
+    public static async ValueTask Authenticate(this HttpClient client, User? user, bool forceRefresh = false)
+    {
+        if (user is null)
+        {
+            client.DefaultRequestHeaders.Authorization = null;
+            return;
+        }
+
+        if (forceRefresh)
+        {
+            user.Token = null;
+        }
+
+        if (user.Token is null)
+        {
+            if (!_authApis.TryGetValue(client, out var webApi))
+            {
+                throw new InvalidOperationException(
+                    "The HttpClient is not associated with a portal. Create clients via AspireHostFixture.CreatePortalAsync.");
+            }
+
+            if (user.PasswordHash is null)
+            {
+                var hashSw = Stopwatch.StartNew();
+                user.PasswordHash = GetClientPassword(user.Password);
+                Timing.Write($"hash({user.Email})", hashSw.ElapsedMilliseconds);
+            }
+
+            var authSw = Stopwatch.StartNew();
+            using var response = await webApi.PostAsync(
+                "/api/2.0/authentication",
+                new
+                {
+                    userName = user.Email,
+                    passwordHash = user.PasswordHash
+                },
+                TestContext.Current.CancellationToken);
+
+            var token = await webApi.ReadAsync<AuthTokenResponse>(response, TestContext.Current.CancellationToken);
+            Timing.Write($"auth({user.Email})", authSw.ElapsedMilliseconds);
+
+            user.Token = token.Token;
+        }
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", user.Token);
+    }
+
+    public static string GetClientPassword(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            password = Guid.NewGuid().ToString();
+        }
+
+        var salt = new UTF8Encoding(false).GetBytes(_passwordHasherSettings.Salt);
+
+        var hashBytes = KeyDerivation.Pbkdf2(
+            password,
+            salt,
+            KeyDerivationPrf.HMACSHA256,
+            _passwordHasherSettings.Iterations,
+            _passwordHasherSettings.Size / 8);
+
+        return Convert.ToHexString(hashBytes).ToLowerInvariant();
+    }
+
+    private static string Password(
+        this Internet internet,
+        int minLength,
+        int maxLength,
+        bool includeUppercase = true,
+        bool includeNumber = false,
+        bool includeSymbol = false)
+    {
+        ArgumentNullException.ThrowIfNull(internet);
+        ArgumentOutOfRangeException.ThrowIfLessThan(minLength, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxLength, minLength);
+
+        var r = internet.Random;
+        var s = "";
+
+        s += r.Char('a', 'z').ToString();
+        if (s.Length < maxLength)
+        {
+            if (includeUppercase)
+            {
+                s += r.Char('A', 'Z').ToString();
+            }
+        }
+
+        if (s.Length < maxLength)
+        {
+            if (includeNumber)
+            {
+                s += r.Char('0', '9').ToString();
+            }
+        }
+
+        if (s.Length < maxLength)
+        {
+            if (includeSymbol)
+            {
+                s += r.Char('!', '/').ToString();
+            }
+        }
+
+        if (s.Length < minLength)
+        {
+            s += r.String2(minLength - s.Length);                // pad up to min
+        }
+
+        if (s.Length < maxLength)
+        {
+            s += r.String2(r.Number(0, maxLength - s.Length));   // random extra padding in range min..max
+        }
+
+        var chars = s.ToArray();
+        var charsShuffled = r.Shuffle(chars).ToArray();
+
+        return new string(charsShuffled);
+    }
+}

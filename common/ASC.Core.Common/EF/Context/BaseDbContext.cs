@@ -197,6 +197,8 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
 {
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
+        await Task.Yield();
+
         var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
         {
             var name = x.GetName().Name;

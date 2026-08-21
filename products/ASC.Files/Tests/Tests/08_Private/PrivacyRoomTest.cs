@@ -59,9 +59,10 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         keys[0].PublicKey.Should().BeEquivalentTo(publicKey);
         keys[0].PrivateKeyEnc.Should().BeEquivalentTo(privateKey);
 
-        keys = (await _privacyRoomApi.DeleteKeysAsync(keys[0].Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        keys.Should().NotBeNull();
-        keys.Should().BeEmpty();
+        await _privacyRoomApi.DeleteKeysAsync(keys[0].Id, cancellationToken: TestContext.Current.CancellationToken);
+
+        keys = (await _privacyRoomApi.GetUserKeysAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        keys.Should().BeNullOrEmpty();
     }
 
     [Fact]

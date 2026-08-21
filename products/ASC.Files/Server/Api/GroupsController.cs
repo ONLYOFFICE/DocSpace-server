@@ -52,7 +52,8 @@ public class GroupsController(
     [HttpPost("")]
     public async Task<RoomGroupDto> AddRoomGroup(RoomGroupRequestDto inDto)
     {
-        var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.Rooms);
+        var name = ValidateGroupName(inDto.Name);
+        var (roomIntIds, roomStringIds) = ParseRoomIds(inDto.Rooms);
 
         if (roomIntIds.Count == 0 && roomStringIds.Count == 0)
         {
@@ -61,14 +62,22 @@ public class GroupsController(
 
         await RoomLogoManager.ValidateRoomCover(inDto.Icon);
 
+        // resolved before the group row is written, so a request that resolves nothing leaves nothing behind
+        var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(roomIntIds, roomStringIds);
+
         var group = await fileStorageService.SaveRoomGroupAsync(new RoomGroup
         {
-            Name = inDto.Name,
+            Name = name,
             UserID = authContext.CurrentAccount.ID,
             Icon = inDto.Icon
         });
 
-        await AddRoomsToGroupAsync(roomIntIds, roomStringIds, group);
+        await AddRoomsToGroupAsync(intIds, stringIds, group);
+
+        if (anyRejected)
+        {
+            throw new InvalidOperationException("Some of the rooms could not be added to the group.");
+        }
 
         return await roomGroupDtoHelper.GetAsync(group, true);
     }
@@ -95,21 +104,44 @@ public class GroupsController(
     [HttpPut("{id:int}")]
     public async Task<RoomGroupDto> UpdateRoomGroup(UpdateRoomGroupRequestDto inDto)
     {
-        var group = await fileStorageService.GetGroupInfoAsync(inDto.Id);
-        group.Name = inDto.UpdateRoom.GroupName ?? group.Name;
+        var update = inDto.UpdateRoom;
 
-        await fileStorageService.SaveRoomGroupAsync(group);
-
-        if (inDto.UpdateRoom.RoomsToAdd != null)
+        if (update.HasPayload && update.GroupName == null && update.RoomsToAdd == null && update.RoomsToRemove == null)
         {
-            var (addInt, addString) = FileOperationsManager.GetIds(inDto.UpdateRoom.RoomsToAdd);
-            await AddRoomsToGroupAsync(addInt, addString, group);
+            throw new ArgumentException("The request does not contain anything to update.");
         }
 
-        if (inDto.UpdateRoom.RoomsToRemove != null)
+        var group = await fileStorageService.GetGroupInfoAsync(inDto.Id);
+
+        if (update.GroupName != null)
         {
-            var (removeInt, removeString) = FileOperationsManager.GetIds(inDto.UpdateRoom.RoomsToRemove);
-            await RemoveRoomsFromGroupAsync(removeInt, removeString, group);
+            group.Name = ValidateGroupName(update.GroupName);
+            await fileStorageService.SaveRoomGroupAsync(group);
+        }
+
+        var rejected = false;
+
+        if (update.RoomsToAdd is { Count: > 0 })
+        {
+            var (addInt, addString) = ParseRoomIds(update.RoomsToAdd);
+            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(addInt, addString);
+
+            await AddRoomsToGroupAsync(intIds, stringIds, group);
+            rejected |= anyRejected;
+        }
+
+        if (update.RoomsToRemove is { Count: > 0 })
+        {
+            var (removeInt, removeString) = ParseRoomIds(update.RoomsToRemove);
+            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsForRemovalAsync(group.Id, removeInt, removeString);
+
+            await RemoveRoomsFromGroupAsync(intIds, stringIds, group);
+            rejected |= anyRejected;
+        }
+
+        if (rejected)
+        {
+            throw new InvalidOperationException("Some of the rooms could not be applied to the group.");
         }
 
         return await roomGroupDtoHelper.GetAsync(group, true);
@@ -157,17 +189,79 @@ public class GroupsController(
 
     private async Task AddRoomsToGroupAsync(List<int> intIds, List<string> stringIds, RoomGroup group)
     {
-        var intTasks = intIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
-        var stringTasks = stringIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
+        // sequential: the same room may legitimately appear twice in one request, and parallel
+        // inserts of the same reference race each other into a duplicate-key failure
+        foreach (var id in intIds)
+        {
+            await fileStorageService.AddRoomToGroupAsync(id, group.Id);
+        }
 
-        await Task.WhenAll(intTasks.Concat(stringTasks));
+        foreach (var id in stringIds)
+        {
+            await fileStorageService.AddRoomToGroupAsync(id, group.Id);
+        }
     }
 
     private async Task RemoveRoomsFromGroupAsync(List<int> intIds, List<string> stringIds, RoomGroup group)
     {
-        var intTasks = intIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
-        var stringTasks = stringIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
+        foreach (var id in intIds)
+        {
+            await fileStorageService.RemoveRoomFromGroupAsync(id, group.Id);
+        }
 
-        await Task.WhenAll(intTasks.Concat(stringTasks));
+        foreach (var id in stringIds)
+        {
+            await fileStorageService.RemoveRoomFromGroupAsync(id, group.Id);
+        }
+    }
+
+    private static string ValidateGroupName(string name)
+    {
+        var trimmed = name?.Trim();
+
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            throw new ArgumentException("The group name must not be empty.", nameof(name));
+        }
+
+        return trimmed;
+    }
+
+    /// <summary>
+    /// Turns the raw <c>rooms</c> payload into internal and third-party room ids, rejecting
+    /// anything that is not a room id at all: a null element, a fractional or non-positive number,
+    /// a number sent as a string, or a nested value. Duplicates are collapsed, so repeating a room
+    /// in one request is a no-op rather than a conflict.
+    /// </summary>
+    private static (List<int> IntIds, List<string> StringIds) ParseRoomIds(List<JsonElement> rooms)
+    {
+        var intIds = new List<int>();
+        var stringIds = new List<string>();
+
+        foreach (var room in rooms ?? [])
+        {
+            switch (room.ValueKind)
+            {
+                case JsonValueKind.Number when room.TryGetInt32(out var id) && id > 0:
+                    if (!intIds.Contains(id))
+                    {
+                        intIds.Add(id);
+                    }
+
+                    break;
+                // a third-party room id is never numeric — a numeric string is a wrong-typed element
+                case JsonValueKind.String when room.GetString() is { Length: > 0 } value && !int.TryParse(value, out _):
+                    if (!stringIds.Contains(value))
+                    {
+                        stringIds.Add(value);
+                    }
+
+                    break;
+                default:
+                    throw new ArgumentException($"'{room}' is not a valid room id.", nameof(rooms));
+            }
+        }
+
+        return (intIds, stringIds);
     }
 }
