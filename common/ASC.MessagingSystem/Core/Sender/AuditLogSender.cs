@@ -38,6 +38,14 @@ public class AuditLogSender(ILoggerFactory loggerFactory, ILogger<AuditLogSender
 {
     public const string LoggerName = "ASC.Audit";
 
+    private const int MaxIpLength = 50;
+    private const int MaxInitiatorLength = 200;
+    private const int MaxTargetLength = 256;
+    private const int MaxUserAgentLength = 512;
+    private const int MaxPageLength = 512;
+    private const int MaxDescriptionLength = 2048;
+    private const string TruncationMarker = "...";
+
     private readonly ILogger _auditLogger = loggerFactory.CreateLogger(LoggerName);
     private readonly ILogger<AuditLogSender> _logger = logger;
 
@@ -56,11 +64,11 @@ public class AuditLogSender(ILoggerFactory loggerFactory, ILogger<AuditLogSender
                 (int)message.Action,
                 message.TenantId,
                 message.UserId,
-                message.Initiator,
-                message.Ip,
-                message.Page,
-                message.UaHeader,
-                message.Target?.ToString(),
+                Sanitize(message.Initiator, MaxInitiatorLength),
+                Sanitize(message.Ip, MaxIpLength),
+                Sanitize(message.Page, MaxPageLength),
+                Sanitize(message.UaHeader, MaxUserAgentLength),
+                Sanitize(message.Target?.ToString(), MaxTargetLength),
                 SerializeDescription(message.Description),
                 message.Date);
         }
@@ -72,6 +80,69 @@ public class AuditLogSender(ILoggerFactory loggerFactory, ILogger<AuditLogSender
 
     private static string SerializeDescription(IList<string> description)
     {
-        return description is { Count: > 0 } ? JsonSerializer.Serialize(description) : null;
+        if (description is not { Count: > 0 })
+        {
+            return null;
+        }
+
+        var remaining = MaxDescriptionLength;
+        var items = new List<string>(description.Count);
+
+        foreach (var item in description)
+        {
+            if (remaining <= 0)
+            {
+                break;
+            }
+
+            var safe = Sanitize(item, remaining);
+            if (safe == null)
+            {
+                continue;
+            }
+
+            remaining -= safe.Length;
+            items.Add(safe);
+        }
+
+        return items.Count > 0 ? JsonSerializer.Serialize(items) : null;
+    }
+
+    private static string Sanitize(string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return null;
+        }
+
+        var result = value.Length > maxLength
+            ? string.Concat(value.AsSpan(0, maxLength), TruncationMarker)
+            : value;
+
+        return ContainsControlCharacter(result) ? ReplaceControlCharacters(result) : result;
+    }
+
+    private static bool ContainsControlCharacter(string value)
+    {
+        foreach (var c in value)
+        {
+            if (char.IsControl(c))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static string ReplaceControlCharacters(string value)
+    {
+        return string.Create(value.Length, value, static (buffer, source) =>
+        {
+            for (var i = 0; i < source.Length; i++)
+            {
+                buffer[i] = char.IsControl(source[i]) ? ' ' : source[i];
+            }
+        });
     }
 }
