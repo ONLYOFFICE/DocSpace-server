@@ -280,16 +280,52 @@ function describeToolCallPending(event: Record<string, unknown>): string {
   } autoAllow=${event["autoAllow"] === true}`;
 }
 
+// Describe an in-engine tool result for the log without dumping it: an image
+// result carries megabytes of base64, and the interesting part is never the
+// payload — it is whether the tool answered with data, with a persisted ref,
+// or with an error (an unconfigured image profile, a provider/gateway refusal
+// such as a 402 from the paid route). Those errors are returned by the engine
+// as an ordinary tool result and are otherwise invisible server-side: the
+// library logs them only to its own console logger.
+function describeToolResult(result: unknown): string {
+  const text = typeof result === "string" ? result : JSON.stringify(result);
+  if (text === undefined) {
+    return String(result);
+  }
+  try {
+    const parsed: unknown = JSON.parse(text);
+    if (isObject(parsed)) {
+      const data = isObject(parsed["data"]) ? parsed["data"] : null;
+      if (data && typeof data["base64"] === "string") {
+        return `{data.base64=${data["base64"].length}B} (not persisted — no ref)`;
+      }
+      if (data && typeof data["ref"] === "string") {
+        return `{data.ref=${data["ref"]}}`;
+      }
+      if (parsed["error"] !== undefined) {
+        return `ERROR ${JSON.stringify(parsed["error"]).slice(0, 700)}`;
+      }
+    }
+  } catch {
+    // Not JSON — fall through to the truncated raw form.
+  }
+  return `${text.slice(0, 500)}${text.length > 500 ? `… (${text.length}B)` : ""}`;
+}
+
 // Scan an event's streamed message for tool-call content parts and record
 // each tool's name against whether its `result` is populated yet. Adapter
 // tools (web search, image generation, DocSpace) execute inside the engine
 // and never surface a `tool-call-pending` to this tap — the only trace they
 // leave here is the tool-call part inside the assistant message, gaining a
 // `result` once the engine ran it. So `executed=true` in the completion
-// summary is the positive proof a tool actually fired and returned.
+// summary is the positive proof a tool actually fired and returned. Each
+// result is also described once (`logged`, keyed by tool-call id) so a tool
+// that answered with an error is visible in the log, not only in the browser.
 function trackToolCalls(
   event: unknown,
   seen: Map<string, boolean>,
+  logged: Set<string>,
+  route: string,
 ): void {
   if (!isObject(event)) {
     return;
@@ -304,6 +340,21 @@ function trackToolCalls(
     const hasResult = part["result"] !== undefined && part["result"] !== null;
     // Latch to true: a later delta without the result must not flip it back.
     seen.set(name, (seen.get(name) ?? false) || hasResult);
+    if (!hasResult) {
+      continue;
+    }
+    const callId = typeof part["toolCallId"] === "string" ? part["toolCallId"] : name;
+    if (logged.has(callId)) {
+      continue;
+    }
+    logged.add(callId);
+    const described = describeToolResult(part["result"]);
+    const line = `${route}: tool result ${name} (callId=${callId}) -> ${described}`;
+    if (described.startsWith("ERROR")) {
+      logger.error(line);
+    } else {
+      logger.info(line);
+    }
   }
 }
 
@@ -319,10 +370,11 @@ async function* logStreamErrors<T>(
 ): AsyncIterable<T> {
   let eventCount = 0;
   const toolCalls = new Map<string, boolean>();
+  const loggedResults = new Set<string>();
   try {
     for await (const event of iter) {
       eventCount += 1;
-      trackToolCalls(event, toolCalls);
+      trackToolCalls(event, toolCalls, loggedResults, route);
       if (isObject(event) && event["type"] === "message-incomplete") {
         const message = isObject(event["message"]) ? event["message"] : null;
         const status = message && isObject(message["status"]) ? message["status"] : null;
@@ -463,6 +515,15 @@ export const aiController = {
       await withToolsPrompt(
         await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
       ),
+    );
+    // The round's scope as the client sent it. `entityId` is what an
+    // in-engine tool upload (a generated image) targets — the engine resolves
+    // it as `contextEntityId ?? entityId` — so a `-` here means an
+    // unscoped round: nothing can be uploaded and the image cannot persist.
+    logger.info(
+      `ai/send-with-stream: round threadId=${req.body.threadId ?? "<new>"} ` +
+        `entityId=${req.body.entityId ?? "-"} contextEntityId=${req.body.contextEntityId ?? "-"} ` +
+        `profileId=${req.body.profileId ?? "-"}`,
     );
     await streamNdjson(
       res,

@@ -50,6 +50,14 @@ export interface DocspaceFolderInfo {
    * Only agent rooms carry one — `undefined` for a regular folder.
    */
   prompt?: string;
+  /** `FolderDto.Type` — the raw `FolderType` value. */
+  folderType?: number;
+  /**
+   * Whether the current user may create entries here (`FolderDto.Security`
+   * -> `FilesSecurityActions.Create`). `undefined` when the DTO carries no
+   * security block at all, which callers must not read as a denial.
+   */
+  canCreate?: boolean;
 }
 
 // Mirrors `FolderType.IsAgent()` in
@@ -57,6 +65,32 @@ export interface DocspaceFolderInfo {
 // type `FolderType.AiRoom`. The DTO also carries it as `RoomType.AiRoom`.
 const FOLDER_TYPE_AI_ROOM = 31;
 const ROOM_TYPE_AI_ROOM = 9;
+
+// Folder types the Files API refuses an upload into outright, whatever the
+// caller's rights — see `FileUploader.GetFolderIdAsync` in
+// products/ASC.Files/Core/Utils/FileUploader.cs, which throws
+// `SecurityException` for these before it ever looks at `CanCreate`.
+const UPLOAD_REFUSING_FOLDER_TYPES = new Set<number>([
+  14, // FolderType.VirtualRooms — the "Rooms" root
+  20, // FolderType.Archive
+  30, // FolderType.RoomTemplates
+]);
+
+/**
+ * Whether `POST api/2.0/files/{folderId}/insert` can succeed for this folder.
+ * A missing `security` block leaves the decision to the server (treated as
+ * allowed) — only an explicit `Create: false` or a refusing folder type is a
+ * local "no".
+ */
+export function canTakeUpload(info: DocspaceFolderInfo | undefined): boolean {
+  if (!info) {
+    return false;
+  }
+  if (info.folderType !== undefined && UPLOAD_REFUSING_FOLDER_TYPES.has(info.folderType)) {
+    return false;
+  }
+  return info.canCreate !== false;
+}
 
 export class DocspaceApiHttpError extends Error {
   public readonly status: number;
@@ -84,11 +118,27 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   const roomType = getNumber(envelope, "roomType");
   const chatSettings = getObject(envelope, "chatSettings");
   const prompt = chatSettings ? getString(chatSettings, "prompt") : undefined;
-  return {
+  const result: DocspaceFolderInfo = {
     isAgent: folderType === FOLDER_TYPE_AI_ROOM || roomType === ROOM_TYPE_AI_ROOM,
     title: getString(envelope, "title"),
     prompt,
   };
+  if (folderType !== undefined) {
+    result.folderType = folderType;
+  }
+  // `FolderDto.Security` is a dictionary keyed by the `FilesSecurityActions`
+  // enum name; the JSON casing has changed before, so match case-insensitively
+  // rather than pinning "Create".
+  const security = getObject(envelope, "security");
+  if (security) {
+    for (const [action, allowed] of Object.entries(security)) {
+      if (action.toLowerCase() === "create" && typeof allowed === "boolean") {
+        result.canCreate = allowed;
+        break;
+      }
+    }
+  }
+  return result;
 }
 
 /**
@@ -247,6 +297,39 @@ export async function getAgentResultStorageId(
       return undefined;
     }
     return String(id);
+  } finally {
+    cancel();
+  }
+}
+
+/**
+ * Resolve the current user's "My documents" folder id
+ * (`GET api/2.0/files/@my` -> `current.id`). Used as the fallback target for
+ * a generated image when the chat's own scope cannot take an upload. The
+ * numeric id is resolved rather than posting to the `@my/insert` alias so the
+ * upload goes through the same code path (and logs the real folder) as any
+ * other target. Resolves to `undefined` when the section is unavailable.
+ */
+export async function getMyDocumentsFolderId(): Promise<string | undefined> {
+  // `count` is [Range(1, …)]-validated on the C# side — ask for the smallest
+  // allowed page, only `current.id` is read.
+  const url = `${proxyBaseUrl}/api/2.0/files/@my?count=1`;
+  const { signal, cancel } = withTimeout(undefined);
+  try {
+    const res = await fetch(url, { headers: getForwardedHeaders(), signal });
+    if (!res.ok) {
+      logger.warn(`getMyDocumentsFolderId: ${url} -> ${res.status} ${res.statusText}`);
+      return undefined;
+    }
+    const raw: unknown = await res.json();
+    const envelope = isObject(raw) ? getObject(raw, "response") : undefined;
+    const current = envelope ? getObject(envelope, "current") : undefined;
+    const id = current ? getEntityId(current, "id") : undefined;
+    if (id === undefined) {
+      logger.warn(`getMyDocumentsFolderId: no current.id in the response from ${url}`);
+      return undefined;
+    }
+    return id;
   } finally {
     cancel();
   }
