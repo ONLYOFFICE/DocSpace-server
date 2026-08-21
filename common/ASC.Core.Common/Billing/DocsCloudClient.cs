@@ -391,7 +391,9 @@ public class DocsCloudServerConfig
     /// The maximum file size in bytes.
     /// </summary>
     /// <example>104857600</example>
-    [Range(0, 209715200)]
+    // The operand type must match the property: the int overload of Range converts the value with Convert.ToInt32,
+    // which overflows (rather than reporting a validation error) on anything above int.MaxValue.
+    [Range(typeof(long), "0", "209715200")]
     public long FileSizeLimit { get; init; }
 }
 
