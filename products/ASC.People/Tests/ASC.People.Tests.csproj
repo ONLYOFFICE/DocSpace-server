@@ -31,6 +31,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\common\ASC.AppHost\ASC.AppHost.csproj" IsAspireProjectResource="false" />
+        <ProjectReference Include="..\..\..\common\Tests\ASC.Tests.Common\ASC.Tests.Common.csproj" />
         <ProjectReference Include="..\..\ASC.People\Server\ASC.People.csproj" Aliases="ASCPeople" />
     </ItemGroup>
 

@@ -125,6 +125,8 @@ public class BaseTest(
         await _filesClient.Authenticate(user);
         await _peopleClient.Authenticate(user);
 
+        var guestSw = Stopwatch.StartNew();
+
         // Create a public room
         var guestEmail = Initializer.FakerMember.Generate().Email;
         var room = await CreatePublicRoom("Test Room For Existing Guest");
@@ -148,6 +150,8 @@ public class BaseTest(
         var result = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var guestId = result.First(r => r.SharedToUser.Email == guestEmail).SharedToUser.Id;
 
+        Timing.Write($"invite.guest({guestEmail})", guestSw.ElapsedMilliseconds);
+
         return new User(guestEmail, "")
         {
             Id = guestId
@@ -156,6 +160,9 @@ public class BaseTest(
 
     protected async Task<FolderDtoInteger> CreatePublicRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
+        var sw = Stopwatch.StartNew();
+        var result = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"createRoom({RoomType.PublicRoom})", sw.ElapsedMilliseconds);
+        return result;
     }
 }

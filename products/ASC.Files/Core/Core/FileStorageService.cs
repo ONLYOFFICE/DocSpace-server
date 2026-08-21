@@ -74,7 +74,6 @@ public class FileStorageService //: IFileStorageService
     ConsumerFactory consumerFactory,
     EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
     SettingsManager settingsManager,
-    FileMarkAsReadOperationsManager fileOperationsManager,
     TenantManager tenantManager,
     FileTrackerHelper fileTracker,
     IEventBus eventBus,
@@ -197,6 +196,22 @@ public class FileStorageService //: IFileStorageService
         folder.Tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
 
         return folder;
+    }
+
+    /// <summary>
+    /// Reads a room the way opening it does: the caller sees the room and everything that was new
+    /// in it up to this moment stops being new for them. The clearing is deliberately synchronous
+    /// so that the very next read of the room news already reflects the visit.
+    /// </summary>
+    public async Task<Folder<T>> GetRoomInfoAsync<T>(T roomId)
+    {
+        var room = await GetFolderAsync(roomId);
+
+        await fileMarker.RemoveMarkAsNewAsync(room);
+
+        room.NewForMe = 0;
+
+        return room;
     }
 
     public async Task<IEnumerable<FileEntry>> GetFoldersAsync<T>(T parentId)
@@ -723,17 +738,54 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
+    /// <summary>
+    /// Checks that the current user may turn <paramref name="roomId"/> into a template. Creating a
+    /// template runs as a background operation, so this has to be called before the operation is
+    /// queued — otherwise the caller gets a successful response for work that is bound to fail.
+    /// </summary>
+    public async Task<Folder<int>> CheckCanCreateRoomTemplateAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if (room is not { IsRoom: true } || room.RootId != await globalFolderHelper.FolderVirtualRoomsAsync || !await fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+
+        return room;
+    }
+
+    /// <summary>
+    /// Checks that the current user may read <paramref name="templateId"/> and is allowed to create
+    /// rooms at all. Same reason as <see cref="CheckCanCreateRoomTemplateAsync"/>: the work itself
+    /// happens in the background.
+    /// </summary>
+    public async Task CheckCanCreateRoomFromTemplateAsync(int templateId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var template = await folderDao.GetFolderAsync(templateId);
+
+        if (template is not { IsRoom: true } || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync || !await fileSecurity.CanReadAsync(template))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+
+        // Reading a template is not enough: the room still lands in the "Rooms" section, which a
+        // User or a Guest may not create in.
+        var roomsRoot = await folderDao.GetFolderAsync(await globalFolderHelper.FolderVirtualRoomsAsync);
+
+        if (!await fileSecurity.CanCreateAsync(roomsRoot))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
     public async Task<Folder<int>> CreateRoomTemplateAsync(int roomId, string title, IEnumerable<FileShareParams> share, IEnumerable<string> tags, LogoRequest logo, string cover, string color)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.FolderRoomTemplatesAsync;
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var room = await folderDao.GetFolderAsync(roomId);
-
-        if (!room.IsRoom || room.RootId != await globalFolderHelper.FolderVirtualRoomsAsync || !await fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
-        }
+        var room = await CheckCanCreateRoomTemplateAsync(roomId);
 
         WatermarkRequestDto watermarkRequestDto = null;
         if (room.SettingsWatermark != null)
@@ -774,12 +826,10 @@ public class FileStorageService //: IFileStorageService
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.FolderVirtualRoomsAsync;
         var folderDao = daoFactory.GetFolderDao<int>();
-        var template = await folderDao.GetFolderAsync(templateId);
 
-        if (!template.IsRoom || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync || !await fileSecurity.CanReadAsync(template))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
-        }
+        await CheckCanCreateRoomFromTemplateAsync(templateId);
+
+        var template = await folderDao.GetFolderAsync(templateId);
 
         await CheckPublicRoomCreationAsync(template.FolderType);
 
@@ -2066,6 +2116,12 @@ public class FileStorageService //: IFileStorageService
             {
                 //await entryManager.MarkAsRecent(file);
 
+                // A rename is a change like any other: the file becomes new for everybody else who
+                // can read it, and stops being new for whoever renamed it - the same pair of calls
+                // the content-save path makes in EntryManager.
+                await fileMarker.MarkAsNewAsync(file);
+                await fileMarker.RemoveMarkAsNewAsync(file);
+
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
                 await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
@@ -2521,11 +2577,12 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
+            // Reading the news does not repair the counters. It used to: an empty list published a
+            // mark-as-read over the whole section, which destroyed every tag written between the
+            // read and the operation - and marking is asynchronous, so that window is hit routinely
+            // by anything created moments earlier. A stale counter is a cosmetic defect; losing the
+            // items behind it is not.
             var newFiles = await fileMarker.GetRootGroupedNewItemsAsync(rootId);
-            if (newFiles.Count == 0)
-            {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(rootId)], []);
-            }
 
             return newFiles
                 .OrderByDescending(x => x.Key)
@@ -2547,13 +2604,10 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
+            // No counter repair here either - see GetNewRootFilesAsync.
             var newFiles = await fileMarker.MarkedItemsAsync(folder)
                 .Where(x => folder.FolderType == FolderType.SHARE || x.FileEntryType == FileEntryType.File)
                 .ToListAsync();
-            if (newFiles.Count == 0)
-            {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folder.Id)], []);
-            }
 
             return newFiles
                 .GroupBy(x => x.ModifiedOn.Date)
@@ -2578,11 +2632,6 @@ public class FileStorageService //: IFileStorageService
             var result = await fileMarker.MarkedItemsAsync(folder).ToListAsync();
 
             result = [.. await entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
-
-            if (result.Count == 0)
-            {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folderId)], []);
-            }
 
             return result;
         }
@@ -5480,17 +5529,124 @@ public class FileStorageService //: IFileStorageService
 
     public async Task DeleteGroup(int groupId)
     {
-        await daoFactory.GetRoomGroupDao<int>().DeleteGroup(groupId);
+        var roomGroupDao = daoFactory.GetRoomGroupDao<int>();
+        var group = await roomGroupDao.GetGroupInfoAsync(groupId);
+
+        if (group == null)
+        {
+            throw new ItemNotFoundException(Resource.ErrorGroupNotFound);
+        }
+
+        if (group.UserID != authContext.CurrentAccount.ID)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        await roomGroupDao.DeleteGroup(groupId);
     }
 
     public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
     {
         var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(roomGroupId);
-        if (group == null)
+        if (group == null || group.UserID != authContext.CurrentAccount.ID)
         {
             throw new ItemNotFoundException(Resource.ErrorGroupNotFound);
         }
         return group;
+    }
+
+    /// <summary>
+    /// Resolves the rooms a group operation refers to before anything is written: every id is
+    /// classified as available, missing or inaccessible. When nothing at all could be resolved the
+    /// operation is refused outright — 404 when the ids simply do not exist, 403 when at least one
+    /// of them exists but the caller may not read it — so that a rejected request never leaves a
+    /// half-built group behind.
+    /// </summary>
+    public async Task<(List<int> InternalRooms, List<string> ThirdpartyRooms, bool AnyRejected)> ResolveGroupRoomsAsync(List<int> intIds, List<string> stringIds)
+    {
+        var (internalRooms, internalNotFound, internalDenied) = await ResolveRoomsAsync(intIds);
+        var (thirdpartyRooms, thirdpartyNotFound, thirdpartyDenied) = await ResolveRoomsAsync(stringIds);
+
+        var notFound = internalNotFound + thirdpartyNotFound;
+        var denied = internalDenied + thirdpartyDenied;
+
+        if (internalRooms.Count == 0 && thirdpartyRooms.Count == 0)
+        {
+            if (denied > 0)
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+            }
+
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        return (internalRooms, thirdpartyRooms, notFound + denied > 0);
+    }
+
+    /// <summary>
+    /// Resolves the rooms a removal refers to. A room that is already linked to the group can always
+    /// be detached from it: the link is the caller's own data, and a room they lost access to - or
+    /// that no longer exists at all - must not stay in their group forever. Ids that are not linked
+    /// go through the usual resolution, so removing something that never existed is still refused.
+    /// </summary>
+    public async Task<(List<int> InternalRooms, List<string> ThirdpartyRooms, bool AnyRejected)> ResolveGroupRoomsForRemovalAsync(int groupId, List<int> intIds, List<string> stringIds)
+    {
+        var refs = await daoFactory.GetRoomGroupDao<int>().GetRoomsByGroupAsync(groupId).ToListAsync();
+
+        var linkedInternal = refs.Where(r => r.InternalRoomId.HasValue).Select(r => r.InternalRoomId.Value).ToHashSet();
+        var linkedThirdparty = refs.Where(r => r.ThirdpartyRoomId != null).Select(r => r.ThirdpartyRoomId).ToHashSet();
+
+        var internalRooms = intIds.Where(linkedInternal.Contains).ToList();
+        var thirdpartyRooms = stringIds.Where(linkedThirdparty.Contains).ToList();
+
+        var unlinkedInt = intIds.Where(r => !linkedInternal.Contains(r)).ToList();
+        var unlinkedString = stringIds.Where(r => !linkedThirdparty.Contains(r)).ToList();
+
+        if (unlinkedInt.Count == 0 && unlinkedString.Count == 0)
+        {
+            return (internalRooms, thirdpartyRooms, false);
+        }
+
+        var (resolvedInt, resolvedString, anyRejected) = await ResolveGroupRoomsAsync(unlinkedInt, unlinkedString);
+
+        internalRooms.AddRange(resolvedInt);
+        thirdpartyRooms.AddRange(resolvedString);
+
+        return (internalRooms, thirdpartyRooms, anyRejected);
+    }
+
+    private async Task<(List<T> Available, int NotFound, int Denied)> ResolveRoomsAsync<T>(List<T> roomIds)
+    {
+        var available = new List<T>();
+        var notFound = 0;
+        var denied = 0;
+
+        if (roomIds.Count == 0)
+        {
+            return (available, notFound, denied);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        foreach (var roomId in roomIds)
+        {
+            var room = await folderDao.GetFolderAsync(roomId);
+
+            if (room == null)
+            {
+                notFound++;
+            }
+            else if (!room.FolderType.IsRoom() || !await fileSecurity.CanReadAsync(room))
+            {
+                denied++;
+            }
+            else
+            {
+                available.Add(roomId);
+            }
+        }
+
+        return (available, notFound, denied);
     }
 
     public IAsyncEnumerable<RoomGroup> GetGroupsAsync()
@@ -5500,13 +5656,11 @@ public class FileStorageService //: IFileStorageService
 
     public async Task AddRoomToGroupAsync<T>(T roomId, int groupId)
     {
-        await CheckRoomAvailability(roomId);
         await daoFactory.GetRoomGroupDao<T>().AddRoomToGroupAsync(roomId, groupId);
     }
 
     public async Task RemoveRoomFromGroupAsync<T>(T roomId, int groupId)
     {
-        await CheckRoomAvailability(roomId);
         await daoFactory.GetRoomGroupDao<T>().RemoveRoomFromGroupAsync(roomId, groupId);
     }
 
@@ -5742,19 +5896,6 @@ public class FileStorageService //: IFileStorageService
         return await externalDbSyncService.GetTaskAsync(roomId);
     }
 
-    private async Task CheckRoomAvailability<T>(T roomId)
-    {
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var room = await folderDao.GetFolderAsync(roomId);
-        if (room == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-        if (!room.FolderType.IsRoom() || !await fileSecurity.CanReadAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
-        }
-    }
     private async Task ValidateChangeRolesPermission<T>(File<T> form)
     {
         if (form == null)

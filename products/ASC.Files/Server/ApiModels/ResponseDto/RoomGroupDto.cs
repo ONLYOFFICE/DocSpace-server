@@ -146,6 +146,12 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
 
             await foreach (var folder in folderDao.GetFoldersAsync(folders))
             {
+                // an archived room leaves its groups; the reference is kept so that unarchiving restores the membership
+                if (folder.RootFolderType == FolderType.Archive)
+                {
+                    continue;
+                }
+
                 yield return await folderWrapperHelper.GetAsync(folder);
             }
         }
