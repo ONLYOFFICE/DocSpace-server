@@ -31,29 +31,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.Diagnostics;
-global using System.Net.Http.Headers;
-global using System.Net.Http.Json;
-global using System.Runtime.CompilerServices;
-global using System.Text;
-global using System.Text.Json;
-global using System.Text.Json.Serialization;
+namespace ASC.Notify.Tests.Infrastructure;
 
-global using ASC.Tests.Common.ApiFactories;
-global using ASC.Tests.Common.Data;
-
-global using Aspire.Hosting;
-global using Aspire.Hosting.ApplicationModel;
-global using Aspire.Hosting.Testing;
-
-global using Bogus;
-global using Bogus.DataSets;
-
-global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-
-global using MySqlConnector;
-
-global using Xunit;
-
-// Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
-global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;
+/// <summary>
+/// The letter suite's portal bundle, which adds nothing to the base.
+///
+/// A letter test calls no HTTP API: it resolves the real notify action out of the in-process service
+/// graph (<see cref="LetterHost"/>) and renders it. What it needs from a portal is the tenant id, the
+/// owner and the alias — all of which <see cref="PortalClientsBase"/> already carries — so there are
+/// no typed API clients to wire up here.
+/// </summary>
+public sealed class LetterPortalClients(PortalContext context) : PortalClientsBase(context);

@@ -34,7 +34,6 @@
 global using System.Globalization;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
-global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
@@ -57,14 +56,12 @@ global using ASC.Notify.Recipients;
 global using ASC.Notify.Tests.Infrastructure;
 global using ASC.Notify.Textile;
 global using ASC.Security.Cryptography;
+global using ASC.Tests.Common.ApiFactories;
+global using ASC.Tests.Common.Data;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
-
-global using Aspire.Hosting;
-global using Aspire.Hosting.ApplicationModel;
-global using Aspire.Hosting.Testing;
 
 global using Autofac;
 

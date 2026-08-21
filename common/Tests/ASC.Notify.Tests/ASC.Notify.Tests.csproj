@@ -29,8 +29,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- The letter tests start MailPit through the AppHost itself (see MailPitFixture); the reference
-         is what makes Projects.ASC_AppHost available, not an Aspire resource declaration. -->
+    <!-- The shared integration-test harness (see .claude/rules/tests.md): the Aspire host, portal
+         registration, the owner credentials, the timing instrumentation and the storage cleanup.
+         Anything a suite needs from it belongs there, not copied back here. -->
+    <ProjectReference Include="..\ASC.Tests.Common\ASC.Tests.Common.csproj" />
+    <!-- Not an Aspire resource declaration - hence IsAspireProjectResource="false" - but what makes
+         Rider recognise this project as an Aspire test host and stand up its run-session endpoint.
+         Without it DCP is still put into IDE execution mode with nothing to connect to: it retries a
+         dead websocket forever, migrate never launches, and every project resource stays Waiting.
+         ASC.Files.Tests, ASC.AI.Tests and ASC.People.Tests all carry the same pair of references. -->
     <ProjectReference Include="..\..\ASC.AppHost\ASC.AppHost.csproj" IsAspireProjectResource="false" />
     <!-- Most notify actions live in ASC.Web.Core; the two backup letters have theirs here.
          Keep this reference: DIHelper.Scan registers an assembly only when it is reachable through the

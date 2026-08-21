@@ -127,7 +127,7 @@ public sealed class LetterScope : IDisposable
 
             var portalUrl = services.GetRequiredService<CommonLinkUtility>().GetFullAbsolutePath("").TrimEnd('/');
 
-            AssertPortalUrl(portalUrl, fixture.Portal);
+            AssertPortalUrl(portalUrl, fixture.PortalUrl, fixture.Portal.PortalName);
 
             var owner = await services.GetRequiredService<UserManager>().GetUsersAsync(tenant.OwnerId);
 
@@ -151,16 +151,16 @@ public sealed class LetterScope : IDisposable
     /// mismatch would otherwise surface as a missing image or an <c>ArgumentException</c> from deep
     /// inside <c>Init</c>, far from the cause.
     /// </summary>
-    private static void AssertPortalUrl(string resolved, LetterPortal portal)
+    private static void AssertPortalUrl(string resolved, string expected, string alias)
     {
-        if (string.Equals(resolved, portal.Url, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(resolved, expected, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
         throw new InvalidOperationException(
-            $"The portal resolves to '{resolved}', but the stack was set up for '{portal.Url}'. That is "
-            + $"what Tenant.GetTenantDomain makes of the alias '{portal.Alias}': check whether "
+            $"The portal resolves to '{resolved}', but the stack was set up for '{expected}'. That is "
+            + $"what Tenant.GetTenantDomain makes of the alias '{alias}': check whether "
             + "`core:base-domain` still is `localhost`, or whether the tenant carries a mapped domain.");
     }
 

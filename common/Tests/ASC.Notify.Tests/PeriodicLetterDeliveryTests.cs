@@ -91,7 +91,7 @@ public class PeriodicLetterDeliveryTests
 
         var recipients = await RecipientsOfAsync<SaasAdminWarningAfterThreeMonthsV1NotifyAction>(scope);
 
-        recipients.Should().Contain(stack.Portal.OwnerId);
+        recipients.Should().Contain(stack.Portal.Owner.Id);
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public class PeriodicLetterDeliveryTests
 
         var recipients = await RecipientsOfAsync<SaasAdminHandyAppsV1NotifyAction>(scope);
 
-        recipients.Should().Contain(stack.Portal.OwnerId)
+        recipients.Should().Contain(stack.Portal.Owner.Id)
             .And.OnlyHaveUniqueItems("the owner is an admin already, and nobody may get the same letter twice");
     }
 
@@ -127,7 +127,7 @@ public class PeriodicLetterDeliveryTests
 
         var recipients = await RecipientsOfAsync<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>(scope);
 
-        recipients.Should().Contain(stack.Portal.OwnerId)
+        recipients.Should().Contain(stack.Portal.Owner.Id)
             .And.NotContain(ASC.Core.Users.Constants.LostUser.Id);
     }
 
@@ -156,7 +156,7 @@ public class PeriodicLetterDeliveryTests
 
         // The owner as the database has them, not scope.Recipient: SendAsync resolves its own
         // recipients, and the scope's copy carries the culture the test asked for.
-        var owner = await scope.Services.GetRequiredService<UserManager>().GetUsersAsync(stack.Portal.OwnerId);
+        var owner = await scope.Services.GetRequiredService<UserManager>().GetUsersAsync(stack.Portal.Owner.Id);
 
         var expected = owner.CultureName is { Length: > 0 } ? owner.GetCulture() : scope.Tenant.GetCulture();
 
@@ -186,7 +186,7 @@ public class PeriodicLetterDeliveryTests
 
         var helper = scope.Services.GetRequiredService<StudioNotifyHelper>();
         var periodic = scope.Services.GetRequiredService<PeriodicNotifyAction>();
-        var owner = stack.Portal.OwnerId;
+        var owner = stack.Portal.Owner.Id;
 
         (await helper.IsSubscribedToNotifyAsync(owner, periodic))
             .Should().BeTrue("a portal owner is subscribed to the periodic notifications to begin with");

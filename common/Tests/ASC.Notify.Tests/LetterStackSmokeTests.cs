@@ -57,7 +57,7 @@ public class LetterStackSmokeTests
         var stack = await GetStackAsync();
 
         stack.Portal.TenantId.Should().BeGreaterThan(0);
-        stack.Portal.OwnerId.Should().NotBeEmpty();
+        stack.Portal.Owner.Id.Should().NotBeEmpty();
 
         using var scope = await LetterScope.OpenAsync(stack, CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName));
 

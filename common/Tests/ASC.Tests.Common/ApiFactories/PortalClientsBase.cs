@@ -34,11 +34,18 @@
 namespace ASC.Tests.Common.ApiFactories;
 
 /// <summary>
-/// Everything a portal (tenant) is created with: its alias, its owner, the base address of every
-/// started service, and the factory the fixture uses to hand out clients on its shared connection pool.
+/// Everything a portal (tenant) is created with: its alias, its tenant id, its owner, the base address
+/// of every started service, and the factory the fixture uses to hand out clients on its shared
+/// connection pool.
 /// </summary>
+/// <remarks>
+/// <paramref name="TenantId"/> is for a suite that reaches the platform in-process rather than over
+/// HTTP — the alias is enough to scope a request through the <c>Origin</c> header, but
+/// <c>TenantManager.SetCurrentTenantAsync</c> wants the id.
+/// </remarks>
 public sealed record PortalContext(
     string PortalName,
+    int TenantId,
     User Owner,
     IReadOnlyDictionary<string, Uri> BaseAddresses,
     Func<Uri, string?, HttpClient> CreateClient);
@@ -59,6 +66,9 @@ public abstract class PortalClientsBase : IDisposable
 
     /// <summary>The portal (tenant) alias these clients are bound to.</summary>
     public string PortalName => _context.PortalName;
+
+    /// <summary>The tenant id of this portal, for anything that addresses the platform in-process.</summary>
+    public int TenantId => _context.TenantId;
 
     /// <summary>The owner of this portal. Its Id is unique per portal.</summary>
     public User Owner => _context.Owner;

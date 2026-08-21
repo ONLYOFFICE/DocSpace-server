@@ -45,10 +45,15 @@ namespace ASC.Tests.Common.ApiFactories;
 /// </remarks>
 public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClients : PortalClientsBase
 {
-    private const string DocSpaceDatabase = "docspace";
-
     // Tenant.DefaultTenant — the tenant portal-independent settings are stored under.
     private const int DefaultTenantId = -1;
+
+    /// <summary>
+    /// Generous, because a cold run builds every project in the graph and pulls the container images on
+    /// top of starting them. Bounded, because a container that dies on startup never reports any state
+    /// at all and would otherwise hang the whole assembly instead of failing it.
+    /// </summary>
+    private static readonly TimeSpan _startUpBudget = TimeSpan.FromMinutes(15);
 
     private static readonly JsonSerializerOptions _apiSystemJsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -69,8 +74,37 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// </summary>
     protected abstract IEnumerable<string> Resources { get; }
 
+    /// <summary>
+    /// What this suite has no use for at all, dropped from the graph before the host is built. The
+    /// <c>integration-test</c> profile brings up six services, socket.io and OpenResty, and a suite
+    /// that touches two of them pays for the rest in startup time and in one more thing that can fail.
+    /// </summary>
+    /// <remarks>
+    /// Leaves only — a resource nothing else waits for. Naming one that a kept resource waits on
+    /// (the database, the migration runner, RabbitMQ, Redis, OpenSearch, or ApiSystem and Web.Api
+    /// themselves) strands that wait on a dependency which no longer exists, and the host never starts.
+    /// </remarks>
+    protected virtual IEnumerable<string> UnusedResources => [];
+
     /// <summary>Builds the suite's own client bundle for a freshly registered portal.</summary>
     protected abstract TClients CreateClients(PortalContext context);
+
+    /// <summary>
+    /// The app is up and portals can be registered, but no test has run yet. For whatever a suite has
+    /// to stand up once against the running stack.
+    /// </summary>
+    protected virtual ValueTask OnStartedAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Runs before the app is torn down, so a suite can dispose what still holds handles into it.
+    /// </summary>
+    protected virtual ValueTask OnDisposingAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
 
     /// <summary>
     /// Suite-specific warmup, run once against a throwaway portal whose owner is already signed in
@@ -93,6 +127,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
 
+        DropUnusedResources(appHost);
+
         _app = await appHost.BuildAsync();
         await _app.StartAsync();
 
@@ -100,7 +136,21 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         var resourceNotifications = _app.ResourceNotifications;
         var resources = new[] { ResourceNames.ApiSystem, ResourceNames.WebApi }.Union(Resources).ToList();
 
-        await Task.WhenAll(resources.Select(r => resourceNotifications.WaitForResourceHealthyAsync(r)));
+        // Bounded: a resource that dies without ever reporting a state would otherwise leave the whole
+        // assembly waiting forever instead of failing it.
+        using var startUp = new CancellationTokenSource(_startUpBudget);
+
+        try
+        {
+            await Task.WhenAll(resources.Select(r => resourceNotifications.WaitForResourceHealthyAsync(r, startUp.Token)));
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"The Aspire stack did not come up within {_startUpBudget.TotalMinutes} minutes. It was "
+                + $"waited on for: {string.Join(", ", resources)}. The log of whichever of them never "
+                + "went healthy is the one to read, not this.");
+        }
 
         foreach (var resource in resources)
         {
@@ -116,12 +166,62 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
         await InitializePasswordSaltAsync();
 
+        await OnStartedAsync();
+
         // Warm up the full portal flow ONCE, serially, before any test runs. Without this, the moment
         // the host goes healthy every parallel test class fires portal/register simultaneously against
         // a completely cold system (JIT of the large registration flow, EF model init, first DB pool
         // open, cache population). That thundering herd of cold registrations contends heavily and can
         // stall. Paying those one-time costs once here keeps the parallel flood hitting warm code paths.
         await WarmUpAsync();
+    }
+
+    /// <summary>
+    /// Drops what <see cref="UnusedResources"/> names, before the host is built. Parameter resources
+    /// are never touched whatever they are called: Aspire adds them for passwords and endpoints, and a
+    /// kept resource may point at one.
+    /// </summary>
+    private void DropUnusedResources(IDistributedApplicationTestingBuilder appHost)
+    {
+        var unused = UnusedResources.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (unused.Count == 0)
+        {
+            return;
+        }
+
+        // The two the base always starts, plus whatever the suite asked for: dropping one of those
+        // would leave InitializeAsync waiting on a resource that is no longer in the graph.
+        var needed = new[] { ResourceNames.ApiSystem, ResourceNames.WebApi }.Union(Resources);
+        var contradicted = unused.Intersect(needed, StringComparer.OrdinalIgnoreCase).ToArray();
+
+        if (contradicted.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"{GetType().Name} lists {string.Join(", ", contradicted)} as unused, but the harness "
+                + $"waits for it — it is either in {nameof(Resources)} or one of the two ApiSystem and "
+                + "Web.Api that portal registration and authentication always need.");
+        }
+
+        var doomed = appHost.Resources
+            .Where(resource => unused.Contains(resource.Name) && resource is not ParameterResource)
+            .ToArray();
+
+        foreach (var resource in doomed)
+        {
+            appHost.Resources.Remove(resource);
+        }
+
+        // Matched by name, so a resource renamed in the AppHost would otherwise silently stop being
+        // dropped and the suite would quietly go back to starting the whole graph.
+        var missing = unused.Except(doomed.Select(resource => resource.Name), StringComparer.OrdinalIgnoreCase).ToArray();
+
+        if (missing.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"The Aspire graph has no resource named {string.Join(", ", missing)}, so "
+                + $"{GetType().Name}.{nameof(UnusedResources)} is out of step with the AppHost.");
+        }
     }
 
     /// <summary>
@@ -188,8 +288,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         {
             await Timing.Measure("startdocs.disable", async () =>
             {
-                var connectionString = await _app.GetConnectionStringAsync(DocSpaceDatabase, cancellationToken)
-                    ?? throw new InvalidOperationException($"No connection string for the '{DocSpaceDatabase}' resource.");
+                var connectionString = await _app.GetConnectionStringAsync(ResourceNames.Database, cancellationToken)
+                    ?? throw new InvalidOperationException($"No connection string for the '{ResourceNames.Database}' resource.");
 
                 await using var connection = new MySqlConnection(connectionString);
                 await connection.OpenAsync(cancellationToken);
@@ -246,7 +346,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
             PasswordHash = Initializer.GetClientPassword(Initializer.OwnerPassword)
         };
 
-        return CreateClients(new PortalContext(portalName, owner, _baseAddresses, CreateRawClient));
+        return CreateClients(new PortalContext(
+            portalName, registration.Tenant.TenantId, owner, _baseAddresses, CreateRawClient));
     }
 
     /// <summary>
@@ -282,6 +383,32 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         Initializer.InitializePasswordHasher(settings.PasswordHash!);
     }
 
+    /// <summary>
+    /// The connection string Aspire published for a resource — for a suite that talks to a container
+    /// directly instead of through a service.
+    /// </summary>
+    protected async Task<string> GetConnectionStringAsync(string resourceName, CancellationToken cancellationToken = default)
+    {
+        return await _app.GetConnectionStringAsync(resourceName, cancellationToken)
+            ?? throw new InvalidOperationException($"Aspire published no connection string for '{resourceName}'.");
+    }
+
+    /// <summary>
+    /// One of a resource's named endpoints, as the host can reach it. Needed for anything that is not
+    /// the default HTTP endpoint — MailPit, for instance, publishes both <c>smtp</c> and <c>http</c>,
+    /// and Aspire gives each of them a random host port.
+    /// </summary>
+    protected Uri GetEndpoint(string resourceName, string endpointName)
+    {
+        return _app.GetEndpoint(resourceName, endpointName);
+    }
+
+    /// <summary>An <see cref="HttpClient"/> for a resource's named HTTP endpoint.</summary>
+    protected HttpClient CreateHttpClient(string resourceName, string endpointName)
+    {
+        return _app.CreateHttpClient(resourceName, endpointName);
+    }
+
     private Uri ResolveBaseAddress(string resourceName)
     {
         using var baseClient = _app.CreateHttpClient(resourceName);
@@ -304,6 +431,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     public async ValueTask DisposeAsync()
     {
+        try
+        {
+            // First: what a suite stood up in OnStartedAsync can still hold handles into the running app.
+            await OnDisposingAsync();
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
         _apiSystemClient.Dispose();
 
         // Teardown is a large, easily-overlooked share of a run's wall clock — it is Aspire/DCP

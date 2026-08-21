@@ -34,57 +34,23 @@
 namespace ASC.Notify.Tests.Infrastructure;
 
 /// <summary>
-/// Everything a letter test needs from the outside world, started once for the whole assembly:
-///
-/// <list type="bullet">
-/// <item>a migrated database with a freshly registered portal — a notify action's <c>Init</c> resolves
-/// links, and shortens them, against a real tenant;</item>
-/// <item>the DocSpace service graph in this process (<see cref="LetterHost"/>), which is what makes the
-/// action resolvable at all;</item>
-/// <item>the MailPit the rendered letters are delivered to.</item>
-/// </list>
-///
-/// The Aspire graph is trimmed to that before the host is built: the <c>integration-test</c> profile
-/// also brings up six services, OpenResty and the document server, and a letter needs none of them.
+/// What the letter tests add to the shared stack: the MailPit the rendered letters are delivered to,
+/// the DocSpace service graph in this process (<see cref="LetterHost"/>) which is what makes a notify
+/// action resolvable at all, and the one portal every letter is rendered for.
 /// </summary>
-public sealed class LetterStackFixture : IAsyncLifetime
+/// <remarks>
+/// Everything else — starting the Aspire host, registering a portal, the owner credentials, the timing
+/// instrumentation, the storage cleanup — comes from <see cref="AspireHostFixture{TClients}"/>.
+///
+/// One portal for the whole assembly, not one per test as the API suites use: a letter test does not
+/// write to the portal, it renders against it. Isolation comes from a service scope of its own per test
+/// (<see cref="LetterScope"/>) and a unique recipient address, so no test reads another's mail.
+/// </remarks>
+public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
 {
-    private const string MailPitResource = "mailpit";
-    private const string ApiSystemResource = "onlyoffice-apisystem";
-    private const string MigrateResource = "migrate";
-    private const string DatabaseResource = "docspace";
-
-    /// <summary>
-    /// What stays in the graph. Redis (<c>cache</c>), RabbitMQ (<c>messaging</c>) and OpenSearch are
-    /// kept even though <see cref="LetterHost"/> switches the first two off for itself: every project in
-    /// the graph waits for them (<c>ProjectConfigurator.AddWaitFor</c>), so dropping them would strand
-    /// ApiSystem on a dependency that no longer exists.
-    /// </summary>
-    private static readonly string[] _keptResources =
-    [
-        "mysql", DatabaseResource, "mysql-root-password", MigrateResource,
-        MailPitResource, ApiSystemResource, "messaging", "cache", "opensearch"
-    ];
-
-    /// <summary>
-    /// Generous, because a cold run builds and starts the migration runner and ApiSystem on top of
-    /// pulling container images. Bounded, because a container that dies on startup never reports any
-    /// state at all and would otherwise hang the whole assembly instead of failing it.
-    /// </summary>
-    private static readonly TimeSpan _startUpBudget = TimeSpan.FromMinutes(15);
-
-    private static readonly JsonSerializerOptions _apiSystemJson = new(JsonSerializerDefaults.Web);
-
-    // Nullable, and disposed as such: InitializeAsync builds these one after another over minutes of
-    // containers and migrations, and xUnit disposes the fixture even when it threw halfway. Declaring
-    // them null-forgiving would turn any startup failure into an NRE out of DisposeAsync, which is the
-    // exception the run then reports instead of the one that actually broke the stack.
-    private DistributedApplication? _app;
-    private HttpClient? _apiSystem;
-    private HttpClient? _mailPitApi;
     private MailPitInbox? _inbox;
     private LetterHost? _host;
-    private LetterPortal? _portal;
+    private LetterPortalClients? _portal;
 
     /// <summary>The inbox every letter test delivers to and reads its score back from.</summary>
     internal MailPitInbox Inbox => _inbox ?? throw NotStarted();
@@ -93,7 +59,66 @@ public sealed class LetterStackFixture : IAsyncLifetime
     internal LetterHost Host => _host ?? throw NotStarted();
 
     /// <summary>The portal the letters are rendered for.</summary>
-    internal LetterPortal Portal => _portal ?? throw NotStarted();
+    internal LetterPortalClients Portal => _portal ?? throw NotStarted();
+
+    /// <summary>
+    /// Where the portal answers. Not the alias: <c>core:base-domain</c> is <c>localhost</c> here — both
+    /// in buildtools/config and from the AppHost, which sets it for every standalone project — and
+    /// <c>Tenant.GetTenantDomain</c> short-circuits on that to <c>localhost</c> whatever the alias is.
+    /// So a registered portal answers on the address the stack publishes, exactly like the letters have
+    /// always assumed. <see cref="LetterScope"/> checks that against <c>CommonLinkUtility</c> rather
+    /// than trusting this comment.
+    /// </summary>
+    internal string PortalUrl => LetterEnvironment.PortalUrl;
+
+    protected override IEnumerable<string> Resources => [ResourceNames.MailPit];
+
+    /// <summary>
+    /// What a letter never touches. It is rendered in this process out of <see cref="LetterHost"/>, so
+    /// all the stack owes the suite is the database the portal was registered into, ApiSystem (the
+    /// registration), Web.Api (the password salt the harness reads once) and MailPit. The five service
+    /// processes and OpenResty below are pure startup cost and five more things that can fail a run of
+    /// letter renders — and OpenResty also binds host ports 8092 and 443 and mounts the client
+    /// packages, which a server-only checkout does not have.
+    /// </summary>
+    protected override IEnumerable<string> UnusedResources =>
+    [
+        ResourceNames.Files, ResourceNames.FilesWorker, ResourceNames.People, ResourceNames.Ai,
+        ResourceNames.SocketIo, ResourceNames.OpenResty
+    ];
+
+    protected override LetterPortalClients CreateClients(PortalContext context)
+    {
+        return new LetterPortalClients(context);
+    }
+
+    protected override async ValueTask OnStartedAsync()
+    {
+        // Two named endpoints: "smtp" for delivery, "http" for the web API. Aspire publishes both on
+        // random host ports, which is why nothing here is hard-coded.
+        var smtp = GetEndpoint(ResourceNames.MailPit, "smtp");
+
+        _inbox = new MailPitInbox(smtp.Host, smtp.Port, CreateHttpClient(ResourceNames.MailPit, "http"));
+
+        _portal = await Timing.Measure("letter.portal", () => CreatePortalAsync(TestContext.Current.CancellationToken));
+
+        var connectionString = await GetConnectionStringAsync(
+            ResourceNames.Database, TestContext.Current.CancellationToken);
+
+        _host = await Timing.Measure("letterhost.build", () => LetterHost.BuildAsync(connectionString, PortalUrl));
+    }
+
+    protected override async ValueTask OnDisposingAsync()
+    {
+        // Before the app goes: the in-process host holds database connections into its container.
+        if (_host is not null)
+        {
+            await _host.DisposeAsync();
+        }
+
+        _inbox?.Dispose();
+        _portal?.Dispose();
+    }
 
     private static InvalidOperationException NotStarted([CallerMemberName] string member = "")
     {
@@ -101,150 +126,4 @@ public sealed class LetterStackFixture : IAsyncLifetime
             $"The letter stack has no {member}: InitializeAsync did not get that far. The failure that "
             + "stopped it is the one to read, not this.");
     }
-
-    public async ValueTask InitializeAsync()
-    {
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            ["DOTNET_LAUNCH_PROFILE=integration-test", "SKIP_CLIENT=true", "APP_HOSTING_STANDALONE=true"]);
-
-        appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
-        appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
-
-        Trim(appHost);
-
-        _app = await appHost.BuildAsync();
-
-        await _app.StartAsync();
-
-        using var startUp = new CancellationTokenSource(_startUpBudget);
-
-        // The migration runner is a one-shot project every service waits to exit, and so must this
-        // fixture: the schema it creates is what the portal is registered into.
-        await _app.ResourceNotifications.WaitForResourceAsync(
-            MigrateResource, KnownResourceStates.Finished, startUp.Token);
-
-        await Task.WhenAll(
-            _app.ResourceNotifications.WaitForResourceHealthyAsync(MailPitResource, startUp.Token),
-            _app.ResourceNotifications.WaitForResourceHealthyAsync(ApiSystemResource, startUp.Token));
-
-        // Two named endpoints: "smtp" for delivery, "http" for the web API. Aspire publishes both on
-        // random host ports, which is why nothing here is hard-coded.
-        var smtp = _app.GetEndpoint(MailPitResource, "smtp");
-
-        _mailPitApi = _app.CreateHttpClient(MailPitResource, "http");
-
-        _inbox = new MailPitInbox(smtp.Host, smtp.Port, _mailPitApi);
-
-        _apiSystem = _app.CreateHttpClient(ApiSystemResource);
-
-        _portal = await RegisterPortalAsync(_apiSystem, startUp.Token);
-
-        var connectionString = await _app.GetConnectionStringAsync(DatabaseResource, startUp.Token)
-            ?? throw new InvalidOperationException(
-                $"Aspire published no connection string for '{DatabaseResource}'.");
-
-        _host = await LetterHost.BuildAsync(connectionString, _portal.Url);
-    }
-
-    /// <summary>
-    /// Drops everything outside <see cref="_keptResources"/>. Parameter resources stay whatever they are
-    /// named: Aspire adds them for passwords and endpoints, and a kept resource may point at one.
-    /// </summary>
-    private static void Trim(IDistributedApplicationTestingBuilder appHost)
-    {
-        var doomed = appHost.Resources
-            .Where(resource => !_keptResources.Contains(resource.Name) && resource is not ParameterResource)
-            .ToArray();
-
-        foreach (var resource in doomed)
-        {
-            appHost.Resources.Remove(resource);
-        }
-    }
-
-    /// <summary>
-    /// Registers a portal through ApiSystem, the way the Files and People suites do. The letters need a
-    /// real owner: an action reads the recipient's email and name, and the tenant the migrations seed
-    /// has an owner with no email at all.
-    /// </summary>
-    private static async Task<LetterPortal> RegisterPortalAsync(HttpClient apiSystem, CancellationToken cancellationToken)
-    {
-        // Lowercase, starts with a letter, 13 chars — a valid portal alias, which is also the host the
-        // portal answers on while `core:base-domain` is empty.
-        var alias = "t" + Guid.NewGuid().ToString("N")[..12];
-
-        // This exact address is what AllowPortalRegistration puts into `web:autotest:secret-email`,
-        // which is what lets registration skip the rate limit and the recaptcha.
-        var payload = JsonSerializer.Serialize(new
-        {
-            PortalName = alias,
-            FirstName = "Portal",
-            LastName = "Owner",
-            Email = "test@example.com",
-            Password = "11111111",
-            Language = LetterCultures.DefaultCultureName,
-            TimeZoneName = "UTC",
-            // Otherwise registration queues a welcome letter of its own.
-            SkipWelcome = true
-        }, _apiSystemJson);
-
-        using var content = new StringContent(payload, Encoding.UTF8, "application/json");
-        using var response = await apiSystem.PostAsync("portal/register", content, cancellationToken);
-
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"Portal registration failed ({(int)response.StatusCode}): {body}");
-        }
-
-        var registration = JsonSerializer.Deserialize<PortalRegistrationResult>(body, _apiSystemJson)
-            ?? throw new InvalidOperationException($"Unreadable registration response: {body}");
-
-        // Not the alias: `core:base-domain` is `localhost` here — both in buildtools/config and from the
-        // AppHost, which sets it for every standalone project — and Tenant.GetTenantDomain
-        // short-circuits on that to `localhost` whatever the alias is. So a registered portal answers on
-        // the address the stack publishes, exactly like the letters have always assumed.
-        // LetterScope checks that against CommonLinkUtility rather than trusting this comment.
-        return new LetterPortal(
-            registration.Tenant.TenantId,
-            registration.Tenant.OwnerId,
-            alias,
-            LetterEnvironment.PortalUrl);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_host != null)
-        {
-            await _host.DisposeAsync();
-        }
-
-        _inbox?.Dispose();
-        _mailPitApi?.Dispose();
-        _apiSystem?.Dispose();
-
-        if (_app != null)
-        {
-            await _app.StopAsync();
-            await _app.DisposeAsync();
-        }
-    }
-}
-
-/// <summary>The registered portal the letters are rendered for.</summary>
-internal sealed record LetterPortal(int TenantId, Guid OwnerId, string Alias, string Url);
-
-/// <summary>The part of the ApiSystem <c>portal/register</c> response the letters need.</summary>
-internal sealed record PortalRegistrationResult
-{
-    public PortalTenant Tenant { get; init; } = null!;
-}
-
-/// <summary>The tenant information embedded in a portal registration response.</summary>
-internal sealed record PortalTenant
-{
-    public int TenantId { get; init; }
-
-    public Guid OwnerId { get; init; }
 }
