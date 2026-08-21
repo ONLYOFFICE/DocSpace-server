@@ -43,6 +43,7 @@ import {
 } from "./docspaceFilesApi.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { getNumber, getString, isObject } from "../narrow.js";
+import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
@@ -294,11 +295,17 @@ function dtoToAttachment(raw: unknown): Attachment | null {
   if (entryId !== undefined) {
     result.path = title ? `${entryId}/${title}` : entryId;
   }
-  // Forward-compat: pick up `type` (ONLYOFFICE file type code) once C#
-  // starts echoing it. Today it isn't included in `AttachmentDto`, so the
-  // value is back-filled from the original input in `createMany`.
-  const type = getNumber(raw, "type");
-  if (type !== undefined) {
+  // `type` is derived from the title here, NOT taken from the DTO: C#
+  // added `AttachmentDto.Type` in Bug 83003, but it carries the DocSpace
+  // `FileType` category enum (Document = 7, Spreadsheet = 5, ...), while
+  // `Attachment.type` is an ONLYOFFICE `c_oAscFileType` code (docx = 65)
+  // — the scale the widget's chip resolves its icon from. Trusting the DTO
+  // value left every chip on the "unknown format" icon, and the category
+  // cannot be widened back into a code anyway, so recompute it from the
+  // file name (which is exactly what C# maps its own value from). Fresh
+  // attaches still prefer the caller's own code, see `createMany`.
+  const type = getOnlyofficeFileType(title);
+  if (type !== 0) {
     result.type = type;
   }
   // Origin marker (0.4.132+). C# doesn't echo it today, so it's normally
@@ -435,11 +442,11 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         );
         throw new Error(`ai service did not return attachment for entryId=${entryId}`);
       }
-      // C# `AttachmentDto` doesn't echo `type` (ONLYOFFICE file type code),
-      // so fall back to the value the caller supplied on input. Once C#
-      // starts echoing `type`, `dtoToAttachment` will already have set it
-      // and we won't overwrite.
-      if (matched.type === undefined && input.type !== undefined) {
+      // The caller's own `type` wins over the title-derived one from
+      // `dtoToAttachment`: it comes from the same `c_oAscFileType` table but
+      // is authoritative for the entry being attached (the host knows the
+      // extension it resolved), so an unmapped title can still carry a code.
+      if (input.type !== undefined) {
         matched.type = input.type;
       }
       result[i] = matched;
