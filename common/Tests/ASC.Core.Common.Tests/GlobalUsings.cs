@@ -38,6 +38,7 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
 
+global using ASC.Api.Core.Middleware;
 global using ASC.Common.Caching;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Security;
@@ -47,6 +48,7 @@ global using ASC.Notify.Cron;
 
 global using FluentAssertions;
 
+global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
