@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -34,44 +34,44 @@
 namespace ASC.MessagingSystem.Core.Sender;
 
 [Singleton]
-public class DbMessageSender : IMessageSender
+public class AuditLogSender(ILoggerFactory loggerFactory, ILogger<AuditLogSender> logger)
 {
-    private readonly ILogger _logger;
-    private readonly MessagesRepository _messagesRepository;
-    private readonly AuditLogSender _auditLogSender;
-    private readonly bool _messagingEnabled;
+    public const string LoggerName = "ASC.Audit";
 
-    public DbMessageSender(IConfiguration configuration, MessagesRepository messagesRepository, AuditLogSender auditLogSender, ILoggerFactory loggerFactory)
-    {
-        var setting = configuration["messaging:enabled"];
-        _messagingEnabled = !string.IsNullOrEmpty(setting) && setting == "true";
-        _messagesRepository = messagesRepository;
-        _auditLogSender = auditLogSender;
-        _logger = loggerFactory.CreateLogger("ASC.Messaging");
-    }
+    private readonly ILogger _auditLogger = loggerFactory.CreateLogger(LoggerName);
+    private readonly ILogger<AuditLogSender> _logger = logger;
 
-    public async Task<int> SendAsync(EventMessage message)
+    public void Send(EventMessage message)
     {
+        if (message == null || !_auditLogger.IsEnabled(LogLevel.Information))
+        {
+            return;
+        }
+
         try
         {
-            if (!_messagingEnabled)
-            {
-                return 0;
-            }
-
-            if (message == null)
-            {
-                return 0;
-            }
-
-            _auditLogSender.Send(message);
-
-            return await _messagesRepository.AddAsync(message);
+            _auditLogger.InfoAuditEvent(
+                MessagesRepository.IsLoginEvent(message.Action) ? "login" : "audit",
+                message.Action.ToStringFast(),
+                (int)message.Action,
+                message.TenantId,
+                message.UserId,
+                message.Initiator,
+                message.Ip,
+                message.Page,
+                message.UaHeader,
+                message.Target?.ToString(),
+                SerializeDescription(message.Description),
+                message.Date);
         }
         catch (Exception ex)
         {
-            _logger.ErrorFailedSend(ex);
-            return 0;
+            _logger.ErrorFailedSendToAuditLog(ex);
         }
+    }
+
+    private static string SerializeDescription(IList<string> description)
+    {
+        return description is { Count: > 0 } ? JsonSerializer.Serialize(description) : null;
     }
 }
