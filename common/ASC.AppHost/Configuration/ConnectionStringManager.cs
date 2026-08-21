@@ -82,6 +82,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             // for InnoDB fsync-heavy init and migrations when the datadir sits on the virtualized
             // Docker Desktop disk. Data disappears with the container, which is fine without a volume.
             mysqlResourceBuilder = mysqlResourceBuilder.WithContainerRuntimeArgs("--tmpfs", "/var/lib/mysql");
+
         }
 
         if (withDbGate)
@@ -113,11 +114,17 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddRabbitMq()
+    public ConnectionStringManager AddRabbitMq(bool withManagementPlugin = true)
     {
         RabbitMqResource = builder
-            .AddRabbitMQ("messaging")
-            .WithManagementPlugin();
+            .AddRabbitMQ("messaging");
+
+        if (withManagementPlugin)
+        {
+            // Enabling the plugin at boot costs a few seconds, and nothing opens the UI during an
+            // integration-test run — so that profile asks for the plain image instead.
+            RabbitMqResource = RabbitMqResource.WithManagementPlugin();
+        }
 
         builder.Eventing.Subscribe(RabbitMqResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {

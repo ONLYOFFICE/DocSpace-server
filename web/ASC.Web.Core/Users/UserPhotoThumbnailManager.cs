@@ -102,6 +102,13 @@ public static class UserPhotoThumbnailManager
         {
             throw new UnknownImageFormatException(error);
         }
+        catch (MagickException error)
+        {
+            // Undecodable content (truncated PNG, malformed JPEG, something that is not an image at
+            // all) surfaces as a MagickException. Left unhandled it escapes this format check as an
+            // unmapped exception and the caller answers 500 for what is plainly a bad request.
+            throw new UnknownImageFormatException(error);
+        }
 
         if (imgFormat != MagickFormat.Png && imgFormat != MagickFormat.Jpeg)
         {

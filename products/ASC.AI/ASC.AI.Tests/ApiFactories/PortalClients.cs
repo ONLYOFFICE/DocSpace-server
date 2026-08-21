@@ -34,70 +34,27 @@
 namespace ASC.AI.Tests.ApiFactories;
 
 /// <summary>
-/// A self-contained set of HTTP/API clients bound to a single portal via the <c>Origin</c> header.
-/// Each test owns one instance, which makes tests fully independent and safe to run in parallel.
+/// The AI suite's per-portal clients. The AI endpoints are internal (<c>[ApiExplorerSettings(IgnoreApi = true)]</c>)
+/// and therefore absent from the generated SDK, so every service is driven through <see cref="RawApiClient"/>.
 /// </summary>
-public sealed class PortalClients : IDisposable
+public sealed class PortalClients : PortalClientsBase
 {
-    /// <summary>The portal (tenant) alias these clients are bound to.</summary>
-    public string PortalName { get; }
-
-    /// <summary>The owner of this portal. Its Id is unique per portal.</summary>
-    public User Owner { get; }
-
     public HttpClient AiHttpClient { get; }
     public HttpClient FilesHttpClient { get; }
     public HttpClient PeopleHttpClient { get; }
-    public HttpClient WebApiHttpClient { get; }
 
-    public AiApiClient Ai { get; }
-    public AiApiClient FilesApi { get; }
-    public AiApiClient PeopleApi { get; }
-    public AiApiClient WebApi { get; }
+    public RawApiClient Ai { get; }
+    public RawApiClient FilesApi { get; }
+    public RawApiClient PeopleApi { get; }
 
-    public PortalClients(
-        Uri aiBaseAddress,
-        Uri filesBaseAddress,
-        Uri peopleBaseAddress,
-        Uri webApiBaseAddress,
-        string portalName,
-        User owner,
-        Func<Uri, string?, HttpClient> createClient)
+    public PortalClients(PortalContext context) : base(context)
     {
-        PortalName = portalName;
-        Owner = owner;
+        AiHttpClient = CreateClient(ResourceNames.Ai);
+        FilesHttpClient = CreateClient(ResourceNames.Files);
+        PeopleHttpClient = CreateClient(ResourceNames.People);
 
-        var origin = $"http://{portalName}";
-
-        // The clients are per-test (own Origin/Auth headers) but share the fixture's connection pool.
-        AiHttpClient = createClient(aiBaseAddress, origin);
-        FilesHttpClient = createClient(filesBaseAddress, origin);
-        PeopleHttpClient = createClient(peopleBaseAddress, origin);
-        WebApiHttpClient = createClient(webApiBaseAddress, origin);
-
-        Ai = new AiApiClient(AiHttpClient);
-        FilesApi = new AiApiClient(FilesHttpClient);
-        PeopleApi = new AiApiClient(PeopleHttpClient);
-        WebApi = new AiApiClient(WebApiHttpClient);
-
-        // Associate every client with this portal's authentication endpoint so the
-        // HttpClient.Authenticate(user) extension knows where to sign in.
-        Initializer.RegisterAuthApi(AiHttpClient, WebApi);
-        Initializer.RegisterAuthApi(FilesHttpClient, WebApi);
-        Initializer.RegisterAuthApi(PeopleHttpClient, WebApi);
-        Initializer.RegisterAuthApi(WebApiHttpClient, WebApi);
-    }
-
-    public void Dispose()
-    {
-        Initializer.UnregisterAuthApi(AiHttpClient);
-        Initializer.UnregisterAuthApi(FilesHttpClient);
-        Initializer.UnregisterAuthApi(PeopleHttpClient);
-        Initializer.UnregisterAuthApi(WebApiHttpClient);
-
-        AiHttpClient.Dispose();
-        FilesHttpClient.Dispose();
-        PeopleHttpClient.Dispose();
-        WebApiHttpClient.Dispose();
+        Ai = new RawApiClient(AiHttpClient);
+        FilesApi = new RawApiClient(FilesHttpClient);
+        PeopleApi = new RawApiClient(PeopleHttpClient);
     }
 }

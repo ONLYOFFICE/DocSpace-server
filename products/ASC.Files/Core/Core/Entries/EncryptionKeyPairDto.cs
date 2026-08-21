@@ -74,37 +74,80 @@ public class EncryptionKeyPairDtoHelper(
     IDaoFactory daoFactory)
 {
 
-    public async Task<List<EncryptionKeyDto>> SetKeyPairAsync(IEnumerable<EncryptionKeyDto> keyPairs, bool replace)
+    public async Task<List<EncryptionKeyDto>> CreateKeyPairAsync(EncryptionKeyDto keyPair)
+    {
+        var userId = await DemandKeyOwnerAsync();
+        ValidateKeyPair(keyPair);
+
+        var currentKeyPairs = await GetKeyPairAsync() ?? [];
+
+        if (currentKeyPairs.Exists(r => r.Id == keyPair.Id))
+        {
+            throw new CustomHttpException(HttpStatusCode.Conflict, $"The encryption key {keyPair.Id} already exists");
+        }
+
+        keyPair.UserId = userId;
+        currentKeyPairs.Add(keyPair);
+
+        return await Save(currentKeyPairs);
+    }
+
+    public async Task<List<EncryptionKeyDto>> ReplaceKeyPairAsync(EncryptionKeyDto keyPair)
+    {
+        var userId = await DemandKeyOwnerAsync();
+        ValidateKeyPair(keyPair);
+
+        var currentKeyPairs = await GetKeyPairAsync() ?? [];
+
+        var index = currentKeyPairs.FindIndex(r => r.Id == keyPair.Id);
+        if (index < 0)
+        {
+            throw new ItemNotFoundException($"The encryption key {keyPair.Id} is not found");
+        }
+
+        keyPair.UserId = userId;
+        currentKeyPairs[index] = keyPair;
+
+        return await Save(currentKeyPairs);
+    }
+
+    /// <summary>
+    /// Checks that the current account may own encryption keys. Guests never can, which is also why
+    /// they cannot be invited to a private room.
+    /// </summary>
+    private async Task<Guid> DemandKeyOwnerAsync()
     {
         var userId = authContext.CurrentAccount.ID;
+
         if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(userId))
         {
             throw new SecurityException();
         }
 
-        var currentAddressString = await GetKeyPairAsync() ?? [];
+        return userId;
+    }
 
-        foreach (var keyPair in keyPairs)
+    /// <summary>
+    /// Checks that the submitted key material is usable. Both halves are mandatory: a request that
+    /// omits or blanks one of them would otherwise be stored as is and leave the user with a key
+    /// that can no longer decrypt anything.
+    /// </summary>
+    private static void ValidateKeyPair(EncryptionKeyDto keyPair)
+    {
+        if (keyPair == null)
         {
-            keyPair.UserId = userId;
-
-            var index = currentAddressString.FindIndex(r=> r.Id == keyPair.Id);
-            if (index > -1)
-            {
-                if (replace)
-                {
-                    currentAddressString[index] = keyPair;
-                }
-            }
-            else if (!replace)
-            {
-                currentAddressString.Add(keyPair);
-            }
+            throw new ArgumentException("The encryption key is not specified");
         }
 
-        await Save(currentAddressString);
+        if (string.IsNullOrWhiteSpace(keyPair.PublicKey))
+        {
+            throw new ArgumentException("The public key is not specified");
+        }
 
-        return currentAddressString;
+        if (string.IsNullOrWhiteSpace(keyPair.PrivateKeyEnc))
+        {
+            throw new ArgumentException("The encrypted private key is not specified");
+        }
     }
 
     public async Task<List<EncryptionKeyDto>> GetKeyPairAsync()
@@ -166,7 +209,7 @@ public class EncryptionKeyPairDtoHelper(
             .Where(keyPair => keyPair != null)
             .SelectMany(keyPair => keyPair);
 
-        return fileKeysPair.ToList();
+        return SanitizeAccessKeys(fileKeysPair);
     }
 
     public async Task<List<EncryptionKeyDto>> GetKeyPairForRoomAsync<T>(T roomId)
@@ -219,20 +262,44 @@ public class EncryptionKeyPairDtoHelper(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        return fileKeysPair;
+        return SanitizeAccessKeys(fileKeysPair);
     }
 
-    public async Task<List<EncryptionKeyDto>> DeleteAsync(Guid id)
+    /// <summary>
+    /// Prepares somebody else's keys for the current user: an entry without a public key is of no
+    /// use to the caller and must not be reported as access at all, and the encrypted private half
+    /// never leaves its owner — only the caller's own entry keeps it.
+    /// </summary>
+    private List<EncryptionKeyDto> SanitizeAccessKeys(IEnumerable<EncryptionKeyDto> keyPairs)
     {
+        var userId = authContext.CurrentAccount.ID;
+
+        return keyPairs
+            .Where(r => !string.IsNullOrEmpty(r.PublicKey))
+            .Select(r =>
+            {
+                if (r.UserId != userId)
+                {
+                    r.PrivateKeyEnc = null;
+                }
+
+                return r;
+            })
+            .ToList();
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        await DemandKeyOwnerAsync();
+
         var currentSettings = await GetKeyPairAsync();
-        if(currentSettings == null)
+
+        if (currentSettings == null || currentSettings.RemoveAll(r => r.Id == id) == 0)
         {
-            return null;
+            throw new ItemNotFoundException($"The encryption key {id} is not found");
         }
 
-        currentSettings.RemoveAll(r => r.Id == id);
-
-        return await Save(currentSettings);
+        await Save(currentSettings);
     }
 
     private async Task<List<EncryptionKeyDto>> Save(List<EncryptionKeyDto> currentSettings)
