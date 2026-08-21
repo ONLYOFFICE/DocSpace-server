@@ -46,15 +46,6 @@ public class DocsCloudClient(
 
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
-    /// <summary>
-    /// Pings the DocsCloud server health endpoint. Requires no authorization, so it intentionally skips the
-    /// configured-check and can be used as a connectivity probe.
-    /// </summary>
-    public async Task CheckHealthAsync()
-    {
-        await docsCloudApi.HealthCheckAsync();
-    }
-
     public async Task<DocsCloudTenant> GetTenantAsync(string portalId, bool refresh = false)
     {
         EnsureConfigured();
