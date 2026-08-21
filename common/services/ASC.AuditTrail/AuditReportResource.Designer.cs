@@ -214,6 +214,60 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI profile assigned to AI agent for action: {0}.
+        /// </summary>
+        public static string AiAgentProfileAssigned {
+            get {
+                return ResourceManager.GetString("AiAgentProfileAssigned", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to AI profile assigned to action: {0}.
+        /// </summary>
+        public static string AiProfileAssigned {
+            get {
+                return ResourceManager.GetString("AiProfileAssigned", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to AI model profile created: {0}.
+        /// </summary>
+        public static string AiProfileCreated {
+            get {
+                return ResourceManager.GetString("AiProfileCreated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to AI model profile deleted: {0}.
+        /// </summary>
+        public static string AiProfileDeleted {
+            get {
+                return ResourceManager.GetString("AiProfileDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to AI profile unassigned from action: {0}.
+        /// </summary>
+        public static string AiProfileUnassigned {
+            get {
+                return ResourceManager.GetString("AiProfileUnassigned", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to AI model profile updated: {0}.
+        /// </summary>
+        public static string AiProfileUpdated {
+            get {
+                return ResourceManager.GetString("AiProfileUpdated", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to AI provider created: {0}.
         /// </summary>
         public static string AIProviderCreated {
@@ -2973,6 +3027,15 @@ namespace ASC.AuditTrail {
         public static string UpdateClient {
             get {
                 return ResourceManager.GetString("UpdateClient", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Updated MCP server {0} of AI agent.
+        /// </summary>
+        public static string UpdatedServerOfAgent {
+            get {
+                return ResourceManager.GetString("UpdatedServerOfAgent", resourceCulture);
             }
         }
         

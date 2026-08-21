@@ -922,6 +922,7 @@ public enum MessageAction
     [Description("Custom quota per AI agent disabled")]
     CustomQuotaPerAiAgentDisabled = 6072,
 
+    // Legacy AI implementation actions, no longer sent. Kept only to render old audit records.
     [Description("AI provider created")]
     AIProviderCreated = 6073,
 
@@ -937,6 +938,7 @@ public enum MessageAction
     [Description("MCP server updated")]
     ServerUpdated = 6077,
 
+    // Legacy AI implementation actions, no longer sent. Kept only to render old audit records.
     [Description("MCP server enabled")]
     ServerEnabled = 6078,
 
@@ -991,6 +993,7 @@ public enum MessageAction
     [Description("Login settings updated")]
     LoginSettingsUpdated = 6095,
 
+    // Legacy AI implementation action, no longer sent (replaced by AiProfileAssigned). Kept only to render old audit records.
     [Description("AI default provider set")]
     AIDefaultProviderSet = 6096,
 
@@ -1011,6 +1014,27 @@ public enum MessageAction
 
     [Description("Docs Cloud quota report downloaded")]
     DocsCloudQuotaReportDownloaded = 6102,
+
+    [Description("AI model profile created")]
+    AiProfileCreated = 6103,
+
+    [Description("AI model profile updated")]
+    AiProfileUpdated = 6104,
+
+    [Description("AI model profile deleted")]
+    AiProfileDeleted = 6105,
+
+    [Description("AI model profile assigned to action")]
+    AiProfileAssigned = 6106,
+
+    [Description("AI model profile unassigned from action")]
+    AiProfileUnassigned = 6107,
+
+    [Description("AI model profile assigned to AI agent action")]
+    AiAgentProfileAssigned = 6108,
+
+    [Description("MCP server of AI agent updated")]
+    UpdatedServerOfAgent = 6109,
 
     #endregion
 
