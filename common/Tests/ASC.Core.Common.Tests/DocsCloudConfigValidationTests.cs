@@ -41,6 +41,19 @@ namespace ASC.Core.Common.Tests;
 public class DocsCloudConfigValidationTests
 {
     private const long MaxFileSizeLimit = 209715200;
+    private const int MaxStringLength = 255;
+
+    /// <summary>
+    /// Every string the configuration carries, with the type it lives on. The property names are distinct across
+    /// those types, so one name identifies both the model to build and the member the error must point at.
+    /// </summary>
+    public static TheoryData<string> LengthLimitedFields =>
+    [
+        nameof(DocsCloudConfig.TenantName),
+        nameof(DocsCloudSecurityConfig.Secret),
+        nameof(DocsCloudSecurityConfig.Header),
+        nameof(DocsCloudIpFilterRule.Address)
+    ];
 
     /// <summary>
     /// A file size limit above <see cref="int.MaxValue"/> used to be declared with the int overload of
@@ -76,15 +89,54 @@ public class DocsCloudConfigValidationTests
     }
 
     /// <summary>
-    /// Validates the server configuration the way MVC validates a bound model: every property, attribute by attribute.
+    /// None of the strings the configuration carries had a length rule, so an arbitrarily long tenant name, secret,
+    /// header name or IP filter address was accepted and forwarded to DocsCloud. They are now capped.
     /// </summary>
+    [Theory]
+    [Trait("Bug", "83327")]
+    [MemberData(nameof(LengthLimitedFields))]
+    public void StringField_LongerThanTheLimit_IsRejected(string field)
+    {
+        Validate(field, MaxStringLength + 1).Should().ContainSingle()
+            .Which.MemberNames.Should().Contain(field);
+    }
+
+    [Theory]
+    [MemberData(nameof(LengthLimitedFields))]
+    public void StringField_AtTheLimit_IsAccepted(string field)
+    {
+        Validate(field, MaxStringLength).Should().BeEmpty();
+    }
+
     private static List<ValidationResult> Validate(long fileSizeLimit)
     {
-        var config = new DocsCloudServerConfig { FileSizeLimit = fileSizeLimit };
+        return Validate(new DocsCloudServerConfig { FileSizeLimit = fileSizeLimit });
+    }
 
+    private static List<ValidationResult> Validate(string field, int length)
+    {
+        var value = new string('a', length);
+
+        return Validate(field switch
+        {
+            nameof(DocsCloudConfig.TenantName) => new DocsCloudConfig { TenantName = value },
+            nameof(DocsCloudSecurityConfig.Secret) => new DocsCloudSecurityConfig { Secret = value },
+            nameof(DocsCloudSecurityConfig.Header) => new DocsCloudSecurityConfig { Header = value },
+            nameof(DocsCloudIpFilterRule.Address) => new DocsCloudIpFilterRule { Address = value },
+            _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Unknown configuration field")
+        });
+    }
+
+    /// <summary>
+    /// Validates one configuration object the way MVC validates a bound model: every property, attribute by
+    /// attribute. MVC additionally walks into nested objects and collection items, which is how these rules are
+    /// reached from the request body.
+    /// </summary>
+    private static List<ValidationResult> Validate(object model)
+    {
         var results = new List<ValidationResult>();
 
-        Validator.TryValidateObject(config, new ValidationContext(config), results, validateAllProperties: true);
+        Validator.TryValidateObject(model, new ValidationContext(model), results, validateAllProperties: true);
 
         return results;
     }

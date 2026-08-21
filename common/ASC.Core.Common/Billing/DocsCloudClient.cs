@@ -335,6 +335,7 @@ public class DocsCloudConfig
     /// The tenant name.
     /// </summary>
     /// <example>My Portal</example>
+    [StringLength(255)]
     public string TenantName { get; init; }
 
     /// <summary>
@@ -367,12 +368,14 @@ public class DocsCloudSecurityConfig
     /// The security secret.
     /// </summary>
     /// <example>abc123</example>
+    [StringLength(255)]
     public string Secret { get; init; }
 
     /// <summary>
     /// The security header name.
     /// </summary>
     /// <example>Authorization</example>
+    [StringLength(255)]
     public string Header { get; init; }
 }
 
@@ -430,6 +433,8 @@ public class DocsCloudIpFilterRule
     /// The IP address.
     /// </summary>
     /// <example>127.0.0.1</example>
+    // A length cap only: the field also carries ranges and CIDR notation, so the format is DocsCloud's to judge.
+    [StringLength(255)]
     public string Address { get; init; }
 
     /// <summary>
