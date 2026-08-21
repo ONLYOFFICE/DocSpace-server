@@ -305,6 +305,11 @@ public class BaseTest(
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom));
     }
 
+    protected async Task<FolderDtoInteger> CreateAiRoom(string roomTitle)
+    {
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.AiRoom));
+    }
+
     /// <summary>
     /// The single place every room is created through, so that room creation - one of the slowest
     /// calls in the suite - is measured the same way whatever type the caller asked for.
