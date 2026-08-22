@@ -436,9 +436,11 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
             // First: what a suite stood up in OnStartedAsync can still hold handles into the running app.
             await OnDisposingAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // ignored
+            // Teardown must not mask the original test failure, but a broken suite-specific
+            // disposal should still be visible instead of silently vanishing.
+            await Console.Error.WriteLineAsync($"OnDisposingAsync failed for {GetType().Name}: {ex}");
         }
 
         _apiSystemClient.Dispose();
