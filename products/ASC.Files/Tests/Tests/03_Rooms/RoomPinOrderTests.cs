@@ -96,7 +96,7 @@ public class RoomPinOrderTests(
     {
         var rooms = (await _roomsApi.GetRoomsFolderAsync(
             filterValue: marker,
-            sortBy: "title",
+            sortBy: "AZ",
             sortOrder: SortOrder.Ascending,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 

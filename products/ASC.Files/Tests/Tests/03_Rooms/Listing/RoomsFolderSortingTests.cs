@@ -120,8 +120,12 @@ public class RoomsFolderSortingTests(
     }
 
     /// <remarks>
-    /// Bug 81809: sorting GET /files/rooms by <c>title</c> is not stable - ascending order does not
-    /// come back as A, B, C.
+    /// Bug 81809: the listing came back in its default order however it was sorted. The cause was
+    /// not an unstable sort — <c>sortBy</c> is parsed into <c>SortedByType</c>, whose member for
+    /// sorting by name is <c>AZ</c>, and the <c>title</c> the TypeScript suite sent simply failed to
+    /// parse and was dropped on the floor. The parameter is now rejected with 400 when it cannot be
+    /// parsed (<c>VirtualRoomsController.GetRoomsFolder</c>), and these tests use the value the API
+    /// defines and the client sends.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81809")]
@@ -137,10 +141,13 @@ public class RoomsFolderSortingTests(
             await Task.Delay(1100, TestContext.Current.CancellationToken);
         }
 
-        // Act
-        var result = (await _roomsApi.GetRoomsFolderAsync(
-            filterValue: marker, sortBy: "title", sortOrder: SortOrder.Ascending,
-            cancellationToken: TestContext.Current.CancellationToken)).Response;
+        // Act - filterValue is served from the search index, which is written asynchronously, so
+        // poll until all three rooms are indexed rather than racing that write with a bare read.
+        var result = await PollAsync(
+            async () => (await _roomsApi.GetRoomsFolderAsync(
+                filterValue: marker, sortBy: "AZ", sortOrder: SortOrder.Ascending,
+                cancellationToken: TestContext.Current.CancellationToken)).Response,
+            page => page.Folders.Count == 3);
 
         // Assert
         result.Folders.Select(f => f.Title).Should().Equal($"{marker} A", $"{marker} B", $"{marker} C");
@@ -161,10 +168,13 @@ public class RoomsFolderSortingTests(
             await Task.Delay(1100, TestContext.Current.CancellationToken);
         }
 
-        // Act
-        var result = (await _roomsApi.GetRoomsFolderAsync(
-            filterValue: marker, sortBy: "title", sortOrder: SortOrder.Descending,
-            cancellationToken: TestContext.Current.CancellationToken)).Response;
+        // Act - filterValue is served from the search index, which is written asynchronously, so
+        // poll until all three rooms are indexed rather than racing that write with a bare read.
+        var result = await PollAsync(
+            async () => (await _roomsApi.GetRoomsFolderAsync(
+                filterValue: marker, sortBy: "AZ", sortOrder: SortOrder.Descending,
+                cancellationToken: TestContext.Current.CancellationToken)).Response,
+            page => page.Folders.Count == 3);
 
         // Assert
         result.Folders.Select(f => f.Title).Should().Equal($"{marker} C", $"{marker} B", $"{marker} A");

@@ -147,7 +147,7 @@ public class AgentsController(
     [HttpGet("agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
     {
-        var folder = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
+        var folder = (await fileStorageService.GetFolderAsync(inDto.Id)).NotFoundIfNull("Folder not found");
 
         return await folderDtoHelper.GetAsync(folder);
     }

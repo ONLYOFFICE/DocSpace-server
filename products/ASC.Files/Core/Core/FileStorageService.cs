@@ -748,12 +748,50 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
 
-        if (room is not { IsRoom: true } || room.RootId != await globalFolderHelper.FolderVirtualRoomsAsync || !await fileSecurity.CanEditRoomAsync(room))
+        // A room that does not exist - or was deleted, and so no longer lives under "Rooms" - is
+        // reported as missing. Answering "access denied" for it told the caller their permissions
+        // were the problem and hid a plain typo in the id. An archived room is the other case: it is
+        // still there and the caller can still see it, it just cannot be turned into a template, so
+        // that stays a refusal.
+        if (room is not { IsRoom: true })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (room.RootId == await globalFolderHelper.FolderArchiveAsync)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+
+        if (room.RootId != await globalFolderHelper.FolderVirtualRoomsAsync)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanEditRoomAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
 
         return room;
+    }
+
+    /// <summary>
+    /// Resolves <paramref name="templateId"/> to a room template, or reports it missing. The public
+    /// settings endpoints address templates only: pointed at an ordinary room they used to answer as
+    /// though that room were a template.
+    /// </summary>
+    public async Task<Folder<int>> CheckIsRoomTemplateAsync(int templateId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var template = await folderDao.GetFolderAsync(templateId);
+
+        if (template is not { IsRoom: true } || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        return template;
     }
 
     /// <summary>
@@ -766,7 +804,14 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<int>();
         var template = await folderDao.GetFolderAsync(templateId);
 
-        if (template is not { IsRoom: true } || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync || !await fileSecurity.CanReadAsync(template))
+        // Missing template and inaccessible template are different answers - see
+        // CheckCanCreateRoomTemplateAsync for why they were worth separating.
+        if (template is not { IsRoom: true } || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(template))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
@@ -1269,6 +1314,16 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
             case FolderType.Archive:
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateArchivedRoom);
+        }
+
+        // Chat settings belong to an AI room and to no other kind: the field is part of that room's
+        // DTO and absent everywhere else. Accepting it for any other room answered 200 and dropped it
+        // silently, so the caller believed it had configured a chat that does not exist.
+        // ArgumentException is what the middleware maps to 400; BadHttpRequestException is not in
+        // that table and would surface as 500.
+        if (updateData.ChatSettings != null && folder.FolderType != FolderType.AiRoom)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(updateData));
         }
 
         var folderAccess = folder.Access;
@@ -3998,7 +4053,7 @@ public class FileStorageService //: IFileStorageService
 
     public async IAsyncEnumerable<AceWrapper> GetRoomSharedInfoAsync<T>(T roomId, IEnumerable<Guid> subjects)
     {
-        var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId).NotFoundIfNull();
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
 
         await foreach (var ace in fileSharing.GetPureSharesAsync(room, subjects))
         {
@@ -4594,9 +4649,11 @@ public class FileStorageService //: IFileStorageService
 
         var room = await folderDao.GetFolderAsync(folderId);
 
+        // A room nobody has is missing, not forbidden: InvalidOperationException is mapped to 403 by
+        // the middleware, which blamed the caller's permissions for an id that resolves to nothing.
         if (room == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (!await fileSecurity.CanPinAsync(room))
@@ -4740,9 +4797,11 @@ public class FileStorageService //: IFileStorageService
 
         var room = await folderDao.GetFolderAsync(folderId);
 
+        // Missing room, same as in SetPinnedStatusAsync: 404, not the 403 the mapping of
+        // InvalidOperationException produced.
         if (room == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (!await fileSecurity.CanEditRoomAsync(room))
@@ -5114,7 +5173,12 @@ public class FileStorageService //: IFileStorageService
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
-        var room = await folderDao.GetFolderAsync(id).NotFoundIfNull();
+
+        // The await has to close over the call before the null check: NotFoundIfNull is a generic
+        // extension over any reference type, so applied to the Task it checked the Task for null -
+        // never null - and let a missing room through to the access check, which then reported it as
+        // 403 "not enough permission" instead of 404.
+        var room = (await folderDao.GetFolderAsync(id)).NotFoundIfNull();
 
         if (!await fileSecurity.CanEditRoomAsync(room))
         {
@@ -5862,7 +5926,7 @@ public class FileStorageService //: IFileStorageService
     public async Task<ExternalDbSyncTask> StartExternalDbSyncAsync(int roomId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
-        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+        var room = (await folderDao.GetFolderAsync(roomId)).NotFoundIfNull();
 
         if (room.FolderType != FolderType.FillingFormsRoom)
         {
@@ -5881,7 +5945,7 @@ public class FileStorageService //: IFileStorageService
     public async Task<ExternalDbSyncTask> GetExternalDbSyncTaskAsync(int roomId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
-        var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+        var room = (await folderDao.GetFolderAsync(roomId)).NotFoundIfNull();
 
         if (room.FolderType != FolderType.FillingFormsRoom)
         {

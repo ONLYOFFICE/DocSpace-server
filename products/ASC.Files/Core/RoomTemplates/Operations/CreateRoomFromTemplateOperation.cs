@@ -36,7 +36,6 @@ namespace ASC.Files.Core.RoomTemplates.Operations;
 [Transient]
 public class CreateRoomFromTemplateOperation : DistributedTaskProgress
 {
-    private Guid _userId;
     private string _title;
     private string _cover;
     private string _color;
@@ -67,6 +66,12 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
     public int TenantId { get; set; }
     public int RoomId { get; set; }
 
+    /// <summary>
+    /// The user who started the operation. Public so it survives the trip through the distributed
+    /// queue: the status endpoint reports an operation only to the caller who started it.
+    /// </summary>
+    public Guid UserId { get; set; }
+
     public void Init(int tenantId,
         Guid userId,
         int templateId,
@@ -84,7 +89,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         bool? @private)
     {
         TenantId = tenantId;
-        _userId = userId;
+        UserId = userId;
         _templateId = templateId;
         _title = title;
         _logo = logo;
@@ -119,7 +124,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
             await PublishChanges();
 
             await tenantManager.SetCurrentTenantAsync(TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(UserId);
 
             LogoRequest dtoLogo = null;
             if (_logo != null && !_copyLogo)

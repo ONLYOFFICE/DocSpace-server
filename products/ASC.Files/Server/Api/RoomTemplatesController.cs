@@ -118,7 +118,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     {
         try
         {
-            var status = await roomTemplatesWorker.GetStatusTemplateCreatingAsync(tenantManager.GetCurrentTenantId());
+            var status = await roomTemplatesWorker.GetStatusTemplateCreatingAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID);
             if (status != null)
             {
                 var result = new RoomTemplateStatusDto
@@ -149,6 +149,8 @@ public class RoomTemplatesController(IEventBus eventBus,
     [HttpGet("{id}/public")]
     public async Task<bool> GetPublicSettings(PublicDto inDto)
     {
+        await fileStorageService.CheckIsRoomTemplateAsync(inDto.Id);
+
         return await fileStorageService.IsPublicAsync(inDto.Id);
     }
 
@@ -163,6 +165,8 @@ public class RoomTemplatesController(IEventBus eventBus,
     [HttpPut("public")]
     public async Task SetPublicSettings(SetPublicDto inDto)
     {
+        await fileStorageService.CheckIsRoomTemplateAsync(inDto.Id);
+
         var shared = fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
 
         var wrappers = new List<AceWrapper> { new() { Id = Constants.GroupEveryone.ID, Access = inDto.Public ? FileShare.Read : FileShare.None, SubjectType = SubjectType.Group } };

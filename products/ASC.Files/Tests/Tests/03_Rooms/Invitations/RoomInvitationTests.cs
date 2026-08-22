@@ -138,15 +138,20 @@ public class RoomInvitationTests(
     }
 
     /// <summary>
-    /// An incorrect (out-of-range) numeric room id is a validation error and should return 400, but
-    /// the endpoint reports 403 "You don't have enough permission to perform the operation" (same
-    /// defect class as pin - BUG 81850).
+    /// Bug 81879: an id that resolves to no room reported 403 "You don't have enough permission to
+    /// perform the operation". The room lookup did guard against a missing folder, but the guard was
+    /// applied to the Task rather than to its result and never fired — fixed in
+    /// <c>FileStorageService.ResendEmailInvitationsAsync</c>.
+    ///
+    /// Asserts 404 rather than the 400 the TypeScript suite asked for: 0 and -1 resolve to nothing
+    /// exactly like an unknown id does, and the whole <c>rooms/{id}</c> family answers 404 for all of
+    /// them (see <c>Pin.RoomPinValidationTests</c> and <c>Read.RoomInfoValidationTests</c>).
     /// </summary>
     [Trait("Bug", "81879")]
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task ResendInvitations_IncorrectRoomId_ReturnsBadRequest(int id)
+    public async Task ResendInvitations_IncorrectRoomId_ReturnsNotFound(int id)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -157,7 +162,7 @@ public class RoomInvitationTests(
                 id, new UserInvitation(resendAll: true), TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(400);
+        exception.ErrorCode.Should().Be(404);
     }
 
     /// <summary>A well-formed room id that does not exist should return 404, but the endpoint returns 403.</summary>

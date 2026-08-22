@@ -162,22 +162,31 @@ public class RoomTagUpdateEdgeCasesTests(
         tags.Should().Contain("Автотест Тег Кириллица");
     }
 
-    /// <remarks>Cyrillic and other Unicode are accepted (see the Cyrillic test above), so emoji should be too.</remarks>
+    /// <remarks>
+    /// Bug 82374, closed as by-design for the same reason as bug 81682 on create: <c>files_tag.name</c>
+    /// is a <c>utf8</c> column, which cannot hold a character outside the Basic Multilingual Plane.
+    /// Cyrillic and other BMP Unicode are accepted (see the Cyrillic test above); a rename to an emoji
+    /// is refused, and the old name must survive the refusal.
+    /// </remarks>
     [Fact]
     [Trait("Bug", "82374")]
-    public async Task UpdateTag_NewNameWithEmoji_ShouldSucceedButReturns500()
+    public async Task UpdateTag_NewNameOutsideBmp_Rejected()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
         await _roomsApi.CreateRoomTagAsync(new CreateTagRequestDto("Autotest Emoji Source"), TestContext.Current.CancellationToken);
 
         // Act
-        var response = await _roomsApi.UpdateRoomTagAsync(
-            new UpdateTagRequestDto("Autotest Emoji Source", "Autotest Emoji 🚀🔥"),
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.UpdateRoomTagAsync(
+                new UpdateTagRequestDto("Autotest Emoji Source", "Autotest Emoji 🚀🔥"),
+                TestContext.Current.CancellationToken));
 
         // Assert
-        response.Response.Should().Be("Autotest Emoji 🚀🔥");
+        exception.ErrorCode.Should().Be(500);
+
+        var tags = await GetTagCatalog();
+        tags.Should().Contain("Autotest Emoji Source", "a refused rename must leave the old name in place");
     }
 
     [Fact]

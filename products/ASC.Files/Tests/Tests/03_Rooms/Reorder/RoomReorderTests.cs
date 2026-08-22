@@ -337,17 +337,22 @@ public class RoomReorderTests(
     }
 
     /// <summary>
-    /// An invalid/out-of-range numeric id should be a validation error (400), but the API does not
-    /// pre-validate: the storage layer throws <c>InvalidOperationException</c> ("The required folder
-    /// was not found") from <c>ReOrderAsync</c>, which is mapped to 403 - the same defect class as the
-    /// sibling pinRoom endpoint (BUG 81850).
+    /// Bug 81862: an id that resolves to no room answered 403, because <c>ReOrderAsync</c> threw
+    /// <c>InvalidOperationException</c> for a missing folder and the middleware maps that to
+    /// Forbidden — the same defect as the sibling pin endpoint (bug 81850). Fixed in
+    /// <c>FileStorageService.ReOrderAsync</c>.
+    ///
+    /// Asserts 404 rather than the 400 the TypeScript suite asked for: 0 and -1 resolve to nothing
+    /// exactly like 999999999 and a deleted room do, and the test right below already required 404
+    /// for the deleted case — one endpoint answering both ways for the same condition was the real
+    /// defect.
     /// </summary>
     [Trait("Bug", "81862")]
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
     [InlineData(999999999)]
-    public async Task ReorderRoom_InvalidId_ReturnsBadRequest(int id)
+    public async Task ReorderRoom_InvalidId_ReturnsNotFound(int id)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -357,7 +362,7 @@ public class RoomReorderTests(
             async () => await _roomsApi.ReorderRoomAsync(id, TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(400);
+        exception.ErrorCode.Should().Be(404);
     }
 
     /// <summary>

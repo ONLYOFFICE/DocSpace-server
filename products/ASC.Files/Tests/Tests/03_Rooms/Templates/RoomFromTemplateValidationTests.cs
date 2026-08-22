@@ -66,15 +66,22 @@ public class RoomFromTemplateValidationTests(
     }
 
     /// <remarks>
-    /// Bug 81667: a template id that cannot possibly resolve to a template (0, an id nobody has, or
-    /// one that has just been deleted) is reported as 404 "not found" rather than 400 "bad request".
-    /// A well-formed but unresolvable reference should fail validation before the lookup, not after.
+    /// Bug 81667: a template id that cannot resolve to a template (0, an id nobody has, or one that
+    /// has just been deleted) used to answer 403 "access denied", which blamed the caller's
+    /// permissions for what is a plain missing resource. Fixed in
+    /// <c>FileStorageService.CheckCanCreateRoomFromTemplateAsync</c>, which now separates "no such
+    /// template" from "you may not read this template".
+    ///
+    /// The TypeScript suite asked for 400 here; this asserts 404 instead, deliberately. A
+    /// well-formed id that resolves to nothing is a missing resource, and the sibling endpoint's own
+    /// bug (81691, <c>RoomTemplateCreateTests</c>) settles on 404 for exactly the same shape of
+    /// error — two adjacent endpoints answering differently would be the real defect.
     /// </remarks>
     [Theory]
     [InlineData(0)]
     [InlineData(999999999)]
     [Trait("Bug", "81667")]
-    public async Task CreateRoomFromTemplate_NonResolvableTemplateId_ShouldBeBadRequest(int templateId)
+    public async Task CreateRoomFromTemplate_NonResolvableTemplateId_ShouldReturnNotFound(int templateId)
     {
         // Act
         await _filesClient.Authenticate(Owner);
@@ -84,15 +91,17 @@ public class RoomFromTemplateValidationTests(
                 TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(400);
+        exception.ErrorCode.Should().Be(404);
 
         var titles = await GetRoomTitles();
         titles.Should().NotContain("Room");
     }
 
+    /// <remarks>See the id-based cases above for why this asserts 404 rather than the 400 the
+    /// TypeScript suite asked for.</remarks>
     [Fact]
     [Trait("Bug", "81667")]
-    public async Task CreateRoomFromTemplate_DeletedTemplate_ShouldBeBadRequest()
+    public async Task CreateRoomFromTemplate_DeletedTemplate_ShouldReturnNotFound()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -108,7 +117,7 @@ public class RoomFromTemplateValidationTests(
                 TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(400);
+        exception.ErrorCode.Should().Be(404);
 
         var titles = await GetRoomTitles();
         titles.Should().NotContain("Room After Delete");

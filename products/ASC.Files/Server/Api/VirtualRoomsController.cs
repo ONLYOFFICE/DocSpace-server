@@ -195,7 +195,7 @@ public class VirtualRoomsInternalController(
     {
         try
         {
-            var status = await roomTemplatesWorker.GetStatusRoomCreatingAsync(tenantManager.GetCurrentTenantId());
+            var status = await roomTemplatesWorker.GetStatusRoomCreatingAsync(tenantManager.GetCurrentTenantId(), _authContext.CurrentAccount.ID);
             if (status != null)
             {
                 var result = new RoomFromTemplateStatusDto { Progress = status.Percentage, Error = status.Exception != null ? status.Exception.Message : "", IsCompleted = status.IsCompleted, RoomId = status.RoomId };
@@ -332,7 +332,7 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("{id}")]
     public async Task<FolderDto<T>> GetRoomInfo(RoomIdRequestDto<T> inDto)
     {
-        var folder = await _fileStorageService.GetRoomInfoAsync(inDto.Id).NotFoundIfNull("Folder not found");
+        var folder = (await _fileStorageService.GetRoomInfoAsync(inDto.Id)).NotFoundIfNull("Folder not found");
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -931,9 +931,17 @@ public class VirtualRoomsCommonController(
             ? JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags)
             : null;
 
+        // An unrecognised sortBy used to be dropped on the floor: the listing came back in the
+        // default order and the caller had no way to tell its sort had been ignored. The accepted
+        // values are the names of SortedByType - sorting by name is "AZ", not "title".
         OrderBy orderBy = null;
-        if (SortedByTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
+        if (!string.IsNullOrEmpty(inDto.SortBy))
         {
+            if (!SortedByTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
+            {
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(inDto.SortBy));
+            }
+
             orderBy = new OrderBy(sortBy, inDto.SortOrder == SortOrder.Ascending);
         }
 

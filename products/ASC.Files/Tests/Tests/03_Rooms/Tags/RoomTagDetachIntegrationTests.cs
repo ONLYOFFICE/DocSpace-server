@@ -152,17 +152,9 @@ public class RoomTagDetachIntegrationTests(
         // Assert
         // FolderContentDtoInteger.Folders is typed List<FileEntryBaseDto>, which drops both "id"
         // and "tags" — read the raw JSON to get at the room's tags in the list response.
-        using var response = await _filesClient.GetAsync(
-            $"api/2.0/files/rooms?filterValue={Uri.EscapeDataString(roomTitle)}",
-            TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        using var document = JsonDocument.Parse(body);
-
-        var listedRoom = document.RootElement.GetProperty("response").GetProperty("folders").EnumerateArray()
-            .Single(f => f.GetProperty("title").GetString() == roomTitle);
-        var tags = listedRoom.TryGetProperty("tags", out var tagsElement)
-            ? tagsElement.EnumerateArray().Select(t => t.GetString()).ToList()
-            : [];
+        // filterValue is served from the search index, which is written asynchronously, so poll for
+        // the room instead of racing that write with a bare read.
+        var tags = await PollForListedRoomTags(roomTitle);
 
         tags.Should().NotContain("ListTag");
     }
@@ -259,5 +251,41 @@ public class RoomTagDetachIntegrationTests(
         // Assert
         var listAfter = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         listAfter.Should().NotContain(name);
+    }
+
+    /// <summary>
+    /// The tags of the room titled <paramref name="roomTitle"/> as GET /files/rooms lists it, polled
+    /// on a deadline because the <c>filterValue</c> search index is written asynchronously. Returns
+    /// the last observed state, so a timeout still fails on the assertion rather than on a throw.
+    /// </summary>
+    private async Task<List<string>> PollForListedRoomTags(string roomTitle)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+
+        while (true)
+        {
+            using var response = await _filesClient.GetAsync(
+                $"api/2.0/files/rooms?filterValue={Uri.EscapeDataString(roomTitle)}",
+                TestContext.Current.CancellationToken);
+            var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+            using var document = JsonDocument.Parse(body);
+
+            var listedRoom = document.RootElement.GetProperty("response").GetProperty("folders").EnumerateArray()
+                .FirstOrDefault(f => f.GetProperty("title").GetString() == roomTitle);
+
+            if (listedRoom.ValueKind != JsonValueKind.Undefined)
+            {
+                return listedRoom.TryGetProperty("tags", out var tagsElement)
+                    ? tagsElement.EnumerateArray().Select(t => t.GetString()).ToList()
+                    : [];
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                return [];
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
     }
 }

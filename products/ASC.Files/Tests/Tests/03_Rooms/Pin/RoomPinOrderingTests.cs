@@ -101,7 +101,7 @@ public class RoomPinOrderingTests(
         await _roomsApi.PinRoomAsync(z.Id, TestContext.Current.CancellationToken);
 
         // Assert
-        var rows = await GetRoomRows(sortBy: "title", sortOrder: SortOrder.Ascending);
+        var rows = await GetRoomRows(sortBy: "AZ", sortOrder: SortOrder.Ascending);
         var zIndex = rows.FindIndex(r => r.Id == z.Id);
         var firstUnpinned = rows.FindIndex(r => !r.Pinned);
 

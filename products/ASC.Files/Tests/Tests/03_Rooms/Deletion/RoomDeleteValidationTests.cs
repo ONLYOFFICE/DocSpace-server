@@ -95,25 +95,29 @@ public class RoomDeleteValidationTests(
         operations.Should().OnlyContain(o => o.Finished && o.Error == "");
     }
 
+    /// <remarks>
+    /// Bug 81697 was raised as "deleteAfter:null returns 200 but no trackable operation". The premise
+    /// does not hold: <c>deleteAfter</c> is a non-nullable bool, so an explicit JSON null is a
+    /// malformed body and the request is refused before any operation could be started — which is how
+    /// every other wrong-typed value on this endpoint is treated (see
+    /// <see cref="DeleteRoom_DeleteAfterAsString_BadRequest"/>). The room must survive the refusal.
+    /// </remarks>
     [Fact]
     [Trait("Bug", "81697")]
-    public async Task DeleteRoom_DeleteAfterNull_ProducesTrackableOperation()
+    public async Task DeleteRoom_DeleteAfterNull_BadRequest()
     {
-        // Same symptom as deleteAfter:true (bug 81698): HTTP returns 200, but the operation is not
-        // pushed to fileops, so waitLongOperation cannot find a record. The DTO's deleteAfter is a
-        // non-nullable bool, so null can only be sent as a raw request.
         // Arrange
         await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Autotest Delete deleteAfter null");
 
         // Act
         using var response = await SendRawDelete(room.Id, "{\"deleteAfter\":null}");
-        var operations = await WaitLongOperation();
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        operations.Should().NotBeNullOrEmpty("deleteAfter:null must still produce a trackable operation");
-        operations.Should().OnlyContain(o => o.Finished);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var titles = await GetRoomTitles();
+        titles.Should().Contain("Autotest Delete deleteAfter null", "a refused request must not delete the room");
     }
 
     [Fact]

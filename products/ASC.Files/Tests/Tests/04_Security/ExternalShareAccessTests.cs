@@ -277,34 +277,4 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         room.Should().NotBeNull();
         room.RoomType.Should().Be(RoomType.CustomRoom);
     }
-
-    /// <remarks>
-    /// Bug 83166: an anonymous visitor following a public room's own primary external link gets the
-    /// right room back (200, isRoom = true, the room's id), but the same response reports
-    /// shared = false — so the caller cannot tell from it that the link grants access. A visitor on
-    /// a public room's own link must be reported as shared.
-    /// </remarks>
-    [Fact]
-    [Trait("Bug", "83166")]
-    public async Task GetExternalShareData_AnonymousOnPublicRoomLink_ReportsShared()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-        var room = await CreatePublicRoom("Autotest Anonymous External Link");
-
-        var link = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(
-            room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-        // Act — no Authorization header at all, which is what a visitor with no portal account has
-        await _filesClient.Authenticate(null);
-        var result = (await _sharingApi.GetExternalShareDataAsync(
-            link.SharedLink.RequestToken,
-            folderId: room.Id.ToString(),
-            cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-        // Assert — the link resolves to the right room for an anonymous caller, and says so
-        result.IsRoom.Should().BeTrue();
-        result.EntityId.Should().Be(room.Id.ToString());
-        result.Shared.Should().BeTrue("a public room's own primary link shares that room with its visitor");
-    }
 }

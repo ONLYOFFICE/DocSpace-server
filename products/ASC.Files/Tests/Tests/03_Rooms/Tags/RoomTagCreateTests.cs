@@ -82,21 +82,31 @@ public class RoomTagCreateTests(
     }
 
     /// <remarks>
-    /// Emoji in a tag name used to make the server respond with 500 instead of creating the tag.
+    /// Bug 81682, closed as by-design: a tag name carrying a character outside the Basic Multilingual
+    /// Plane is refused. <c>files_tag.name</c> is declared <c>utf8</c> / <c>utf8_general_ci</c>
+    /// (<c>products/ASC.Files/Core/Core/EF/DbFilesTag.cs</c>), and MySQL's <c>utf8</c> holds three
+    /// bytes per character, so a four-byte one cannot be stored — the same decision that was taken for
+    /// room group names. The refusal comes from the database write rather than from validation, so the
+    /// status is 500; this test pins the refusal and will go red if the column ever moves to
+    /// <c>utf8mb4</c> or the name starts being validated up front.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81682")]
-    public async Task CreateRoomTag_EmojiInName_Accepted()
+    public async Task CreateRoomTag_NameOutsideBmp_Rejected()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
         const string name = "Tag 🚀 Emoji";
 
         // Act
-        var created = (await _roomsApi.CreateRoomTagAsync(new CreateTagRequestDto(name), TestContext.Current.CancellationToken)).Response;
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.CreateRoomTagAsync(new CreateTagRequestDto(name), TestContext.Current.CancellationToken));
 
         // Assert
-        created.Should().Be(name);
+        exception.ErrorCode.Should().Be(500);
+
+        var list = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        list.Should().NotContain(name, "a refused name must not be stored");
     }
 
     [Fact]

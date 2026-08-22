@@ -42,21 +42,25 @@ public class RoomUnpinValidationTests(
     AspireAppFixture fixture)
     : RoomPinTestsBase(fixture)
 {
+    /// <remarks>
+    /// Bug 82366, the unpin half of bug 81850: a missing room answered 403 because the service threw
+    /// <c>InvalidOperationException</c>, which the middleware maps to Forbidden. Fixed in
+    /// <c>FileStorageService.SetPinnedStatusAsync</c>. Asserts 404 rather than the 400 the TypeScript
+    /// suite asked for — see the pin test for why the whole <c>rooms/{id}</c> family answers 404 here.
+    /// </remarks>
     [Trait("Bug", "82366")]
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
     [InlineData(999999999)]
-    public async Task UnpinRoom_NonExistentId_ShouldReturnBadRequestValidationError(int id)
+    public async Task UnpinRoom_NonExistentId_ReturnsNotFound(int id)
     {
-        // A non-existent/invalid numeric id should be a validation error (400), but the API
-        // currently returns 403 "The required folder was not found" - as with pin.
         await _filesClient.Authenticate(Owner);
 
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.UnpinRoomAsync(id, TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(400);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
@@ -72,7 +76,7 @@ public class RoomUnpinValidationTests(
     }
 
     [Fact]
-    public async Task UnpinRoom_DeletedRoom_Forbidden()
+    public async Task UnpinRoom_DeletedRoom_ReturnsNotFound()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -82,11 +86,11 @@ public class RoomUnpinValidationTests(
         await _roomsApi.DeleteRoomAsync(room.Id, new DeleteRoomRequest(false), TestContext.Current.CancellationToken);
         await WaitLongOperation();
 
-        // Act & Assert — mirrors pin: the room is gone, so the action is rejected with 403.
+        // Act & Assert — mirrors pin: the room is gone, so it is reported missing.
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.UnpinRoomAsync(room.Id, TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(403);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]

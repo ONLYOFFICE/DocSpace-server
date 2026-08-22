@@ -43,10 +43,10 @@ public class RoomsFolderPaginationTests(
     : BaseTest(fixture)
 {
     /// <remarks>
-    /// Bug 81809: title sorting is not stable, so <c>sortBy=title</c> combined with
-    /// <c>startIndex</c> + <c>count</c> hands back a different slice from call to call — rooms are
-    /// skipped and repeated across pages. The request is issued several times concurrently, which
-    /// is what makes the instability show.
+    /// Bug 81809: the paged slice varied from call to call because the sort was not applied at all —
+    /// <c>sortBy</c> is parsed into <c>SortedByType</c> (sorting by name is <c>AZ</c>) and the
+    /// unparseable <c>title</c> was silently ignored, leaving the default order. Fixed in
+    /// <c>VirtualRoomsController.GetRoomsFolder</c>, which now rejects a value it cannot parse.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81809")]
@@ -78,16 +78,34 @@ public class RoomsFolderPaginationTests(
         }
     }
 
+    /// <summary>
+    /// One page of the marker's rooms. filterValue is served from the search index, which is written
+    /// asynchronously, so the read is polled until the page is full rather than raced against that
+    /// write; the last observed page is returned either way, so a timeout still fails on the
+    /// caller's own assertion.
+    /// </summary>
     private async Task<List<string>> GetSliceTitles(string marker)
     {
-        var page = (await _roomsApi.GetRoomsFolderAsync(
-            filterValue: marker,
-            sortBy: "title",
-            sortOrder: SortOrder.Ascending,
-            startIndex: 1,
-            count: 2,
-            cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var deadline = DateTime.UtcNow.AddSeconds(15);
 
-        return page.Folders.ConvertAll(f => f.Title);
+        while (true)
+        {
+            var page = (await _roomsApi.GetRoomsFolderAsync(
+                filterValue: marker,
+                sortBy: "AZ",
+                sortOrder: SortOrder.Ascending,
+                startIndex: 1,
+                count: 2,
+                cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+            var titles = page.Folders.ConvertAll(f => f.Title);
+
+            if (titles.Count == 2 || DateTime.UtcNow >= deadline)
+            {
+                return titles;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
     }
 }

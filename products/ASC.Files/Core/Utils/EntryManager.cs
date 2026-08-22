@@ -1631,7 +1631,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
                 var rootFolder = int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1 ?
-                    await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull() :
+                    (await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)))).NotFoundIfNull() :
                     await documentServiceHelper.GetRootFolderAsync(file);
 
                 switch (rootFolder.FolderType)

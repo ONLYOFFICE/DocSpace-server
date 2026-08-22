@@ -42,21 +42,30 @@ public class RoomPinValidationTests(
     AspireAppFixture fixture)
     : RoomPinTestsBase(fixture)
 {
+    /// <remarks>
+    /// Bug 81850: an id that resolves to no room answered 403 "access denied", because the service
+    /// threw <c>InvalidOperationException</c> for a missing folder and the middleware maps that to
+    /// Forbidden — so a typo in the id looked like a permissions problem. Fixed in
+    /// <c>FileStorageService.SetPinnedStatusAsync</c>, which now reports it as missing.
+    ///
+    /// The TypeScript suite asked for 400 on these ids. This asserts 404 instead, deliberately: 0 and
+    /// -1 resolve to nothing just like 999999999 does, and every other endpoint in the
+    /// <c>rooms/{id}</c> family already answers 404 for all three (see
+    /// <c>Read.RoomInfoValidationTests.GetRoomInfo_NonExistingOrOutOfRangeId_Returns404</c>).
+    /// </remarks>
     [Trait("Bug", "81850")]
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
     [InlineData(999999999)]
-    public async Task PinRoom_NonExistentId_ShouldReturnBadRequestValidationError(int id)
+    public async Task PinRoom_NonExistentId_ReturnsNotFound(int id)
     {
-        // A non-existent/invalid numeric id should be a validation error (400), but the API
-        // currently returns 403 "The required folder was not found".
         await _filesClient.Authenticate(Owner);
 
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.PinRoomAsync(id, TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(400);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
@@ -71,8 +80,13 @@ public class RoomPinValidationTests(
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    /// <remarks>
+    /// A deleted room is gone, so this is a missing room and answers 404. It used to answer 403 with
+    /// the body still saying "The required folder was not found" — the mapping artifact fixed along
+    /// with bugs 81850 and 82366; the test asserted that artifact.
+    /// </remarks>
     [Fact]
-    public async Task PinRoom_DeletedRoom_Forbidden()
+    public async Task PinRoom_DeletedRoom_ReturnsNotFound()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -86,7 +100,7 @@ public class RoomPinValidationTests(
             async () => await _roomsApi.PinRoomAsync(room.Id, TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(403);
+        exception.ErrorCode.Should().Be(404);
         exception.ErrorContent?.ToString().Should().Contain("The required folder was not found");
     }
 

@@ -137,19 +137,28 @@ public class RoomsFolderValidationTests(
         ((int)response.StatusCode).Should().Be(400);
     }
 
+    /// <remarks>
+    /// This test used to assert the opposite — that an unknown <c>sortBy</c> is ignored and the
+    /// listing comes back in its default order. That silence was bug 81809: a caller asking for an
+    /// order it did not get had no way to know. <c>sortBy</c> now has to name a <c>SortedByType</c>
+    /// member (sorting by name is <c>AZ</c>) and anything else is a bad request, in line with
+    /// <see cref="GetRoomsFolder_InvalidSortOrder_IsRejected"/> right above.
+    /// </remarks>
     [Fact]
-    public async Task GetRoomsFolder_InvalidSortBy_IsIgnoredAndReturnsDefaultOrder()
+    [Trait("Bug", "81809")]
+    public async Task GetRoomsFolder_InvalidSortBy_ReturnsBadRequest()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
         await CreateCustomRoom("Autotest SortBy Default " + Guid.NewGuid().ToString()[..8]);
 
         // Act
-        var result = (await _roomsApi.GetRoomsFolderAsync(
-            sortBy: "thisFieldDoesNotExist", cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetRoomsFolderAsync(
+                sortBy: "thisFieldDoesNotExist", cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        result.Folders.Should().NotBeEmpty();
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -235,8 +244,11 @@ public class RoomsFolderValidationTests(
         var tagOnly = await CreateCustomRoom("Autotest Unrelated");
         await _roomsApi.AddRoomTagsAsync(tagOnly.Id, new BatchTagsRequestDto([tag]), TestContext.Current.CancellationToken);
 
-        // Act
-        var raw = await GetRoomsFolderRawAsync(tags: JsonSerializer.Serialize(new[] { tag }), filterValue: "TagCombo");
+        // Act - both the tag and the title filter are served from the search index, which is written
+        // asynchronously, so poll for the tagged room instead of racing that write.
+        var raw = await PollAsync(
+            () => GetRoomsFolderRawAsync(tags: JsonSerializer.Serialize(new[] { tag }), filterValue: "TagCombo"),
+            page => page.Folders.Exists(f => f.Id == match.Id));
 
         // Assert
         var ids = raw.Folders.Select(f => f.Id).ToList();
@@ -321,9 +333,9 @@ public class RoomsFolderValidationTests(
 
         // Act
         var first = (await _roomsApi.GetRoomsFolderAsync(
-            sortBy: "title", sortOrder: SortOrder.Ascending, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            sortBy: "AZ", sortOrder: SortOrder.Ascending, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var second = (await _roomsApi.GetRoomsFolderAsync(
-            sortBy: "title", sortOrder: SortOrder.Ascending, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            sortBy: "AZ", sortOrder: SortOrder.Ascending, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         second.Folders.Select(f => f.Title).Should().Equal(first.Folders.Select(f => f.Title));

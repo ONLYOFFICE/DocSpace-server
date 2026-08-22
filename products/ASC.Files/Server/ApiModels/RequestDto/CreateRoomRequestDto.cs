@@ -88,10 +88,10 @@ public class CreateRoomRequestDto
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// The room color.
+    /// The room color, as a six-digit hexadecimal value without a leading '#'.
     /// </summary>
-    /// <example>#FF0000</example>
-    [StringLength(6)]
+    /// <example>FF0000</example>
+    [RegularExpression("^[0-9a-fA-F]{6}$")]
     public string Color { get; set; }
 
     /// <summary>

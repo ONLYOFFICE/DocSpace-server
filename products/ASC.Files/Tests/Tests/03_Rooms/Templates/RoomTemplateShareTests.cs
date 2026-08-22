@@ -155,11 +155,30 @@ public class RoomTemplateShareTests(
         exception.ErrorCode.Should().Be(404);
     }
 
+    [Fact]
+    public async Task GetTemplatePublicSettings_NonExistentId_ReturnsNotFound()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetPublicSettingsAsync(999999999, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    /// <remarks>
+    /// The TypeScript suite expected 404 here too, but 0 and -1 are not ids that could ever exist —
+    /// they fail validation before any lookup, which is the same answer the write side gives for them
+    /// (bug 81949, <see cref="SetTemplatePublicSettings_ZeroOrNegativeId_ShouldReturnBadRequest"/>).
+    /// Two ends of the same feature answering differently for the same input was the real defect.
+    /// </remarks>
     [Theory]
-    [InlineData(999999999)]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task GetTemplatePublicSettings_NonExistentOrOutOfRangeId_ReturnsNotFound(int id)
+    public async Task GetTemplatePublicSettings_ZeroOrNegativeId_ReturnsBadRequest(int id)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -169,7 +188,7 @@ public class RoomTemplateShareTests(
             async () => await _roomsApi.GetPublicSettingsAsync(id, TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(404);
+        exception.ErrorCode.Should().Be(400);
     }
 
     // The id is a route parameter typed as a plain int: a non-integer value can only be sent raw,
