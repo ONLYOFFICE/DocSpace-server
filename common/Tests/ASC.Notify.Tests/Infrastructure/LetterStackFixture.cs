@@ -49,6 +49,12 @@ namespace ASC.Notify.Tests.Infrastructure;
 public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
 {
     private MailPitInbox? _inbox;
+
+    // Held rather than passed straight into the inbox: MailPitInbox does not take ownership of the
+    // client it is handed - its Dispose only releases its own semaphore - so whoever creates the
+    // client is the one that has to release it.
+    private HttpClient? _mailPitApi;
+
     private LetterHost? _host;
     private LetterPortalClients? _portal;
 
@@ -98,7 +104,9 @@ public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
         // random host ports, which is why nothing here is hard-coded.
         var smtp = GetEndpoint(ResourceNames.MailPit, "smtp");
 
-        _inbox = new MailPitInbox(smtp.Host, smtp.Port, CreateHttpClient(ResourceNames.MailPit, "http"));
+        _mailPitApi = CreateHttpClient(ResourceNames.MailPit, "http");
+
+        _inbox = new MailPitInbox(smtp.Host, smtp.Port, _mailPitApi);
 
         _portal = await Timing.Measure("letter.portal", () => CreatePortalAsync(TestContext.Current.CancellationToken));
 
@@ -116,7 +124,9 @@ public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
             await _host.DisposeAsync();
         }
 
+        // The inbox before the client it reads through, and both before the app they point at.
         _inbox?.Dispose();
+        _mailPitApi?.Dispose();
         _portal?.Dispose();
     }
 
