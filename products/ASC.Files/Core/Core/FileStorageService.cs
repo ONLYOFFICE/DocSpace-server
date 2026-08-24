@@ -1006,7 +1006,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType == FolderType.VirtualRooms)
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.Forms)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1668,7 +1668,8 @@ public class FileStorageService //: IFileStorageService
                             folder.FolderType != FolderType.VirtualRooms &&
                             folder.FolderType != FolderType.RoomTemplates &&
                             folder.FolderType != FolderType.DefaultTemplates &&
-                            folder.FolderType != FolderType.Archive;
+                            folder.FolderType != FolderType.Archive &&
+                            folder.FolderType != FolderType.Forms;
 
             if (!canCreate)
             {
