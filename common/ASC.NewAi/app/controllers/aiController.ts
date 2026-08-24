@@ -42,6 +42,7 @@ import type {
   DenyToolCallInput,
 } from "@onlyoffice/ai-chat/core";
 import logger from "../log.js";
+import { agentAssignedProfileId } from "./agentProfile.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse } from "./_helpers.js";
@@ -454,7 +455,8 @@ export const aiController = {
     // Without this the provider request runs without the forwarded auth /
     // request headers, so a correct call comes back with an empty message
     // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
-    // Mirrors sendWithStream.
+    // Mirrors sendWithStream. (No profile pinning here: SendInput carries no
+    // profileId, so there is nothing for a caller to override.)
     markForwardHeadersToProvider();
     const result = await engine.send(await withEntityMetadata(req.body));
     res.json(result);
@@ -511,6 +513,17 @@ export const aiController = {
         req.body.profileId = thread.profileId;
       }
     }
+    // The agent's assigned profile is authoritative for rounds in its scope:
+    // substitute it over whatever the caller (or the thread prefill above)
+    // put in profileId, so an agent's chat cannot be re-run on a different
+    // model (Bug 82914). No agent in scope, or an agent with no resolvable
+    // assignment, leaves the value untouched.
+    {
+      const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
+      if (agentProfileId) {
+        req.body.profileId = agentProfileId;
+      }
+    }
     const body = withContextPrompt(
       await withToolsPrompt(
         await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
@@ -536,6 +549,13 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Agent scope pins the model — see sendWithStream (Bug 82914).
+    {
+      const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
+      if (agentProfileId) {
+        req.body.profileId = agentProfileId;
+      }
+    }
     const body = withContextPrompt(
       await withToolsPrompt(
         await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
