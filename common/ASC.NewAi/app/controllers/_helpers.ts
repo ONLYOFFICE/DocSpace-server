@@ -34,6 +34,7 @@
 import type { Request, Response, NextFunction, RequestHandler } from "express";
 import logger from "../log.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
+import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 
 export type TypedRequest<ReqBody = unknown, ReqQuery = Record<string, unknown>> = Request<
   Record<string, string>,
@@ -57,6 +58,15 @@ type AsyncHandler<ReqBody, ReqQuery> = (
 // else collapses to a generic 500.
 function clientError(err: unknown): { status: number; message: string } {
   if (err instanceof AiServiceHttpError) {
+    return { status: err.status, message: err.statusText || "Upstream error" };
+  }
+  // A failure relayed from the DocSpace Files API with the caller's own
+  // credentials — e.g. a 403 when resolving an agent room the caller cannot
+  // access, or a 404 for a room that does not exist (Bugs 82715, 82816, and
+  // every /ai/* route that resolves an agent entityId). Forward its real
+  // status instead of masking it as a generic 500. `message` embeds the
+  // internal proxy URL, so relay only the status/reason phrase.
+  if (err instanceof DocspaceApiHttpError) {
     return { status: err.status, message: err.statusText || "Upstream error" };
   }
   const status = (err as { status?: unknown })?.status;
@@ -187,6 +197,9 @@ export async function streamNdjson(
   res: Response,
   generator: AsyncIterable<unknown>,
 ): Promise<void> {
+  const iterator = generator[Symbol.asyncIterator]();
+  const first = await iterator.next();
+
   res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
   res.setHeader("Cache-Control", "no-cache, no-transform");
   res.setHeader("X-Accel-Buffering", "no");
@@ -196,9 +209,12 @@ export async function streamNdjson(
   // skipped by the lib's `readNdjson` parser.
   const heartbeat = startStreamHeartbeat(res, "\n");
   try {
-    for await (const event of generator) {
+    let current = first;
+    while (!current.done) {
+      const event = current.value;
       res.write(`${JSON.stringify(event)}\n`);
       heartbeat.touch();
+      current = await iterator.next();
     }
   } catch (err) {
     logger.error(`stream aborted: ${errorDetails(err)}`);
@@ -221,6 +237,9 @@ export async function streamOpenAiSse(
   res: Response,
   generator: AsyncIterable<unknown>,
 ): Promise<void> {
+  const iterator = generator[Symbol.asyncIterator]();
+  const first = await iterator.next();
+
   res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
   res.setHeader("Cache-Control", "no-cache, no-transform");
   res.setHeader("Connection", "keep-alive");
@@ -230,9 +249,12 @@ export async function streamOpenAiSse(
   // SSE comment line: ignored by any SSE consumer, keeps the connection warm.
   const heartbeat = startStreamHeartbeat(res, ": ping\n\n");
   try {
-    for await (const chunk of generator) {
+    let current = first;
+    while (!current.done) {
+      const chunk = current.value;
       res.write(`data: ${JSON.stringify(chunk)}\n\n`);
       heartbeat.touch();
+      current = await iterator.next();
     }
     res.write("data: [DONE]\n\n");
   } catch (err) {

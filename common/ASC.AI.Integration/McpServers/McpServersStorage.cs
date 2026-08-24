@@ -213,7 +213,7 @@ public class McpServersStorage(
         {
             return await crypto.DecryptAsync(config);
         }
-        catch (CryptographicException)
+        catch (Exception ex) when (ex is CryptographicException or FormatException)
         {
             return string.Empty;
         }

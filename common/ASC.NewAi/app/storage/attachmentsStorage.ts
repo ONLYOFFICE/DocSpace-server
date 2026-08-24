@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { randomUUID } from "node:crypto";
@@ -42,17 +42,6 @@ import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/attachments";
-
-// In-memory cache for raw-payload drafts (device upload, dnd) that arrive
-// without a DocSpace entry id. The C# backend currently has no endpoint
-// for raw content, so we synthesize an Attachment record server-side and
-// keep it here until the message is sent (or the process restarts —
-// drafts don't survive restarts, which is acceptable for a draft).
-//
-// Lifetime: from `createMany` (or `create`) until `delete`/`deleteMany`
-// removes the id. `readById`/`readManyByIds` serve from this map first so
-// the chat-widget's image preview can pull the base64 payload back.
-const rawAttachmentCache = new Map<string, Attachment>();
 
 // DocSpace pre-signed URLs come back as host-relative paths
 // (`/storage/files/...`). `fetch()` in Node refuses relative URLs, so
@@ -69,19 +58,38 @@ function resolveAbsoluteUrl(url: string): string {
 // header. Providers reject `data:application/octet-stream;…` for image_url so
 // we want a real image/* mime when possible.
 function detectImageMime(bytes: Uint8Array, fallback: string | null): string {
-  if (bytes.length >= 8
-    && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47
+  ) {
     return "image/png";
   }
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
     return "image/jpeg";
   }
-  if (bytes.length >= 4 && bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
+  if (
+    bytes.length >= 4 &&
+    bytes[0] === 0x47 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x38
+  ) {
     return "image/gif";
   }
-  if (bytes.length >= 12
-    && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46
-    && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+  if (
+    bytes.length >= 12 &&
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50
+  ) {
     return "image/webp";
   }
   if (fallback && fallback.startsWith("image/")) {
@@ -103,10 +111,14 @@ function decodeImagePayload(base64: string): { bytes: Uint8Array; mime: string }
 
 function extensionForMime(mime: string): string {
   switch (mime) {
-    case "image/jpeg": return ".jpg";
-    case "image/gif": return ".gif";
-    case "image/webp": return ".webp";
-    default: return ".png";
+    case "image/jpeg":
+      return ".jpg";
+    case "image/gif":
+      return ".gif";
+    case "image/webp":
+      return ".webp";
+    default:
+      return ".png";
   }
 }
 
@@ -114,10 +126,7 @@ function extensionForMime(mime: string): string {
 // public DocSpace Files API (`POST api/2.0/files/{folderId}/insert`), acting on
 // behalf of the current user (forwarded auth cookies). Returns the new entry id
 // (internal int or thirdparty string, serialized as string).
-async function insertGeneratedImage(
-  folderId: string,
-  base64: string,
-): Promise<string> {
+async function insertGeneratedImage(folderId: string, base64: string): Promise<string> {
   const { bytes, mime } = decodeImagePayload(base64);
   // The engine only ever passes the tool name ("generate_image") as the
   // title, so a timestamp is the most meaningful name we can produce here.
@@ -135,7 +144,12 @@ async function insertGeneratedImage(
   // FormData body, and `getForwardedHeaders` strips content-type anyway.
   const { signal, cancel } = withTimeout(undefined);
   try {
-    const res = await fetch(url, { method: "POST", headers: getForwardedHeaders(), body: form, signal });
+    const res = await fetch(url, {
+      method: "POST",
+      headers: getForwardedHeaders(),
+      body: form,
+      signal,
+    });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new AiServiceHttpError(res.status, res.statusText, text, url);
@@ -173,7 +187,9 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
     const b64 = Buffer.from(buf).toString("base64");
     return `data:${mime};base64,${b64}`;
   } catch (err) {
-    logger.error(`fetchImageAsDataUrl: ${url} failed: ${err instanceof Error ? err.message : String(err)}`);
+    logger.error(
+      `fetchImageAsDataUrl: ${url} failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
     return null;
   }
 }
@@ -307,9 +323,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     return result;
   }
 
-  async createMany(
-    inputs: Omit<Attachment, "id" | "createdAt">[],
-  ): Promise<Attachment[]> {
+  async createMany(inputs: Omit<Attachment, "id" | "createdAt">[]): Promise<Attachment[]> {
     if (inputs.length === 0) {
       return [];
     }
@@ -333,26 +347,16 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       await Promise.all(toolTasks);
     }
 
-    // Synthesize records for raw-payload drafts (no `input.path`, not a tool
-    // upload). The C# backend can't accept these yet, so we stash them in a
-    // server-local cache and serve them back through `readById`/
-    // `readManyByIds`. Keeps the chip preview alive in the composer until the
-    // message is sent.
+    // Raw-payload drafts (device upload, dnd — no `input.path`, not a tool
+    // upload) are rejected: the C# backend has no endpoint for raw content,
+    // and the former in-process cache that held them served one user's
+    // payload to any other caller (`readById` hit the shared map before any
+    // tenant/user check on the backend). Fail loudly instead of leaking.
     inputs.forEach((input, i) => {
       if (result[i] || input.path || input.source === "tool") return;
-      const id = randomUUID();
-      const rec: Attachment = {
-        id,
-        kind: input.kind,
-        title: input.title,
-        createdAt: Date.now(),
-        ...(input.source !== undefined ? { source: input.source } : {}),
-        ...(input.content !== undefined ? { content: input.content } : {}),
-        ...(input.base64 !== undefined ? { base64: input.base64 } : {}),
-        ...(input.type !== undefined ? { type: input.type } : {}),
-      };
-      rawAttachmentCache.set(id, rec);
-      result[i] = rec;
+      throw new Error(
+        "raw-payload attachments (no DocSpace entry id) are not supported by the backend",
+      );
     });
 
     const docspaceIndices: number[] = [];
@@ -375,13 +379,13 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
 
     const raw = await aiService.post(PATH, { entryIds });
     logger.debug(
-      `HttpAttachmentsStorage.createMany: POST ${PATH} entryIds=${JSON.stringify(entryIds)} `
-        + `raw response=${JSON.stringify(raw)}`,
+      `HttpAttachmentsStorage.createMany: POST ${PATH} entryIds=${JSON.stringify(entryIds)} ` +
+        `raw response=${JSON.stringify(raw)}`,
     );
     if (!Array.isArray(raw)) {
       logger.error(
-        `HttpAttachmentsStorage.createMany: backend returned non-array payload `
-          + `(type=${raw === null ? "null" : typeof raw}); raw=${JSON.stringify(raw)}`,
+        `HttpAttachmentsStorage.createMany: backend returned non-array payload ` +
+          `(type=${raw === null ? "null" : typeof raw}); raw=${JSON.stringify(raw)}`,
       );
       throw new Error("ai service returned a non-array response for attachments createMany");
     }
@@ -402,8 +406,8 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     }
     if (skipped.length > 0) {
       logger.warn(
-        `HttpAttachmentsStorage.createMany: ${skipped.length} item(s) skipped `
-          + `(missing id/title/kind/entryId); skipped=${JSON.stringify(skipped)}`,
+        `HttpAttachmentsStorage.createMany: ${skipped.length} item(s) skipped ` +
+          `(missing id/title/kind/entryId); skipped=${JSON.stringify(skipped)}`,
       );
     }
     docspaceIndices.forEach((i, docspaceIdx) => {
@@ -412,10 +416,10 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       const matched = byEntryId.get(entryId);
       if (!matched) {
         logger.error(
-          `HttpAttachmentsStorage.createMany: no match for entryId=${entryId}. `
-            + `requested=${JSON.stringify(entryIds)} `
-            + `backend entryIds=${JSON.stringify([...byEntryId.keys()])} `
-            + `raw=${JSON.stringify(raw)}`,
+          `HttpAttachmentsStorage.createMany: no match for entryId=${entryId}. ` +
+            `requested=${JSON.stringify(entryIds)} ` +
+            `backend entryIds=${JSON.stringify([...byEntryId.keys()])} ` +
+            `raw=${JSON.stringify(raw)}`,
         );
         throw new Error(`ai service did not return attachment for entryId=${entryId}`);
       }
@@ -457,9 +461,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
   // image attachment through the existing entry-based flow, so reads serve a
   // pre-signed URL exactly like a user upload. The lib keeps only the returned
   // attachment `id` as a lightweight ref.
-  private async uploadToolImage(
-    input: Omit<Attachment, "id" | "createdAt">,
-  ): Promise<Attachment> {
+  private async uploadToolImage(input: Omit<Attachment, "id" | "createdAt">): Promise<Attachment> {
     if (!input.base64) {
       throw new Error("tool image attachment is missing its base64 payload");
     }
@@ -525,8 +527,6 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
   }
 
   async readById(id: string): Promise<Attachment | null> {
-    const cached = rawAttachmentCache.get(id);
-    if (cached) return cached;
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       const a = dtoToAttachment(raw);
@@ -547,26 +547,17 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       return [];
     }
 
-    // Split into cached (raw-payload) vs remote ids — only the latter
-    // need to hit C#.
-    const remoteIds: string[] = [];
-    for (const id of ids) {
-      if (!rawAttachmentCache.has(id)) remoteIds.push(id);
-    }
-
     const byId = new Map<string, Attachment>();
-    if (remoteIds.length > 0) {
-      const raw = await aiService.post(`${PATH}/read`, { ids: remoteIds });
-      const list = Array.isArray(raw) ? raw : [];
-      for (const item of list) {
-        const a = dtoToAttachment(item);
-        if (a) {
-          byId.set(a.id, a);
-        }
+    const raw = await aiService.post(`${PATH}/read`, { ids });
+    const list = Array.isArray(raw) ? raw : [];
+    for (const item of list) {
+      const a = dtoToAttachment(item);
+      if (a) {
+        byId.set(a.id, a);
       }
     }
 
-    const result = ids.map((id) => rawAttachmentCache.get(id) ?? byId.get(id) ?? null);
+    const result = ids.map((id) => byId.get(id) ?? null);
     await inlineImagesAsync(result);
     return result;
   }
@@ -592,9 +583,6 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
   }
 
   async delete(id: string): Promise<void> {
-    if (rawAttachmentCache.delete(id)) {
-      return;
-    }
     try {
       await aiService.delete(`${PATH}/${encodeURIComponent(id)}`);
     } catch (err) {
@@ -609,14 +597,7 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     if (ids.length === 0) {
       return;
     }
-    const remoteIds: string[] = [];
-    for (const id of ids) {
-      if (!rawAttachmentCache.delete(id)) {
-        remoteIds.push(id);
-      }
-    }
-    if (remoteIds.length === 0) return;
-    await aiService.delete(PATH, { body: { ids: remoteIds } });
+    await aiService.delete(PATH, { body: { ids } });
   }
 
   async deleteByMessage(messageId: string): Promise<void> {

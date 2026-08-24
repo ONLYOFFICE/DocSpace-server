@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.PreferencesStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Preferences")]
 public class PreferencesReadTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -121,7 +120,7 @@ public class PreferencesReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Read_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.GetAsync(
+        using var response = await _ai.GetAsync(
             $"{PreferencesPath}?entityId=999999999",
             TestContext.Current.CancellationToken);
 

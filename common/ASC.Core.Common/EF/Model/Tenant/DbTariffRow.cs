@@ -41,6 +41,7 @@ public class DbTariffRow : BaseEntity
     public int TenantId { get; set; }
     public DateTime? DueDate { get; set; }
     public int? NextQuantity { get; set; }
+    public int? NextQuota { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -100,6 +101,12 @@ public static class DbTariffRowExtension
                     .HasColumnType("int")
                     .IsRequired(false)
                     .HasDefaultValueSql("NULL");
+
+                entity.Property(e => e.NextQuota)
+                    .HasColumnName("next_quota")
+                    .HasColumnType("int")
+                    .IsRequired(false)
+                    .HasDefaultValueSql("NULL");
             });
         }
 
@@ -136,6 +143,12 @@ public static class DbTariffRowExtension
 
                 entity.Property(e => e.NextQuantity)
                     .HasColumnName("next_quantity")
+                    .HasColumnType("integer")
+                    .IsRequired(false)
+                    .HasDefaultValue(null);
+
+                entity.Property(e => e.NextQuota)
+                    .HasColumnName("next_quota")
                     .HasColumnType("integer")
                     .IsRequired(false)
                     .HasDefaultValue(null);

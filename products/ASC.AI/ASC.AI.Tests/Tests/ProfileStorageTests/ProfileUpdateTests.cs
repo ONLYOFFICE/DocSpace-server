@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ProfileStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Profiles")]
 public class ProfileUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -44,8 +43,8 @@ public class ProfileUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         var created = await CreateProfileAsync();
         var update = BuildUpdateBody("renamed-profile");
 
-        using var updateResponse = await Ai.PutAsync($"{ProfilesPath}/{created.Id}", update, TestContext.Current.CancellationToken);
-        var updated = await Ai.ReadAsync<ProfileDto>(updateResponse, TestContext.Current.CancellationToken);
+        using var updateResponse = await _ai.PutAsync($"{ProfilesPath}/{created.Id}", update, TestContext.Current.CancellationToken);
+        var updated = await _ai.ReadAsync<ProfileDto>(updateResponse, TestContext.Current.CancellationToken);
 
         updated.Id.Should().Be(created.Id);
         updated.Name.Should().Be(update.Name);
@@ -57,8 +56,8 @@ public class ProfileUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         updated.UseResponsesApi.Should().Be(update.UseResponsesApi);
         updated.CanUseTool.Should().Be(update.CanUseTool);
 
-        using var getResponse = await Ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
-        var fetched = await Ai.ReadAsync<ProfileDto>(getResponse, TestContext.Current.CancellationToken);
+        using var getResponse = await _ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
+        var fetched = await _ai.ReadAsync<ProfileDto>(getResponse, TestContext.Current.CancellationToken);
 
         fetched.Name.Should().Be(update.Name);
         fetched.ProviderType.Should().Be(update.ProviderType);

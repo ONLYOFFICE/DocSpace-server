@@ -1,6 +1,6 @@
 {
   "components": {
-    "NewAiSuccessResponse": {
+    "AiSuccessResponse": {
       "type": "object",
       "properties": {
         "success": {
@@ -13,7 +13,7 @@
       "additionalProperties": false,
       "description": "Generic success acknowledgement for mutations that return no data."
     },
-    "NewAiErrorResponse": {
+    "AiErrorResponse": {
       "type": "object",
       "properties": {
         "error": {
@@ -26,13 +26,13 @@
       "additionalProperties": false,
       "description": "Error body — a single human-readable message."
     },
-    "NewAiAiActionArgs": {
+    "AiAiActionArgs": {
       "type": "object",
       "properties": {
         "tools": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiTMCPItem"
+            "$ref": "#/components/schemas/AiTMCPItem"
           },
           "description": "Extra tools offered to the model for this request."
         },
@@ -64,7 +64,7 @@
       },
       "additionalProperties": false
     },
-    "NewAiTMCPItem": {
+    "AiTMCPItem": {
       "type": "object",
       "properties": {
         "name": {
@@ -96,7 +96,7 @@
       "additionalProperties": false,
       "description": "Descriptor for a tool exposed by an MCP server."
     },
-    "NewAiActionType": {
+    "AiActionType": {
       "type": "string",
       "enum": [
         "Default",
@@ -110,7 +110,7 @@
         "Vision"
       ]
     },
-    "NewAiThreadMessageLike": {
+    "AiThreadMessageLike": {
       "type": "object",
       "properties": {
         "id": {
@@ -185,7 +185,7 @@
       ],
       "additionalProperties": false
     },
-    "NewAiAiSendStreamBody": {
+    "AiAiSendStreamBody": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -193,11 +193,11 @@
           "description": "Target thread; a new one is created (with an auto title) when omitted."
         },
         "userMessage": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike",
+          "$ref": "#/components/schemas/AiThreadMessageLike",
           "description": "The user turn to send."
         },
         "actionArgs": {
-          "$ref": "#/components/schemas/NewAiAiActionArgs"
+          "$ref": "#/components/schemas/AiAiActionArgs"
         },
         "entityId": {
           "type": "string",
@@ -213,7 +213,7 @@
       ],
       "additionalProperties": false
     },
-    "NewAiChatEvent": {
+    "AiChatEvent": {
       "description": "Discriminated event emitted by the streaming methods of  {@link  AIEngine } . The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a  {@link  ChatEvent }  so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via  {@link  AIEngine.approveToolCall }  or  {@link  AIEngine.denyToolCall } .\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant   reply lifecycle.\n- `message-incomplete` — the provider returned an error or   incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
       "type": "object",
       "properties": {
@@ -231,7 +231,7 @@
           "description": "Emitted once per `sendWithStream` call, immediately after the user message has been persisted by storage and before the assistant stream starts. Carries the storage-assigned `id` and `createdAt`. The UI uses it to render the user bubble — no client-side optimistic placeholder is needed, which keeps the runtime tree free of phantom nodes from index-fallback ids."
         },
         "message": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike"
+          "$ref": "#/components/schemas/AiThreadMessageLike"
         },
         "messageId": {
           "type": "string"
@@ -261,18 +261,18 @@
         "type"
       ]
     },
-    "NewAiOpenAIStreamChunk": {
+    "AiOpenAIStreamChunk": {
       "anyOf": [
         {
-          "$ref": "#/components/schemas/NewAiOpenAIChatCompletionChunk"
+          "$ref": "#/components/schemas/AiOpenAIChatCompletionChunk"
         },
         {
-          "$ref": "#/components/schemas/NewAiOpenAIStreamError"
+          "$ref": "#/components/schemas/AiOpenAIStreamError"
         }
       ],
       "description": "A chunk or the terminal error envelope emitted on a failed stream."
     },
-    "NewAiOpenAIChatCompletionChunk": {
+    "AiOpenAIChatCompletionChunk": {
       "type": "object",
       "properties": {
         "id": {
@@ -280,9 +280,7 @@
         },
         "object": {
           "type": "string",
-          "enum": [
-            "chat.completion.chunk"
-          ]
+          "const": "chat.completion.chunk"
         },
         "created": {
           "type": "number"
@@ -293,7 +291,7 @@
         "choices": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiOpenAIChunkChoice"
+            "$ref": "#/components/schemas/AiOpenAIChunkChoice"
           }
         }
       },
@@ -306,17 +304,17 @@
       ],
       "additionalProperties": false
     },
-    "NewAiOpenAIChunkChoice": {
+    "AiOpenAIChunkChoice": {
       "type": "object",
       "properties": {
         "index": {
           "type": "number"
         },
         "delta": {
-          "$ref": "#/components/schemas/NewAiOpenAIChoiceDelta"
+          "$ref": "#/components/schemas/AiOpenAIChoiceDelta"
         },
         "finish_reason": {
-          "$ref": "#/components/schemas/NewAiOpenAIFinishReason"
+          "$ref": "#/components/schemas/AiOpenAIFinishReason"
         }
       },
       "required": [
@@ -326,29 +324,29 @@
       ],
       "additionalProperties": false
     },
-    "NewAiOpenAIChoiceDelta": {
+    "AiOpenAIChoiceDelta": {
       "type": "object",
       "properties": {
         "role": {
           "type": "string",
-          "enum": [
-            "assistant"
-          ]
+          "const": "assistant"
         },
         "content": {
-          "nullable": true,
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "tool_calls": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiOpenAIToolCallDelta"
+            "$ref": "#/components/schemas/AiOpenAIToolCallDelta"
           }
         }
       },
       "additionalProperties": false
     },
-    "NewAiOpenAIToolCallDelta": {
+    "AiOpenAIToolCallDelta": {
       "type": "object",
       "properties": {
         "index": {
@@ -359,9 +357,7 @@
         },
         "type": {
           "type": "string",
-          "enum": [
-            "function"
-          ]
+          "const": "function"
         },
         "function": {
           "type": "object",
@@ -381,9 +377,11 @@
       ],
       "additionalProperties": false
     },
-    "NewAiOpenAIFinishReason": {
-      "nullable": true,
-      "type": "string",
+    "AiOpenAIFinishReason": {
+      "type": [
+        "string",
+        "null"
+      ],
       "enum": [
         "stop",
         "length",
@@ -393,7 +391,7 @@
       ],
       "description": "OpenAI Chat Completions streaming shapes.\n\n {@link  toOpenAIChatCompletionStream }  maps the engine's transport-agnostic  {@link  ChatEvent }  stream onto these chunks so a host can expose an OpenAI-compatible `POST /v1/chat/completions` (`stream: true`) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent."
     },
-    "NewAiOpenAIStreamError": {
+    "AiOpenAIStreamError": {
       "type": "object",
       "properties": {
         "error": {
@@ -406,12 +404,16 @@
               "type": "string"
             },
             "code": {
-              "nullable": true,
-              "type": "string"
+              "type": [
+                "string",
+                "null"
+              ]
             },
             "param": {
-              "nullable": true,
-              "type": "string"
+              "type": [
+                "string",
+                "null"
+              ]
             }
           },
           "required": [
@@ -429,7 +431,7 @@
       "additionalProperties": false,
       "description": "OpenAI streaming error envelope. When the upstream request fails mid-stream the OpenAI API emits a single `data:` line carrying an `error` object (no `choices`), then closes the stream — the official SDK turns this into a thrown `APIError`. Mirrors that shape so a host exposing an OpenAI-compatible endpoint stays wire-compatible."
     },
-    "NewAiAiToolCallData": {
+    "AiAiToolCallData": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -445,11 +447,11 @@
           "description": "Index of the tool-call content part inside `message.content`."
         },
         "message": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike",
+          "$ref": "#/components/schemas/AiThreadMessageLike",
           "description": "Snapshot of the assistant message at the time the tool call surfaced."
         },
         "actionArgs": {
-          "$ref": "#/components/schemas/NewAiAiActionArgs"
+          "$ref": "#/components/schemas/AiAiActionArgs"
         },
         "entityId": {
           "type": "string"
@@ -466,14 +468,14 @@
       ],
       "additionalProperties": false
     },
-    "NewAiResolvedAssignment": {
+    "AiResolvedAssignment": {
       "type": "object",
       "properties": {
         "profileId": {
           "type": "string"
         },
         "profile": {
-          "$ref": "#/components/schemas/NewAiProfile"
+          "$ref": "#/components/schemas/AiProfile"
         }
       },
       "required": [
@@ -483,7 +485,7 @@
       "additionalProperties": false,
       "description": "Resolved profile for an action — both the storage row and its ID."
     },
-    "NewAiProfile": {
+    "AiProfile": {
       "type": "object",
       "properties": {
         "id": {
@@ -495,11 +497,11 @@
           "description": "User-defined profile display name."
         },
         "providerType": {
-          "$ref": "#/components/schemas/NewAiProviderType",
+          "$ref": "#/components/schemas/AiProviderType",
           "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
         },
         "basedOn": {
-          "$ref": "#/components/schemas/NewAiBuiltinProviderType",
+          "$ref": "#/components/schemas/AiBuiltinProviderType",
           "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
         },
         "baseUrl": {
@@ -560,10 +562,10 @@
       "additionalProperties": false,
       "description": "Complete AI provider + model configuration saved by the user. Profiles are the primary way users save and reuse provider configurations."
     },
-    "NewAiProviderType": {
+    "AiProviderType": {
       "anyOf": [
         {
-          "$ref": "#/components/schemas/NewAiBuiltinProviderType"
+          "$ref": "#/components/schemas/AiBuiltinProviderType"
         },
         {
           "type": "string"
@@ -571,7 +573,7 @@
       ],
       "description": "Provider type identifier. Accepts all 17 built-in types with autocomplete, plus any custom `string` for dynamically registered providers."
     },
-    "NewAiBuiltinProviderType": {
+    "AiBuiltinProviderType": {
       "type": "string",
       "enum": [
         "anthropic",
@@ -594,7 +596,7 @@
       ],
       "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
     },
-    "NewAiAssignmentMutationResult": {
+    "AiAssignmentMutationResult": {
       "description": "Outcome of  {@link  AssignmentsEngine.assign }  /  {@link  AssignmentsEngine.unassign } . Either a success or a field-scoped error suitable for displaying in the profile editor.",
       "type": "object",
       "properties": {
@@ -602,14 +604,14 @@
           "type": "boolean"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiTErrorData": {
+    "AiTErrorData": {
       "type": "object",
       "properties": {
         "field": {
@@ -630,7 +632,7 @@
       ],
       "additionalProperties": false
     },
-    "NewAiBulkAssignmentResult": {
+    "AiBulkAssignmentResult": {
       "description": "Outcome of  {@link  AssignmentsEngine.bulkAssign } . Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
       "type": "object",
       "properties": {
@@ -643,10 +645,10 @@
             "type": "object",
             "properties": {
               "actionType": {
-                "$ref": "#/components/schemas/NewAiActionType"
+                "$ref": "#/components/schemas/AiActionType"
               },
               "error": {
-                "$ref": "#/components/schemas/NewAiTErrorData"
+                "$ref": "#/components/schemas/AiTErrorData"
               }
             },
             "required": [
@@ -661,7 +663,7 @@
         "success"
       ]
     },
-    "NewAiAttachment": {
+    "AiAttachment": {
       "type": "object",
       "properties": {
         "id": {
@@ -719,6 +721,30 @@
         "createdAt": {
           "type": "number",
           "description": "Storage-assigned creation timestamp."
+        },
+        "canAnalyze": {
+          "type": "boolean",
+          "description": "Whether the attached form can be analyzed."
+        },
+        "formKeys": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "text"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Keys of the fields inside the form. `key` is the field identifier, `text` its human-readable label."
         }
       },
       "required": [
@@ -730,7 +756,7 @@
       "additionalProperties": false,
       "description": "Persistent record for a single attachment (file or image) referenced from a user message. Files carry extracted text in `content`; images carry base64 data in `base64`. Metadata (`title`, `path`, `type`) is always present for display purposes regardless of whether the heavy payload is loaded."
     },
-    "NewAiCreateProfileInput": {
+    "AiCreateProfileInput": {
       "type": "object",
       "properties": {
         "name": {
@@ -738,11 +764,11 @@
           "description": "User-defined profile display name."
         },
         "providerType": {
-          "$ref": "#/components/schemas/NewAiProviderType",
+          "$ref": "#/components/schemas/AiProviderType",
           "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
         },
         "basedOn": {
-          "$ref": "#/components/schemas/NewAiBuiltinProviderType",
+          "$ref": "#/components/schemas/AiBuiltinProviderType",
           "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
         },
         "baseUrl": {
@@ -798,7 +824,7 @@
       "additionalProperties": false,
       "description": "Input for creating a new profile — the same shape as  {@link  Profile }  without the engine-generated fields (`id`, `createdAt`)."
     },
-    "NewAiProfileMutationResult": {
+    "AiProfileMutationResult": {
       "description": "Outcome of `create` / `update` — either a success carrying the persisted profile, or a failure with a field-level error description from the name check or the provider credential check.",
       "type": "object",
       "properties": {
@@ -806,17 +832,17 @@
           "type": "boolean"
         },
         "profile": {
-          "$ref": "#/components/schemas/NewAiProfile"
+          "$ref": "#/components/schemas/AiProfile"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiModel": {
+    "AiModel": {
       "type": "object",
       "properties": {
         "id": {
@@ -828,7 +854,7 @@
           "description": "Human-readable model name for display in the UI."
         },
         "provider": {
-          "$ref": "#/components/schemas/NewAiProviderType",
+          "$ref": "#/components/schemas/AiProviderType",
           "description": "Provider that offers this model."
         },
         "reasoning": {
@@ -848,7 +874,7 @@
       "additionalProperties": false,
       "description": "AI model metadata. Describes a single model available from a provider."
     },
-    "NewAiCreatePromptInput": {
+    "AiCreatePromptInput": {
       "type": "object",
       "properties": {
         "name": {
@@ -858,8 +884,10 @@
           "type": "string"
         },
         "folderId": {
-          "nullable": true,
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
@@ -869,7 +897,7 @@
       "additionalProperties": false,
       "description": "Input for creating a prompt — the engine generates `id`/`createdAt`/`updatedAt`."
     },
-    "NewAiPromptMutationResult": {
+    "AiPromptMutationResult": {
       "description": "Outcome of `create` / `update` / `move` on a prompt — either the persisted prompt or a field-scoped error.",
       "type": "object",
       "properties": {
@@ -877,17 +905,17 @@
           "type": "boolean"
         },
         "prompt": {
-          "$ref": "#/components/schemas/NewAiPrompt"
+          "$ref": "#/components/schemas/AiPrompt"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiPrompt": {
+    "AiPrompt": {
       "type": "object",
       "properties": {
         "id": {
@@ -925,7 +953,7 @@
       "additionalProperties": false,
       "description": "Saved prompt template that users can quickly insert into the chat."
     },
-    "NewAiFolderMutationResult": {
+    "AiFolderMutationResult": {
       "description": "Outcome of `createFolder` / `renameFolder` — either the persisted folder or a field-scoped error.",
       "type": "object",
       "properties": {
@@ -933,17 +961,17 @@
           "type": "boolean"
         },
         "folder": {
-          "$ref": "#/components/schemas/NewAiPromptFolder"
+          "$ref": "#/components/schemas/AiPromptFolder"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiPromptFolder": {
+    "AiPromptFolder": {
       "type": "object",
       "properties": {
         "id": {
@@ -972,25 +1000,23 @@
       "additionalProperties": false,
       "description": "Folder for organizing saved prompts."
     },
-    "NewAiPromptBundle": {
+    "AiPromptBundle": {
       "type": "object",
       "properties": {
         "version": {
           "type": "number",
-          "enum": [
-            1
-          ]
+          "const": 1
         },
         "folders": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiPromptFolder"
+            "$ref": "#/components/schemas/AiPromptFolder"
           }
         },
         "prompts": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiPrompt"
+            "$ref": "#/components/schemas/AiPrompt"
           }
         }
       },
@@ -1002,7 +1028,7 @@
       "additionalProperties": false,
       "description": "Versioned, self-contained bundle of every saved prompt and folder. Stable wire format — `version` lets the import path migrate older shapes if the schema ever changes."
     },
-    "NewAiImportMode": {
+    "AiImportMode": {
       "type": "string",
       "enum": [
         "replace",
@@ -1010,7 +1036,7 @@
       ],
       "description": "Mode passed to  {@link  PromptsEngine.importBundle } ."
     },
-    "NewAiImportResult": {
+    "AiImportResult": {
       "description": "Outcome of  {@link  PromptsEngine.importBundle } . Either every entry persisted with counts, or no entries persisted plus a per-entry error report.",
       "type": "object",
       "properties": {
@@ -1036,7 +1062,7 @@
         "errors": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiImportError"
+            "$ref": "#/components/schemas/AiImportError"
           }
         }
       },
@@ -1044,7 +1070,7 @@
         "success"
       ]
     },
-    "NewAiImportError": {
+    "AiImportError": {
       "type": "object",
       "properties": {
         "kind": {
@@ -1059,7 +1085,7 @@
           "type": "string"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
@@ -1070,7 +1096,7 @@
       "additionalProperties": false,
       "description": "Per-entry error reported by  {@link  PromptsEngine.importBundle } ."
     },
-    "NewAiThread": {
+    "AiThread": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -1086,11 +1112,11 @@
           "description": "Timestamp (ms since epoch) of the last message in this thread. Used for sorting."
         },
         "provider": {
-          "$ref": "#/components/schemas/NewAiTProvider",
+          "$ref": "#/components/schemas/AiTProvider",
           "description": "Provider configuration at the time of last message. Used for thread-level provider display."
         },
         "model": {
-          "$ref": "#/components/schemas/NewAiModel",
+          "$ref": "#/components/schemas/AiModel",
           "description": "Model info at the time of last message."
         },
         "profileId": {
@@ -1104,11 +1130,11 @@
       "additionalProperties": false,
       "description": "Chat conversation metadata. Represents a single chat session (thread)."
     },
-    "NewAiTProvider": {
+    "AiTProvider": {
       "type": "object",
       "properties": {
         "type": {
-          "$ref": "#/components/schemas/NewAiProviderType",
+          "$ref": "#/components/schemas/AiProviderType",
           "description": "Provider type identifier."
         },
         "name": {
@@ -1132,20 +1158,20 @@
       "additionalProperties": false,
       "description": "Minimal provider connection configuration. Used to connect to a provider API."
     },
-    "NewAiOpenOrCreateInput": {
+    "AiOpenOrCreateInput": {
       "type": "object",
       "properties": {
         "threadId": {
           "type": "string"
         },
         "profile": {
-          "$ref": "#/components/schemas/NewAiProfile"
+          "$ref": "#/components/schemas/AiProfile"
         },
         "profileId": {
           "type": "string"
         },
         "firstMessage": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike"
+          "$ref": "#/components/schemas/AiThreadMessageLike"
         },
         "entityId": {
           "type": "string",
@@ -1160,7 +1186,7 @@
       "additionalProperties": false,
       "description": "Input for  {@link  ThreadsEngine.openOrCreate } : open an existing thread if `threadId` is given, otherwise create a new one with an auto-generated title derived from `firstMessage`."
     },
-    "NewAiOpenOrCreateResult": {
+    "AiOpenOrCreateResult": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -1173,7 +1199,7 @@
         "priorMessages": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike"
+            "$ref": "#/components/schemas/AiThreadMessageLike"
           }
         }
       },
@@ -1185,11 +1211,11 @@
       "additionalProperties": false,
       "description": "Resolved thread state returned by  {@link  ThreadsEngine.openOrCreate } ."
     },
-    "NewAiMcpServerConfig": {
+    "AiMcpServerConfig": {
       "type": "object",
       "description": "One MCP server configuration. The shape is intentionally open — MCP allows per-transport fields (`command`/`args` for stdio, `url` for HTTP, plus env, headers, etc.) and the storage layer stays agnostic to which transport is in use."
     },
-    "NewAiToolsMutationResult": {
+    "AiToolsMutationResult": {
       "description": "Outcome of an MCP-server CRUD call. Either success or a field-scoped error suitable for the settings form.",
       "type": "object",
       "properties": {
@@ -1197,14 +1223,14 @@
           "type": "boolean"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiToolsBulkResult": {
+    "AiToolsBulkResult": {
       "description": "Outcome of  {@link  ToolsEngine.replaceAllCustomServers }  — either every entry persisted, or no entries persisted plus a per-key error report.",
       "type": "object",
       "properties": {
@@ -1220,7 +1246,7 @@
                 "type": "string"
               },
               "error": {
-                "$ref": "#/components/schemas/NewAiTErrorData"
+                "$ref": "#/components/schemas/AiTErrorData"
               }
             },
             "required": [
@@ -1235,7 +1261,7 @@
         "success"
       ]
     },
-    "NewAiWebSearchConfig": {
+    "AiWebSearchConfig": {
       "type": "object",
       "properties": {
         "provider": {
@@ -1268,7 +1294,7 @@
       "additionalProperties": false,
       "description": "Web-search provider configuration. Credentials and provider selection for the built-in web-search tool group."
     },
-    "NewAiWebSearchMutationResult": {
+    "AiWebSearchMutationResult": {
       "description": "Outcome of  {@link  WebSearchEngine.configure }  — either the persisted config or a field-scoped error suitable for the settings form.",
       "type": "object",
       "properties": {
@@ -1276,21 +1302,21 @@
           "type": "boolean"
         },
         "config": {
-          "$ref": "#/components/schemas/NewAiWebSearchConfig"
+          "$ref": "#/components/schemas/AiWebSearchConfig"
         },
         "error": {
-          "$ref": "#/components/schemas/NewAiTErrorData"
+          "$ref": "#/components/schemas/AiTErrorData"
         }
       },
       "required": [
         "success"
       ]
     },
-    "NewAiAiUserSettingsWrapper": {
+    "AiAiUserSettingsWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiAiUserSettingsDto"
+          "$ref": "#/components/schemas/AiAiUserSettingsDto"
         },
         "count": {
           "type": "integer",
@@ -1326,23 +1352,25 @@
         }
       }
     },
-    "NewAiAiUserSettingsDto": {
+    "AiAiUserSettingsDto": {
       "type": "object",
       "properties": {
         "chatRecommendedModelVisible": {
+          "examples": [
+            true
+          ],
           "type": "boolean",
-          "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user.",
-          "example": true
+          "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user."
         }
       },
       "additionalProperties": false,
       "description": "The per-user AI settings."
     },
-    "NewAiVectorizationSettingsWrapper": {
+    "AiVectorizationSettingsWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiVectorizationSettingsDto"
+          "$ref": "#/components/schemas/AiVectorizationSettingsDto"
         },
         "count": {
           "type": "integer",
@@ -1378,24 +1406,30 @@
         }
       }
     },
-    "NewAiVectorizationSettingsDto": {
+    "AiVectorizationSettingsDto": {
       "type": "object",
       "properties": {
         "type": {
-          "$ref": "#/components/schemas/NewAiEmbeddingProviderType"
+          "description": "The type of embedding provider configured for document vectorization.",
+          "$ref": "#/components/schemas/AiEmbeddingProviderType"
         },
         "needReset": {
+          "examples": [
+            false
+          ],
           "type": "boolean",
-          "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
-          "example": false
+          "description": "Indicates whether the embedding provider API key needs to be reconfigured."
         }
       },
       "additionalProperties": false,
       "description": "The vectorization settings."
     },
-    "NewAiEmbeddingProviderType": {
+    "AiEmbeddingProviderType": {
       "oneOf": [
         {
+          "examples": [
+            "None"
+          ],
           "enum": [
             "None",
             "OpenAi",
@@ -1403,10 +1437,12 @@
             "PortalAi"
           ],
           "type": "string",
-          "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]",
-          "example": "None"
+          "description": "[None - None, OpenAi - OpenAi, OpenRouter - OpenRouter, PortalAi - PortalAi]"
         },
         {
+          "examples": [
+            0
+          ],
           "enum": [
             0,
             1,
@@ -1415,7 +1451,6 @@
           ],
           "type": "integer",
           "description": "[0 - None, 1 - OpenAi, 2 - OpenRouter, 3 - PortalAi]",
-          "example": 0,
           "x-enum-varnames": [
             "None",
             "OpenAi",
@@ -1426,11 +1461,11 @@
       ],
       "x-enum-type": "integer"
     },
-    "NewAiAiSettingsWrapper": {
+    "AiAiSettingsWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiAiSettingsDto"
+          "$ref": "#/components/schemas/AiAiSettingsDto"
         },
         "count": {
           "type": "integer",
@@ -1466,132 +1501,71 @@
         }
       }
     },
-    "NewAiAiSettingsDto": {
+    "AiAiSettingsDto": {
       "required": [
-        "embeddingModel",
-        "generateDocxToolName",
-        "generateFormToolName",
-        "generatePresentationToolName",
-        "knowledgeSearchToolName",
-        "modelAliases",
-        "webCrawlingToolName",
-        "webSearchToolName"
+        "embeddingModel"
       ],
       "type": "object",
       "properties": {
-        "webSearchEnabled": {
-          "type": "boolean",
-          "description": "Indicates whether web search is enabled for AI chat sessions.",
-          "example": true
-        },
-        "webSearchNeedReset": {
-          "type": "boolean",
-          "description": "Indicates whether the web search API key needs to be reconfigured.",
-          "example": false
-        },
         "vectorizationEnabled": {
+          "examples": [
+            true
+          ],
           "type": "boolean",
-          "description": "Indicates whether document vectorization is enabled.",
-          "example": true
+          "description": "Indicates whether document vectorization is enabled."
         },
         "vectorizationNeedReset": {
+          "examples": [
+            false
+          ],
           "type": "boolean",
-          "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
-          "example": false
+          "description": "Indicates whether the embedding provider API key needs to be reconfigured."
         },
         "aiReady": {
+          "examples": [
+            true
+          ],
           "type": "boolean",
-          "description": "Indicates whether the AI subsystem is fully configured and operational.",
-          "example": true
-        },
-        "aiReadyNeedReset": {
-          "type": "boolean",
-          "description": "Indicates whether the AI provider API key needs to be reconfigured.",
-          "example": false
-        },
-        "portalMcpServerId": {
-          "type": "string",
-          "description": "The unique identifier of the portal-level MCP server, if configured.",
-          "format": "uuid",
-          "nullable": true,
-          "example": "00000000-0000-0000-0000-000000000000"
+          "description": "Indicates whether the AI subsystem is fully configured and operational."
         },
         "embeddingModel": {
-          "type": "string",
-          "description": "The name of the embedding model used for document vectorization.",
-          "nullable": true,
-          "example": "text-embedding-3-small"
-        },
-        "modelAliases": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Mapping of model identifiers to human-readable aliases.",
-          "nullable": true,
-          "example": {
-            "gpt-5.2": "GPT-5.2",
-            "claude-sonnet-4-20250514": "Claude Sonnet 4"
-          }
-        },
-        "knowledgeSearchToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant for knowledge base search.",
-          "nullable": true,
-          "example": "knowledge_search"
-        },
-        "webSearchToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant for web search.",
-          "nullable": true,
-          "example": "web_search"
-        },
-        "webCrawlingToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant for web page crawling.",
-          "nullable": true,
-          "example": "web_crawling"
-        },
-        "generateDocxToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI to launch docx creation in the editor.",
-          "nullable": true,
-          "example": "generate_docx"
-        },
-        "generateFormToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant to launch form creation in the editor.",
-          "nullable": true,
-          "example": "generate_form"
-        },
-        "generatePresentationToolName": {
-          "type": "string",
-          "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
-          "nullable": true,
-          "example": "generate_presentation"
+          "examples": [
+            "text-embedding-3-small"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The name of the embedding model used for document vectorization."
         },
         "systemAiEnabled": {
+          "examples": [
+            true
+          ],
           "type": "boolean",
-          "description": "Indicates whether the system-level AI provider is enabled.",
-          "example": true
+          "description": "Indicates whether the system-level AI provider is enabled."
         },
         "recommendedModelForForms": {
-          "type": "string",
-          "description": "The identifier of the model recommended for form generation.",
-          "nullable": true,
-          "example": "gpt-5.4"
+          "examples": [
+            "gpt-5.4"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The identifier of the model recommended for form generation."
         }
       },
       "additionalProperties": false,
       "description": "The AI module settings."
     },
-    "NewAiFolderIntegerArrayWrapper": {
+    "AiFolderIntegerArrayWrapper": {
       "type": "object",
       "properties": {
         "response": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiFolderDtoInteger"
+            "$ref": "#/components/schemas/AiFolderDtoInteger"
           }
         },
         "count": {
@@ -1628,159 +1602,228 @@
         }
       }
     },
-    "NewAiFolderDtoInteger": {
+    "AiFolderDtoInteger": {
       "allOf": [
         {
-          "$ref": "#/components/schemas/NewAiFileEntryDtoInteger"
+          "$ref": "#/components/schemas/AiFileEntryDtoInteger"
         },
         {
           "type": "object",
           "properties": {
             "parentId": {
+              "examples": [
+                10
+              ],
               "type": "integer",
               "description": "The parent folder ID of the folder.",
-              "format": "int32",
-              "example": 10
+              "format": "int32"
             },
             "filesCount": {
+              "examples": [
+                5
+              ],
               "type": "integer",
               "description": "The number of files that the folder contains.",
-              "format": "int32",
-              "example": 5
+              "format": "int32"
             },
             "foldersCount": {
+              "examples": [
+                7
+              ],
               "type": "integer",
               "description": "The number of folders that the folder contains.",
-              "format": "int32",
-              "example": 7
+              "format": "int32"
             },
             "isShareable": {
-              "type": "boolean",
-              "description": "Specifies if the folder can be shared or not.",
-              "nullable": true,
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "description": "Specifies if the folder can be shared or not."
             },
             "new": {
+              "examples": [
+                0
+              ],
               "type": "integer",
               "description": "The new element index in the folder.",
-              "format": "int32",
-              "example": 0
+              "format": "int32"
             },
             "mute": {
+              "examples": [
+                false
+              ],
               "type": "boolean",
-              "description": "Specifies if the folder notifications are enabled or not.",
-              "example": false
+              "description": "Specifies if the folder notifications are enabled or not."
             },
             "tags": {
-              "type": "array",
+              "examples": [
+                [
+                  "tag1",
+                  "tag2"
+                ]
+              ],
+              "type": [
+                "null",
+                "array"
+              ],
               "items": {
                 "type": "string"
               },
-              "description": "The list of tags of the folder.",
-              "nullable": true,
-              "example": [
-                "tag1",
-                "tag2"
-              ]
+              "description": "The list of tags of the folder."
             },
             "logo": {
-              "$ref": "#/components/schemas/NewAiLogo"
+              "description": "The folder logo.",
+              "$ref": "#/components/schemas/AiLogo"
             },
             "pinned": {
+              "examples": [
+                false
+              ],
               "type": "boolean",
-              "description": "Specifies if the folder is pinned or not.",
-              "example": false
+              "description": "Specifies if the folder is pinned or not."
             },
             "roomType": {
-              "$ref": "#/components/schemas/NewAiRoomType"
+              "description": "The room type of the folder.",
+              "$ref": "#/components/schemas/AiRoomType"
             },
             "private": {
+              "examples": [
+                false
+              ],
               "type": "boolean",
-              "description": "Specifies if the folder is private or not.",
-              "example": false
+              "description": "Specifies if the folder is private or not."
             },
             "indexing": {
+              "examples": [
+                true
+              ],
               "type": "boolean",
-              "description": "Specifies if the folder is indexed or not.",
-              "example": true
+              "description": "Specifies if the folder is indexed or not."
             },
             "denyDownload": {
+              "examples": [
+                false
+              ],
               "type": "boolean",
-              "description": "Specifies if the folder can be downloaded or not.",
-              "example": false
+              "description": "Specifies if the folder can be downloaded or not."
             },
             "lifetime": {
-              "$ref": "#/components/schemas/NewAiRoomDataLifetimeDto"
+              "description": "The room data lifetime settings of the folder.",
+              "$ref": "#/components/schemas/AiRoomDataLifetimeDto"
             },
             "watermark": {
-              "$ref": "#/components/schemas/NewAiWatermarkDto"
+              "description": "The watermark settings of the folder.",
+              "$ref": "#/components/schemas/AiWatermarkDto"
             },
             "type": {
-              "$ref": "#/components/schemas/NewAiFolderType"
+              "description": "The folder type.",
+              "$ref": "#/components/schemas/AiFolderType"
             },
             "inRoom": {
-              "type": "boolean",
-              "description": "Specifies if the folder is placed in the room or not.",
-              "nullable": true,
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "description": "Specifies if the folder is placed in the room or not."
             },
             "quotaLimit": {
-              "type": "integer",
+              "examples": [
+                1073741824
+              ],
+              "type": [
+                "null",
+                "integer"
+              ],
               "description": "The folder quota limit.",
-              "format": "int64",
-              "nullable": true,
-              "example": 1073741824
+              "format": "int64"
             },
             "isCustomQuota": {
-              "type": "boolean",
-              "description": "Specifies if the folder room has a custom quota or not.",
-              "nullable": true,
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "description": "Specifies if the folder room has a custom quota or not."
             },
             "usedSpace": {
-              "type": "integer",
+              "examples": [
+                524288000
+              ],
+              "type": [
+                "null",
+                "integer"
+              ],
               "description": "How much folder space is used (counter).",
-              "format": "int64",
-              "nullable": true,
-              "example": 524288000
+              "format": "int64"
             },
             "passwordProtected": {
-              "type": "boolean",
-              "description": "Specifies if the folder is password protected or not.",
-              "nullable": true,
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "description": "Specifies if the folder is password protected or not."
             },
             "expired": {
-              "type": "boolean",
+              "examples": [
+                false
+              ],
+              "type": [
+                "null",
+                "boolean"
+              ],
               "description": "Specifies if an external link to the folder is expired or not.",
-              "nullable": true,
-              "example": false,
               "deprecated": true
             },
             "chatSettings": {
-              "$ref": "#/components/schemas/NewAiChatSettingsDto"
+              "description": "The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.\r\nOnly applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured.",
+              "$ref": "#/components/schemas/AiChatSettingsDto"
             },
             "rootRoomType": {
-              "$ref": "#/components/schemas/NewAiRoomType"
+              "description": "The room type of the root folder. Indicates the type of the parent room if the current folder is nested within a room hierarchy.\r\nThis property helps identify the context in which a nested folder exists.",
+              "$ref": "#/components/schemas/AiRoomType"
             },
             "saveFormAsXLSX": {
-              "type": "boolean",
-              "description": "Specifies whether to save form data as XLSX file.",
-              "nullable": true,
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "description": "Specifies whether to save form data as XLSX file."
             },
             "sendFormToExternalDB": {
-              "type": "boolean",
-              "description": "Specifies whether to send form data to external database.",
-              "nullable": true,
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "description": "Specifies whether to send form data to external database."
             },
             "originalFormId": {
-              "type": "integer",
+              "examples": [
+                42
+              ],
+              "type": [
+                "null",
+                "integer"
+              ],
               "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
-              "format": "int32",
-              "nullable": true,
-              "example": 42
+              "format": "int32"
             }
           }
         }
@@ -1788,22 +1831,29 @@
       "additionalProperties": false,
       "description": "The folder parameters."
     },
-    "NewAiChatSettingsDto": {
+    "AiChatSettingsDto": {
       "type": "object",
       "properties": {
         "prompt": {
-          "type": "string",
-          "description": "The system prompt for the chat.",
-          "nullable": true,
-          "example": "You are a helpful assistant."
+          "examples": [
+            "You are a helpful assistant."
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The system prompt for the chat."
         }
       },
       "additionalProperties": false,
       "description": "The chat settings parameters."
     },
-    "NewAiFolderType": {
+    "AiFolderType": {
       "oneOf": [
         {
+          "examples": [
+            "DEFAULT"
+          ],
           "enum": [
             "DEFAULT",
             "COMMON",
@@ -1837,10 +1887,12 @@
             "Forms"
           ],
           "type": "string",
-          "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]",
-          "example": "DEFAULT"
+          "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
         },
         {
+          "examples": [
+            0
+          ],
           "enum": [
             0,
             1,
@@ -1875,7 +1927,6 @@
           ],
           "type": "integer",
           "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
-          "example": 0,
           "x-enum-varnames": [
             "DEFAULT",
             "COMMON",
@@ -1913,7 +1964,7 @@
       "description": "The folder type.",
       "x-enum-type": "integer"
     },
-    "NewAiWatermarkDto": {
+    "AiWatermarkDto": {
       "required": [
         "additions",
         "imageHeight",
@@ -1924,51 +1975,71 @@
       "type": "object",
       "properties": {
         "additions": {
-          "$ref": "#/components/schemas/NewAiWatermarkAdditions"
+          "description": "Specifies whether to display in the watermark: username, user email, user ip-adress, current date, and room name.",
+          "$ref": "#/components/schemas/AiWatermarkAdditions"
         },
         "text": {
-          "type": "string",
-          "description": "The watermark text.",
-          "nullable": true,
-          "example": "Confidential"
+          "examples": [
+            "Confidential"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The watermark text."
         },
         "rotate": {
+          "examples": [
+            45
+          ],
           "type": "integer",
           "description": "The watermark text and image rotate.",
-          "format": "int32",
-          "example": 45
+          "format": "int32"
         },
         "imageScale": {
+          "examples": [
+            100
+          ],
           "type": "integer",
           "description": "The watermark image scale.",
-          "format": "int32",
-          "example": 100
+          "format": "int32"
         },
         "imageUrl": {
-          "type": "string",
-          "description": "The watermark image url.",
-          "nullable": true,
-          "example": "http://localhost/watermark.png"
+          "examples": [
+            "http://localhost/watermark.png"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The watermark image url."
         },
         "imageHeight": {
+          "examples": [
+            100
+          ],
           "type": "number",
           "description": "The watermark image height.",
-          "format": "double",
-          "example": 100
+          "format": "double"
         },
         "imageWidth": {
+          "examples": [
+            200
+          ],
           "type": "number",
           "description": "The watermark image width.",
-          "format": "double",
-          "example": 200
+          "format": "double"
         }
       },
       "additionalProperties": false,
       "description": "The watermark settings."
     },
-    "NewAiWatermarkAdditions": {
+    "AiWatermarkAdditions": {
       "oneOf": [
         {
+          "examples": [
+            "UserName"
+          ],
           "enum": [
             "UserName",
             "UserEmail",
@@ -1977,10 +2048,12 @@
             "RoomName"
           ],
           "type": "string",
-          "description": "[UserName - User name, UserEmail - User email, UserIpAdress - User ip adress, CurrentDate - Current date, RoomName - Room name]",
-          "example": "UserName"
+          "description": "[UserName - User name, UserEmail - User email, UserIpAdress - User ip adress, CurrentDate - Current date, RoomName - Room name]"
         },
         {
+          "examples": [
+            1
+          ],
           "enum": [
             1,
             2,
@@ -1990,7 +2063,6 @@
           ],
           "type": "integer",
           "description": "[1 - User name, 2 - User email, 4 - User ip adress, 8 - Current date, 16 - Room name]",
-          "example": 1,
           "x-enum-varnames": [
             "UserName",
             "UserEmail",
@@ -2003,49 +2075,65 @@
       "description": "The watermark additions.",
       "x-enum-type": "integer"
     },
-    "NewAiRoomDataLifetimeDto": {
+    "AiRoomDataLifetimeDto": {
       "type": "object",
       "properties": {
         "deletePermanently": {
+          "examples": [
+            true
+          ],
           "type": "boolean",
-          "description": "Specifies whether to permanently delete the room data or not.",
-          "example": true
+          "description": "Specifies whether to permanently delete the room data or not."
         },
         "period": {
-          "$ref": "#/components/schemas/NewAiRoomDataLifetimePeriod"
+          "description": "Specifies the time period type of the room data lifetime.",
+          "$ref": "#/components/schemas/AiRoomDataLifetimePeriod"
         },
         "value": {
+          "examples": [
+            33
+          ],
           "maximum": 999,
           "minimum": 1,
-          "type": "integer",
+          "type": [
+            "null",
+            "integer"
+          ],
           "description": "Specifies the time period value of the room data lifetime.",
-          "format": "int32",
-          "nullable": true,
-          "example": 33
+          "format": "int32"
         },
         "enabled": {
-          "type": "boolean",
-          "description": "Specifies whether the room data lifetime setting is enabled or not.",
-          "nullable": true,
-          "example": true
+          "examples": [
+            true
+          ],
+          "type": [
+            "null",
+            "boolean"
+          ],
+          "description": "Specifies whether the room data lifetime setting is enabled or not."
         }
       },
       "additionalProperties": false,
       "description": "The room data lifetime information."
     },
-    "NewAiRoomDataLifetimePeriod": {
+    "AiRoomDataLifetimePeriod": {
       "oneOf": [
         {
+          "examples": [
+            "Day"
+          ],
           "enum": [
             "Day",
             "Month",
             "Year"
           ],
           "type": "string",
-          "description": "[Day - Day, Month - Month, Year - Year]",
-          "example": "Day"
+          "description": "[Day - Day, Month - Month, Year - Year]"
         },
         {
+          "examples": [
+            0
+          ],
           "enum": [
             0,
             1,
@@ -2053,7 +2141,6 @@
           ],
           "type": "integer",
           "description": "[0 - Day, 1 - Month, 2 - Year]",
-          "example": 0,
           "x-enum-varnames": [
             "Day",
             "Month",
@@ -2064,9 +2151,12 @@
       "description": "The room data lifetime period.",
       "x-enum-type": "integer"
     },
-    "NewAiRoomType": {
+    "AiRoomType": {
       "oneOf": [
         {
+          "examples": [
+            "FillingFormsRoom"
+          ],
           "enum": [
             "FillingFormsRoom",
             "EditingRoom",
@@ -2076,10 +2166,12 @@
             "AiRoom"
           ],
           "type": "string",
-          "description": "[FillingFormsRoom - Form filling room, EditingRoom - Collaboration room, CustomRoom - Custom room, PublicRoom - Public room, VirtualDataRoom - Virtual data room, AiRoom - AI Room]",
-          "example": "FillingFormsRoom"
+          "description": "[FillingFormsRoom - Form filling room, EditingRoom - Collaboration room, CustomRoom - Custom room, PublicRoom - Public room, VirtualDataRoom - Virtual data room, AiRoom - AI Room]"
         },
         {
+          "examples": [
+            1
+          ],
           "enum": [
             1,
             2,
@@ -2090,7 +2182,6 @@
           ],
           "type": "integer",
           "description": "[1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]",
-          "example": 1,
           "x-enum-varnames": [
             "FillingFormsRoom",
             "EditingRoom",
@@ -2104,7 +2195,7 @@
       "description": "The room type.",
       "x-enum-type": "integer"
     },
-    "NewAiLogo": {
+    "AiLogo": {
       "required": [
         "large",
         "medium",
@@ -2114,43 +2205,64 @@
       "type": "object",
       "properties": {
         "original": {
-          "type": "string",
-          "description": "The original logo.",
-          "nullable": true,
-          "example": "https://portal.example.com/logo/original.png"
+          "examples": [
+            "https://portal.example.com/logo/original.png"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The original logo."
         },
         "large": {
-          "type": "string",
-          "description": "The large logo.",
-          "nullable": true,
-          "example": "https://portal.example.com/logo/large.png"
+          "examples": [
+            "https://portal.example.com/logo/large.png"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The large logo."
         },
         "medium": {
-          "type": "string",
-          "description": "The medium logo.",
-          "nullable": true,
-          "example": "https://portal.example.com/logo/medium.png"
+          "examples": [
+            "https://portal.example.com/logo/medium.png"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The medium logo."
         },
         "small": {
-          "type": "string",
-          "description": "The small logo.",
-          "nullable": true,
-          "example": "https://portal.example.com/logo/small.png"
+          "examples": [
+            "https://portal.example.com/logo/small.png"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The small logo."
         },
         "color": {
-          "type": "string",
-          "description": "The logo color.",
-          "nullable": true,
-          "example": "#4781D1"
+          "examples": [
+            "#4781D1"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The logo color."
         },
         "cover": {
-          "$ref": "#/components/schemas/NewAiLogoCover"
+          "description": "The logo cover.",
+          "$ref": "#/components/schemas/AiLogoCover"
         }
       },
       "additionalProperties": false,
       "description": "The room logo information."
     },
-    "NewAiLogoCover": {
+    "AiLogoCover": {
       "required": [
         "data",
         "id"
@@ -2158,72 +2270,107 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
-          "description": "The logo cover ID.",
-          "nullable": true,
-          "example": "default_cover"
+          "examples": [
+            "default_cover"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The logo cover ID."
         },
         "data": {
-          "type": "string",
-          "description": "The logo cover data.",
-          "nullable": true,
-          "example": "base64-image-data..."
+          "examples": [
+            "base64-image-data..."
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The logo cover data."
         }
       },
       "additionalProperties": false,
       "description": "The logo cover information."
     },
-    "NewAiFileEntryDtoInteger": {
+    "AiFileEntryDtoInteger": {
       "allOf": [
         {
-          "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+          "$ref": "#/components/schemas/AiFileEntryBaseDto"
         },
         {
           "type": "object",
           "properties": {
             "id": {
+              "examples": [
+                10
+              ],
               "type": "integer",
               "description": "The file entry ID.",
-              "format": "int32",
-              "example": 10
+              "format": "int32"
             },
             "rootFolderId": {
+              "examples": [
+                1
+              ],
               "type": "integer",
               "description": "The root folder ID of the file entry.",
-              "format": "int32",
-              "example": 1
+              "format": "int32"
             },
             "originId": {
+              "examples": [
+                12
+              ],
               "type": "integer",
               "description": "The origin ID of the file entry.",
-              "format": "int32",
-              "example": 12
+              "format": "int32"
             },
             "originRoomId": {
+              "examples": [
+                22
+              ],
               "type": "integer",
               "description": "The origin room ID of the file entry.",
-              "format": "int32",
-              "example": 22
+              "format": "int32"
             },
             "originTitle": {
-              "type": "string",
-              "description": "The origin title of the file entry.",
-              "nullable": true,
-              "example": "Original Title"
+              "examples": [
+                "Original Title"
+              ],
+              "type": [
+                "null",
+                "string"
+              ],
+              "description": "The origin title of the file entry."
             },
             "originRoomTitle": {
-              "type": "string",
-              "description": "The origin room title of the file entry.",
-              "nullable": true,
-              "example": "Original Room"
+              "examples": [
+                "Original Room"
+              ],
+              "type": [
+                "null",
+                "string"
+              ],
+              "description": "The origin room title of the file entry."
             },
             "canShare": {
+              "examples": [
+                true
+              ],
               "type": "boolean",
-              "description": "Specifies if the file entry can be shared or not.",
-              "example": true
+              "description": "Specifies if the file entry can be shared or not."
             },
             "shareSettings": {
-              "type": "object",
+              "examples": [
+                {
+                  "ExternalLink": 1,
+                  "InvitationLink": 2
+                }
+              ],
+              "type": [
+                "null",
+                "object"
+              ],
               "properties": {
                 "User": {
                   "type": "integer",
@@ -2247,15 +2394,20 @@
                 }
               },
               "additionalProperties": false,
-              "description": "A dictionary representing the sharing settings for the file entry.",
-              "nullable": true,
-              "example": {
-                "ExternalLink": 1,
-                "InvitationLink": 2
-              }
+              "description": "A dictionary representing the sharing settings for the file entry."
             },
             "security": {
-              "type": "object",
+              "examples": [
+                {
+                  "Read": true,
+                  "Edit": false,
+                  "Delete": false
+                }
+              ],
+              "type": [
+                "null",
+                "object"
+              ],
               "properties": {
                 "Read": {
                   "type": "boolean"
@@ -2394,19 +2546,27 @@
                 },
                 "CanUseAi": {
                   "type": "boolean"
+                },
+                "HistoryExport": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false,
-              "description": "The actions that can be performed with the file entry.",
-              "nullable": true,
-              "example": {
-                "Read": true,
-                "Edit": false,
-                "Delete": false
-              }
+              "description": "The actions that can be performed with the file entry."
             },
             "availableShareRights": {
-              "type": "object",
+              "examples": [
+                {
+                  "ExternalLink": [
+                    "Read",
+                    "Edit"
+                  ]
+                }
+              ],
+              "type": [
+                "null",
+                "object"
+              ],
               "properties": {
                 "User": {
                   "type": "array",
@@ -2440,35 +2600,41 @@
                 }
               },
               "additionalProperties": false,
-              "description": "The available external rights of the file entry.",
-              "nullable": true,
-              "example": {
-                "ExternalLink": [
-                  "Read",
-                  "Edit"
-                ]
-              }
+              "description": "The available external rights of the file entry."
             },
             "requestToken": {
-              "type": "string",
-              "description": "The request token of the file entry.",
-              "nullable": true,
-              "example": "token-abc-123"
+              "examples": [
+                "token-abc-123"
+              ],
+              "type": [
+                "null",
+                "string"
+              ],
+              "description": "The request token of the file entry."
             },
             "external": {
-              "type": "boolean",
-              "description": "Specifies if the folder can be accessed via an external link or not.",
-              "nullable": true,
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "description": "Specifies if the folder can be accessed via an external link or not."
             },
             "expirationDate": {
-              "$ref": "#/components/schemas/NewAiApiDateTime"
+              "description": "Represents the expiration date of the file entry.",
+              "$ref": "#/components/schemas/AiApiDateTime"
             },
             "isLinkExpired": {
-              "type": "boolean",
-              "description": "Indicates whether the shareable link associated with the file or folder has expired.",
-              "nullable": true,
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "description": "Indicates whether the shareable link associated with the file or folder has expired."
             }
           }
         }
@@ -2476,126 +2642,177 @@
       "additionalProperties": false,
       "description": "The generic file entry information."
     },
-    "NewAiApiDateTime": {
+    "AiApiDateTime": {
       "type": "object",
       "properties": {
         "utcTime": {
+          "examples": [
+            "2018-01-01T00:00:00.0000000Z"
+          ],
           "type": "string",
           "description": "The time in UTC format.",
           "format": "date-time",
-          "readOnly": true,
-          "example": "2018-01-01T00:00:00.0000000Z"
+          "readOnly": true
         },
         "timeZoneOffset": {
+          "examples": [
+            "00:00:00"
+          ],
           "type": "string",
           "description": "The time zone offset.",
           "format": "date-span",
-          "readOnly": true,
-          "example": "00:00:00"
+          "readOnly": true
         }
       },
       "additionalProperties": false,
       "description": "The API date and time parameters."
     },
-    "NewAiFileEntryBaseDto": {
+    "AiFileEntryBaseDto": {
       "type": "object",
       "properties": {
         "title": {
-          "type": "string",
-          "description": "The file entry title.",
-          "nullable": true,
-          "example": "Some title.txt"
+          "examples": [
+            "Some title.txt"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The file entry title."
         },
         "access": {
-          "$ref": "#/components/schemas/NewAiFileShare"
+          "description": "The access rights to the file entry.",
+          "$ref": "#/components/schemas/AiFileShare"
         },
         "sharedBy": {
-          "$ref": "#/components/schemas/NewAiEmployeeDto"
+          "description": "Provides information about the employee who shared the file or folder.",
+          "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "ownedBy": {
-          "$ref": "#/components/schemas/NewAiEmployeeDto"
+          "description": "The information about the employee who owns the file entry.",
+          "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "shared": {
+          "examples": [
+            false
+          ],
           "type": "boolean",
-          "description": "Specifies if the file entry is shared via link or not.",
-          "example": false
+          "description": "Specifies if the file entry is shared via link or not."
         },
         "sharedForUser": {
+          "examples": [
+            false
+          ],
           "type": "boolean",
-          "description": "Specifies if the file entry is shared for user or not.",
-          "example": false
+          "description": "Specifies if the file entry is shared for user or not."
         },
         "sharedExternal": {
+          "examples": [
+            false
+          ],
           "type": "boolean",
-          "description": "Specifies if the file entry is shared via a public (non-internal) external link.",
-          "example": false
+          "description": "Specifies if the file entry is shared via a public (non-internal) external link."
         },
         "parentShared": {
+          "examples": [
+            false
+          ],
           "type": "boolean",
-          "description": "Indicates whether the parent entity is shared.",
-          "example": false
+          "description": "Indicates whether the parent entity is shared."
         },
         "shortWebUrl": {
-          "type": "string",
+          "examples": [
+            "http://localhost/s/abc123"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The short Web URL.",
-          "format": "uri",
-          "nullable": true,
-          "example": "http://localhost/s/abc123"
+          "format": "uri"
         },
         "created": {
-          "$ref": "#/components/schemas/NewAiApiDateTime"
+          "description": "The creation date and time of the file entry.",
+          "$ref": "#/components/schemas/AiApiDateTime"
         },
         "createdBy": {
-          "$ref": "#/components/schemas/NewAiEmployeeDto"
+          "description": "The file entry author.",
+          "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "updated": {
-          "$ref": "#/components/schemas/NewAiApiDateTime"
+          "description": "The last date and time when the file entry was updated.",
+          "$ref": "#/components/schemas/AiApiDateTime"
         },
         "autoDelete": {
-          "$ref": "#/components/schemas/NewAiApiDateTime"
+          "description": "The date and time when the file entry will be automatically deleted.",
+          "$ref": "#/components/schemas/AiApiDateTime"
         },
         "rootFolderType": {
-          "$ref": "#/components/schemas/NewAiFolderType"
+          "description": "The root folder type of the file entry.",
+          "$ref": "#/components/schemas/AiFolderType"
         },
         "parentRoomType": {
-          "$ref": "#/components/schemas/NewAiFolderType"
+          "description": "The parent room type of the file entry.",
+          "$ref": "#/components/schemas/AiFolderType"
         },
         "updatedBy": {
-          "$ref": "#/components/schemas/NewAiEmployeeDto"
+          "description": "The user who updated the file entry.",
+          "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "providerItem": {
-          "type": "boolean",
-          "description": "Specifies if the file entry provider is specified or not.",
-          "nullable": true,
-          "example": false
+          "examples": [
+            false
+          ],
+          "type": [
+            "null",
+            "boolean"
+          ],
+          "description": "Specifies if the file entry provider is specified or not."
         },
         "providerKey": {
-          "type": "string",
-          "description": "The provider key of the file entry.",
-          "nullable": true,
-          "example": "google-drive"
+          "examples": [
+            "google-drive"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The provider key of the file entry."
         },
         "providerId": {
-          "type": "integer",
+          "examples": [
+            1
+          ],
+          "type": [
+            "null",
+            "integer"
+          ],
           "description": "The provider ID of the file entry.",
-          "format": "int32",
-          "nullable": true,
-          "example": 1
+          "format": "int32"
         },
         "order": {
-          "type": "string",
-          "description": "The order of the file entry.",
-          "nullable": true,
-          "example": "1"
+          "examples": [
+            "1"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The order of the file entry."
         },
         "isFavorite": {
-          "type": "boolean",
-          "description": "Specifies if the file is a favorite or not.",
-          "nullable": true,
-          "example": false
+          "examples": [
+            false
+          ],
+          "type": [
+            "null",
+            "boolean"
+          ],
+          "description": "Specifies if the file is a favorite or not."
         },
         "fileEntryType": {
-          "$ref": "#/components/schemas/NewAiFileEntryType"
+          "description": "The file entry type.",
+          "$ref": "#/components/schemas/AiFileEntryType"
         }
       },
       "additionalProperties": false,
@@ -2608,25 +2825,29 @@
         "FolderDtoString"
       ]
     },
-    "NewAiFileEntryType": {
+    "AiFileEntryType": {
       "oneOf": [
         {
+          "examples": [
+            "Folder"
+          ],
           "enum": [
             "Folder",
             "File"
           ],
           "type": "string",
-          "description": "[Folder - Folder, File - File]",
-          "example": "Folder"
+          "description": "[Folder - Folder, File - File]"
         },
         {
+          "examples": [
+            1
+          ],
           "enum": [
             1,
             2
           ],
           "type": "integer",
           "description": "[1 - Folder, 2 - File]",
-          "example": 1,
           "x-enum-varnames": [
             "Folder",
             "File"
@@ -2636,74 +2857,111 @@
       "description": "The file entry type.",
       "x-enum-type": "integer"
     },
-    "NewAiEmployeeDto": {
+    "AiEmployeeDto": {
       "type": "object",
       "properties": {
         "id": {
+          "examples": [
+            "00000000-0000-0000-0000-000000000000"
+          ],
           "type": "string",
           "description": "The user ID.",
-          "format": "uuid",
-          "example": "00000000-0000-0000-0000-000000000000"
+          "format": "uuid"
         },
         "displayName": {
-          "type": "string",
-          "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
-          "nullable": true,
-          "example": "Mike Zanyatski"
+          "examples": [
+            "Mike Zanyatski"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The HTML-encoded user's display name formatted according to the default format for the current culture."
         },
         "avatar": {
-          "type": "string",
-          "description": "The user avatar.",
-          "nullable": true,
-          "example": "https://example.com/avatar.jpg"
+          "examples": [
+            "https://example.com/avatar.jpg"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The user avatar."
         },
         "avatarOriginal": {
-          "type": "string",
-          "description": "The user original size avatar.",
-          "nullable": true,
-          "example": "https://example.com/avatar_original.jpg"
+          "examples": [
+            "https://example.com/avatar_original.jpg"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The user original size avatar."
         },
         "avatarMax": {
-          "type": "string",
-          "description": "The user maximum size avatar.",
-          "nullable": true,
-          "example": "https://example.com/avatar_max.jpg"
+          "examples": [
+            "https://example.com/avatar_max.jpg"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The user maximum size avatar."
         },
         "avatarMedium": {
-          "type": "string",
-          "description": "The user medium size avatar.",
-          "nullable": true,
-          "example": "https://example.com/avatar_medium.jpg"
+          "examples": [
+            "https://example.com/avatar_medium.jpg"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The user medium size avatar."
         },
         "avatarSmall": {
-          "type": "string",
-          "description": "The user small size avatar.",
-          "nullable": true,
-          "example": "https://example.com/avatar_small.jpg"
+          "examples": [
+            "https://example.com/avatar_small.jpg"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The user small size avatar."
         },
         "profileUrl": {
-          "type": "string",
-          "description": "The user profile URL.",
-          "nullable": true,
-          "example": "https://example.com/profile/user123"
+          "examples": [
+            "https://example.com/profile/user123"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The user profile URL."
         },
         "hasAvatar": {
+          "examples": [
+            true
+          ],
           "type": "boolean",
-          "description": "Specifies if the user has an avatar or not.",
-          "example": true
+          "description": "Specifies if the user has an avatar or not."
         },
         "isAnonim": {
+          "examples": [
+            false
+          ],
           "type": "boolean",
-          "description": "Specifies if the user is anonymous or not.",
-          "example": false
+          "description": "Specifies if the user is anonymous or not."
         }
       },
       "additionalProperties": false,
       "description": "The user parameters."
     },
-    "NewAiFileShare": {
+    "AiFileShare": {
       "oneOf": [
         {
+          "examples": [
+            "None"
+          ],
           "enum": [
             "None",
             "ReadWrite",
@@ -2719,10 +2977,12 @@
             "ContentCreator"
           ],
           "type": "string",
-          "description": "[None - None, ReadWrite - Read and write, Read - Read, Restrict - Restrict, Varies - Varies, Review - Review, Comment - Comment, FillForms - Fill forms, CustomFilter - Custom filter, RoomManager - Room manager, Editing - Editing, ContentCreator - Content creator]",
-          "example": "None"
+          "description": "[None - None, ReadWrite - Read and write, Read - Read, Restrict - Restrict, Varies - Varies, Review - Review, Comment - Comment, FillForms - Fill forms, CustomFilter - Custom filter, RoomManager - Room manager, Editing - Editing, ContentCreator - Content creator]"
         },
         {
+          "examples": [
+            0
+          ],
           "enum": [
             0,
             1,
@@ -2739,7 +2999,6 @@
           ],
           "type": "integer",
           "description": "[0 - None, 1 - Read and write, 2 - Read, 3 - Restrict, 4 - Varies, 5 - Review, 6 - Comment, 7 - Fill forms, 8 - Custom filter, 9 - Room manager, 10 - Editing, 11 - Content creator]",
-          "example": 0,
           "x-enum-varnames": [
             "None",
             "ReadWrite",
@@ -2759,11 +3018,11 @@
       "description": "The access rights type.",
       "x-enum-type": "integer"
     },
-    "NewAiFileOperationWrapper": {
+    "AiFileOperationWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiFileOperationDto"
+          "$ref": "#/components/schemas/AiFileOperationDto"
         },
         "count": {
           "type": "integer",
@@ -2799,7 +3058,7 @@
         }
       }
     },
-    "NewAiFileOperationDto": {
+    "AiFileOperationDto": {
       "required": [
         "error",
         "finished",
@@ -2811,82 +3070,117 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
-          "description": "The file operation ID.",
-          "nullable": true,
-          "example": "00000000-0000-0000-0000-000000000000"
+          "examples": [
+            "00000000-0000-0000-0000-000000000000"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The file operation ID."
         },
         "Operation": {
-          "$ref": "#/components/schemas/NewAiFileOperationType"
+          "description": "The file operation type.",
+          "$ref": "#/components/schemas/AiFileOperationType"
         },
         "progress": {
+          "examples": [
+            100
+          ],
           "type": "integer",
           "description": "The file operation progress in percentage.",
-          "format": "int32",
-          "example": 100
+          "format": "int32"
         },
         "error": {
-          "type": "string",
-          "description": "The file operation error message.",
-          "nullable": true,
-          "example": "File not found."
+          "examples": [
+            "File not found."
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The file operation error message."
         },
         "processed": {
-          "type": "string",
-          "description": "The file operation processing status.",
-          "nullable": true,
-          "example": "1"
+          "examples": [
+            "1"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The file operation processing status."
         },
         "finished": {
+          "examples": [
+            true
+          ],
           "type": "boolean",
-          "description": "Specifies if the file operation is finished or not.",
-          "example": true
+          "description": "Specifies if the file operation is finished or not."
         },
         "url": {
-          "type": "string",
+          "examples": [
+            "http://localhost/download"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The file operation URL.",
-          "format": "uri",
-          "nullable": true,
-          "example": "http://localhost/download"
+          "format": "uri"
         },
         "files": {
-          "type": "array",
+          "examples": [
+            [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
+          ],
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "description": "The file entry information.",
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of files of the file operation.",
-          "nullable": true,
-          "example": [
-            {
-              "id": 10,
-              "title": "document.docx"
-            }
-          ]
+          "description": "The list of files of the file operation."
         },
         "folders": {
-          "type": "array",
+          "examples": [
+            [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
+          ],
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "description": "The file entry information.",
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of folders of the file operation.",
-          "nullable": true,
-          "example": [
-            {
-              "id": 20,
-              "title": "My Folder"
-            }
-          ]
+          "description": "The list of folders of the file operation."
         },
         "status": {
-          "$ref": "#/components/schemas/NewAiDistributedTaskStatus"
+          "description": "The status of the distributed task related to the file operation.",
+          "$ref": "#/components/schemas/AiDistributedTaskStatus"
         }
       },
       "additionalProperties": false,
       "description": "The file operation information."
     },
-    "NewAiDistributedTaskStatus": {
+    "AiDistributedTaskStatus": {
       "oneOf": [
         {
+          "examples": [
+            "Created"
+          ],
           "enum": [
             "Created",
             "Running",
@@ -2895,10 +3189,12 @@
             "Failted"
           ],
           "type": "string",
-          "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]",
-          "example": "Created"
+          "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]"
         },
         {
+          "examples": [
+            0
+          ],
           "enum": [
             0,
             1,
@@ -2908,7 +3204,6 @@
           ],
           "type": "integer",
           "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]",
-          "example": 0,
           "x-enum-varnames": [
             "Created",
             "Running",
@@ -2920,9 +3215,12 @@
       ],
       "x-enum-type": "integer"
     },
-    "NewAiFileOperationType": {
+    "AiFileOperationType": {
       "oneOf": [
         {
+          "examples": [
+            "Move"
+          ],
           "enum": [
             "Move",
             "Copy",
@@ -2934,10 +3232,12 @@
             "Duplicate"
           ],
           "type": "string",
-          "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate]",
-          "example": "Move"
+          "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate]"
         },
         {
+          "examples": [
+            0
+          ],
           "enum": [
             0,
             1,
@@ -2950,7 +3250,6 @@
           ],
           "type": "integer",
           "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
-          "example": 0,
           "x-enum-varnames": [
             "Move",
             "Copy",
@@ -2966,13 +3265,13 @@
       "description": "The file operation type.",
       "x-enum-type": "integer"
     },
-    "NewAiNewItemsAgentNewItemsArrayWrapper": {
+    "AiNewItemsAgentNewItemsArrayWrapper": {
       "type": "object",
       "properties": {
         "response": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiNewItemsDtoAgentNewItemsDto"
+            "$ref": "#/components/schemas/AiNewItemsDtoAgentNewItemsDto"
           }
         },
         "count": {
@@ -3009,7 +3308,7 @@
         }
       }
     },
-    "NewAiNewItemsDtoAgentNewItemsDto": {
+    "AiNewItemsDtoAgentNewItemsDto": {
       "required": [
         "date",
         "items"
@@ -3017,21 +3316,25 @@
       "type": "object",
       "properties": {
         "date": {
-          "$ref": "#/components/schemas/NewAiApiDateTime"
+          "description": "The date and time when the new item was created.",
+          "$ref": "#/components/schemas/AiApiDateTime"
         },
         "items": {
-          "type": "array",
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
-            "$ref": "#/components/schemas/NewAiAgentNewItemsDto"
+            "description": "The agent new item's information.",
+            "$ref": "#/components/schemas/AiAgentNewItemsDto"
           },
-          "description": "The list of items.",
-          "nullable": true
+          "description": "The list of items."
         }
       },
       "additionalProperties": false,
       "description": "The new item parameters."
     },
-    "NewAiAgentNewItemsDto": {
+    "AiAgentNewItemsDto": {
       "required": [
         "agent",
         "items"
@@ -3039,25 +3342,29 @@
       "type": "object",
       "properties": {
         "agent": {
-          "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+          "description": "The file entry information.",
+          "$ref": "#/components/schemas/AiFileEntryBaseDto"
         },
         "items": {
-          "type": "array",
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "description": "The file entry information.",
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of file entry items.",
-          "nullable": true
+          "description": "The list of file entry items."
         }
       },
       "additionalProperties": false,
       "description": "The agent new item's information."
     },
-    "NewAiFolderIntegerWrapper": {
+    "AiFolderIntegerWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiFolderDtoInteger"
+          "$ref": "#/components/schemas/AiFolderDtoInteger"
         },
         "count": {
           "type": "integer",
@@ -3093,11 +3400,11 @@
         }
       }
     },
-    "NewAiFolderContentIntegerWrapper": {
+    "AiFolderContentIntegerWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "$ref": "#/components/schemas/NewAiFolderContentDtoInteger"
+          "$ref": "#/components/schemas/AiFolderContentDtoInteger"
         },
         "count": {
           "type": "integer",
@@ -3133,7 +3440,7 @@
         }
       }
     },
-    "NewAiFolderContentDtoInteger": {
+    "AiFolderContentDtoInteger": {
       "required": [
         "pathParts",
         "total"
@@ -3141,64 +3448,85 @@
       "type": "object",
       "properties": {
         "files": {
-          "type": "array",
+          "examples": [
+            [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
+          ],
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "description": "The file entry information.",
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of files in the folder.",
-          "nullable": true,
-          "example": [
-            {
-              "id": 10,
-              "title": "document.docx"
-            }
-          ]
+          "description": "The list of files in the folder."
         },
         "folders": {
-          "type": "array",
+          "examples": [
+            [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
+          ],
+          "type": [
+            "null",
+            "array"
+          ],
           "items": {
-            "$ref": "#/components/schemas/NewAiFileEntryBaseDto"
+            "description": "The file entry information.",
+            "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of folders in the folder.",
-          "nullable": true,
-          "example": [
-            {
-              "id": 20,
-              "title": "My Folder"
-            }
-          ]
+          "description": "The list of folders in the folder."
         },
         "current": {
-          "$ref": "#/components/schemas/NewAiFolderDtoInteger"
+          "description": "The current folder information.",
+          "$ref": "#/components/schemas/AiFolderDtoInteger"
         },
         "pathParts": {
-          "description": "The folder path.",
-          "nullable": true,
-          "example": "{key = \"Key\", path = \"//path//to//folder\"}"
+          "examples": [
+            "{key = \"Key\", path = \"//path//to//folder\"}"
+          ],
+          "type": "null",
+          "description": "The folder path."
         },
         "startIndex": {
+          "examples": [
+            0
+          ],
           "type": "integer",
           "description": "The folder start index.",
-          "format": "int32",
-          "example": 0
+          "format": "int32"
         },
         "count": {
+          "examples": [
+            4
+          ],
           "type": "integer",
           "description": "The number of folder elements.",
-          "format": "int32",
-          "example": 4
+          "format": "int32"
         },
         "total": {
+          "examples": [
+            4
+          ],
           "type": "integer",
           "description": "The total number of elements in the folder.",
-          "format": "int32",
-          "example": 4
+          "format": "int32"
         },
         "new": {
+          "examples": [
+            0
+          ],
           "type": "integer",
           "description": "The new element index in the folder.",
-          "format": "int32",
-          "example": 0
+          "format": "int32"
         }
       },
       "additionalProperties": false,
@@ -3206,20 +3534,20 @@
     }
   },
   "operations": {
-    "newAiAiSend": {
+    "aiAiSend": {
       "request": {
         "type": "object",
         "properties": {
           "actionType": {
-            "$ref": "#/components/schemas/NewAiActionType",
+            "$ref": "#/components/schemas/AiActionType",
             "description": "Which AI action to run — selects the assignment slot and action."
           },
           "userMessage": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "$ref": "#/components/schemas/AiThreadMessageLike",
             "description": "The user turn to send."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/NewAiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs"
           },
           "entityId": {
             "type": "string",
@@ -3233,10 +3561,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiThreadMessageLike"
+        "$ref": "#/components/schemas/AiThreadMessageLike"
       }
     },
-    "newAiAiSendCustom": {
+    "aiAiSendCustom": {
       "request": {
         "type": "object",
         "properties": {
@@ -3249,10 +3577,10 @@
             "description": "Caller-supplied system prompt for this one-turn call."
           },
           "userMessage": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike"
+            "$ref": "#/components/schemas/AiThreadMessageLike"
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/NewAiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs"
           }
         },
         "required": [
@@ -3263,27 +3591,27 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiThreadMessageLike",
+        "$ref": "#/components/schemas/AiThreadMessageLike",
         "description": "One-shot mode (`isStream: false`) returns the assistant message shown here; streaming mode instead emits a newline-delimited `ChatEvent` stream."
       }
     },
-    "newAiAiSendWithStream": {
+    "aiAiSendWithStream": {
       "request": {
-        "$ref": "#/components/schemas/NewAiAiSendStreamBody"
+        "$ref": "#/components/schemas/AiAiSendStreamBody"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiChatEvent"
+        "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "newAiAiSendWithStreamOpenAI": {
+    "aiAiSendWithStreamOpenAI": {
       "request": {
-        "$ref": "#/components/schemas/NewAiAiSendStreamBody"
+        "$ref": "#/components/schemas/AiAiSendStreamBody"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiOpenAIStreamChunk"
+        "$ref": "#/components/schemas/AiOpenAIStreamChunk"
       }
     },
-    "newAiAiRegenerateStream": {
+    "aiAiRegenerateStream": {
       "request": {
         "type": "object",
         "properties": {
@@ -3292,7 +3620,7 @@
             "description": "Target thread (must already exist)."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/NewAiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs"
           },
           "entityId": {
             "type": "string"
@@ -3307,10 +3635,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiChatEvent"
+        "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "newAiAiApproveToolCall": {
+    "aiAiApproveToolCall": {
       "request": {
         "type": "object",
         "additionalProperties": false,
@@ -3335,11 +3663,11 @@
             "description": "Index of the tool-call content part inside `message.content`."
           },
           "message": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "$ref": "#/components/schemas/AiThreadMessageLike",
             "description": "Snapshot of the assistant message at the time the tool call surfaced."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/NewAiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs"
           },
           "entityId": {
             "type": "string"
@@ -3357,38 +3685,40 @@
         ]
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiChatEvent"
+        "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "newAiAiDenyToolCall": {
+    "aiAiDenyToolCall": {
       "request": {
-        "$ref": "#/components/schemas/NewAiAiToolCallData"
+        "$ref": "#/components/schemas/AiAiToolCallData"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiChatEvent"
+        "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "newAiAssignmentsResolveForAction": {
+    "aiAssignmentsResolveForAction": {
       "response": {
-        "$ref": "#/components/schemas/NewAiResolvedAssignment"
+        "$ref": "#/components/schemas/AiResolvedAssignment"
       }
     },
-    "newAiAssignmentsTryResolveForAction": {
+    "aiAssignmentsTryResolveForAction": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/NewAiResolvedAssignment"
+            "$ref": "#/components/schemas/AiResolvedAssignment"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
-    "newAiAssignmentsAssign": {
+    "aiAssignmentsAssign": {
       "request": {
         "type": "object",
         "properties": {
           "actionType": {
-            "$ref": "#/components/schemas/NewAiActionType",
+            "$ref": "#/components/schemas/AiActionType",
             "description": "Action the assignment applies to."
           },
           "profileId": {
@@ -3403,15 +3733,15 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiAssignmentMutationResult"
+        "$ref": "#/components/schemas/AiAssignmentMutationResult"
       }
     },
-    "newAiAssignmentsUnassign": {
+    "aiAssignmentsUnassign": {
       "request": {
-        "$ref": "#/components/schemas/NewAiActionType"
+        "$ref": "#/components/schemas/AiActionType"
       }
     },
-    "newAiAssignmentsBulkAssign": {
+    "aiAssignmentsBulkAssign": {
       "request": {
         "type": "object",
         "additionalProperties": {
@@ -3419,16 +3749,18 @@
         }
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiBulkAssignmentResult"
+        "$ref": "#/components/schemas/AiBulkAssignmentResult"
       }
     },
-    "newAiAssignmentsGetAssignment": {
+    "aiAssignmentsGetAssignment": {
       "response": {
-        "nullable": true,
-        "type": "string"
+        "type": [
+          "string",
+          "null"
+        ]
       }
     },
-    "newAiAssignmentsGetAllAssignments": {
+    "aiAssignmentsGetAllAssignments": {
       "response": {
         "type": "object",
         "additionalProperties": {
@@ -3436,12 +3768,12 @@
         }
       }
     },
-    "newAiAssignmentsCascadeProfileDelete": {
+    "aiAssignmentsCascadeProfileDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiAttachmentsSaveFile": {
+    "aiAttachmentsSaveFile": {
       "request": {
         "type": "object",
         "properties": {
@@ -3484,10 +3816,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiAttachment"
+        "$ref": "#/components/schemas/AiAttachment"
       }
     },
-    "newAiAttachmentsSaveFilesMany": {
+    "aiAttachmentsSaveFilesMany": {
       "request": {
         "type": "object",
         "properties": {
@@ -3534,11 +3866,11 @@
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiAttachment"
+          "$ref": "#/components/schemas/AiAttachment"
         }
       }
     },
-    "newAiAttachmentsSaveImage": {
+    "aiAttachmentsSaveImage": {
       "request": {
         "type": "object",
         "properties": {
@@ -3575,10 +3907,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiAttachment"
+        "$ref": "#/components/schemas/AiAttachment"
       }
     },
-    "newAiAttachmentsSaveImagesMany": {
+    "aiAttachmentsSaveImagesMany": {
       "request": {
         "type": "object",
         "properties": {
@@ -3620,24 +3952,26 @@
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiAttachment"
+          "$ref": "#/components/schemas/AiAttachment"
         }
       }
     },
-    "newAiAttachmentsGet": {
+    "aiAttachmentsGet": {
       "request": {
         "type": "string"
       },
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/NewAiAttachment"
+            "$ref": "#/components/schemas/AiAttachment"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
-    "newAiAttachmentsGetMany": {
+    "aiAttachmentsGetMany": {
       "request": {
         "type": "array",
         "items": {
@@ -3647,21 +3981,23 @@
       "response": {
         "type": "array",
         "items": {
-          "nullable": true,
-          "allOf": [
+          "anyOf": [
             {
-              "$ref": "#/components/schemas/NewAiAttachment"
+              "$ref": "#/components/schemas/AiAttachment"
+            },
+            {
+              "type": "null"
             }
           ]
         }
       }
     },
-    "newAiAttachmentsDelete": {
+    "aiAttachmentsDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiAttachmentsDeleteMany": {
+    "aiAttachmentsDeleteMany": {
       "request": {
         "type": "array",
         "items": {
@@ -3669,7 +4005,7 @@
         }
       }
     },
-    "newAiAttachmentsLinkToMessage": {
+    "aiAttachmentsLinkToMessage": {
       "request": {
         "type": "object",
         "properties": {
@@ -3697,12 +4033,12 @@
         "additionalProperties": false
       }
     },
-    "newAiPreferencesGetDeepMode": {
+    "aiPreferencesGetDeepMode": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiPreferencesSetDeepMode": {
+    "aiPreferencesSetDeepMode": {
       "request": {
         "type": "object",
         "properties": {
@@ -3720,51 +4056,51 @@
         "additionalProperties": false
       }
     },
-    "newAiPreferencesClearDeepMode": {
+    "aiPreferencesClearDeepMode": {
       "request": {
         "type": "string"
       }
     },
-    "newAiPreferencesIsDeepModeSet": {
+    "aiPreferencesIsDeepModeSet": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiProfilesCreate": {
+    "aiProfilesCreate": {
       "request": {
-        "$ref": "#/components/schemas/NewAiCreateProfileInput"
+        "$ref": "#/components/schemas/AiCreateProfileInput"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiProfileMutationResult"
+        "$ref": "#/components/schemas/AiProfileMutationResult"
       }
     },
-    "newAiProfilesUpdate": {
+    "aiProfilesUpdate": {
       "request": {
-        "$ref": "#/components/schemas/NewAiProfile"
+        "$ref": "#/components/schemas/AiProfile"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiProfileMutationResult"
+        "$ref": "#/components/schemas/AiProfileMutationResult"
       }
     },
-    "newAiProfilesDelete": {
+    "aiProfilesDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiProfilesListModels": {
+    "aiProfilesListModels": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiModel"
+          "$ref": "#/components/schemas/AiModel"
         }
       }
     },
-    "newAiProfilesListProviderModels": {
+    "aiProfilesListProviderModels": {
       "request": {
         "type": "object",
         "properties": {
           "providerType": {
-            "$ref": "#/components/schemas/NewAiProviderType",
+            "$ref": "#/components/schemas/AiProviderType",
             "description": "Provider whose catalog to list."
           },
           "baseUrl": {
@@ -3786,11 +4122,11 @@
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiModel"
+          "$ref": "#/components/schemas/AiModel"
         }
       }
     },
-    "newAiProfilesTestConnection": {
+    "aiProfilesTestConnection": {
       "request": {
         "type": "string"
       },
@@ -3798,9 +4134,7 @@
         "anyOf": [
           {
             "type": "boolean",
-            "enum": [
-              true
-            ]
+            "const": true
           },
           {
             "type": "object",
@@ -3814,28 +4148,28 @@
         ]
       }
     },
-    "newAiProfilesGetById": {
+    "aiProfilesGetById": {
       "response": {
-        "$ref": "#/components/schemas/NewAiProfile"
+        "$ref": "#/components/schemas/AiProfile"
       }
     },
-    "newAiProfilesList": {
+    "aiProfilesList": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiProfile"
+          "$ref": "#/components/schemas/AiProfile"
         }
       }
     },
-    "newAiPromptsCreate": {
+    "aiPromptsCreate": {
       "request": {
-        "$ref": "#/components/schemas/NewAiCreatePromptInput"
+        "$ref": "#/components/schemas/AiCreatePromptInput"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiPromptMutationResult"
+        "$ref": "#/components/schemas/AiPromptMutationResult"
       }
     },
-    "newAiPromptsUpdate": {
+    "aiPromptsUpdate": {
       "request": {
         "type": "object",
         "properties": {
@@ -3853,8 +4187,10 @@
                 "type": "string"
               },
               "folderId": {
-                "nullable": true,
-                "type": "string"
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             },
             "additionalProperties": false,
@@ -3868,10 +4204,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiPromptMutationResult"
+        "$ref": "#/components/schemas/AiPromptMutationResult"
       }
     },
-    "newAiPromptsMove": {
+    "aiPromptsMove": {
       "request": {
         "type": "object",
         "properties": {
@@ -3880,8 +4216,10 @@
             "description": "Prompt id to move."
           },
           "folderId": {
-            "nullable": true,
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Target folder id, or `null` for root."
           }
         },
@@ -3892,31 +4230,31 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiPromptMutationResult"
+        "$ref": "#/components/schemas/AiPromptMutationResult"
       }
     },
-    "newAiPromptsDelete": {
+    "aiPromptsDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiPromptsList": {
+    "aiPromptsList": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiPrompt"
+          "$ref": "#/components/schemas/AiPrompt"
         }
       }
     },
-    "newAiPromptsCreateFolder": {
+    "aiPromptsCreateFolder": {
       "request": {
         "type": "string"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderMutationResult"
+        "$ref": "#/components/schemas/AiFolderMutationResult"
       }
     },
-    "newAiPromptsRenameFolder": {
+    "aiPromptsRenameFolder": {
       "request": {
         "type": "object",
         "properties": {
@@ -3936,40 +4274,40 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderMutationResult"
+        "$ref": "#/components/schemas/AiFolderMutationResult"
       }
     },
-    "newAiPromptsDeleteFolder": {
+    "aiPromptsDeleteFolder": {
       "request": {
         "type": "string"
       }
     },
-    "newAiPromptsListFolders": {
+    "aiPromptsListFolders": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiPromptFolder"
+          "$ref": "#/components/schemas/AiPromptFolder"
         }
       }
     },
-    "newAiPromptsExport": {
+    "aiPromptsExport": {
       "response": {
-        "$ref": "#/components/schemas/NewAiPromptBundle"
+        "$ref": "#/components/schemas/AiPromptBundle"
       }
     },
-    "newAiPromptsImportBundle": {
+    "aiPromptsImportBundle": {
       "request": {
         "type": "object",
         "properties": {
           "bundle": {
-            "$ref": "#/components/schemas/NewAiPromptBundle",
+            "$ref": "#/components/schemas/AiPromptBundle",
             "description": "Bundle to restore."
           },
           "options": {
             "type": "object",
             "properties": {
               "mode": {
-                "$ref": "#/components/schemas/NewAiImportMode"
+                "$ref": "#/components/schemas/AiImportMode"
               }
             },
             "additionalProperties": false,
@@ -3982,30 +4320,34 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiImportResult"
+        "$ref": "#/components/schemas/AiImportResult"
       }
     },
-    "newAiPromptsGetById": {
+    "aiPromptsGetById": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/NewAiPrompt"
+            "$ref": "#/components/schemas/AiPrompt"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
-    "newAiPromptsGetFolderById": {
+    "aiPromptsGetFolderById": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/NewAiPromptFolder"
+            "$ref": "#/components/schemas/AiPromptFolder"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
-    "newAiThreadsCreate": {
+    "aiThreadsCreate": {
       "request": {
         "type": "object",
         "properties": {
@@ -4028,18 +4370,18 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiThread"
+        "$ref": "#/components/schemas/AiThread"
       }
     },
-    "newAiThreadsOpenOrCreate": {
+    "aiThreadsOpenOrCreate": {
       "request": {
-        "$ref": "#/components/schemas/NewAiOpenOrCreateInput"
+        "$ref": "#/components/schemas/AiOpenOrCreateInput"
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiOpenOrCreateResult"
+        "$ref": "#/components/schemas/AiOpenOrCreateResult"
       }
     },
-    "newAiThreadsAppendUserMessage": {
+    "aiThreadsAppendUserMessage": {
       "request": {
         "type": "object",
         "properties": {
@@ -4047,7 +4389,7 @@
             "type": "string"
           },
           "message": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "$ref": "#/components/schemas/AiThreadMessageLike",
             "description": "Message to persist (id/createdAt are storage-assigned)."
           },
           "profileId": {
@@ -4061,10 +4403,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiThreadMessageLike"
+        "$ref": "#/components/schemas/AiThreadMessageLike"
       }
     },
-    "newAiThreadsTouch": {
+    "aiThreadsTouch": {
       "request": {
         "type": "object",
         "properties": {
@@ -4081,7 +4423,7 @@
         "additionalProperties": false
       }
     },
-    "newAiThreadsRename": {
+    "aiThreadsRename": {
       "request": {
         "type": "object",
         "properties": {
@@ -4100,17 +4442,17 @@
         "additionalProperties": false
       }
     },
-    "newAiThreadsDelete": {
+    "aiThreadsDelete": {
       "request": {
         "type": "string"
       }
     },
-    "newAiThreadsClearMessages": {
+    "aiThreadsClearMessages": {
       "request": {
         "type": "string"
       }
     },
-    "newAiThreadsRegenerateTitle": {
+    "aiThreadsRegenerateTitle": {
       "request": {
         "type": "object",
         "properties": {
@@ -4118,7 +4460,7 @@
             "type": "string"
           },
           "profile": {
-            "$ref": "#/components/schemas/NewAiProfile",
+            "$ref": "#/components/schemas/AiProfile",
             "description": "Profile used to regenerate the title."
           }
         },
@@ -4132,43 +4474,47 @@
         "type": "string"
       }
     },
-    "newAiThreadsList": {
+    "aiThreadsList": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiThread"
+          "$ref": "#/components/schemas/AiThread"
         }
       }
     },
-    "newAiThreadsReadMessages": {
+    "aiThreadsReadMessages": {
       "response": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NewAiThreadMessageLike"
+          "$ref": "#/components/schemas/AiThreadMessageLike"
         }
       }
     },
-    "newAiThreadsGetById": {
+    "aiThreadsGetById": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/NewAiThread"
+            "$ref": "#/components/schemas/AiThread"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
-    "newAiThreadsGetMessageById": {
+    "aiThreadsGetMessageById": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike"
+            "$ref": "#/components/schemas/AiThreadMessageLike"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
-    "newAiThreadsUpdateMessage": {
+    "aiThreadsUpdateMessage": {
       "request": {
         "type": "object",
         "properties": {
@@ -4176,7 +4522,7 @@
             "type": "string"
           },
           "message": {
-            "$ref": "#/components/schemas/NewAiThreadMessageLike",
+            "$ref": "#/components/schemas/AiThreadMessageLike",
             "description": "Replacement message content."
           }
         },
@@ -4187,12 +4533,12 @@
         "additionalProperties": false
       }
     },
-    "newAiThreadsDeleteMessage": {
+    "aiThreadsDeleteMessage": {
       "request": {
         "type": "string"
       }
     },
-    "newAiToolsAddCustomServer": {
+    "aiToolsAddCustomServer": {
       "request": {
         "type": "object",
         "properties": {
@@ -4201,7 +4547,7 @@
             "description": "Server name (unique within scope)."
           },
           "config": {
-            "$ref": "#/components/schemas/NewAiMcpServerConfig",
+            "$ref": "#/components/schemas/AiMcpServerConfig",
             "description": "Server transport configuration."
           },
           "entityId": {
@@ -4215,10 +4561,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiToolsMutationResult"
+        "$ref": "#/components/schemas/AiToolsMutationResult"
       }
     },
-    "newAiToolsUpdateCustomServer": {
+    "aiToolsUpdateCustomServer": {
       "request": {
         "type": "object",
         "properties": {
@@ -4226,7 +4572,7 @@
             "type": "string"
           },
           "config": {
-            "$ref": "#/components/schemas/NewAiMcpServerConfig"
+            "$ref": "#/components/schemas/AiMcpServerConfig"
           },
           "entityId": {
             "type": "string"
@@ -4239,10 +4585,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiToolsMutationResult"
+        "$ref": "#/components/schemas/AiToolsMutationResult"
       }
     },
-    "newAiToolsRemoveCustomServer": {
+    "aiToolsRemoveCustomServer": {
       "request": {
         "type": "object",
         "properties": {
@@ -4259,43 +4605,45 @@
         "additionalProperties": false
       }
     },
-    "newAiToolsGetCustomServer": {
+    "aiToolsGetCustomServer": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/NewAiMcpServerConfig"
+            "$ref": "#/components/schemas/AiMcpServerConfig"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
-    "newAiToolsListCustomServers": {
+    "aiToolsListCustomServers": {
       "response": {
         "type": "object",
         "additionalProperties": {
-          "$ref": "#/components/schemas/NewAiMcpServerConfig"
+          "$ref": "#/components/schemas/AiMcpServerConfig"
         }
       }
     },
-    "newAiToolsListSystemTools": {
+    "aiToolsListSystemTools": {
       "response": {
         "type": "object",
         "additionalProperties": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/NewAiTMCPItem"
+            "$ref": "#/components/schemas/AiTMCPItem"
           }
         }
       }
     },
-    "newAiToolsReplaceAllCustomServers": {
+    "aiToolsReplaceAllCustomServers": {
       "request": {
         "type": "object",
         "properties": {
           "map": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/NewAiMcpServerConfig"
+              "$ref": "#/components/schemas/AiMcpServerConfig"
             },
             "description": "Full replacement set, keyed by server name."
           },
@@ -4309,10 +4657,10 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiToolsBulkResult"
+        "$ref": "#/components/schemas/AiToolsBulkResult"
       }
     },
-    "newAiToolsSetDisabled": {
+    "aiToolsSetDisabled": {
       "request": {
         "type": "object",
         "properties": {
@@ -4337,7 +4685,7 @@
         "additionalProperties": false
       }
     },
-    "newAiToolsGetDisabled": {
+    "aiToolsGetDisabled": {
       "response": {
         "type": "object",
         "additionalProperties": {
@@ -4348,12 +4696,12 @@
         }
       }
     },
-    "newAiToolsIsToolDisabled": {
+    "aiToolsIsToolDisabled": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiToolsSetAllowAlways": {
+    "aiToolsSetAllowAlways": {
       "request": {
         "type": "object",
         "properties": {
@@ -4379,7 +4727,7 @@
         "additionalProperties": false
       }
     },
-    "newAiToolsGetAllowAlways": {
+    "aiToolsGetAllowAlways": {
       "response": {
         "type": "array",
         "items": {
@@ -4387,37 +4735,37 @@
         }
       }
     },
-    "newAiToolsIsAllowAlways": {
+    "aiToolsIsAllowAlways": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiWebSearchGetActiveConfig": {
+    "aiWebSearchGetActiveConfig": {
       "response": {
-        "nullable": true,
-        "allOf": [
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/NewAiWebSearchConfig"
+            "$ref": "#/components/schemas/AiWebSearchConfig"
+          },
+          {
+            "type": "null"
           }
         ]
       }
     },
-    "newAiWebSearchIsConfigured": {
+    "aiWebSearchIsConfigured": {
       "response": {
         "type": "boolean"
       }
     },
-    "newAiWebSearchTestConnection": {
+    "aiWebSearchTestConnection": {
       "request": {
-        "$ref": "#/components/schemas/NewAiWebSearchConfig"
+        "$ref": "#/components/schemas/AiWebSearchConfig"
       },
       "response": {
         "anyOf": [
           {
             "type": "boolean",
-            "enum": [
-              true
-            ]
+            "const": true
           },
           {
             "type": "object",
@@ -4431,12 +4779,12 @@
         ]
       }
     },
-    "newAiWebSearchConfigure": {
+    "aiWebSearchConfigure": {
       "request": {
         "type": "object",
         "properties": {
           "config": {
-            "$ref": "#/components/schemas/NewAiWebSearchConfig"
+            "$ref": "#/components/schemas/AiWebSearchConfig"
           },
           "entityId": {
             "type": "string"
@@ -4448,15 +4796,15 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiWebSearchMutationResult"
+        "$ref": "#/components/schemas/AiWebSearchMutationResult"
       }
     },
-    "newAiWebSearchSetActiveConfig": {
+    "aiWebSearchSetActiveConfig": {
       "request": {
         "type": "object",
         "properties": {
           "config": {
-            "$ref": "#/components/schemas/NewAiWebSearchConfig"
+            "$ref": "#/components/schemas/AiWebSearchConfig"
           },
           "entityId": {
             "type": "string"
@@ -4468,12 +4816,12 @@
         "additionalProperties": false
       }
     },
-    "newAiWebSearchClear": {
+    "aiWebSearchClear": {
       "request": {
         "type": "string"
       }
     },
-    "newAiExportTextToDocx": {
+    "aiExportTextToDocx": {
       "request": {
         "type": "object",
         "properties": {
@@ -4486,13 +4834,9 @@
             "description": "Markdown content to convert."
           },
           "folderId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
+            "type": [
+              "string",
+              "number"
             ],
             "description": "Target folder id (int or string)."
           }
@@ -4518,7 +4862,7 @@
         "description": "Accepted-for-processing acknowledgement (conversion is asynchronous)."
       }
     },
-    "newAiAgentsCreate": {
+    "aiAgentsCreate": {
       "request": {
         "type": "object",
         "additionalProperties": false,
@@ -4596,10 +4940,10 @@
         ]
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
       }
     },
-    "newAiAgentsUpdate": {
+    "aiAgentsUpdate": {
       "request": {
         "type": "object",
         "additionalProperties": false,
@@ -4666,10 +5010,10 @@
         }
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
       }
     },
-    "newAiAgentsDelete": {
+    "aiAgentsDelete": {
       "request": {
         "type": "object",
         "properties": {
@@ -4681,23 +5025,19 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFileOperationWrapper"
+        "$ref": "#/components/schemas/AiFileOperationWrapper"
       }
     },
-    "newAiAgentsUpdateQuota": {
+    "aiAgentsUpdateQuota": {
       "request": {
         "type": "object",
         "properties": {
           "roomIds": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string"
-                }
+              "type": [
+                "number",
+                "string"
               ],
               "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
             },
@@ -4715,23 +5055,19 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
       }
     },
-    "newAiAgentsResetQuota": {
+    "aiAgentsResetQuota": {
       "request": {
         "type": "object",
         "properties": {
           "roomIds": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string"
-                }
+              "type": [
+                "number",
+                "string"
               ],
               "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
             },
@@ -4744,47 +5080,47 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
       }
     },
-    "newAiAgentsList": {
+    "aiAgentsList": {
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderContentIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderContentIntegerWrapper"
       }
     },
-    "newAiAgentsNews": {
+    "aiAgentsNews": {
       "response": {
-        "$ref": "#/components/schemas/NewAiNewItemsAgentNewItemsArrayWrapper"
+        "$ref": "#/components/schemas/AiNewItemsAgentNewItemsArrayWrapper"
       }
     },
-    "newAiAgentsGet": {
+    "aiAgentsGet": {
       "response": {
-        "$ref": "#/components/schemas/NewAiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
       }
     },
-    "newAiSettingsGet": {
+    "aiSettingsGet": {
       "response": {
-        "$ref": "#/components/schemas/NewAiAiSettingsWrapper"
+        "$ref": "#/components/schemas/AiAiSettingsWrapper"
       }
     },
-    "newAiSettingsGetVectorization": {
+    "aiSettingsGetVectorization": {
       "response": {
-        "$ref": "#/components/schemas/NewAiVectorizationSettingsWrapper"
+        "$ref": "#/components/schemas/AiVectorizationSettingsWrapper"
       }
     },
-    "newAiSettingsSetVectorization": {
+    "aiSettingsSetVectorization": {
       "response": {
-        "$ref": "#/components/schemas/NewAiVectorizationSettingsWrapper"
+        "$ref": "#/components/schemas/AiVectorizationSettingsWrapper"
       }
     },
-    "newAiSettingsGetUser": {
+    "aiSettingsGetUser": {
       "response": {
-        "$ref": "#/components/schemas/NewAiAiUserSettingsWrapper"
+        "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
       }
     },
-    "newAiSettingsSetUser": {
+    "aiSettingsSetUser": {
       "response": {
-        "$ref": "#/components/schemas/NewAiAiUserSettingsWrapper"
+        "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
       }
     }
   }

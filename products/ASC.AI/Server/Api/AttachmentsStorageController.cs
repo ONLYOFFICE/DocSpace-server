@@ -34,14 +34,11 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[InternalRoute]
-[ApiController]
+[ApiEndpoint("ai", Internal = true)]
 [AiFeature]
-[ControllerName("ai")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class AttachmentsStorageController(
-    AttachmentsStorageService attachmentsStorageService,
-    AttachmentHandler attachmentHandler) : ControllerBase
+    AttachmentsStorageService attachmentsStorageService) : ControllerBase
 {
     [HttpPost("attachments")]
     public async Task<List<AttachmentDto>> CreateManyAsync(CreateAttachmentsRequestDto inDto)
@@ -65,7 +62,7 @@ public class AttachmentsStorageController(
                 continue;
             }
 
-            var (canAnalyze, keys) = await attachmentHandler.GetFormAnalysisInfoAsync(fileId);
+            var (canAnalyze, keys) = await attachmentsStorageService.GetFormAnalysisInfoAsync(fileId);
             result.Add(new FormAnalysisDto
             {
                 EntryId = entryId,

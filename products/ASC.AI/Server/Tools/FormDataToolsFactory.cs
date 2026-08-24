@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -787,6 +787,14 @@ public class FormDataToolsFactory(
             }
             writer.WriteEndArray();
         }
+    }
+
+    // Result of save_form_analysis_report: the converted .docx report file saved into the room.
+    private sealed class GeneratedFileResult
+    {
+        public required int Id { get; init; }
+        public required string Title { get; init; }
+        public required string Extension { get; init; }
     }
 }
 

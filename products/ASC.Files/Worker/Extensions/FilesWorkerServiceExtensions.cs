@@ -37,7 +37,6 @@ using ASC.Data.Storage.Encryption;
 using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 using ASC.Files.Core.RoomTemplates.Operations;
 using ASC.Files.Core.Services.NotifyService;
-using ASC.Files.Worker.IntegrationEvents.EventHandling;
 using ASC.Files.Worker.Services;
 using ASC.Web.Files.Configuration;
 
@@ -97,6 +96,7 @@ public static class FilesWorkerServiceExtensions
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
         services.RegisterQueue<EncryptionOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
         services.RegisterQueue<CustomerOperationsReportTask>();
+        services.RegisterQueue<AuditReportTask>();
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
 
@@ -170,6 +170,8 @@ public static class FilesWorkerServiceExtensions
             eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent,
                 DataStorageEncryptionIntegrationEventHandler>(),
             eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent,
-                CustomerOperationsReportIntegrationEventHandler>());
+                CustomerOperationsReportIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<AuditReportIntegrationEvent,
+                AuditReportIntegrationEventHandler>());
     }
 }

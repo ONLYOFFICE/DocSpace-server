@@ -38,7 +38,5 @@ namespace ASC.People.Api;
 /// </summary>
 /// <name>people</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("people")]
+[ApiEndpoint("people")]
 public abstract class ApiControllerBase : ControllerBase;

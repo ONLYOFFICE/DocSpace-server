@@ -44,9 +44,7 @@ namespace ASC.Web.Api.Controllers;
 ///</remarks>
 ///<name>portal</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("portal")]
+[ApiEndpoint("portal")]
 public class PortalController(
     ILogger<PortalController> logger,
     UserManager userManager,
@@ -535,8 +533,16 @@ public class PortalController(
 
         foreach (var quota in source.Quotas)
         {
-            var definition = await tenantManager.GetTenantQuotaAsync(quota.Id);
-            if (definition == null || definition.TenantId != quota.Id || definition.Price <= 0)
+            if (quota.State == QuotaState.Overdue)
+            {
+                continue;
+            }
+
+            // when a switch to a different quota is scheduled, the upcoming payment is for that quota, not the current one
+            var quotaId = quota.NextQuota ?? quota.Id;
+
+            var definition = await tenantManager.GetTenantQuotaAsync(quotaId);
+            if (definition == null || definition.TenantId != quotaId || definition.Price <= 0)
             {
                 continue;
             }
@@ -547,7 +553,7 @@ public class PortalController(
 
             result.Add(new UpcomingPaymentDto
             {
-                Id = quota.Id,
+                Id = quotaId,
                 Name = definition.Name,
                 Title = title,
                 UnitOfMeasure = unitOfMeasure,

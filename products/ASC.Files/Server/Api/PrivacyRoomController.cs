@@ -31,17 +31,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.MessagingSystem.EF.Model;
-
 namespace ASC.Api.Documents;
 
 /// <summary>
 /// Provides API endpoints for managing privacy rooms and encryption keys.
 /// </summary>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("privacyroom")]
+[ApiEndpoint("privacyroom")]
 public class PrivacyRoomControllerCommon(
     AuthContext authContext,
     PermissionContext permissionContext,
@@ -54,6 +50,7 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Creates and sets encryption keys for the user.
     /// </remarks>
+    /// <path>api/2.0/privacyroom/keys</path>
     /// <param name="inDto">The request object containing public and private key information.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpPost("keys")]
@@ -68,6 +65,7 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Replaces an existing encryption key with a new one for the user.
     /// </remarks>
+    /// <path>api/2.0/privacyroom/keys</path>
     /// <param name="inDto">The request object containing the public and private key information to replace the existing key.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpPut("keys")]
@@ -77,81 +75,12 @@ public class PrivacyRoomControllerCommon(
     }
 
     /// <summary>
-    /// Retrieves a specific user encryption key based on the provided filter conditions.
-    /// </summary>
-    /// <remarks>
-    /// Retrieves a specific user encryption key based on the provided filter conditions.
-    /// </remarks>
-    /// <returns>The encryption key data transfer object that matches the provided filter conditions, or null if no match is found.</returns>
-    [HttpGet("keys/filter")]
-    public async Task<EncryptionKeyDto> GetUserKeysByFilter([FromQuery] GetUserKeysByFilterRequestDto inDto)
-    {
-        await Demand();
-
-        return (await encryptionKeyPairHelper.GetKeyPairAsync()).FirstOrDefault(r =>
-        {
-            var result = false;
-
-            if (inDto.Id.HasValue)
-            {
-                if (r.Id != inDto.Id)
-                {
-                    return false;
-                }
-
-                result = true;
-            }
-
-            // if (inDto.Type.HasValue)
-            // {
-            //     if (r.Type != inDto.Type.Value)
-            //     {
-            //         return false;
-            //     }
-            //
-            //     result = true;
-            // }
-            //
-            // if (!string.IsNullOrEmpty(inDto.Version))
-            // {
-            //     if (!r.Version.Equals(inDto.Version, StringComparison.OrdinalIgnoreCase))
-            //     {
-            //         return false;
-            //     }
-            //
-            //     result = true;
-            // }
-
-            if (!string.IsNullOrEmpty(inDto.PublicKey))
-            {
-                if (!r.PublicKey.Equals(inDto.PublicKey, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
-
-                result = true;
-            }
-
-            if (!string.IsNullOrEmpty(inDto.PrivateKeyEnc))
-            {
-                if (!r.PrivateKeyEnc.Equals(inDto.PrivateKeyEnc, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
-
-                result = true;
-            }
-
-            return result;
-        });
-    }
-
-    /// <summary>
     /// Retrieves encryption keys associated with the current user.
     /// </summary>
     /// <remarks>
     /// Retrieves encryption keys associated with the current user.
     /// </remarks>
+    /// <path>api/2.0/privacyroom/keys</path>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpGet("keys")]
     public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeys()
@@ -167,6 +96,7 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Retrieves the encryption keys associated with a specific privacy room.
     /// </remarks>
+    /// <path>api/2.0/privacyroom/{roomId}/access</path>
     /// <param name="roomId">The identifier of the privacy room.</param>
     /// <returns>A task containing a collection of encryption key data transfer objects for the specified room.</returns>
     [HttpGet("{roomId:int}/access")]
@@ -183,6 +113,7 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Deletes an encryption key and removes it from the system based on the provided key identifier.
     /// </remarks>
+    /// <path>api/2.0/privacyroom/keys/{id}</path>
     /// <returns>The task result contains a collection of remaining encryption key data transfer objects after the deletion.</returns>
     [HttpDelete("keys/{id:guid}")]
     public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(DeleteEncryptionKeyRequestDto inDto)

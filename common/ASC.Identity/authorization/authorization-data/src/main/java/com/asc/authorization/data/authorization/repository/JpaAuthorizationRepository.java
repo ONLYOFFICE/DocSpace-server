@@ -83,8 +83,6 @@ public interface JpaAuthorizationRepository
    * <ul>
    *   <li>State
    *   <li>Authorization code value
-   *   <li>Access token value
-   *   <li>Refresh token value
    *   <li>Access token hash
    *   <li>Refresh token hash
    * </ul>
@@ -94,12 +92,10 @@ public interface JpaAuthorizationRepository
    *     otherwise empty.
    */
   @Query(
-      "SELECT a FROM AuthorizationEntity a WHERE a.state = :token"
+      "SELECT a FROM AuthorizationEntity a WHERE a.accessTokenHash = :token"
+          + " OR a.refreshTokenHash = :token"
           + " OR a.authorizationCodeValue = :token"
-          + " OR a.accessTokenValue = :token"
-          + " OR a.refreshTokenValue = :token"
-          + " OR a.accessTokenHash = :token"
-          + " OR a.refreshTokenHash = :token")
+          + " OR a.state = :token")
   Optional<AuthorizationEntity>
       findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(
           @Param("token") String token);
@@ -151,6 +147,33 @@ public interface JpaAuthorizationRepository
       value = "DELETE FROM identity_authorizations WHERE tenant_id = :tenantId",
       nativeQuery = true)
   void deleteAllAuthorizationsByTenantId(@Param("tenantId") long tenantId);
+
+  /**
+   * Deletes every authorization granted to a client owned by a specific tenant, whichever tenant
+   * the authorizing user belonged to.
+   *
+   * @param ownerTenantId the ID of the tenant owning the clients.
+   */
+  @Modifying
+  @Query(
+      value = "DELETE FROM identity_authorizations WHERE owner_tenant_id = :ownerTenantId",
+      nativeQuery = true)
+  void deleteAllAuthorizationsByOwnerTenantId(@Param("ownerTenantId") long ownerTenantId);
+
+  /**
+   * Deletes every authorization granted to a client created by a specific user, whichever tenant
+   * the authorizing user belonged to.
+   *
+   * @param ownerTenantId the ID of the tenant owning the clients.
+   * @param ownerUserId the ID of the user who created the clients.
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_authorizations WHERE owner_tenant_id = :ownerTenantId AND owner_user_id = :ownerUserId",
+      nativeQuery = true)
+  void deleteAllAuthorizationsByOwner(
+      @Param("ownerTenantId") long ownerTenantId, @Param("ownerUserId") String ownerUserId);
 
   /**
    * Retrieves a list of authorizations for a specific principal, optionally filtered by a last

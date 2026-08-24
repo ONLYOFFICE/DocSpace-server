@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -386,12 +386,92 @@ internal class FileDao(
 
         return await (await globalStore.GetStoreAsync(tenantId.Value)).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), 0);
     }
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, Guid chatId = default)
+    // Allows a file save to overshoot the portal (tariff) total-size quota within a grace of
+    // SetupInfo.AvailableFileSize, mirroring the soft-overshoot behavior of custom room/user quota.
+    // Returns true when the overshoot is within grace (file saved with a warning); the caller throws otherwise.
+    // Callers hold the tenant_quota_{tenantId} fair lock across this check and the write that consumes the
+    // quota, so the grace is granted at most once even under concurrent saves near the boundary (once
+    // used > MaxTotalSize the next open falls back to viewer and further saves are rejected).
+    private async Task<bool> TryAllowTenantQuotaGraceAsync(File<int> file)
     {
-        return await SaveFileAsync(file, fileStream, true, true, null, chatId);
+        var quota = await _tenantManager.GetCurrentTenantQuotaAsync();
+        if (quota == null || quota.MaxTotalSize == 0)
+        {
+            return false;
+        }
+
+        // the per-file cap stays absolute - no grace
+        if (quota.MaxFileSize != 0 && quota.MaxFileSize < file.ContentLength)
+        {
+            return false;
+        }
+
+        var used = await _maxTotalSizeStatistic.GetValueAsync();
+
+        // already over the limit -> no grace (grace is consumed only once; serialized by the caller's lock)
+        if (used > quota.MaxTotalSize)
+        {
+            return false;
+        }
+
+        if (used + file.ContentLength > quota.MaxTotalSize + _setupInfo.AvailableFileSize)
+        {
+            return false;
+        }
+
+        // the quota-row update path (TenantQuotaController.QuotaUsedCheckAsync) detects the same
+        // soft-overshoot and fires TenantQuotaExceededAsync, so the socket is not raised here to avoid
+        // notifying the client twice for a single save
+        await filesMessageService.SendAsync(MessageAction.FileSavedButTenantQuotaExceeded, file, MessageInitiator.DocsService, file.Title);
+
+        return true;
     }
 
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkFolder)
+    // Enforces the portal (tariff) total-size quota for a file content write. When the file does not fit in
+    // the remaining quota, editor saves (allowQuotaGrace) may take a bounded soft overshoot; the returned lock
+    // must be held by the caller across the write that consumes the quota, so the grace is granted at most once.
+    // Returns (null, false) when the file fits; throws when the write is not allowed.
+    private async Task<(IDistributedLockHandle TenantQuotaLock, bool GraceForThisSave)> EnforceTenantQuotaAsync(File<int> file, bool allowQuotaGrace, int tenantId)
+    {
+        var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
+        if (maxChunkedUploadSize >= file.ContentLength)
+        {
+            return (null, false);
+        }
+
+        // over the remaining tariff quota. Grace is opt-in per call: only editor saves pass allowQuotaGrace
+        // (see EntryManager.SaveEditingAsync); uploads/conversions/copies keep the strict tariff limit
+        if (!allowQuotaGrace)
+        {
+            throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
+        }
+
+        // serialize the grace check with the write that consumes it via a tenant-scoped fair lock (held by the
+        // caller until its method returns), so the overshoot is granted at most once under concurrency
+        var tenantQuotaLock = await _distributedLockProvider.TryAcquireFairLockAsync($"tenant_quota_{tenantId}");
+        try
+        {
+            if (!await TryAllowTenantQuotaGraceAsync(file))
+            {
+                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToTenantQuota, file, MessageInitiator.DocsService, file.Title);
+                throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
+            }
+        }
+        catch
+        {
+            await tenantQuotaLock.DisposeAsync();
+            throw;
+        }
+
+        return (tenantQuotaLock, true);
+    }
+
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool allowQuotaGrace = false)
+    {
+        return await SaveFileAsync(file, fileStream, true, true, null, allowQuotaGrace);
+    }
+
+    public async Task<File<int>> SaveFormFileAsync(File<int> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream, true, checkFolder);
     }
@@ -402,20 +482,17 @@ internal class FileDao(
         bool checkQuota,
         bool checkFolder,
         ChunkedUploadSession<int> uploadSession = null,
-        Guid chatId = default)
+        bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
 
-        if (checkQuota)
-        {
-            var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
-            if (maxChunkedUploadSize < file.ContentLength)
-            {
-                throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
-            }
-        }
-
         var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var (tenantQuotaLock, graceForThisSave) = checkQuota
+            ? await EnforceTenantQuotaAsync(file, allowQuotaGrace, tenantId)
+            : ((IDistributedLockHandle)null, false);
+        await using var quotaLockScope = tenantQuotaLock;
+
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
@@ -623,18 +700,6 @@ internal class FileDao(
                                     });
                         }
 
-                        if (chatId != Guid.Empty)
-                        {
-                            var attachment = new DbChatMessageAttachment
-                            {
-                                TenantId = tenantId,
-                                ChatId = chatId,
-                                FileId = file.Id,
-                                ModifiedOn = DateTime.UtcNow
-                            };
-
-                            await filesDbContext.MessageAttachments.AddAsync(attachment);
-                        }
                         await filesDbContext.SaveChangesAsync();
                         await tx.CommitAsync();
                     });
@@ -711,7 +776,7 @@ internal class FileDao(
             {
                 try
                 {
-                    await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
+                    await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder, graceForThisSave);
                 }
                 catch (Exception saveException)
                 {
@@ -829,7 +894,7 @@ internal class FileDao(
         }
     }
 
-    public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
+    public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -838,14 +903,10 @@ internal class FileDao(
             throw new ArgumentException("No file id or folder id toFolderId determine provider");
         }
 
-        var maxChunkedUploadSize = await _setupInfo.MaxChunkedUploadSize(_tenantManager, _maxTotalSizeStatistic);
-
-        if (maxChunkedUploadSize < file.ContentLength)
-        {
-            throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
-        }
-
         var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var (tenantQuotaLock, graceForThisSave) = await EnforceTenantQuotaAsync(file, allowQuotaGrace, tenantId);
+        await using var quotaLockScope = tenantQuotaLock;
 
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
@@ -914,7 +975,7 @@ internal class FileDao(
             try
             {
                 await DeleteVersionStreamAsync(file);
-                await SaveFileStreamAsync(file, fileStream);
+                await SaveFileStreamAsync(file, fileStream, allowQuotaGrace: graceForThisSave);
             }
             catch
             {
@@ -979,11 +1040,11 @@ internal class FileDao(
         await store.DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
     }
 
-    private async Task SaveFileStreamAsync(File<int> file, Stream stream, Folder<int> currentFolder = null)
+    private async Task SaveFileStreamAsync(File<int> file, Stream stream, Folder<int> currentFolder = null, bool allowQuotaGrace = false)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
 
-        await (await globalStore.GetStoreAsync()).SaveAsync(string.Empty, GetUniqFilePath(file), file.GetFileQuotaOwner(), stream, file.Title);
+        await (await globalStore.GetStoreAsync()).SaveAsync(string.Empty, GetUniqFilePath(file), file.GetFileQuotaOwner(), stream, file.Title, allowQuotaGrace: allowQuotaGrace);
 
         currentFolder ??= await folderDao.GetFolderAsync(file.FolderIdDisplay);
 
@@ -1041,7 +1102,6 @@ internal class FileDao(
             await context.DeleteTagsAsync(tenantId);
             await context.DeleteSecurityByFileIdsAsync(tenantId, fileIds);
             await context.DeleteOrderByFileIdsAsync(tenantId, fileIds);
-            await context.DeleteMessageAttachmentsByFileIdsAsync(tenantId, fileIds);
 
             var entryEventsIds = await context.AuditEventsIdsByFileIdsAsync(fileIds).ToListAsync();
             await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
@@ -1590,7 +1650,7 @@ internal class FileDao(
         throw new NotImplementedException();
     }
 
-    private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId, Guid chatId = default)
+    private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId)
     {
         var fileState = await fileHelper.GetFileState(file);
 
@@ -1612,7 +1672,7 @@ internal class FileDao(
         await using (var stream = await GetFileStreamAsync(file))
         {
             copy.ContentLength = stream.CanSeek ? stream.Length : file.ContentLength;
-            copy = await SaveFileAsync(copy, stream, true, true, null, chatId);
+            copy = await SaveFileAsync(copy, stream, true, true, null);
         }
 
         if (file.ThumbnailStatus != Thumbnail.Created)
@@ -1638,17 +1698,12 @@ internal class FileDao(
         return copy;
     }
 
-    public Task<File<int>> CopyFileAsync(int fileId, int toFolderId)
-    {
-        return CopyFileAsync(fileId, toFolderId, Guid.Empty);
-    }
-
-    public async Task<File<int>> CopyFileAsync(int fileId, int toFolderId, Guid chatId)
+    public async Task<File<int>> CopyFileAsync(int fileId, int toFolderId)
     {
         var file = await GetFileAsync(fileId);
         if (file != null)
         {
-            return await CopyFileAsync(file, toFolderId, chatId);
+            return await CopyFileAsync(file, toFolderId);
         }
 
         return null;

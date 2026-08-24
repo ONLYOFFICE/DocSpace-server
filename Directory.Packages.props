@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitiveEnabled>true</CentralPackageTransitiveEnabled>
@@ -25,7 +25,6 @@
          Projects can temporarily use VersionOverride metadata on PackageReference
          until the versions are moved here. -->
     <PackageVersion Include="Amazon.Extensions.S3.Encryption" Version="4.0.1" />
-    <PackageVersion Include="Anthropic.SDK" Version="5.10.0" />
     <PackageVersion Include="AnyAscii" Version="0.3.3" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.4.0" />
     <PackageVersion Include="ARSoft.Tools.NetStandard.DXSdata" Version="1.0.0" />
@@ -131,9 +130,7 @@
     <PackageVersion Include="Microsoft.Windows.Compatibility" Version="10.0.10" />
     <PackageVersion Include="Microting.EntityFrameworkCore.MySql" Version="10.0.10" />
     <PackageVersion Include="Microting.EntityFrameworkCore.MySql.Json.Microsoft" Version="10.0.10" />
-    <PackageVersion Include="ModelContextProtocol" Version="1.4.0" />
     <PackageVersion Include="Moq" Version="4.18.4" />
-    <PackageVersion Include="Mscc.GenerativeAI.Microsoft" Version="3.1.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.6.3" />
     <PackageVersion Include="MySql.Data" Version="9.2.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
@@ -171,7 +168,6 @@
     <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.1" />
     <PackageVersion Include="Refit" Version="11.0.1" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="11.0.1" />
-    <PackageVersion Include="Respawn" Version="7.0.0" />
     <PackageVersion Include="ResXResourceReader.NetStandard" Version="1.1.0" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.16.16" />

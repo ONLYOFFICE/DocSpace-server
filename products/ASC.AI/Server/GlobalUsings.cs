@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -33,15 +33,9 @@
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Core;
-global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Utils;
 
-global using ASC.AI.Core.Chat;
-global using ASC.AI.Core.Chat.Data;
-global using ASC.AI.Core.Chat.Completion;
-global using ASC.AI.Core.Provider;
-global using ASC.AI.Core.Provider.Data;
 global using ASC.AI.Integration.Assignments;
 global using ASC.AI.Integration.Attachments;
 global using ASC.AI.Integration.Preferences;
@@ -66,15 +60,11 @@ global using ASC.AI.Models.RequestDto.ToolPreferences;
 global using ASC.AI.Models.RequestDto.Tools;
 global using ASC.AI.Models.RequestDto.Vectorization;
 global using ASC.AI.Models.RequestDto.WebSearch;
-global using ASC.AI.Core.MCP;
-global using ASC.AI.Core.MCP.Data;
-global using ASC.AI.Core.MCP.Transport;
 global using ASC.AI.Core.Settings;
-global using ASC.AI.Core.Retrieval.Web;
-global using ASC.AI.Core.Retrieval.Knowledge;
+global using ASC.AI.Integration.McpServers;
+global using ASC.AI.Integration.WebSearch;
 global using ASC.AI.Service;
 global using ASC.AI.Tools.Core;
-global using ASC.AI.Core.Tools.Editor;
 global using ASC.Core;
 global using ASC.Core.Common.AI;
 

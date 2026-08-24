@@ -37,7 +37,12 @@ import type {
   McpHttpServerConfig,
   ToolsAdapter,
 } from "@onlyoffice/ai-chat/core";
-import { getMcpServers } from "../../config/index.js";
+import type { TMCPItem } from "@onlyoffice/ai-chat";
+import {
+  getMcpServers,
+  mcpPortalBaseUrl,
+  PORTAL_MCP_SERVER_NAME,
+} from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { withTimeout } from "../storage/httpClient.js";
 import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
@@ -48,21 +53,50 @@ import logger from "../log.js";
 // mirrors the C# `HttpClientTransport`, which sends `Referer` = portal root
 // plus `Authorization`. Derive the portal root from the forwarded proxy /
 // client headers so a request without it doesn't get rejected (HTTP 400).
+// docspace-mcp reaches the portal API at the URL carried in `Referer`
+// (its internal-mode credential parser uses it as the API base). The MCP
+// server runs in a container, so a loopback host derived from the browser
+// origin (`localhost:8092` in dev) points at the container itself, not the
+// portal — rewrite it to `host.docker.internal`, which resolves to the
+// host from inside Docker. Real portal domains pass through untouched.
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
+const CONTAINER_HOST_ALIAS = "host.docker.internal";
+
+function rewriteLoopback(portalRoot: string): string {
+  try {
+    const url = new URL(portalRoot);
+    if (LOOPBACK_HOSTS.has(url.hostname)) {
+      url.hostname = CONTAINER_HOST_ALIAS;
+      return url.href;
+    }
+  } catch {
+    // not a URL — return as-is, the MCP server will reject it
+  }
+  return portalRoot;
+}
+
 function portalReferer(headers: Record<string, string>): string | undefined {
+  // Explicit override (`AI__MCP_PORTAL_BASE_URL`) wins over derivation —
+  // for setups where neither the client origin nor the loopback rewrite
+  // yields an address the MCP container can reach.
+  const override = mcpPortalBaseUrl();
+  if (override) {
+    return override.replace(/\/+$/, "") + "/";
+  }
   const origin = headers["origin"];
   if (origin) {
-    return origin.replace(/\/+$/, "") + "/";
+    return rewriteLoopback(origin.replace(/\/+$/, "") + "/");
   }
   const xfHost = headers["x-forwarded-host"]?.split(",")[0]?.trim();
   if (xfHost) {
     const proto = headers["x-forwarded-proto"]?.split(",")[0]?.trim() || "https";
-    return `${proto}://${xfHost}/`;
+    return rewriteLoopback(`${proto}://${xfHost}/`);
   }
   const referer = headers["referer"];
   if (referer) {
     try {
       const parsed = new URL(referer);
-      return `${parsed.protocol}//${parsed.host}/`;
+      return rewriteLoopback(`${parsed.protocol}//${parsed.host}/`);
     } catch {
       // malformed referer — fall through
     }
@@ -245,16 +279,19 @@ async function agentServerWhitelist(
   if (!agentId) {
     return undefined;
   }
+  // The portal's own MCP server is always enabled, agents included — it
+  // never depends on the per-agent marker map (and the failure path below
+  // keeps it too).
   try {
     const servers = await storage.mcpServers.readAll(agentId);
-    return new Set(Object.keys(servers));
+    return new Set([...Object.keys(servers), PORTAL_MCP_SERVER_NAME]);
   } catch (err) {
     logger.error(
       `systemTools: failed to resolve MCP whitelist for agent ${agentId}: ${
         err instanceof Error ? err.message : String(err)
-      } — serving no system tools`,
+      } — serving only the portal MCP server`,
     );
-    return new Set();
+    return new Set([PORTAL_MCP_SERVER_NAME]);
   }
 }
 
@@ -282,6 +319,78 @@ function filterByWhitelist<T>(
   return filtered;
 }
 
+// Read-only (GET) MCP operations run without an approval dialog.
+//
+// docspace-mcp marks its read-only operations with the MCP-standard
+// `annotations.readOnlyHint: true`; the raw descriptor survives the
+// `tools/list` cast, so the hint is readable here. System servers are
+// host-configured and trusted, so the hint is honored for all of them:
+// `requireApproval: false` auto-allows the call in every consumer of this
+// catalog — the DocSpace chat engine (autoAllow on tool-call-pending),
+// agents, and the editor plugin (via editor-tools/list). Mutating tools
+// keep prompting through the systemServerTypes approval flow.
+function withReadOnlyAutoAllow(
+  grouped: Record<string, TMCPItem[]>,
+): Record<string, TMCPItem[]> {
+  const result: Record<string, TMCPItem[]> = {};
+  for (const [type, items] of Object.entries(grouped)) {
+    result[type] = items.map((tool) => {
+      const annotations = (
+        tool as { annotations?: { readOnlyHint?: unknown } }
+      ).annotations;
+      return annotations?.readOnlyHint === true
+        ? { ...tool, requireApproval: false }
+        : tool;
+    });
+  }
+  return result;
+}
+
+// A failed MCP tool call is usually NOT a transport error: the MCP server
+// answers 200 with `isError: true` inside the result payload (e.g. when the
+// portal rejected its API call with a 401), so neither the fetch-level warn
+// nor the callTool catch ever fires — on a warn-level stand such failures
+// were completely invisible. Detect that shape and return the last line of
+// the error text (the MCP server's own step trace ends with the actual
+// failure, e.g. "GET …/files/rooms: 401 Unauthorized"; never user content).
+// Returns undefined for successful or unrecognized results.
+function describeToolErrorResult(result: unknown): string | undefined {
+  let payload: unknown = result;
+  if (typeof payload === "string") {
+    try {
+      payload = JSON.parse(payload);
+    } catch {
+      return undefined;
+    }
+  }
+  if (!payload || typeof payload !== "object") {
+    return undefined;
+  }
+  const { isError, content } = payload as {
+    isError?: unknown;
+    content?: unknown;
+  };
+  if (isError !== true) {
+    return undefined;
+  }
+  let text = "";
+  if (Array.isArray(content)) {
+    const first = content.find(
+      (part): part is { text: string } =>
+        !!part &&
+        typeof part === "object" &&
+        typeof (part as { text?: unknown }).text === "string",
+    );
+    text = first?.text ?? "";
+  }
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const last = lines[lines.length - 1] ?? "<no error text>";
+  return last.slice(0, 300);
+}
+
 // Diagnostic wrapper around the source: logs enumeration and invocation so
 // we can see whether the engine is even offered the system tools and
 // whether calls reach the MCP server. Delegates everything to `source`;
@@ -303,7 +412,9 @@ export const systemToolsSource: ToolsAdapter & {
     let grouped: Awaited<ReturnType<typeof source.getTools>>;
     try {
       const whitelist = await agentServerWhitelist(entityId);
-      grouped = filterByWhitelist(await source.getTools(), whitelist);
+      grouped = withReadOnlyAutoAllow(
+        filterByWhitelist(await source.getTools(), whitelist),
+      );
     } catch (err) {
       logger.error(
         `systemTools.getTools failed after ${Date.now() - started}ms: ${err instanceof Error ? err.message : String(err)}`,
@@ -346,7 +457,14 @@ export const systemToolsSource: ToolsAdapter & {
         }
       }
       const result = await source.callTool(toolName, args);
-      logger.info(`systemTools.callTool name=${toolName} ok`);
+      const failure = describeToolErrorResult(result);
+      if (failure) {
+        logger.warn(
+          `systemTools.callTool name=${toolName} returned an error result: ${failure}`,
+        );
+      } else {
+        logger.info(`systemTools.callTool name=${toolName} ok`);
+      }
       return result;
     } catch (err) {
       logger.error(

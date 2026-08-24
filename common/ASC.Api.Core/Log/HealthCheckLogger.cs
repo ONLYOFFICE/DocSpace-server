@@ -31,15 +31,13 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ILogger = Microsoft.Extensions.Logging.ILogger;
-
 namespace ASC.Api.Core.Log;
 
 internal static partial class HealthCheckLogger
 {
     [LoggerMessage(LogLevel.Error, "Health check failed. Status: {Status}. Duration: {Duration}ms")]
-    public static partial void ErrorHealthCheckFailed(this ILogger logger, string Status, double Duration);
+    public static partial void ErrorHealthCheckFailed(this ILogger logger, string status, double duration);
 
     [LoggerMessage(LogLevel.Error, "Failed health check: {HealthCheckName}, Status: {Status}, Duration: {Duration}ms, Description: {Description}")]
-    public static partial void ErrorHealthCheckEntry(this ILogger logger, string HealthCheckName, string Status, double Duration, string Description);
+    public static partial void ErrorHealthCheckEntry(this ILogger logger, string healthCheckName, string status, double duration, string description);
 }

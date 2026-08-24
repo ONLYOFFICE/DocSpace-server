@@ -130,6 +130,7 @@ public abstract class UploadController<T>(
     /// The file information, such as name, size, and additional metadata, must be provided in the request.
     /// This method facilitates large file upload scenarios by enabling chunked file uploads.
     /// </remarks>
+    /// <path>api/2.0/files/{folderId}/session</path>
     /// <param name="inDto">The request object containing the folder ID and session details, including file name, size, relative path, and additional upload settings.</param>
     /// <returns>A response containing details about the created upload session, such as session ID, expiration information, and upload progress data.</returns>
     [Tags("Files / Operations")]
@@ -145,6 +146,7 @@ public abstract class UploadController<T>(
     /// This method allows users to cancel an ongoing upload session identified by the session ID.
     /// Once the session is aborted, the associated resources will be cleaned up, and the session will no longer accept further uploads.
     /// </remarks>
+    /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
     /// <param name="inDto">A request object containing the session ID of the upload session to be aborted.</param>
     /// <returns>A Task representing the asynchronous operation.</returns>
     [Tags("Files / Operations")]
@@ -176,6 +178,7 @@ public abstract class UploadController<T>(
     /// versioning information is updated accordingly. The method also triggers associated webhooks and socket notifications to reflect
     /// the updated file state.
     /// </remarks>
+    /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
     /// <param name="inDto">
     /// Contains information about the ongoing upload session, including the session ID, the file chunk data, and its size.
     /// </param>
@@ -261,6 +264,7 @@ public abstract class UploadController<T>(
     /// The server updates the upload session status and stores the progress information after processing
     /// each chunk. The updated session details are returned in the response.
     /// </remarks>
+    /// <path>api/2.0/files/{folderId}/session/{sessionId}/upload</path>
     /// <param name="inDto">
     /// An object containing the necessary parameters for uploading a chunk, including:
     /// <b>SessionId</b>: The unique identifier for the upload session.
@@ -287,6 +291,7 @@ public abstract class UploadController<T>(
     /// This method consolidates chunked uploads into a complete file if required, sends notifications about the upload event,
     /// and performs any additional cleanup or related actions, such as socket updates and webhook publishing.
     /// </remarks>
+    /// <path>api/2.0/files/{folderId}/session/{sessionId}/finalize</path>
     /// <returns>An object containing details about the completed upload session, including file metadata and upload status.</returns>
     [Tags("Files / Operations")]
     [SwaggerResponse(200)]

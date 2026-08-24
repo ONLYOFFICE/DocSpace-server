@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Core.Common.Quota.Features;
-
 namespace ASC.Web.Api.Core;
 
 [Scope]

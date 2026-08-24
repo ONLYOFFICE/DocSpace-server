@@ -624,13 +624,16 @@ public class FileStorageService //: IFileStorageService
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
+        var folderType = DocSpaceHelper.MapToFolderType(roomType);
+
+        await CheckPublicRoomCreationAsync(folderType);
 
         return await CreateRoomAsync(async () =>
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings, sendFormToExternalDB, saveFormAsXLSX);
+                return await InternalCreateFolderAsync(parentId, title, folderType, privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings, sendFormToExternalDB, saveFormAsXLSX);
             }
         }, privacy, share);
     }
@@ -673,6 +676,8 @@ public class FileStorageService //: IFileStorageService
         }
 
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
+
+        await CheckPublicRoomCreationAsync(folderType);
 
         var room = await CreateRoomAsync(async () =>
         {
@@ -775,6 +780,8 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
+
+        await CheckPublicRoomCreationAsync(template.FolderType);
 
         WatermarkRequestDto watermarkDto = null;
         if (watermark != null)
@@ -3077,15 +3084,29 @@ public class FileStorageService //: IFileStorageService
     #endregion
 
 
-    public async Task<(List<int>, List<int>)> GetTrashContentAsync()
+    public async Task<(List<int>, List<int>)> GetTrashContentAsync(List<FolderType> folderType = null)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
         var trashId = await folderDao.GetFolderIDTrashAsync(true);
-        var foldersIdTask = await folderDao.GetFoldersAsync(trashId).Select(f => f.Id).ToListAsync();
-        var filesIdTask = await fileDao.GetFilesAsync(trashId).ToListAsync();
 
-        return (foldersIdTask, filesIdTask);
+        if (folderType is not { Count: > 0 })
+        {
+            var allFoldersId = await folderDao.GetFoldersAsync(trashId).Select(f => f.Id).ToListAsync();
+            var allFilesId = await fileDao.GetFilesAsync(trashId).ToListAsync();
+
+            return (allFoldersId, allFilesId);
+        }
+
+        var foldersId = await folderDao.GetFoldersAsync(trashId, null, FilterType.None, false, Guid.Empty, string.Empty, folderType: folderType)
+            .Select(f => f.Id)
+            .ToListAsync();
+
+        var filesId = await fileDao.GetFilesAsync(trashId, null, FilterType.None, false, Guid.Empty, string.Empty, null, false, folderType: folderType)
+            .Select(f => f.Id)
+            .ToListAsync();
+
+        return (foldersId, filesId);
     }
 
     public async IAsyncEnumerable<FileOperationResult> CheckConversionAsync<T>(List<CheckConversionRequestDto<T>> filesInfoJson, bool sync = false)
@@ -6007,6 +6028,26 @@ public class FileStorageService //: IFileStorageService
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Throws <see cref="SecurityException"/> when an attempt is made to create a
+    /// <see cref="FolderType.PublicRoom"/> while external link creation is restricted for the Rooms
+    /// section. Such a room always gets a public primary link, so it must be rejected before anything
+    /// is persisted — otherwise the restriction could be bypassed from any section that offers room
+    /// creation (Rooms, Backup, room templates, third-party storage).
+    /// </summary>
+    private async Task CheckPublicRoomCreationAsync(FolderType folderType)
+    {
+        if (folderType != FolderType.PublicRoom)
+        {
+            return;
+        }
+
+        if (await externalShare.IsPublicRoomCreationRestrictedAsync())
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
     }
 
     /// <summary>

@@ -188,42 +188,16 @@ public abstract class BaseStartup
         var rateLimiterSettings = rateLimiterSettingsSection.Get<RateLimiterSettings>();
         builder.Services.Configure<RateLimiterSettings>(rateLimiterSettingsSection);
 
+        services.AddSingleton<RateLimiterIpAllowList>();
+
         services.AddRateLimiter(options =>
         {
-            bool EnableNoLimiter(IPAddress address)
+            bool EnableNoLimiter(HttpContext httpContext)
             {
-                var knownNetworks = _configuration.GetSection("core:hosting:rateLimiterOptions:knownNetworks").Get<List<string>>();
-                var knownIPAddresses = _configuration.GetSection("core:hosting:rateLimiterOptions:knownIPAddresses").Get<List<string>>();
+                var address = httpContext?.Connection.RemoteIpAddress;
 
-                if (knownIPAddresses is { Count: > 0 })
-                {
-                    foreach (var knownIPAddress in knownIPAddresses)
-                    {
-                        if (IPAddress.Parse(knownIPAddress).Equals(address))
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                if (knownNetworks is { Count: > 0 })
-                {
-                    foreach (var knownNetwork in knownNetworks)
-                    {
-                        var prefix = IPAddress.Parse(knownNetwork.Split("/")[0]);
-                        var prefixLength = Convert.ToInt32(knownNetwork.Split("/")[1]);
-                        var ipNetwork = new IPNetwork(prefix, prefixLength);
-
-                        if (ipNetwork.Contains(address))
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
+                return address != null && httpContext.RequestServices.GetRequiredService<RateLimiterIpAllowList>().Contains(address);
             }
-
 
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
@@ -233,7 +207,7 @@ public abstract class BaseStartup
 
                     var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
-                    if (EnableNoLimiter(remoteIpAddress))
+                    if (EnableNoLimiter(httpContext))
                     {
                         return RateLimitPartition.GetNoLimiter("no_limiter");
                     }
@@ -254,7 +228,7 @@ public abstract class BaseStartup
 
                     var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
-                    if (EnableNoLimiter(remoteIpAddress))
+                    if (EnableNoLimiter(httpContext))
                     {
                         return RateLimitPartition.GetNoLimiter("no_limiter");
                     }
@@ -282,7 +256,7 @@ public abstract class BaseStartup
 
                         var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
-                        if (EnableNoLimiter(remoteIpAddress))
+                        if (EnableNoLimiter(httpContext))
                         {
                             return RateLimitPartition.GetNoLimiter("no_limiter");
                         }
@@ -310,9 +284,8 @@ public abstract class BaseStartup
                 var permitLimit = rateLimiterSettings.SensitiveApiLimit;
                 var path = httpContext?.Request.Path.ToString();
                 var partitionKey = $"{RateLimiterPolicy.SensitiveApi}_{userId}|{path}";
-                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
-                if (EnableNoLimiter(remoteIpAddress))
+                if (EnableNoLimiter(httpContext))
                 {
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
@@ -328,9 +301,7 @@ public abstract class BaseStartup
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
 
-                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
-
-                if (EnableNoLimiter(remoteIpAddress))
+                if (EnableNoLimiter(httpContext))
                 {
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
@@ -399,9 +370,8 @@ public abstract class BaseStartup
                 var permitLimit = rateLimiterSettings.PaymentsApiLimit;
                 var path = httpContext?.Request.Path.ToString();
                 var partitionKey = $"{RateLimiterPolicy.PaymentsApi}_{userId}|{path}";
-                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
-                if (EnableNoLimiter(remoteIpAddress))
+                if (EnableNoLimiter(httpContext))
                 {
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
@@ -484,8 +454,6 @@ public abstract class BaseStartup
 
         var mvcBuilder = services.AddMvcCore(config =>
         {
-            config.Conventions.Add(new ControllerNameAttributeConvention());
-
             var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
             config.Filters.Add(new AuthorizeFilter(policy));

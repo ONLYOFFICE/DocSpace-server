@@ -35,6 +35,7 @@ namespace ASC.AI.Models.RequestDto.Threads;
 
 public class CreateThreadRequestDto
 {
+    [MaxLength(AiIntegrationLimits.MaxNameLength)]
     public required string Title { get; init; }
     public Guid? ProfileId { get; init; }
     public string? EntityId { get; init; }

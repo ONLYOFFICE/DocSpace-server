@@ -47,17 +47,28 @@ public class AttachmentResult
 
 [Scope]
 public class AttachmentsStorageService(
+    UserManager userManager,
+    AuthContext authContext,
     TenantManager tenantManager,
     AttachmentsStorage storage,
+    MessageStorageService messageStorageService,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
-    VectorizationGlobalSettings vectorizationGlobalSettings)
+    VectorizationGlobalSettings vectorizationGlobalSettings,
+    ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
+    FormFillingReportCreator formFillingReportCreator,
+    ILogger<AttachmentsStorageService> logger,
+    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly TimeSpan _downloadUrlExpiration = TimeSpan.FromHours(1);
+    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async IAsyncEnumerable<AttachmentResult> CreateManyAsync(HashSet<string> entryIds)
     {
+        await AssertUserHasAccessAsync(_allowedTypes);
+
         if (entryIds.Count == 0)
         {
             yield break;
@@ -78,8 +89,8 @@ public class AttachmentsStorageService(
             }
         }
 
-        var intDao = daoFactory.GetFileDao<int>();
-        var strDao = daoFactory.GetFileDao<string>();
+        var intDao = DaoFactory.GetFileDao<int>();
+        var strDao = DaoFactory.GetFileDao<string>();
 
         var internalFiles = await LoadFilesAsync(intDao, internalIds);
         var thirdpartyFiles = await LoadFilesAsync(strDao, thirdpartyIds);
@@ -96,7 +107,7 @@ public class AttachmentsStorageService(
             createParams.Add(await BuildParamAsync(strDao, file));
         }
 
-        var created = await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), createParams);
+        var created = await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, createParams);
         var index = 0;
 
         foreach (var file in internalFiles)
@@ -112,44 +123,98 @@ public class AttachmentsStorageService(
 
     public async Task<AttachmentResult> ReadByIdAsync(Guid id)
     {
-        var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id)
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id)
             ?? throw new ItemNotFoundException();
 
-        var dataUrl = attachment.Kind == AttachmentKind.Image
-            ? await GetDataUrlAsync(attachment)
-            : null;
-
-        return ToResult(attachment, dataUrl);
+        return await ToResultAsync(attachment);
     }
 
     public async IAsyncEnumerable<AttachmentResult> ReadManyByIdsAsync(HashSet<Guid> ids)
     {
-        var attachments = await storage.ReadManyByIdsAsync(tenantManager.GetCurrentTenantId(), ids);
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        var attachments = await storage.ReadManyByIdsAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids);
 
         foreach (var attachment in attachments)
         {
-            var dataUrl = attachment.Kind == AttachmentKind.Image
-                ? await GetDataUrlAsync(attachment)
-                : null;
-
-            yield return ToResult(attachment, dataUrl);
+            yield return await ToResultAsync(attachment);
         }
     }
 
     public async Task UpdateManyAsync(HashSet<Guid> ids, Guid messageId)
     {
-        await storage.UpdateManyAsync(tenantManager.GetCurrentTenantId(), ids, messageId);
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        var message = await messageStorageService.ReadByIdAsync(messageId);
+
+        await storage.UpdateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids, message.Id);
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), id);
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id);
     }
 
     public async Task DeleteManyAsync(HashSet<Guid> ids)
     {
-        await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), ids);
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids);
     }
+
+    /// <summary>
+    /// Reports whether an attached file is a started filling-form whose submissions can be analysed by the
+    /// form-data tools, plus the field keys/types that make up its report columns. Returns (false, []) when no
+    /// forms database is configured, the file is not such a form, or its submission table does not yet exist.
+    /// </summary>
+    public async Task<(bool CanAnalyze, IReadOnlyList<(string Key, string Type)> Keys)> GetFormAnalysisInfoAsync(int fileId)
+    {
+        var client = GetEnabledFormsDatabaseClient();
+        if (client == null)
+        {
+            return (false, []);
+        }
+
+        try
+        {
+            var fileDao = DaoFactory.GetFileDao<int>();
+            var file = await fileDao.GetFileAsync(fileId);
+            if (file is not { IsForm: true })
+            {
+                return (false, []);
+            }
+
+            var properties = await fileDao.GetProperties(fileId);
+            var formFilling = properties?.FormFilling;
+            if (formFilling?.StartFilling != true || formFilling.OriginalFormId != fileId)
+            {
+                return (false, []);
+            }
+
+            var tableName = FormFillingReportCreator.GetTableName(fileId, file.Version);
+            if (!await client.TableExistsAsync(tableName))
+            {
+                return (false, []);
+            }
+
+            var fields = await formFillingReportCreator.GetFormFieldsMetadataAsync(fileId, file.Version);
+            return (true, fields.Select(f => (f.Key, f.Type)).ToList());
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormAnalysisFailed(e, fileId);
+            return (false, []);
+        }
+    }
+
+    private IFormsDatabaseClient? GetEnabledFormsDatabaseClient() =>
+        externalDatabaseClient.IsEnabled() ? externalDatabaseClient :
+        builtinFormsDatabaseClient.IsEnabled() ? builtinFormsDatabaseClient :
+        null;
 
     private async Task<List<File<T>>> LoadFilesAsync<T>(IFileDao<T> fileDao, IReadOnlyCollection<T> entryIds)
     {
@@ -166,7 +231,7 @@ public class AttachmentsStorageService(
                 continue;
             }
 
-            if (!await fileSecurity.CanReadAsync(file))
+            if (!await FileSecurity.CanReadAsync(file))
             {
                 throw new SecurityException();
             }
@@ -191,7 +256,7 @@ public class AttachmentsStorageService(
                 internalEntryId = intFile.Id;
                 break;
             case File<string> strFile:
-                var (hashId, _) = await daoFactory.GetMapping<string>().MappingIdAsync(strFile.Id, saveIfNotExist: true);
+                var (hashId, _) = await DaoFactory.GetMapping<string>().MappingIdAsync(strFile.Id, saveIfNotExist: true);
                 thirdpartyEntryId = hashId;
                 break;
         }
@@ -236,10 +301,33 @@ public class AttachmentsStorageService(
             ? await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration)
             : null;
 
-        return ToResult(attachment, dataUrl);
+        return ToResult(attachment, dataUrl, file is File<string> thirdpartyFile ? thirdpartyFile.Id : null);
     }
 
-    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl)
+    private async Task<AttachmentResult> ToResultAsync(Attachment attachment)
+    {
+        var thirdpartyEntryId = await ResolveThirdpartyEntryIdAsync(attachment.ThirdpartyEntryId);
+
+        var dataUrl = attachment.Kind == AttachmentKind.Image
+            ? await GetDataUrlAsync(attachment.EntryId, thirdpartyEntryId)
+            : null;
+
+        return ToResult(attachment, dataUrl, thirdpartyEntryId);
+    }
+
+    private async Task<string?> ResolveThirdpartyEntryIdAsync(string? hashId)
+    {
+        if (string.IsNullOrEmpty(hashId))
+        {
+            return null;
+        }
+
+        var (entryId, _) = await DaoFactory.GetMapping<string>().MappingIdAsync(hashId);
+
+        return string.IsNullOrEmpty(entryId) ? null : entryId;
+    }
+
+    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl, string? thirdpartyEntryId)
     {
         return new AttachmentResult
         {
@@ -249,27 +337,33 @@ public class AttachmentsStorageService(
             Content = attachment.Content,
             DataUrl = dataUrl,
             EntryId = attachment.EntryId,
-            ThirdpartyEntryId = attachment.ThirdpartyEntryId,
+            ThirdpartyEntryId = thirdpartyEntryId,
             CreatedAt = attachment.CreatedAt
         };
     }
 
-    private async Task<string?> GetDataUrlAsync(Attachment attachment)
+    private async Task<string?> GetDataUrlAsync(int? entryId, string? thirdpartyEntryId)
     {
-        if (attachment.EntryId.HasValue)
+        if (entryId.HasValue)
         {
-            var fileDao = daoFactory.GetFileDao<int>();
-            var file = await fileDao.GetFileAsync(attachment.EntryId.Value);
+            var fileDao = DaoFactory.GetFileDao<int>();
+            var file = await fileDao.GetFileAsync(entryId.Value);
             return file == null ? null : await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration);
         }
 
-        if (!string.IsNullOrEmpty(attachment.ThirdpartyEntryId))
+        if (!string.IsNullOrEmpty(thirdpartyEntryId))
         {
-            var fileDao = daoFactory.GetFileDao<string>();
-            var file = await fileDao.GetFileAsync(attachment.ThirdpartyEntryId);
+            var fileDao = DaoFactory.GetFileDao<string>();
+            var file = await fileDao.GetFileAsync(thirdpartyEntryId);
             return file == null ? null : await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration);
         }
 
         return null;
     }
+}
+
+internal static partial class AttachmentsStorageServiceLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Form analysis check failed for file {fileId}")]
+    public static partial void WarnFormAnalysisFailed(this ILogger<AttachmentsStorageService> logger, Exception exception, int fileId);
 }

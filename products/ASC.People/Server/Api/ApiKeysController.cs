@@ -34,9 +34,7 @@
 namespace ASC.People.Api;
 
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("keys")]
+[ApiEndpoint("keys")]
 public class ApiKeysController(
     ApiKeyManager apiKeyManager,
     AuthContext authContext,

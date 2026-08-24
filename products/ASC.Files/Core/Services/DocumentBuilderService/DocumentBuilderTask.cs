@@ -34,11 +34,11 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
 {
-    private string _baseUri;
-    private int _tenantId;
+    protected string _baseUri;
+    protected int _tenantId;
     protected Guid _userId;
     protected TData _data;
-    private readonly IServiceScopeFactory _serviceProvider;
+    protected readonly IServiceScopeFactory _serviceProvider;
 
     public TId ResultFileId { get; set; }
     public string ResultFileName { get; set; }
@@ -77,6 +77,7 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
     protected override async Task DoJob()
     {
         ILogger logger = null;
+        DocumentBuilderInputData inputData = null;
 
         try
         {
@@ -116,7 +117,7 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
                 return;
             }
 
-            var inputData = await GetDocumentBuilderInputDataAsync(scope.ServiceProvider);
+            inputData = await GetDocumentBuilderInputDataAsync(scope.ServiceProvider);
 
             Percentage = 30;
 
@@ -155,6 +156,10 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
         }
         finally
         {
+            // The script temp file is written before the build starts, so it has to be removed on
+            // every outcome — a failed or cancelled build would leak it otherwise.
+            DocumentBuilderScriptHelper.DeleteScriptFile(inputData?.Script);
+
             IsCompleted = true;
             await PublishChanges();
         }

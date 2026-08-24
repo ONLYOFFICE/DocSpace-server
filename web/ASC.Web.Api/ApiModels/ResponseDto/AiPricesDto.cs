@@ -55,7 +55,7 @@ public class AiPricesDto
     /// <summary>
     /// Gets the list of pricing entries for AI image models.
     /// </summary>
-    /// <example>[{"id":"gpt-5.4-image-2","alias":"GPT 5.4 Image 2","provider":"OpenRouter","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":8.0,"image":30.0}}]</example>
+    /// <example>[{"id":"gpt-5.4-image-2","alias":"GPT 5.4 Image 2","provider":"OpenRouter","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":8.0,"completion":15.0,"image":30.0}}]</example>
     public required List<AiEntryPricingDto<AiImagePriceDto>> Image { get; init; }
 
     /// <summary>
@@ -156,6 +156,12 @@ public class AiImagePriceDto
     /// </summary>
     /// <example>8.0</example>
     public decimal Prompt { get; init; }
+
+    /// <summary>
+    /// Gets the price per one million completion tokens.
+    /// </summary>
+    /// <example>15.0</example>
+    public decimal Completion { get; init; }
 
     /// <summary>
     /// Gets the price per generated image.

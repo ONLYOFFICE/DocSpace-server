@@ -38,8 +38,10 @@ import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 
-function checkConfigUrl(config: WebSearchConfig | undefined): void {
-  assertSafeBaseUrl(config?.baseUrl);
+async function checkConfigUrl(
+  config: WebSearchConfig | undefined,
+): Promise<void> {
+  await assertSafeBaseUrl(config?.baseUrl);
 }
 
 const engine = new WebSearchEngine({ storage });
@@ -58,14 +60,14 @@ export const webSearchController = {
   }),
 
   testConnection: asyncHandler<WebSearchConfig>(async (req, res) => {
-    checkConfigUrl(req.body);
+    await checkConfigUrl(req.body);
     const result = await engine.testConnection(req.body);
     res.json(result);
   }),
 
   configure: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["body", "entityId"] as const);
-    checkConfigUrl(args.body as WebSearchConfig);
+    await checkConfigUrl(args.body as WebSearchConfig);
     const result = await engine.configure(
       args.body as WebSearchConfig,
       args.entityId as string | undefined,
@@ -75,7 +77,7 @@ export const webSearchController = {
 
   setActiveConfig: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["body", "entityId"] as const);
-    checkConfigUrl(args.body as WebSearchConfig);
+    await checkConfigUrl(args.body as WebSearchConfig);
     await engine.setActiveConfig(
       args.body as WebSearchConfig,
       args.entityId as string | undefined,

@@ -436,6 +436,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:top-up-wallet", { auto });
   }
 
+  function walletLowBalance({ room } = {}) {
+    logger.info(`wallet low balance ${room}`);
+    filesIO.to(room).emit("s:wallet-low-balance", {});
+  }
+
   function updateHistory({ room, id, type } = {}) {
     logger.info(`update ${type} history ${id} in room ${room}`);
     filesIO.to(room).emit("s:update-history", { id, type });
@@ -612,6 +617,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-ai-config");
   }
 
+  function changeAiAccessSettings({ room, enabled } = {}) {
+    logger.info(`change ai access settings in room ${room}, enabled: ${enabled}`);
+    filesIO.to(room).emit("s:change-ai-access-settings", { enabled });
+  }
+
   function changeExternalSharingSettings({
     room,
     externalShare,
@@ -655,6 +665,7 @@ module.exports = (io) => {
     changeWebPlugin,
     changeAppEnabled,
     topUpWallet,
+    walletLowBalance,
     updateHistory,
     logoutSession,
     changeMyType,
@@ -683,6 +694,7 @@ module.exports = (io) => {
     changeAccessRightsForFolder,
     quotaExceeded,
     changeAiConfig,
+    changeAiAccessSettings,
     changeExternalSharingSettings,
     externalDbSettings
   };

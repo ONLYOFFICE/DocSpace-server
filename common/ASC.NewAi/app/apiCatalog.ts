@@ -67,24 +67,30 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
 
 // Routes registered explicitly in `routes.ts` that are not backed by an
 // engine. Kept in sync by hand with those `router.<verb>(...)` calls.
-// `operationId`s are lowerCamelCase and `newAi`-scoped so they never clash
+// `operationId`s are lowerCamelCase and `ai`-scoped so they never clash
 // with the .NET AI service's ids (e.g. its own `getAgents`) once merged.
 export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
-  { method: "POST", path: "/text-to-docx", tag: "Export", operationId: "newAiExportTextToDocx", summary: "Start markdown → docx export", hasBody: true },
-  { method: "GET", path: "/agents", tag: "Agents", operationId: "newAiAgentsList", summary: "List agents" },
-  { method: "POST", path: "/agents", tag: "Agents", operationId: "newAiAgentsCreate", summary: "Create an agent", hasBody: true },
-  { method: "GET", path: "/agents/news", tag: "Agents", operationId: "newAiAgentsNews", summary: "List agent news items" },
-  { method: "GET", path: "/agents/{id}", tag: "Agents", operationId: "newAiAgentsGet", summary: "Get an agent", pathParams: ["id"] },
-  { method: "PUT", path: "/agents/{id}", tag: "Agents", operationId: "newAiAgentsUpdate", summary: "Update an agent", pathParams: ["id"], hasBody: true },
-  { method: "DELETE", path: "/agents/{id}", tag: "Agents", operationId: "newAiAgentsDelete", summary: "Delete an agent", pathParams: ["id"], hasBody: true },
-  { method: "PUT", path: "/agents/agentquota", tag: "Agents", operationId: "newAiAgentsUpdateQuota", summary: "Update agents' quota", hasBody: true },
-  { method: "PUT", path: "/agents/resetquota", tag: "Agents", operationId: "newAiAgentsResetQuota", summary: "Reset agents' quota", hasBody: true },
-  { method: "GET", path: "/config", tag: "Settings", operationId: "newAiSettingsGet", summary: "Get AI settings" },
-  { method: "GET", path: "/config/vectorization", tag: "Settings", operationId: "newAiSettingsGetVectorization", summary: "Get vectorization settings" },
-  { method: "PUT", path: "/config/vectorization", tag: "Settings", operationId: "newAiSettingsSetVectorization", summary: "Update vectorization settings", hasBody: true },
-  { method: "GET", path: "/config/user", tag: "Settings", operationId: "newAiSettingsGetUser", summary: "Get user AI settings" },
-  { method: "PUT", path: "/config/user", tag: "Settings", operationId: "newAiSettingsSetUser", summary: "Update user AI settings", hasBody: true },
-  { method: "POST", path: "/vectorization/tasks", tag: "Vectorization", operationId: "newAiVectorizationStartTask", summary: "Start a vectorization task", hasBody: true },
+  { method: "POST", path: "/text-to-docx", tag: "Export", operationId: "aiExportTextToDocx", summary: "Start markdown → docx export", hasBody: true },
+  { method: "GET", path: "/agents", tag: "Agents", operationId: "aiAgentsList", summary: "List agents" },
+  { method: "POST", path: "/agents", tag: "Agents", operationId: "aiAgentsCreate", summary: "Create an agent", hasBody: true },
+  { method: "GET", path: "/agents/news", tag: "Agents", operationId: "aiAgentsNews", summary: "List agent news items" },
+  { method: "GET", path: "/agents/{id}", tag: "Agents", operationId: "aiAgentsGet", summary: "Get an agent", pathParams: ["id"] },
+  { method: "PUT", path: "/agents/{id}", tag: "Agents", operationId: "aiAgentsUpdate", summary: "Update an agent", pathParams: ["id"], hasBody: true },
+  { method: "DELETE", path: "/agents/{id}", tag: "Agents", operationId: "aiAgentsDelete", summary: "Delete an agent", pathParams: ["id"], hasBody: true },
+  { method: "PUT", path: "/agents/agentquota", tag: "Agents", operationId: "aiAgentsUpdateQuota", summary: "Update agents' quota", hasBody: true },
+  { method: "PUT", path: "/agents/resetquota", tag: "Agents", operationId: "aiAgentsResetQuota", summary: "Reset agents' quota", hasBody: true },
+  { method: "GET", path: "/config", tag: "Settings", operationId: "aiSettingsGet", summary: "Get AI settings" },
+  { method: "GET", path: "/config/vectorization", tag: "Settings", operationId: "aiSettingsGetVectorization", summary: "Get vectorization settings" },
+  { method: "PUT", path: "/config/vectorization", tag: "Settings", operationId: "aiSettingsSetVectorization", summary: "Update vectorization settings", hasBody: true },
+  { method: "GET", path: "/config/user", tag: "Settings", operationId: "aiSettingsGetUser", summary: "Get user AI settings" },
+  { method: "PUT", path: "/config/user", tag: "Settings", operationId: "aiSettingsSetUser", summary: "Update user AI settings", hasBody: true },
+  { method: "POST", path: "/vectorization/tasks", tag: "Vectorization", operationId: "aiVectorizationStartTask", summary: "Start a vectorization task", hasBody: true },
+  { method: "POST", path: "/openai/{profileId}/v1/chat/completions", tag: "OpenAI passthrough", operationId: "aiOpenaiChatCompletions", summary: "OpenAI-compatible chat completions proxied to the profile's provider", pathParams: ["profileId"], hasBody: true },
+  { method: "POST", path: "/openai/{profileId}/v1/images/generations", tag: "OpenAI passthrough", operationId: "aiOpenaiImagesGenerations", summary: "OpenAI-compatible image generation proxied to the profile's provider", pathParams: ["profileId"], hasBody: true },
+  { method: "GET", path: "/editor-tools/list", tag: "Editor tools", operationId: "aiEditorToolsList", summary: "Sanitized DocSpace tool catalog for the editor AI plugin" },
+  { method: "POST", path: "/editor-tools/call", tag: "Editor tools", operationId: "aiEditorToolsCall", summary: "Execute a DocSpace tool on behalf of the editor AI plugin", hasBody: true },
+  { method: "POST", path: "/websearch/v1/search", tag: "Web search", operationId: "aiWebSearchPassthroughSearch", summary: "Web search proxied to the portal's active web-search provider", hasBody: true },
+  { method: "POST", path: "/websearch/v1/contents", tag: "Web search", operationId: "aiWebSearchPassthroughContents", summary: "Web page contents proxied to the portal's active web-search provider", hasBody: true },
 ];
 
 // Base path the service is mounted under (the DocSpace nginx route). Shared

@@ -64,7 +64,7 @@ public class FormRecoveryService(
     /// returns <c>true</c>. When everything is already in sync returns <c>false</c> so the caller performs the
     /// ordinary report build instead.
     /// </summary>
-    public async Task<bool> TryRecoverFormAsync(int roomId, int originalFormId, Guid userId, CancellationToken cancellationToken)
+    public async Task<bool> TryRecoverFormAsync(int roomId, int originalFormId, CancellationToken cancellationToken)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -127,7 +127,7 @@ public class FormRecoveryService(
 
         try
         {
-            await RebuildReportHistoryAsync(roomId, originalFormId, userId, cancellationToken);
+            await RebuildReportHistoryAsync(roomId, originalFormId, cancellationToken);
         }
         catch (Exception e)
         {
@@ -298,7 +298,7 @@ public class FormRecoveryService(
     /// Rebuilds the form's results xlsx version history from the index — one file version per form version that
     /// has submissions, oldest first — which recovering many versions at once can't get from the normal build.
     /// </summary>
-    private async Task RebuildReportHistoryAsync(int roomId, int formId, Guid userId, CancellationToken cancellationToken)
+    private async Task RebuildReportHistoryAsync(int roomId, int formId, CancellationToken cancellationToken)
     {
         var fileDao = daoFactory.GetFileDao<int>();
 
@@ -369,7 +369,7 @@ public class FormRecoveryService(
             reportVersion++;
             var submissions = bucket.OrderBy(FormNumberOf).ToList();
 
-            var reportData = await FormFillingReportTask.GetFormFillingReportData(serviceProvider, userId, formId, submissions);
+            var reportData = await serviceProvider.GetRequiredService<FormFillingReportBuilder>().BuildReportDataAsync(formId, submissions);
             var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
             var versionScript = script
                 .Replace("${tempFileName}", tempFileName)

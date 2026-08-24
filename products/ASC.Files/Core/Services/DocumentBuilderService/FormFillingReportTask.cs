@@ -1,34 +1,34 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
@@ -47,9 +47,8 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
 
     private const string ScriptName = "FormFillingReport.docbuilder";
 
-    // Field-key set this run's report version targets, and whether a form edit changed it — computed while
-    // assembling the report data and read when deciding whether to start a new report version.
-    private string _currentKeySet = "";
+    // Whether this run's report version has a different field-key set than the previous version — computed by
+    // the report builder and read when deciding whether to start a new report version.
     private bool _keySetChanged;
 
     /// <summary>
@@ -64,7 +63,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         }
 
         var recoveryService = serviceProvider.GetRequiredService<FormRecoveryService>();
-        return await recoveryService.TryRecoverFormAsync(_data.RoomId, _data.OriginalFormId, _userId, CancellationToken);
+        return await recoveryService.TryRecoverFormAsync(_data.RoomId, _data.OriginalFormId, CancellationToken);
     }
 
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
@@ -72,219 +71,29 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
 
-        var reportCreator = serviceProvider.GetService<FormFillingReportCreator>();
+        // Resolved from the per-execution scope: the tenant and user context the report depends on
+        // is only established after DoJob has created that scope. The builder groups submissions by
+        // field-key set and reports whether that set changed versus the previous version.
+        var result = await serviceProvider.GetRequiredService<FormFillingReportBuilder>()
+            .BuildAsync(_userId, _data.RoomId, _data.OriginalFormId, _data.OriginalFormVersion);
 
-        // One query for all of the form's submissions, then group by field-key set in memory (cheap): a report
-        // version is defined by its key set, so an edit that keeps the same fields (e.g. adding a word) keeps
-        // filling the current version instead of starting a new one.
-        var allSubmissions = (await reportCreator.GetFormFillingResults(_data.RoomId, _data.OriginalFormId)).ToList();
-
-        var currentSubmission = allSubmissions.LastOrDefault(s => s.OriginalFormVersion == _data.OriginalFormVersion)
-                                ?? allSubmissions.LastOrDefault();
-        _currentKeySet = currentSubmission != null ? FormFillingReportCreator.KeySetSignature(currentSubmission) : "";
-
-        var previousSubmission = allSubmissions
-            .Where(s => s.OriginalFormVersion < _data.OriginalFormVersion)
-            .OrderBy(s => s.OriginalFormVersion)
-            .LastOrDefault();
-        _keySetChanged = previousSubmission != null && FormFillingReportCreator.KeySetSignature(previousSubmission) != _currentKeySet;
-
-        var submissions = allSubmissions.Where(s => FormFillingReportCreator.KeySetSignature(s) == _currentKeySet).ToList();
-        var data = await GetFormFillingReportData(serviceProvider, _userId, _data.OriginalFormId, submissions);
+        _keySetChanged = result.KeySetChanged;
 
         script = script
             .Replace("${tempFileName}", tempFileName)
-            .Replace("${inputData}", JsonSerializer.Serialize(data));
+            .Replace("${inputData}", JsonSerializer.Serialize(result.Data));
 
         return new DocumentBuilderInputData(script, tempFileName, "");
     }
 
-    protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
+    protected override Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
     {
-        var daoFactory = serviceProvider.GetService<IDaoFactory>();
-        var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
-        var tenantUtil = serviceProvider.GetService<TenantUtil>();
-
-        var fileDao = daoFactory.GetFileDao<int>();
-        var origProperties = await daoFactory.GetFileDao<int>().GetProperties(_data.OriginalFormId);
-        var resultFile = await fileDao.GetFileAsync(origProperties.FormFilling.ResultsFileID);
-
-        using var request = new HttpRequestMessage();
-        request.RequestUri = fileUri;
-        
-#pragma warning disable CA2000
-        var httpClient = clientFactory.CreateClient();
-#pragma warning restore CA2000
-        
-        using var response = await httpClient.SendAsync(request);
-        await using var stream = await response.Content.ReadAsStreamAsync();
-
-        // New report version only when a form edit actually changed the field-key set; edits that keep the same
-        // fields (adding a word, moving things) keep filling the current version.
-        if (origProperties.FormFilling.IsVersionChanged && _keySetChanged)
-        {
-            resultFile.Version++;
-            resultFile.VersionGroup++;
-            resultFile.ContentLength = stream.Length;
-
-            resultFile = await fileDao.SaveFileAsync(resultFile, stream, false);
-        }
-        else
-        {
-            resultFile.CreateOn = tenantUtil.DateTimeNow();
-            resultFile.ContentLength = stream.Length;
-
-            resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
-        }
-
-        if (origProperties.FormFilling.IsVersionChanged)
-        {
-            origProperties.FormFilling.IsVersionChanged = false;
-            await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
-        }
-
-        if (resultFile.Id != origProperties.FormFilling.ResultsFileID)
-        {
-            origProperties.FormFilling.ResultsFileID = resultFile.Id;
-            await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
-        }
-
-        var xlsxProperties = new EntryProperties<int>
-        {
-            FormFilling = new FormFillingProperties<int>
-            {
-                StartFilling = false,
-                OriginalFormId = origProperties.FormFilling.OriginalFormId,
-                OriginalFormVersion = origProperties.FormFilling.OriginalFormVersion,
-                RoomId = origProperties.FormFilling.RoomId,
-                ResultsFolderId = origProperties.FormFilling.ResultsFolderId,
-                ResultsFileID = resultFile.Id
-            }
-        };
-        await fileDao.SaveProperties(resultFile.Id, xlsxProperties);
-
-        var socketManager = serviceProvider.GetService<SocketManager>();
-        if (_data.IsNewFile)
-        {
-            await socketManager.CreateFileAsync(resultFile);
-        }
-        else
-        {
-            await socketManager.UpdateFileAsync(resultFile);
-        }
-
-        var filesMessageService = serviceProvider.GetService<FilesMessageService>();
         var headers = _data.Headers != null
             ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))
             : [];
-        await filesMessageService.SendAsync(_data.IsNewFile ? MessageAction.FileCreated : MessageAction.FileUpdated, resultFile, headers, resultFile.Title);
 
-        return resultFile;
-    }
-
-    public static async Task<object> GetFormFillingReportData(IServiceProvider serviceProvider, Guid userId, int originalFormId, IEnumerable<DbFormsItemDataSearch> formFillingResults)
-    {
-        var userManager = serviceProvider.GetService<UserManager>();
-        var daoFactory = serviceProvider.GetService<IDaoFactory>();
-        var settingsManager = serviceProvider.GetService<SettingsManager>();
-        var tenantManager = serviceProvider.GetService<TenantManager>();
-        var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
-        var filesLinkUtility = serviceProvider.GetService<FilesLinkUtility>();
-        var fileUtility = serviceProvider.GetService<FileUtility>();
-        var tenantUtil = serviceProvider.GetService<TenantUtil>();
-
-        var user = await userManager.GetUsersAsync(userId);
-        var fileDao = daoFactory.GetFileDao<int>();
-
-        var userCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = userCulture;
-        CultureInfo.CurrentUICulture = userCulture;
-
-        var tenantCulture = tenantManager.GetCurrentTenant().GetCulture();
-
-        var keys = new List<string>();
-        var values = new List<List<object>>();
-        if (formFillingResults.Any())
-        {
-            var formsData = formFillingResults.FirstOrDefault().FormsData;
-            if (formsData.Any())
-            {
-                keys.Add(FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture));
-                keys.AddRange(formsData.Skip(1).Where(d => d.Type != "picture" && d.Type != "signature").Select(field => field.Key));
-                keys.Add(FilesCommonResource.ResourceManager.GetString("Date", tenantCulture));
-                keys.Add(FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture));
-
-                foreach (var formFillingRes in formFillingResults)
-                {
-                    var t = new List<object>();
-                    foreach (var field in formFillingRes.FormsData)
-                    {
-                        if (field.Type is "picture" or "signature")
-                        {
-                            continue;
-                        }
-                        t.Add(new
-                        {
-                            format = field.Type == "dateTime" ? $"{tenantCulture.DateTimeFormat.ShortDatePattern}" : "@",
-                            value = field.Value,
-                            url = ""
-                        });
-                    }
-                    t.Add(new
-                    {
-                        format = $"{tenantCulture.DateTimeFormat.ShortDatePattern} {tenantCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}",
-                        value = tenantUtil.DateTimeFromUtc(formFillingRes.CreateOn).ToString("G", tenantCulture),
-                        url = ""
-                    });
-                    var formsDataFile = await fileDao.GetFileAsync(formFillingRes.Id);
-                    if (formsDataFile != null)
-                    {
-                        var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
-                        t.Add(new
-                        {
-                            format = "@",
-                            value = FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture),
-                            url = resultUrl
-                        });
-                    }
-                    values.Add(t);
-                }
-            }
-        }
-
-        var properties = await daoFactory.GetFileDao<int>().GetProperties(originalFormId);
-        var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
-        var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
-
-        var sheetName = properties?.FormFilling?.Title;
-        if (string.IsNullOrEmpty(sheetName))
-        {
-            var form = await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId);
-            sheetName = Path.GetFileNameWithoutExtension(form?.Title ?? string.Empty);
-        }
-
-        var data = new
-        {
-            resources = new
-            {
-                sheetName
-            },
-
-            themeColors = new
-            {
-                mainBgColor = DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1),
-                lightBgColor = DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08),
-                mainFontColor = DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1)
-            },
-
-            data = new
-            {
-                keys,
-                values
-            }
-        };
-
-        return data;
+        return serviceProvider.GetRequiredService<FormFillingResultFileWriter>()
+            .SaveAsync(_data.OriginalFormId, _data.IsNewFile, fileUri, headers, _keySetChanged);
     }
 }
 
