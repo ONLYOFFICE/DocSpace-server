@@ -768,6 +768,15 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal Renamed</value>
   </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Private room encryption key {0} created</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Private room encryption key {0} deleted</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Private room encryption key {0} updated</value>
+  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Products [{0}]. Access Opened</value>
   </data>
