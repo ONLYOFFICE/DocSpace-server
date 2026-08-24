@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -99,7 +99,9 @@ public abstract class RoomPinTestsBase(
         string? filterValue = null,
         SearchArea? searchArea = null)
     {
-        var deadline = DateTime.UtcNow.AddSeconds(10);
+        // 30s, not 10: a filtered list is served from the search index, and under a full-suite run
+        // the indexer lags well past the deadline that suffices for a single-class run.
+        var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {

@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -68,7 +68,12 @@ public abstract class RoomsFolderTestBase(
     /// instead of reading once — on a deadline, returning the last observed state so a failing
     /// assertion still shows what was actually there.
     /// </summary>
-    protected async Task<T> PollAsync<T>(Func<Task<T>> read, Func<T, bool> until, int timeoutSeconds = 10)
+    /// <remarks>
+    /// The default deadline is generous on purpose: in a full-suite run (3000+ tests in parallel)
+    /// the OpenSearch indexer lags well past the ~10 seconds that suffice for a single-class run,
+    /// and these were the only tests that flaked under that load.
+    /// </remarks>
+    protected async Task<T> PollAsync<T>(Func<Task<T>> read, Func<T, bool> until, int timeoutSeconds = 30)
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
 

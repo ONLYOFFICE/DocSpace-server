@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -569,4 +569,48 @@ public class BaseTest(
 
         return json.RootElement.GetProperty("response").GetProperty("current").GetProperty("id").GetInt32();
     }
+    /// <summary>
+    /// Adds a member of the given type to the portal. Guests cannot be created through
+    /// <see cref="InviteContact"/> — they only come into existence by being invited into a room by
+    /// e-mail, which is what <see cref="InviteGuest"/> does. This dispatcher keeps the
+    /// role-parameterised theories working with a single call site.
+    /// </summary>
+    protected async Task<User> InviteMember(EmployeeType employeeType)
+    {
+        return employeeType == EmployeeType.Guest
+            ? await InviteGuest()
+            : await InviteContact(employeeType);
+    }
+
+    /// <summary>Invites an existing portal member into a room with the given access level.</summary>
+    protected async Task InviteToRoom(int roomId, User user, FileShare access)
+    {
+        await _roomsApi.SetRoomSecurityAsync(
+            roomId,
+            new RoomInvitationRequest
+            {
+                Invitations = [new RoomInvitation { Id = user.Id, Access = access }],
+                Notify = false
+            },
+            cancellationToken: TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Archives a room and waits for the asynchronous operation to finish.</summary>
+    protected async Task ArchiveRoom(int roomId)
+    {
+        await _roomsApi.ArchiveRoomAsync(roomId, new ArchiveRoomRequest(false), TestContext.Current.CancellationToken);
+        await WaitLongOperation();
+    }
+
+    /// <summary>Terminates a portal member, acting as the portal owner.</summary>
+    protected async Task TerminateUser(User user)
+    {
+        await _peopleClient.Authenticate(Owner);
+
+        await _userStatusApi.UpdateUserStatusAsync(
+            EmployeeStatus.Terminated,
+            new UpdateMembersRequestDto([user.Id], resendAll: false),
+            TestContext.Current.CancellationToken);
+    }
+
 }
