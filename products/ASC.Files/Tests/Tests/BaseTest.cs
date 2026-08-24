@@ -148,70 +148,14 @@ public class BaseTest(
     /// <summary>
     /// Invites and registers a new member of the given type into the current test's portal.
     /// </summary>
-    protected async Task<User> InviteContact(EmployeeType employeeType, User? user = null)
+    protected Task<User> InviteContact(EmployeeType employeeType, User? user = null)
     {
-        user ??= Owner;
-        await _peopleClient.Authenticate(user);
-
-        var fakeMember = Initializer.FakerMember.Generate();
-
-        var memberSw = Stopwatch.StartNew();
-        var createMemberResponse = await _clients.ProfilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
-        {
-            CultureName = "en-US",
-            Spam = false,
-            Email = fakeMember.Email,
-            Password = fakeMember.Password,
-            FirstName = fakeMember.FirstName,
-            LastName = fakeMember.LastName,
-            Type = employeeType,
-        }, TestContext.Current.CancellationToken);
-        Timing.Write($"invite.addMember({employeeType})", memberSw.ElapsedMilliseconds);
-
-        if (createMemberResponse.StatusCode != HttpStatusCode.OK)
-        {
-            throw new HttpRequestException($"Unable to invite user {employeeType}");
-        }
-
-        return new User(fakeMember.Email, fakeMember.Password) { Id = createMemberResponse.Data.Response.Id };
+        return Invitations.InviteContactAsync(_clients.ProfilesApi, _peopleClient, employeeType, user ?? Owner, TestContext.Current.CancellationToken);
     }
 
-
-    protected async Task<User> InviteGuest(User? user = null)
+    protected Task<User> InviteGuest(User? user = null)
     {
-        user ??= Owner;
-        await _peopleClient.Authenticate(user);
-
-        var fakeGuest = Initializer.FakerMember.Generate();
-
-        var payload = JsonSerializer.Serialize(new
-        {
-            firstName = fakeGuest.FirstName,
-            lastName = fakeGuest.LastName,
-            email = fakeGuest.Email,
-            password = fakeGuest.Password,
-            type = nameof(EmployeeType.Guest),
-            cultureName = "en-US",
-            spam = false
-        });
-
-        using var content = new StringContent(payload, Encoding.UTF8, "application/json");
-
-        var guestSw = Stopwatch.StartNew();
-        using var response = await _peopleClient.PostAsync("api/2.0/people/active", content, TestContext.Current.CancellationToken);
-        Timing.Write($"invite.guest({user.Email})", guestSw.ElapsedMilliseconds);
-
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"Unable to create a guest ({(int)response.StatusCode}): {body}");
-        }
-
-        using var json = JsonDocument.Parse(body);
-        var guestId = json.RootElement.GetProperty("response").GetProperty("id").GetGuid();
-
-        return new User(fakeGuest.Email, fakeGuest.Password) { Id = guestId };
+        return Invitations.InviteGuestAsync(_peopleClient, user ?? Owner, TestContext.Current.CancellationToken);
     }
 
     protected async Task<FileDtoInteger> GetFile(int fileId)
