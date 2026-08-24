@@ -193,9 +193,10 @@ public class FolderNewItemsTests(
     }
 
     /// <remarks>
-    /// BUG 81712: the owner's last-read marker is set when the room is created and a later visit
-    /// does not move it, so a file another member added in between is still reported as new.
-    /// Asserts the behaviour the product should have.
+    /// BUG 81712: reading a folder's content did not move the caller's last-read marker, so a file
+    /// another member added before the first visit was still reported as new. Fixed by clearing the
+    /// new-item marks in <c>FileStorageService.GetFolderItemsAsync</c>, mirroring the room-level
+    /// clearing in <c>GetRoomInfoAsync</c>.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81712")]
@@ -222,9 +223,10 @@ public class FolderNewItemsTests(
     }
 
     /// <remarks>
-    /// BUG 81712: re-opening a folder does not clear its new items. The same defect is already
-    /// pinned at room level by <c>RoomNewItemsSemanticsTests.News_RevisitingRoom_ClearsNews</c>;
-    /// this asserts the behaviour the product should have, so it turns green when the bug is fixed.
+    /// BUG 81712: re-opening a folder did not clear its new items (the room-level twin is
+    /// <c>RoomNewItemsSemanticsTests.News_RevisitingRoom_ClearsNews</c>). Fixed by clearing the
+    /// new-item marks in <c>FileStorageService.GetFolderItemsAsync</c> on every content read of a
+    /// room or an ordinary folder.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81712")]

@@ -544,6 +544,15 @@ public class FileStorageService //: IFileStorageService
             ParentRoom = parentRoom
         };
 
+        // Reading a folder's content is the folder-level analogue of GetRoomInfoAsync: everything
+        // that was new in it up to this moment stops being new for the caller, synchronously, so the
+        // very next news read already reflects the visit. Section roots (Rooms, Archive, Recent, ...)
+        // are only containers - opening them must not consume the per-room badges.
+        if (parent.IsRoom || parent.FolderType == FolderType.DEFAULT)
+        {
+            await fileMarker.RemoveMarkAsNewAsync(parent);
+        }
+
         return result;
     }
 
