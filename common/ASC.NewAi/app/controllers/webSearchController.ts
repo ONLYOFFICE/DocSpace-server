@@ -37,6 +37,7 @@ import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
+import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
 async function checkConfigUrl(
   config: WebSearchConfig | undefined,
@@ -46,20 +47,35 @@ async function checkConfigUrl(
 
 const engine = new WebSearchEngine({ storage });
 
+// testConnection is the one route here that never touches the C# storage —
+// the probe goes straight to the search provider — so it inherits none of
+// the downstream gates. Borrow them: a throwaway config read runs the same
+// [AiFeature] (AI disabled) and employee-type (Guest) checks and rethrows
+// their 403 before any outbound connection is made (Bugs 83234 / 83235).
+async function assertWebSearchAccess(): Promise<void> {
+  await storage.webSearch.read();
+}
+
 export const webSearchController = {
   getActiveConfig: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
+    // A room config must not be readable by someone who cannot open the
+    // room (Bug 82901). Inaccessible/unknown rooms surface as 404 — the
+    // same convention as threads/create.
+    await assertEntityAccessible(entityId);
     const config = await engine.getActiveConfig(entityId);
     res.json(config);
   }),
 
   isConfigured: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
+    await assertEntityAccessible(entityId);
     const value = await engine.isConfigured(entityId);
     res.json(value);
   }),
 
   testConnection: asyncHandler<WebSearchConfig>(async (req, res) => {
+    await assertWebSearchAccess();
     await checkConfigUrl(req.body);
     const result = await engine.testConnection(req.body);
     res.json(result);
@@ -67,6 +83,7 @@ export const webSearchController = {
 
   configure: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["body", "entityId"] as const);
+    await assertEntityAccessible(args.entityId as string | undefined);
     await checkConfigUrl(args.body as WebSearchConfig);
     const result = await engine.configure(
       args.body as WebSearchConfig,
@@ -77,6 +94,7 @@ export const webSearchController = {
 
   setActiveConfig: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["body", "entityId"] as const);
+    await assertEntityAccessible(args.entityId as string | undefined);
     await checkConfigUrl(args.body as WebSearchConfig);
     await engine.setActiveConfig(
       args.body as WebSearchConfig,
