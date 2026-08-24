@@ -221,15 +221,16 @@ export const agentsController = {
     const agent = await aiService.put(`/agents/${id}`, rest, { raw: true });
 
     if (profileId !== undefined) {
-      const existing = await storage.assignments
-        .readByType(AGENT_ACTION_TYPE, id)
-        .catch(() => null);
+      // Re-bind through the upsert endpoint: a read-then-create/update dance
+      // breaks when the agent's current profile is disabled or deleted — the
+      // resolver-backed read hides the existing row, the create then hits
+      // "assignment already exists" and surfaces as a 403 (Bug 83355). The
+      // upsert has no existence failure mode.
       try {
-        if (existing) {
-          await storage.assignments.update(AGENT_ACTION_TYPE, profileId, id);
-        } else {
-          await storage.assignments.create(AGENT_ACTION_TYPE, profileId, id);
-        }
+        await storage.assignments.upsertMany(
+          { [AGENT_ACTION_TYPE]: profileId },
+          id,
+        );
       } catch (err) {
         rethrowAssignmentError(err, profileId);
       }
