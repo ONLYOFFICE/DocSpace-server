@@ -399,6 +399,15 @@ public class BaseTest(
         }
     }
 
+    /// <remarks>
+    /// An <b>empty</b> status list is a terminal state, not "not started yet": publishing an
+    /// operation writes it into the distributed cache before the triggering HTTP call returns
+    /// (<c>DistributedTaskQueue.PublishTask</c>), and reading the statuses prunes every finished
+    /// operation (<c>FileOperationsManagerHolder.GetOperationResults</c> dequeues it and leaves it
+    /// out of the same response). So once the caller's request has returned, "nothing listed" can
+    /// only mean "everything finished" — waiting further would just burn the whole deadline, which
+    /// is exactly what every fast operation used to do here for 30 seconds.
+    /// </remarks>
     protected async Task<List<FileOperationDto>?> WaitLongOperation(string? operationId = null)
     {
         List<FileOperationDto>? statuses;
@@ -412,7 +421,7 @@ public class BaseTest(
 
             // On the deadline the last observed statuses are returned as they are, so the caller's
             // own assertion reports what the operation was actually doing.
-            if (statuses.Count > 0 && statuses.TrueForAll(r => r.Finished) || DateTime.UtcNow >= deadline)
+            if (statuses.TrueForAll(r => r.Finished) || DateTime.UtcNow >= deadline)
             {
                 break;
             }
