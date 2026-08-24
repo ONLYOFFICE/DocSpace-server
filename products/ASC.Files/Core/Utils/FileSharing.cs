@@ -169,7 +169,8 @@ public class FileSharingAceHelper(
 
             if (room != null)
             {
-                if (folder.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+                // createIfNotExist: false — a missing room-templates root cannot be anyone's root
+                if (folder.RootId is int root && root == await globalFolderHelper.GetFolderRoomTemplatesAsync(false))
                 {
                     if (w.Access != FileShare.Read && w.Access != FileShare.None || w.SubjectType != SubjectType.User && w.SubjectType != SubjectType.Group)
                     {
@@ -268,7 +269,7 @@ public class FileSharingAceHelper(
                 }
 
                 if (room.RootId is int root &&
-                    root != await globalFolderHelper.FolderRoomTemplatesAsync &&
+                    root != await globalFolderHelper.GetFolderRoomTemplatesAsync(false) &&
                     (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) ||
                      !userAccesses.Contains(w.Access)))
                 {

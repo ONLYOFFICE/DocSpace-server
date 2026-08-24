@@ -941,7 +941,8 @@ public class FileStorageService //: IFileStorageService
                 : WebhookTrigger.RoomCreated,
             folder);
 
-        if (folder.ParentId is int parent && parent == await globalFolderHelper.FolderRoomTemplatesAsync)
+        // createIfNotExist: false — a missing room-templates root cannot be the parent of anything
+        if (folder.ParentId is int parent && parent == await globalFolderHelper.GetFolderRoomTemplatesAsync(false))
         {
         }
         else

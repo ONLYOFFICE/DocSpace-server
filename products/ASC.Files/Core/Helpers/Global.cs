@@ -1005,6 +1005,11 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
         return await FolderRoomTemplatesAsync;
     }
 
+    public async ValueTask<int> GetFolderRoomTemplatesAsync(bool createIfNotExist)
+    {
+        return await globalFolder.GetFolderRoomTemplatesAsync(daoFactory, createIfNotExist);
+    }
+
     public async ValueTask<int> GetFolderDefaultTemplatesAsync()
     {
         return await FolderDefaultTemplatesAsync;
