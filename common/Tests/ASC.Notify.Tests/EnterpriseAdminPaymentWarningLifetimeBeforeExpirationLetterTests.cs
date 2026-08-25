@@ -38,12 +38,6 @@ namespace ASC.Notify.Tests;
 /// </summary>
 public class EnterpriseAdminPaymentWarningLifetimeBeforeExpirationLetterTests : PeriodicLetterTestBase<EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyAction>
 {
-    /// <summary>The pricing page the sending code appends its campaign parameters to.</summary>
-    private static string PricesUrl(CultureInfo culture)
-    {
-        return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "docspaceprices", culture, "https://www.onlyoffice.com/docspace-prices.aspx");
-    }
-
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should().Contain(scope.Recipient.FirstName)
