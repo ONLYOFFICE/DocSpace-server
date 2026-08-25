@@ -90,7 +90,14 @@ export async function assertThreadCreatable(
   profileId: string | undefined,
 ): Promise<void> {
   await assertEntityAccessible(entityId);
-  if (profileId && (await storage.profiles.readById(profileId))) {
+  // A malformed profileId makes the C# lookup fail with a non-404 status;
+  // treat that the same as "no such profile" and fall through to the
+  // scope-assignment resolution instead of relaying an opaque error
+  // (Bug 83045).
+  if (
+    profileId
+    && (await storage.profiles.readById(profileId).catch(() => undefined))
+  ) {
     return;
   }
   const resolved = await assignmentsEngine.tryResolveForAction(

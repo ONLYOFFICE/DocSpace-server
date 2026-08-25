@@ -450,6 +450,23 @@ function hasNonEmptyText(userMessage: unknown): boolean {
   return false;
 }
 
+// Validation error when the effective profileId does not reference an
+// existing profile, or null when it does (or when no profileId is supplied —
+// the engine then resolves the scope's assignment itself). A malformed id
+// makes the C# lookup fail with a non-404 status; that is just as much "no
+// such profile" to the caller, so both collapse to the same message.
+async function unknownProfileIdError(
+  profileId: string | undefined,
+): Promise<string | null> {
+  if (!profileId) {
+    return null;
+  }
+  const profile = await storage.profiles
+    .readById(profileId)
+    .catch(() => undefined);
+  return profile ? null : `unknown profileId: ${profileId}`;
+}
+
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
     // Without this the provider request runs without the forwarded auth /
@@ -534,6 +551,19 @@ export const aiController = {
         req.body.profileId = agentProfileId;
       }
     }
+    // The effective profileId must reference an existing profile BEFORE the
+    // stream opens: a malformed or unknown id otherwise surfaces only as an
+    // opaque {"type":"error"} frame inside a 200 stream (Bug 83045), or the
+    // engine silently falls back to another model (Bug 83160). Runs after
+    // the thread prefill and the agent substitution, so only the value that
+    // will actually be used is checked.
+    {
+      const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError) {
+        res.status(400).json({ error: profileError });
+        return;
+      }
+    }
     const body = withContextPrompt(
       await withToolsPrompt(
         await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
@@ -564,6 +594,14 @@ export const aiController = {
       const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
       if (agentProfileId) {
         req.body.profileId = agentProfileId;
+      }
+    }
+    // Same pre-flight as sendWithStream (Bugs 83045 / 83160).
+    {
+      const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError) {
+        res.status(400).json({ error: profileError });
+        return;
       }
     }
     const body = withContextPrompt(
