@@ -80,18 +80,14 @@ public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
     protected override IEnumerable<string> Resources => [ResourceNames.MailPit];
 
     /// <summary>
-    /// What a letter never touches. It is rendered in this process out of <see cref="LetterHost"/>, so
-    /// all the stack owes the suite is the database the portal was registered into, ApiSystem (the
-    /// registration), Web.Api (the password salt the harness reads once) and MailPit. The five service
-    /// processes and OpenResty below are pure startup cost and five more things that can fail a run of
-    /// letter renders — and OpenResty also binds host ports 8092 and 443 and mounts the client
-    /// packages, which a server-only checkout does not have.
+    /// The letter suite's own graph (see the switch in <c>ASC.AppHost/Program.cs</c>): a letter is
+    /// rendered in this process out of <see cref="LetterHost"/>, so all the stack owes the suite is
+    /// the database the portal was registered into, ApiSystem (the registration), Web.Api (the
+    /// password salt the harness reads once) and MailPit. The service processes, socket.io and
+    /// OpenResty of <c>integration-test</c> would be pure startup cost and more things that can fail
+    /// a run of letter renders.
     /// </summary>
-    protected override IEnumerable<string> UnusedResources =>
-    [
-        ResourceNames.Files, ResourceNames.FilesWorker, ResourceNames.People, ResourceNames.Ai,
-        ResourceNames.SocketIo, ResourceNames.OpenResty
-    ];
+    protected override string LaunchProfile => "notify-test";
 
     protected override LetterPortalClients CreateClients(PortalContext context)
     {

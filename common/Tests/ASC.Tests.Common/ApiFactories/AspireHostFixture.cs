@@ -75,16 +75,12 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     protected abstract IEnumerable<string> Resources { get; }
 
     /// <summary>
-    /// What this suite has no use for at all, dropped from the graph before the host is built. The
-    /// <c>integration-test</c> profile brings up six services, socket.io and OpenResty, and a suite
-    /// that touches two of them pays for the rest in startup time and in one more thing that can fail.
+    /// The AppHost launch profile this suite's stack is built from. The profile is where the resource
+    /// graph is decided (the switch in <c>ASC.AppHost/Program.cs</c>), so a suite that needs a smaller
+    /// graph than <c>integration-test</c> gets a profile of its own there rather than pruning the graph
+    /// here — one mechanism for "what starts", not two.
     /// </summary>
-    /// <remarks>
-    /// Leaves only — a resource nothing else waits for. Naming one that a kept resource waits on
-    /// (the database, the migration runner, RabbitMQ, Redis, OpenSearch, or ApiSystem and Web.Api
-    /// themselves) strands that wait on a dependency which no longer exists, and the host never starts.
-    /// </remarks>
-    protected virtual IEnumerable<string> UnusedResources => [];
+    protected virtual string LaunchProfile => "integration-test";
 
     /// <summary>Builds the suite's own client bundle for a freshly registered portal.</summary>
     protected abstract TClients CreateClients(PortalContext context);
@@ -117,17 +113,15 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     public async ValueTask InitializeAsync()
     {
-        // Start Aspire AppHost with integration-test profile.
+        // Start the Aspire AppHost with the suite's launch profile.
         // APP_HOSTING_STANDALONE=true makes the platform resolve the current tenant from the
         // Origin header first (see TenantManager.SetCurrentTenantAsync), which is how every test
         // is scoped to its own freshly registered portal.
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            ["DOTNET_LAUNCH_PROFILE=integration-test", "SKIP_CLIENT=true", "APP_HOSTING_STANDALONE=true"]);
+            [$"DOTNET_LAUNCH_PROFILE={LaunchProfile}", "SKIP_CLIENT=true", "APP_HOSTING_STANDALONE=true"]);
 
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
-
-        DropUnusedResources(appHost);
 
         _app = await appHost.BuildAsync();
         await _app.StartAsync();
@@ -174,54 +168,6 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // open, cache population). That thundering herd of cold registrations contends heavily and can
         // stall. Paying those one-time costs once here keeps the parallel flood hitting warm code paths.
         await WarmUpAsync();
-    }
-
-    /// <summary>
-    /// Drops what <see cref="UnusedResources"/> names, before the host is built. Parameter resources
-    /// are never touched whatever they are called: Aspire adds them for passwords and endpoints, and a
-    /// kept resource may point at one.
-    /// </summary>
-    private void DropUnusedResources(IDistributedApplicationTestingBuilder appHost)
-    {
-        var unused = UnusedResources.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        if (unused.Count == 0)
-        {
-            return;
-        }
-
-        // The two the base always starts, plus whatever the suite asked for: dropping one of those
-        // would leave InitializeAsync waiting on a resource that is no longer in the graph.
-        var needed = new[] { ResourceNames.ApiSystem, ResourceNames.WebApi }.Union(Resources);
-        var contradicted = unused.Intersect(needed, StringComparer.OrdinalIgnoreCase).ToArray();
-
-        if (contradicted.Length > 0)
-        {
-            throw new InvalidOperationException(
-                $"{GetType().Name} lists {string.Join(", ", contradicted)} as unused, but the harness "
-                + $"waits for it — it is either in {nameof(Resources)} or one of the two ApiSystem and "
-                + "Web.Api that portal registration and authentication always need.");
-        }
-
-        var doomed = appHost.Resources
-            .Where(resource => unused.Contains(resource.Name) && resource is not ParameterResource)
-            .ToArray();
-
-        foreach (var resource in doomed)
-        {
-            appHost.Resources.Remove(resource);
-        }
-
-        // Matched by name, so a resource renamed in the AppHost would otherwise silently stop being
-        // dropped and the suite would quietly go back to starting the whole graph.
-        var missing = unused.Except(doomed.Select(resource => resource.Name), StringComparer.OrdinalIgnoreCase).ToArray();
-
-        if (missing.Length > 0)
-        {
-            throw new InvalidOperationException(
-                $"The Aspire graph has no resource named {string.Join(", ", missing)}, so "
-                + $"{GetType().Name}.{nameof(UnusedResources)} is out of step with the AppHost.");
-        }
     }
 
     /// <summary>

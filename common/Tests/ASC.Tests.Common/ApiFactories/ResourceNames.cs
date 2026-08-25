@@ -46,19 +46,8 @@ public static class ResourceNames
     public const string WebApi = "onlyoffice-web-api";
 
     public const string Files = "onlyoffice-files";
-    public const string FilesWorker = "onlyoffice-files-worker";
     public const string People = "onlyoffice-people";
     public const string Ai = "onlyoffice-ai";
-
-    /// <summary>The socket.io hub. Nothing in the graph waits for it.</summary>
-    public const string SocketIo = "onlyoffice-socketIO";
-
-    /// <summary>
-    /// The reverse proxy the portal is published through — <c>Constants.OpenRestyContainer</c>. Added
-    /// for every launch profile, and it binds host ports 8092 and 443, so a suite that does not go
-    /// through it is better off naming it in <c>UnusedResources</c>.
-    /// </summary>
-    public const string OpenResty = "onlyoffice-openresty";
 
     /// <summary>
     /// The DocSpace database, for a suite that talks to it directly rather than through a service —
