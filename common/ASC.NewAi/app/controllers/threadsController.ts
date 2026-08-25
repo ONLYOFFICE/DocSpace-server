@@ -220,6 +220,14 @@ export const threadsController = {
       res.status(400).json({ error: "threadId required" });
       return;
     }
+    // The storage layer deliberately swallows the C# 404 (idempotent delete
+    // for engine cascades), so without this check deleting a nonexistent or
+    // already-deleted thread reported success — unlike rename/clear-messages
+    // on the same ids (Bug 83095). Verify existence at the HTTP boundary.
+    if ((await storage.threads.readById(idStr)) === null) {
+      res.status(404).json({ error: "thread not found" });
+      return;
+    }
     await engine.delete(idStr);
     res.json({ success: true });
   }),
