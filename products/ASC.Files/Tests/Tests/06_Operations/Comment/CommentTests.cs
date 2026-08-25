@@ -140,8 +140,8 @@ public class CommentTests(
     }
 
     /// <remarks>
-    /// BUG 82266: a comment longer than 255 characters is silently truncated instead of being
-    /// rejected. Asserts the behaviour the product should have.
+    /// BUG 82266: a comment longer than 255 characters was silently truncated instead of being
+    /// rejected. Fixed by putting <c>[StringLength(255)]</c> on the <c>UpdateComment</c> DTO.
     /// </remarks>
     [Fact]
     [Trait("Bug", "82266")]
@@ -161,8 +161,9 @@ public class CommentTests(
     }
 
     /// <remarks>
-    /// BUG 82268: a non-existent file id is reported as 403 (SecurityException) instead of 404.
-    /// Asserts the behaviour the product should have.
+    /// BUG 82268: a non-existent file id was reported as 403 (SecurityException) instead of 404.
+    /// Fixed by making <c>UpdateCommentAsync</c> distinguish a missing file (404) from a missing
+    /// version (400).
     /// </remarks>
     [Fact]
     [Trait("Bug", "82268")]
@@ -180,8 +181,8 @@ public class CommentTests(
     }
 
     /// <remarks>
-    /// BUG 82271: a non-existent version is reported as 403 (SecurityException) instead of 400.
-    /// Asserts the behaviour the product should have.
+    /// BUG 82271: a non-existent version was reported as 403 (SecurityException) instead of 400.
+    /// Fixed by making <c>UpdateCommentAsync</c> answer 400 for a version the file does not have.
     /// </remarks>
     [Fact]
     [Trait("Bug", "82271")]
@@ -200,8 +201,8 @@ public class CommentTests(
     }
 
     /// <remarks>
-    /// BUG 82271: version 0 is reported as 403 (SecurityException) instead of 400. Asserts the
-    /// behaviour the product should have.
+    /// BUG 82271: version 0 was reported as 403 (SecurityException) instead of 400. Fixed by the
+    /// <c>[Range(1, int.MaxValue)]</c> annotation on the <c>UpdateComment</c> DTO.
     /// </remarks>
     [Fact]
     [Trait("Bug", "82271")]
@@ -220,8 +221,8 @@ public class CommentTests(
     }
 
     /// <remarks>
-    /// BUG 82271: a negative version is reported as 403 (SecurityException) instead of 400. Asserts
-    /// the behaviour the product should have.
+    /// BUG 82271: a negative version was reported as 403 (SecurityException) instead of 400. Fixed
+    /// by the <c>[Range(1, int.MaxValue)]</c> annotation on the <c>UpdateComment</c> DTO.
     /// </remarks>
     [Fact]
     [Trait("Bug", "82271")]

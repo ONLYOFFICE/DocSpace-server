@@ -121,6 +121,11 @@ public class GetSecurityInfoPermissionsTests(
         securityInfos.Should().NotBeNull();
     }
 
+    /// <summary>
+    /// BUG 82675: the batch GetSecurityInfo answered 200 with an empty list for a file the caller
+    /// could not read. Fixed by making <c>FileSharing.GetSharedInfoAsync</c> throw
+    /// <c>SecurityException</c> for an unreadable entry.
+    /// </summary>
     [Fact]
     [Trait("Bug", "82675")]
     public async Task GetSecurityInfo_UserWithoutFileAccess_Returns403()
@@ -150,6 +155,10 @@ public class GetSecurityInfoPermissionsTests(
         securityInfos.Should().NotBeNull();
     }
 
+    /// <summary>
+    /// BUG 82675: same for guests — an unreadable file yielded 200 with an empty list. Fixed by the
+    /// <c>SecurityException</c> in <c>FileSharing.GetSharedInfoAsync</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "82675")]
     public async Task GetSecurityInfo_GuestWithoutFileAccess_Returns403()

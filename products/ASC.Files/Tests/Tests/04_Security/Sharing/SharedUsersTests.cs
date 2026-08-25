@@ -145,6 +145,11 @@ public class SharedUsersTests(
         userIds.Should().Contain(user2.Id.ToString());
     }
 
+    /// <summary>
+    /// BUG 81109: a guest calling sharedusers saw every account the file was shared with instead of
+    /// only the owner. Fixed by filtering the list to the owner for guest callers in
+    /// <c>FileStorageService.SharedUsersAsync</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "81109")]
     public async Task GetSharedUsers_Guest_SeesOwnerButNotUserEntry()
@@ -271,6 +276,11 @@ public class SharedUsersTests(
         users.Should().NotBeNull();
     }
 
+    /// <summary>
+    /// BUG 83105: sharedusers for a non-existent file threw <c>InvalidOperationException</c>, which
+    /// mapped to 403 instead of 404. Fixed by throwing <c>ItemNotFoundException</c> for a missing file
+    /// in <c>FileStorageService.SharedUsersAsync</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83105")]
     public async Task GetSharedUsers_NonExistentFileId_Returns404()

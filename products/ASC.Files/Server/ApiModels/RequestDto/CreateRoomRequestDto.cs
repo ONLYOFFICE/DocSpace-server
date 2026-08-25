@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The request parameters for creating a room.
 /// </summary>
-public class CreateRoomRequestDto
+public class CreateRoomRequestDto : IValidatableObject
 {
     /// <summary>
     /// The room name.
@@ -138,4 +138,17 @@ public class CreateRoomRequestDto
     /// </summary>
     /// <example>false</example>
     public bool? SaveFormAsXLSX { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        // `share` is exposed by the OpenAPI document but createRoom has no implementation behind it
+        // (FileStorageService.CreateRoomAsync ignores the shares argument). Accepting it and dropping
+        // it silently is worse than refusing it: share the room after it is created.
+        if (Share != null && Share.Any())
+        {
+            yield return new ValidationResult(
+                "The 'share' parameter is not supported on room creation. Share the room after it is created.",
+                [nameof(Share)]);
+        }
+    }
 }

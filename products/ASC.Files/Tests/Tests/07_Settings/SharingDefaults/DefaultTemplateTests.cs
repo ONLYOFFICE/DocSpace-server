@@ -79,6 +79,11 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
         exception.ErrorContent?.ToString().Should().Contain("You don't have enough permission to perform the operation");
     }
 
+    /// <summary>
+    /// BUG 79837: uploading a template over 100MB made Kestrel abort the connection instead of
+    /// answering. Fixed by putting <c>[DisableRequestSizeLimit]</c> on <c>UploadDefaultTemplate</c>
+    /// plus an explicit size check answering 400 with a message.
+    /// </summary>
     [Fact]
     [Trait("Bug", "79837")]
     public async Task UploadDefaultTemplate_LargerThan100MB_ReturnsBadRequestWithErrorMessage()

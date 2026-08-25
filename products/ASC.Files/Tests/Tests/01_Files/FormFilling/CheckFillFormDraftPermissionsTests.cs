@@ -53,9 +53,10 @@ public class CheckFillFormDraftPermissionsTests(
     }
 
     /// <summary>
-    /// BUG 81441: the endpoint is <c>[AllowAnonymous]</c>, so ASP.NET's own auth middleware never
-    /// rejects an unauthenticated caller with 401 - the app-level check further downstream throws a
-    /// plain <c>SecurityException</c>, which the API maps to 403 instead.
+    /// BUG 81441: the endpoint is <c>[AllowAnonymous]</c> and the downstream check threw a plain
+    /// <c>SecurityException</c>, so an unauthenticated caller got 403 instead of 401. Fixed by the
+    /// <c>DemandAuthenticatedOrLinkAsync</c> guard in
+    /// <c>FileStorageService.CheckFillFormDraftAsync</c>.
     /// </summary>
     [Trait("Bug", "81441")]
     [Fact]

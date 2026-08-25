@@ -39,6 +39,11 @@ public class CheckDestFolderBugTests(
     AspireAppFixture fixture)
     : CheckDestFolderTestBase(fixture)
 {
+    /// <summary>
+    /// BUG 82103: checkdestfolder accepted an archived room as destination instead of answering 403.
+    /// Fixed by checking <c>CanCreateAsync</c> on the destination in
+    /// <c>MoveOrCopyDestFolderCheckAsync</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "82103")]
     public async Task CheckDestFolder_ArchivedRoom_Returns403()
@@ -55,6 +60,11 @@ public class CheckDestFolderBugTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 82158: a non-existent destination folder did not yield 404. Fixed by throwing
+    /// <c>ItemNotFoundException</c> for a null destination folder in
+    /// <c>MoveOrCopyDestFolderCheckAsync</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "82158")]
     public async Task CheckDestFolder_NonExistentDestFolderId_Returns404()
@@ -68,6 +78,11 @@ public class CheckDestFolderBugTests(
         exception.ErrorCode.Should().Be(404);
     }
 
+    /// <summary>
+    /// BUG 82159: omitting destFolderId did not yield 400. Fixed by rejecting a missing
+    /// destFolderId with <c>ArgumentException</c> in
+    /// <c>OperationController.CheckMoveOrCopyDestFolder</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "82159")]
     public async Task CheckDestFolder_NoDestFolderIdSpecified_Returns400()
@@ -81,6 +96,10 @@ public class CheckDestFolderBugTests(
         exception.ErrorCode.Should().Be(400);
     }
 
+    /// <summary>
+    /// BUG 82104: a user with no access to the destination room was not rejected with 403. Fixed by
+    /// checking <c>CanCreateAsync</c> on the destination in <c>MoveOrCopyDestFolderCheckAsync</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "82104")]
     public async Task CheckDestFolder_UserWithoutDestAccess_Returns403()
@@ -101,6 +120,10 @@ public class CheckDestFolderBugTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 82104: same for guests — no 403 for an inaccessible destination. Fixed by the
+    /// <c>CanCreateAsync</c> check in <c>MoveOrCopyDestFolderCheckAsync</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "82104")]
     public async Task CheckDestFolder_GuestWithoutDestAccess_Returns403()

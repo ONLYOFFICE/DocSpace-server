@@ -91,7 +91,7 @@ public class VirtualRoomsInternalController(
         lifetime?.StartDate = DateTime.UtcNow;
 
         var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private,
-            inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover,
+            inDto.Indexing, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover,
             inDto.Tags, inDto.Logo, inDto.ChatSettings, inDto.SendFormToExternalDB, inDto.SaveFormAsXLSX);
 
         return await _folderDtoHelper.GetAsync(room);
@@ -425,9 +425,12 @@ public abstract class VirtualRoomsController<T>(
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoom(DeleteRoomRequestDto<T> inDto)
     {
-        await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
+        // deleteAfter only means "do not keep the record forever"; the operation must still be
+        // trackable at least until the client has polled it once, so the result is always held.
+        var taskId = await fileDeleteOperationsManager.Publish([inDto.Id], [], false, true, true);
+        var tasks = await fileDeleteOperationsManager.GetOperationResults(id: taskId);
 
-        return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
+        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
     /// <remarks>

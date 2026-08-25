@@ -91,6 +91,12 @@ public class ThirdPartyAccessPermissionsTests(
         exception.ErrorContent?.ToString().Should().Contain("You don't have enough permission to perform the operation");
     }
 
+    /// <summary>
+    /// BUG 82302: the test's Arrange could not delete the admin (deletion requires a suspended
+    /// member) while the product already rejected deleted users' tokens. Fixed by terminating before
+    /// deleting here and by making <c>IdentityClient.DeleteClientsAsync</c> treat a 404 from the
+    /// identity service as idempotent success.
+    /// </summary>
     [Fact]
     [Trait("Bug", "82302")]
     public async Task ChangeAccessToThirdparty_DeletedDocSpaceAdmin_Unauthorized()
@@ -99,7 +105,9 @@ public class ThirdPartyAccessPermissionsTests(
         var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
         await _filesClient.Authenticate(admin);
 
-        await _peopleClient.Authenticate(Owner);
+        // Deletion is only allowed for suspended members, so the admin is terminated first
+        // (TerminateUser leaves _peopleClient authenticated as the Owner).
+        await TerminateUser(admin);
         await _profilesApi.DeleteMemberAsync(admin.Id.ToString(), TestContext.Current.CancellationToken);
 
         // Act

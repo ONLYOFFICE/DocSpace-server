@@ -87,6 +87,12 @@ public class SetSecurityInfoTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 83263: a guest with read-only access could change sharing because the guard in
+    /// <c>FileSharingAceHelper.SetAceObjectAsync</c> treated an empty ace list as a self-leave
+    /// (vacuously true <c>TrueForAll</c>) and skipped <c>CanSetAccessAsync</c>. Fixed so the
+    /// access check always runs.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83263")]
     public async Task SetSecurityInfo_Guest_CannotSetSecurityInfoOnOwnerFile_Returns403()
@@ -150,6 +156,11 @@ public class SetSecurityInfoTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 83263: same hole through the per-file endpoint — the self-leave shortcut in
+    /// <c>FileSharingAceHelper.SetAceObjectAsync</c> let a guest bypass <c>CanSetAccessAsync</c>.
+    /// Fixed so the access check always runs.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83263")]
     public async Task SetFileSecurityInfo_Guest_CannotSetFileSecurityInfoOnOwnerFile_Returns403()

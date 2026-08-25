@@ -164,9 +164,10 @@ public class FileLinkPrimaryTests(
     }
 
     /// <remarks>
-    /// BUG 81571: an unauthenticated caller should get 401 Unauthorized, the same as every other
-    /// endpoint in this file (<c>SetFileExternalLink</c>, <c>GetFileLinks</c>). The API currently
-    /// returns 403 here instead.
+    /// BUG 81571: an unauthenticated caller got 403 instead of 401 Unauthorized, unlike every other
+    /// endpoint in this file (<c>SetFileExternalLink</c>, <c>GetFileLinks</c>). Fixed by the
+    /// <c>DemandAuthenticatedOrLinkAsync</c> guard at the top of
+    /// <c>FileStorageService.GetPrimaryExternalLinkAsync</c>.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81571")]

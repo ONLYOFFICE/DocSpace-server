@@ -82,9 +82,10 @@ public class StartFillingFilePermissionsTests(
     }
 
     /// <summary>
-    /// BUG 81400: a <see cref="EmployeeType.User"/> with no access to the room at all is answered
-    /// 200 instead of 403 - <c>StartFillingAsync</c> only rejects the caller when they hold an
-    /// explicit <see cref="FileShare.FillForms"/> ACE on the room, not when they hold none.
+    /// BUG 81400: a <see cref="EmployeeType.User"/> with no access to the room at all was answered
+    /// 200 instead of 403 - <c>StartFillingAsync</c> only rejected callers holding an explicit
+    /// <see cref="FileShare.FillForms"/> ACE on the room, not those holding none. Fixed by rejecting
+    /// callers with no room membership unless they can manage the room (owner/portal admin).
     /// </summary>
     [Trait("Bug", "81400")]
     [Fact]

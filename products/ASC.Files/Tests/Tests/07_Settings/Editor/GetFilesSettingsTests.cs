@@ -81,9 +81,9 @@ public class GetFilesSettingsTests(
         settings.ChunkUploadSize.Should().BePositive();
     }
 
-    // BUG 82323: the endpoint is marked [AllowAnonymous] in SettingsController.GetFilesSettings, so an
-    // unauthenticated caller can read the portal's file settings. It should require authentication like
-    // every other endpoint in this file.
+    // BUG 82323: the endpoint was marked [AllowAnonymous], so an unauthenticated caller could read the
+    // portal's file settings. Fixed by the DemandAuthenticatedOrLinkAsync guard in
+    // SettingsController.GetFilesSettings (link holders still pass).
     [Trait("Bug", "82323")]
     [Fact]
     public async Task GetFilesSettings_Anonymous_ShouldBeUnauthorized()

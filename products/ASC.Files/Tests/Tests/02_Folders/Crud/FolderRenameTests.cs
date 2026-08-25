@@ -174,9 +174,9 @@ public class FolderRenameTests(
     }
 
     /// <summary>
-    /// TS: "BUG 81507: PUT /api/2.0/files/folder/:folderId - empty string title returns 400" was a
-    /// <c>test.fail</c> — the API accepted the empty title and returned 200. Asserted here as the
-    /// product should behave: an empty title is rejected with 400.
+    /// BUG 81507: renaming a folder to an empty title was accepted with 200 (the TS suite carried it
+    /// as a <c>test.fail</c>). Fixed by implementing <c>IValidatableObject</c> on the
+    /// <c>CreateFolder</c> DTO to reject blank titles with 400.
     /// </summary>
     [Trait("Bug", "81507")]
     [Fact]

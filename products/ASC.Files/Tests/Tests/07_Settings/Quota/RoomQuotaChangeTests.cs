@@ -98,12 +98,15 @@ public class RoomQuotaChangeTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 82293: the API answered 200 and applied the quota even though the room-quota feature was
+    /// never enabled for this portal. Fixed by making <c>FolderQuotaChangeAsync</c> refuse when
+    /// <c>TenantRoomQuotaSettings.EnableQuota</c> is off.
+    /// </summary>
     [Trait("Bug", "82293")]
     [Fact]
     public async Task UpdateRoomsQuota_FeatureDisabled_ReturnsForbidden()
     {
-        // BUG 82293: the API returns 200 and applies the quota even though the room-quota
-        // feature was never enabled for this portal. It should reject the change instead.
         await _filesClient.Authenticate(Owner);
         await _webApiClient.Authenticate(Owner);
 

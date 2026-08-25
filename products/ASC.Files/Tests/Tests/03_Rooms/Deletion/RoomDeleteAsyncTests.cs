@@ -44,12 +44,16 @@ public class RoomDeleteAsyncTests(
     AspireAppFixture fixture)
     : RoomsPermissionsTestBase(fixture)
 {
+    /// <summary>
+    /// BUG 81698: with <c>deleteAfter: true</c> the HTTP call answered 200 but the delete was not
+    /// pushed to fileops, so polling found no matching operation. Fixed by making
+    /// <c>VirtualRoomsController.DeleteRoom</c> always hold the operation result and return the
+    /// operation by its task id.
+    /// </summary>
     [Fact]
     [Trait("Bug", "81698")]
     public async Task DeleteRoom_DeleteAfterTrue_ProducesTrackableOperation()
     {
-        // HTTP returns 200, but the delete is not pushed to fileops, so waitLongOperation cannot
-        // find a matching record and the last poll returns an empty list.
         // Arrange
         await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Autotest Delete deleteAfter true");

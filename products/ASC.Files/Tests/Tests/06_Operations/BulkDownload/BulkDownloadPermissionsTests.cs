@@ -185,6 +185,11 @@ public class BulkDownloadPermissionsTests(
         operation.Url.Should().Contain("filehandler.ashx?action=bulk");
     }
 
+    /// <summary>
+    /// BUG 81822: bulkdownload answered 404 instead of 403 for a user with no access to the room.
+    /// Fixed by making <c>DownloadPermissionsCheck</c> distinguish entries dropped by the download
+    /// filter (403) from missing ones (404).
+    /// </summary>
     [Fact]
     [Trait("Bug", "81822")]
     public async Task BulkDownload_UserWithoutRoomMembership_Forbidden()
@@ -196,9 +201,7 @@ public class BulkDownloadPermissionsTests(
 
         var user = await InviteContact(EmployeeType.User);
 
-        // Act & Assert - the endpoint currently returns 404 instead of 403 for a user with no
-        // access to the room at all; it should reject the request as forbidden, same as every
-        // other operation on a room the caller cannot see.
+        // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.BulkDownloadAsync(
             new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
@@ -207,6 +210,11 @@ public class BulkDownloadPermissionsTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 81823: bulkdownload answered 404 instead of 401 for an unauthenticated caller. Fixed by
+    /// the <c>DemandAuthenticatedOrLinkAsync</c> guard in
+    /// <c>FileDownloadOperationsManager.Publish</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "81823")]
     public async Task BulkDownload_Unauthenticated_ReturnsUnauthorized()
@@ -215,8 +223,7 @@ public class BulkDownloadPermissionsTests(
         await _filesClient.Authenticate(Owner);
         var file = await CreateFileInMy("Autotest BulkDownload Anon File.docx", Owner);
 
-        // Act & Assert - the endpoint currently returns 404 instead of 401 for an unauthenticated
-        // caller; it should reject the request as unauthorized before it ever looks at the file.
+        // Act & Assert
         await _filesClient.Authenticate(null);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.BulkDownloadAsync(
             new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),

@@ -185,9 +185,10 @@ public class FolderLinkPrimarySetTests(
     }
 
     /// <remarks>
-    /// BUG 81807: GET /api/2.0/files/folder/{id}/link behaves as "get or create" for folders. After a
-    /// folder's primary link is explicitly deleted via PUT (access: None), GET should answer 404, but
-    /// instead recreates a brand-new primary link.
+    /// BUG 81807: GET /api/2.0/files/folder/{id}/link behaved as "get or create" — after a folder's
+    /// primary link was explicitly deleted via PUT (access: None), GET recreated a brand-new primary
+    /// link instead of answering 404. Fixed by writing a <c>TagType.PrimaryLinkRevoked</c> marker on
+    /// explicit revocation, which <c>GetPrimaryExternalLinkAsync</c> now honours with a 404.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81807")]

@@ -99,12 +99,15 @@ public class RoomQuotaResetTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 82293: the API answered 200 instead of rejecting the reset when the room-quota feature
+    /// was never enabled for this portal. Fixed by making <c>FolderQuotaChangeAsync</c> refuse when
+    /// <c>TenantRoomQuotaSettings.EnableQuota</c> is off.
+    /// </summary>
     [Trait("Bug", "82293")]
     [Fact]
     public async Task ResetRoomQuota_FeatureDisabled_ReturnsForbidden()
     {
-        // BUG 82293: the API returns 200 instead of rejecting the reset when the room-quota
-        // feature was never enabled for this portal.
         await _filesClient.Authenticate(Owner);
         await _webApiClient.Authenticate(Owner);
 

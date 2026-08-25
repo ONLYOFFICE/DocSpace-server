@@ -43,6 +43,11 @@ public class RemoveSecurityInfoTests(
     AspireAppFixture fixture)
     : SharingTestBase(fixture)
 {
+    /// <summary>
+    /// BUG 83259: RemoveSecurityInfo answered 200/true but left the sharing entry in place. Fixed by
+    /// making <c>FileStorageService.RemoveAceAsync</c> actually revoke user/group shares via
+    /// <c>FileSecurity.ShareAsync(None)</c> when the caller can set access.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83259")]
     public async Task RemoveSecurityInfo_SingleFile_RemovesSharingEntry()
@@ -60,6 +65,11 @@ public class RemoveSecurityInfoTests(
         securityInfos.Should().NotContain(e => e.SharedToUser != null && e.SharedToUser.Id == user.Id);
     }
 
+    /// <summary>
+    /// BUG 83259: the no-op also affected folders — the invited member kept the room share. Fixed by
+    /// the <c>FileStorageService.RemoveAceAsync</c> rewrite revoking shares via
+    /// <c>FileSecurity.ShareAsync(None)</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83259")]
     public async Task RemoveSecurityInfo_Folder_RemovesSharingEntry()
@@ -80,6 +90,11 @@ public class RemoveSecurityInfoTests(
         securityInfos.Should().NotContain(e => e.SharedToUser != null && e.SharedToUser.Id == user.Id);
     }
 
+    /// <summary>
+    /// BUG 83259: a batch call over several files removed nothing. Fixed by the
+    /// <c>FileStorageService.RemoveAceAsync</c> rewrite revoking each share via
+    /// <c>FileSecurity.ShareAsync(None)</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83259")]
     public async Task RemoveSecurityInfo_MultipleFiles_RemovesAllSharingEntries()
@@ -102,6 +117,11 @@ public class RemoveSecurityInfoTests(
         securityInfos2.Should().NotContain(e => e.SharedToUser != null && e.SharedToUser.Id == user.Id);
     }
 
+    /// <summary>
+    /// BUG 83259: a mixed file-and-folder batch removed nothing. Fixed by the
+    /// <c>FileStorageService.RemoveAceAsync</c> rewrite revoking each share via
+    /// <c>FileSecurity.ShareAsync(None)</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83259")]
     public async Task RemoveSecurityInfo_FilesAndFoldersCombined_RemovesAllSharingEntries()
@@ -138,6 +158,11 @@ public class RemoveSecurityInfoTests(
         result.Should().BeTrue();
     }
 
+    /// <summary>
+    /// BUG 83259: after the no-op removal the user still appeared in the batch security info. Fixed
+    /// by the <c>FileStorageService.RemoveAceAsync</c> rewrite revoking shares via
+    /// <c>FileSecurity.ShareAsync(None)</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83259")]
     public async Task RemoveSecurityInfo_AfterRemoval_SharedUserEntryDisappearsFromBatchSecurityInfo()
@@ -154,6 +179,11 @@ public class RemoveSecurityInfoTests(
         securityInfos.Should().NotContain(e => e.SharedToUser != null && e.SharedToUser.Id == user.Id);
     }
 
+    /// <summary>
+    /// BUG 83259: because the removal was a no-op, the formerly shared user kept access to the file.
+    /// Fixed by the <c>FileStorageService.RemoveAceAsync</c> rewrite revoking shares via
+    /// <c>FileSecurity.ShareAsync(None)</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83259")]
     public async Task RemoveSecurityInfo_FormerlySharedUser_LosesAccessAfterRemoval()

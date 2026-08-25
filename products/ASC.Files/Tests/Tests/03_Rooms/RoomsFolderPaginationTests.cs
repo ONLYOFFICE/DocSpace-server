@@ -61,6 +61,11 @@ public class RoomsFolderPaginationTests(
             await CreateCustomRoom($"Autotest {marker} {suffix}");
         }
 
+        // filterValue is served from the search index, which is written asynchronously. A slice
+        // taken before every room is indexed pages a smaller set and legitimately differs, so the
+        // unpaged filter is awaited to see the whole marker set first.
+        await WaitForRoomsIndexed(marker, 4);
+
         // Act — the same page requested five times
         var slices = new List<List<string>>();
 
@@ -79,33 +84,40 @@ public class RoomsFolderPaginationTests(
     }
 
     /// <summary>
-    /// One page of the marker's rooms. filterValue is served from the search index, which is written
-    /// asynchronously, so the read is polled until the page is full rather than raced against that
-    /// write; the last observed page is returned either way, so a timeout still fails on the
-    /// caller's own assertion.
+    /// Waits until the unpaged marker filter returns at least <paramref name="count"/> rooms, i.e.
+    /// the asynchronous search-index write has caught up; ends on the deadline either way, so a
+    /// timeout still fails on the caller's own assertion.
     /// </summary>
-    private async Task<List<string>> GetSliceTitles(string marker)
+    private async Task WaitForRoomsIndexed(string marker, int count)
     {
-        var deadline = DateTime.UtcNow.AddSeconds(15);
+        var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {
-            var page = (await _roomsApi.GetRoomsFolderAsync(
+            var all = (await _roomsApi.GetRoomsFolderAsync(
                 filterValue: marker,
-                sortBy: "AZ",
-                sortOrder: SortOrder.Ascending,
-                startIndex: 1,
-                count: 2,
                 cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-            var titles = page.Folders.ConvertAll(f => f.Title);
-
-            if (titles.Count == 2 || DateTime.UtcNow >= deadline)
+            if (all.Folders.Count >= count || DateTime.UtcNow >= deadline)
             {
-                return titles;
+                return;
             }
 
             await Task.Delay(500, TestContext.Current.CancellationToken);
         }
+    }
+
+    /// <summary>One page of the marker's rooms, exactly as the paged request returns it.</summary>
+    private async Task<List<string>> GetSliceTitles(string marker)
+    {
+        var page = (await _roomsApi.GetRoomsFolderAsync(
+            filterValue: marker,
+            sortBy: "AZ",
+            sortOrder: SortOrder.Ascending,
+            startIndex: 1,
+            count: 2,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        return page.Folders.ConvertAll(f => f.Title);
     }
 }

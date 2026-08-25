@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Security.Authentication;
-
 namespace ASC.Web.Files.Utils;
 
 [Scope]
@@ -1162,6 +1160,16 @@ public class EntryManager(IDaoFactory daoFactory,
             _ => (x, y) => c * x.Title.EnumerableComparer(y.Title)
         };
 
+        // The DAOs return rows in unspecified order, so a comparer that rates two entries equal
+        // (e.g. titles differing only by case) would let the database decide the page boundary
+        // and repeated paged reads could return different slices. Ids give a total order.
+        var baseSorter = sorter;
+        sorter = (x, y) =>
+        {
+            var cmp = baseSorter(x, y);
+            return cmp != 0 ? cmp : string.CompareOrdinal(GetEntryIdKey(x), GetEntryIdKey(y));
+        };
+
         var comparer = Comparer<FileEntry>.Create(sorter);
 
         if (orderBy.SortedBy != SortedByType.New)
@@ -1211,6 +1219,16 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         return entries.OrderBy(r => r, comparer);
+    }
+
+    private static string GetEntryIdKey(FileEntry entry)
+    {
+        return entry switch
+        {
+            FileEntry<int> internalEntry => internalEntry.Id.ToString(CultureInfo.InvariantCulture),
+            FileEntry<string> thirdPartyEntry => thirdPartyEntry.Id,
+            _ => entry.Title
+        };
     }
 
     private static long GetContentLength(FileEntry entry)

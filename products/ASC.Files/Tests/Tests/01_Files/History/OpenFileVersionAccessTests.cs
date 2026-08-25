@@ -40,6 +40,11 @@ public class OpenFileVersionAccessTests(
     AspireAppFixture fixture)
     : HistoryTestBase(fixture)
 {
+    /// <summary>
+    /// BUG 80683: the server answered 200 and served the content of a specific past version to a
+    /// viewer whose Read access did not cover history. Fixed by requiring <c>CanReadHistoryAsync</c>
+    /// for any explicit version parameter in <c>DocumentServiceHelper.GetCurFileInfoAsync</c>.
+    /// </summary>
     [Fact]
     [Trait("Bug", "80683")]
     public async Task OpenEditFile_ViewerInRoom_CannotOpenSpecificFileVersion()
@@ -62,8 +67,7 @@ public class OpenFileVersionAccessTests(
 
         // Act & Assert
         // ...but must not be able to open a specific past version, which is not covered by their
-        // Read access to the file itself. The server currently returns 200 and serves the version
-        // content anyway.
+        // Read access to the file itself.
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.OpenEditFileAsync(file.Id, version: 1, view: true, cancellationToken: TestContext.Current.CancellationToken));
 

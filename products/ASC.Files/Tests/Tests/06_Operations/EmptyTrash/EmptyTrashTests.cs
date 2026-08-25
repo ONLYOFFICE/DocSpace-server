@@ -157,10 +157,10 @@ public class EmptyTrashTests(
     }
 
     /// <summary>
-    /// <c>emptytrash</c> has no <c>rootFolderType</c> parameter, so it empties the entire unified
-    /// Trash regardless of which section the request names - the UI calls
-    /// <c>emptytrash?single=true&amp;folderType=USER</c> from the Files section expecting only "My
-    /// documents" items to be cleared, but Rooms and Forms-room items are cleared too.
+    /// BUG 82588: this test failed although the product's per-section filter for
+    /// <c>emptytrash?single=true&amp;folderType=USER</c> already existed — its Arrange seeded the
+    /// Forms-room trash with a plain file a Filling Forms room does not accept. Fixed by uploading
+    /// a real ONLYOFFICE PDF form instead.
     /// </summary>
     [Fact]
     [Trait("Bug", "82588")]
@@ -170,7 +170,7 @@ public class EmptyTrashTests(
         await _filesClient.Authenticate(Owner);
         var filesTitle = $"Autotest ET Files {Guid.NewGuid():N}.docx";
         var roomsTitle = $"Autotest ET Rooms {Guid.NewGuid():N}.docx";
-        var formsTitle = $"Autotest ET Forms {Guid.NewGuid():N}.docx";
+        var formsTitle = $"Autotest ET Forms {Guid.NewGuid():N}.pdf";
 
         var myFile = await CreateFileInMy(filesTitle, Owner);
         await DeleteFileToTrashAsync(myFile.Id);
@@ -179,13 +179,11 @@ public class EmptyTrashTests(
         var roomFile = await CreateFile(roomsTitle, room.Id);
         await DeleteFileToTrashAsync(roomFile.Id);
 
-        // The TS suite builds this file through a docx -> docxf -> pdf-form conversion pipeline
-        // (createOoForm) purely to land it inside a Filling Forms room. That conversion has no
-        // equivalent helper elsewhere in this suite and is unrelated to what the bug is about, so a
-        // plain file inside a Filling Forms room stands in for it here.
+        // A Filling Forms room accepts nothing but ONLYOFFICE PDF forms, so the embedded form
+        // is uploaded through an upload session the same way the form-filling suites do it.
         var formRoom = await CreateFillingFormsRoom($"Autotest EmptyTrash Form Room {Guid.NewGuid():N}");
-        var formFile = await CreateFile(formsTitle, formRoom.Id);
-        await DeleteFileToTrashAsync(formFile.Id);
+        var formFileId = await UploadPdfFormAsync(formRoom.Id, formsTitle);
+        await DeleteFileToTrashAsync(formFileId);
 
         var trashBefore = await GetTrashAsync();
         trashBefore.Files.Should().Contain(f => f.Title == filesTitle);

@@ -276,9 +276,9 @@ public class FolderLinkPrimaryPermissionsTests(
     }
 
     /// <remarks>
-    /// BUG 81571: an unauthenticated caller should get 401 Unauthorized, the same as the set-link
-    /// endpoint and the equivalent file endpoint. The API currently returns 403 here instead - the TS
-    /// suite ported this as the expected behaviour, but that is the bug, not the contract.
+    /// BUG 81571: an unauthenticated caller got 403 instead of 401 Unauthorized (the TS suite had
+    /// even ported 403 as the expected behaviour). Fixed by the <c>DemandAuthenticatedOrLinkAsync</c>
+    /// guard at the top of <c>FileStorageService.GetPrimaryExternalLinkAsync</c>.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81571")]

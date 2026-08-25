@@ -76,6 +76,41 @@ public abstract class EmptyTrashTestBase(
     }
 
     /// <summary>
+    /// Uploads the embedded ONLYOFFICE PDF form into the given folder through an upload session -
+    /// the only kind of file a Filling Forms room accepts.
+    /// </summary>
+    protected async Task<int> UploadPdfFormAsync(int folderId, string title)
+    {
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
+
+        await using var stream = typeof(EmptyTrashTestBase).Assembly.GetManifestResourceStream("ASC.Files.Tests.Data.new.pdf")!;
+
+        var session = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(
+            folderId,
+            new SessionRequest(title, stream.Length),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        var chunkSize = (int)settings.ChunkUploadSize;
+        var buffer = new byte[chunkSize];
+        var chunkNumber = 1;
+        int bytesRead;
+
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, chunkSize), TestContext.Current.CancellationToken)) > 0)
+        {
+            await using var chunkStream = new MemoryStream(buffer, 0, bytesRead);
+
+            await _filesOperationsApi.UploadAsyncSessionAsync(folderId, session.Id, chunkNumber, new FileParameter(chunkStream), TestContext.Current.CancellationToken);
+
+            chunkNumber++;
+        }
+
+        var result = (await _filesOperationsApi.FinalizeSessionAsync(folderId, session.Id, TestContext.Current.CancellationToken)).Response;
+        result.Uploaded.Should().BeTrue();
+
+        return result.File.Id;
+    }
+
+    /// <summary>
     /// Empties the Trash of the currently authenticated user and waits for the operation to finish.
     /// The started operation(s) are returned as last observed, per the same "may already be pruned"
     /// caveat as every other batch operation endpoint.

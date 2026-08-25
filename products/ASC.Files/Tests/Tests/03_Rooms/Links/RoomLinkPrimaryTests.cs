@@ -200,4 +200,32 @@ public class RoomLinkPrimaryTests(
         // Assert
         link.SharedLink.LinkType.Should().Be(LinkType.External);
     }
+
+    /// <summary>
+    /// A public room's primary link is not allowed to disappear: revoking it must mint a
+    /// replacement immediately, so a later read returns a new link instead of 404 — unlike
+    /// ordinary folders and custom rooms, whose revoked primary link stays revoked (bug 81807).
+    /// </summary>
+    [Fact]
+    public async Task RevokePrimaryLink_PublicRoom_LinkIsRecreated()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreatePublicRoom("Autotest Primary Link Revoke");
+
+        var original = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Act - revoke the primary link
+        await _roomsApi.SetRoomLinkAsync(
+            room.Id,
+            new RoomLinkRequest(linkId: original.SharedLink.Id, access: FileShare.None, linkType: LinkType.External, title: "Autotest Revoked Primary", denyDownload: false),
+            TestContext.Current.CancellationToken);
+
+        // Assert - a fresh primary link exists without anyone creating it explicitly
+        var replacement = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        replacement.SharedLink.Primary.Should().BeTrue();
+        replacement.SharedLink.LinkType.Should().Be(LinkType.External);
+        replacement.SharedLink.Id.Should().NotBe(original.SharedLink.Id);
+    }
 }

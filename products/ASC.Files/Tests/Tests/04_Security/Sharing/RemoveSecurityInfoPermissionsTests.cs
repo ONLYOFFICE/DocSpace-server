@@ -106,6 +106,11 @@ public class RemoveSecurityInfoPermissionsTests(
         result.Should().BeTrue();
     }
 
+    /// <summary>
+    /// BUG 83262: a user without set-access rights got 200 from RemoveSecurityInfo on someone else's
+    /// file. Fixed in the <c>FileStorageService.RemoveAceAsync</c> rewrite — callers who cannot set
+    /// access are rejected unless their only access is via an external link (self-removal).
+    /// </summary>
     [Fact]
     [Trait("Bug", "83262")]
     public async Task RemoveSecurityInfo_User_CannotRemoveSharingFromOwnerFile_Returns403()
@@ -120,6 +125,10 @@ public class RemoveSecurityInfoPermissionsTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 83262: a read-only guest got 200 from RemoveSecurityInfo on the owner's file. Fixed in
+    /// the <c>FileStorageService.RemoveAceAsync</c> rewrite rejecting callers who cannot set access.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83262")]
     public async Task RemoveSecurityInfo_Guest_CannotRemoveSharingFromOwnerFile_Returns403()
@@ -136,6 +145,11 @@ public class RemoveSecurityInfoPermissionsTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 83262: an unrelated user could target another user's file by id (IDOR) and got 200.
+    /// Fixed in the <c>FileStorageService.RemoveAceAsync</c> rewrite rejecting callers who cannot
+    /// set access.
+    /// </summary>
     [Fact]
     [Trait("Bug", "83262")]
     public async Task RemoveSecurityInfo_User_CannotRemoveSharingFromAnotherUsersFile_Idor_Returns403()

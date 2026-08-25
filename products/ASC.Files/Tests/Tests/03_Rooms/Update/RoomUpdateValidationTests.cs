@@ -119,9 +119,10 @@ public class RoomUpdateValidationTests(
     }
 
     /// <summary>
-    /// Undocumented parameters should be rejected (see the `share` param, BUG 81582), but the API
-    /// silently ignores them and applies the known fields instead. The DTO cannot carry an unknown
-    /// property, so this goes over raw HTTP.
+    /// BUG 82365: the API silently ignored undocumented parameters and applied the known fields
+    /// instead of rejecting the request. Fixed by annotating <c>UpdateRoomRequest</c> with
+    /// <c>JsonUnmappedMemberHandling.Disallow</c>. The DTO cannot carry an unknown property, so
+    /// this goes over raw HTTP.
     /// </summary>
     [Fact]
     [Trait("Bug", "82365")]

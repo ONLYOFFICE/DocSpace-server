@@ -111,6 +111,10 @@ public class ReferenceDataPermissionsTests(
         exception.ErrorCode.Should().Be(401);
     }
 
+    /// <summary>
+    /// BUG 81414: referencedata for an inaccessible file answered 200 with an Error payload instead
+    /// of 403. Fixed by making <c>GetReferenceDataAsync</c> throw <c>SecurityException</c>.
+    /// </summary>
     [Trait("Bug", "81414")]
     [Fact]
     public async Task GetReferenceData_UserWithoutRoomAccess_Forbidden()
@@ -154,6 +158,10 @@ public class ReferenceDataPermissionsTests(
         result.Response.ReferenceData.CanEditRoom.Should().BeFalse();
     }
 
+    /// <summary>
+    /// BUG 81414: same for guests — 200 with an Error payload instead of 403. Fixed by the
+    /// <c>SecurityException</c> in <c>GetReferenceDataAsync</c>.
+    /// </summary>
     [Trait("Bug", "81414")]
     [Fact]
     public async Task GetReferenceData_GuestWithoutRoomAccess_Forbidden()

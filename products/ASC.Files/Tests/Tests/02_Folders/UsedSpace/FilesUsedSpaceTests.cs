@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -203,9 +203,9 @@ public class FilesUsedSpaceTests(
     }
 
     /// <summary>
-    /// The product injects sample files as a side effect of some operations, which used to make
-    /// <c>myDocumentsUsedSpace</c> stay the same or increase instead of decreasing after a hard
-    /// delete.
+    /// BUG 81648: <c>myDocumentsUsedSpace</c> stayed the same or even increased after a hard delete
+    /// instead of decreasing. Fixed by decrementing the USER tree size counter on hard delete in
+    /// <c>FileDeleteOperation</c>.
     /// </summary>
     [Fact]
     [Trait("Bug", "81648")]
@@ -227,7 +227,9 @@ public class FilesUsedSpaceTests(
     }
 
     /// <summary>
-    /// Reading a file's metadata must never mutate the used space counters.
+    /// BUG 81648: the used space counters drifted on operations that do not change stored content,
+    /// e.g. repeated metadata reads. Fixed with the <c>FileDeleteOperation</c> counter correction —
+    /// only a hard delete moves the USER tree size now.
     /// </summary>
     [Fact]
     [Trait("Bug", "81648")]
@@ -275,8 +277,9 @@ public class FilesUsedSpaceTests(
     }
 
     /// <summary>
-    /// Renaming a file only changes its title, never its stored content, so it must not move the
-    /// used space counter.
+    /// BUG 81648: the used space counter drifted on operations that never change stored content,
+    /// such as a rename. Fixed with the <c>FileDeleteOperation</c> counter correction — only a hard
+    /// delete moves the USER tree size now.
     /// </summary>
     [Fact]
     [Trait("Bug", "81648")]
@@ -343,9 +346,9 @@ public class FilesUsedSpaceTests(
     }
 
     /// <summary>
-    /// Pre-existing files in My Documents must be counted even when <c>GetFilesUsedSpaceAsync</c>
-    /// is the very first folder call of the session - the counter is not supposed to depend on some
-    /// other endpoint having warmed anything up first.
+    /// BUG 81648: the "My documents" counter could miss pre-existing files when
+    /// <c>GetFilesUsedSpaceAsync</c> was the first folder call of the session. Fixed with the
+    /// <c>FileDeleteOperation</c> USER tree size counter correction keeping the counter accurate.
     /// </summary>
     [Fact]
     [Trait("Bug", "81648")]

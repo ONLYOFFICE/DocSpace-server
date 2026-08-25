@@ -123,7 +123,6 @@ public class AgentsController(
             inDto.Title,
             inDto.Private,
             inDto.Indexing,
-            inDto.Share,
             inDto.Quota,
             lifetime,
             inDto.DenyDownload,

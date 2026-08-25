@@ -92,6 +92,12 @@ public class RoomDeleteFileOpsTests(
         list.Folders.Should().Contain(f => f.Title != null && f.Title.Contains("Autotest Admin Room For Owner Duplicate"));
     }
 
+    /// <summary>
+    /// BUG 81287: deleting a room with an open file removed part of the content before failing, so
+    /// the delete was not atomic. Fixed by pre-validating the whole subtree in
+    /// <c>DeletePermissionsCheck.CheckSubtreeFilesPermissionsAsync</c> — one blocked file now fails
+    /// the folder delete before anything is removed.
+    /// </summary>
     [Fact]
     [Trait("Bug", "81287")]
     public async Task DeleteBatchItems_RoomWithOpenFile_RollsBackAtomicallyWithClearError()

@@ -80,8 +80,10 @@ public class FileCreateVariantsTests(
     }
 
     /// <summary>
-    /// Bug 80324: creating a file with an unknown extension (<c>.md</c>) was expected to keep that
-    /// extension, but the server threw a <c>NullReferenceException</c> and returned 403.
+    /// BUG 80324: creating a file with an unknown extension (<c>.md</c>) did not keep it — the
+    /// server rewrote the title to <c>.docx</c> (and could throw a <c>NullReferenceException</c>
+    /// mapped to 403). Fixed by making <c>CreateNewFileAsync</c> keep unknown extensions and the
+    /// <c>FileUtility.ExtsKeepOnCreate</c> list (.md/.markdown) verbatim.
     /// </summary>
     [Fact]
     [Trait("Bug", "80324")]

@@ -116,6 +116,11 @@ public class FileInfoPermissionsTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// BUG 80752: an anonymous caller got 403 ("Access denied") instead of 401. Fixed by the
+    /// <c>DemandAuthenticatedOrLinkAsync</c> guard in <c>FileStorageService.GetFileAsync</c> — no
+    /// session and no link key now yields 401.
+    /// </summary>
     [Fact]
     [Trait("Bug", "80752")]
     public async Task GetFileInfo_Anonymous_ReturnsUnauthorized()

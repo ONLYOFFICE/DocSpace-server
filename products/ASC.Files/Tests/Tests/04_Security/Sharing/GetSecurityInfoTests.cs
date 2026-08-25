@@ -44,6 +44,11 @@ public class GetSecurityInfoTests(
     AspireAppFixture fixture)
     : SharingTestBase(fixture)
 {
+    /// <summary>
+    /// BUG 80956: a guest reading security info saw other users' group memberships in
+    /// <c>sharedToUser</c>. Fixed by suppressing other users' groups for Guests as well as Users in
+    /// <c>EmployeeFullDto.FillGroupsAsync</c> (common/ASC.Api.Core).
+    /// </summary>
     [Fact]
     [Trait("Bug", "80956")]
     public async Task GetSecurityInfo_GuestOnRoomFile_DoesNotIncludeGroupsInSharedToUser()

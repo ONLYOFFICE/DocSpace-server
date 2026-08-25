@@ -206,9 +206,9 @@ public class RoomCreateOptionalFieldsTests(AspireAppFixture fixture) : BaseTest(
     }
 
     /// <summary>
-    /// The `share` parameter is exposed by the generated SDK/OpenAPI document but has no backing
-    /// implementation on createRoom. Today the server accepts it and silently drops it (200); it
-    /// should instead reject a field it does not support.
+    /// BUG 81582: the `share` parameter was exposed by the generated SDK/OpenAPI document without a
+    /// backing implementation on createRoom — the server accepted it and silently dropped it (200).
+    /// Fixed by validating in <c>CreateRoomRequestDto</c> that the unsupported parameter is not sent.
     /// </summary>
     [Fact]
     [Trait("Bug", "81582")]

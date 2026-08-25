@@ -128,7 +128,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
                 };
             }
 
-            var template = await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo, _cover, _color);
+            var template = await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, _tags, dtoLogo, _cover, _color);
             TemplateId = template.Id;
 
             List<AceWrapper> wrappers = null;

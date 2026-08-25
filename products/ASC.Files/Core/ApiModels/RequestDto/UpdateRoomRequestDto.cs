@@ -36,6 +36,11 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The request parameters for updating a room.
 /// </summary>
+/// <remarks>
+/// An undocumented field in the payload is a caller mistake, not something to ignore: a typo'd
+/// property name would otherwise be reported as a successful update that changed nothing.
+/// </remarks>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class UpdateRoomRequest
 {
     /// <summary>

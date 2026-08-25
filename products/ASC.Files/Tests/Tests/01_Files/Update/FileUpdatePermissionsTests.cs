@@ -249,8 +249,9 @@ public class FileUpdatePermissionsTests(
     }
 
     /// <summary>
-    /// BUG 80752: an unauthenticated caller is rejected with 403 ("Access denied") instead of the
-    /// correct 401 ("Unauthorized").
+    /// BUG 80752: an unauthenticated caller was rejected with 403 ("Access denied") instead of 401.
+    /// Fixed by the <c>DemandAuthenticatedOrLinkAsync</c> guard in
+    /// <c>FileStorageService.FileRenameAsync</c> — no session and no link key now yields 401.
     /// </summary>
     [Trait("Bug", "80752")]
     [Fact]
