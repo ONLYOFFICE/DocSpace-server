@@ -41,6 +41,7 @@ import {
 } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
+import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
 
@@ -124,10 +125,13 @@ export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
-    // Scope is resolved inside mcpServersStorage (create/readAll both run the
-    // entityId through resolveAgentEntityId), so a non-agent folder writes to
-    // and reads back from the global scope and the server stays visible
-    // (Bug 82863) — no 404 gate needed here.
+    // A supplied entityId must at least be REACHABLE: a nonexistent or
+    // deleted id otherwise folds silently into the portal-wide scope and
+    // mutates it (Bug 82975). An accessible NON-agent folder still folds to
+    // global BY DESIGN (Bug 82863: the widget sends the current location
+    // here) — the gate is on accessibility, not agent-ness, mirroring the
+    // threads/create decision (Bug 82719).
+    await assertEntityAccessible(args.entityId as string | undefined);
     const result = await engine.addCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -139,6 +143,8 @@ export const toolsController = {
   updateCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
+    // Same accessibility gate as addCustomServer (Bug 82975).
+    await assertEntityAccessible(args.entityId as string | undefined);
     const result = await engine.updateCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -155,6 +161,8 @@ export const toolsController = {
       return;
     }
     const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    // Same accessibility gate as addCustomServer (Bug 82975).
+    await assertEntityAccessible(entityId);
     await engine.removeCustomServer(name, entityId);
     res.json({ success: true });
   }),
@@ -208,6 +216,9 @@ export const toolsController = {
       res.status(400).json({ error: "map is required and must be an object" });
       return;
     }
+    // Critical here: an unreachable entityId used to fold to the portal-wide
+    // scope and WIPE its whole server map (Bug 82975).
+    await assertEntityAccessible(args.entityId as string | undefined);
     const map = args.map as Record<string, McpServerConfig>;
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
@@ -223,6 +234,9 @@ export const toolsController = {
 
   setDisabled: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["serverType", "toolNames", "entityId"] as const);
+    // Same accessibility gate as the server writes above (Bug 82975): a
+    // bogus entityId must not silently write prefs into the global scope.
+    await assertEntityAccessible(args.entityId as string | undefined);
     await engine.setDisabled(
       args.serverType as string,
       (args.toolNames as string[]) ?? [],
@@ -254,6 +268,8 @@ export const toolsController = {
       req.body,
       ["serverType", "toolName", "value", "entityId"] as const,
     );
+    // Same accessibility gate as the server writes above (Bug 82975).
+    await assertEntityAccessible(args.entityId as string | undefined);
     await engine.setAllowAlways(
       args.serverType as string,
       args.toolName as string,
