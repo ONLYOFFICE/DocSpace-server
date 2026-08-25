@@ -56,7 +56,7 @@ internal static class LetterAssertions
     /// code resolves from <c>externalresources.json</c> and from the portal address.</item>
     /// </list>
     /// </summary>
-    public static void PatternIsPortable(RenderedLetter letter)
+    public static void ShouldHavePortablePattern(this RenderedLetter letter)
     {
         foreach (var text in new[] { letter.SubjectPattern, letter.BodyPattern })
         {
@@ -77,7 +77,7 @@ internal static class LetterAssertions
     /// <param name="whoOwesTheValue">
     /// Where a missing value should have come from, so the failure names the place to fix.
     /// </param>
-    public static void NoUnresolvedTags(RenderedLetter letter, string whoOwesTheValue)
+    public static void ShouldHaveNoUnresolvedTags(this RenderedLetter letter, string whoOwesTheValue)
     {
         var tags = letter.ReferencedTags;
 
@@ -101,7 +101,7 @@ internal static class LetterAssertions
     /// renders and still contains the address, so a check that the address is present passes while the
     /// reader is looking at <c>“Help Center”:”https://…”</c>.
     /// </summary>
-    public static void LinksRendered(RenderedLetter letter)
+    public static void ShouldHaveRenderedLinks(this RenderedLetter letter)
     {
         var raw = _unrenderedLink.Matches(letter.Body)
             .Select(match => match.Value)
@@ -110,5 +110,51 @@ internal static class LetterAssertions
         raw.Should().BeEmpty("a textile link was not recognised and its address is printed to the reader; "
             + "the translation most likely glues a particle or a suffix to the closing quotation mark — "
             + "put a space there");
+    }
+
+    /// <summary>
+    /// The picture at the top of the letter, whichever of the two it is. An action that sets a
+    /// <c>TopGif</c> gets it; one that does not is shown the tenant letter logo, which
+    /// <c>NotifyTransferRequest.AddLetterLogoAsync</c> attaches to the message and references as a
+    /// <c>cid:</c> — never as a file under the image folder, which is why nothing here looks for one.
+    /// </summary>
+    public static void ShouldHaveTopImage(this RenderedLetter letter, List<ITagValue> tags)
+    {
+        var topGif = tags.Find(tag => tag.Tag == CommonTags.TopGif)?.Value as string;
+
+        if (!string.IsNullOrEmpty(topGif))
+        {
+            letter.Body.Should().Contain(topGif, "the top image the action sets must reach the letter");
+
+            return;
+        }
+
+        var logo = tags.Find(tag => tag.Tag == CommonTags.LetterLogo)?.Value as string;
+
+        logo.Should().StartWith("cid:", "a letter without a top image is sent the letter logo as an attachment");
+
+        letter.Body.Should().Contain(logo!, "the letter logo must be referenced by the content id it was attached under");
+
+        tags.Should().Contain(tag => tag.Tag == CommonTags.EmbeddedAttachments,
+            "the content id has to point at something, or the reader sees a broken image");
+    }
+
+    /// <summary>
+    /// That the letter signed off, when the action signed it. Whether a letter has a signature at all,
+    /// which resource it uses and whether it is a table row of its own are the action's decisions, so
+    /// there is nothing here for a test to declare — only that what the action produced survived
+    /// rendering. The wording itself belongs to <c>AssertDefaultCultureText</c>.
+    /// </summary>
+    public static void ShouldHaveSignature(this RenderedLetter letter, List<ITagValue> tags)
+    {
+        var signature = tags.Find(tag => tag.Tag == "TrulyYours")?.Value as string;
+
+        if (string.IsNullOrEmpty(signature))
+        {
+            return;
+        }
+
+        letter.Body.Should().Contain(LetterEnvironment.SiteUrl,
+            "the signature links to the site, so that link has to survive rendering");
     }
 }

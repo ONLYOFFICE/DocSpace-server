@@ -113,12 +113,12 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 
         var letter = await LetterPreview.RenderAsync(pattern, tags, culture);
 
-        LetterAssertions.PatternIsPortable(letter);
-        LetterAssertions.NoUnresolvedTags(letter, $"the tags {typeof(TAction).Name}.Init sets");
-        LetterAssertions.LinksRendered(letter);
+        letter.ShouldHavePortablePattern();
+        letter.ShouldHaveNoUnresolvedTags($"the tags {typeof(TAction).Name}.Init sets");
+        letter.ShouldHaveRenderedLinks();
 
-        AssertTopImage(letter, tags);
-        AssertSignature(letter, tags);
+        letter.ShouldHaveTopImage(tags);
+        letter.ShouldHaveSignature(tags);
 
         AssertContent(letter, scope);
 
@@ -234,52 +234,6 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
     {
         return tags.Find(tag => tag.Tag == CommonTags.EmbeddedAttachments)?.Value
             as NotifyMessageAttachment[] ?? [];
-    }
-
-    /// <summary>
-    /// The picture at the top of the letter, whichever of the two it is. An action that sets a
-    /// <c>TopGif</c> gets it; one that does not is shown the tenant letter logo, which
-    /// <c>NotifyTransferRequest.AddLetterLogoAsync</c> attaches to the message and references as a
-    /// <c>cid:</c> — never as a file under the image folder, which is why nothing here looks for one.
-    /// </summary>
-    private static void AssertTopImage(RenderedLetter letter, List<ITagValue> tags)
-    {
-        var topGif = tags.Find(tag => tag.Tag == CommonTags.TopGif)?.Value as string;
-
-        if (!string.IsNullOrEmpty(topGif))
-        {
-            letter.Body.Should().Contain(topGif, "the top image the action sets must reach the letter");
-
-            return;
-        }
-
-        var logo = tags.Find(tag => tag.Tag == CommonTags.LetterLogo)?.Value as string;
-
-        logo.Should().StartWith("cid:", "a letter without a top image is sent the letter logo as an attachment");
-
-        letter.Body.Should().Contain(logo!, "the letter logo must be referenced by the content id it was attached under");
-
-        tags.Should().Contain(tag => tag.Tag == CommonTags.EmbeddedAttachments,
-            "the content id has to point at something, or the reader sees a broken image");
-    }
-
-    /// <summary>
-    /// That the letter signed off, when the action signed it. Whether a letter has a signature at all,
-    /// which resource it uses and whether it is a table row of its own are the action's decisions, so
-    /// there is nothing here for a test to declare — only that what the action produced survived
-    /// rendering. The wording itself belongs to <see cref="AssertDefaultCultureText"/>.
-    /// </summary>
-    private static void AssertSignature(RenderedLetter letter, List<ITagValue> tags)
-    {
-        var signature = tags.Find(tag => tag.Tag == "TrulyYours")?.Value as string;
-
-        if (string.IsNullOrEmpty(signature))
-        {
-            return;
-        }
-
-        letter.Body.Should().Contain(LetterEnvironment.SiteUrl,
-            "the signature links to the site, so that link has to survive rendering");
     }
 
     /// <summary>
