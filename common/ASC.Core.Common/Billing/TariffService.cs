@@ -1367,15 +1367,26 @@ public class TariffService(
         return (outcome, result);
     }
 
-    public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null)
+    public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true)
     {
-        // The balance may be consumed concurrently, so the top-up is retried several times.
         var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
 
+        // A delayed payment method accepts the deposit right away, but the money is credited only
+        // once the transfer settles, so the balance cannot reflect it within this call and the loop below would
+        // charge the customer again on every attempt. Such wallets are topped up manually - only report whether
+        // what is already there covers the cost.
+        if (!allowTopUp)
+        {
+            return balanceAmount >= requiredAmount;
+        }
+
+        // The balance may be consumed concurrently, so the top-up is retried several times.
         for (var attempt = 0; attempt < MaxTopUpAttempts && balanceAmount < requiredAmount; attempt++)
         {
             var topUpAmount = Math.Ceiling((requiredAmount - balanceAmount) * 100) / 100;
 
+            // waitForChanges must stay true: TopUpOutcome.Unknown is the only early exit that stops this loop
+            // from firing a second real deposit, and it can only be reported when the balance is polled.
             var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
             if (toppedUp)
             {

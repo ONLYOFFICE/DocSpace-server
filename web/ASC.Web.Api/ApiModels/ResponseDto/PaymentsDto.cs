@@ -487,6 +487,19 @@ public class CustomerInfoDto(CustomerInfo customerInfo, EmployeeDto employeeDto)
     public PaymentMethodStatus PaymentMethodStatus { get; private set; } = customerInfo.PaymentMethodStatus;
 
     /// <summary>
+    /// The customer's payment method type.
+    /// </summary>
+    /// <example>card</example>
+    public string PaymentMethodType { get; private set; } = customerInfo.PaymentMethodType;
+
+    /// <summary>
+    /// Indicates whether the customer's payment method is delayed, i.e. the money reaches the wallet only after
+    /// the transfer settles rather than immediately.
+    /// </summary>
+    /// <example>false</example>
+    public bool IsDelayedPaymentMethod { get; private set; } = customerInfo.IsDelayedPaymentMethod;
+
+    /// <summary>
     /// The customer email address.
     /// </summary>
     /// <example>user@example.com</example>

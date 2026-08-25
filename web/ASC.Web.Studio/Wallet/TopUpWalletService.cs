@@ -122,6 +122,8 @@ public class TopUpWalletService(
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
+            // Only the auto top-up branch below needs the customer, so it is checked for null there: the
+            // low-balance branch must keep working even while billing is unavailable.
             var customerInfo = await tariffService.GetCustomerInfoAsync(data.TenantId);
             if (!string.IsNullOrEmpty(customerInfo?.Email))
             {
@@ -140,7 +142,7 @@ public class TopUpWalletService(
             var balance = await tariffService.GetCustomerBalanceAsync(data.TenantId, true);
             if (balance == null)
             {
-                logger.Error($"TopUpWalletService: balance is null for tenant {data.TenantId}");
+                logger.ErrorTopUpWalletServiceBalanceIsNull(data.TenantId);
                 return;
             }
 
@@ -155,6 +157,32 @@ public class TopUpWalletService(
             var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == settings.Currency);
             if (subAccount == null || subAccount.Amount >= settings.MinBalance)
             {
+                return;
+            }
+
+            // A top-up is due from here on, so the payment method has to be known. The poller comes back in a
+            // few minutes, so a transient billing failure just skips this cycle instead of disabling anything.
+            if (customerInfo == null)
+            {
+                logger.ErrorTopUpWalletServiceCustomerIsNull(data.TenantId);
+                return;
+            }
+
+            // Auto top-up cannot work without a usable payment method; and a delayed one credits the
+            // wallet only once the transfer settles, so the balance would still be below MinBalance on the next
+            // tick and every tick would deposit again. In both cases stop auto top-up and tell the owner, which
+            // also falls back to low-balance monitoring instead of letting the wallet drain quietly.
+            if (customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
+            {
+                logger.InfoTopUpWalletServicePaymentMethodNotSet(data.TenantId);
+                await SendTopUpWalletErrorAsync(data.TenantId, payer, owner, settings);
+                return;
+            }
+
+            if (customerInfo.IsDelayedPaymentMethod)
+            {
+                logger.InfoTopUpWalletServiceDelayedPaymentMethod(data.TenantId);
+                await SendTopUpWalletErrorAsync(data.TenantId, payer, owner, settings);
                 return;
             }
 

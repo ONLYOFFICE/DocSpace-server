@@ -439,9 +439,11 @@ public class PaymentController(
         await paymentHelper.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
 
         // Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
+        // A delayed payment method cannot be topped up on the fly, so its wallet has to cover the cost already.
         var siteName = tenant.GetTenantDomain(coreSettings);
+        var allowTopUp = !customerInfo.IsDelayedPaymentMethod;
 
-        if (!await tariffService.EnsureWalletBalanceAsync(tenant.Id, requiredAmount, defaultCurrency, participant, siteName, false))
+        if (!await tariffService.EnsureWalletBalanceAsync(tenant.Id, requiredAmount, defaultCurrency, participant, siteName, false, null, allowTopUp))
         {
             throw new BillingException("Insufficient balance");
         }
@@ -775,8 +777,9 @@ public class PaymentController(
         }
 
         var siteName = tenant.GetTenantDomain(coreSettings);
+        var waitForChanges = !customerInfo.IsDelayedPaymentMethod;
 
-        return await paymentHelper.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName);
+        return await paymentHelper.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName, waitForChanges);
     }
 
     /// <remarks>
