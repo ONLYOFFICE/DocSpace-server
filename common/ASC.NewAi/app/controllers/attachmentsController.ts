@@ -45,12 +45,6 @@ interface FileInput {
   title?: string;
 }
 
-interface ImageInput {
-  name: string;
-  base64: string;
-  title?: string;
-}
-
 type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 
 // Coerce a file `type` to a number. Accepts a real number or a numeric string
@@ -63,19 +57,6 @@ type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 // attachments (see the Bug 82743 note).
 function normalizeFileType(value: unknown): number | undefined {
   return parseInt10(value);
-}
-
-// Reject an image payload that is not valid base64 (Bug 82752). Accepts both a
-// bare base64 string and a `data:<mime>;base64,<payload>` data URL (the shape
-// the composer sends); validates the payload against the base64 alphabet and
-// required padding.
-function isValidBase64(value: string): boolean {
-  const match = /^data:[^,]*;base64,(.*)$/s.exec(value);
-  const data = (match ? (match[1] ?? "") : value).trim();
-  if (data.length === 0 || data.length % 4 !== 0) {
-    return false;
-  }
-  return /^[A-Za-z0-9+/]+={0,2}$/.test(data);
 }
 
 // Validate a single file-attachment input up front so a malformed shape returns
@@ -110,38 +91,6 @@ function parseFileInput(raw: unknown): ParseResult<FileInput> {
     content: raw.content,
     type,
   };
-  if (typeof raw.title === "string") {
-    value.title = raw.title;
-  }
-  return { ok: true, value };
-}
-
-// Validate a single image-attachment input up front (Bugs 82751, 82752,
-// 82753): `name` and `base64` must be present and non-empty, `base64` must be
-// valid base64, and `title` (if present) must be a string.
-function parseImageInput(raw: unknown): ParseResult<ImageInput> {
-  if (!isObject(raw)) {
-    return { ok: false, error: "input is required and must be an object" };
-  }
-  if (typeof raw.name !== "string" || raw.name.length === 0) {
-    return {
-      ok: false,
-      error: "input.name is required and must be a non-empty string",
-    };
-  }
-  if (typeof raw.base64 !== "string" || raw.base64.length === 0) {
-    return {
-      ok: false,
-      error: "input.base64 is required and must be a non-empty string",
-    };
-  }
-  if (!isValidBase64(raw.base64)) {
-    return { ok: false, error: "input.base64 must be valid base64 data" };
-  }
-  if (raw.title !== undefined && typeof raw.title !== "string") {
-    return { ok: false, error: "input.title must be a string when present" };
-  }
-  const value: ImageInput = { name: raw.name, base64: raw.base64 };
   if (typeof raw.title === "string") {
     value.title = raw.title;
   }
@@ -194,48 +143,9 @@ export const attachmentsController = {
     res.json(result);
   }),
 
-  saveImage: asyncHandler(async (req, res) => {
-    const args = unpackPositional(req.body, ["input", "entityId"] as const);
-    // Validate the image payload up front: a missing/invalid `base64` or `name`
-    // reaches the engine and throws, collapsing to a 500 (Bugs 82751, 82752,
-    // 82753). Reject with a clean 400 instead.
-    const parsed = parseImageInput(args.input);
-    if (!parsed.ok) {
-      res.status(400).json({ error: parsed.error });
-      return;
-    }
-    const result = await engine.saveImage(
-      parsed.value,
-      args.entityId as string | undefined,
-    );
-    res.json(result);
-  }),
-
-  saveImagesMany: asyncHandler(async (req, res) => {
-    const args = unpackPositional(req.body, ["inputs", "entityId"] as const);
-    // Validate each element with the same rules as save-image; an element
-    // without a payload must fail with a clean 400 (Bug 82755).
-    const rawInputs = args.inputs;
-    if (rawInputs !== undefined && rawInputs !== null && !Array.isArray(rawInputs)) {
-      res.status(400).json({ error: "inputs must be an array" });
-      return;
-    }
-    const list = Array.isArray(rawInputs) ? rawInputs : [];
-    const inputs: ImageInput[] = [];
-    for (let i = 0; i < list.length; i++) {
-      const parsed = parseImageInput(list[i]);
-      if (!parsed.ok) {
-        res.status(400).json({ error: `inputs[${i}]: ${parsed.error}` });
-        return;
-      }
-      inputs.push(parsed.value);
-    }
-    const result = await engine.saveImagesMany(
-      inputs,
-      args.entityId as string | undefined,
-    );
-    res.json(result);
-  }),
+  // `saveImage` / `saveImagesMany` are intentionally absent: the routes are
+  // unmounted in `apiCatalog.ts` (Bug 83289) because the C# backend cannot
+  // persist a raw base64 draft — see the comment there.
 
   get: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["id"] as const);

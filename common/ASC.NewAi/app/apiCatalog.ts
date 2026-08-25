@@ -51,12 +51,26 @@ import type { EngineDoc, CustomRouteDoc } from "./openapi.js";
 // config and controller imports so the emitter stays a pure, offline build
 // step (no storage/appsettings needed).
 
+// `save-image` / `save-images-many` are deliberately not served here
+// (Bug 83289): the C# backend stores attachments only as references to
+// existing DocSpace entries, so a raw base64 draft has nowhere to go and
+// these routes could never succeed. The library keeps them for
+// local-storage hosts (and the DocSpace widget never calls them — image
+// drops go through the host's own `onDropFiles` upload); this service
+// unmounts them → 404. Tool-generated images take the dedicated upload
+// path in `attachmentsStorage.uploadToolImage` instead.
+const {
+  saveImage: _saveImage,
+  saveImagesMany: _saveImagesMany,
+  ...ATTACHMENTS_ROUTES
+} = DEFAULT_ATTACHMENTS_ROUTES;
+
 // Engine groups backed by an `@onlyoffice/ai-chat` service. `name` is the
 // controller key used in `routes.ts`; `tag`/`description` drive the docs.
 export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
   { name: "ai", tag: "AI", description: "Chat completions and tool-call approval.", routes: DEFAULT_AI_ROUTES },
   { name: "assignments", tag: "Assignments", description: "Profile-to-entity assignment resolution.", routes: DEFAULT_ASSIGNMENTS_ROUTES },
-  { name: "attachments", tag: "Attachments", description: "Message file and image attachments.", routes: DEFAULT_ATTACHMENTS_ROUTES },
+  { name: "attachments", tag: "Attachments", description: "Message file and image attachments.", routes: ATTACHMENTS_ROUTES },
   { name: "preferences", tag: "Preferences", description: "Per-entity chat preferences (e.g. deep mode).", routes: DEFAULT_PREFERENCES_ROUTES },
   { name: "profiles", tag: "Profiles", description: "AI provider profiles and model discovery.", routes: DEFAULT_PROFILES_ROUTES },
   { name: "prompts", tag: "Prompts", description: "Saved prompts and prompt folders.", routes: DEFAULT_PROMPTS_ROUTES },
