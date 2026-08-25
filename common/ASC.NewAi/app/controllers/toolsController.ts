@@ -33,7 +33,17 @@
 
 import { ToolsEngine } from "@onlyoffice/ai-chat/core";
 import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
-import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
+import {
+  PORTAL_MCP_SERVER_NAME,
+  DOCSPACE_INTEGRATION_SERVER_TYPE,
+  DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+  WEB_SEARCH_TYPE,
+  IMAGE_GENERATION_TYPE,
+} from "../../config/index.js";
+import {
+  customToolsSource,
+  resolveCustomServers,
+} from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import {
   systemToolsSource,
@@ -194,7 +204,15 @@ export const toolsController = {
 
   listSystemTools: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    const tools = await engine.listSystemTools(entityId);
+    // The catalog is the system groups plus the registered custom MCP
+    // servers' live tools — before this merge no listing route could show a
+    // registered server's tools at all (Bug 83163). Server-type keys are
+    // unique across the two sources (customToolsSource skips system-server
+    // markers), so a plain spread cannot clobber a group.
+    const [tools, custom] = await Promise.all([
+      engine.listSystemTools(entityId),
+      customToolsSource.getTools(entityId),
+    ]);
     // Hide the portal MCP server from every management surface (the MCP
     // settings page's permission cards, the agent dialog's server picker):
     // it is always enabled with all tools and cannot be configured. The
@@ -203,7 +221,7 @@ export const toolsController = {
     if (isObject(tools)) {
       delete (tools as Record<string, unknown>)[PORTAL_MCP_SERVER_NAME];
     }
-    res.json(tools);
+    res.json({ ...tools, ...custom });
   }),
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {
@@ -237,6 +255,30 @@ export const toolsController = {
     // Same accessibility gate as the server writes above (Bug 82975): a
     // bogus entityId must not silently write prefs into the global scope.
     await assertEntityAccessible(args.entityId as string | undefined);
+    // The serverType must be a group key the round's tool filter actually
+    // matches — an arbitrary string used to be stored verbatim and read back
+    // "successfully" while never disabling anything (Bug 83013). Valid keys:
+    // the host-configured system servers, the two DocSpace-integration
+    // groups, web-search / image-generation, and the scope's registered
+    // custom MCP servers.
+    const serverType = args.serverType as string;
+    const entityId = args.entityId as string | undefined;
+    const validTypes = new Set<string>([
+      ...systemToolsSource.getServerTypes(),
+      DOCSPACE_INTEGRATION_SERVER_TYPE,
+      DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+      WEB_SEARCH_TYPE,
+      IMAGE_GENERATION_TYPE,
+      ...Object.keys(await resolveCustomServers(entityId)),
+    ]);
+    if (typeof serverType !== "string" || !validTypes.has(serverType)) {
+      res.status(400).json({
+        error:
+          `unknown serverType "${String(serverType)}"; valid values: ` +
+          [...validTypes].sort().join(", "),
+      });
+      return;
+    }
     await engine.setDisabled(
       args.serverType as string,
       (args.toolNames as string[]) ?? [],

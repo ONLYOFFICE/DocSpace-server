@@ -43,7 +43,11 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import logger from "../log.js";
 import { agentAssignedProfileId } from "./agentProfile.js";
-import { markForwardHeadersToProvider } from "../requestContext.js";
+import {
+  markForwardHeadersToProvider,
+  getCustomServerNames,
+} from "../requestContext.js";
+import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
 import { assertThreadCreatable } from "./threadsController.js";
@@ -222,14 +226,23 @@ async function withEntityMetadata<T>(body: T): Promise<T> {
 const toolsAdapter = new HttpToolsAdapter();
 const engine = new AIEngine({
   storage,
-  // System (host-configured MCP) tools run server-side and pause for UI
-  // approval; most DocSpace integration tools run silently. Compose both.
-  toolsAdapter: composeToolsAdapters(systemToolsSource, toolsAdapter),
-  // Approval-required server types: the MCP servers plus the DocSpace
-  // integration tools explicitly grouped under the approval serverType
-  // (e.g. document/presentation/form generation).
+  // System (host-configured MCP) tools and registered custom MCP servers
+  // run server-side and pause for UI approval; most DocSpace integration
+  // tools run silently. Compose all three — before customToolsSource was
+  // wired in, the custom-server registry was pure configuration and its
+  // tools never reached the model (Bugs 82989 / 82990).
+  toolsAdapter: composeToolsAdapters(
+    systemToolsSource,
+    customToolsSource,
+    toolsAdapter,
+  ),
+  // Approval-required server types: the MCP servers (host-configured and
+  // custom — the latter resolved per request, see primeCustomServers) plus
+  // the DocSpace integration tools explicitly grouped under the approval
+  // serverType (e.g. document/presentation/form generation).
   systemServerTypes: () => [
     ...systemToolsSource.getServerTypes(),
+    ...getCustomServerNames(),
     DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
   ],
 });
@@ -475,6 +488,10 @@ export const aiController = {
     // Mirrors sendWithStream. (No profile pinning here: SendInput carries no
     // profileId, so there is nothing for a caller to override.)
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     const result = await engine.send(await withEntityMetadata(req.body));
     res.json(result);
   }),
@@ -483,6 +500,10 @@ export const aiController = {
     // As with `send`, the forwarded headers must be marked before the
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     const body = withRequestSignal(res, req.body);
     const result = engine.sendCustom(body);
     if (body.isStream) {
@@ -502,6 +523,10 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     // Reject an empty prompt before opening the stream: a user message with
     // no non-whitespace text otherwise reaches the provider and streams back
     // nothing (Bug 82720).
@@ -589,6 +614,10 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     // Agent scope pins the model — see sendWithStream (Bug 82914).
     {
       const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
@@ -617,6 +646,10 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
     const body = withContextPrompt(
@@ -632,6 +665,10 @@ export const aiController = {
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
@@ -641,6 +678,10 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
