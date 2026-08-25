@@ -195,7 +195,21 @@ export const threadsController = {
 
   rename: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "title"] as const);
-    await engine.rename(args.threadId as string, args.title as string);
+    // Same title rules as threads/create: a missing/null/empty/whitespace
+    // title is a 400, never a silent success — rename used to accept all of
+    // those and blank the stored name, a state create can't produce
+    // (Bug 83094).
+    if (typeof args.threadId !== "string" || args.threadId.length === 0) {
+      res.status(400).json({ error: "threadId required" });
+      return;
+    }
+    if (typeof args.title !== "string" || args.title.trim().length === 0) {
+      res.status(400).json({
+        error: "title is required and must be a non-empty string",
+      });
+      return;
+    }
+    await engine.rename(args.threadId, args.title);
     res.json({ success: true });
   }),
 
