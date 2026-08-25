@@ -271,10 +271,11 @@ const source = new SystemToolsSource({
 // custom-servers map in `/mcp-servers` (managed by the agent
 // create/edit dialog through the new-ai `tools/*` routes): an entry whose
 // name matches a system server acts as the "enabled" marker for it.
-// Returns `undefined` when `entityId` is absent or not an agent room — no
-// filtering, the full configured set stays available. Fails closed: if the
-// whitelist cannot be resolved, an agent gets no system MCP tools rather
-// than all of them.
+// Returns `undefined` when `entityId` is absent, not an agent room, or the
+// agent has no stored server map at all (never configured — no restriction,
+// Bug 82991) — no filtering, the full configured set stays available. Fails
+// closed only on a resolution ERROR: then an agent gets just the portal MCP
+// server rather than everything.
 async function agentServerWhitelist(
   entityId: string | undefined,
 ): Promise<Set<string> | undefined> {
@@ -290,6 +291,14 @@ async function agentServerWhitelist(
   // keeps it too).
   try {
     const servers = await storage.mcpServers.readAll(agentId);
+    // An agent with NO stored server map has simply never configured one:
+    // that means "no restriction", not "deny all" — a fresh agent used to
+    // get an empty catalog from list-system-tools because everything was
+    // filtered out (Bug 82991). The whitelist kicks in only once the agent
+    // has explicit marker entries.
+    if (Object.keys(servers).length === 0) {
+      return undefined;
+    }
     return new Set([...Object.keys(servers), PORTAL_MCP_SERVER_NAME]);
   } catch (err) {
     logger.error(
