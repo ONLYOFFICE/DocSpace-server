@@ -204,11 +204,33 @@ export const attachmentsController = {
       });
       return;
     }
-    await engine.linkToMessage(
-      args.ids as string[],
-      args.messageId,
-      args.threadId,
-    );
+    // Shape is fine — now verify the references (Bug 82771 reopen): the C#
+    // binding endpoint silently skips unknown ids, so without these checks a
+    // nonexistent message/thread/attachment (or a message from another
+    // thread) still answered `success: true`. The thread's own existence
+    // follows from the ownership check — a nonexistent threadId can never
+    // match the message's actual thread.
+    const ids = args.ids as string[];
+    const messageThreadId = await storage.messages.readThreadId(args.messageId);
+    if (messageThreadId === null) {
+      res.status(404).json({ error: "message not found" });
+      return;
+    }
+    if (messageThreadId !== args.threadId) {
+      res.status(400).json({
+        error: "messageId does not belong to the given threadId",
+      });
+      return;
+    }
+    const attachments = await engine.getMany(ids);
+    const missing = ids.filter((_, i) => !attachments[i]);
+    if (missing.length > 0) {
+      res.status(404).json({
+        error: `attachment(s) not found: ${missing.join(", ")}`,
+      });
+      return;
+    }
+    await engine.linkToMessage(ids, args.messageId, args.threadId);
     res.json({ success: true });
   }),
 };
