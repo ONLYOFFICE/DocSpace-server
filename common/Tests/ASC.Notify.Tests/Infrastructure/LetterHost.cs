@@ -112,6 +112,12 @@ internal sealed class LetterHost : IAsyncDisposable
             ["ConnectionStrings:default:connectionString"] = connectionString,
             ["mysqlServerVersion"] = MySqlServerVersion,
 
+            // What the AppHost injects into every service process (ProjectConfigurator) and what the
+            // whole stack is standalone by. It cannot come from appsettings.test.json here: this host
+            // runs in the test process, whose environment is whatever `dotnet test` was started with —
+            // without it the base domain resolves to "" and every tenant domain becomes the bare alias.
+            ["core:base-domain"] = "localhost",
+
             // The letters need neither: FusionCache stays L1-only, cache notifications fall back to the
             // in-process implementation and the event bus to its in-memory subscriptions manager. The
             // containers in the Aspire graph are there for ApiSystem, not for this host.
