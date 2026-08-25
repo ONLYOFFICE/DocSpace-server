@@ -226,7 +226,10 @@ const forwardingFetch: FetchLike = async (url, init) => {
 // Map each preconfigured MCP server onto a system-tools entry keyed by its
 // name (the `serverType` used for per-tool prefs and approval grouping).
 function buildServers(): Record<string, McpHttpServerConfig> {
-  const servers: Record<string, McpHttpServerConfig> = {};
+  // Null prototype: the keys are config-provided names, but lookups arrive
+  // with CLIENT-supplied names — "constructor"/"toString" must miss, not
+  // resolve to an inherited Object.prototype member (Bug 82986).
+  const servers: Record<string, McpHttpServerConfig> = Object.create(null);
   for (const server of getMcpServers()) {
     servers[server.name] = { url: server.endpoint };
   }
@@ -246,7 +249,10 @@ const serverNames = Object.keys(servers);
 export function getSystemServerConfig(
   name: string,
 ): McpHttpServerConfig | undefined {
-  return servers[name];
+  // Own-property only — belt to the null-prototype braces above; a name
+  // that is not a configured system server must yield undefined so the
+  // caller's own config is validated instead (Bug 82986).
+  return Object.hasOwn(servers, name) ? servers[name] : undefined;
 }
 
 if (serverNames.length > 0) {
