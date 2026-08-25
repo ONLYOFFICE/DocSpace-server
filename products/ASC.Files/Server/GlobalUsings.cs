@@ -86,6 +86,7 @@ global using ASC.Files.Helpers;
 global using ASC.Files.Log;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
+global using ASC.MessagingSystem.EF.Model;
 global using ASC.Web.Api.Core;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;

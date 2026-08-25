@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Files.Core.Configuration;
@@ -574,7 +574,7 @@ public class GlobalFolder(
 
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
-            var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIDUserAsync(daoFactory).Result));
+            var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdUserAsync(daoFactory).Result));
             return myFolderId.Value;
         }
         else
@@ -589,7 +589,7 @@ public class GlobalFolder(
         }
     }
 
-    private async Task<int> GetFolderIDUserAsync(IDaoFactory daoFactory)
+    private static async Task<int> GetFolderIdUserAsync(IDaoFactory daoFactory)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         return await folderDao.GetFolderIDUserAsync(false);
@@ -806,16 +806,11 @@ public class GlobalFolder(
     {
         var folderDao = (FolderDao)daoFactory.GetFolderDao<int>();
 
-        var id = my ? await folderDao.GetFolderIDUserAsync(false) : await folderDao.GetFolderIDCommonAsync(false);
+        var (id, created) = my ?
+            await folderDao.GetFolderIdUserWithCreateInfoAsync(true) :
+            await folderDao.GetFolderIdCommonWithCreateInfoAsync(true);
 
-        if (!Equals(id, 0))
-        {
-            return id;
-        }
-
-        id = my ? await folderDao.GetFolderIDUserAsync(true) : await folderDao.GetFolderIDCommonAsync(true);
-
-        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).StartDocsEnabled)
+        if (!created || !(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).StartDocsEnabled)
         {
             return id;
         }
@@ -823,30 +818,25 @@ public class GlobalFolder(
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
 
-        var task = new Task(async () => await CreateSampleDocumentsAsync(serviceProvider, tenantId, userId, id, my),
-            TaskCreationOptions.LongRunning);
-
-        _ = task.ConfigureAwait(false);
-
-        task.Start();
+        _ = Task.Run(() => CreateSampleDocumentsAsync(serviceProvider, tenantId, userId, id, my));
 
         return id;
     }
 
-    private async Task CreateSampleDocumentsAsync(IServiceProvider serviceProvider, int tenantId, Guid userId, int folderId, bool my)
+    private async Task CreateSampleDocumentsAsync(IServiceProvider sProvider, int tenantId, Guid userId, int folderId, bool my)
     {
         try
         {
-            await using var scope = serviceProvider.CreateAsyncScope();
+            await using var scope = sProvider.CreateAsyncScope();
 
-            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var tManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
-            await tenantManager.SetCurrentTenantAsync(tenantId);
+            await tManager.SetCurrentTenantAsync(tenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            var culture = my ? (await userManager.GetUsersAsync(userId)).GetCulture() : tenantManager.GetCurrentTenant().GetCulture();
+            var uManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+            var culture = my ? (await uManager.GetUsersAsync(userId)).GetCulture() : tManager.GetCurrentTenant().GetCulture();
 
             var globalStore = scope.ServiceProvider.GetRequiredService<GlobalStore>();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
@@ -866,7 +856,7 @@ public class GlobalFolder(
         }
     }
 
-    private async Task SaveSampleDocumentsAsync(IServiceProvider serviceProvider, FileMarker fileMarker, FolderDao folderDao, FileDao fileDao, SocketManager socketManager,
+    private async Task SaveSampleDocumentsAsync(IServiceProvider sProvider, FileMarker fileMarker, FolderDao folderDao, FileDao fileDao, SocketManager socketManager,
         int folderId, string path, IDataStore storeTemplate)
     {
         var files = await storeTemplate.ListFilesRelativeAsync("", path, "*", false)
@@ -877,14 +867,14 @@ public class GlobalFolder(
 
         foreach (var file in files)
         {
-            await SaveFileAsync(serviceProvider, storeTemplate, fileMarker, fileDao, socketManager, path + file, folderId, files);
+            await SaveFileAsync(sProvider, storeTemplate, fileMarker, fileDao, socketManager, path + file, folderId, files);
         }
 
         await foreach (var folderName in storeTemplate.ListDirectoriesRelativeAsync(path, false))
         {
             try
             {
-                var folder = serviceProvider.GetRequiredService<Folder<int>>();
+                var folder = sProvider.GetRequiredService<Folder<int>>();
                 folder.Title = folderName;
                 folder.ParentId = folderId;
 
@@ -893,7 +883,7 @@ public class GlobalFolder(
                 var subFolder = await folderDao.GetFolderAsync(subFolderId);
                 await socketManager.CreateFolderAsync(subFolder);
 
-                await SaveSampleDocumentsAsync(serviceProvider, fileMarker, folderDao, fileDao, socketManager, folderId, path + folderName + "/", storeTemplate);
+                await SaveSampleDocumentsAsync(sProvider, fileMarker, folderDao, fileDao, socketManager, subFolderId, path + folderName + "/", storeTemplate);
             }
             catch (Exception e)
             {
@@ -902,7 +892,7 @@ public class GlobalFolder(
         }
     }
 
-    private async Task SaveFileAsync(IServiceProvider serviceProvider, IDataStore storeTemplate, FileMarker fileMarker, FileDao fileDao, SocketManager socketManager,
+    private async Task SaveFileAsync(IServiceProvider sProvider, IDataStore storeTemplate, FileMarker fileMarker, FileDao fileDao, SocketManager socketManager,
         string filePath, int folderId, List<string> files)
     {
         try
@@ -918,7 +908,7 @@ public class GlobalFolder(
                 }
             }
 
-            var newFile = serviceProvider.GetRequiredService<File<int>>();
+            var newFile = sProvider.GetRequiredService<File<int>>();
 
             newFile.Title = fileName;
             newFile.ParentId = folderId;

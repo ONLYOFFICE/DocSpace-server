@@ -34,6 +34,7 @@
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
+import logger from "../log.js";
 import type { AssignmentsStorage, ActionType } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/assignments";
@@ -54,9 +55,21 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
         `${PATH}/${encodeURIComponent(actionType)}`,
         scopedEntityId ? { query: entityIdQuery(scopedEntityId) } : undefined,
       );
-      return typeof raw === "string" ? raw : null;
+      const profileId = typeof raw === "string" ? raw : null;
+      // The action -> profile routing. `image_generation` is the one the
+      // built-in `generate_image` tool resolves: no assignment here and the
+      // tool answers "Image generation provider is not configured." without
+      // ever calling a provider.
+      logger.info(
+        `HttpAssignmentsStorage.readByType(${actionType}) entityId=${entityId ?? "-"}` +
+          `${scopedEntityId ? ` scoped=${scopedEntityId}` : ""} -> profileId=${profileId ?? "NONE"}`,
+      );
+      return profileId;
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
+        logger.info(
+          `HttpAssignmentsStorage.readByType(${actionType}) entityId=${entityId ?? "-"} -> 404 NO ASSIGNMENT`,
+        );
         return null;
       }
       throw err;
