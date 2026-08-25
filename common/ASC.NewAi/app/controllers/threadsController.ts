@@ -39,7 +39,7 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
-import { asyncHandler, unpackPositional } from "./_helpers.js";
+import { asyncHandler, unpackPositional, attachmentLimitError } from "./_helpers.js";
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 import { agentAssignedProfileId } from "./agentProfile.js";
@@ -172,6 +172,13 @@ export const threadsController = {
 
   appendUserMessage: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "message", "profileId"] as const);
+    // Enforce the composer's per-kind attachment cap server-side — the UI
+    // cannot exceed it, so only a direct API call can (Bug 82894).
+    const limitError = attachmentLimitError(args.message);
+    if (limitError) {
+      res.status(400).json({ error: limitError });
+      return;
+    }
     const messageId = await engine.appendUserMessage(
       args.threadId as string,
       args.message as ThreadMessageInput,

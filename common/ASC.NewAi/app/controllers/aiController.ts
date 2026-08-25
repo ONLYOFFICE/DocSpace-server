@@ -45,7 +45,7 @@ import logger from "../log.js";
 import { agentAssignedProfileId } from "./agentProfile.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
-import { asyncHandler, streamNdjson, streamOpenAiSse } from "./_helpers.js";
+import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
@@ -493,6 +493,16 @@ export const aiController = {
         error: "userMessage must contain non-empty text content",
       });
       return;
+    }
+    // The same per-kind attachment cap as threads/append-user-message —
+    // this endpoint persists the user message through the same engine, so
+    // it is the other way around the composer's limit (Bug 82894).
+    {
+      const limitError = attachmentLimitError(req.body.userMessage);
+      if (limitError) {
+        res.status(400).json({ error: limitError });
+        return;
+      }
     }
     // A new thread (no threadId) is created implicitly here, so gate it like
     // threads/create: a supplied entityId must be accessible and a profile
