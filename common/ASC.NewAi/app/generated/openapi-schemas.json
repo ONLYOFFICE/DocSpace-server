@@ -1158,34 +1158,6 @@
       "additionalProperties": false,
       "description": "Minimal provider connection configuration. Used to connect to a provider API."
     },
-    "AiOpenOrCreateInput": {
-      "type": "object",
-      "properties": {
-        "threadId": {
-          "type": "string"
-        },
-        "profile": {
-          "$ref": "#/components/schemas/AiProfile"
-        },
-        "profileId": {
-          "type": "string"
-        },
-        "firstMessage": {
-          "$ref": "#/components/schemas/AiThreadMessageLike"
-        },
-        "entityId": {
-          "type": "string",
-          "description": "Opaque scope token persisted on a freshly created thread. Ignored when `threadId` is provided (the existing thread keeps its scope)."
-        }
-      },
-      "required": [
-        "profile",
-        "profileId",
-        "firstMessage"
-      ],
-      "additionalProperties": false,
-      "description": "Input for  {@link  ThreadsEngine.openOrCreate } : open an existing thread if `threadId` is given, otherwise create a new one with an auto-generated title derived from `firstMessage`."
-    },
     "AiOpenOrCreateResult": {
       "type": "object",
       "properties": {
@@ -4437,7 +4409,46 @@
     },
     "aiThreadsOpenOrCreate": {
       "request": {
-        "$ref": "#/components/schemas/AiOpenOrCreateInput"
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/AiProfile",
+            "description": "Profile the title generation runs on."
+          },
+          "profileId": {
+            "type": "string"
+          },
+          "firstMessage": {
+            "$ref": "#/components/schemas/AiThreadMessageLike",
+            "description": "First user message a fresh thread derives its title from."
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Opaque scope token persisted on a freshly created thread."
+          },
+          "entityMeta": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string"
+              },
+              "entityTitle": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is re-resolved server-side before reaching the provider as metadata."
+          }
+        },
+        "required": [
+          "profile",
+          "profileId",
+          "firstMessage"
+        ],
+        "additionalProperties": false
       },
       "response": {
         "$ref": "#/components/schemas/AiOpenOrCreateResult"
@@ -4524,6 +4535,19 @@
           "profile": {
             "$ref": "#/components/schemas/AiProfile",
             "description": "Profile used to regenerate the title."
+          },
+          "entityMeta": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string"
+              },
+              "entityTitle": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is re-resolved server-side before reaching the provider as metadata."
           }
         },
         "required": [
