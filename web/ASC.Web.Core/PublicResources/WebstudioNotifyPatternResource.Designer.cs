@@ -2263,6 +2263,23 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///We’re reaching out to let you know that automatic top-up is not supported for your current payment method: the money reaches the ${LetterLogoText} Wallet only after the bank transfer is settled, so the balance cannot be replenished right away.
+        ///
+        ///Automatic top-up has therefore been turned off. To avoid any interruption of paid services, please top up your wallet balance manually, or switch to a payment method that supports automatic top-up.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_wallet_auto_top_up_unavailable {
+            get {
+                return ResourceManager.GetString("pattern_wallet_auto_top_up_unavailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to h1. Welcome to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;!
         ///
         ///
@@ -3108,6 +3125,15 @@ namespace ASC.Web.Core.PublicResources {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Action required: Automatic top-up is unavailable for your ${LetterLogoText} Wallet.
+        /// </summary>
+        public static string subject_wallet_auto_top_up_unavailable {
+            get {
+                return ResourceManager.GetString("subject_wallet_auto_top_up_unavailable", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
         /// </summary>

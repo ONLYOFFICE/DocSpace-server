@@ -1896,6 +1896,17 @@ If you need help, browse our Help Center or ask our support team.
 
 $TrulyYours</comment>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Hello, $UserName!
+
+We’re reaching out to let you know that automatic top-up is not supported for your current payment method: the money reaches the ${LetterLogoText} Wallet only after the bank transfer is settled, so the balance cannot be replenished right away.
+
+Automatic top-up has therefore been turned off. To avoid any interruption of paid services, please top up your wallet balance manually, or switch to a payment method that supports automatic top-up.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_zoom_welcome" xml:space="preserve">
     <value>h1. Welcome to &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;!
 
@@ -2187,6 +2198,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_welcome_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText}!</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Action required: Automatic top-up is unavailable for your ${LetterLogoText} Wallet</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Welcome to ${LetterLogoText}!</value>

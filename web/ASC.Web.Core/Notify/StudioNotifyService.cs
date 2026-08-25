@@ -863,6 +863,23 @@ public class StudioNotifyService(
         }
     }
 
+    public async Task SendWalletAutoTopUpUnavailableAsync(UserInfo payer, UserInfo owner)
+    {
+        var users = new[] { payer, owner }
+            .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
+            .DistinctBy(user => user.Email);
+
+        var walletAutoTopUpUnavailableNotifyAction = serviceProvider.GetService<WalletAutoTopUpUnavailableNotifyAction>();
+
+        foreach (var user in users)
+        {
+            walletAutoTopUpUnavailableNotifyAction.Init(user);
+
+            var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
+            await studioNotifyServiceHelper.SendNoticeToAsync(walletAutoTopUpUnavailableNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
+        }
+    }
+
     public async Task SendLowWalletBalanceAsync(UserInfo payer, UserInfo owner)
     {
         var users = new[] { payer, owner }

@@ -2626,6 +2626,36 @@ public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUti
 }
 
 [Scope]
+public sealed class WalletAutoTopUpUnavailableNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "wallet_auto_top_up_unavailable";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_wallet_auto_top_up_unavailable, () => WebstudioNotifyPatternResource.pattern_wallet_auto_top_up_unavailable),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_wallet_auto_top_up_unavailable)
+        ];
+    }
+
+    public void Init(UserInfo user)
+    {
+        var culture = GetCulture(user);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, culture.Name),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
+        ];
+    }
+}
+
+[Scope]
 public sealed class LowWalletBalanceNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "low_wallet_balance";

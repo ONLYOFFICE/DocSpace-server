@@ -168,10 +168,11 @@ public class TopUpWalletService(
                 return;
             }
 
-            // Auto top-up cannot work without a usable payment method; and a delayed one credits the
-            // wallet only once the transfer settles, so the balance would still be below MinBalance on the next
-            // tick and every tick would deposit again. In both cases stop auto top-up and tell the owner, which
-            // also falls back to low-balance monitoring instead of letting the wallet drain quietly.
+            // Both branches below stop auto top-up and switch the tenant to low-balance monitoring, rather than
+            // letting the wallet drain quietly - but they are not the same event, so they send different letters:
+            // a missing payment method is a failure that may well resolve itself, while a delayed one simply
+            // cannot support auto top-up (the wallet is credited only once the transfer settles, so the balance
+            // would still be below MinBalance on the next tick and every tick would deposit again).
             if (customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
             {
                 logger.InfoTopUpWalletServicePaymentMethodNotSet(data.TenantId);
@@ -182,7 +183,7 @@ public class TopUpWalletService(
             if (customerInfo.IsDelayedPaymentMethod)
             {
                 logger.InfoTopUpWalletServiceDelayedPaymentMethod(data.TenantId);
-                await SendTopUpWalletErrorAsync(data.TenantId, payer, owner, settings);
+                await SendAutoTopUpUnavailableAsync(data.TenantId, payer, owner, settings);
                 return;
             }
 
@@ -279,22 +280,35 @@ public class TopUpWalletService(
         }
     }
 
-    private async Task SendTopUpWalletErrorAsync(int tenantId, UserInfo payer, UserInfo owner, TenantWalletSettings settings)
+    // An attempt was made and failed - something may well succeed next time, so this reads as an error.
+    private Task SendTopUpWalletErrorAsync(int tenantId, UserInfo payer, UserInfo owner, TenantWalletSettings settings)
+    {
+        logger.ErrorTopUpWalletServiceFail(tenantId);
+
+        return DisableAutoTopUpAsync(tenantId, owner, settings, notify => notify.SendTopUpWalletErrorAsync(payer, owner));
+    }
+
+    // Nothing failed here: the payment method structurally cannot support an automatic top-up, so the owner
+    // gets a letter that says so and asks them to top the wallet up by hand, not a "top-up failed" one.
+    private Task SendAutoTopUpUnavailableAsync(int tenantId, UserInfo payer, UserInfo owner, TenantWalletSettings settings)
+    {
+        return DisableAutoTopUpAsync(tenantId, owner, settings, notify => notify.SendWalletAutoTopUpUnavailableAsync(payer, owner));
+    }
+
+    private async Task DisableAutoTopUpAsync(int tenantId, UserInfo owner, TenantWalletSettings settings, Func<StudioNotifyService, Task> sendNoticeAsync)
     {
         try
         {
-            logger.ErrorTopUpWalletServiceFail(tenantId);
-
             await using var scope = _scopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
+            await tenantManager.SetCurrentTenantAsync(tenantId);
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             await securityContext.AuthenticateMeWithoutCookieAsync(tenantId, owner.Id);
 
             var studioNotifyService = scope.ServiceProvider.GetRequiredService<StudioNotifyService>();
-            await studioNotifyService.SendTopUpWalletErrorAsync(payer, owner);
+            await sendNoticeAsync(studioNotifyService);
 
             var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
             var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
