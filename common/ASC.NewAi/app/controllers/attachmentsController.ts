@@ -47,6 +47,23 @@ interface FileInput {
 
 type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 
+// Mirror of the widget's device-upload blocklist (ARCHIVE_EXTENSION in
+// ui-kit ai-agent/providers/files/upload-files.ts): archives cannot be
+// text-extracted, so declaring one is a client error. This is metadata-level
+// validation only (title/path are caller-supplied) — the authoritative gate
+// stays in C#, which validates the RESOLVED file title against the
+// vectorization allowlist and cannot be bypassed by a spoofed title
+// (Bug 82893).
+const ARCHIVE_EXTENSION =
+  /\.(zip|rar|7z|tar|gz|tgz|bz2|tbz2?|xz|txz|zst|lz|lzma|cab|iso)$/i;
+
+function declaredFileName(title: unknown, path: string): string {
+  if (typeof title === "string" && title.length > 0) {
+    return title;
+  }
+  return path.split(/[\\/]/).pop() ?? path;
+}
+
 // Coerce a file `type` to a number. Accepts a real number or a numeric string
 // like "1" (Bugs 82745, 82746); anything else (boolean, object, non-numeric
 // string) yields `undefined` so the caller can reject it with a 400. The value
@@ -85,6 +102,13 @@ function parseFileInput(raw: unknown): ParseResult<FileInput> {
   }
   if (raw.title !== undefined && typeof raw.title !== "string") {
     return { ok: false, error: "input.title must be a string when present" };
+  }
+  const declaredName = declaredFileName(raw.title, raw.path);
+  if (ARCHIVE_EXTENSION.test(declaredName)) {
+    return {
+      ok: false,
+      error: `archive attachments are not supported: ${declaredName}`,
+    };
   }
   const value: FileInput = {
     path: raw.path,
