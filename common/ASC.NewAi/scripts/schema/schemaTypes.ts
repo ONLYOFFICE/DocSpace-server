@@ -313,7 +313,9 @@ export type Req_aiProfilesListProviderModels = {
 export type Res_aiProfilesListProviderModels = Model[];
 export type Req_aiProfilesTestConnection = string;
 export type Res_aiProfilesTestConnection = true | { message?: string };
-export type Res_aiProfilesGetById = Profile;
+// `key` and `headers` are stripped from the HTTP response (Bug 82821) —
+// see profilesController.getById.
+export type Res_aiProfilesGetById = Omit<Profile, "key" | "headers">;
 export type Res_aiProfilesList = Profile[];
 
 /* ------------------------------- Prompts ------------------------------- */

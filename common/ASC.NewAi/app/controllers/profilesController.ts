@@ -195,18 +195,22 @@ export const profilesController = {
       res.status(400).json({ error: "id required" });
       return;
     }
-    const profile = await engine.getById(id);
+    // Read WITHOUT the onlyoffice provider override: the override rewrites
+    // `baseUrl` to the internal service address and merges the caller's
+    // forwarded auth headers — meant for in-process provider calls, never
+    // for an HTTP response (Bug 82821). The former justification for the
+    // full profile — the doceditor Next passthrough — was removed; the
+    // editor now goes through /openai/{profileId}/v1, which resolves the
+    // profile server-side. `key` and `headers` are dropped on top: no
+    // consumer reads them (on SaaS `key` is the "onlyoffice" placeholder;
+    // on self-hosted it is the tenant's real provider secret).
+    const profile = await storage.profiles.readByIdRaw(id);
     if (!profile) {
       res.status(404).json({ error: "Profile not found" });
       return;
     }
-    // Return the full profile (same shape as `list`): the doceditor AI
-    // passthrough (packages/doceditor .../ai/passthrough) resolves the
-    // profile through this endpoint and needs baseUrl/key/headers to reach
-    // the provider. get-by-id is caller-scoped (a user reads their own
-    // profile), so this is not a cross-user leak — the earlier redaction
-    // (Bug 82821) broke the passthrough and is reverted.
-    res.json(profile);
+    const { key: _key, headers: _headers, ...publicProfile } = profile;
+    res.json(publicProfile);
   }),
 
   list: asyncHandler(async (_req, res) => {
