@@ -196,6 +196,24 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
   }
+  // A per-request `{mode: "replace"}` prompt override substitutes the
+  // agent's stored instructions for this round (Bug 83236) — without this
+  // skip, appendActionPrompt would concatenate the instruction into the
+  // replace text and the agent's marker would win. This helper runs
+  // innermost, so the override seen here is still the client's own; the
+  // tools/context fragments appended later are round infrastructure (tool
+  // list, location, date) and stay regardless of the mode. The stored
+  // instructions themselves are untouched — the skip is per-request.
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
+  const prompt = actionArgs["prompt"];
+  if (
+    isObject(prompt) &&
+    prompt["mode"] === "replace" &&
+    typeof prompt["text"] === "string" &&
+    prompt["text"].trim().length > 0
+  ) {
+    return body;
+  }
   const instruction = await safeGetAgentInstruction(contextScopeOf(body));
   return instruction ? appendActionPrompt(body, instruction) : body;
 }
