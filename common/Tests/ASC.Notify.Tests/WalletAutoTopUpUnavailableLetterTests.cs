@@ -39,44 +39,29 @@ namespace ASC.Notify.Tests;
 /// once the transfer settles. Distinct from <see cref="TopUpWalletErrorLetterTests"/>, which covers
 /// an attempt that was made and failed. Also goes out over Telegram, from the same pattern.
 /// </summary>
-public class WalletAutoTopUpUnavailableLetterTests : LetterTestBase
+public class WalletAutoTopUpUnavailableLetterTests : LetterTestBase<WalletAutoTopUpUnavailableNotifyAction>
 {
     /// <summary>The wallet page the button leads to.</summary>
-    private static string WalletUrl => LetterEnvironment.PortalLink("billing/wallet");
-
-    protected override string LetterId => "wallet_auto_top_up_unavailable";
-
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_wallet_auto_top_up_unavailable,
-        () => WebstudioNotifyPatternResource.pattern_wallet_auto_top_up_unavailable);
-
-    /// <summary>The sending code sets no top image, so the tenant letter logo is rendered instead.</summary>
-    protected override string? TopGif => null;
-
-    /// <summary>Textile letter: <c>$TrulyYours</c> is inline, not a table row of its own.</summary>
-    protected override bool TrulyYoursAsTableRow => false;
-
-    /// <summary>Mirrors <c>WalletAutoTopUpUnavailableNotifyAction.Init</c>.</summary>
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture)
+    private static string WalletUrl(LetterScope scope)
     {
-        return [OrangeButton("ButtonGoToWalletSettings", culture, WalletUrl)];
+        return $"{scope.PortalUrl}/billing/wallet";
     }
 
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture)
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(RecipientName)
-            .And.Contain(Resource("ButtonGoToWalletSettings", culture))
-            .And.Contain(WalletUrl);
+        letter.Body.Should().Contain(scope.Recipient.FirstName)
+            .And.Contain(Resource("ButtonGoToWalletSettings", scope.Culture))
+            .And.Contain(WalletUrl(scope));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter)
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
         letter.Subject.Should().Be($"Action required: Automatic top-up is unavailable for your {logoText} Wallet");
 
         // No apostrophes in the expected strings: TextileStyler rewrites them.
-        letter.Body.Should().Contain($"Hello, {RecipientName}!")
+        letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain("automatic top-up is not supported for your current payment method")
             .And.Contain($"the money reaches the {logoText} Wallet only after the bank transfer is settled");
 
@@ -86,5 +71,12 @@ public class WalletAutoTopUpUnavailableLetterTests : LetterTestBase
 
         // The brand no longer carries the DocSpace suffix.
         letter.Body.Should().NotContain("DocSpace");
+    }
+
+    protected override Task InitAsync(WalletAutoTopUpUnavailableNotifyAction action, LetterScope scope)
+    {
+        action.Init(scope.Recipient);
+
+        return Task.CompletedTask;
     }
 }
