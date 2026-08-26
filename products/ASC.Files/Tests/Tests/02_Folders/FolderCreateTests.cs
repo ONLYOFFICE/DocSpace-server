@@ -50,7 +50,8 @@ public class FolderCreateTests(
     [
         FolderType.Archive,
         FolderType.TRASH,
-        FolderType.VirtualRooms
+        FolderType.VirtualRooms,
+        FolderType.Forms
     ];
     
     [Fact]

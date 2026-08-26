@@ -61,7 +61,8 @@ public class FileCreateTests(
     [
         FolderType.Archive,
         FolderType.TRASH,
-        FolderType.VirtualRooms
+        FolderType.VirtualRooms,
+        FolderType.Forms
     ];
 
     [Theory]

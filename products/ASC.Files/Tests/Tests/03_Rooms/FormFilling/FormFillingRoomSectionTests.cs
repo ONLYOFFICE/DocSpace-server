@@ -266,4 +266,99 @@ public class FormFillingRoomSectionTests(
         roomsContent.Folders.Should().NotContain(r => r.Title == formRoom.Title,
             "browsing the Virtual Rooms root folder must not list form filling rooms");
     }
+
+    /// <summary>
+    /// A room's primary external link is what a non-member visits to view or fill a form room
+    /// without being invited to it. An authenticated user with no access to the room obtains that
+    /// access through GET /files/share/{requestToken}?folderId={roomId} — the same call the
+    /// external-link landing page makes — after which GET /files/rooms/{id} answers 200 for them
+    /// with external = true.
+    ///
+    /// BUG 83228: such a room used to show up for that user under searchArea=Any but never under
+    /// searchArea=Forms, so it was unreachable from the Forms section right after being viewed
+    /// through its own link. It is listed in both sections now.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "83228")]
+    public async Task FormRoomOpenedViaExternalLink_AppearsInFormsSection()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var formRoom = await CreateFillingFormsRoom("Form Room " + Guid.NewGuid().ToString()[..8]);
+        await StartFormFillingAsync(formRoom.Id);
+
+        var link = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(
+            formRoom.Id,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var requestToken = link.SharedLink.RequestToken;
+
+        // A second authenticated portal user with no direct access to this room.
+        var member = await InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(member);
+
+        // Act - open the room through its external link
+        await _sharingApi.GetExternalShareDataAsync(
+            requestToken,
+            folderId: formRoom.Id.ToString(),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert - the visit really granted access, and the room is reachable from the Forms section
+        var info = (await _roomsApi.GetRoomInfoAsync(formRoom.Id, TestContext.Current.CancellationToken)).Response;
+        info.External.Should().BeTrue("visiting the external link must grant the caller access to the room");
+
+        var formsSection = (await _roomsApi.GetRoomsFolderAsync(
+            searchArea: SearchArea.Forms,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        formsSection.Folders.Should().Contain(r => r.Title == formRoom.Title,
+            "a form room opened via its external link must be listed in the Forms section");
+    }
+
+    /// <summary>
+    /// Uploads the shared PDF asset into a room and starts form filling on it, so the room holds a
+    /// real form rather than being empty.
+    /// </summary>
+    private async Task StartFormFillingAsync(int roomId)
+    {
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
+
+        await using var stream = typeof(FormFillingRoomSectionTests).Assembly
+            .GetManifestResourceStream("ASC.Files.Tests.Data.new.pdf")!;
+
+        var session = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(
+            roomId,
+            new SessionRequest("new.pdf", stream.Length),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        var chunkSize = (int)settings.ChunkUploadSize;
+        var buffer = new byte[chunkSize];
+        var chunkNumber = 1;
+        int bytesRead;
+
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, chunkSize), TestContext.Current.CancellationToken)) > 0)
+        {
+            await using var chunkStream = new MemoryStream(buffer, 0, bytesRead);
+
+            await _filesOperationsApi.UploadAsyncSessionAsync(
+                roomId,
+                session.Id,
+                chunkNumber,
+                new FileParameter(chunkStream),
+                TestContext.Current.CancellationToken);
+
+            chunkNumber++;
+        }
+
+        var uploaded = (await _filesOperationsApi.FinalizeSessionAsync(
+            roomId,
+            session.Id,
+            TestContext.Current.CancellationToken)).Response;
+
+        var formId = uploaded.File.Id;
+
+        await _filesApi.ManageFormFillingAsync(
+            formId.ToString(),
+            new ManageFormFillingDtoInteger(formId, FormFillingManageAction.Start),
+            TestContext.Current.CancellationToken);
+    }
 }

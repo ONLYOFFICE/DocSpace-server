@@ -42,6 +42,7 @@ import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
+import { agentAssignedProfileId } from "./agentProfile.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -135,6 +136,15 @@ interface UpdateMessageBody {
 
 export const threadsController = {
   create: asyncHandler<CreateBody>(async (req, res) => {
+    // The agent's assigned profile is authoritative for threads created in
+    // its room: substitute it over any caller-supplied profileId so a new
+    // thread cannot start on a different model (Bug 82915).
+    if (req.body && typeof req.body === "object") {
+      const agentProfileId = await agentAssignedProfileId(req.body.entityId);
+      if (agentProfileId) {
+        req.body.profileId = agentProfileId;
+      }
+    }
     await assertThreadCreatable(req.body?.entityId, req.body?.profileId);
     const thread = await engine.create(req.body);
     res.json(thread);

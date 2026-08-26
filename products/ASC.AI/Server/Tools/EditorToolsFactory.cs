@@ -212,27 +212,59 @@ public class EditorToolsFactory(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var file = await fileStorageService.CreateNewFileAsync(new FileModel<T, int>
-            {
-                ParentId = folderId,
-                Title = fileName
-            }, ignoreTemplates: true);
-
-            return new ToolResponse<GeneratedFileResult>
-            {
-                Data = new GeneratedFileResult
-                {
-                    Id = file.Id,
-                    Title = file.Title,
-                    ParentId = folderId,
-                    ParentTitle = parentTitle
-                }
-            };
+            return await CreateFileCoreAsync(folderId, parentTitle, fileName);
         }
-        catch (Exception e)
+        catch (OperationCanceledException e)
         {
             return new ToolResponse<GeneratedFileResult> { Error = e.Message };
         }
+        catch (Exception e)
+        {
+            return await TryCreateFileInMyAsync(folderId, fileName, e);
+        }
+    }
+
+    private async Task<ToolResponse<GeneratedFileResult>> TryCreateFileInMyAsync<T>(T folderId, string fileName, Exception error)
+        where T : notnull
+    {
+        try
+        {
+            var myFolder = await daoFactory.GetFolderDao<int>().GetFolderAsync(await globalFolderHelper.FolderMyAsync);
+            if (myFolder is null || Equals(folderId, myFolder.Id))
+            {
+                return new ToolResponse<GeneratedFileResult> { Error = error.Message };
+            }
+
+            return await CreateFileCoreAsync(myFolder.Id, myFolder.Title, fileName);
+        }
+        catch (Exception)
+        {
+            return new ToolResponse<GeneratedFileResult> { Error = error.Message };
+        }
+    }
+
+    private async Task<ToolResponse<GeneratedFileResult>> CreateFileCoreAsync<T>(
+        T folderId,
+        string parentTitle,
+        string fileName)
+        where T : notnull
+    {
+        var file = await fileStorageService.CreateNewFileAsync(new FileModel<T, int>
+        {
+            ParentId = folderId,
+            Title = fileName
+        }, ignoreTemplates: true);
+
+        return new ToolResponse<GeneratedFileResult>
+        {
+            Data = new GeneratedFileResult
+            {
+                Id = file.Id,
+                Title = file.Title,
+                ParentId = folderId,
+                ParentTitle = parentTitle
+            }
+        };
     }
 
     private sealed record FileCreateTarget(

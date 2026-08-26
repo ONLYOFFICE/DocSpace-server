@@ -37,8 +37,12 @@ namespace ASC.Files.Tests.Tests._08_Privacy;
 /// Access control for the four per-caller key-management endpoints. Encryption keys are personal:
 /// every authenticated role manages only their own keys, and there is no parameter to target
 /// another user's keys (cross-user isolation is covered separately in
-/// <see cref="CrossUserIsolationTests"/>). Anonymous requests get 401. Guests currently get 403 on
-/// set/replace/delete, which is BUG 82524 — they should be able to manage their own keys.
+/// <see cref="CrossUserIsolationTests"/>). Anonymous requests get 401.
+///
+/// A Guest is read-only on the key surface, by design: reading answers 200 with an always-empty
+/// set, while set/replace are refused with 403. This was once reported as BUG 82524 and is not a
+/// bug — a Guest is not meant to own encryption key material. As a knock-on effect a Guest can
+/// never be a member of a private room, since membership requires the invitee to hold a key.
 /// </summary>
 [Trait("Category", "Permissions")]
 [Trait("Feature", "PrivacyRoom")]
@@ -75,8 +79,15 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
     [Fact]
     public async Task GetUserKeys_Guest_ReadsOwnEmptyKeySet()
     {
-        // A guest cannot create a key (BUG 82524), so reading returns their OWN empty set (200,
-        // no keys) — never another user's keys.
+        // Reading is open to a guest (200); creating is not (403, see SetKeys_Guest_Denied), so a
+        // guest's own set is always empty — and it is never another user's keys. The owner's
+        // populated read is the positive control: it proves the endpoint does report keys in this
+        // portal, so the guest's empty read is scoping and not a broken read.
+        await _filesClient.Authenticate(Owner);
+        await SetFakeKeys();
+        var ownerKeys = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
+        ownerKeys.Should().ContainSingle();
+
         var guest = await InviteGuest();
         await _filesClient.Authenticate(guest);
 
@@ -139,6 +150,8 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
     {
         // Guests hold no encryption keys by design, which is also what makes them uninvitable to a
         // private room — see RoomAccessKeysPermissionsTests.Invite_GuestToPrivateRoom_AlwaysRefused.
+        // Nothing is stored: the refused call must not leave a key behind, so the key set is read
+        // back afterwards — a 403 that still wrote a key could not pass.
         var guest = await InviteGuest();
         await _filesClient.Authenticate(guest);
 
@@ -147,7 +160,11 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
                 new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
                 TestContext.Current.CancellationToken));
 
+        var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
+        after.Should().BeNullOrEmpty();
+
         exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent.ToString().Should().Contain("Access denied");
     }
 
     [Fact]
@@ -198,8 +215,10 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
     [Fact]
     public async Task ReplaceKey_Guest_Denied()
     {
-        // A guest is refused before the request is even looked at, so the missing key that would
-        // otherwise make this a 404 never comes into play.
+        // ReplaceKey shares the create path's access check, so a guest is refused here for the same
+        // by-design reason as on POST: no key material for guests. A guest also never has a key to
+        // replace in the first place — the empty read afterwards pins both halves of that, and the
+        // missing key that would otherwise make this a 404 never comes into play.
         var guest = await InviteGuest();
         await _filesClient.Authenticate(guest);
 
@@ -208,7 +227,11 @@ public class KeyAccessPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTe
                 new EncryptionKeyRequestDto(publicKey: $"pk-{Guid.NewGuid():N}", privateKeyEnc: "prv"),
                 TestContext.Current.CancellationToken));
 
+        var after = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
+        after.Should().BeNullOrEmpty();
+
         exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent.ToString().Should().Contain("Access denied");
     }
 
     [Fact]
