@@ -49,6 +49,7 @@ import {
 } from "../requestContext.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
+import { aiService } from "../storage/httpClient.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
@@ -495,7 +496,36 @@ async function unknownProfileIdError(
   const profile = await storage.profiles
     .readById(profileId)
     .catch(() => undefined);
-  return profile ? null : `unknown profileId: ${profileId}`;
+  if (!profile) {
+    return `unknown profileId: ${profileId}`;
+  }
+  return aiToolsUnpaidError(profile.providerType);
+}
+
+// Sentinel message so the callers can tell the billing failure (402) apart
+// from the unknown-profile validation error (400) in unknownProfileIdError's
+// single string channel.
+const AI_TOOLS_UNPAID_ERROR =
+  "The AI Tools service is not paid for the current portal";
+
+// 402 message when the effective profile rides the portal gateway while the
+// tenant's AI Tools wallet service is not paid, null otherwise. Without
+// this check the round opens a 200 NDJSON stream and the billing failure
+// surfaces only as an in-stream error frame (Bug 83344). `aiReady` (the C#
+// AiAccessibility status) is false here in exactly one reachable state —
+// the unpaid gateway wallet: the admin kill-switch already failed the
+// profile read above with 403, and non-gateway providers have no wallet.
+async function aiToolsUnpaidError(
+  providerType: string | undefined,
+): Promise<string | null> {
+  if (providerType !== "onlyoffice") {
+    return null;
+  }
+  const config = await aiService.get("/config").catch(() => undefined);
+  if (isObject(config) && config["aiReady"] === false) {
+    return AI_TOOLS_UNPAID_ERROR;
+  }
+  return null;
 }
 
 export const aiController = {
@@ -603,7 +633,9 @@ export const aiController = {
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
       if (profileError) {
-        res.status(400).json({ error: profileError });
+        res
+          .status(profileError === AI_TOOLS_UNPAID_ERROR ? 402 : 400)
+          .json({ error: profileError });
         return;
       }
     }
@@ -647,7 +679,9 @@ export const aiController = {
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
       if (profileError) {
-        res.status(400).json({ error: profileError });
+        res
+          .status(profileError === AI_TOOLS_UNPAID_ERROR ? 402 : 400)
+          .json({ error: profileError });
         return;
       }
     }
