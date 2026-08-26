@@ -31,14 +31,19 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.ClearEvents.Extensions;
-public static class ServiceCollectionExtension
-{
-    public static IServiceCollection AddClearEventsServices(this IServiceCollection services)
-    {
-        services.AddHostedService<ClearEventsService>();
-        services.AddHostedService<ClearAuditEventsService>();
+namespace ASC.ClearEvents.Configuration;
 
-        return services;
-    }
+public class AuditTrailRetentionConfiguration
+{
+    public const string SectionName = "clearEvents:auditTrail";
+
+    public bool Enabled { get; init; } = true;
+
+    public int PaidLifeTimeDays { get; init; } = 3 * 365;
+
+    public int FreeLifeTimeDays { get; init; } = 365;
+
+    public TimeSpan Period { get; init; } = TimeSpan.FromDays(1);
+
+    public int BatchSize { get; init; } = 1000;
 }

@@ -31,14 +31,19 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.ClearEvents.Extensions;
-public static class ServiceCollectionExtension
-{
-    public static IServiceCollection AddClearEventsServices(this IServiceCollection services)
-    {
-        services.AddHostedService<ClearEventsService>();
-        services.AddHostedService<ClearAuditEventsService>();
+namespace ASC.ClearEvents;
 
-        return services;
+/// <summary>
+/// ASC.ClearEvents runs on BaseWorkerStartup, like ASC.Notify, because the audit trail cleanup resolves
+/// ITariffService, whose graph reaches UserManager and the socket channels lazily through
+/// TenantQuotaMapper -> RegionHelper. That set cannot be pinned down by hand.
+/// </summary>
+public class Startup(IConfiguration configuration) : BaseWorkerStartup(configuration)
+{
+    public override async Task ConfigureServices(WebApplicationBuilder builder)
+    {
+        await base.ConfigureServices(builder);
+
+        builder.Services.AddClearEventsServices();
     }
 }
