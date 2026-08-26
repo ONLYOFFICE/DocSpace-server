@@ -44,6 +44,7 @@ global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
 
 global using Aspire.Hosting;
+global using Aspire.Hosting.ApplicationModel;
 global using Aspire.Hosting.Testing;
 
 global using Bogus;

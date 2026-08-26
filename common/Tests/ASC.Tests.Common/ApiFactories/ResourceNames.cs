@@ -48,4 +48,13 @@ public static class ResourceNames
     public const string Files = "onlyoffice-files";
     public const string People = "onlyoffice-people";
     public const string Ai = "onlyoffice-ai";
+
+    /// <summary>
+    /// The DocSpace database, for a suite that talks to it directly rather than through a service —
+    /// also the name its connection string is published under.
+    /// </summary>
+    public const string Database = "docspace";
+
+    /// <summary>The mail server the letter tests deliver to. Endpoints: <c>smtp</c> and <c>http</c>.</summary>
+    public const string MailPit = "mailpit";
 }
