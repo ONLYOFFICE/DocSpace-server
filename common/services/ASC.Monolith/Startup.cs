@@ -85,6 +85,7 @@ public class Startup : BaseStartup
 
         // === ASC.ClearEvents ===
         services.AddHostedService<ClearEventsService>();
+        services.AddHostedService<ClearAuditEventsService>();
 
         // === ASC.ApiSystem authentication schemes ===
         services.AddApiSystemAuthServices();
