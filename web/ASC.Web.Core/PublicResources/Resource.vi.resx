@@ -211,7 +211,7 @@
     <value>Đã vượt quá hạn mức không gian AI agent</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Không thể đặt hạn mức cho mỗi ai agent. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+    <value>Không thể đặt hạn mức cho mỗi ai agent. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Tự động gia hạn</value>
@@ -1120,7 +1120,7 @@
     <value>Đã vượt quá hạn mức không gian phòng</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Không thể đặt hạn mức cho mỗi phòng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+    <value>Không thể đặt hạn mức cho mỗi phòng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Châu Á-Thái Bình Dương (Singapore)</value>
@@ -1285,7 +1285,7 @@
     <value>Đã xảy ra lỗi ngoài dự kiến. Xin hãy thử lại.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Bạn đã được kết nối thành công với Telegram để nhận thông báo từ DocSpace của bạn.</value>
+    <value>Bạn đã được kết nối thành công với Telegram để nhận thông báo từ không gian làm việc của bạn.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Mã không chính xác</value>
@@ -1300,7 +1300,7 @@
     <value>Đã vượt quá hạn mức không gian người dùng</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Không thể đặt hạn mức cho mỗi người dùng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+    <value>Không thể đặt hạn mức cho mỗi người dùng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Vùng Tây Hoa Kỳ (Oregon)</value>
@@ -1321,7 +1321,7 @@
     <value>Tìm kiếm web</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Tìm kiếm web</value>
+    <value>Tìm kiếm AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Tín dụng AI</value>

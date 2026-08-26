@@ -103,6 +103,33 @@ public interface JpaConsentRepository
   void deleteAllConsentsByTenantId(@Param("tenantId") long tenantId);
 
   /**
+   * Deletes every consent given to a client owned by a specific tenant, whichever tenant the
+   * consenting user belonged to.
+   *
+   * @param ownerTenantId The ID of the tenant owning the clients.
+   */
+  @Modifying
+  @Query(
+      value = "DELETE FROM identity_consents WHERE owner_tenant_id = :ownerTenantId",
+      nativeQuery = true)
+  void deleteAllConsentsByOwnerTenantId(@Param("ownerTenantId") long ownerTenantId);
+
+  /**
+   * Deletes every consent given to a client created by a specific user, whichever tenant the
+   * consenting user belonged to.
+   *
+   * @param ownerTenantId The ID of the tenant owning the clients.
+   * @param ownerUserId The ID of the user who created the clients.
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_consents WHERE owner_tenant_id = :ownerTenantId AND owner_user_id = :ownerUserId",
+      nativeQuery = true)
+  void deleteAllConsentsByOwner(
+      @Param("ownerTenantId") long ownerTenantId, @Param("ownerUserId") String ownerUserId);
+
+  /**
    * Deletes all authorizations associated with a specific client.
    *
    * @param registeredClientId The unique identifier of the registered client for which the

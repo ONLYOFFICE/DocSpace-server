@@ -42,7 +42,9 @@ public class AssignmentsStorageService(
     AssignmentsResolver resolver,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
+    AiGateway gateway,
+    MessageService messageService,
+    FilesMessageService filesMessageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _writeGlobalTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _writeLocalTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin];
@@ -50,14 +52,18 @@ public class AssignmentsStorageService(
 
     public async Task CreateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
+        AssertProfileIdIsValid(profileId);
+
         var userTypes = !string.IsNullOrEmpty(entityId) ? _writeLocalTypes : _writeGlobalTypes;
 
-        var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
+        var folder = await AssertUserHasAccessToFolderAsync(userTypes, entityId);
 
-        if (!await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
+        if (!await storage.CreateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, folder?.Id))
         {
             throw new InvalidOperationException($"Assignment for action type '{actionType.ToStringFast()}' already exists");
         }
+
+        await SendAssignedAsync(actionType, profileId, folder);
     }
 
     public async Task<Guid?> ReadByTypeAsync(ActionType actionType, string? entityId = null)
@@ -80,36 +86,111 @@ public class AssignmentsStorageService(
 
     public async Task UpdateAsync(ActionType actionType, Guid profileId, string? entityId = null)
     {
+        AssertProfileIdIsValid(profileId);
+
         var userTypes = !string.IsNullOrEmpty(entityId) ? _writeLocalTypes : _writeGlobalTypes;
 
-        var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
+        var folder = await AssertUserHasAccessToFolderAsync(userTypes, entityId);
 
-        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, entryId))
+        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), actionType, profileId, folder?.Id))
         {
             throw new ItemNotFoundException($"Assignment for action type '{actionType.ToStringFast()}' was not found");
         }
+
+        await SendAssignedAsync(actionType, profileId, folder);
     }
 
     public async Task UpsertManyAsync(IReadOnlyDictionary<ActionType, Guid> assignments, string? entityId = null)
     {
+        foreach (var profileId in assignments.Values)
+        {
+            AssertProfileIdIsValid(profileId);
+        }
+
         var userTypes = !string.IsNullOrEmpty(entityId) ? _writeLocalTypes : _writeGlobalTypes;
 
-        var entryId = await AssertUserHasAccessAsync(userTypes, entityId);
+        var folder = await AssertUserHasAccessToFolderAsync(userTypes, entityId);
 
-        await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments, entryId);
+        await storage.UpsertManyAsync(tenantManager.GetCurrentTenantId(), assignments, folder?.Id);
+
+        foreach (var (actionType, profileId) in assignments)
+        {
+            await SendAssignedAsync(actionType, profileId, folder);
+        }
     }
 
-    public async Task DeleteAsync(ActionType actionType)
+    public async Task UnassignAsync(ActionType actionType)
     {
         await AssertUserHasAccessAsync(_writeGlobalTypes);
 
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), actionType);
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var stored = await storage.ReadByTypeAsync(tenantId, actionType);
+
+        if (AssignmentsResolver.HasDefault(actionType))
+        {
+            await storage.UnassignAsync(tenantId, actionType);
+        }
+        else
+        {
+            await storage.DeleteAsync(tenantId, actionType);
+        }
+
+        if (UnassignChangesState(actionType, stored))
+        {
+            messageService.Send(MessageAction.AiProfileUnassigned, actionType.ToStringFast());
+        }
     }
 
-    public async Task DeleteManyAsync(IReadOnlyCollection<ActionType> actionTypes)
+    public async Task UnassignManyAsync(IReadOnlyCollection<ActionType> actionTypes)
     {
         await AssertUserHasAccessAsync(_writeGlobalTypes);
 
-        await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), actionTypes);
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var storedAll = await storage.ReadAllAsync(tenantId);
+
+        var withDefaults = actionTypes.Where(AssignmentsResolver.HasDefault).ToArray();
+        var withoutDefaults = actionTypes.Where(x => !AssignmentsResolver.HasDefault(x)).ToArray();
+
+        await storage.UnassignManyAsync(tenantId, withDefaults);
+        await storage.DeleteManyAsync(tenantId, withoutDefaults);
+
+        foreach (var actionType in actionTypes)
+        {
+            var stored = storedAll.TryGetValue(actionType, out var profileId) ? profileId : (Guid?)null;
+
+            if (UnassignChangesState(actionType, stored))
+            {
+                messageService.Send(MessageAction.AiProfileUnassigned, actionType.ToStringFast());
+            }
+        }
+    }
+
+    private async Task SendAssignedAsync(ActionType actionType, Guid profileId, Folder<int>? folder)
+    {
+        if (folder is null)
+        {
+            messageService.Send(MessageAction.AiProfileAssigned, MessageTarget.Create(profileId), actionType.ToStringFast());
+        }
+        else
+        {
+            await filesMessageService.SendAsync(MessageAction.AiAgentProfileAssigned, folder, actionType.ToStringFast());
+        }
+    }
+
+    private static bool UnassignChangesState(ActionType actionType, Guid? stored)
+    {
+        return AssignmentsResolver.HasDefault(actionType)
+            ? stored != AssignmentsStorage.UnassignedProfileId
+            : stored is not null && stored.Value != AssignmentsStorage.UnassignedProfileId;
+    }
+
+    private static void AssertProfileIdIsValid(Guid profileId)
+    {
+        if (profileId == AssignmentsStorage.UnassignedProfileId)
+        {
+            throw new ArgumentException(@"profileId must not be empty", nameof(profileId));
+        }
     }
 }

@@ -40,6 +40,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -78,6 +80,24 @@ public class SecurityConfiguration {
   }
 
   /**
+   * Configures a dedicated security filter chain for actuator health endpoints.
+   *
+   * @param http the HttpSecurity object for configuring security
+   * @return the SecurityFilterChain object representing the configured security filter chain
+   * @throws Exception if an error occurs during configuration
+   */
+  @Order(1)
+  @Bean("registrationHealthProbeSecurityFilterChain")
+  SecurityFilterChain registrationHealthProbeSecurityFilterChain(HttpSecurity http)
+      throws Exception {
+    return http.securityMatcher("/health", "/health/**")
+        .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
+        .csrf(AbstractHttpConfigurer::disable)
+        .cors(AbstractHttpConfigurer::disable)
+        .build();
+  }
+
+  /**
    * Configures the security filter chain for HTTP requests.
    *
    * @param http the HttpSecurity object for configuring security
@@ -96,8 +116,7 @@ public class SecurityConfiguration {
                         .requestMatchers(
                             String.format("%s/oauth2/clients/*/public/info", webApi),
                             String.format("%s/clients/*/public/info", webApi),
-                            "/docs**",
-                            "/health/**")
+                            "/docs**")
                         .permitAll()
                         .anyRequest()
                         .authenticated())
@@ -120,5 +139,32 @@ public class SecurityConfiguration {
    */
   private RequestMatcher checkManagementPort() {
     return (HttpServletRequest request) -> request.getLocalPort() != serverPort;
+  }
+
+  /**
+   * Both filters are {@code @Component}s, so Spring Boot auto-registers them as raw servlet filters
+   * on {@code /*} in addition to their explicit wiring into {@link HttpSecurity} above. That
+   * auto-registration bypasses {@code securityMatcher} scoping entirely, so a request to a path
+   * excluded from a chain (like the health endpoints) still runs through them. Disabling the
+   * auto-registration keeps each filter active only where it's explicitly added via {@code
+   * addFilterAt}/{@code addFilterAfter}.
+   */
+  @Bean("registrationDisableBasicSignatureAuthFilterAutoRegistration")
+  FilterRegistrationBean<BasicSignatureAuthenticationFilter>
+      disableBasicSignatureAuthFilterAutoRegistration(
+          @Qualifier("registrationBasicSignatureAuthenticationFilter")
+              BasicSignatureAuthenticationFilter filter) {
+    var registration = new FilterRegistrationBean<>(filter);
+    registration.setEnabled(false);
+    return registration;
+  }
+
+  @Bean("registrationDisableRateLimiterFilterAutoRegistration")
+  @ConditionalOnProperty(prefix = "bucket4j", name = "enabled", havingValue = "true")
+  FilterRegistrationBean<RateLimiterFilter> disableRateLimiterFilterAutoRegistration(
+      @Qualifier("registrationRateLimiterFilter") RateLimiterFilter filter) {
+    var registration = new FilterRegistrationBean<>(filter);
+    registration.setEnabled(false);
+    return registration;
   }
 }

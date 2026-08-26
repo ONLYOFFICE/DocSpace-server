@@ -211,7 +211,7 @@
     <value>Se ha superado la cuota de espacio del agente de IA</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Error al establecer la cuota por agente de IA. El valor introducido es mayor que el almacenamiento total de DocSpace.</value>
+    <value>Error al establecer la cuota por agente de IA. El valor introducido es mayor que el almacenamiento total.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Renovación automática</value>
@@ -808,7 +808,7 @@
     <value>Nombre o apellido incorrecto</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>Il limite degli inviti è stato superato</value>
+    <value>Se ha superado el límite de invitaciones</value>
   </data>
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Añada al menos 1 dirección IP permitida.</value>
@@ -820,7 +820,7 @@
     <value>Su plan de precios no admite esta opción</value>
   </data>
   <data name="ErrorNotCorrectEmail" xml:space="preserve">
-    <value>E-mail inválido</value>
+    <value>Correo electrónico incorrecto</value>
   </data>
   <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
     <value>Nombre de dominio inválido</value>
@@ -868,7 +868,7 @@
     <value>Añada al menos 1 dominio de confianza.</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Utente disabilitato</value>
+    <value>Usuario deshabilitado</value>
   </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
     <value>Usuario no ha sido encontrado</value>
@@ -1087,7 +1087,7 @@
     <value>Las instrucciones para cambiar el correo electrónico se han enviado con éxito</value>
   </data>
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>Le istruzioni per la modifica della password sono state inviate all'indirizzo email {0}.</value>
+    <value>Las instrucciones para cambiar la contraseña se han enviado a la dirección de correo electrónico {0}.</value>
   </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Si existe un usuario con el correo electrónico {0}, la instrucción para cambiar la contraseña se ha enviado a esta dirección de correo electrónico.</value>
@@ -1120,7 +1120,7 @@
     <value>Se ha superado la cuota de espacio de la sala</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Error al establecer la cuota por sala. El valor introducido es mayor que el almacenamiento total de DocSpace.</value>
+    <value>Error al establecer la cuota por sala. El valor introducido es mayor que el almacenamiento total.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asia Pacífico (Singapur)</value>
@@ -1240,7 +1240,7 @@
     <value>Ajuste el almacenamiento a la cantidad exacta que necesite.</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Amministratori aggiunti:</value>
+    <value>Administradores añadidos:</value>
   </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Salas:</value>
@@ -1285,7 +1285,7 @@
     <value>Se ha producido un error inesperado. Por favor, inténtelo de nuevo.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Ha conectado correctamente Telegram para recibir notificaciones de su DocSpace.</value>
+    <value>Ha conectado correctamente Telegram para recibir notificaciones de su espacio de trabajo.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Código incorrecto</value>
@@ -1300,7 +1300,7 @@
     <value>Se ha superado la cuota de espacio de usuario</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Error al establecer la cuota por usuario. El valor introducido es mayor que el almacenamiento total de DocSpace.</value>
+    <value>Error al establecer la cuota por usuario. El valor introducido es mayor que el almacenamiento total.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Región EE.UU. Oeste (Oregón)</value>
@@ -1321,7 +1321,7 @@
     <value>Búsqueda web</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Búsqueda web</value>
+    <value>Búsqueda con IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Créditos de IA</value>

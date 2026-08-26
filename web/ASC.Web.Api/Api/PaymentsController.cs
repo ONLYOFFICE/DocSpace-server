@@ -44,10 +44,8 @@ namespace ASC.Web.Api.Controllers;
 ///</remarks>
 ///<name>portal</name>
 [Scope]
-[DefaultRoute("payment")]
-[ApiController]
+[ApiEndpoint("portal", "payment")]
 [AllowNotPayment]
-[ControllerName("portal")]
 public class PaymentController(
     CoreSettings coreSettings,
     UserManager userManager,
@@ -896,7 +894,8 @@ public class PaymentController(
         var filter = new MonthlyUsageFilter
         {
             UtcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime),
-            UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow)
+            UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow),
+            TimeZome = tenant.TimeZone ?? "UTC"
         };
 
         var usage = await tariffService.GetCustomerMonthlyUsageAsync(tenant.Id, filter);

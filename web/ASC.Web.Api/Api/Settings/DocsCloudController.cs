@@ -37,7 +37,7 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("docscloud")]
+[ApiEndpoint(Template = "docscloud")]
 public class DocsCloudController(
     PermissionContext permissionContext,
     TenantManager tenantManager,
@@ -173,21 +173,6 @@ public class DocsCloudController(
     }
 
     /// <remarks>
-    /// Checks whether the DocsCloud server is reachable.
-    /// </remarks>
-    /// <summary>Check the DocsCloud server health</summary>
-    /// <path>api/2.0/settings/docscloud/healthcheck</path>
-    [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "DocsCloud server is reachable")]
-    [HttpGet("healthcheck")]
-    public async Task CheckHealth()
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        await docsCloudClient.CheckHealthAsync();
-    }
-
-    /// <remarks>
     /// Returns the DocsCloud tenant of the current portal.
     /// </remarks>
     /// <summary>Get the DocsCloud tenant</summary>
@@ -209,6 +194,7 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/info</path>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant information", typeof(DocsCloudTenantInfo))]
+    [SwaggerResponse(400, "The DocsCloud tenant is not activated")]
     [HttpGet("tenant/info")]
     public async Task<DocsCloudTenantInfo> GetTenantInfo(bool refresh = false)
     {
@@ -243,6 +229,7 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/config</path>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant configuration", typeof(DocsCloudConfig))]
+    [SwaggerResponse(400, "The DocsCloud tenant is not activated")]
     [HttpGet("tenant/config")]
     public async Task<DocsCloudConfig> GetTenantConfig(bool refresh = false)
     {
@@ -258,6 +245,7 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/config</path>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "Updated DocsCloud tenant configuration", typeof(DocsCloudConfig))]
+    [SwaggerResponse(400, "Invalid request parameters, or the DocsCloud tenant is not activated")]
     [HttpPut("tenant/config")]
     public async Task<DocsCloudConfig> UpdateTenantConfig(DocsCloudConfig inDto)
     {
@@ -273,6 +261,7 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/quota</path>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud user quota", typeof(DocsCloudQuota))]
+    [SwaggerResponse(400, "The DocsCloud tenant is not activated")]
     [HttpGet("tenant/quota")]
     public async Task<DocsCloudQuota> GetTenantQuota(bool refresh = false)
     {
@@ -369,6 +358,7 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/usage</path>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant usage statistics", typeof(DocsCloudUsage))]
+    [SwaggerResponse(400, "The DocsCloud tenant is not activated")]
     [HttpGet("tenant/usage")]
     public async Task<DocsCloudUsage> GetTenantUsage(bool refresh = false)
     {

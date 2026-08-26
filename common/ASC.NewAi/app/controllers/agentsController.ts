@@ -30,13 +30,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ActionType } from "@onlyoffice/ai-chat/core";
+import { ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
 import type { QueryValue } from "../storage/httpClient.js";
 import { asyncHandler } from "./_helpers.js";
 import { isObject, getString, getNumber, getObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
+import { sanitizeInstruction } from "../sanitizeInstruction.js";
 
 // The agent's profile is stored as an assignment scoped to the agent's
 // entry id. `Chat` is the action an agent room serves; fall back to
@@ -66,6 +67,25 @@ function rethrowAssignmentError(err: unknown, profileId: string): never {
     });
   }
   throw err;
+}
+
+// Validate the profile BEFORE touching the agent room. Without this a
+// well-formed but unknown profileId creates a full agent room with no model
+// binding (Bug 82922) or applies the room update and then wipes the binding
+// (Bug 82925), and an image-only profile binds fine but yields
+// model_not_found on every chat request (Bug 82926 / 82927). Profiles with
+// no capabilities bitmask (legacy rows) are allowed — chat is their default.
+async function assertUsableChatProfile(profileId: string): Promise<void> {
+  const profile = await storage.profiles.readById(profileId);
+  if (!profile) {
+    badRequest(`AI profile "${profileId}" does not exist`);
+  }
+  if (
+    typeof profile.capabilities === "number" &&
+    (profile.capabilities & CapabilitiesUI.Chat) === 0
+  ) {
+    badRequest(`AI profile "${profileId}" does not support chat`);
+  }
 }
 
 // Agent ids are int folder ids on the .NET side (`RoomIdRequestDto<int>`).
@@ -119,6 +139,8 @@ export const agentsController = {
       badRequest("prompt is required and must be a string");
     }
 
+    await assertUsableChatProfile(profileId);
+
     const { profileId: _profileId, prompt: _prompt, ...rest } = body;
     // The agent's model comes from the assigned profile, so only the prompt
     // is stored on the room via a prompt-only `chatSettings` (accepted by
@@ -128,7 +150,7 @@ export const agentsController = {
     // agent id is read out of `response` for the assignment.
     const envelope = await aiService.post(
       "/agents",
-      { ...rest, chatSettings: { prompt } },
+      { ...rest, chatSettings: { prompt: sanitizeInstruction(prompt) } },
       { raw: true },
     );
     const created = isObject(envelope) ? getObject(envelope, "response") : undefined;
@@ -204,20 +226,35 @@ export const agentsController = {
     if (profileId !== undefined && !UUID_PATTERN.test(profileId)) {
       badRequest("profileId must be a UUID");
     }
+    if (profileId !== undefined) {
+      await assertUsableChatProfile(profileId);
+    }
     const { profileId: _profileId, ...rest } = body;
+
+    // The instruction (chatSettings.prompt) is untrusted: strip markup before
+    // forwarding so stored HTML can't round-trip into another user's reply
+    // (Bug 82726). Mirrors createAgent and the read-side in safeGetAgentInstruction.
+    const chatSettings = getObject(rest, "chatSettings");
+    if (chatSettings) {
+      const prompt = getString(chatSettings, "prompt");
+      if (prompt !== undefined) {
+        chatSettings["prompt"] = sanitizeInstruction(prompt);
+      }
+    }
 
     const agent = await aiService.put(`/agents/${id}`, rest, { raw: true });
 
     if (profileId !== undefined) {
-      const existing = await storage.assignments
-        .readByType(AGENT_ACTION_TYPE, id)
-        .catch(() => null);
+      // Re-bind through the upsert endpoint: a read-then-create/update dance
+      // breaks when the agent's current profile is disabled or deleted — the
+      // resolver-backed read hides the existing row, the create then hits
+      // "assignment already exists" and surfaces as a 403 (Bug 83355). The
+      // upsert has no existence failure mode.
       try {
-        if (existing) {
-          await storage.assignments.update(AGENT_ACTION_TYPE, profileId, id);
-        } else {
-          await storage.assignments.create(AGENT_ACTION_TYPE, profileId, id);
-        }
+        await storage.assignments.upsertMany(
+          { [AGENT_ACTION_TYPE]: profileId },
+          id,
+        );
       } catch (err) {
         rethrowAssignmentError(err, profileId);
       }

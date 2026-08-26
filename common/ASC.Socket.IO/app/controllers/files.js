@@ -269,6 +269,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-ai-access-settings", (req, res) => {
+    files.changeAiAccessSettings(req.body);
+    res.end();
+  });
+
   router.post("/change-external-sharing-settings", (req, res) => {
     files.changeExternalSharingSettings(req.body);
     res.end();

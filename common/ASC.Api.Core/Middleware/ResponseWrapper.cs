@@ -91,6 +91,15 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             case AccountingPaymentRequiredException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
+            // Asking for the configuration, quota or usage of a DocsCloud tenant the portal never activated is a
+            // client error, not a server fault: the caller is told what is missing, without a stack trace.
+            // The other DocsCloud failures (service not configured, authorization rejected) are ours to fix,
+            // so they stay 500 and keep being logged as critical.
+            case DocsCloudNotFoundException e:
+                status = HttpStatusCode.BadRequest;
+                message = e.Message;
+                withStackTrace = false;
+                break;
             case CustomHttpException httpException:
                 status = (HttpStatusCode)httpException.StatusCode;
                 withStackTrace = false;

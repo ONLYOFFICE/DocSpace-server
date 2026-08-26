@@ -1041,11 +1041,16 @@ public class FileSharing(
         return await securityDao.GetGroupMembersWithSecurityCountAsync(entry, groupId, text);
     }
 
+    /// <summary>
+    /// Tells whether the current user may list the shares of <paramref name="entry"/> for the given
+    /// filter. Not being able to read the entry at all is an access violation and throws, while a
+    /// reader who simply may not see the links gets an empty list.
+    /// </summary>
     private async Task<bool> CheckAccessAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
     {
         if (!await fileSecurity.CanReadAsync(entry))
         {
-            return false;
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         switch (filterType)

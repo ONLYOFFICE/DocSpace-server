@@ -33,7 +33,6 @@
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Core;
-global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Utils;
 
@@ -109,6 +108,7 @@ global using Microsoft.Extensions.AI;
 
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
+global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Text;
 global using System.Text.Json;

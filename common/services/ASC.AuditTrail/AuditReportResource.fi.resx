@@ -349,7 +349,7 @@
     <value>Asiakirjat [{0}]. Asiakirja kopioitu kansiosta "{1}" kansioon "{2}"</value>
   </data>
   <data name="FileCopiedWithOverwriting" xml:space="preserve">
-    <value>Asiakirjat [{0}]. Asiakirja kopioitu kansiosta "{1}" kansioon "{2}"</value>
+    <value>Asiakirjat [{0}]. Asiakirja kopioitu korvaten kansiosta "{1}" kansioon "{2}"</value>
   </data>
   <data name="FileCreated" xml:space="preserve">
     <value>Asiakirjat. Luotu: {0}</value>
@@ -397,13 +397,13 @@
     <value>Tiedosto merkitty Suosikiksi: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
-    <value>Asiakirjat [{0}]. Siiretty kansiosta "{1}" kansioon "{2}"</value>
+    <value>Asiakirjat [{0}]. Siirretty kansiosta "{1}" kansioon "{2}"</value>
   </data>
   <data name="FileMovedToTrash" xml:space="preserve">
     <value>Asiakirjat [{0}]. Siirretty roskakoriin</value>
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
-    <value>Asiakirjat [{0}]. Siiretty kansiosta "{1}" kansioon "{2}"</value>
+    <value>Asiakirjat [{0}]. Siirretty korvaten kansiosta "{1}" kansioon "{2}"</value>
   </data>
   <data name="FileOpenedForChange" xml:space="preserve">
     <value>Kansio avattu muutosta varten: {0}</value>
@@ -493,7 +493,7 @@
     <value>Kansiot [{0}]. Siiretty kansioon: {1}</value>
   </data>
   <data name="FolderMovedToTrash" xml:space="preserve">
-    <value>Kansiot [{0}]. Siiretty roskakoriin</value>
+    <value>Kansiot [{0}]. Siirretty roskakoriin</value>
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Kansiot [{0}]. Siiretty (ylikirjoitus) kansioon: {1}</value>
@@ -910,7 +910,7 @@
     <value>Lähetä</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Käyttäjä {0} lähetti {1}:lle liittymiskutsun tähän DocSpaceen</value>
+    <value>Käyttäjä {0} lähetti kutsun {1}:lle</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Kutsun ohjeistus lähetetty: {0}</value>

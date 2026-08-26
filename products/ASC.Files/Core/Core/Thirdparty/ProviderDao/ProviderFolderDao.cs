@@ -803,8 +803,81 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
+    public async IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
     {
-        throw new NotImplementedException();
+        if (CheckInvalidFilter(filterType) || location == Location.Link)
+        {
+            yield break;
+        }
+
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var taggedIds = await GetTaggedThirdPartyIdsAsync(filesDbContext, tagOwner, tagType, FileEntryType.Folder);
+        if (taggedIds.Count == 0)
+        {
+            yield break;
+        }
+
+        var providers = await providerDao.GetProvidersInfoAsync().ToDictionaryAsync(r => r.ProviderId);
+        var folders = new List<Folder<string>>();
+
+        await foreach (var folder in GetFoldersAsync(taggedIds.Keys, filterType: filterType, subjectGroup: subjectGroup, subjectID: excludeSubject ? Guid.Empty : subjectId,
+                           searchText: searchText, excludeSubject: excludeSubject))
+        {
+            if (!string.IsNullOrEmpty(folder.Error) || !CheckTagEntryLocation(folder, providers, location, folderType))
+            {
+                continue;
+            }
+
+            if (excludeSubject && subjectId != Guid.Empty && folder.CreateBy == subjectId)
+            {
+                continue;
+            }
+
+            if (providers.TryGetValue(folder.ProviderId, out var provider) && !string.IsNullOrEmpty(provider.FolderId))
+            {
+                folder.OriginRoomId = provider.FolderId;
+                folder.OriginRoomTitle = provider.CustomerTitle;
+            }
+
+            folders.Add(folder);
+        }
+
+        foreach (var folder in SortFolders(folders, orderBy).Skip(Math.Max(offset, 0)).Take(count > 0 ? count : folders.Count))
+        {
+            yield return folder;
+        }
+    }
+
+    private static bool CheckInvalidFilter(FilterType filterType)
+    {
+        return filterType is
+            FilterType.FilesOnly or
+            FilterType.ByExtension or
+            FilterType.DocumentsOnly or
+            FilterType.ImagesOnly or
+            FilterType.PresentationsOnly or
+            FilterType.SpreadsheetsOnly or
+            FilterType.ArchiveOnly or
+            FilterType.MediaOnly or
+            FilterType.DiagramsOnly or
+            FilterType.Pdf or
+            FilterType.PdfForm;
+    }
+
+    private static IEnumerable<Folder<string>> SortFolders(List<Folder<string>> folders, OrderBy orderBy)
+    {
+        if (orderBy == null)
+        {
+            return folders.OrderBy(r => r.Title);
+        }
+
+        return orderBy.SortedBy switch
+        {
+            SortedByType.Author => orderBy.IsAsc ? folders.OrderBy(r => r.CreateBy) : folders.OrderByDescending(r => r.CreateBy),
+            SortedByType.DateAndTime => orderBy.IsAsc ? folders.OrderBy(r => r.ModifiedOn) : folders.OrderByDescending(r => r.ModifiedOn),
+            SortedByType.DateAndTimeCreation => orderBy.IsAsc ? folders.OrderBy(r => r.CreateOn) : folders.OrderByDescending(r => r.CreateOn),
+            _ => folders.OrderBy(r => r.Title)
+        };
     }
 }

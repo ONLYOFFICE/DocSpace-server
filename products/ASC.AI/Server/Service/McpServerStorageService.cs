@@ -43,19 +43,23 @@ public class McpServerStorageService(
     McpServersStorage storage,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
+    AiGateway gateway,
+    MessageService messageService,
+    FilesMessageService filesMessageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async Task CreateAsync(string name, string config, string? entityId = null)
     {
-        var entryId = await AssertUserHasAccessAsync(_writeTypes, entityId);
+        var folder = await AssertUserHasAccessToFolderAsync(_writeTypes, entityId);
 
-        if (!await storage.CreateAsync(tenantManager.GetCurrentTenantId(), name, config, entryId))
+        if (!await storage.CreateAsync(tenantManager.GetCurrentTenantId(), name, config, folder?.Id))
         {
             throw new InvalidOperationException($"MCP server with name '{name}' already exists");
         }
+
+        await SendCreatedAsync(name, folder);
     }
 
     public async Task<McpServer> ReadByNameAsync(string name, string? entityId = null)
@@ -75,25 +79,93 @@ public class McpServerStorageService(
 
     public async Task UpdateAsync(string name, string config, string? entityId = null)
     {
-        var entryId = await AssertUserHasAccessAsync(_writeTypes, entityId);
+        var folder = await AssertUserHasAccessToFolderAsync(_writeTypes, entityId);
 
-        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), name, config, entryId))
+        if (!await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), name, config, folder?.Id))
         {
             throw new ItemNotFoundException($"MCP server with name '{name}' was not found");
         }
+
+        await SendUpdatedAsync(name, folder);
     }
 
     public async Task ReplaceAllAsync(IReadOnlyDictionary<string, string> servers, string? entityId = null)
     {
-        var entryId = await AssertUserHasAccessAsync(_writeTypes, entityId);
+        var folder = await AssertUserHasAccessToFolderAsync(_writeTypes, entityId);
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        await storage.ReplaceAllAsync(tenantManager.GetCurrentTenantId(), servers, entryId);
+        var existing = await storage.ReadAllAsync(tenantId, folder?.Id);
+
+        await storage.ReplaceAllAsync(tenantId, servers, folder?.Id);
+
+        var existingConfigs = existing.ToDictionary(s => s.Name, s => s.Config);
+
+        foreach (var (name, config) in servers)
+        {
+            if (!existingConfigs.TryGetValue(name, out var oldConfig))
+            {
+                await SendCreatedAsync(name, folder);
+            }
+            else if (oldConfig != config)
+            {
+                await SendUpdatedAsync(name, folder);
+            }
+        }
+
+        foreach (var name in existingConfigs.Keys.Where(n => !servers.ContainsKey(n)))
+        {
+            await SendDeletedAsync(name, folder);
+        }
     }
 
     public async Task DeleteAsync(string name, string? entityId = null)
     {
-        var entryId = await AssertUserHasAccessAsync(_writeTypes, entityId);
+        var folder = await AssertUserHasAccessToFolderAsync(_writeTypes, entityId);
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), name, entryId);
+        var existing = await storage.ReadByNameAsync(tenantId, name, folder?.Id);
+
+        await storage.DeleteAsync(tenantId, name, folder?.Id);
+
+        if (existing is not null)
+        {
+            await SendDeletedAsync(name, folder);
+        }
+    }
+
+    private async Task SendCreatedAsync(string name, Folder<int>? folder)
+    {
+        if (folder is null)
+        {
+            messageService.Send(MessageAction.ServerCreated, MessageTarget.Create(name), name);
+        }
+        else
+        {
+            await filesMessageService.SendAsync(MessageAction.AddedServerToAgent, folder, name);
+        }
+    }
+
+    private async Task SendUpdatedAsync(string name, Folder<int>? folder)
+    {
+        if (folder is null)
+        {
+            messageService.Send(MessageAction.ServerUpdated, MessageTarget.Create(name), name);
+        }
+        else
+        {
+            await filesMessageService.SendAsync(MessageAction.UpdatedServerOfAgent, folder, name);
+        }
+    }
+
+    private async Task SendDeletedAsync(string name, Folder<int>? folder)
+    {
+        if (folder is null)
+        {
+            messageService.Send(MessageAction.ServerDeleted, MessageTarget.Create(name), name);
+        }
+        else
+        {
+            await filesMessageService.SendAsync(MessageAction.DeletedServerFromAgent, folder, name);
+        }
     }
 }

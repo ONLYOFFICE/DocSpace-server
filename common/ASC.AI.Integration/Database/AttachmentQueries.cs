@@ -36,64 +36,92 @@ namespace ASC.AI.Integration.Database;
 public partial class AiIntegrationContext
 {
     [PreCompileQuery]
-    public Task<DbAttachment?> GetAttachmentAsync(int tenantId, Guid id)
+    public Task<DbAttachment?> GetAttachmentAsync(int tenantId, Guid createdBy, Guid id)
     {
-        return AttachmentQueriesContainer.GetAttachmentAsync(this, tenantId, id);
+        return AttachmentQueriesContainer.GetAttachmentAsync(this, tenantId, createdBy, id);
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbAttachment> GetAttachmentsByIdsAsync(int tenantId, IEnumerable<Guid> ids)
+    public IAsyncEnumerable<DbAttachment> GetAttachmentsByIdsAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids)
     {
-        return AttachmentQueriesContainer.GetAttachmentsByIdsAsync(this, tenantId, ids);
+        return AttachmentQueriesContainer.GetAttachmentsByIdsAsync(this, tenantId, createdBy, ids);
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateAttachmentBindingsByIdsAsync(int tenantId, IEnumerable<Guid> ids, Guid messageId)
+    public Task<int> UpdateAttachmentBindingsByIdsAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId)
     {
-        return AttachmentQueriesContainer.UpdateAttachmentBindingsByIdsAsync(this, tenantId, ids, messageId);
+        return AttachmentQueriesContainer.UpdateAttachmentBindingsByIdsAsync(this, tenantId, createdBy, ids, messageId);
     }
 
     [PreCompileQuery]
-    public Task<int> DeleteAttachmentAsync(int tenantId, Guid id)
+    public Task<int> DeleteAttachmentAsync(int tenantId, Guid createdBy, Guid id)
     {
-        return AttachmentQueriesContainer.DeleteAttachmentAsync(this, tenantId, id);
+        return AttachmentQueriesContainer.DeleteAttachmentAsync(this, tenantId, createdBy, id);
     }
 
     [PreCompileQuery]
-    public Task<int> DeleteAttachmentsByIdsAsync(int tenantId, IEnumerable<Guid> ids)
+    public Task<int> DeleteAttachmentsByIdsAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids)
     {
-        return AttachmentQueriesContainer.DeleteAttachmentsByIdsAsync(this, tenantId, ids);
+        return AttachmentQueriesContainer.DeleteAttachmentsByIdsAsync(this, tenantId, createdBy, ids);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<OrphanAttachment> GetOrphanAttachmentsAsync(DateTime cutoffDate, int take)
+    {
+        return AttachmentQueriesContainer.GetOrphanAttachmentsAsync(this, cutoffDate, take);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteAttachmentsAsync(int tenantId, IEnumerable<Guid> ids)
+    {
+        return AttachmentQueriesContainer.DeleteAttachmentsAsync(this, tenantId, ids);
     }
 }
 
 static file class AttachmentQueriesContainer
 {
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<DbAttachment?>> GetAttachmentAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, Guid, Task<DbAttachment?>> GetAttachmentAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid id) =>
-                ctx.Attachments.FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, Guid id) =>
+                ctx.Attachments.FirstOrDefault(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Id == id));
 
-    public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbAttachment>> GetAttachmentsByIdsAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, IAsyncEnumerable<DbAttachment>> GetAttachmentsByIdsAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids) =>
                 ctx.Attachments
-                    .Where(x => x.TenantId == tenantId && ids.Contains(x.Id)));
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id)));
 
-    public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, Guid, Task<int>> UpdateAttachmentBindingsByIdsAsync =
-        (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids, Guid messageId) =>
+    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, Guid, Task<int>> UpdateAttachmentBindingsByIdsAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId) =>
             ctx.Attachments
-                .Where(x => x.TenantId == tenantId && ids.Contains(x.Id))
+                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id))
                 .ExecuteUpdateAsync(x => x
                     .SetProperty(y => y.MessageId, messageId));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteAttachmentAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, Guid, Task<int>> DeleteAttachmentAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid id) =>
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, Guid id) =>
                 ctx.Attachments
-                    .Where(x => x.TenantId == tenantId && x.Id == id)
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Id == id)
                     .ExecuteDelete());
 
-    public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, Task<int>> DeleteAttachmentsByIdsAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, Task<int>> DeleteAttachmentsByIdsAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids) =>
+                ctx.Attachments
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id))
+                    .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, DateTime, int, IAsyncEnumerable<OrphanAttachment>> GetOrphanAttachmentsAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, DateTime cutoffDate, int take) =>
+                ctx.Attachments
+                    .Where(x => x.MessageId == null && x.CreatedAt <= cutoffDate)
+                    .OrderBy(x => x.CreatedAt)
+                    .Take(take)
+                    .Select(x => new OrphanAttachment { TenantId = x.TenantId, Id = x.Id }));
+
+    public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, Task<int>> DeleteAttachmentsAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids) =>
                 ctx.Attachments

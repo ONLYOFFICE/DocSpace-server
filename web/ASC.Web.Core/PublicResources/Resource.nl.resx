@@ -211,7 +211,7 @@
     <value>De ruimtequota voor AI-agenten is overschreden</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Fout bij het instellen van quota per AI-agent. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+    <value>Fout bij het instellen van quota per AI-agent. De ingevoerde waarde is groter dan de totale opslag.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatische verlenging</value>
@@ -1078,10 +1078,10 @@
     <value>Succesvol geüpload</value>
   </data>
   <data name="LicenseUploadedOverdue" xml:space="preserve">
-    <value>Succesvol geüpload. {0}Ondersteuning is sinds {2}.{1} niet beschikbaar voor deze licentie</value>
+    <value>Succesvol geüpload. {0}Ondersteuning en updates zijn voor deze licentie niet beschikbaar sinds {2}.{1}</value>
   </data>
   <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
-    <value>Succesvol geüpload. {0}Ondersteuning is sinds {2}.{1} niet beschikbaar voor deze licentie</value>
+    <value>Succesvol geüpload. {0}Ondersteuning is voor deze licentie niet beschikbaar sinds {2}.{1}</value>
   </data>
   <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
     <value>De e-mailwijzigingsinstructies zijn succesvol verzonden</value>
@@ -1120,7 +1120,7 @@
     <value>Kamer ruimte quota overschreden</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Fout bij het instellen van quota per kamer. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+    <value>Fout bij het instellen van quota per kamer. De ingevoerde waarde is groter dan de totale opslag.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asia Pacific (Singapore)</value>
@@ -1285,7 +1285,7 @@
     <value>Er is een onverwachte fout opgetreden. Probeer het opnieuw.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>U bent nu succesvol verbonden met Telegram om meldingen van uw DocSpace te ontvangen.</value>
+    <value>U bent nu succesvol verbonden met Telegram om meldingen van uw werkruimte te ontvangen.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Onjuiste code</value>
@@ -1300,7 +1300,7 @@
     <value>Gebruikersruimte quota overschreden</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Fout bij het instellen van quota per gebruiker. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+    <value>Fout bij het instellen van quota per gebruiker. De ingevoerde waarde is groter dan de totale opslag.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>VS West (Oregon) Regio</value>
@@ -1321,7 +1321,7 @@
     <value>Webzoekopdracht</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Webzoekopdracht</value>
+    <value>AI-zoeken</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI-credits</value>

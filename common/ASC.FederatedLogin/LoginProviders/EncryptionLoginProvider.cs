@@ -40,6 +40,13 @@ public class EncryptionLoginProvider(
     InstanceCrypto instanceCrypto,
     AccountLinker accountLinker)
 {
+    /// <summary>
+    /// The maximum length of the serialized profile, bound by the MySQL TEXT column it is stored in
+    /// (<c>account_links.profile</c>). MySQL truncates a longer value instead of failing, which
+    /// leaves an undecryptable blob behind and silently destroys the keys the user already had.
+    /// </summary>
+    private const int MaxProfileLength = 65535;
+
     public async Task SetKeysAsync(Guid userId, string keys)
     {
         if (string.IsNullOrEmpty(keys))
@@ -53,6 +60,11 @@ public class EncryptionLoginProvider(
             Provider = ProviderConstants.Encryption,
             Name = await instanceCrypto.EncryptAsync(keys)
         };
+
+        if (Encoding.UTF8.GetByteCount(loginProfile.ToString()) > MaxProfileLength)
+        {
+            throw new ArgumentException("The encryption keys are too large to be stored");
+        }
 
         await accountLinker.RemoveProviderAsync(userId);
         await accountLinker.AddLinkAsync(userId, loginProfile);

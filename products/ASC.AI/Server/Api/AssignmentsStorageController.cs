@@ -34,10 +34,8 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[InternalRoute]
-[ApiController]
+[ApiEndpoint("ai", Internal = true)]
 [AiFeature]
-[ControllerName("ai")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class AssignmentsStorageController(AssignmentsStorageService assignmentsStorageService) : ControllerBase
 {
@@ -76,7 +74,7 @@ public class AssignmentsStorageController(AssignmentsStorageService assignmentsS
     [HttpDelete("assignments/{actionType}")]
     public async Task<IActionResult> DeleteAsync(DeleteAssignmentRequestDto inDto)
     {
-        await assignmentsStorageService.DeleteAsync(ParseActionType(inDto.ActionType));
+        await assignmentsStorageService.UnassignAsync(ParseActionType(inDto.ActionType));
         return NoContent();
     }
 
@@ -84,7 +82,7 @@ public class AssignmentsStorageController(AssignmentsStorageService assignmentsS
     public async Task<IActionResult> DeleteManyAsync(DeleteAssignmentsRequestDto inDto)
     {
         var actionTypes = inDto.Body.ActionTypes.Select(ParseActionType).ToArray();
-        await assignmentsStorageService.DeleteManyAsync(actionTypes);
+        await assignmentsStorageService.UnassignManyAsync(actionTypes);
         return NoContent();
     }
 

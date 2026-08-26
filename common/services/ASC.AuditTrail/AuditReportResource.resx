@@ -162,6 +162,24 @@
   <data name="AIDefaultProviderSet" xml:space="preserve">
     <value>Default AI provider set: Name: {0}, Default Model: {1}</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI profile assigned to AI agent for action: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI profile assigned to action: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI model profile created: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI model profile deleted: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI profile unassigned from action: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI model profile updated: {0}</value>
+  </data>
   <data name="AIProviderCreated" xml:space="preserve">
     <value>AI provider created: {0}</value>
   </data>
@@ -750,6 +768,15 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal Renamed</value>
   </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Private room encryption key {0} created</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Private room encryption key {0} deleted</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Private room encryption key {0} updated</value>
+  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Products [{0}]. Access Opened</value>
   </data>
@@ -931,7 +958,7 @@
     <value>Send</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>User {0} sent an invitation to {1} to join this DocSpace</value>
+    <value>User {0} sent an invitation to {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Invite Instructions Sent: {0}</value>
@@ -1046,6 +1073,9 @@
   </data>
   <data name="UpdateClient" xml:space="preserve">
     <value>Client {0} updated</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Updated MCP server {0} of AI agent</value>
   </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Upload</value>

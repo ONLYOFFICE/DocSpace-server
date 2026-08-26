@@ -32,7 +32,7 @@ server/
 │   ├── ASC.Data.Backup* # Backup/restore
 │   ├── services/        # Background services (Notify, AuditTrail, etc.) + ASC.Monolith (all-in-one single-process host)
 │   ├── Tools/           # Dev tools: ASC.Migration.Runner (applies DB migrations), ASC.Migration.Creator, ASC.Api.Documentation, etc.
-│   └── Tests/           # Core test projects (only ASC.Core.Common.Tests is in ASC.Tests.slnx; the rest are legacy)
+│   └── Tests/           # ASC.Tests.Common (shared integration-test harness) + ASC.Core.Common.Tests; the other projects here are legacy
 ├── products/            # Feature modules
 │   ├── ASC.Files/       # File management (Server, Core, Worker, Tests)
 │   ├── ASC.People/      # User/team management (Server, Tests)
@@ -85,9 +85,11 @@ C# naming, style, and API conventions live in `.claude/rules/csharp-style.md` (l
 
 ## Testing
 
+Conventions for writing integration tests (per-test portal, roles, `ApiException` assertions, access-level matrices, class size vs parallelism): `.claude/rules/tests.md`.
+
 - **Framework**: xUnit v3 with `UseMicrosoftTestingPlatformRunner`
 - **Assertions**: FluentAssertions
-- **Infrastructure**: integration tests do NOT use Testcontainers — they boot the real Aspire AppHost via `Aspire.Hosting.Testing` (`DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>` with the `integration-test` launch profile), which provides MySQL/PostgreSQL/RabbitMQ/Redis/OpenSearch containers. Fixtures: `products/ASC.Files/Tests/ApiFactories/AspireAppFixture.cs`, `products/ASC.People/Tests/Factory/AspireAppFixture.cs`, `products/ASC.AI/ASC.AI.Tests/ApiFactories/AspireAppFixture.cs`
+- **Infrastructure**: integration tests do NOT use Testcontainers — they boot the real Aspire AppHost via `Aspire.Hosting.Testing` (`DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>` with the `integration-test` launch profile), which provides MySQL/PostgreSQL/RabbitMQ/Redis/OpenSearch containers. The harness is shared: `common/Tests/ASC.Tests.Common` holds `AspireHostFixture<TClients>`, `PortalClientsBase`, `Initializer` and `RawApiClient`; each suite only derives a thin `AspireAppFixture`/`PortalClients` pair in its own `ApiFactories/` folder
 - **Fake data**: Bogus
 - **DB cleanup**: Respawn
 - **Test locations**: `products/*/Tests/` and `common/Tests/ASC.Core.Common.Tests`. The other 5 projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`

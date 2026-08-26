@@ -42,9 +42,11 @@ import type {
   DenyToolCallInput,
 } from "@onlyoffice/ai-chat/core";
 import logger from "../log.js";
+import { agentAssignedProfileId } from "./agentProfile.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse } from "./_helpers.js";
+import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
   HttpToolsAdapter,
@@ -53,7 +55,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
-import { safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
+import { safeGetAgentEntity, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -78,10 +80,14 @@ function withRequestSignal<T>(res: Response, body: T): T {
   if (!isObject(body)) {
     return body;
   }
-  const actionArgs = body["actionArgs"];
-  if (!isObject(actionArgs)) {
-    return body;
-  }
+  // Always wire the abort signal, even when the request carries no
+  // `actionArgs`. The UI sends an `actionArgs` object (with a signal that
+  // collapses to `{}` over JSON), but a direct API client omits it entirely
+  // — and without the signal a client disconnect never reaches the provider,
+  // so generation runs to completion and keeps burning tokens after the user
+  // has stopped waiting. Create the object when missing so cancellation works
+  // for every caller.
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
   return {
     ...body,
     actionArgs: { ...actionArgs, signal: responseAbortSignal(res) },
@@ -89,10 +95,10 @@ function withRequestSignal<T>(res: Response, body: T): T {
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt
-// override. The fragment ships alongside the tool list from
-// `tools/list`; the engine's own `getTools` reuses the cached fetch, so
-// this adds no extra round-trip. An existing client override is kept and
-// the fragment appended to its text; otherwise an `append` override is set.
+// override. The fragment ships alongside the tool list from the .NET
+// `tools/list`; nothing along this path is cached (deliberate — see
+// SystemToolsSource), so the prompt fetch is its own round-trip next to
+// the engine's `getTools`.
 // Append `fragment` to the action's system-prompt override (the engine
 // folds it onto the baked-in default via `resolveSystemPrompt`). Keeps an
 // existing override's text and adds the fragment after a blank line;
@@ -141,18 +147,19 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
 }
 
 // Build the context fragment that tells the agent where it is operating and
-// how to scope tool calls. The workspace lines are emitted only when an
-// `entityId` (the agent/room scope) is present.
+// how to scope tool calls. The location lines are emitted only when an
+// `entityId` (the folder/room the chat is opened from) is present.
 function buildContextFragment(entityId: string | undefined): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
     "Context:",
-    "- You are an AI agent operating inside a workspace, not a generic standalone assistant.",
+    "- You are an AI agent operating inside a DocSpace workspace, not a generic standalone assistant.",
   ];
   if (entityId) {
     lines.push(
-      `- This conversation is scoped to a single agent workspace (id: ${entityId}). Any tool you call reads or modifies data within the current user's workspace, on their behalf and with their permissions — never assume access beyond that scope.`,
-      `- When a tool needs a workspace, folder, or scope identifier and the user did not specify one, use this workspace id (${entityId}) — e.g. scope searches and listings to it.`,
+      `- You are currently in the folder or room with id ${entityId} — this is the user's current location. Any tool you call reads or modifies data on the user's behalf and with their permissions — never assume access beyond that.`,
+      `- When a tool needs a folder, room, or scope identifier and the user did not specify one, use this folder/room id (${entityId}) — e.g. scope searches and listings to it.`,
+      `- To see what is in the current location (its files and subfolders), call the get_folder_content tool with this id (${entityId}); use get_folder_info for the location's own properties. Do this when the user refers to "this folder/room", "these files", or asks what is here.`,
     );
   }
   lines.push(
@@ -187,6 +194,29 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
   }
   const instruction = await safeGetAgentInstruction(contextScopeOf(body));
   return instruction ? appendActionPrompt(body, instruction) : body;
+}
+
+// Describe the host entity the round runs for — the agent whose chat this
+// is — in `actionArgs`. `@onlyoffice/ai-chat` (>= 0.5.50) turns the pair into
+// the ONLYOFFICE request's `metadata` object (`agent_id` / `agent_title`),
+// including on tool-call resume rounds, so the backend can attribute usage to
+// the agent. Server-resolved on purpose: the title comes from the Files API
+// under the caller's credentials, so a client cannot claim someone else's
+// agent. A plain chat (no agent room in scope) contributes nothing and the
+// field stays absent.
+async function withEntityMetadata<T>(body: T): Promise<T> {
+  if (!isObject(body)) {
+    return body;
+  }
+  const entity = await safeGetAgentEntity(contextScopeOf(body));
+  if (!entity.entityId) {
+    return body;
+  }
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
+  return {
+    ...body,
+    actionArgs: { ...actionArgs, ...entity },
+  } as T;
 }
 
 const toolsAdapter = new HttpToolsAdapter();
@@ -251,16 +281,52 @@ function describeToolCallPending(event: Record<string, unknown>): string {
   } autoAllow=${event["autoAllow"] === true}`;
 }
 
+// Describe an in-engine tool result for the log without dumping it: an image
+// result carries megabytes of base64, and the interesting part is never the
+// payload — it is whether the tool answered with data, with a persisted ref,
+// or with an error (an unconfigured image profile, a provider/gateway refusal
+// such as a 402 from the paid route). Those errors are returned by the engine
+// as an ordinary tool result and are otherwise invisible server-side: the
+// library logs them only to its own console logger.
+function describeToolResult(result: unknown): string {
+  const text = typeof result === "string" ? result : JSON.stringify(result);
+  if (text === undefined) {
+    return String(result);
+  }
+  try {
+    const parsed: unknown = JSON.parse(text);
+    if (isObject(parsed)) {
+      const data = isObject(parsed["data"]) ? parsed["data"] : null;
+      if (data && typeof data["base64"] === "string") {
+        return `{data.base64=${data["base64"].length}B} (not persisted — no ref)`;
+      }
+      if (data && typeof data["ref"] === "string") {
+        return `{data.ref=${data["ref"]}}`;
+      }
+      if (parsed["error"] !== undefined) {
+        return `ERROR ${JSON.stringify(parsed["error"]).slice(0, 700)}`;
+      }
+    }
+  } catch {
+    // Not JSON — fall through to the truncated raw form.
+  }
+  return `${text.slice(0, 500)}${text.length > 500 ? `… (${text.length}B)` : ""}`;
+}
+
 // Scan an event's streamed message for tool-call content parts and record
 // each tool's name against whether its `result` is populated yet. Adapter
 // tools (web search, image generation, DocSpace) execute inside the engine
 // and never surface a `tool-call-pending` to this tap — the only trace they
 // leave here is the tool-call part inside the assistant message, gaining a
 // `result` once the engine ran it. So `executed=true` in the completion
-// summary is the positive proof a tool actually fired and returned.
+// summary is the positive proof a tool actually fired and returned. Each
+// result is also described once (`logged`, keyed by tool-call id) so a tool
+// that answered with an error is visible in the log, not only in the browser.
 function trackToolCalls(
   event: unknown,
   seen: Map<string, boolean>,
+  logged: Set<string>,
+  route: string,
 ): void {
   if (!isObject(event)) {
     return;
@@ -275,6 +341,21 @@ function trackToolCalls(
     const hasResult = part["result"] !== undefined && part["result"] !== null;
     // Latch to true: a later delta without the result must not flip it back.
     seen.set(name, (seen.get(name) ?? false) || hasResult);
+    if (!hasResult) {
+      continue;
+    }
+    const callId = typeof part["toolCallId"] === "string" ? part["toolCallId"] : name;
+    if (logged.has(callId)) {
+      continue;
+    }
+    logged.add(callId);
+    const described = describeToolResult(part["result"]);
+    const line = `${route}: tool result ${name} (callId=${callId}) -> ${described}`;
+    if (described.startsWith("ERROR")) {
+      logger.error(line);
+    } else {
+      logger.info(line);
+    }
   }
 }
 
@@ -290,10 +371,11 @@ async function* logStreamErrors<T>(
 ): AsyncIterable<T> {
   let eventCount = 0;
   const toolCalls = new Map<string, boolean>();
+  const loggedResults = new Set<string>();
   try {
     for await (const event of iter) {
       eventCount += 1;
-      trackToolCalls(event, toolCalls);
+      trackToolCalls(event, toolCalls, loggedResults, route);
       if (isObject(event) && event["type"] === "message-incomplete") {
         const message = isObject(event["message"]) ? event["message"] : null;
         const status = message && isObject(message["status"]) ? message["status"] : null;
@@ -332,13 +414,58 @@ async function* logStreamErrors<T>(
   }
 }
 
+// A user message must carry some non-whitespace text before a stream is
+// opened. `content` is either a plain string or an array of parts; text
+// lives on `{ type: "text", text }` parts (and bare string parts), mirroring
+// the engine's own text extraction. Attachment-only parts (file/image) do
+// not count — an empty prompt otherwise reaches the provider and streams
+// back nothing (Bug 82720).
+function hasNonEmptyText(userMessage: unknown): boolean {
+  if (!isObject(userMessage)) {
+    return false;
+  }
+  const content = userMessage["content"];
+  if (typeof content === "string") {
+    return content.trim().length > 0;
+  }
+  if (!Array.isArray(content)) {
+    return false;
+  }
+  for (const part of content) {
+    if (typeof part === "string") {
+      if (part.trim().length > 0) {
+        return true;
+      }
+      continue;
+    }
+    if (
+      isObject(part)
+      && part["type"] === "text"
+      && typeof part["text"] === "string"
+      && part["text"].trim().length > 0
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
-    const result = await engine.send(req.body);
+    // Without this the provider request runs without the forwarded auth /
+    // request headers, so a correct call comes back with an empty message
+    // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
+    // Mirrors sendWithStream. (No profile pinning here: SendInput carries no
+    // profileId, so there is nothing for a caller to override.)
+    markForwardHeadersToProvider();
+    const result = await engine.send(await withEntityMetadata(req.body));
     res.json(result);
   }),
 
   sendCustom: asyncHandler<SendCustomInput>(async (req, res) => {
+    // As with `send`, the forwarded headers must be marked before the
+    // provider call or a correct request fails with a 500 (Bug 82836).
+    markForwardHeadersToProvider();
     const body = withRequestSignal(res, req.body);
     const result = engine.sendCustom(body);
     if (body.isStream) {
@@ -358,8 +485,58 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Reject an empty prompt before opening the stream: a user message with
+    // no non-whitespace text otherwise reaches the provider and streams back
+    // nothing (Bug 82720).
+    if (!hasNonEmptyText(req.body.userMessage)) {
+      res.status(400).json({
+        error: "userMessage must contain non-empty text content",
+      });
+      return;
+    }
+    // A new thread (no threadId) is created implicitly here, so gate it like
+    // threads/create: a supplied entityId must be accessible and a profile
+    // must resolve, otherwise 404 (review #6).
+    if (!req.body.threadId) {
+      await assertThreadCreatable(req.body.entityId, req.body.profileId);
+    }
+    // When the request omits profileId, the engine resolves the Chat
+    // assignment (or the Default slot) and persists it onto the thread,
+    // silently overwriting the model the thread was created with (Bug 82860).
+    // Pre-fill profileId from the thread's stored value: a session-level
+    // profileId is honored for the request without mutating persisted state,
+    // so the thread keeps its own model. The proper fix lives in the engine's
+    // profile resolution; this is a proxy-side guard.
+    if (!req.body.profileId && req.body.threadId) {
+      const thread = await storage.threads.readById(req.body.threadId);
+      if (thread?.profileId) {
+        req.body.profileId = thread.profileId;
+      }
+    }
+    // The agent's assigned profile is authoritative for rounds in its scope:
+    // substitute it over whatever the caller (or the thread prefill above)
+    // put in profileId, so an agent's chat cannot be re-run on a different
+    // model (Bug 82914). No agent in scope, or an agent with no resolvable
+    // assignment, leaves the value untouched.
+    {
+      const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
+      if (agentProfileId) {
+        req.body.profileId = agentProfileId;
+      }
+    }
     const body = withContextPrompt(
-      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+      await withToolsPrompt(
+        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+      ),
+    );
+    // The round's scope as the client sent it. `entityId` is what an
+    // in-engine tool upload (a generated image) targets — the engine resolves
+    // it as `contextEntityId ?? entityId` — so a `-` here means an
+    // unscoped round: nothing can be uploaded and the image cannot persist.
+    logger.info(
+      `ai/send-with-stream: round threadId=${req.body.threadId ?? "<new>"} ` +
+        `entityId=${req.body.entityId ?? "-"} contextEntityId=${req.body.contextEntityId ?? "-"} ` +
+        `profileId=${req.body.profileId ?? "-"}`,
     );
     await streamNdjson(
       res,
@@ -372,8 +549,17 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Agent scope pins the model — see sendWithStream (Bug 82914).
+    {
+      const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
+      if (agentProfileId) {
+        req.body.profileId = agentProfileId;
+      }
+    }
     const body = withContextPrompt(
-      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+      await withToolsPrompt(
+        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+      ),
     );
     await streamOpenAiSse(
       res,
@@ -386,7 +572,9 @@ export const aiController = {
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
     const body = withContextPrompt(
-      await withToolsPrompt(await withAgentInstruction(withRequestSignal(res, req.body))),
+      await withToolsPrompt(
+        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+      ),
     );
     await streamNdjson(
       res,
@@ -396,7 +584,7 @@ export const aiController = {
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withRequestSignal(res, req.body);
+    const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       logStreamErrors("ai/approve-tool-call", engine.approveToolCall(body)),
@@ -405,7 +593,7 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
-    const body = withRequestSignal(res, req.body);
+    const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       logStreamErrors("ai/deny-tool-call", engine.denyToolCall(body)),

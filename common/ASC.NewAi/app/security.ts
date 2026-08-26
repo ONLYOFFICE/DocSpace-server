@@ -31,6 +31,10 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { BlockList, isIP } from "net";
+import { lookup } from "dns/promises";
+import { allowPrivateBaseUrl } from "../config/index.js";
+
 // A client-correctable error. `asyncHandler` surfaces the message verbatim
 // (because `expose` is set) under the carried `status`, unlike the generic
 // 500 it returns for unexpected failures.
@@ -43,51 +47,76 @@ export class InvalidUrlError extends Error {
   }
 }
 
-function isIpv4Literal(host: string): number[] | null {
-  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
-  if (!m) {
-    return null;
-  }
-  const octets = m.slice(1).map(Number);
-  return octets.some((o) => o > 255) ? null : octets;
+// Cloud-metadata / link-local and the unspecified "this host" range: never a
+// legitimate LLM or web-search endpoint, so blocked even when an on-prem
+// install opts into private ranges via `AI__ALLOW_PRIVATE_BASE_URL`.
+// `BlockList` matches IPv4-mapped IPv6 (`::ffff:169.254.169.254`) against the
+// IPv4 rules automatically, so a mapped metadata address is caught too.
+const alwaysBlocked = new BlockList();
+alwaysBlocked.addSubnet("0.0.0.0", 8, "ipv4"); // "this host"
+alwaysBlocked.addSubnet("169.254.0.0", 16, "ipv4"); // link-local — IMDS metadata
+alwaysBlocked.addSubnet("fe80::", 10, "ipv6"); // IPv6 link-local
+
+// Loopback + RFC1918 private ranges. Blocked by default (anti-SSRF), allowed
+// when `AI__ALLOW_PRIVATE_BASE_URL` is set for on-prem model servers reachable
+// only on the internal network. Mirrors the private entries of the C#
+// `UrlValidator` default blacklist.
+const privateBlocked = new BlockList();
+privateBlocked.addSubnet("127.0.0.0", 8, "ipv4"); // loopback
+privateBlocked.addSubnet("10.0.0.0", 8, "ipv4");
+privateBlocked.addSubnet("100.64.0.0", 10, "ipv4"); // carrier-grade NAT
+privateBlocked.addSubnet("172.16.0.0", 12, "ipv4");
+privateBlocked.addSubnet("192.168.0.0", 16, "ipv4");
+privateBlocked.addAddress("::1", "ipv6"); // loopback
+privateBlocked.addSubnet("fc00::", 7, "ipv6"); // unique local
+
+// Cap on the DNS lookup so an unresolvable / slow name can't hang the guard.
+// Matches the 3s the C# `UrlValidator` allows for resolution.
+const DNS_TIMEOUT_MS = 3000;
+
+function ipFamily(address: string): "ipv4" | "ipv6" | undefined {
+  const family = isIP(address);
+  return family === 4 ? "ipv4" : family === 6 ? "ipv6" : undefined;
 }
 
-// Block cloud-metadata / link-local addresses that are never a legitimate
-// LLM or web-search endpoint. RFC1918 private ranges and loopback are
-// allowed on purpose: DocSpace supports on-prem model servers reachable
-// only on the internal network (e.g. a local Ollama at 127.0.0.1, or an
-// inference box on 10.x / 192.168.x). Network-layer egress filtering is the
-// right place to restrict those; here we only stop the obvious SSRF targets.
-function isBlockedHost(hostname: string): boolean {
-  const host = hostname.replace(/^\[|\]$/g, "").toLowerCase();
-  const v4 = isIpv4Literal(host);
-  if (v4) {
-    const [a, b] = v4;
-    if (a === 169 && b === 254) {
-      return true; // 169.254.0.0/16 link-local — AWS/GCP/Azure metadata (IMDS)
-    }
-    if (a === 0) {
-      return true; // 0.0.0.0/8 "this host"
-    }
-    return false;
+// True when `address` falls in a range we refuse to reach. `privateBlocked` is
+// consulted unless the on-prem override is set; `alwaysBlocked` always is.
+function isBlockedAddress(address: string, family: "ipv4" | "ipv6"): boolean {
+  if (alwaysBlocked.check(address, family)) {
+    return true;
   }
-  if (host.startsWith("fe80:")) {
-    return true; // IPv6 link-local
-  }
-  if (host.includes("169.254.")) {
-    return true; // IPv4-mapped IPv6 of link-local, e.g. ::ffff:169.254.169.254
-  }
-  return false;
+  return !allowPrivateBaseUrl() && privateBlocked.check(address, family);
+}
+
+async function resolveHost(
+  host: string,
+): Promise<{ address: string; family: number }[]> {
+  const timeout = new Promise<never>((_, reject) => {
+    setTimeout(
+      () => reject(new Error("DNS resolution timed out")),
+      DNS_TIMEOUT_MS,
+    ).unref();
+  });
+  return Promise.race([lookup(host, { all: true }), timeout]);
 }
 
 /**
  * Validate a user-supplied provider / web-search `baseUrl` before the engine
  * makes an outbound call to it (anti-SSRF). No-op for an absent endpoint
  * (cloud providers use their built-in URL). Throws {@link InvalidUrlError}
- * for a malformed URL, a non-http(s) scheme, embedded credentials, or a
- * link-local / metadata host.
+ * for a malformed URL, a non-http(s) scheme, embedded credentials, or a host
+ * that is — or resolves to — a loopback / private / link-local / metadata
+ * address.
+ *
+ * WHATWG `URL` normalises decimal / hex / octal / short-form IPv4 literals to
+ * dotted form (`2130706433`, `0x7f000001`, `127.1` all become `127.0.0.1`), so
+ * a literal host is range-checked directly. A name is resolved via DNS first
+ * and every returned address is checked, so a hostname pointing at an internal
+ * address (`localhost`, or an attacker-controlled record) cannot slip a private
+ * target past the guard. Resolution failure is treated as unsafe: if the host
+ * can't be verified, the call is refused rather than left to the engine.
  */
-export function assertSafeBaseUrl(raw: unknown): void {
+export async function assertSafeBaseUrl(raw: unknown): Promise<void> {
   if (raw === undefined || raw === null || raw === "") {
     return;
   }
@@ -106,7 +135,25 @@ export function assertSafeBaseUrl(raw: unknown): void {
   if (parsed.username || parsed.password) {
     throw new InvalidUrlError("baseUrl must not contain credentials");
   }
-  if (isBlockedHost(parsed.hostname)) {
-    throw new InvalidUrlError("baseUrl host is not allowed");
+
+  const host = parsed.hostname.replace(/^\[|\]$/g, "");
+  const literalFamily = ipFamily(host);
+  if (literalFamily) {
+    if (isBlockedAddress(host, literalFamily)) {
+      throw new InvalidUrlError("baseUrl host is not allowed");
+    }
+    return;
+  }
+
+  let resolved: { address: string; family: number }[];
+  try {
+    resolved = await resolveHost(host);
+  } catch {
+    throw new InvalidUrlError("baseUrl host could not be resolved");
+  }
+  for (const { address, family } of resolved) {
+    if (isBlockedAddress(address, family === 4 ? "ipv4" : "ipv6")) {
+      throw new InvalidUrlError("baseUrl host is not allowed");
+    }
   }
 }

@@ -8,3 +8,9 @@ client:
       username: ${REDIS_USERNAME:}
       password: ${REDIS_PASSWORD:}
       ssl: ${REDIS_SSL:false}
+      timeout: ${REDIS_TIMEOUT:2s}
+      pool:
+        max-active: ${REDIS_POOL_MAX_ACTIVE:32}
+        max-idle: ${REDIS_POOL_MAX_IDLE:16}
+        min-idle: ${REDIS_POOL_MIN_IDLE:0}
+        max-wait: ${REDIS_POOL_MAX_WAIT:200ms}

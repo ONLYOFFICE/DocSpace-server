@@ -41,10 +41,8 @@ namespace ASC.Web.Api.Controllers;
 /// </remarks>
 /// <name>authentication</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
+[ApiEndpoint("authentication")]
 [WebhookDisable]
-[ControllerName("authentication")]
 public class AuthenticationController(
     UserManager userManager,
     LdapUserManager ldapUserManager,

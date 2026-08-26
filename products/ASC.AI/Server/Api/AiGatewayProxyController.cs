@@ -34,11 +34,9 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[DefaultRoute]
-[ApiController]
+[ApiEndpoint("ai")]
 [ApiExplorerSettings(IgnoreApi = true)]
 [AiFeature]
-[ControllerName("ai")]
 public class AiGatewayProxyController(
     IHttpClientFactory httpClientFactory,
     AiGateway aiGateway,
@@ -53,6 +51,8 @@ public class AiGatewayProxyController(
         "search",
         "contents"
     };
+
+    private static readonly string[] _forwardedHeaders = ["x-session-id"];
 
     [HttpGet("gateway/{*path}")]
     [HttpPost("gateway/{*path}")]
@@ -71,7 +71,17 @@ public class AiGatewayProxyController(
 
         var isModelsPath = path == "models";
 
-        var key = await aiGateway.GetKeyAsync(isModelsPath);
+        string key;
+
+        try
+        {
+            key = await aiGateway.GetKeyAsync(isModelsPath);
+        }
+        catch (AiServiceDisabledException)
+        {
+            throw new CustomHttpException(HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_AiServicesDisabled);
+        }
+
         if (isModelsPath && !string.IsNullOrEmpty(key))
         {
             path = "customer/models";
@@ -94,6 +104,14 @@ public class AiGatewayProxyController(
 
         using var request = new HttpRequestMessage(new HttpMethod(Request.Method), uri);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
+
+        foreach (var header in _forwardedHeaders)
+        {
+            if (Request.Headers.TryGetValue(header, out var values))
+            {
+                request.Headers.TryAddWithoutValidation(header, (IEnumerable<string>)values);
+            }
+        }
 
         if (Request.ContentLength is > 0)
         {

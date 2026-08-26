@@ -36,8 +36,6 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 [Transient]
 public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 {
-    private const string ScriptName = "AuditReport.docbuilder";
-
     public AuditReportTask()
     {
     }
@@ -63,6 +61,8 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
         throw new NotSupportedException();
     }
 
+    // This task drives the whole pipeline itself: the CSV flavour skips the document builder
+    // entirely, so it cannot use the two-step flow of the base class.
     protected override async Task DoJob()
     {
         ILogger logger = null;
@@ -147,183 +147,33 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
         }
     }
 
-    private Task ProduceAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, string nameArg0, string nameArg1, CultureInfo culture) where T : BaseEvent
+    private async Task ProduceAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, string nameArg0, string nameArg1, CultureInfo culture) where T : BaseEvent
     {
-        return _data.Format == AuditReportFormat.Csv
-            ? BuildCsvAsync(serviceProvider, events, reportNameFormat, nameArg0, nameArg1)
-            : BuildXlsxAsync(serviceProvider, events, reportNameFormat, nameArg0, nameArg1, culture);
-    }
+        var isDocSpaceAdmin = await serviceProvider.GetService<UserManager>().IsDocSpaceAdminAsync(_userId);
 
-    private async Task BuildXlsxAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, string nameArg0, string nameArg1, CultureInfo culture) where T : BaseEvent
-    {
-        var tempPath = serviceProvider.GetService<TempPath>();
-        var documentBuilderTask = serviceProvider.GetService<DocumentBuilderTask>();
+        var descriptor = new AuditReportDescriptor(reportNameFormat, nameArg0, nameArg1, _data.From, _data.To, culture,
+            AuditReportColumns.Resolve<T>(_data.Kind, isDocSpaceAdmin));
 
-        var (headers, props) = GetColumns<T>();
+        // Writers are resolved from the per-execution scope: the tenant and user context they rely
+        // on is only established above, inside this job's own scope.
+        var result = _data.Format == AuditReportFormat.Csv
+            ? await serviceProvider.GetRequiredService<AuditCsvReportWriter>()
+                .WriteAsync(events, descriptor, ReportProgressAsync)
+            : await serviceProvider.GetRequiredService<AuditXlsxReportWriter>()
+                .WriteAsync(_userId, events, descriptor, ReportProgressAsync, CancellationToken);
 
-        var dateFormat = $"{culture.DateTimeFormat.ShortDatePattern} {culture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
-
-        var jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-
-        var header = await BuildReportHeaderAsync(serviceProvider, culture);
-
-        var period = _data.From.HasValue && _data.To.HasValue
-            ? $"{_data.From.Value.ToShortDateString()} - {_data.To.Value.ToShortDateString()}"
-            : _data.From?.ToShortDateString() ?? _data.To?.ToShortDateString() ?? string.Empty;
-
-        var scriptInputData = new
-        {
-            resources = new
-            {
-                company = Resource.AccountingReportCompany + ":",
-                report = Resource.AccountingReportTitle + ":",
-                period = Resource.AccountingReportPeriod + ":",
-                dateGenerated = Resource.AccountingReportDateGenerated + ":",
-                sheetName = GetSheetName(reportNameFormat),
-                dateGeneratedFormat = header.DateGeneratedFormat
-            },
-            info = new
-            {
-                company = header.Company,
-                report = GetReportTitle(reportNameFormat),
-                period,
-                dateGenerated = header.DateGenerated
-            },
-            logoSrc = header.LogoSrc,
-            themeColors = new
-            {
-                mainBgColor = header.MainBgColor,
-                lightBgColor = header.LightBgColor,
-                mainFontColor = header.MainFontColor
-            },
-            keys = headers,
-            aligns = headers.Select(_ => "left").ToList()
-        };
-
-        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
-
-        var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
-        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
-        var outputFileName = string.Format(reportNameFormat + ".xlsx", nameArg0, nameArg1);
-
-        script = script
-            .Replace("${inputData}", JsonSerializer.Serialize(scriptInputData, jsonOptions))
-            .Replace("${tempFileName}", tempFileName);
-
-        var scriptParts = script.Split("${dataValues}");
-
-        await using (var writer = new StreamWriter(scriptFilePath))
-        {
-            await writer.WriteAsync(scriptParts[0]);
-
-            foreach (var @event in events)
-            {
-                var cells = new List<Cell>(props.Count);
-
-                foreach (var prop in props)
-                {
-                    var value = prop.GetValue(@event);
-
-                    if (prop.PropertyType == typeof(DateTime))
-                    {
-                        cells.Add(new Cell(((DateTime)value).ToString("G", CultureInfo.InvariantCulture), dateFormat));
-                    }
-                    else
-                    {
-                        // force text format to stop formulas from executing in user-controlled values
-                        cells.Add(new Cell(value?.ToString(), "@"));
-                    }
-                }
-
-                await writer.WriteAsync(JsonSerializer.Serialize(cells, jsonOptions) + ",");
-            }
-
-            await writer.WriteAsync(scriptParts[1]);
-        }
-
-        var inputData = new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
-
-        Percentage = 30;
-        await PublishChanges();
-
-        CancellationToken.ThrowIfCancellationRequested();
-
-        var fileUri = await documentBuilderTask.BuildFileAsync(inputData, CancellationToken);
-
-        Percentage = 60;
-        await PublishChanges();
-
-        CancellationToken.ThrowIfCancellationRequested();
-
-        var file = await SaveResultFileAsync(serviceProvider, new Uri(fileUri), outputFileName);
-
-        var filesLinkUtility = serviceProvider.GetService<FilesLinkUtility>();
-
-        ResultFileId = file.Id;
-        ResultFileName = file.Title;
-        ResultFileUrl = filesLinkUtility.GetFileWebEditorUrl(file.Id);
-
-        SendDownloadedMessage(serviceProvider);
-
-        if (System.IO.File.Exists(scriptFilePath))
-        {
-            System.IO.File.Delete(scriptFilePath);
-        }
-    }
-
-    private async Task BuildCsvAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, string nameArg0, string nameArg1) where T : BaseEvent
-    {
-        var csvFileHelper = serviceProvider.GetService<CsvFileHelper>();
-        var csvFileUploader = serviceProvider.GetService<CsvFileUploader>();
-
-        var reportName = string.Format(reportNameFormat + ".csv", nameArg0, nameArg1);
-
-        Percentage = 50;
-        await PublishChanges();
-
-        await using var stream = csvFileHelper.CreateFile(events, new BaseEventMap<T>());
-        var fileUrl = await csvFileUploader.UploadFile(stream, reportName);
-
-        ResultFileName = reportName;
-        ResultFileUrl = fileUrl;
+        ResultFileId = result.FileId;
+        ResultFileName = result.FileName;
+        ResultFileUrl = result.FileUrl;
 
         SendDownloadedMessage(serviceProvider);
     }
 
-    private async Task<File<int>> SaveResultFileAsync(IServiceProvider serviceProvider, Uri fileUri, string outputFileName)
+    private async Task ReportProgressAsync(int percentage)
     {
-        var daoFactory = serviceProvider.GetService<IDaoFactory>();
-        var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
-        var socketManager = serviceProvider.GetService<SocketManager>();
-        var globalFolder = serviceProvider.GetService<GlobalFolder>();
+        Percentage = percentage;
 
-        var file = serviceProvider.GetService<File<int>>();
-
-        file.CreateBy = _userId;
-        file.ParentId = await globalFolder.GetFolderMyAsync(daoFactory);
-        file.Title = outputFileName;
-
-        using var request = new HttpRequestMessage { RequestUri = fileUri };
-
-#pragma warning disable CA2000
-        var httpClient = clientFactory.CreateClient();
-#pragma warning restore CA2000
-
-        using var response = await httpClient.SendAsync(request);
-        await using var stream = await response.Content.ReadAsStreamAsync();
-
-        var fileDao = daoFactory.GetFileDao<int>();
-
-        file.ContentLength = stream.Length;
-
-        file = await fileDao.SaveFileAsync(file, stream);
-        await socketManager.CreateFileAsync(file);
-
-        return file;
+        await PublishChanges();
     }
 
     private void SendDownloadedMessage(IServiceProvider serviceProvider)
@@ -345,88 +195,6 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 
         messageService.SendHeadersMessage(action, target: null, httpHeaders: headers, null);
     }
-
-    private static (List<string> Headers, List<PropertyInfo> Props) GetColumns<T>() where T : BaseEvent
-    {
-        var columns = typeof(T).GetProperties()
-            .Select(p => new
-            {
-                Property = p,
-                Attribute = p.GetCustomAttribute<EventAttribute>()
-            })
-            .Where(x => x.Attribute != null)
-            .OrderBy(x => x.Attribute!.Order)
-            .ToList();
-
-        var headers = columns
-            .Select(c => AuditReportResource.ResourceManager.GetString(c.Attribute!.Resource))
-            .ToList();
-
-        var props = columns
-            .Select(x => x.Property)
-            .ToList();
-
-        return (headers, props);
-    }
-
-    private static string GetReportTitle(string reportNameFormat)
-    {
-        var name = reportNameFormat;
-
-        var index = name.IndexOf('(');
-        if (index > 0)
-        {
-            name = name[..index].Trim();
-        }
-
-        return name;
-    }
-
-    private static string GetSheetName(string reportNameFormat)
-    {
-        var name = GetReportTitle(reportNameFormat);
-
-        return name.Length > 31 ? name[..31] : name;
-    }
-
-    private static async Task<ReportHeader> BuildReportHeaderAsync(IServiceProvider serviceProvider, CultureInfo culture)
-    {
-        var settingsManager = serviceProvider.GetService<SettingsManager>();
-        var tenantLogoManager = serviceProvider.GetService<TenantLogoManager>();
-        var tenantUtil = serviceProvider.GetService<TenantUtil>();
-
-        var logoText = await tenantLogoManager.GetLogoTextAsync();
-
-        // the document builder currently cannot embed a logo referenced by URL, so we inline it
-        // as a base64 data URI. Once the builder's image handling is fixed, switch back to the URL:
-        var logoSrc = await tenantLogoManager.GetTopLogoDataUriAsync()
-                      ?? await tenantLogoManager.GetTopLogoAbsoluteUrlAsync();
-
-        var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
-        var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
-
-        var dateGeneratedFormat = $"{culture.DateTimeFormat.ShortDatePattern} {culture.DateTimeFormat.LongTimePattern.Replace("tt", "AM/PM")}";
-
-        return new ReportHeader(
-            logoSrc,
-            DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1),
-            DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08),
-            DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1),
-            logoText,
-            tenantUtil.DateTimeNow().ToString("G", CultureInfo.InvariantCulture),
-            dateGeneratedFormat);
-    }
-
-    private sealed record ReportHeader(
-        string LogoSrc,
-        int[] MainBgColor,
-        int[] LightBgColor,
-        int[] MainFontColor,
-        string Company,
-        string DateGenerated,
-        string DateGeneratedFormat);
-
-    private sealed record Cell(string Value, string Format, string Halign = null);
 }
 
 public record AuditReportTaskData(

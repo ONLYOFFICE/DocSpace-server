@@ -42,7 +42,8 @@ public class WebSearchStorageService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     AiGateway gateway,
-    BaseCommonLinkUtility linkUtility) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
+    BaseCommonLinkUtility linkUtility,
+    MessageService messageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private readonly AiGateway _gateway = gateway;
 
@@ -76,6 +77,8 @@ public class WebSearchStorageService(
         AssertGatewayNotConfigured();
 
         await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), config);
+
+        messageService.Send(MessageAction.SetWebSearchSettings, config.Provider);
     }
 
     public async Task DeleteAsync()
@@ -84,5 +87,7 @@ public class WebSearchStorageService(
         AssertGatewayNotConfigured();
 
         await storage.DeleteAsync(tenantManager.GetCurrentTenantId());
+
+        messageService.Send(MessageAction.ResetWebSearchSettings);
     }
 }

@@ -392,7 +392,7 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
   ];
 
   return {
-    openapi: "3.0.3",
+    openapi: "3.1.1",
     info: {
       title: "ONLYOFFICE DocSpace AI Service API",
       version: "2.0",

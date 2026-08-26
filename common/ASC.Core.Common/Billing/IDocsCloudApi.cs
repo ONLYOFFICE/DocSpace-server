@@ -40,9 +40,6 @@ namespace ASC.Core.Billing;
 /// </summary>
 public interface IDocsCloudApi
 {
-    [Get("/healthcheck")]
-    Task HealthCheckAsync();
-
     [Get("/tenant")]
     Task<DocsCloudTenant> GetTenantAsync([Query] string portalId);
 

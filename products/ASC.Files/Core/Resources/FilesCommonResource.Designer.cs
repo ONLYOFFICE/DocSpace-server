@@ -583,6 +583,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid folder id.
+        /// </summary>
+        public static string ErrorMessage_InvalidFolderId {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InvalidFolderId", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Invalid provider.
         /// </summary>
         public static string ErrorMessage_InvalidProvider {
@@ -671,7 +680,7 @@ namespace ASC.Files.Core.Resources {
                 return ResourceManager.GetString("ErrorMessage_NotSupportedFormat", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to This action is only available in a private room.
         /// </summary>
@@ -680,7 +689,7 @@ namespace ASC.Files.Core.Resources {
                 return ResourceManager.GetString("ErrorMessage_PrivateRoomOnly", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to An AI agent&apos;s instruction cannot be longer than {0} characters.
         /// </summary>
@@ -1259,7 +1268,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace Administrator.
+        ///   Looks up a localized string similar to Full admin.
         /// </summary>
         public static string RoleEnum_DocSpaceAdmin {
             get {

@@ -709,13 +709,13 @@
     <value>Đã thay đổi người sở hữu: {0}</value>
   </data>
   <data name="OwnerSentChangeOwnerInstructions" xml:space="preserve">
-    <value>Người sở hữu {{0}]. Đã gửi hướng dẫn thay đổi người sở hữu</value>
+    <value>Người sở hữu [{0}]. Đã gửi hướng dẫn thay đổi người sở hữu</value>
   </data>
   <data name="OwnerSentPortalDeactivationInstructions" xml:space="preserve">
-    <value>Người sở hữu {{0}]. Đã gửi Hướng dẫn Ngừng hoạt động Cổng thông tin</value>
+    <value>Người sở hữu [{0}]. Đã gửi Hướng dẫn Ngừng hoạt động Cổng thông tin</value>
   </data>
   <data name="OwnerSentPortalDeleteInstructions" xml:space="preserve">
-    <value>Người sở hữu {{0}]. Đã gửi Hướng dẫn Xóa Công thông tin</value>
+    <value>Người sở hữu [{0}]. Đã gửi Hướng dẫn Xóa Cổng thông tin</value>
   </data>
   <data name="PageCol" xml:space="preserve">
     <value>Trang</value>
@@ -910,7 +910,7 @@
     <value>Gửi</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Người dùng {0} đã gửi lời mời đến {1} để tham gia DocSpace này</value>
+    <value>Người dùng {0} đã gửi lời mời đến {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Đã gửi hướng dẫn mời: {0}</value>

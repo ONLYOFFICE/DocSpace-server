@@ -33,7 +33,7 @@
 
 namespace ASC.Files.Api;
 
-[DefaultRoute("roomtemplate")]
+[ApiEndpoint(Template = "roomtemplate")]
 public class RoomTemplatesController(IEventBus eventBus,
     AuthContext authContext,
     TenantManager tenantManager,
@@ -70,6 +70,11 @@ public class RoomTemplatesController(IEventBus eventBus,
             dto.Share = null;
             dto.Groups = [Constants.GroupEveryone.ID];
         }
+
+        // The template is built by a background operation, so the access to the source room has to
+        // be verified here — otherwise the caller is told the request succeeded and only finds out
+        // later, from the operation status, that it could not.
+        await fileStorageService.CheckCanCreateRoomTemplateAsync(dto.RoomId);
 
         var taskId = await roomTemplatesWorker.StartCreateTemplateAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
             dto.RoomId,
