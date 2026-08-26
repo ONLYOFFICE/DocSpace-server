@@ -43,9 +43,14 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import logger from "../log.js";
 import { agentAssignedProfileId } from "./agentProfile.js";
-import { markForwardHeadersToProvider } from "../requestContext.js";
+import {
+  markForwardHeadersToProvider,
+  getCustomServerNames,
+} from "../requestContext.js";
+import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
-import { asyncHandler, streamNdjson, streamOpenAiSse } from "./_helpers.js";
+import { aiService } from "../storage/httpClient.js";
+import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
@@ -192,6 +197,24 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
   }
+  // A per-request `{mode: "replace"}` prompt override substitutes the
+  // agent's stored instructions for this round (Bug 83236) — without this
+  // skip, appendActionPrompt would concatenate the instruction into the
+  // replace text and the agent's marker would win. This helper runs
+  // innermost, so the override seen here is still the client's own; the
+  // tools/context fragments appended later are round infrastructure (tool
+  // list, location, date) and stay regardless of the mode. The stored
+  // instructions themselves are untouched — the skip is per-request.
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
+  const prompt = actionArgs["prompt"];
+  if (
+    isObject(prompt) &&
+    prompt["mode"] === "replace" &&
+    typeof prompt["text"] === "string" &&
+    prompt["text"].trim().length > 0
+  ) {
+    return body;
+  }
   const instruction = await safeGetAgentInstruction(contextScopeOf(body));
   return instruction ? appendActionPrompt(body, instruction) : body;
 }
@@ -222,14 +245,23 @@ async function withEntityMetadata<T>(body: T): Promise<T> {
 const toolsAdapter = new HttpToolsAdapter();
 const engine = new AIEngine({
   storage,
-  // System (host-configured MCP) tools run server-side and pause for UI
-  // approval; most DocSpace integration tools run silently. Compose both.
-  toolsAdapter: composeToolsAdapters(systemToolsSource, toolsAdapter),
-  // Approval-required server types: the MCP servers plus the DocSpace
-  // integration tools explicitly grouped under the approval serverType
-  // (e.g. document/presentation/form generation).
+  // System (host-configured MCP) tools and registered custom MCP servers
+  // run server-side and pause for UI approval; most DocSpace integration
+  // tools run silently. Compose all three — before customToolsSource was
+  // wired in, the custom-server registry was pure configuration and its
+  // tools never reached the model (Bugs 82989 / 82990).
+  toolsAdapter: composeToolsAdapters(
+    systemToolsSource,
+    customToolsSource,
+    toolsAdapter,
+  ),
+  // Approval-required server types: the MCP servers (host-configured and
+  // custom — the latter resolved per request, see primeCustomServers) plus
+  // the DocSpace integration tools explicitly grouped under the approval
+  // serverType (e.g. document/presentation/form generation).
   systemServerTypes: () => [
     ...systemToolsSource.getServerTypes(),
+    ...getCustomServerNames(),
     DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
   ],
 });
@@ -450,6 +482,52 @@ function hasNonEmptyText(userMessage: unknown): boolean {
   return false;
 }
 
+// Validation error when the effective profileId does not reference an
+// existing profile, or null when it does (or when no profileId is supplied —
+// the engine then resolves the scope's assignment itself). A malformed id
+// makes the C# lookup fail with a non-404 status; that is just as much "no
+// such profile" to the caller, so both collapse to the same message.
+async function unknownProfileIdError(
+  profileId: string | undefined,
+): Promise<string | null> {
+  if (!profileId) {
+    return null;
+  }
+  const profile = await storage.profiles
+    .readById(profileId)
+    .catch(() => undefined);
+  if (!profile) {
+    return `unknown profileId: ${profileId}`;
+  }
+  return aiToolsUnpaidError(profile.providerType);
+}
+
+// Sentinel message so the callers can tell the billing failure (402) apart
+// from the unknown-profile validation error (400) in unknownProfileIdError's
+// single string channel.
+const AI_TOOLS_UNPAID_ERROR =
+  "The AI Tools service is not paid for the current portal";
+
+// 402 message when the effective profile rides the portal gateway while the
+// tenant's AI Tools wallet service is not paid, null otherwise. Without
+// this check the round opens a 200 NDJSON stream and the billing failure
+// surfaces only as an in-stream error frame (Bug 83344). `aiReady` (the C#
+// AiAccessibility status) is false here in exactly one reachable state —
+// the unpaid gateway wallet: the admin kill-switch already failed the
+// profile read above with 403, and non-gateway providers have no wallet.
+async function aiToolsUnpaidError(
+  providerType: string | undefined,
+): Promise<string | null> {
+  if (providerType !== "onlyoffice") {
+    return null;
+  }
+  const config = await aiService.get("/config").catch(() => undefined);
+  if (isObject(config) && config["aiReady"] === false) {
+    return AI_TOOLS_UNPAID_ERROR;
+  }
+  return null;
+}
+
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
     // Without this the provider request runs without the forwarded auth /
@@ -458,6 +536,10 @@ export const aiController = {
     // Mirrors sendWithStream. (No profile pinning here: SendInput carries no
     // profileId, so there is nothing for a caller to override.)
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     const result = await engine.send(await withEntityMetadata(req.body));
     res.json(result);
   }),
@@ -466,6 +548,10 @@ export const aiController = {
     // As with `send`, the forwarded headers must be marked before the
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     const body = withRequestSignal(res, req.body);
     const result = engine.sendCustom(body);
     if (body.isStream) {
@@ -485,6 +571,10 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     // Reject an empty prompt before opening the stream: a user message with
     // no non-whitespace text otherwise reaches the provider and streams back
     // nothing (Bug 82720).
@@ -493,6 +583,16 @@ export const aiController = {
         error: "userMessage must contain non-empty text content",
       });
       return;
+    }
+    // The same per-kind attachment cap as threads/append-user-message —
+    // this endpoint persists the user message through the same engine, so
+    // it is the other way around the composer's limit (Bug 82894).
+    {
+      const limitError = attachmentLimitError(req.body.userMessage);
+      if (limitError) {
+        res.status(400).json({ error: limitError });
+        return;
+      }
     }
     // A new thread (no threadId) is created implicitly here, so gate it like
     // threads/create: a supplied entityId must be accessible and a profile
@@ -524,6 +624,21 @@ export const aiController = {
         req.body.profileId = agentProfileId;
       }
     }
+    // The effective profileId must reference an existing profile BEFORE the
+    // stream opens: a malformed or unknown id otherwise surfaces only as an
+    // opaque {"type":"error"} frame inside a 200 stream (Bug 83045), or the
+    // engine silently falls back to another model (Bug 83160). Runs after
+    // the thread prefill and the agent substitution, so only the value that
+    // will actually be used is checked.
+    {
+      const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError) {
+        res
+          .status(profileError === AI_TOOLS_UNPAID_ERROR ? 402 : 400)
+          .json({ error: profileError });
+        return;
+      }
+    }
     const body = withContextPrompt(
       await withToolsPrompt(
         await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
@@ -549,11 +664,25 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     // Agent scope pins the model — see sendWithStream (Bug 82914).
     {
       const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
       if (agentProfileId) {
         req.body.profileId = agentProfileId;
+      }
+    }
+    // Same pre-flight as sendWithStream (Bugs 83045 / 83160).
+    {
+      const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError) {
+        res
+          .status(profileError === AI_TOOLS_UNPAID_ERROR ? 402 : 400)
+          .json({ error: profileError });
+        return;
       }
     }
     const body = withContextPrompt(
@@ -569,6 +698,10 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
     const body = withContextPrompt(
@@ -584,6 +717,10 @@ export const aiController = {
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
@@ -593,6 +730,10 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers(contextScopeOf(req.body));
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,

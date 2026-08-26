@@ -33,7 +33,17 @@
 
 import { ToolsEngine } from "@onlyoffice/ai-chat/core";
 import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
-import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
+import {
+  PORTAL_MCP_SERVER_NAME,
+  DOCSPACE_INTEGRATION_SERVER_TYPE,
+  DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+  WEB_SEARCH_TYPE,
+  IMAGE_GENERATION_TYPE,
+} from "../../config/index.js";
+import {
+  customToolsSource,
+  resolveCustomServers,
+} from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import {
   systemToolsSource,
@@ -41,6 +51,7 @@ import {
 } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
+import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
 
@@ -124,10 +135,13 @@ export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
-    // Scope is resolved inside mcpServersStorage (create/readAll both run the
-    // entityId through resolveAgentEntityId), so a non-agent folder writes to
-    // and reads back from the global scope and the server stays visible
-    // (Bug 82863) — no 404 gate needed here.
+    // A supplied entityId must at least be REACHABLE: a nonexistent or
+    // deleted id otherwise folds silently into the portal-wide scope and
+    // mutates it (Bug 82975). An accessible NON-agent folder still folds to
+    // global BY DESIGN (Bug 82863: the widget sends the current location
+    // here) — the gate is on accessibility, not agent-ness, mirroring the
+    // threads/create decision (Bug 82719).
+    await assertEntityAccessible(args.entityId as string | undefined);
     const result = await engine.addCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -139,6 +153,8 @@ export const toolsController = {
   updateCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
+    // Same accessibility gate as addCustomServer (Bug 82975).
+    await assertEntityAccessible(args.entityId as string | undefined);
     const result = await engine.updateCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -155,6 +171,8 @@ export const toolsController = {
       return;
     }
     const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    // Same accessibility gate as addCustomServer (Bug 82975).
+    await assertEntityAccessible(entityId);
     await engine.removeCustomServer(name, entityId);
     res.json({ success: true });
   }),
@@ -186,7 +204,15 @@ export const toolsController = {
 
   listSystemTools: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    const tools = await engine.listSystemTools(entityId);
+    // The catalog is the system groups plus the registered custom MCP
+    // servers' live tools — before this merge no listing route could show a
+    // registered server's tools at all (Bug 83163). Server-type keys are
+    // unique across the two sources (customToolsSource skips system-server
+    // markers), so a plain spread cannot clobber a group.
+    const [tools, custom] = await Promise.all([
+      engine.listSystemTools(entityId),
+      customToolsSource.getTools(entityId),
+    ]);
     // Hide the portal MCP server from every management surface (the MCP
     // settings page's permission cards, the agent dialog's server picker):
     // it is always enabled with all tools and cannot be configured. The
@@ -195,7 +221,7 @@ export const toolsController = {
     if (isObject(tools)) {
       delete (tools as Record<string, unknown>)[PORTAL_MCP_SERVER_NAME];
     }
-    res.json(tools);
+    res.json({ ...tools, ...custom });
   }),
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {
@@ -208,6 +234,9 @@ export const toolsController = {
       res.status(400).json({ error: "map is required and must be an object" });
       return;
     }
+    // Critical here: an unreachable entityId used to fold to the portal-wide
+    // scope and WIPE its whole server map (Bug 82975).
+    await assertEntityAccessible(args.entityId as string | undefined);
     const map = args.map as Record<string, McpServerConfig>;
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
@@ -223,6 +252,33 @@ export const toolsController = {
 
   setDisabled: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["serverType", "toolNames", "entityId"] as const);
+    // Same accessibility gate as the server writes above (Bug 82975): a
+    // bogus entityId must not silently write prefs into the global scope.
+    await assertEntityAccessible(args.entityId as string | undefined);
+    // The serverType must be a group key the round's tool filter actually
+    // matches — an arbitrary string used to be stored verbatim and read back
+    // "successfully" while never disabling anything (Bug 83013). Valid keys:
+    // the host-configured system servers, the two DocSpace-integration
+    // groups, web-search / image-generation, and the scope's registered
+    // custom MCP servers.
+    const serverType = args.serverType as string;
+    const entityId = args.entityId as string | undefined;
+    const validTypes = new Set<string>([
+      ...systemToolsSource.getServerTypes(),
+      DOCSPACE_INTEGRATION_SERVER_TYPE,
+      DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+      WEB_SEARCH_TYPE,
+      IMAGE_GENERATION_TYPE,
+      ...Object.keys(await resolveCustomServers(entityId)),
+    ]);
+    if (typeof serverType !== "string" || !validTypes.has(serverType)) {
+      res.status(400).json({
+        error:
+          `unknown serverType "${String(serverType)}"; valid values: ` +
+          [...validTypes].sort().join(", "),
+      });
+      return;
+    }
     await engine.setDisabled(
       args.serverType as string,
       (args.toolNames as string[]) ?? [],
@@ -254,6 +310,8 @@ export const toolsController = {
       req.body,
       ["serverType", "toolName", "value", "entityId"] as const,
     );
+    // Same accessibility gate as the server writes above (Bug 82975).
+    await assertEntityAccessible(args.entityId as string | undefined);
     await engine.setAllowAlways(
       args.serverType as string,
       args.toolName as string,
