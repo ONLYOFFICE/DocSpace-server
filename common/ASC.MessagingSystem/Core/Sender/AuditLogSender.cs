@@ -114,9 +114,14 @@ public class AuditLogSender(ILoggerFactory loggerFactory, ILogger<AuditLogSender
             return null;
         }
 
-        var result = value.Length > maxLength
-            ? string.Concat(value.AsSpan(0, maxLength), TruncationMarker)
-            : value;
+        var result = value;
+        if (value.Length > maxLength)
+        {
+            // the marker counts towards maxLength so the result never exceeds it
+            result = maxLength > TruncationMarker.Length
+                ? string.Concat(value.AsSpan(0, maxLength - TruncationMarker.Length), TruncationMarker)
+                : value[..maxLength];
+        }
 
         return ContainsUnsafeCharacter(result) ? ReplaceUnsafeCharacters(result) : result;
     }
