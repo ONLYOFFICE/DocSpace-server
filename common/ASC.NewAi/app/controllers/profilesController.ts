@@ -135,8 +135,16 @@ export const profilesController = {
 
   listProviderModels: asyncHandler<ListProviderModelsBody>(async (req, res) => {
     const { providerType, baseUrl, apiKey } = req.body ?? {};
-    if (!providerType || !baseUrl) {
-      res.status(400).json({ error: "providerType and baseUrl required" });
+    // One error per actually-missing field, so the client knows which
+    // input to highlight (Bug 83116).
+    if (!providerType) {
+      res
+        .status(400)
+        .json({ error: "providerType required", field: "providerType" });
+      return;
+    }
+    if (!baseUrl) {
+      res.status(400).json({ error: "baseUrl required", field: "baseUrl" });
       return;
     }
     await assertSafeBaseUrl(baseUrl);
