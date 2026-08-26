@@ -41,6 +41,7 @@ import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.entity.Client;
+import com.asc.registration.data.client.entity.ClientCursor;
 import com.asc.registration.data.client.entity.ClientEntity;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
 import com.asc.registration.data.client.repository.JpaClientRepository;
@@ -122,12 +123,15 @@ class ClientQueryRepositoryDomainAdapterTest {
   @ParameterizedTest
   @ValueSource(ints = {1, 5, 10})
   void whenClientsAreQueriedByTenantId_thenReturnPaginatedResponse(int limit) {
-    List<ClientEntity> entities = List.of(clientEntity);
-    ZonedDateTime lastCreatedOn = ZonedDateTime.now();
-
+    var lastCreatedOn = ZonedDateTime.now();
+    var cursor = mock(ClientCursor.class);
+    when(cursor.getClientId()).thenReturn(clientId.getValue().toString());
+    when(cursor.getCreatedOn()).thenReturn(lastCreatedOn);
     when(jpaClientRepository.findAllByTenantIdWithCursor(
             eq(tenantId.getValue()), eq(lastCreatedOn), eq(limit + 1)))
-        .thenReturn(entities);
+        .thenReturn(List.of(cursor));
+    when(jpaClientRepository.findAllByClientIds(List.of(clientId.getValue().toString())))
+        .thenReturn(List.of(clientEntity));
 
     var result =
         clientQueryRepositoryDomainAdapter.findAllByTenantId(tenantId, limit, null, lastCreatedOn);
@@ -135,6 +139,7 @@ class ClientQueryRepositoryDomainAdapterTest {
     assertEquals(client, result.getData().iterator().next());
     verify(jpaClientRepository)
         .findAllByTenantIdWithCursor(eq(tenantId.getValue()), eq(lastCreatedOn), eq(limit + 1));
+    verify(jpaClientRepository).findAllByClientIds(List.of(clientId.getValue().toString()));
     verify(clientDataAccessMapper).toDomain(clientEntity);
   }
 
