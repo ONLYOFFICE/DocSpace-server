@@ -60,6 +60,25 @@ async function assertProfilesWritable(): Promise<void> {
   }
 }
 
+// `providerType: "external"` delegates all HTTP transport to the host
+// application's `externalFetch` (a browser-side hook) — a server-created
+// profile has no such transport, so `engine.create` blows up inside the
+// live credentials probe with an unhandled error (Bug 83114, agreed to be
+// a 400). Reject it up front with an actionable message.
+function rejectExternalProviderType(
+  providerType: unknown,
+  res: { status: (code: number) => { json: (body: unknown) => void } },
+): boolean {
+  if (providerType !== "external") {
+    return false;
+  }
+  res.status(400).json({
+    error:
+      'providerType "external" cannot be used for server-managed profiles: it delegates transport to the host application',
+  });
+  return true;
+}
+
 // Translate a provider-side failure (raised by the OpenAI-compatible SDK
 // while listing models) into a meaningful HTTP status + message instead of
 // letting `asyncHandler` collapse everything to a generic 500. The base URL
@@ -138,6 +157,9 @@ interface ListProviderModelsBody {
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
     await assertProfilesWritable();
+    if (rejectExternalProviderType(req.body?.providerType, res)) {
+      return;
+    }
     await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.create(req.body);
     res.json(result);
@@ -145,6 +167,9 @@ export const profilesController = {
 
   update: asyncHandler<Profile>(async (req, res) => {
     await assertProfilesWritable();
+    if (rejectExternalProviderType(req.body?.providerType, res)) {
+      return;
+    }
     await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.update(req.body);
     res.json(result);
