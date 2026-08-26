@@ -48,6 +48,13 @@ const engine = new ProfilesEngine({ storage });
 // and key come from the user's profile form, so most failures are config
 // errors that should read as such in the UI.
 function describeProviderError(err: unknown): { status: number; message: string } {
+  // An unknown providerType never reaches the network — the provider
+  // registry lookup throws before any request is made. Surface it as the
+  // input error it is instead of collapsing into a 502 "Failed to list
+  // provider models" (Bug 83117).
+  if (err instanceof Error && err.message.startsWith("Unknown provider type")) {
+    return { status: 400, message: err.message };
+  }
   // OpenAI-SDK HTTP errors expose a numeric `status`.
   const httpStatus =
     typeof (err as { status?: unknown })?.status === "number"
