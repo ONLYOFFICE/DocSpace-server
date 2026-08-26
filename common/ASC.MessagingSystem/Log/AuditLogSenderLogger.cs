@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,47 +31,13 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.MessagingSystem.Core.Sender;
-
-[Singleton]
-public class DbMessageSender : IMessageSender
+namespace ASC.MessagingSystem.Log;
+internal static partial class AuditLogSenderLogger
 {
-    private readonly ILogger _logger;
-    private readonly MessagesRepository _messagesRepository;
-    private readonly AuditLogSender _auditLogSender;
-    private readonly bool _messagingEnabled;
+    [LoggerMessage(LogLevel.Information, "{EventType}|{Action}|{ActionId}|{TenantId}|{UserId}|{Initiator}|{Ip}|{Page}|{UserAgent}|{Target}|{Description}|{Date}")]
+    public static partial void InfoAuditEvent(this ILogger logger, string eventType, string action, int actionId, int tenantId, Guid userId,
+        string initiator, string ip, string page, string userAgent, string target, string description, DateTime date);
 
-    public DbMessageSender(IConfiguration configuration, MessagesRepository messagesRepository, AuditLogSender auditLogSender, ILoggerFactory loggerFactory)
-    {
-        var setting = configuration["messaging:enabled"];
-        _messagingEnabled = !string.IsNullOrEmpty(setting) && setting == "true";
-        _messagesRepository = messagesRepository;
-        _auditLogSender = auditLogSender;
-        _logger = loggerFactory.CreateLogger("ASC.Messaging");
-    }
-
-    public async Task<int> SendAsync(EventMessage message)
-    {
-        try
-        {
-            if (!_messagingEnabled)
-            {
-                return 0;
-            }
-
-            if (message == null)
-            {
-                return 0;
-            }
-
-            _auditLogSender.Send(message);
-
-            return await _messagesRepository.AddAsync(message);
-        }
-        catch (Exception ex)
-        {
-            _logger.ErrorFailedSend(ex);
-            return 0;
-        }
-    }
+    [LoggerMessage(LogLevel.Error, "Failed to send a message to the audit log")]
+    public static partial void ErrorFailedSendToAuditLog(this ILogger logger, Exception exception);
 }
