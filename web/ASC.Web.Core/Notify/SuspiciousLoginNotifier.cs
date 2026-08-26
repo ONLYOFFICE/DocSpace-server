@@ -131,6 +131,7 @@ public partial class SuspiciousLoginNotifier(
 
             if (DateTime.UtcNow - current.Date > configuration.FreshLoginWindow)
             {
+                logger.DebugStaleLoginEventSkipped(userId, loginEventId, current.Date);
                 return;
             }
 
@@ -178,11 +179,13 @@ public partial class SuspiciousLoginNotifier(
                 newCountry = seenAnyCountry && !knownCountry;
             }
 
-            // Signal 3: several failed login attempts recently
+            // Signal 3: several failed login attempts since the previous successful login
+            var lastSuccessId = baseline[0].Id;
             var failSince = DateTime.UtcNow - configuration.FailWindow;
             var failCount = await messagesContext.LoginEvents
                 .Where(e => e.TenantId == tenantId
                     && e.Date >= failSince
+                    && e.Id > lastSuccessId
                     && e.Id < current.Id
                     && (e.UserId == userId || e.Login == user.Email)
                     && e.Action.HasValue
