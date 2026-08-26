@@ -34,13 +34,31 @@
 import { ProfilesEngine } from "@onlyoffice/ai-chat/core";
 import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { AiServiceHttpError } from "../storage/httpClient.js";
+import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { asString, isObject } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import logger from "../log.js";
 
 const engine = new ProfilesEngine({ storage });
+
+// Profiles are read-only when the portal AI gateway is configured (SaaS):
+// the C# storage rejects every write with 403 — but only after
+// `engine.create`/`update` has already dialed the caller-supplied baseUrl
+// to live-validate the key. Check the flag first so no outbound request is
+// made for an operation that cannot succeed anyway (Bug 83112).
+// `systemAiEnabled` mirrors `AiStatus.GatewayEnabled`
+// (AiSettingsService.GetAiSettingsAsync), the same state
+// AssertGatewayNotConfigured trips on.
+async function assertProfilesWritable(): Promise<void> {
+  const config = await aiService.get("/config");
+  if (isObject(config) && config["systemAiEnabled"] === true) {
+    throw Object.assign(
+      new Error("AI profiles are read-only on this portal (managed by the AI gateway)"),
+      { status: 403, expose: true },
+    );
+  }
+}
 
 // Translate a provider-side failure (raised by the OpenAI-compatible SDK
 // while listing models) into a meaningful HTTP status + message instead of
@@ -119,12 +137,14 @@ interface ListProviderModelsBody {
 
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
+    await assertProfilesWritable();
     await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.create(req.body);
     res.json(result);
   }),
 
   update: asyncHandler<Profile>(async (req, res) => {
+    await assertProfilesWritable();
     await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.update(req.body);
     res.json(result);
