@@ -34,6 +34,7 @@
 import { ProfilesEngine } from "@onlyoffice/ai-chat/core";
 import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
+import { AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
@@ -176,6 +177,15 @@ export const profilesController = {
       const models = await engine.listModels(profileId);
       res.json(models);
     } catch (err) {
+      // A failure from the C# storage hop (the profile read inside
+      // `engine.listModels`) carries the real verdict — 403 for guests or
+      // disabled AI, 404 for a missing profile. `describeProviderError`
+      // would misread its 401/403 as a provider auth failure and answer
+      // 400 "Invalid API key" (Bug 82971) — rethrow so asyncHandler
+      // forwards the upstream status instead.
+      if (err instanceof AiServiceHttpError) {
+        throw err;
+      }
       const { status, message } = describeProviderError(err);
       logger.warn(
         `listModels failed (profileId=${profileId}) -> ${status}: ${
