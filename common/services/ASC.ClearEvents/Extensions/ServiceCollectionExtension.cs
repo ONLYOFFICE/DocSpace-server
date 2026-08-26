@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,27 +31,14 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Api.Core.Core;
-using ASC.Common.Logging;
-
 namespace ASC.ClearEvents.Extensions;
 public static class ServiceCollectionExtension
 {
-    public static async Task<IServiceCollection> AddClearEventsServices(this IServiceCollection services, IConfiguration configuration, string @namespace)
+    public static IServiceCollection AddClearEventsServices(this IServiceCollection services)
     {
-
-        services.AddSingleton<EFLoggerFactory>();
         services.AddHostedService<ClearEventsService>();
-        services.AddBaseDbContextPool<MessagesContext>();
-        services.AddEventBus(configuration); // only for healthcheck. need refactoring
-        services.AddCustomHealthCheck(configuration);
-
-        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(configuration, @namespace);
-
-        services.AddHybridCache(connectionMultiplexer);
-        services.AddMemoryCache(connectionMultiplexer);
+        services.AddHostedService<ClearAuditEventsService>();
 
         return services;
-
     }
 }
