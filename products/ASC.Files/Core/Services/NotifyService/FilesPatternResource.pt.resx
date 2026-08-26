@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Notificação do DocSpace. Agente de IA eliminado</value>
+    <value>Notificação do ${LetterLogoText}. Agente de IA eliminado</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Documentos. Todos os assinantes completaram o $DocumentTitle</value>
@@ -262,19 +262,19 @@ $Message</value>
     <value>Estado da assinatura alterado</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Notificação do DocSpace. Mencionada no documento</value>
+    <value>Notificação do ${LetterLogoText}. Mencionada no documento</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Notificação do DocSpace. O formulário está preenchido</value>
+    <value>Notificação do ${LetterLogoText}. O formulário está preenchido</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Notificação do DocSpace.</value>
+    <value>Notificação do ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Notificação do DocSpace. O formulário está preenchido</value>
+    <value>Notificação do ${LetterLogoText}. O formulário está preenchido</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Notificação do DocSpace.</value>
+    <value>Notificação do ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Documentos. O envio foi concluído.</value>
@@ -283,7 +283,7 @@ $Message</value>
     <value>O envio foi concluído.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Notificação do DocSpace. Sala eliminada</value>
+    <value>Notificação do ${LetterLogoText}. Sala eliminada</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Documentos. Acesso autorizado para o documento $DocumentTitle</value>
@@ -307,9 +307,9 @@ $Message</value>
     <value>Documentos. Acesso concedido à pasta: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Notificação do DocSpace.</value>
+    <value>Notificação do ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Notificação do DocSpace.</value>
+    <value>Notificação do ${LetterLogoText}.</value>
   </data>
 </root>

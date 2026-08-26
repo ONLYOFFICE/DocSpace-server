@@ -895,7 +895,7 @@
     <value>전송</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>사용자 {0}님이 {1}님에게 이 DocSpace에 참여하라는 초대장을 보냈습니다</value>
+    <value>사용자 {0}님이 {1}님에게 초대장을 보냈습니다</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>초대 지침이 전송되었습니다: {0}</value>

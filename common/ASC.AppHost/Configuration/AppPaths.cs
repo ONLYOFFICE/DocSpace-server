@@ -60,6 +60,17 @@ public static class AppPaths
     }
 
     /// <summary>
+    /// <c>web:temp</c> for the integration-test profile. Without it every service falls back to
+    /// <c>&lt;ContentRoot&gt;/temp</c> (see <c>TempPath</c>) and litters the source tree — e.g.
+    /// <c>products/ASC.Files/Worker/temp</c>. Keeping it inside the test storage root means the
+    /// existing cleanup wipes it along with the rest of the run's data.
+    /// </summary>
+    public static string GetTestTempDirectory(string basePath)
+    {
+        return Path.Combine(GetTestStorageRoot(basePath), "temp");
+    }
+
+    /// <summary>
     /// Log directory for the integration-test profile.
     /// </summary>
     public static string GetTestLogsDirectory(string basePath)

@@ -35,9 +35,15 @@ import { randomUUID } from "node:crypto";
 
 import date from "date-and-time";
 import { aiService, AiServiceHttpError, proxyBaseUrl, withTimeout } from "./httpClient.js";
-import { getFolderInfo, getAgentResultStorageId } from "./docspaceFilesApi.js";
+import {
+  getFolderInfo,
+  getAgentResultStorageId,
+  getMyDocumentsFolderId,
+  canTakeUpload,
+} from "./docspaceFilesApi.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { getNumber, getString, isObject } from "../narrow.js";
+import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
@@ -142,28 +148,52 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
   const url = `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(folderId)}/insert`;
   // Don't set Content-Type — `fetch` derives the multipart boundary from the
   // FormData body, and `getForwardedHeaders` strips content-type anyway.
+  const headers = getForwardedHeaders();
+  // Diagnostics for a failing generated-image upload: the request as it
+  // actually goes out. Header NAMES only (a value would leak the session
+  // cookie) — what matters is whether `cookie` / `authorization` is there at
+  // all, since a lost request context uploads anonymously and answers 401.
+  logger.info(
+    `insertGeneratedImage: POST ${url} title=${fileName} mime=${mime} bytes=${bytes.length} ` +
+      `auth=[${Object.keys(headers).filter((h) => h === "cookie" || h === "authorization").join(",") || "NONE"}] ` +
+      `forwarded=[${Object.keys(headers).sort().join(",")}]`,
+  );
   const { signal, cancel } = withTimeout(undefined);
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: getForwardedHeaders(),
+      headers,
       body: form,
       signal,
     });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
+      logger.error(
+        `insertGeneratedImage: POST ${url} -> ${res.status} ${res.statusText}; ` +
+          `body=${text.slice(0, 1000)}`,
+      );
       throw new AiServiceHttpError(res.status, res.statusText, text, url);
     }
     const json: unknown = await res.json();
     const file = isObject(json) && "response" in json ? json.response : json;
     if (!isObject(file)) {
+      logger.error(
+        `insertGeneratedImage: POST ${url} -> 200 but unexpected payload=${JSON.stringify(json).slice(0, 1000)}`,
+      );
       throw new Error("DocSpace insert returned an unexpected payload");
     }
     const numId = getNumber(file, "id");
     const id = numId !== undefined ? String(numId) : getString(file, "id");
     if (id === undefined) {
+      logger.error(
+        `insertGeneratedImage: POST ${url} -> 200 but no file id in payload=${JSON.stringify(file).slice(0, 1000)}`,
+      );
       throw new Error("DocSpace insert returned a file without an id");
     }
+    logger.info(
+      `insertGeneratedImage: POST ${url} -> 200 entryId=${id} title=${getString(file, "title") ?? "?"} ` +
+        `folderId=${String(getNumber(file, "folderId") ?? getString(file, "folderId") ?? "?")}`,
+    );
     return id;
   } finally {
     cancel();
@@ -265,11 +295,17 @@ function dtoToAttachment(raw: unknown): Attachment | null {
   if (entryId !== undefined) {
     result.path = title ? `${entryId}/${title}` : entryId;
   }
-  // Forward-compat: pick up `type` (ONLYOFFICE file type code) once C#
-  // starts echoing it. Today it isn't included in `AttachmentDto`, so the
-  // value is back-filled from the original input in `createMany`.
-  const type = getNumber(raw, "type");
-  if (type !== undefined) {
+  // `type` is derived from the title here, NOT taken from the DTO: C#
+  // added `AttachmentDto.Type` in Bug 83003, but it carries the DocSpace
+  // `FileType` category enum (Document = 7, Spreadsheet = 5, ...), while
+  // `Attachment.type` is an ONLYOFFICE `c_oAscFileType` code (docx = 65)
+  // — the scale the widget's chip resolves its icon from. Trusting the DTO
+  // value left every chip on the "unknown format" icon, and the category
+  // cannot be widened back into a code anyway, so recompute it from the
+  // file name (which is exactly what C# maps its own value from). Fresh
+  // attaches still prefer the caller's own code, see `createMany`.
+  const type = getOnlyofficeFileType(title);
+  if (type !== 0) {
     result.type = type;
   }
   // Origin marker (0.4.132+). C# doesn't echo it today, so it's normally
@@ -296,6 +332,22 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     }
 
     const result: (Attachment | null)[] = new Array(inputs.length).fill(null);
+
+    // One line per create batch: the shape the engine handed us. A
+    // `source=tool` row with `entityId=-` is the silent no-scope case (the
+    // upload cannot run at all); `source=user` rows carry a DocSpace `path`.
+    logger.info(
+      `HttpAttachmentsStorage.createMany: ${inputs.length} input(s) ` +
+        inputs
+          .map(
+            (input, i) =>
+              `#${i}{kind=${input.kind} source=${input.source ?? "user"} ` +
+              `entityId=${input.entityId ?? "-"} path=${input.path ?? "-"} ` +
+              `title=${input.title ?? "-"} base64=${input.base64?.length ?? 0}B ` +
+              `messageId=${input.messageId ?? "-"} threadId=${input.threadId ?? "-"}}`,
+          )
+          .join(" "),
+    );
 
     // 0.4.132+: tool-generated images (`generate_image`) arrive as raw base64
     // with `source === "tool"` and no DocSpace entry. Upload the bytes as a
@@ -390,11 +442,11 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         );
         throw new Error(`ai service did not return attachment for entryId=${entryId}`);
       }
-      // C# `AttachmentDto` doesn't echo `type` (ONLYOFFICE file type code),
-      // so fall back to the value the caller supplied on input. Once C#
-      // starts echoing `type`, `dtoToAttachment` will already have set it
-      // and we won't overwrite.
-      if (matched.type === undefined && input.type !== undefined) {
+      // The caller's own `type` wins over the title-derived one from
+      // `dtoToAttachment`: it comes from the same `c_oAscFileType` table but
+      // is authoritative for the entry being attached (the host knows the
+      // extension it resolved), so an unmapped title can still carry a code.
+      if (input.type !== undefined) {
         matched.type = input.type;
       }
       result[i] = matched;
@@ -418,21 +470,54 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
   // attachment `id` as a lightweight ref.
   private async uploadToolImage(input: Omit<Attachment, "id" | "createdAt">): Promise<Attachment> {
     if (!input.base64) {
+      // Logged here, not only thrown: both of these throws are OUTSIDE the
+      // try below, so the engine catches them into its own console-only
+      // logger and the file log would show nothing at all.
+      logger.error(
+        `uploadToolImage: no base64 payload (entityId=${input.entityId ?? "-"} title=${input.title ?? "-"}) ` +
+          "— the generated image cannot be persisted",
+      );
       throw new Error("tool image attachment is missing its base64 payload");
     }
     if (!input.entityId) {
+      logger.error(
+        "uploadToolImage: no entityId (target folder) — the chat round was sent without an entity scope, " +
+          "so there is nowhere to upload the generated image; the engine keeps the raw base64 in the tool result " +
+          `(title=${input.title ?? "-"} base64=${input.base64.length}B)`,
+      );
       throw new Error("tool image attachment is missing entityId (target folder)");
     }
+    logger.info(
+      `uploadToolImage: begin entityId=${input.entityId} title=${input.title ?? "-"} ` +
+        `base64=${input.base64.length}B payload=${input.base64.startsWith("data:") ? "data-url" : "bare-base64"}`,
+    );
 
     // Agent rooms must not hold generated files directly — artifacts belong
-    // in the agent's Result Storage system subfolder. Plain folders keep
-    // taking the upload as-is. Log each step and rethrow with context: the
-    // engine swallows persist failures into its console-only logger, so
-    // without this the file log shows nothing when an upload dies.
+    // in the agent's Result Storage system subfolder. A plain folder takes the
+    // upload as-is when it can hold one at all: the chat's scope follows the
+    // user's location, so it is regularly somewhere no file may be created —
+    // the "Rooms" root, an archived room, a room the user only reads. The
+    // Files API answers those with `Access denied`
+    // (`FileUploader.GetFolderIdAsync`), so such a scope falls back to the
+    // user's own "My documents" instead of losing the image.
+    //
+    // Every step is logged and `stage` names the one that failed for the catch
+    // below: the engine swallows persist failures into its console-only
+    // logger, so without this the file log shows nothing when an upload dies,
+    // and a 404 from the folder read reads exactly like a 404 from the insert.
+    let stage = "folder-info";
     try {
       let targetFolderId = input.entityId;
       const folderInfo = await getFolderInfo(input.entityId);
+      logger.info(
+        `uploadToolImage: folder-info entityId=${input.entityId} -> ` +
+          (folderInfo
+            ? `isAgent=${folderInfo.isAgent} title=${folderInfo.title ?? "-"} ` +
+                `folderType=${folderInfo.folderType ?? "?"} canCreate=${folderInfo.canCreate ?? "?"}`
+            : "NOT FOUND (404 or unparseable) — the scope is not a folder this user can read"),
+      );
       if (folderInfo?.isAgent) {
+        stage = "result-storage";
         const resultStorageId = await getAgentResultStorageId(input.entityId);
         if (!resultStorageId) {
           throw new Error(
@@ -440,12 +525,51 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
           );
         }
         targetFolderId = resultStorageId;
+      } else if (!canTakeUpload(folderInfo)) {
+        stage = "my-documents";
+        const myDocumentsId = await getMyDocumentsFolderId();
+        if (!myDocumentsId) {
+          throw new Error(
+            `the chat scope ${input.entityId} cannot take an upload and "My documents" could not be resolved`,
+          );
+        }
+        logger.warn(
+          `uploadToolImage: scope ${input.entityId} cannot take an upload ` +
+            `(folderType=${folderInfo?.folderType ?? "?"} canCreate=${folderInfo?.canCreate ?? "?"}) ` +
+            `-> falling back to My documents ${myDocumentsId}`,
+        );
+        targetFolderId = myDocumentsId;
       }
       logger.info(
         `uploadToolImage: entityId=${input.entityId} isAgent=${folderInfo?.isAgent ?? "unknown"} -> target folder ${targetFolderId}`,
       );
 
-      const entryId = await insertGeneratedImage(targetFolderId, input.base64);
+      stage = "insert";
+      let entryId: string;
+      try {
+        entryId = await insertGeneratedImage(targetFolderId, input.base64);
+      } catch (err) {
+        // `FolderDto.Security` is computed for the folder view-model while
+        // `FileUploader` re-checks the right server-side, so the preflight
+        // above can pass on a target the upload still refuses. Give the image
+        // the same second chance a refused scope gets.
+        if (!(err instanceof AiServiceHttpError) || err.status !== 403) {
+          throw err;
+        }
+        stage = "my-documents";
+        const myDocumentsId = await getMyDocumentsFolderId();
+        if (!myDocumentsId || myDocumentsId === targetFolderId) {
+          throw err;
+        }
+        logger.warn(
+          `uploadToolImage: insert into folder ${targetFolderId} was refused (403) ` +
+            `-> retrying into My documents ${myDocumentsId}`,
+        );
+        stage = "insert-retry";
+        entryId = await insertGeneratedImage(myDocumentsId, input.base64);
+        targetFolderId = myDocumentsId;
+      }
+      stage = "attachment-record";
 
       // Reuse the entry-based path: `path` routes this back through the
       // DocSpace branch of `createMany` (no `source`, so it won't recurse
@@ -457,11 +581,20 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
         throw new Error("failed to create attachment for uploaded tool image");
       }
       attachment.source = "tool";
+      // The id logged here is the `ref` the engine splices into the tool
+      // result and the widget then resolves through `GET /attachments/{id}`
+      // — grep the same id in `readById` below to see whether the ref that
+      // reached the browser resolved or 404'd.
+      logger.info(
+        `uploadToolImage: ok entityId=${input.entityId} folder=${targetFolderId} ` +
+          `entryId=${entryId} ref=${attachment.id} ` +
+          `title=${attachment.title} hasDataUrl=${attachment.base64 !== undefined}`,
+      );
       return attachment;
     } catch (err) {
       logger.error(
-        `uploadToolImage: entityId=${input.entityId} failed: ${
-          err instanceof Error ? err.message : String(err)
+        `uploadToolImage: entityId=${input.entityId} FAILED at stage=${stage}: ${
+          err instanceof Error ? `${err.message}${err.stack ? `\n${err.stack}` : ""}` : String(err)
         }`,
       );
       // Don't rethrow: the engine's fallback would splice the raw base64
@@ -471,13 +604,19 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       // chat stores a lightweight dangling ref (`readById` returns null,
       // the preview shows as unavailable) and the failure stays visible
       // only in the log above.
-      return {
+      const placeholder: Attachment = {
         id: randomUUID(),
         kind: "image",
         title: input.title,
         createdAt: Date.now(),
         source: "tool",
       };
+      logger.error(
+        `uploadToolImage: returning an UNRESOLVABLE placeholder ref=${placeholder.id} — ` +
+          "nothing was persisted, so the stream carries a ref the chat can never hydrate " +
+          "(broken image in the message, no file in DocSpace)",
+      );
+      return placeholder;
     }
   }
 
@@ -485,12 +624,28 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       const a = dtoToAttachment(raw);
-      if (a) {
-        await inlineImagesAsync([a]);
+      if (!a) {
+        logger.warn(
+          `HttpAttachmentsStorage.readById(${id}): unusable payload (missing id/title/kind) ` +
+            `raw=${JSON.stringify(raw).slice(0, 500)}`,
+        );
+        return a;
       }
+      await inlineImagesAsync([a]);
+      logger.info(
+        `HttpAttachmentsStorage.readById(${id}) -> kind=${a.kind} title=${a.title} ` +
+          `path=${a.path ?? "-"} hasDataUrl=${a.base64 !== undefined}`,
+      );
       return a;
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
+        // The dangling-ref tell: the chat asked for an attachment that was
+        // never persisted (see the placeholder log in `uploadToolImage`) or
+        // has since been deleted — e.g. reaped by the AI worker's
+        // orphan-attachment cleaner, which drops rows with no message id.
+        logger.warn(
+          `HttpAttachmentsStorage.readById(${id}): 404 — DANGLING REF, the chat cannot hydrate this attachment`,
+        );
         return null;
       }
       throw err;
@@ -513,6 +668,13 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     }
 
     const result = ids.map((id) => byId.get(id) ?? null);
+    const missing = ids.filter((id) => !byId.has(id));
+    if (missing.length > 0) {
+      logger.warn(
+        `HttpAttachmentsStorage.readManyByIds: ${missing.length}/${ids.length} DANGLING REF(s) ` +
+          `not returned by the backend: ${missing.join(", ")}`,
+      );
+    }
     await inlineImagesAsync(result);
     return result;
   }

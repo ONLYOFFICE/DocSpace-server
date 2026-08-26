@@ -500,7 +500,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
     <value>Creator de conținut</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Administrator DocSpace</value>
+    <value>Administrator complet</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>

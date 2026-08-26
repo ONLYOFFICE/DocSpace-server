@@ -240,6 +240,34 @@ public class FileCopyTests(
     }
 
     [Fact]
+    public async Task CopyFile_ToFormsRoot_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("source_file.docx", Owner);
+
+        var formsRootId = await GetFolderIdAsync(FolderType.Forms, Owner);
+
+        // Act
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(formsRootId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
+                copyParams,
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
     public async Task CopyFile_ToAnotherUsersFolder_ReturnsError()
     {
         // Arrange

@@ -835,7 +835,7 @@
     <value>送信する</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>ユーザー{0}は{1}にこのDocSpaceへの招待を送信しました</value>
+    <value>ユーザー{0}は{1}に招待を送信しました</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>手順は送信された：{0}</value>

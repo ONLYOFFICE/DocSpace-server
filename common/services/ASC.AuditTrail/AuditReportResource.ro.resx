@@ -637,7 +637,7 @@
     <value>Conectarea unică nu a reușit</value>
   </data>
   <data name="LoginFailViaTfaApp" xml:space="preserve">
-    <value>Conectarea unică nu a reușit</value>
+    <value>Conectarea prin aplicația de autentificare nu a reușit</value>
   </data>
   <data name="LoginHistoryReportDownloaded" xml:space="preserve">
     <value>Raport Istoric de Conectări a fost încărcat</value>
@@ -901,7 +901,7 @@
     <value>Trimitere</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Utilizatorul {0} a trimis invitația de asociere la DocSpace către {1}</value>
+    <value>Utilizatorul {0} a trimis o invitație către {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instrucțiuni de invitare au fost trimise: {0}</value>
