@@ -2177,7 +2177,7 @@ public class FileStorageService //: IFileStorageService
             properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
 
             await fileDao.SaveProperties(fileId, properties);
-            await socketManager.CreateFileAsync(file);
+            await socketManager.UpdateFileAsync(file);
         }
 
         return file;

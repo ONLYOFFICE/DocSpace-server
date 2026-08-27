@@ -226,7 +226,10 @@ const forwardingFetch: FetchLike = async (url, init) => {
 // Map each preconfigured MCP server onto a system-tools entry keyed by its
 // name (the `serverType` used for per-tool prefs and approval grouping).
 function buildServers(): Record<string, McpHttpServerConfig> {
-  const servers: Record<string, McpHttpServerConfig> = {};
+  // Null prototype: the keys are config-provided names, but lookups arrive
+  // with CLIENT-supplied names — "constructor"/"toString" must miss, not
+  // resolve to an inherited Object.prototype member (Bug 82986).
+  const servers: Record<string, McpHttpServerConfig> = Object.create(null);
   for (const server of getMcpServers()) {
     servers[server.name] = { url: server.endpoint };
   }
@@ -246,7 +249,10 @@ const serverNames = Object.keys(servers);
 export function getSystemServerConfig(
   name: string,
 ): McpHttpServerConfig | undefined {
-  return servers[name];
+  // Own-property only — belt to the null-prototype braces above; a name
+  // that is not a configured system server must yield undefined so the
+  // caller's own config is validated instead (Bug 82986).
+  return Object.hasOwn(servers, name) ? servers[name] : undefined;
 }
 
 if (serverNames.length > 0) {
@@ -265,10 +271,11 @@ const source = new SystemToolsSource({
 // custom-servers map in `/mcp-servers` (managed by the agent
 // create/edit dialog through the new-ai `tools/*` routes): an entry whose
 // name matches a system server acts as the "enabled" marker for it.
-// Returns `undefined` when `entityId` is absent or not an agent room — no
-// filtering, the full configured set stays available. Fails closed: if the
-// whitelist cannot be resolved, an agent gets no system MCP tools rather
-// than all of them.
+// Returns `undefined` when `entityId` is absent, not an agent room, or the
+// agent has no stored server map at all (never configured — no restriction,
+// Bug 82991) — no filtering, the full configured set stays available. Fails
+// closed only on a resolution ERROR: then an agent gets just the portal MCP
+// server rather than everything.
 async function agentServerWhitelist(
   entityId: string | undefined,
 ): Promise<Set<string> | undefined> {
@@ -284,6 +291,14 @@ async function agentServerWhitelist(
   // keeps it too).
   try {
     const servers = await storage.mcpServers.readAll(agentId);
+    // An agent with NO stored server map has simply never configured one:
+    // that means "no restriction", not "deny all" — a fresh agent used to
+    // get an empty catalog from list-system-tools because everything was
+    // filtered out (Bug 82991). The whitelist kicks in only once the agent
+    // has explicit marker entries.
+    if (Object.keys(servers).length === 0) {
+      return undefined;
+    }
     return new Set([...Object.keys(servers), PORTAL_MCP_SERVER_NAME]);
   } catch (err) {
     logger.error(
