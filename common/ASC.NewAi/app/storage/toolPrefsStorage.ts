@@ -31,7 +31,11 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
+import {
+  PORTAL_MCP_SERVER_NAME,
+  DOCSPACE_INTEGRATION_SERVER_TYPE,
+  DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+} from "../../config/index.js";
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
@@ -175,6 +179,31 @@ function withoutPortalServer(
   return rest;
 }
 
+// The DocSpace integration tools are one logical source split over two group
+// keys only because the engine gates approval per serverType (the approval
+// tools live under the `-approval` group). A user disabling e.g.
+// docspace_generate_docx cannot know which of the two keys the tool is
+// grouped under — the split is an implementation detail — so on read the two
+// disabled lists are merged and served under BOTH keys: a name disabled
+// under either takes effect regardless of the group the tool is emitted in
+// (Bug 83013). The filter matches names within a group, so an unrelated
+// name in the merged list is inert.
+function aliasIntegrationGroups(
+  disabled: Record<string, string[]>,
+): Record<string, string[]> {
+  const base = disabled[DOCSPACE_INTEGRATION_SERVER_TYPE] ?? [];
+  const approval = disabled[DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE] ?? [];
+  if (base.length === 0 && approval.length === 0) {
+    return disabled;
+  }
+  const merged = [...new Set([...base, ...approval])];
+  return {
+    ...disabled,
+    [DOCSPACE_INTEGRATION_SERVER_TYPE]: merged,
+    [DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE]: merged,
+  };
+}
+
 async function putDisabled(
   disabled: Record<string, string[]>,
   entityId: string | undefined,
@@ -210,7 +239,7 @@ export class HttpToolPrefsStorage implements ToolPrefsStorage {
   async readDisabled(entityId?: string): Promise<Record<string, string[]>> {
     try {
       const raw = await readToolPrefsRaw(entityId);
-      return withoutPortalServer(parseDisabled(raw));
+      return aliasIntegrationGroups(withoutPortalServer(parseDisabled(raw)));
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return {};

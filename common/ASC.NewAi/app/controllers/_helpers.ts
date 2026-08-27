@@ -35,6 +35,43 @@ import type { Request, Response, NextFunction, RequestHandler } from "express";
 import logger from "../log.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
+import { isObject } from "../narrow.js";
+
+// Mirror of the widget composer's per-kind attachment cap (ATTACHMENT_LIMIT
+// in the chat library's attachments store): at most 5 file parts and 5
+// image parts per user message. The UI cannot exceed it, so only direct API
+// callers hit this (Bug 82894).
+const MAX_ATTACHMENTS_PER_KIND = 5;
+
+/**
+ * Validation error when a user message carries more attachment parts than
+ * the composer allows, or `null` when the message is within limits (or has
+ * no part-array content at all — shape errors are for other validators).
+ */
+export function attachmentLimitError(userMessage: unknown): string | null {
+  if (!isObject(userMessage)) {
+    return null;
+  }
+  const content = userMessage["content"];
+  if (!Array.isArray(content)) {
+    return null;
+  }
+  let files = 0;
+  let images = 0;
+  for (const part of content) {
+    if (!isObject(part)) continue;
+    if (part["type"] === "file") files += 1;
+    else if (part["type"] === "image") images += 1;
+  }
+  if (files > MAX_ATTACHMENTS_PER_KIND || images > MAX_ATTACHMENTS_PER_KIND) {
+    return (
+      `a message may carry at most ${MAX_ATTACHMENTS_PER_KIND} file and ` +
+      `${MAX_ATTACHMENTS_PER_KIND} image attachments ` +
+      `(got ${files} file(s), ${images} image(s))`
+    );
+  }
+  return null;
+}
 
 export type TypedRequest<ReqBody = unknown, ReqQuery = Record<string, unknown>> = Request<
   Record<string, string>,
