@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -356,13 +356,30 @@ public class FileShareTests(
     [Fact]
     public async Task PrimaryExternalLink_WithDateExpired_ReturnsFileData()
     {
-        // Arrange and Act
-        const int seconds = 1;
-        var (share, fileId) = await CreateFileAndShare(FileShare.Read, expirationDate: DateTime.UtcNow.AddSeconds(seconds));
-        await Task.Delay(TimeSpan.FromSeconds(seconds), TestContext.Current.CancellationToken);
+        // Arrange and Act - the margin must survive the round trips inside CreateFileAndShare: an
+        // expiration that is already past when the server stores it is silently discarded, leaving a
+        // link that never expires.
+        var (share, fileId) = await CreateFileAndShare(FileShare.Read, expirationDate: DateTime.UtcNow.AddSeconds(5));
 
-        // Assert
-        await TryOpenEditAsync(share, fileId, throwException: true);
+        // Assert - the expiry is enforced by the server clock, so a fixed one-second sleep races it.
+        // Retry the open until the refusal arrives; the deadline ending the loop rethrows the last
+        // assertion, which then reports that the link never expired.
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+            try
+            {
+                await TryOpenEditAsync(share, fileId, throwException: true);
+                return;
+            }
+            catch (Exception) when (DateTime.UtcNow < deadline)
+            {
+                await Task.Delay(1000, TestContext.Current.CancellationToken);
+            }
+        }
     }
 
     [Fact]

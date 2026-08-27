@@ -46,4 +46,7 @@ internal static partial class CreateRoomFromTemplateOperationLogger
 
     [LoggerMessage(LogLevel.Warning, "CreateRoomFromTemplateOperation")]
     public static partial void WarningCanNotCopyFolder(this ILogger<CreateRoomFromTemplateOperation> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "CreateRoomFromTemplateOperation: the room was created but its quota could not be applied")]
+    public static partial void WarningCanNotApplyQuota(this ILogger<CreateRoomFromTemplateOperation> logger, Exception exception);
 }

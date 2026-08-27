@@ -80,7 +80,11 @@ public class FileSharingAceHelper(
         var file = entry as File<T>;
         var room = folder is { IsRoom: true } ? folder : null;
 
-        if (!aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None) &&
+        // TrueForAll is vacuously true on an empty list, which would skip the CanSetAccess guard for
+        // callers whose requested shares were all filtered out upstream (e.g. a guest sharing to users).
+        var selfLeave = aceWrappers.Count > 0 && aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None);
+
+        if (!selfLeave &&
             !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r,_) =>
             {
                 var roomType = room?.FolderType;
@@ -169,7 +173,8 @@ public class FileSharingAceHelper(
 
             if (room != null)
             {
-                if (folder.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+                // createIfNotExist: false — a missing room-templates root cannot be anyone's root
+                if (folder.RootId is int root && root == await globalFolderHelper.GetFolderRoomTemplatesAsync(false))
                 {
                     if (w.Access != FileShare.Read && w.Access != FileShare.None || w.SubjectType != SubjectType.User && w.SubjectType != SubjectType.Group)
                     {
@@ -268,7 +273,7 @@ public class FileSharingAceHelper(
                 }
 
                 if (room.RootId is int root &&
-                    root != await globalFolderHelper.FolderRoomTemplatesAsync &&
+                    root != await globalFolderHelper.GetFolderRoomTemplatesAsync(false) &&
                     (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) ||
                      !userAccesses.Contains(w.Access)))
                 {
@@ -905,6 +910,13 @@ public class FileSharing(
 
         foreach (var entry in entries)
         {
+            // The single-entry overload degrades a denied entry to an empty list because background
+            // consumers rely on that; the API batch must report the denial instead of hiding it.
+            if (!await fileSecurity.CanReadAsync(entry))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
             IEnumerable<AceWrapper> acesForObject;
             try
             {

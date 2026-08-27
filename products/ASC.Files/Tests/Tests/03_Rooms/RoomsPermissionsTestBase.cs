@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -42,19 +42,6 @@ public abstract class RoomsPermissionsTestBase(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    /// <summary>
-    /// Adds a member of the given type to the portal. Guests cannot be created through
-    /// <see cref="BaseTest.InviteContact"/> — they only come into existence by being invited into a
-    /// room by e-mail, which is what <see cref="BaseTest.InviteGuest"/> does. This dispatcher keeps
-    /// the role-parameterised theories working with a single call site.
-    /// </summary>
-    protected async Task<User> InviteMember(EmployeeType employeeType)
-    {
-        return employeeType == EmployeeType.Guest
-            ? await InviteGuest()
-            : await InviteContact(employeeType);
-    }
-
     /// <summary>Creates a room, turns it into a template with the given visibility and returns its id.</summary>
     protected async Task<int> CreateTemplate(string title, bool isPublic)
     {
@@ -162,17 +149,6 @@ public abstract class RoomsPermissionsTestBase(
         return await _filesClient.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
-    /// <summary>Terminates a portal member, acting as the portal owner.</summary>
-    protected async Task TerminateUser(User user)
-    {
-        await _peopleClient.Authenticate(Owner);
-
-        await _userStatusApi.UpdateUserStatusAsync(
-            EmployeeStatus.Terminated,
-            new UpdateMembersRequestDto([user.Id], resendAll: false),
-            TestContext.Current.CancellationToken);
-    }
-
     /// <summary>Creates a tag and attaches it to a freshly created room, so the tag has a link.</summary>
     protected async Task SeedLinkedTag(string tagName)
     {
@@ -183,23 +159,4 @@ public abstract class RoomsPermissionsTestBase(
         await _roomsApi.AddRoomTagsAsync(room.Id, new BatchTagsRequestDto([tagName]), TestContext.Current.CancellationToken);
     }
 
-    /// <summary>Archives a room and waits for the asynchronous operation to finish.</summary>
-    protected async Task ArchiveRoom(int roomId)
-    {
-        await _roomsApi.ArchiveRoomAsync(roomId, new ArchiveRoomRequest(false), TestContext.Current.CancellationToken);
-        await WaitLongOperation();
-    }
-
-    /// <summary>Invites an existing portal member into a room with the given access level.</summary>
-    protected async Task InviteToRoom(int roomId, User user, FileShare access)
-    {
-        await _roomsApi.SetRoomSecurityAsync(
-            roomId,
-            new RoomInvitationRequest
-            {
-                Invitations = [new RoomInvitation { Id = user.Id, Access = access }],
-                Notify = false
-            },
-            cancellationToken: TestContext.Current.CancellationToken);
-    }
 }
