@@ -213,6 +213,7 @@ public class FoldersControllerInternal(
     }
 }
 
+[ConstraintRoute("thirdparty", AffectsOrder = false)]
 public class FoldersControllerThirdparty(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,

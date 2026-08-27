@@ -500,7 +500,7 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
     <value>Tvůrce obsahu</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Správce DocSpace</value>
+    <value>Úplný správce</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>

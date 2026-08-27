@@ -42,9 +42,25 @@ function entityIdQuery(entityId: string | undefined): Record<string, QueryValue>
   return entityId ? { entityId } : undefined;
 }
 
+// Writes and reads must agree on the scope key. Reads fold a non-agent
+// entityId to the global scope (`resolveAgentEntityId` → undefined), so a
+// write keyed by a raw room/folder id would store a row no read ever sees —
+// the deep-mode toggle flipped from an ordinary room appeared saved but
+// read back as the portal value, and a folder id 403'd in the C# PUT
+// (Bug 82900). Scope resolution here mirrors threads and tool prefs: the
+// scope ladder is global-or-agent by design (Bug 82719).
+async function scopedEntityId(
+  entityId: string | undefined,
+): Promise<string | null> {
+  return (await resolveAgentEntityId(entityId)) ?? null;
+}
+
 export class HttpPreferencesStorage implements PreferencesStorage {
   async createDeepMode(value: boolean, entityId?: string): Promise<void> {
-    await aiService.put(PATH, { deepMode: value, entityId: entityId ?? null });
+    await aiService.put(PATH, {
+      deepMode: value,
+      entityId: await scopedEntityId(entityId),
+    });
   }
 
   async readDeepMode(entityId?: string): Promise<boolean | null> {
@@ -64,16 +80,22 @@ export class HttpPreferencesStorage implements PreferencesStorage {
   }
 
   async updateDeepMode(value: boolean, entityId?: string): Promise<void> {
-    await aiService.put(PATH, { deepMode: value, entityId: entityId ?? null });
+    await aiService.put(PATH, {
+      deepMode: value,
+      entityId: await scopedEntityId(entityId),
+    });
   }
 
   async upsertDeepMode(value: boolean, entityId?: string): Promise<void> {
-    await aiService.put(PATH, { deepMode: value, entityId: entityId ?? null });
+    await aiService.put(PATH, {
+      deepMode: value,
+      entityId: await scopedEntityId(entityId),
+    });
   }
 
   async deleteDeepMode(entityId?: string): Promise<void> {
     try {
-      const query = entityIdQuery(entityId);
+      const query = entityIdQuery(await resolveAgentEntityId(entityId));
       await aiService.delete(PATH, query ? { query } : undefined);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {

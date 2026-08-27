@@ -11,7 +11,8 @@
     ],
     "additionalDirectories": [
       "../buildtools/config",
-      "../Logs"
+      "../Logs",
+      "../tests"
     ]
   }
 }

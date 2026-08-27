@@ -211,7 +211,7 @@
     <value>Spațiu de stocare pentru agenți de IA a fost depășit</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Definirea cotei de stocare per agent nu a reușit. Valoarea introdusă depășește  cota spațiului de stocare DocSpace.</value>
+    <value>Definirea cotei de stocare per agent nu a reușit. Valoarea introdusă depășește spațiul total de stocare.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Reînnoire automată</value>
@@ -865,7 +865,7 @@
     <value>Prea multe încercări de conectare. Încercați din nou mai târziu</value>
   </data>
   <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Adăugați cel puțin o adresă IP permisă.</value>
+    <value>Adăugați cel puțin un domeniu de încredere.</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Utilizatorul este dezactivat</value>
@@ -1120,7 +1120,7 @@
     <value>Spațiu de stocare pentru sala  a fost depășit</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Definirea cotei de stocare per sală nu a reușit. Valoarea introdusă depășește cota spațiului de stocare DocSpace.</value>
+    <value>Definirea cotei de stocare per sală nu a reușit. Valoarea introdusă depășește spațiul total de stocare.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asia Pacific (Singapore)</value>
@@ -1285,7 +1285,7 @@
     <value>A intervenit o eroare neaşteptată. Încercaţi din nou.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Ați conectat cu succes contul Telegram pentru a primi notificări de DocSpace.</value>
+    <value>Ați conectat cu succes contul Telegram pentru a primi notificări din spațiul de lucru.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Cod incorect</value>
@@ -1300,7 +1300,7 @@
     <value>Spațiu de stocare pentru utilizatori  a fost depășit</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Definirea cotei de stocare per utilizator nu a reușit. Valoarea introdusă depășește cota spațiului de stocare DocSpace.</value>
+    <value>Definirea cotei de stocare per utilizator nu a reușit. Valoarea introdusă depășește spațiul total de stocare.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Regiunea US West (Oregon)</value>

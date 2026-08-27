@@ -211,7 +211,7 @@
     <value>Cota de espaço do agente de IA excedida</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a quota por agente de IA. O valor inserido é maior que o armazenamento total do DocSpace.</value>
+    <value>Falha ao definir a quota por agente de IA. O valor inserido é maior que o armazenamento total.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Renovação automática</value>
@@ -460,7 +460,7 @@
     <value>Segredo de cliente</value>
   </data>
   <data name="ConsumersMicrosoftDescription" xml:space="preserve">
-    <value>Habilite o aplicativo para entrar no portal usando uma conta Apple ID.</value>
+    <value>Habilite o aplicativo para entrar no portal usando uma conta Microsoft.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
     <value>Habilite este aplicativo para permitir que seus usuários façam login no {LogoText} usando a Microsoft. {0} Vá para o Microsoft Azure e crie uma nova integração de aplicativo {LogoText}. Insira os dados que você recebeu abaixo:</value>
@@ -583,7 +583,7 @@
     <value>Token de bot</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Collega l'account Telegram per ricevere le notifiche del portale tramite Telegram.</value>
+    <value>Conecte a conta do Telegram para receber notificações do portal via Telegram.</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Para receber notificações do portal via Telegram, habilite o Telegram bot. Você pode criar um novo bot usando BotFather in Telegram Desktop. Para usar este bot, os usuários do portal precisam ativar as notificações por telegrama em sua página de perfil. {0}Colar o nome de usuário do bot e o token que você recebeu nos campos abaixo.</value>
@@ -1120,7 +1120,7 @@
     <value>Cota de espaço da sala excedida</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a cota por sala. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+    <value>Falha ao definir a cota por sala. O valor inserido é maior do que o armazenamento total.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Ásia-Pacífico (Cingapura)</value>
@@ -1285,7 +1285,7 @@
     <value>Ocorreu um erro inesperado. Tente novamente.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Você se conectou com sucesso ao Telegram para receber notificações do seu DocSpace.</value>
+    <value>Você se conectou com sucesso ao Telegram para receber notificações do seu espaço de trabalho.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Código incorreto</value>
@@ -1300,7 +1300,7 @@
     <value>Cota de espaço do usuário excedida</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a cota por usuário. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+    <value>Falha ao definir a cota por usuário. O valor inserido é maior do que o armazenamento total.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Região Oeste dos EUA (Oregon)</value>

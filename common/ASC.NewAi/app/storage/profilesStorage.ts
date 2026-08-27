@@ -33,6 +33,7 @@
 
 import { aiService, AiServiceHttpError, aiServiceBaseUrl } from "./httpClient.js";
 import { isObject, getString, getNumber, getBoolean } from "../narrow.js";
+import logger from "../log.js";
 import {
   getForwardedHeaders,
   shouldForwardHeadersToProvider,
@@ -163,9 +164,48 @@ export class HttpProfilesStorage implements ProfilesStorage {
   async readById(id: string): Promise<Profile | undefined> {
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
-      return withOnlyofficeProviderOverrides(dtoToProfile(raw));
+      const profile = withOnlyofficeProviderOverrides(dtoToProfile(raw));
+      // The provider override above rewrites `baseUrl` to the INTERNAL
+      // gateway address and merges the caller's forwarded auth headers —
+      // exactly what in-process provider calls (chat engine, openai
+      // passthrough) need, and exactly what must never leave the process.
+      // HTTP responses use `readByIdRaw` below instead (Bug 82821).
+      // The provider a round (or the image tool) is about to call, AFTER the
+      // onlyoffice override — so `baseUrl` is the portal's own gateway path
+      // for paid profiles and the raw provider URL otherwise. `key` is only
+      // reported as present/absent; never logged.
+      logger.info(
+        profile
+          ? `HttpProfilesStorage.readById(${id}) -> providerType=${profile.providerType} ` +
+              `model=${profile.modelId} baseUrl=${profile.baseUrl} hasKey=${profile.key !== undefined} ` +
+              `capabilities=${profile.capabilities ?? "-"} canUseTool=${profile.canUseTool ?? "-"} ` +
+              `useProxy=${profile.useProxy ?? "-"} isCloud=${profile.isCloudProvider ?? "-"} ` +
+              `headers=[${Object.keys(profile.headers ?? {}).sort().join(",")}]`
+          : `HttpProfilesStorage.readById(${id}) -> UNUSABLE payload (a required field is missing): ` +
+              `${JSON.stringify(raw).slice(0, 500)}`,
+      );
+      return profile;
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
+        logger.warn(`HttpProfilesStorage.readById(${id}) -> 404 NOT FOUND`);
+        return undefined;
+      }
+      throw err;
+    }
+  }
+
+  // Same read as `readById` but WITHOUT `withOnlyofficeProviderOverrides`:
+  // the profile exactly as the C# storage serves it (public gateway baseUrl
+  // on SaaS — the same object `readAll` returns). This is the only variant
+  // an HTTP response may echo: the override's internal service address and
+  // forwarded auth headers must never reach a client (Bug 82821).
+  async readByIdRaw(id: string): Promise<Profile | undefined> {
+    try {
+      const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
+      return dtoToProfile(raw);
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        logger.warn(`HttpProfilesStorage.readByIdRaw(${id}) -> 404 NOT FOUND`);
         return undefined;
       }
       throw err;

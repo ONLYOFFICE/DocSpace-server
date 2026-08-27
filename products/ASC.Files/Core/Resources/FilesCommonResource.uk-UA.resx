@@ -500,7 +500,7 @@
     <value>Автор контенту</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Адміністратор DocSpace</value>
+    <value>Повний адміністратор</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Редактор</value>

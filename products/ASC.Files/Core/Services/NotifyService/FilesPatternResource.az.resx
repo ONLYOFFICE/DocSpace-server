@@ -248,19 +248,19 @@ $Message</value>
     <value>İmza statusu dəyişdi</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace bildirişi. Sənəddə qeyd olunub</value>
+    <value>${LetterLogoText} bildirişi. Sənəddə qeyd olunub</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace bildirişi. Forma dolduruldu</value>
+    <value>${LetterLogoText} bildirişi. Forma dolduruldu</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace bildirişi.</value>
+    <value>${LetterLogoText} bildirişi.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace bildirişi. Forma dolduruldu</value>
+    <value>${LetterLogoText} bildirişi. Forma dolduruldu</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace bildirişi.</value>
+    <value>${LetterLogoText} bildirişi.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Sənədlər. E-poçt göndərilməsi tamamlandı.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Poçt göndərişi tamamlandı.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace bildirişi. Otaq silindi</value>
+    <value>${LetterLogoText} bildirişi. Otaq silindi</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Sənədlər. $DocumentTitle 'a Giriş Verildi</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Sənədlər. Qovluğa girişicazəsi verildi: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace bildirişi.</value>
+    <value>${LetterLogoText} bildirişi.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace bildirişi.</value>
+    <value>${LetterLogoText} bildirişi.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName bir AI agenti sildi
@@ -310,6 +310,6 @@ $__AuthorName AI agentini sildi: $RoomTitle</value>
     <value>Siz "$RoomTitle" AI agentinə dəvət edildiniz</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace bildirişi. AI agenti silindi</value>
+    <value>${LetterLogoText} bildirişi. AI agenti silindi</value>
   </data>
 </root>

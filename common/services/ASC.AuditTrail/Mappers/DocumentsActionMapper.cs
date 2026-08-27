@@ -41,7 +41,8 @@ internal class DocumentsActionMapper : IProductActionMapper
         new FoldersActionMapper(),
         new RoomsActionMapper(),
         new SettingsActionMapper(),
-        new AgentsActionMapper()
+        new AgentsActionMapper(),
+        new PrivacyRoomActionMapper()
     ];
 
     public ProductType Product => ProductType.Documents;
@@ -221,9 +222,11 @@ internal class AgentsActionMapper : ILocationActionMapper
                 {
                     { ActionType.Create, [MessageAction.AgentCreated] },
                     { ActionType.Update, [
-                        MessageAction.AgentRenamed, 
-                        MessageAction.AddedServerToAgent, 
-                        MessageAction.DeletedServerFromAgent
+                        MessageAction.AgentRenamed,
+                        MessageAction.AddedServerToAgent,
+                        MessageAction.DeletedServerFromAgent,
+                        MessageAction.UpdatedServerOfAgent,
+                        MessageAction.AiAgentProfileAssigned
                     ] },
                     { ActionType.Delete, [MessageAction.AgentDeleted] }
                 }
@@ -262,6 +265,35 @@ internal class SettingsActionMapper : ILocationActionMapper
                     MessageAction.DocumentsThirdPartySettingsUpdated, MessageAction.DocumentsOverwritingSettingsUpdated,
                     MessageAction.DocumentsForcesave, MessageAction.DocumentsStoreForcesave, MessageAction.DocumentsUploadingFormatsSettingsUpdated,
                     MessageAction.DocumentsExternalShareSettingsUpdated, MessageAction.DocumentsDefaultTemplatesSettingsUpdated
+                ]
+            }
+        };
+    }
+}
+
+internal class PrivacyRoomActionMapper : ILocationActionMapper
+{
+    public LocationType Location { get; }
+    public IDictionary<MessageAction, MessageMaps> Actions { get; }
+
+    public PrivacyRoomActionMapper()
+    {
+        Location = LocationType.DocumentsSettings;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
+        {
+            {
+                ActionType.Create, [
+                    MessageAction.PrivacyRoomKeyCreated
+                ]
+            },
+            {
+                ActionType.Update, [
+                    MessageAction.PrivacyRoomKeyUpdated
+                ]
+            },
+            {
+                ActionType.Delete, [
+                    MessageAction.PrivacyRoomKeyDeleted
                 ]
             }
         };

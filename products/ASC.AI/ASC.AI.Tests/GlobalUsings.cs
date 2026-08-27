@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -35,27 +35,17 @@ extern alias ASCAi;
 
 global using System.Diagnostics;
 global using System.Net;
-global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
-global using System.Runtime.CompilerServices;
-global using System.Text;
 global using System.Text.Json;
-global using System.Text.Json.Serialization;
 
 global using ASC.AI.Integration.Profiles;
 global using ASC.AI.Integration.ToolPrefs;
 global using ASC.AI.Tests.ApiFactories;
-global using ASC.AI.Tests.Data;
 global using ASC.Core.Users;
-
-global using Aspire.Hosting;
-global using Aspire.Hosting.Testing;
-
-global using Bogus;
+global using ASC.Tests.Common.ApiFactories;
+global using ASC.Tests.Common.Data;
 
 global using FluentAssertions;
-
-global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 global using Xunit;
 
@@ -67,9 +57,9 @@ global using MessagesPageDto = ASCAi::ASC.AI.Models.ResponseDto.MessagesPageDto;
 global using PreferencesDto = ASCAi::ASC.AI.Models.ResponseDto.PreferencesDto;
 global using ProfileDto = ASCAi::ASC.AI.Models.ResponseDto.ProfileDto;
 global using Task = System.Threading.Tasks.Task;
-// Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
-global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;
+global using PromptDto = ASCAi::ASC.AI.Models.ResponseDto.PromptDto;
+global using PromptFolderDto = ASCAi::ASC.AI.Models.ResponseDto.PromptFolderDto;
 global using ThreadDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadDto;
 global using ThreadsPageDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadsPageDto;
 global using UpdateProfileBody = ASCAi::ASC.AI.Models.RequestDto.Profiles.UpdateProfileBody;
-global using User = ASC.AI.Tests.Data.User;
+global using User = ASC.Tests.Common.Data.User;

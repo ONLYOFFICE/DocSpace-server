@@ -211,7 +211,7 @@
     <value>MI aģenta vietas kvota pārsniegta</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Neizdevās iestatīt kvotu katram MI aģentam. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+    <value>Neizdevās iestatīt kvotu katram MI aģentam. Ievadītā vērtība ir lielāka par kopējo krātuves apjomu.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automātiska atjaunošana</value>
@@ -280,7 +280,7 @@
     <value>Box</value>
   </data>
   <data name="ConsumersboxClientId" xml:space="preserve">
-    <value>Laatikon tunnus</value>
+    <value>Box ID</value>
   </data>
   <data name="ConsumersboxClientSecret" xml:space="preserve">
     <value>Box atslēga</value>
@@ -973,7 +973,7 @@
     <value>Nepareizs grupas filtrs.</value>
   </data>
   <data name="LdapSettingsErrorWrongGroupNameAttribute" xml:space="preserve">
-    <value>Neizdevās iegūt grupas atribūtu vienai vai vairākām grupām.</value>
+    <value>Neizdevās iegūt grupas nosaukuma atribūtu vienai vai vairākām grupām.</value>
   </data>
   <data name="LdapSettingsErrorWrongLoginAttribute" xml:space="preserve">
     <value>Neizdevās iegūt pieslēgšanās atribūtu vienam vai vairākiem lietotājiem.</value>
@@ -1120,7 +1120,7 @@
     <value>Pārsniegta telpas vietas kvota</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Neizdevās iestatīt kvotu katrai istabai. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+    <value>Neizdevās iestatīt kvotu katrai istabai. Ievadītā vērtība ir lielāka par kopējo krātuves apjomu.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Singapūra</value>
@@ -1285,7 +1285,7 @@
     <value>Radās neparedzēta kļūda. Lūdzu, mēģiniet vēlreiz.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Telegram ir veiksmīgi pievienots paziņojumu saņemšanai no DocSpace.</value>
+    <value>Telegram ir veiksmīgi pievienots paziņojumu saņemšanai no darbvietas.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Nepareizs kods</value>
@@ -1300,7 +1300,7 @@
     <value>Pārsniegta lietotāja vietas kvota</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Neizdevās iestatīt kvotu katram lietotājam. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+    <value>Neizdevās iestatīt kvotu katram lietotājam. Ievadītā vērtība ir lielāka par kopējo krātuves apjomu.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>ASV rietumu reģions (Oregon)</value>

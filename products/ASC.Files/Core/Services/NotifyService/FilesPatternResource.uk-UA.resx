@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Сповіщення DocSpace. AІ-агента видалено</value>
+    <value>Сповіщення ${LetterLogoText}. AІ-агента видалено</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Документи. Всі підписи завершені $DocumentTitle</value>
@@ -262,19 +262,19 @@ $Message</value>
     <value>Статус підписання змінився</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Сповіщення DocSpace. Згадано в документі</value>
+    <value>Сповіщення ${LetterLogoText}. Згадано в документі</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Сповіщення DocSpace. Форму заповнено</value>
+    <value>Сповіщення ${LetterLogoText}. Форму заповнено</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Сповіщення DocSpace.</value>
+    <value>Сповіщення ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Сповіщення DocSpace. Форму заповнено</value>
+    <value>Сповіщення ${LetterLogoText}. Форму заповнено</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Сповіщення DocSpace.</value>
+    <value>Сповіщення ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Документи. Поштова розсилка завершена.</value>
@@ -283,7 +283,7 @@ $Message</value>
     <value>Надсилання виконано.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Сповіщення DocSpace. Кімнату видалено</value>
+    <value>Сповіщення ${LetterLogoText}. Кімнату видалено</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Документи. Надано Доступ до $DocumentTitle</value>
@@ -307,9 +307,9 @@ $Message</value>
     <value>Документи. Надано доступ до папки: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Сповіщення DocSpace.</value>
+    <value>Сповіщення ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Сповіщення DocSpace.</value>
+    <value>Сповіщення ${LetterLogoText}.</value>
   </data>
 </root>

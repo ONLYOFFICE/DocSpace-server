@@ -101,6 +101,28 @@ if (args.Length == 0)
     }
 }
 
+var requestedSdks = args.TakeWhile(arg => !arg.StartsWith('-')).ToArray();
+
+if (requestedSdks.Length > 1)
+{
+    var unknownSdks = requestedSdks.Where(sdk => !sdkCommands.Contains(sdk, StringComparer.Ordinal)).ToArray();
+    if (unknownSdks.Length > 0)
+    {
+        AnsiConsole.MarkupLine(
+            $"[red]{Markup.Escape($"Unknown SDK: {string.Join(", ", unknownSdks)}. Available (case-sensitive): {string.Join(", ", sdkCommands)}.")}[/]");
+        return 1;
+    }
+
+    if (requestedSdks.Length != args.Length)
+    {
+        AnsiConsole.MarkupLine(
+            $"[red]{Markup.Escape($"Options cannot be combined with several SDKs, because each option belongs to a single SDK. Got: {string.Join(" ", args)}.")}[/]");
+        return 1;
+    }
+
+    return RunCommands(app, requestedSdks);
+}
+
 var buildExitCode = BuildSdkGenerator();
 if (buildExitCode != 0)
 {

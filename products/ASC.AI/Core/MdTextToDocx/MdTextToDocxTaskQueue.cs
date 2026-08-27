@@ -51,6 +51,7 @@ public class MdToDocxTaskPublisher(
     AuthContext authContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
+    UserManager userManager,
     IEventBus eventBus)
 {
     public async Task PublishAsync<T>(string title, string content, T folderId)
@@ -72,7 +73,7 @@ public class MdToDocxTaskPublisher(
         // TextToDocxTask.DoJob re-resolves the folder and re-runs CheckSecurity under the
         // task's authenticated identity at execution time, which catches folder deletion or
         // permission changes that happen between publication and execute.
-        _ = await Target.InitializeAsync(daoFactory, fileSecurity, intFolderId, thirdpartyFolderId);
+        _ = await Target.InitializeAsync(daoFactory, fileSecurity, userManager, authContext, intFolderId, thirdpartyFolderId);
 
         var data = new MdTextToDocxTaskData
         {

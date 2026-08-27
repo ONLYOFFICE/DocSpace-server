@@ -901,7 +901,7 @@
     <value>Pošalji</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Korisnik {0} je poslao pozivnicu {1} da se pridruži ovom DocSpace-u</value>
+    <value>Korisnik {0} je poslao pozivnicu {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instrukcije poziva poslate: {0}</value>
