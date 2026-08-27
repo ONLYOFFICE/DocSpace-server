@@ -52,6 +52,21 @@ logger.info("Storage initialized");
 
 const app = express();
 
+// Server-Timing header so DevTools can tell server time from network time;
+// set at header flush, so for streamed replies it is time-to-first-byte.
+app.use((_req, res, next) => {
+  const startedAt = process.hrtime.bigint();
+  const writeHead = res.writeHead.bind(res);
+  res.writeHead = ((...args: Parameters<typeof writeHead>) => {
+    if (!res.headersSent) {
+      const elapsedMs = (process.hrtime.bigint() - startedAt) / 1_000_000n;
+      res.setHeader("Server-Timing", `express-request-time;dur=${elapsedMs}ms`);
+    }
+    return writeHead(...args);
+  }) as typeof res.writeHead;
+  next();
+});
+
 // CORS is off by default: the chat UI reaches this service same-origin via
 // the DocSpace nginx (`/api/2.0/new-ai`), so no cross-origin request is
 // expected. A blanket `cors()` would emit `Access-Control-Allow-Origin: *`
