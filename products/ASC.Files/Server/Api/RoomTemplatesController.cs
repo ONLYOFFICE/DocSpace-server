@@ -74,7 +74,7 @@ public class RoomTemplatesController(IEventBus eventBus,
         // The template is built by a background operation, so the access to the source room has to
         // be verified here — otherwise the caller is told the request succeeded and only finds out
         // later, from the operation status, that it could not.
-        await fileStorageService.CheckCanCreateRoomTemplateAsync(dto.RoomId);
+        await fileStorageService.CheckCanCreateRoomTemplateAsync(dto.RoomId, dto.Quota);
 
         var taskId = await roomTemplatesWorker.StartCreateTemplateAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
             dto.RoomId,

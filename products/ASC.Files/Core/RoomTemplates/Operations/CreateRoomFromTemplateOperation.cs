@@ -166,7 +166,16 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
 
             if (_quota.HasValue)
             {
-                await fileStorageService.FolderQuotaChangeAsync(room.Id, _quota.Value);
+                // The quota is the last, optional step: failing it (e.g. the quota feature was
+                // switched off mid-operation) must not destroy the room that was just built.
+                try
+                {
+                    await fileStorageService.FolderQuotaChangeAsync(room.Id, _quota.Value);
+                }
+                catch (Exception ex)
+                {
+                    logger.WarningCanNotApplyQuota(ex);
+                }
             }
 
             Percentage = 100;

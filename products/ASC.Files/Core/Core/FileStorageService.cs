@@ -657,6 +657,8 @@ public class FileStorageService //: IFileStorageService
         bool? sendFormToExternalDB = null,
         bool? saveFormAsXLSX = null)
     {
+        await CheckQuotaFeatureAsync<TenantRoomQuotaSettings>(quota);
+
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
@@ -677,6 +679,8 @@ public class FileStorageService //: IFileStorageService
         bool? sendFormToExternalDB = null,
         bool? saveFormAsXLSX = null)
     {
+        await CheckQuotaFeatureAsync<TenantAiAgentQuotaSettings>(quota);
+
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.GetFolderAiAgentsAsync();
 
@@ -763,8 +767,10 @@ public class FileStorageService //: IFileStorageService
     /// template runs as a background operation, so this has to be called before the operation is
     /// queued — otherwise the caller gets a successful response for work that is bound to fail.
     /// </summary>
-    public async Task<Folder<int>> CheckCanCreateRoomTemplateAsync(int roomId)
+    public async Task<Folder<int>> CheckCanCreateRoomTemplateAsync(int roomId, long? quota = null)
     {
+        await CheckRoomQuotaFeatureAsync(quota);
+
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
 
@@ -819,8 +825,10 @@ public class FileStorageService //: IFileStorageService
     /// rooms at all. Same reason as <see cref="CheckCanCreateRoomTemplateAsync"/>: the work itself
     /// happens in the background.
     /// </summary>
-    public async Task CheckCanCreateRoomFromTemplateAsync(int templateId)
+    public async Task CheckCanCreateRoomFromTemplateAsync(int templateId, long? quota = null)
     {
+        await CheckRoomQuotaFeatureAsync(quota);
+
         var folderDao = daoFactory.GetFolderDao<int>();
         var template = await folderDao.GetFolderAsync(templateId);
 
@@ -843,6 +851,31 @@ public class FileStorageService //: IFileStorageService
         if (!await fileSecurity.CanCreateAsync(roomsRoot))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
+    /// <summary>
+    /// A quota may only be requested while the matching per-entity quota feature is on. For the
+    /// template operations the quota itself is applied at the end of the background job; the toggle
+    /// is validated up front so the caller gets a synchronous refusal instead of an operation that
+    /// fails after all the copying is done.
+    /// </summary>
+    private async Task CheckRoomQuotaFeatureAsync(long? quota)
+    {
+        await CheckQuotaFeatureAsync<TenantRoomQuotaSettings>(quota);
+    }
+
+    private async Task CheckQuotaFeatureAsync<TSettings>(long? quota) where TSettings : TenantEntityQuotaSettings, ISettings<TSettings>
+    {
+        if (!quota.HasValue)
+        {
+            return;
+        }
+
+        var quotaSettings = await settingsManager.LoadAsync<TSettings>();
+        if (!quotaSettings.EnableQuota)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
     }
 
@@ -1224,13 +1257,6 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)
     {
-        // The per-room quota is a portal feature: refuse to set or reset one while it is off.
-        var roomQuotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-        if (!roomQuotaSettings.EnableQuota)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
@@ -1256,6 +1282,19 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
         var isRoom = folder.IsRoom;
+
+        // The per-entity quota is a portal feature: refuse to set or reset one while it is off.
+        // Each entity kind has its own toggle (same classification as CheckCustomQuotaAsync).
+        TenantEntityQuotaSettings entityQuotaSettings = folder.FolderType is FolderType.AiRoom
+            ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+            : isRoom
+                ? await settingsManager.LoadAsync<TenantRoomQuotaSettings>()
+                : await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+
+        if (!entityQuotaSettings.EnableQuota)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
 
         if (maxTotalSize < quota)
         {
@@ -6193,16 +6232,18 @@ public class FileStorageService //: IFileStorageService
         {
             // Entries whose primary link is not auto-recreated remember an explicit revocation, so
             // that a later read reports 404 instead of silently resurrecting the link.
-            var revokedMarker = Tag.PrimaryLinkRevoked(entry);
             var tagDao = daoFactory.GetTagDao<T>();
 
             if (eventType == EventType.Remove)
             {
-                await tagDao.SaveTagsAsync(revokedMarker);
+                await tagDao.SaveTagsAsync(Tag.PrimaryLinkRevoked(entry));
             }
             else
             {
-                await tagDao.RemoveTagsAsync(revokedMarker);
+                // The tag ROW is shared by every marked entry of the tenant (its key carries no
+                // entry), so only this entry's LINK is removed - RemoveTagsAsync would drop the row
+                // with all links and un-revoke everyone else.
+                await tagDao.RemoveTagLinksAsync(entry.Id, entry.FileEntryType, TagType.PrimaryLinkRevoked);
             }
         }
 
