@@ -64,6 +64,7 @@ public class BaseTest(
     protected PaymentApi _paymentApi = null!;
     protected SharingApi _sharingApi = null!;
     protected PrivacyroomApi _privacyRoomApi = null!;
+    protected ThirdPartyIntegrationApi _thirdPartyApi = null!;
 
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
@@ -121,6 +122,7 @@ public class BaseTest(
         _paymentApi = _clients.PaymentApi;
         _sharingApi = _clients.SharingApi;
         _privacyRoomApi = _clients.PrivacyroomApi;
+        _thirdPartyApi = _clients.ThirdPartyIntegrationApi;
 
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;
