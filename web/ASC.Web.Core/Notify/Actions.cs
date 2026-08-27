@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AuditTrail.Models;
-
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
@@ -576,6 +574,51 @@ public sealed class PasswordChangedNotifyAction(CommonLinkUtility commonLinkUtil
             new TagValue(CommonTags.Location, location),
             new TagValue(CommonTags.Browser, auditEvent.Browser),
             new TagValue(CommonTags.IP, auditEvent.IP),
+            TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.Culture, cultureInfo.Name)
+        ];
+    }
+}
+
+[Scope]
+public sealed class SuspiciousLoginNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "suspicious_login";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_suspicious_login, () => WebstudioNotifyPatternResource.pattern_suspicious_login),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_suspicious_login)
+        ];
+    }
+
+    public void Init(UserInfo userInfo, BaseEvent loginEvent)
+    {
+        var cultureInfo = GetCulture(userInfo);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePassword", cultureInfo);
+        var hash = loginEvent.Date.ToString("s", CultureInfo.InvariantCulture);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        var location = string.Empty;
+        if (!string.IsNullOrEmpty(loginEvent.Country) || !string.IsNullOrEmpty(loginEvent.City))
+        {
+            location = string.Join(", ", new[] { loginEvent.Country, loginEvent.City }.Where(s => !string.IsNullOrEmpty(s)));
+        }
+
+        Tags =
+        [
+            new TagValue(CommonTags.UserName, userInfo.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.UserEmail, userInfo.Email),
+            new TagValue(CommonTags.Date, loginEvent.Date.ToShortDateString() + " " + loginEvent.Date.ToShortTimeString()),
+            new TagValue(CommonTags.Device, loginEvent.Platform),
+            new TagValue(CommonTags.Location, location),
+            new TagValue(CommonTags.Browser, loginEvent.Browser),
+            new TagValue(CommonTags.IP, loginEvent.IP),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)

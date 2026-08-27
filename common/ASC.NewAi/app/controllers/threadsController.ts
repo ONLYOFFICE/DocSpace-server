@@ -39,9 +39,12 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
-import { asyncHandler, unpackPositional } from "./_helpers.js";
+import { asyncHandler, unpackPositional, attachmentLimitError } from "./_helpers.js";
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
-import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
+import {
+  assertEntityAccessible,
+  safeGetAgentEntity,
+} from "../storage/docspaceFilesApi.js";
 import { agentAssignedProfileId } from "./agentProfile.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
@@ -90,7 +93,14 @@ export async function assertThreadCreatable(
   profileId: string | undefined,
 ): Promise<void> {
   await assertEntityAccessible(entityId);
-  if (profileId && (await storage.profiles.readById(profileId))) {
+  // A malformed profileId makes the C# lookup fail with a non-404 status;
+  // treat that the same as "no such profile" and fall through to the
+  // scope-assignment resolution instead of relaying an opaque error
+  // (Bug 83045).
+  if (
+    profileId
+    && (await storage.profiles.readById(profileId).catch(() => undefined))
+  ) {
     return;
   }
   const resolved = await assignmentsEngine.tryResolveForAction(
@@ -166,12 +176,30 @@ export const threadsController = {
       return;
     }
     await assertEntityAccessible(getString(body, "entityId"));
-    const result = await engine.openOrCreate(body);
+    // The title generated on create must reach the provider with the same
+    // entity metadata a chat round sends (lib 0.5.64: `entityMeta` input).
+    // Server-resolved on purpose, overriding anything client-supplied: the
+    // pair comes from the Files API under the caller's credentials, so a
+    // client cannot claim someone else's agent (mirrors withEntityMetadata
+    // in aiController).
+    const entity = await safeGetAgentEntity(getString(body, "entityId"));
+    const result = await engine.openOrCreate(
+      entity.entityId
+        ? ({ ...body, entityMeta: entity } as OpenOrCreateInput)
+        : (body as OpenOrCreateInput),
+    );
     res.json(result);
   }),
 
   appendUserMessage: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "message", "profileId"] as const);
+    // Enforce the composer's per-kind attachment cap server-side — the UI
+    // cannot exceed it, so only a direct API call can (Bug 82894).
+    const limitError = attachmentLimitError(args.message);
+    if (limitError) {
+      res.status(400).json({ error: limitError });
+      return;
+    }
     const messageId = await engine.appendUserMessage(
       args.threadId as string,
       args.message as ThreadMessageInput,
@@ -188,7 +216,21 @@ export const threadsController = {
 
   rename: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "title"] as const);
-    await engine.rename(args.threadId as string, args.title as string);
+    // Same title rules as threads/create: a missing/null/empty/whitespace
+    // title is a 400, never a silent success — rename used to accept all of
+    // those and blank the stored name, a state create can't produce
+    // (Bug 83094).
+    if (typeof args.threadId !== "string" || args.threadId.length === 0) {
+      res.status(400).json({ error: "threadId required" });
+      return;
+    }
+    if (typeof args.title !== "string" || args.title.trim().length === 0) {
+      res.status(400).json({
+        error: "title is required and must be a non-empty string",
+      });
+      return;
+    }
+    await engine.rename(args.threadId, args.title);
     res.json({ success: true });
   }),
 
@@ -197,6 +239,14 @@ export const threadsController = {
     const idStr = typeof threadId === "string" ? threadId : asString(req.query["threadId"]);
     if (!idStr) {
       res.status(400).json({ error: "threadId required" });
+      return;
+    }
+    // The storage layer deliberately swallows the C# 404 (idempotent delete
+    // for engine cascades), so without this check deleting a nonexistent or
+    // already-deleted thread reported success — unlike rename/clear-messages
+    // on the same ids (Bug 83095). Verify existence at the HTTP boundary.
+    if ((await storage.threads.readById(idStr)) === null) {
+      res.status(404).json({ error: "thread not found" });
       return;
     }
     await engine.delete(idStr);
@@ -215,7 +265,10 @@ export const threadsController = {
   }),
 
   regenerateTitle: asyncHandler(async (req, res) => {
-    const args = unpackPositional(req.body, ["threadId", "profile"] as const);
+    const args = unpackPositional(
+      req.body,
+      ["threadId", "profile", "entityMeta"] as const,
+    );
     // The engine dereferences `profile` (and needs a real threadId); a missing
     // profile makes it throw a TypeError → 500 (Bug 82828). Validate both up
     // front and return a clean 400.
@@ -225,7 +278,20 @@ export const threadsController = {
       });
       return;
     }
-    const title = await engine.regenerateTitle(args.threadId, args.profile as Profile);
+    // Optional third element (lib 0.5.64): the entity pair the title request
+    // runs for. The Thread DTO does not echo its entityId back, so the body
+    // is the only scope source here — but only the id is taken as a hint;
+    // the pair itself is re-resolved server-side under the caller's
+    // credentials so a client cannot claim someone else's agent.
+    const entityIdHint = isObject(args.entityMeta)
+      ? getString(args.entityMeta, "entityId")
+      : undefined;
+    const entity = await safeGetAgentEntity(entityIdHint);
+    const title = await engine.regenerateTitle(
+      args.threadId,
+      args.profile as Profile,
+      entity.entityId ? entity : undefined,
+    );
     res.json({ title });
   }),
 

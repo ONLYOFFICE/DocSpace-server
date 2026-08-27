@@ -793,6 +793,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Suspicious login detected
+
+We noticed a login to your account *$UserName*, *$UserEmail* on *$Date* in ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" that looks different from your usual activity.
+
+IP: *$IP*
+Device: *$Device*
+#if($Location != "")
+Location: *$Location*
+#end
+Browser: *$Browser*
+
+If this was you - no further steps are required. If you don't recognize this login, please change your password immediately.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deactivation of the "${__VirtualRootPath}":"${__VirtualRootPath}" portal
 
@@ -2018,6 +2036,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Your password was changed successfully</value>
+  </data>
+  <data name="subject_suspicious_login" xml:space="preserve">
+    <value>Suspicious login to your ${LetterLogoText} account</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deactivation of the ${__VirtualRootHost} portal</value>
