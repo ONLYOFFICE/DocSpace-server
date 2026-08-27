@@ -796,7 +796,7 @@ $TrulyYours</value>
   <data name="pattern_suspicious_login" xml:space="preserve">
     <value>h1.Suspicious login detected
 
-We noticed a login to your account *$UserName*, *$UserEmail* on *$Date* in DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}" that looks different from your usual activity.
+We noticed a login to your account *$UserName*, *$UserEmail* on *$Date* in ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" that looks different from your usual activity.
 
 IP: *$IP*
 Device: *$Device*
@@ -2027,7 +2027,7 @@ $TrulyYours</value>
     <value>Your password was changed successfully</value>
   </data>
   <data name="subject_suspicious_login" xml:space="preserve">
-    <value>Suspicious login to your DocSpace account</value>
+    <value>Suspicious login to your ${LetterLogoText} account</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deactivation of the ${__VirtualRootHost} portal</value>
