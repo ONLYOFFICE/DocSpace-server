@@ -64,41 +64,6 @@ public partial class SuspiciousLoginNotifier(
     SuspiciousLoginNotifierConfiguration configuration,
     ILogger<SuspiciousLoginNotifier> logger)
 {
-    private static readonly int[] _successActions =
-    [
-        (int)MessageAction.LoginSuccess,
-        (int)MessageAction.LoginSuccessViaSocialAccount,
-        (int)MessageAction.LoginSuccessViaSms,
-        (int)MessageAction.LoginSuccessViaApi,
-        (int)MessageAction.LoginSuccessViaSocialApp,
-        (int)MessageAction.LoginSuccessViaApiSms,
-        (int)MessageAction.LoginSuccessViaSSO,
-        (int)MessageAction.LoginSuccessViaApiSocialAccount,
-        (int)MessageAction.LoginSuccesViaTfaApp,
-        (int)MessageAction.LoginSuccessViaApiTfa,
-        (int)MessageAction.LoginSuccessViaOAuth,
-        (int)MessageAction.LoginSuccessViaPassword,
-        (int)MessageAction.AuthLinkActivated
-    ];
-
-    private static readonly int[] _failActions =
-    [
-        (int)MessageAction.LoginFailInvalidCombination,
-        (int)MessageAction.LoginFailSocialAccountNotFound,
-        (int)MessageAction.LoginFailDisabledProfile,
-        (int)MessageAction.LoginFail,
-        (int)MessageAction.LoginFailViaSms,
-        (int)MessageAction.LoginFailViaApi,
-        (int)MessageAction.LoginFailViaApiSms,
-        (int)MessageAction.LoginFailViaApiTfa,
-        (int)MessageAction.LoginFailViaApiSocialAccount,
-        (int)MessageAction.LoginFailViaTfaApp,
-        (int)MessageAction.LoginFailViaSSO,
-        (int)MessageAction.LoginFailIpSecurity,
-        (int)MessageAction.LoginFailBruteForce,
-        (int)MessageAction.LoginFailRecaptcha
-    ];
-
     private static readonly Regex _versionToken = VersionRegex();
     private static readonly Regex _whitespace = WhitespaceRegex();
 
@@ -124,7 +89,7 @@ public partial class SuspiciousLoginNotifier(
             var current = await messagesContext.LoginEvents
                 .FirstOrDefaultAsync(e => e.Id == loginEventId && e.TenantId == tenantId && e.UserId == userId);
 
-            if (current is not { Action: not null } || !_successActions.Contains(current.Action.Value))
+            if (current is not { Action: not null } || !LoginActions.Success.Contains(current.Action.Value))
             {
                 return;
             }
@@ -140,7 +105,7 @@ public partial class SuspiciousLoginNotifier(
                     && e.UserId == userId
                     && e.Id < current.Id
                     && e.Action.HasValue
-                    && _successActions.Contains(e.Action.Value))
+                    && LoginActions.Success.Contains(e.Action.Value))
                 .OrderByDescending(e => e.Id)
                 .Take(configuration.HistoryLimit)
                 .ToListAsync();
@@ -189,7 +154,7 @@ public partial class SuspiciousLoginNotifier(
                     && e.Id < current.Id
                     && (e.UserId == userId || e.Login == user.Email)
                     && e.Action.HasValue
-                    && _failActions.Contains(e.Action.Value))
+                    && LoginActions.Fail.Contains(e.Action.Value))
                 .CountAsync();
             var manyFails = failCount >= configuration.FailThreshold;
 

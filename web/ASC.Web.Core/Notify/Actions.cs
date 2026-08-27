@@ -607,7 +607,7 @@ public sealed class SuspiciousLoginNotifyAction(CommonLinkUtility commonLinkUtil
         var location = string.Empty;
         if (!string.IsNullOrEmpty(loginEvent.Country) || !string.IsNullOrEmpty(loginEvent.City))
         {
-            location = loginEvent.Country + ", " + loginEvent.City;
+            location = string.Join(", ", new[] { loginEvent.Country, loginEvent.City }.Where(s => !string.IsNullOrEmpty(s)));
         }
 
         Tags =

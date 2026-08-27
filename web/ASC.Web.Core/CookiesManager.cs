@@ -345,16 +345,19 @@ public class CookiesManager(
         var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookies);
         if (checkSuspiciousLogin && loginEventId != 0)
         {
-            try
+            _ = Task.Run(async () =>
             {
-                await eventBus.PublishAsync(new SuspiciousLoginIntegrationEvent(userId, tenantManager.GetCurrentTenantId(), loginEventId));
+                try
+                {
+                    await eventBus.PublishAsync(new SuspiciousLoginIntegrationEvent(userId, tenantManager.GetCurrentTenantId(), loginEventId));
 
-                logger.DebugSuspiciousLoginCheckRequested(userId, loginEventId);
-            }
-            catch (Exception ex)
-            {
-                logger.ErrorSuspiciousLoginCheckRequest(userId, loginEventId, ex);
-            }
+                    logger.DebugSuspiciousLoginCheckRequested(userId, loginEventId);
+                }
+                catch (Exception ex)
+                {
+                    logger.ErrorSuspiciousLoginCheckRequest(userId, loginEventId, ex);
+                }
+            });
         }
 
         return cookies;
