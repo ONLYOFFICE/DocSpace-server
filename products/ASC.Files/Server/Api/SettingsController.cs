@@ -449,13 +449,15 @@ public class SettingsController(
     [SwaggerResponse(400, "Incorrect or missing file")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("settings/defaulttemplate")]
+    // Kestrel's global 100 MB limit aborts the connection mid-upload, so the caller would see a
+    // reset instead of a reason. The form limit below takes over: the multipart reader rejects the
+    // oversized section while it streams in, and the caller gets a readable 400.
     [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = MaxDefaultTemplateSize)]
     public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        // Kestrel's global 100 MB limit aborts the connection mid-upload, so the caller sees a
-        // reset instead of a reason. Take the body ourselves and answer with a message it can show.
         if (inDto.File.Length > MaxDefaultTemplateSize)
         {
             throw new ArgumentException(FileSizeComment.GetFileSizeExceptionString(MaxDefaultTemplateSize));

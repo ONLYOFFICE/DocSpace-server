@@ -769,8 +769,6 @@ public class FileStorageService //: IFileStorageService
     /// </summary>
     public async Task<Folder<int>> CheckCanCreateRoomTemplateAsync(int roomId, long? quota = null)
     {
-        await CheckRoomQuotaFeatureAsync(quota);
-
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
 
@@ -798,6 +796,8 @@ public class FileStorageService //: IFileStorageService
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
+
+        await CheckQuotaFeatureAsync(room, quota);
 
         return room;
     }
@@ -827,8 +827,6 @@ public class FileStorageService //: IFileStorageService
     /// </summary>
     public async Task CheckCanCreateRoomFromTemplateAsync(int templateId, long? quota = null)
     {
-        await CheckRoomQuotaFeatureAsync(quota);
-
         var folderDao = daoFactory.GetFolderDao<int>();
         var template = await folderDao.GetFolderAsync(templateId);
 
@@ -852,17 +850,27 @@ public class FileStorageService //: IFileStorageService
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
+
+        await CheckQuotaFeatureAsync(template, quota);
     }
 
     /// <summary>
     /// A quota may only be requested while the matching per-entity quota feature is on. For the
     /// template operations the quota itself is applied at the end of the background job; the toggle
     /// is validated up front so the caller gets a synchronous refusal instead of an operation that
-    /// fails after all the copying is done.
+    /// fails after all the copying is done. The toggle is picked by the entity's own kind, so an
+    /// AI-agent room reaching this path is gated by the agent feature, not the room one.
     /// </summary>
-    private async Task CheckRoomQuotaFeatureAsync(long? quota)
+    private async Task CheckQuotaFeatureAsync<T>(Folder<T> entity, long? quota)
     {
-        await CheckQuotaFeatureAsync<TenantRoomQuotaSettings>(quota);
+        if (entity.FolderType is FolderType.AiRoom)
+        {
+            await CheckQuotaFeatureAsync<TenantAiAgentQuotaSettings>(quota);
+        }
+        else
+        {
+            await CheckQuotaFeatureAsync<TenantRoomQuotaSettings>(quota);
+        }
     }
 
     private async Task CheckQuotaFeatureAsync<TSettings>(long? quota) where TSettings : TenantEntityQuotaSettings, ISettings<TSettings>
