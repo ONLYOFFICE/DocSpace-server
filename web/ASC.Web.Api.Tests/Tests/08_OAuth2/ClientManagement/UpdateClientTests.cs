@@ -31,28 +31,33 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Tests.ApiFactories;
+namespace ASC.Web.Api.Tests.Tests._08_OAuth2.ClientManagement;
 
 /// <summary>
-/// The Web.Api suite's Aspire host: Web.Api itself is always started by the base fixture, plus
-/// People (members and guests a test invites) and the two identity containers the OAuth2 suites
-/// talk to.
+/// PUT /api/2.0/clients/{clientId} — every role can update its own OAuth2 client.
 /// </summary>
-public class AspireAppFixture : AspireHostFixture<PortalClients>
+[Trait("Category", "OAuth2")]
+public class UpdateClientTests(
+    AspireAppFixture fixture)
+    : ClientManagementTestBase(fixture)
 {
-    protected override IEnumerable<string> Resources =>
-        [ResourceNames.People, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization];
-
-    protected override PortalClients CreateClients(PortalContext context)
+    [Theory]
+    [InlineData(null)]
+    [InlineData(EmployeeType.DocSpaceAdmin)]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    public async Task UpdateClient_OwnClient_ByRole_ReturnsOk(EmployeeType? employeeType)
     {
-        return new PortalClients(context);
-    }
+        // Arrange
+        var user = employeeType is null ? Owner : await InviteContact(employeeType.Value);
+        var created = await CreateClientAsAsync(user);
 
-    protected override async ValueTask WarmUpAsync(PortalClients clients)
-    {
-        await clients.WebApiHttpClient.Authenticate(clients.Owner);
+        var body = ValidUpdateClientBody(name: "Updated OAuth Client", description: "Updated description");
 
-        // Touch the settings path — the one every test hits right after signing in.
-        await clients.CommonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken);
+        // Act
+        var result = await UpdateClientRawAsync(created.ClientId, body);
+
+        // Assert
+        result.StatusCode.Should().Be(HttpStatusCode.OK, "{0}", result.Body);
     }
 }

@@ -39,6 +39,12 @@ namespace ASC.Web.Api.Tests.ApiFactories;
 public sealed class PortalClients : PortalClientsBase
 {
     public HttpClient PeopleHttpClient { get; }
+    public HttpClient IdentityHttpClient { get; }
+
+    // Identity (OAuth2) service — the registration container serves /api/2.0/clients and /api/2.0/scopes
+    public ClientManagementApi ClientManagementApi { get; }
+    public ClientQueryingApi ClientQueryingApi { get; }
+    public ScopeManagementApi ScopeManagementApi { get; }
 
     // People service — member invitation for the role helpers, plus the endpoints the SDK files
     // under other tags but People actually serves (guests share link, API keys)
@@ -92,6 +98,22 @@ public sealed class PortalClients : PortalClientsBase
         // is served by the People service — so it rides the People client, not WebApi.
         PortalGuestsApi = new PortalGuestsApi(PeopleHttpClient, peopleConfig);
         ApiKeysApi = new ApiKeysApi(PeopleHttpClient, peopleConfig);
+
+        IdentityHttpClient = CreateClient(ResourceNames.IdentityRegistration);
+
+        // The identity (Spring) side closes idle keep-alive connections aggressively; reusing them
+        // from the shared pool races with that and dies with "response ended prematurely" under
+        // parallel load. One connection per request costs little here and removes the race.
+        IdentityHttpClient.DefaultRequestHeaders.ConnectionClose = true;
+
+        // Identity's audit path (HttpUtils.getClientBrowser) NPEs into a 500 on a request without
+        // a User-Agent — every real client sends one, so these tests do too.
+        IdentityHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "ASC.Web.Api.Tests/1.0");
+
+        var identityConfig = new Configuration { BasePath = BasePathOf(ResourceNames.IdentityRegistration) };
+        ClientManagementApi = new ClientManagementApi(IdentityHttpClient, identityConfig);
+        ClientQueryingApi = new ClientQueryingApi(IdentityHttpClient, identityConfig);
+        ScopeManagementApi = new ScopeManagementApi(IdentityHttpClient, identityConfig);
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         AuthenticationApi = new AuthenticationApi(WebApiHttpClient, webApiConfig);

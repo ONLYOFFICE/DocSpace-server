@@ -45,6 +45,9 @@ global using ASC.Tests.Common.Data;
 global using ASC.Web.Api.Tests.ApiFactories;
 
 global using DocSpace.API.SDK.Api.Authentication;
+// OAuth20 also declares AuthorizationApi and DiscoveryApi; the explicit aliases below win over
+// namespace imports, so the bare names keep resolving to the Settings/OAuth20 types as aliased.
+global using DocSpace.API.SDK.Api.OAuth20;
 global using DocSpace.API.SDK.Api.Capabilities;
 global using DocSpace.API.SDK.Api.People;
 global using DocSpace.API.SDK.Api.Settings;

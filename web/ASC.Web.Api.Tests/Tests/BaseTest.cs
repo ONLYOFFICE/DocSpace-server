@@ -52,6 +52,11 @@ public class BaseTest(
     protected ApiKeysApi _apiKeysApi = null!;
     protected MigrationApi _migrationApi = null!;
 
+    protected HttpClient _identityClient = null!;
+    protected ClientManagementApi _clientManagementApi = null!;
+    protected ClientQueryingApi _clientQueryingApi = null!;
+    protected ScopeManagementApi _scopeManagementApi = null!;
+
     protected AuthenticationApi _authenticationApi = null!;
     protected CapabilitiesApi _capabilitiesApi = null!;
     protected AccessToDevToolsApi _accessToDevToolsApi = null!;
@@ -100,6 +105,11 @@ public class BaseTest(
         _profilesApi = _clients.ProfilesApi;
         _apiKeysApi = _clients.ApiKeysApi;
         _migrationApi = _clients.MigrationApi;
+
+        _identityClient = _clients.IdentityHttpClient;
+        _clientManagementApi = _clients.ClientManagementApi;
+        _clientQueryingApi = _clients.ClientQueryingApi;
+        _scopeManagementApi = _clients.ScopeManagementApi;
 
         _authenticationApi = _clients.AuthenticationApi;
         _capabilitiesApi = _clients.CapabilitiesApi;
