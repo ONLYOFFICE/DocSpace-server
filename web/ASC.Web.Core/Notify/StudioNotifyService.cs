@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AuditTrail.Models;
-
 using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
@@ -113,6 +111,15 @@ public class StudioNotifyService(
         passwordChangedNotifyAction.Init(userInfo, auditEvent);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(passwordChangedNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
+    }
+
+    public async Task SendSuspiciousLoginAsync(UserInfo userInfo, BaseEvent loginEvent)
+    {
+        var suspiciousLoginNotifyAction = serviceProvider.GetService<SuspiciousLoginNotifyAction>();
+        suspiciousLoginNotifyAction.Init(userInfo, loginEvent);
+
+        var recipient = new DirectRecipient(userInfo.Id.ToString(), null, [userInfo.Email], false);
+        await studioNotifyServiceHelper.SendNoticeToAsync(suspiciousLoginNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
     }
 
     #endregion

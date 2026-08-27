@@ -19,7 +19,7 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class WebstudioNotifyPatternResource {
@@ -31,7 +31,7 @@ namespace ASC.Web.Core.PublicResources {
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal WebstudioNotifyPatternResource() {
         }
-
+        
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -483,7 +483,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ButtonGoToDocSpace", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Go to Wallet settings.
         /// </summary>
@@ -636,7 +636,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ButtonUpgrade", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Use discount.
         /// </summary>
@@ -645,7 +645,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ButtonUseDiscount", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Visit Billing section.
         /// </summary>
@@ -1098,7 +1098,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("pattern_join", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
@@ -1115,7 +1115,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("pattern_low_wallet_balance", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
@@ -1768,7 +1768,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("pattern_saas_admin_welcome_v1", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
@@ -2107,6 +2107,30 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_storage_encryption_success {
             get {
                 return ResourceManager.GetString("pattern_storage_encryption_success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to h1.Suspicious login detected
+        ///
+        ///We noticed a login to your account *$UserName*, *$UserEmail* on *$Date* in DocSpace: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; that looks different from your usual activity.
+        ///
+        ///IP: *$IP*
+        ///Device: *$Device*
+        ///#if($Location != &quot;&quot;)
+        ///Location: *$Location*
+        ///#end
+        ///Browser: *$Browser*
+        ///
+        ///If this was you - no further steps are required. If you don&apos;t recognize this login, please change your password immediately.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_suspicious_login {
+            get {
+                return ResourceManager.GetString("pattern_suspicious_login", resourceCulture);
             }
         }
         
@@ -2504,7 +2528,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("subject_join", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Action required: Your ${LetterLogoText} Wallet balance is running low.
         /// </summary>
@@ -2513,7 +2537,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("subject_low_wallet_balance", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Mailbox creation.
         /// </summary>
@@ -3027,6 +3051,15 @@ namespace ASC.Web.Core.PublicResources {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Suspicious login to your account.
+        /// </summary>
+        public static string subject_suspicious_login {
+            get {
+                return ResourceManager.GetString("subject_suspicious_login", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText}.
         /// </summary>
