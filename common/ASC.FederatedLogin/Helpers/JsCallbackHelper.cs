@@ -58,7 +58,7 @@ public static partial class JsCallbackHelper
         return reader.ReadToEnd();
     }
 
-    public static string RenderCallbackPage(string profileTransport, string callback, string returnUrl, string host, bool desktop, IReadOnlyCollection<string> allowedHosts = null)
+    public static string RenderCallbackPage(string profileTransport, string callback, string returnUrl, bool desktop, IReadOnlyCollection<string> allowedHosts = null)
     {
         //All values are spliced into a live <script> block, so they must be encoded for the
         //JavaScript context to prevent XSS. The callback is a code identifier rather than a
@@ -66,7 +66,7 @@ public static partial class JsCallbackHelper
         //to window.location.href, where encoding alone is not enough, so it is validated too.
         var profile = HttpUtility.JavaScriptStringEncode(profileTransport, true);
         var safeCallback = GetSafeCallback(callback);
-        var safeReturnUrl = HttpUtility.JavaScriptStringEncode(desktop ? GetSafeReturnUrl(returnUrl, host, allowedHosts) : DefaultReturnUrl, true);
+        var safeReturnUrl = HttpUtility.JavaScriptStringEncode(desktop ? GetSafeReturnUrl(returnUrl, allowedHosts) : DefaultReturnUrl, true);
         var desktopLiteral = desktop.ToString().ToLowerInvariant();
 
         //One pass over the template: with sequential replacements a value carrying a
@@ -86,16 +86,12 @@ public static partial class JsCallbackHelper
         return !string.IsNullOrEmpty(callback) && CallbackRegex().IsMatch(callback) ? callback : DefaultCallback;
     }
 
-    /// <param name="host">
-    /// The host the request came in on (<see cref="HttpRequest.Host"/>). Pass the host itself
-    /// rather than anything derived from the request url: the scheme, host and port of
-    /// <c>HttpRequestExtensions.Url()</c> can be overridden by the caller through the "origin"
-    /// query parameter, which would defeat the check below.
-    /// </param>
     /// <param name="allowedHosts">
-    /// Hosts a return url may point at besides <paramref name="host"/>. Empty by default.
+    /// The hosts an absolute return url may point at — the desktop flow returns to the
+    /// registration site rather than to the portal. Empty by default, which leaves only
+    /// site-relative paths allowed.
     /// </param>
-    public static string GetSafeReturnUrl(string returnUrl, string host, IReadOnlyCollection<string> allowedHosts = null)
+    public static string GetSafeReturnUrl(string returnUrl, IReadOnlyCollection<string> allowedHosts = null)
     {
         if (string.IsNullOrWhiteSpace(returnUrl))
         {
@@ -120,19 +116,14 @@ public static partial class JsCallbackHelper
 
         //The url is assigned to window.location.href, so a "javascript:" or "data:" url would
         //execute as script in the portal origin, and any other host is an open redirect out of
-        //it. An absolute url is therefore allowed only on http(s) and on a known host.
+        //it. An absolute url is therefore allowed only on http(s) and on a configured host.
+        //The port is not compared: behind a reverse proxy the port a request arrives on is not
+        //the public one.
         return Uri.TryCreate(url, UriKind.Absolute, out var uri)
             && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
-            && IsKnownHost(uri.Host, host, allowedHosts)
+            && allowedHosts != null
+            && allowedHosts.Contains(uri.Host, StringComparer.OrdinalIgnoreCase)
             ? url
             : DefaultReturnUrl;
-    }
-
-    private static bool IsKnownHost(string urlHost, string host, IReadOnlyCollection<string> allowedHosts)
-    {
-        //The port is deliberately not compared: behind a reverse proxy the port the request
-        //arrives on is not the public one.
-        return !string.IsNullOrEmpty(host) && string.Equals(urlHost, host, StringComparison.OrdinalIgnoreCase)
-            || allowedHosts != null && allowedHosts.Contains(urlHost, StringComparer.OrdinalIgnoreCase);
     }
 }

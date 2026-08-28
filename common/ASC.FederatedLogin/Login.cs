@@ -148,7 +148,7 @@ public class Login(
 
     private async Task RenderXrdsAsync(HttpContext context)
     {
-        var returnUrl = Uri.EscapeDataString(JsCallbackHelper.GetSafeReturnUrl(ReturnUrl, context.Request.Host.Host, _allowedReturnUrlHosts));
+        var returnUrl = Uri.EscapeDataString(JsCallbackHelper.GetSafeReturnUrl(ReturnUrl, _allowedReturnUrlHosts));
         var xrdsloginuri = new Uri(context.Request.Url(), new Uri(context.Request.Url().AbsolutePath, UriKind.Relative)) + "?auth=openid&returnurl=" + returnUrl;
         var xrdsimageuri = new Uri(context.Request.Url(), new Uri(webHostEnvironment.WebRootPath, UriKind.Relative)) + "openid.gif";
         await XrdsHelper.RenderXrdsAsync(context.Response, xrdsloginuri, xrdsimageuri);
@@ -160,7 +160,7 @@ public class Login(
 
         var desktop = Mode == LoginMode.Redirect;
         var profileTransport = await loginProfileTransport.ToString(profile, pureTransport);
-        var pageContent = JsCallbackHelper.RenderCallbackPage(profileTransport, Callback, ReturnUrl, context.Request.Host.Host, desktop, _allowedReturnUrlHosts);
+        var pageContent = JsCallbackHelper.RenderCallbackPage(profileTransport, Callback, ReturnUrl, desktop, _allowedReturnUrlHosts);
 
         //Render a page
         context.Response.ContentType = "text/html";
