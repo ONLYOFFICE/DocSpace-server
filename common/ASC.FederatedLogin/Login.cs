@@ -144,7 +144,8 @@ public class Login(
 
     private async Task RenderXrdsAsync(HttpContext context)
     {
-        var xrdsloginuri = new Uri(context.Request.Url(), new Uri(context.Request.Url().AbsolutePath, UriKind.Relative)) + "?auth=openid&returnurl=" + ReturnUrl;
+        var returnUrl = Uri.EscapeDataString(JsCallbackHelper.GetSafeReturnUrl(ReturnUrl));
+        var xrdsloginuri = new Uri(context.Request.Url(), new Uri(context.Request.Url().AbsolutePath, UriKind.Relative)) + "?auth=openid&returnurl=" + returnUrl;
         var xrdsimageuri = new Uri(context.Request.Url(), new Uri(webHostEnvironment.WebRootPath, UriKind.Relative)) + "openid.gif";
         await XrdsHelper.RenderXrdsAsync(context.Response, xrdsloginuri, xrdsimageuri);
     }

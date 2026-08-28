@@ -37,6 +37,7 @@ global using System.Diagnostics;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Net.Http.Headers;
 global using System.Reflection;
+global using System.Security;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
 global using System.Security.Cryptography.Pkcs;

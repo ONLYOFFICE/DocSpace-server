@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -33,11 +33,11 @@
 
 global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
-global using System.Globalization;
 global using System.Net;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
+global using System.Xml.Linq;
 
 global using ASC.Api.Core.Middleware;
 global using ASC.Common.Caching;
@@ -52,7 +52,6 @@ global using FluentAssertions;
 
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging.Abstractions;
