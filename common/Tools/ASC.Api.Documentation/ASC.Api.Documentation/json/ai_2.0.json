@@ -2,10 +2,15 @@
   "openapi": "3.1.1",
   "info": {
     "title": "Api",
+    "description": "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, collaboration and file sharing. Requests are authenticated with the portal session cookie, an API key, Basic credentials, or an OAuth 2.0 / OpenID Connect token; see the security schemes of this document.",
     "contact": {
       "name": "API Support",
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
+    },
+    "license": {
+      "name": "AGPL-3.0-only",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.html"
     },
     "version": "3.7.0",
     "x-scalar-sdk-installation": [
@@ -177,31 +182,13 @@
             "description": "Agent information",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -219,13 +206,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -238,19 +219,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -288,31 +263,13 @@
             "description": "Agent information",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -330,13 +287,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -349,19 +300,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -406,31 +351,13 @@
             "description": "Agent information",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -448,13 +375,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -467,19 +388,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -534,31 +449,13 @@
             "description": "Updated agent information",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -576,13 +473,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -595,19 +486,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -662,31 +547,13 @@
             "description": "File operation",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -704,13 +571,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -723,19 +584,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -775,31 +630,13 @@
             "description": "List of AI agents with the detailed information",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -817,13 +654,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -836,19 +667,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -888,31 +713,13 @@
             "description": "List of AI agents with the detailed information",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -930,13 +737,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -949,19 +750,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -991,31 +786,13 @@
             "description": "List of new items",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1033,13 +810,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -1052,19 +823,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1106,31 +871,13 @@
             "description": "Vectorization settings",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1148,13 +895,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -1167,19 +908,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1207,31 +942,13 @@
             "description": "Vectorization settings",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1249,13 +966,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -1268,19 +979,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1310,31 +1015,13 @@
             "description": "AI settings",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1352,13 +1039,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -1371,19 +1052,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1413,31 +1088,13 @@
             "description": "User AI settings",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1455,13 +1112,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -1474,19 +1125,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1524,31 +1169,13 @@
             "description": "User AI settings",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1566,13 +1193,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -1585,19 +1206,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1639,31 +1254,13 @@
             "description": "Ok",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             }
           },
@@ -1674,13 +1271,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             }
           },
@@ -1693,19 +1284,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1733,7 +1318,7 @@
         "type": "object",
         "properties": {
           "agent": {
-            "description": "The file entry information.",
+            "description": "The agent file entry.",
             "$ref": "#/components/schemas/FileEntryBaseDto"
           },
           "items": {
@@ -1813,6 +1398,7 @@
         "type": "object",
         "properties": {
           "response": {
+            "description": "The AiSettingsDto object returned by the operation.",
             "$ref": "#/components/schemas/AiSettingsDto"
           },
           "count": {
@@ -1847,7 +1433,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the AiSettingsDto object."
       },
       "AiUserSettingsDto": {
         "type": "object",
@@ -1867,6 +1454,7 @@
         "type": "object",
         "properties": {
           "response": {
+            "description": "The AiUserSettingsDto object returned by the operation.",
             "$ref": "#/components/schemas/AiUserSettingsDto"
           },
           "count": {
@@ -1901,32 +1489,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
-      },
-      "ApiDateTime": {
-        "type": "object",
-        "properties": {
-          "utcTime": {
-            "examples": [
-              "2018-01-01T00:00:00.0000000Z"
-            ],
-            "type": "string",
-            "description": "The time in UTC format.",
-            "format": "date-time",
-            "readOnly": true
-          },
-          "timeZoneOffset": {
-            "examples": [
-              "00:00:00"
-            ],
-            "type": "string",
-            "description": "The time zone offset.",
-            "format": "date-span",
-            "readOnly": true
-          }
         },
-        "additionalProperties": false,
-        "description": "The API date and time parameters."
+        "description": "The successful API response containing the AiUserSettingsDto object."
       },
       "ChatSettings": {
         "type": "object",
@@ -2042,11 +1606,11 @@
             "$ref": "#/components/schemas/RoomDataLifetimeDto"
           },
           "watermark": {
-            "description": "The request parameters for adding watermarks.",
+            "description": "The watermark settings.",
             "$ref": "#/components/schemas/WatermarkRequestDto"
           },
           "logo": {
-            "description": "The logo request parameters.",
+            "description": "The room logo.",
             "$ref": "#/components/schemas/LogoRequest"
           },
           "tags": {
@@ -2175,6 +1739,7 @@
             ]
           }
         ],
+        "description": "The status of the distributed task.",
         "x-enum-type": "integer"
       },
       "EmailInvitationDto": {
@@ -2231,6 +1796,7 @@
             ]
           }
         ],
+        "description": "The embedding provider type used for document vectorization.",
         "x-enum-type": "integer"
       },
       "EmployeeDto": {
@@ -2397,20 +1963,41 @@
             "format": "uri"
           },
           "created": {
+            "examples": [
+              "2021-01-01T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The creation date and time of the file entry.",
-            "$ref": "#/components/schemas/ApiDateTime"
+            "format": "date-time"
           },
           "createdBy": {
             "description": "The file entry author.",
             "$ref": "#/components/schemas/EmployeeDto"
           },
           "updated": {
+            "examples": [
+              "2021-01-01T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The last date and time when the file entry was updated.",
-            "$ref": "#/components/schemas/ApiDateTime"
+            "format": "date-time"
           },
           "autoDelete": {
+            "examples": [
+              "2021-01-01T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The date and time when the file entry will be automatically deleted.",
-            "$ref": "#/components/schemas/ApiDateTime"
+            "format": "date-time"
           },
           "rootFolderType": {
             "description": "The root folder type of the file entry.",
@@ -2820,8 +2407,15 @@
                 "description": "Specifies if the folder can be accessed via an external link or not."
               },
               "expirationDate": {
+                "examples": [
+                  "2021-01-01T00:00:00Z"
+                ],
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "Represents the expiration date of the file entry.",
-                "$ref": "#/components/schemas/ApiDateTime"
+                "format": "date-time"
               },
               "isLinkExpired": {
                 "examples": [
@@ -3042,6 +2636,7 @@
         "type": "object",
         "properties": {
           "response": {
+            "description": "The FileOperationDto object returned by the operation.",
             "$ref": "#/components/schemas/FileOperationDto"
           },
           "count": {
@@ -3076,7 +2671,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the FileOperationDto object."
       },
       "FileShare": {
         "oneOf": [
@@ -3262,6 +2858,7 @@
         "type": "object",
         "properties": {
           "response": {
+            "description": "The FolderContentDtoInteger object returned by the operation.",
             "$ref": "#/components/schemas/FolderContentDtoInteger"
           },
           "count": {
@@ -3296,7 +2893,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the FolderContentDtoInteger object."
       },
       "FolderDtoInteger": {
         "allOf": [
@@ -3534,7 +3132,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FolderDtoInteger"
-            }
+            },
+            "description": "The list of FolderDtoInteger objects returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -3568,12 +3167,14 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the list of FolderDtoInteger objects."
       },
       "FolderIntegerWrapper": {
         "type": "object",
         "properties": {
           "response": {
+            "description": "The FolderDtoInteger object returned by the operation.",
             "$ref": "#/components/schemas/FolderDtoInteger"
           },
           "count": {
@@ -3608,7 +3209,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the FolderDtoInteger object."
       },
       "FolderType": {
         "oneOf": [
@@ -3889,7 +3491,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/NewItemsDtoAgentNewItemsDto"
-            }
+            },
+            "description": "The list of NewItemsDtoAgentNewItemsDto objects returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -3923,7 +3526,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the list of NewItemsDtoAgentNewItemsDto objects."
       },
       "NewItemsDtoAgentNewItemsDto": {
         "required": [
@@ -3933,8 +3537,15 @@
         "type": "object",
         "properties": {
           "date": {
+            "examples": [
+              "2025-01-01T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The date and time when the new item was created.",
-            "$ref": "#/components/schemas/ApiDateTime"
+            "format": "date-time"
           },
           "items": {
             "type": [
@@ -4405,6 +4016,7 @@
         "type": "object",
         "properties": {
           "response": {
+            "description": "The VectorizationSettingsDto object returned by the operation.",
             "$ref": "#/components/schemas/VectorizationSettingsDto"
           },
           "count": {
@@ -4439,7 +4051,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the VectorizationSettingsDto object."
       },
       "VectorizationStartRequestBody": {
         "required": [

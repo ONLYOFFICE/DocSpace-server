@@ -4,7 +4,8 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Always true — the mutation completed."
         }
       },
       "required": [
@@ -17,7 +18,8 @@
       "type": "object",
       "properties": {
         "error": {
-          "type": "string"
+          "type": "string",
+          "description": "The error message, ready to be shown to the caller."
         }
       },
       "required": [
@@ -62,7 +64,8 @@
           "description": "Override the action's baked-in system prompt (replace or append)."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Wire-serializable subset of the engine's `ActionArgs` — drops the engine-injected `signal`/`fetch`; `profile`/`messages` are owned by the engine and never sent by the caller."
     },
     "AiTMCPItem": {
       "type": "object",
@@ -187,7 +190,8 @@
         "role",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "A single chat message as it travels on the wire."
     },
     "AiAiSendStreamBody": {
       "type": "object",
@@ -201,7 +205,8 @@
           "description": "The user turn to send."
         },
         "actionArgs": {
-          "$ref": "#/components/schemas/AiAiActionArgs"
+          "$ref": "#/components/schemas/AiAiActionArgs",
+          "description": "Per-request engine options: extra tools, reasoning, prompt override."
         },
         "entityId": {
           "type": "string",
@@ -215,7 +220,8 @@
       "required": [
         "userMessage"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Shared body of the two streaming send endpoints (`sendWithStream` and its OpenAI-framed twin) — the `Chat` action is implied, so there is no `actionType`."
     },
     "AiChatEvent": {
       "description": "Discriminated event emitted by the streaming methods of  {@link  AIEngine } . The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a  {@link  ChatEvent }  so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via  {@link  AIEngine.approveToolCall }  or  {@link  AIEngine.denyToolCall } .\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant   reply lifecycle.\n- `message-incomplete` — the provider returned an error or   incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
@@ -455,13 +461,16 @@
           "description": "Snapshot of the assistant message at the time the tool call surfaced."
         },
         "actionArgs": {
-          "$ref": "#/components/schemas/AiAiActionArgs"
+          "$ref": "#/components/schemas/AiAiActionArgs",
+          "description": "Per-request engine options: extra tools, reasoning, prompt override."
         },
         "entityId": {
-          "type": "string"
+          "type": "string",
+          "description": "Optional entity (room) scope for profile resolution."
         },
         "profileId": {
-          "type": "string"
+          "type": "string",
+          "description": "Session-level profile override for this request only."
         }
       },
       "required": [
@@ -470,7 +479,8 @@
         "idx",
         "message"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Identifies a pending tool call to resume — mirrors the library `ToolCallData` (its serializable fields)."
     },
     "AiResolvedAssignment": {
       "type": "object",
@@ -1292,6 +1302,7 @@
       "type": "object",
       "properties": {
         "response": {
+          "description": "The AiUserSettingsDto object returned by the operation.",
           "$ref": "#/components/schemas/AiAiUserSettingsDto"
         },
         "count": {
@@ -1326,7 +1337,8 @@
           "description": "HTTP status code of the response (duplicate of status)",
           "format": "int32"
         }
-      }
+      },
+      "description": "The successful API response containing the AiUserSettingsDto object."
     },
     "AiAiUserSettingsDto": {
       "type": "object",
@@ -1346,6 +1358,7 @@
       "type": "object",
       "properties": {
         "response": {
+          "description": "The VectorizationSettingsDto object returned by the operation.",
           "$ref": "#/components/schemas/AiVectorizationSettingsDto"
         },
         "count": {
@@ -1380,7 +1393,8 @@
           "description": "HTTP status code of the response (duplicate of status)",
           "format": "int32"
         }
-      }
+      },
+      "description": "The successful API response containing the VectorizationSettingsDto object."
     },
     "AiVectorizationSettingsDto": {
       "type": "object",
@@ -1435,12 +1449,14 @@
           ]
         }
       ],
+      "description": "The embedding provider type used for document vectorization.",
       "x-enum-type": "integer"
     },
     "AiAiSettingsWrapper": {
       "type": "object",
       "properties": {
         "response": {
+          "description": "The AiSettingsDto object returned by the operation.",
           "$ref": "#/components/schemas/AiAiSettingsDto"
         },
         "count": {
@@ -1475,7 +1491,8 @@
           "description": "HTTP status code of the response (duplicate of status)",
           "format": "int32"
         }
-      }
+      },
+      "description": "The successful API response containing the AiSettingsDto object."
     },
     "AiAiSettingsDto": {
       "required": [
@@ -1542,7 +1559,8 @@
           "type": "array",
           "items": {
             "$ref": "#/components/schemas/AiFolderDtoInteger"
-          }
+          },
+          "description": "The list of FolderDtoInteger objects returned by the operation."
         },
         "count": {
           "type": "integer",
@@ -1576,7 +1594,8 @@
           "description": "HTTP status code of the response (duplicate of status)",
           "format": "int32"
         }
-      }
+      },
+      "description": "The successful API response containing the list of FolderDtoInteger objects."
     },
     "AiFolderDtoInteger": {
       "allOf": [
@@ -2599,8 +2618,15 @@
               "description": "Specifies if the folder can be accessed via an external link or not."
             },
             "expirationDate": {
+              "examples": [
+                "2021-01-01T00:00:00Z"
+              ],
+              "type": [
+                "null",
+                "string"
+              ],
               "description": "Represents the expiration date of the file entry.",
-              "$ref": "#/components/schemas/AiApiDateTime"
+              "format": "date-time"
             },
             "isLinkExpired": {
               "examples": [
@@ -2617,31 +2643,6 @@
       ],
       "additionalProperties": false,
       "description": "The generic file entry information."
-    },
-    "AiApiDateTime": {
-      "type": "object",
-      "properties": {
-        "utcTime": {
-          "examples": [
-            "2018-01-01T00:00:00.0000000Z"
-          ],
-          "type": "string",
-          "description": "The time in UTC format.",
-          "format": "date-time",
-          "readOnly": true
-        },
-        "timeZoneOffset": {
-          "examples": [
-            "00:00:00"
-          ],
-          "type": "string",
-          "description": "The time zone offset.",
-          "format": "date-span",
-          "readOnly": true
-        }
-      },
-      "additionalProperties": false,
-      "description": "The API date and time parameters."
     },
     "AiFileEntryBaseDto": {
       "type": "object",
@@ -2708,20 +2709,41 @@
           "format": "uri"
         },
         "created": {
+          "examples": [
+            "2021-01-01T00:00:00Z"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The creation date and time of the file entry.",
-          "$ref": "#/components/schemas/AiApiDateTime"
+          "format": "date-time"
         },
         "createdBy": {
           "description": "The file entry author.",
           "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "updated": {
+          "examples": [
+            "2021-01-01T00:00:00Z"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The last date and time when the file entry was updated.",
-          "$ref": "#/components/schemas/AiApiDateTime"
+          "format": "date-time"
         },
         "autoDelete": {
+          "examples": [
+            "2021-01-01T00:00:00Z"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The date and time when the file entry will be automatically deleted.",
-          "$ref": "#/components/schemas/AiApiDateTime"
+          "format": "date-time"
         },
         "rootFolderType": {
           "description": "The root folder type of the file entry.",
@@ -2998,6 +3020,7 @@
       "type": "object",
       "properties": {
         "response": {
+          "description": "The FileOperationDto object returned by the operation.",
           "$ref": "#/components/schemas/AiFileOperationDto"
         },
         "count": {
@@ -3032,7 +3055,8 @@
           "description": "HTTP status code of the response (duplicate of status)",
           "format": "int32"
         }
-      }
+      },
+      "description": "The successful API response containing the FileOperationDto object."
     },
     "AiFileOperationDto": {
       "required": [
@@ -3189,6 +3213,7 @@
           ]
         }
       ],
+      "description": "The status of the distributed task.",
       "x-enum-type": "integer"
     },
     "AiFileOperationType": {
@@ -3248,7 +3273,8 @@
           "type": "array",
           "items": {
             "$ref": "#/components/schemas/AiNewItemsDtoAgentNewItemsDto"
-          }
+          },
+          "description": "The list of NewItemsDtoAgentNewItemsDto objects returned by the operation."
         },
         "count": {
           "type": "integer",
@@ -3282,7 +3308,8 @@
           "description": "HTTP status code of the response (duplicate of status)",
           "format": "int32"
         }
-      }
+      },
+      "description": "The successful API response containing the list of NewItemsDtoAgentNewItemsDto objects."
     },
     "AiNewItemsDtoAgentNewItemsDto": {
       "required": [
@@ -3292,8 +3319,15 @@
       "type": "object",
       "properties": {
         "date": {
+          "examples": [
+            "2025-01-01T00:00:00Z"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
           "description": "The date and time when the new item was created.",
-          "$ref": "#/components/schemas/AiApiDateTime"
+          "format": "date-time"
         },
         "items": {
           "type": [
@@ -3318,7 +3352,7 @@
       "type": "object",
       "properties": {
         "agent": {
-          "description": "The file entry information.",
+          "description": "The agent file entry.",
           "$ref": "#/components/schemas/AiFileEntryBaseDto"
         },
         "items": {
@@ -3340,6 +3374,7 @@
       "type": "object",
       "properties": {
         "response": {
+          "description": "The FolderDtoInteger object returned by the operation.",
           "$ref": "#/components/schemas/AiFolderDtoInteger"
         },
         "count": {
@@ -3374,12 +3409,14 @@
           "description": "HTTP status code of the response (duplicate of status)",
           "format": "int32"
         }
-      }
+      },
+      "description": "The successful API response containing the FolderDtoInteger object."
     },
     "AiFolderContentIntegerWrapper": {
       "type": "object",
       "properties": {
         "response": {
+          "description": "The FolderContentDtoInteger object returned by the operation.",
           "$ref": "#/components/schemas/AiFolderContentDtoInteger"
         },
         "count": {
@@ -3414,7 +3451,8 @@
           "description": "HTTP status code of the response (duplicate of status)",
           "format": "int32"
         }
-      }
+      },
+      "description": "The successful API response containing the FolderContentDtoInteger object."
     },
     "AiFolderContentDtoInteger": {
       "required": [
@@ -3523,7 +3561,8 @@
             "description": "The user turn to send."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
           },
           "entityId": {
             "type": "string",
@@ -3556,7 +3595,8 @@
             "$ref": "#/components/schemas/AiThreadMessageLike"
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
           }
         },
         "required": [
@@ -3596,13 +3636,16 @@
             "description": "Target thread (must already exist)."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
           },
           "entityId": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional entity (room) scope for profile resolution."
           },
           "profileId": {
-            "type": "string"
+            "type": "string",
+            "description": "Session-level profile override for this request only."
           }
         },
         "required": [
@@ -3643,13 +3686,16 @@
             "description": "Snapshot of the assistant message at the time the tool call surfaced."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
           },
           "entityId": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional entity (room) scope for profile resolution."
           },
           "profileId": {
-            "type": "string"
+            "type": "string",
+            "description": "Session-level profile override for this request only."
           }
         },
         "required": [
