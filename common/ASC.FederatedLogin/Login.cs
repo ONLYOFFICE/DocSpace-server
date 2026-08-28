@@ -40,7 +40,8 @@ public class Login(
     LoginProfileTransport loginProfileTransport,
     IConfiguration configuration)
 {
-    //Hosts a return url may point at besides the portal itself.
+    //The complete allow-list for absolute return urls, including the portal's own host if an
+    //absolute (rather than relative) return url to it is ever required — nothing is implicitly allowed.
     private readonly string[] _allowedReturnUrlHosts = configuration.GetSection("federated-login:allowed-return-url-hosts").Get<string[]>() ?? [];
 
     private string Callback => _params.Get("callback");
