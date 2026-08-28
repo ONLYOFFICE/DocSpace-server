@@ -66,10 +66,36 @@ public class RoomGroupUpdateRenameTests(
 
         // Act
         var updated = (await _roomGroupsApi.UpdateRoomGroupAsync(
-            created.Id, new UpdateRoomGroupRequest(groupName: "Переименовано 名字 🎯"), TestContext.Current.CancellationToken)).Response;
+            created.Id, new UpdateRoomGroupRequest(groupName: "Переименовано 名字"), TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        updated.Name.Should().Be("Переименовано 名字 🎯");
+        updated.Name.Should().Be("Переименовано 名字");
+    }
+
+    /// <summary>
+    /// Renaming to a name outside the Basic Multilingual Plane is refused for the same reason
+    /// creating one is: <c>files_group.name</c> is a <c>utf8</c> column, which holds three bytes per
+    /// character (<c>products/ASC.Files/Core/Core/EF/DbFilesGroup.cs</c>). Accepted behaviour, so the
+    /// refusal is what is asserted — and the old name must survive it.
+    /// See <c>RoomGroupCreateTests.Create_NameOutsideBmp_Rejected</c>.
+    /// </summary>
+    [Fact]
+    public async Task Rename_ToNameOutsideBmp_Rejected()
+    {
+        // Arrange
+        var roomId = await CreateGroupRoomId("Emoji Rename");
+        var created = await CreateRoomGroup("Plain", [roomId]);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomGroupsApi.UpdateRoomGroupAsync(
+                created.Id, new UpdateRoomGroupRequest(groupName: "Rooms 🎯"), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(500);
+
+        var groups = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        groups.Single(g => g.Id == created.Id).Name.Should().Be("Plain", "a refused rename must leave the old name in place");
     }
 
     [Fact]

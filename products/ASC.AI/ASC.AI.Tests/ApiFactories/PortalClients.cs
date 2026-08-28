@@ -47,6 +47,10 @@ public sealed class PortalClients : PortalClientsBase
     public RawApiClient FilesApi { get; }
     public RawApiClient PeopleApi { get; }
 
+    // The one typed client this suite needs: inviting members goes through the public People API,
+    // which the SDK does expose (see Invitations.InviteContactAsync).
+    public ProfilesApi ProfilesApi { get; }
+
     public PortalClients(PortalContext context) : base(context)
     {
         AiHttpClient = CreateClient(ResourceNames.Ai);
@@ -56,5 +60,7 @@ public sealed class PortalClients : PortalClientsBase
         Ai = new RawApiClient(AiHttpClient);
         FilesApi = new RawApiClient(FilesHttpClient);
         PeopleApi = new RawApiClient(PeopleHttpClient);
+
+        ProfilesApi = new ProfilesApi(PeopleHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.People) });
     }
 }

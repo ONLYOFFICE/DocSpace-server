@@ -44,7 +44,9 @@ public class SettingsController(
     FileDtoHelper fileDtoHelper,
     DefaultTemplateSettingsConverter defaultTemplateSettingsConverter,
     DefaultTemplateSettingsHelper defaultTemplateSettingsHelper,
-    PermissionContext permissionContext)
+    PermissionContext permissionContext,
+    AuthContext authContext,
+    ExternalShare externalShare)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -202,6 +204,13 @@ public class SettingsController(
     [HttpGet("settings")]
     public async Task<FilesSettingsDto> GetFilesSettings()
     {
+        // [AllowAnonymous] stays for external-link viewers (the share page reads the extension
+        // tables before authenticating); a caller with neither a session nor a link key gets 401.
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
+        {
+            throw new AuthenticationException();
+        }
+
         return await settingsDtoConverter.Get();
     }
 
@@ -440,12 +449,26 @@ public class SettingsController(
     [SwaggerResponse(400, "Incorrect or missing file")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("settings/defaulttemplate")]
+    // Kestrel's global 100 MB limit aborts the connection mid-upload, so the caller would see a
+    // reset instead of a reason. The form limit below takes over: the multipart reader rejects the
+    // oversized section while it streams in, and the caller gets a readable 400.
+    [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = MaxDefaultTemplateSize)]
     public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
+
+        if (inDto.File.Length > MaxDefaultTemplateSize)
+        {
+            throw new ArgumentException(FileSizeComment.GetFileSizeExceptionString(MaxDefaultTemplateSize));
+        }
+
+        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto.File.OpenReadStream());
         return await defaultTemplateSettingsConverter.ConvertToDtoAsync(settings);
     }
+
+    /// <summary>Matches the Kestrel-wide body limit the [DisableRequestSizeLimit] above bypasses.</summary>
+    private const long MaxDefaultTemplateSize = 100 * 1024 * 1024;
 
     /// <remarks>
     /// Changes the setting that allows the user to organize the grouping of rooms.

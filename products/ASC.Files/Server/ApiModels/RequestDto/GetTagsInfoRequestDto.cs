@@ -54,6 +54,7 @@ public class GetTagsInfoRequestDto
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
+    [Range(0, int.MaxValue)]
     public int StartIndex { get; set; }
 
     /// <summary>

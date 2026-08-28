@@ -227,11 +227,15 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
 // under the caller's credentials, so a client cannot claim someone else's
 // agent. A plain chat (no agent room in scope) contributes nothing and the
 // field stays absent.
-async function withEntityMetadata<T>(body: T): Promise<T> {
+//
+// `scope` overrides where the agent is read from, for the one input shape that
+// carries no top-level scope of its own (see {@link customScopeOf}). It is only
+// ever a hint: the pair itself is always re-resolved here.
+async function withEntityMetadata<T>(body: T, scope?: string): Promise<T> {
   if (!isObject(body)) {
     return body;
   }
-  const entity = await safeGetAgentEntity(contextScopeOf(body));
+  const entity = await safeGetAgentEntity(scope ?? contextScopeOf(body));
   if (!entity.entityId) {
     return body;
   }
@@ -240,6 +244,31 @@ async function withEntityMetadata<T>(body: T): Promise<T> {
     ...body,
     actionArgs: { ...actionArgs, ...entity },
   } as T;
+}
+
+// Scope of a `sendCustom` round. `SendCustomInput` is `isStream` /
+// `systemPrompt` / `userMessage` / `actionArgs` / `profileId` — it has no
+// `entityId` of its own, so the only place a caller can name the agent is
+// `actionArgs.entityId`, the same field the metadata pair lives in. Treated as
+// a hint and re-resolved server-side by `withEntityMetadata`, so a client still
+// cannot claim someone else's agent (mirrors threads/regenerate-title).
+//
+// `contextScopeOf` still wins when present: a host that sends the round with an
+// explicit top-level scope keeps describing it that way.
+function customScopeOf(body: unknown): string | undefined {
+  const scope = contextScopeOf(body);
+  if (scope) {
+    return scope;
+  }
+  if (!isObject(body)) {
+    return undefined;
+  }
+  const actionArgs = body["actionArgs"];
+  if (!isObject(actionArgs)) {
+    return undefined;
+  }
+  const entityId = actionArgs["entityId"];
+  return typeof entityId === "string" ? entityId : undefined;
 }
 
 const toolsAdapter = new HttpToolsAdapter();
@@ -552,7 +581,16 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
-    const body = withRequestSignal(res, req.body);
+    // Attribute the round to the agent for the backend's usage accounting, as
+    // every other model-bound route does. The library carries the pair from
+    // `actionArgs` into the provider credentials on this path too — `sendCustom`
+    // builds its action args with `{...actionArgs}` and the provider factory
+    // reads `entityId`/`entityTitle` from them, for both the streaming
+    // (`sendMessage`) and one-shot (`sendMessageSync`) branches.
+    const body = await withEntityMetadata(
+      withRequestSignal(res, req.body),
+      customScopeOf(req.body),
+    );
     const result = engine.sendCustom(body);
     if (body.isStream) {
       if (isAsyncIterable(result)) {
