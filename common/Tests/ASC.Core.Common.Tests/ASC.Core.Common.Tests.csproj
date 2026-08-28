@@ -23,6 +23,8 @@
     <!-- ASC.Api.Core carries CustomExceptionHandler: the exception-to-status-code mapping the API answers with. -->
     <ProjectReference Include="..\..\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\ASC.Core.Common\ASC.Core.Common.csproj" />
+    <!-- ASC.FederatedLogin carries JsCallbackHelper: the validation of the values spliced into the OAuth callback page. -->
+    <ProjectReference Include="..\..\ASC.FederatedLogin\ASC.FederatedLogin.csproj" />
   </ItemGroup>
 
   <ItemGroup>

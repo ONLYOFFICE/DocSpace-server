@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.FederatedLogin;
@@ -39,7 +39,7 @@ public class Login(
     ProviderManager providerManager,
     LoginProfileTransport loginProfileTransport)
 {
-    private string Callback => _params.Get("callback") ?? "loginCallback";
+    private string Callback => _params.Get("callback");
     private string Auth => _params.Get("auth");
     private string ReturnUrl => _params.Get("returnurl"); //TODO?? FormsAuthentication.LoginUrl;
     private string Pure => _params.Get("pure");
@@ -154,18 +154,14 @@ public class Login(
         bool.TryParse(Pure, out var pureTransport);
 
         var desktop = Mode == LoginMode.Redirect;
-        var returnUrl = desktop && !string.IsNullOrWhiteSpace(ReturnUrl) ? ReturnUrl : "/";
+        var profileTransport = await loginProfileTransport.ToString(profile, pureTransport);
+        var pageContent = JsCallbackHelper.RenderCallbackPage(profileTransport, Callback, ReturnUrl, desktop);
 
         //Render a page
         context.Response.ContentType = "text/html";
-        await context.Response.WriteAsync(
-            JsCallbackHelper.GetCallbackPage()
-            .Replace("%PROFILE%", $"\"{await loginProfileTransport.ToString(profile, pureTransport)}\"")
-            .Replace("%CALLBACK%", Callback)
-            .Replace("%RETURNURL%", $"\"{returnUrl}\"")
-            .Replace("%DESKTOP%", desktop.ToString().ToLowerInvariant())
-            );
+        await context.Response.WriteAsync(pageContent);
     }
+
 }
 
 public class LoginHandler
