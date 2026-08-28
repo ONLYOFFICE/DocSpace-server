@@ -43,8 +43,9 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webplugins;
 internal static class WebPluginsTestData
 {
     /// <summary>
-    /// Builds a single-entry zip archive containing a <c>config.json</c> plugin manifest, the
-    /// minimum a plugin package needs to pass validation.
+    /// Builds a zip archive containing a <c>config.json</c> plugin manifest and the
+    /// <c>plugin.js</c> entry the extractor requires — the minimum a plugin package needs to pass
+    /// validation.
     /// </summary>
     public static byte[] CreatePluginZip(string pluginName)
     {
@@ -66,13 +67,19 @@ internal static class WebPluginsTestData
 
         using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, leaveOpen: true))
         {
-            var entry = archive.CreateEntry("config.json");
-            using var entryStream = entry.Open();
-            using var writer = new StreamWriter(entryStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-            writer.Write(configJson);
+            AddEntry(archive, "config.json", configJson);
+            AddEntry(archive, "plugin.js", $"window.Plugins = window.Plugins || {{}}; window.Plugins.{sanitizedPluginName} = {{}};");
         }
 
         return memoryStream.ToArray();
+    }
+
+    private static void AddEntry(System.IO.Compression.ZipArchive archive, string name, string content)
+    {
+        var entry = archive.CreateEntry(name);
+        using var entryStream = entry.Open();
+        using var writer = new StreamWriter(entryStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        writer.Write(content);
     }
 
     /// <summary>

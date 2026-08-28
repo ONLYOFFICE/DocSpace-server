@@ -94,6 +94,11 @@ public class SecurityController(
 
             foreach (var e in i.Users)
             {
+                if (!await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, e.Id))
+                {
+                    continue;
+                }
+
                 s.Users.Add(await employeeWrapperHelper.GetAsync(e));
             }
 

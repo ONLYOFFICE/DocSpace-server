@@ -65,12 +65,37 @@ public class SecurityRequestsDto
 /// <summary>
 /// The request parameters for retrieving the security settings across the multiple modules.
 /// </summary>
-public class SecuritySettingsRequestDto
+public class SecuritySettingsRequestDto : IValidatableObject
 {
     /// <summary>
     /// The list of module identifiers for which to retrieve the security settings.
     /// </summary>
-    /// <example>["item1", "item2"]</example>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     [FromQuery(Name = "ids")]
     public IEnumerable<string> Ids { get; set; }
+
+    public IEnumerable<DataAnnotationsValidationResult> Validate(ValidationContext validationContext)
+    {
+        return WebItemIdValidator.Validate(Ids, nameof(Ids));
+    }
+}
+
+/// <summary>
+/// Rejects a module identifier that is not a GUID before it reaches the security store, which
+/// parses it without guarding and would otherwise fail the request with an unhandled error.
+/// </summary>
+public static class WebItemIdValidator
+{
+    public static IEnumerable<DataAnnotationsValidationResult> Validate(IEnumerable<string> ids, string memberName)
+    {
+        if (ids == null)
+        {
+            yield break;
+        }
+
+        foreach (var id in ids.Where(id => !Guid.TryParse(id, out _)))
+        {
+            yield return new DataAnnotationsValidationResult($"The module ID \"{id}\" is not a valid identifier.", [memberName]);
+        }
+    }
 }

@@ -45,19 +45,21 @@ public class TfaAppGenerateSetupCodeTests(
     AspireAppFixture fixture)
     : TfaTestBase(fixture)
 {
-    // Docs: 405 "TFA application settings are not available" when TFA App is disabled. Live API
-    // returns 403 instead — here with an empty body, unlike the other doc-mismatch cases, which
-    // return the exception message.
+    // Docs promise 405 "TFA application settings are not available" when TFA App is disabled, and
+    // the action does answer 405 now — but only for a caller that got past its
+    // [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")] gate. Over a Bearer
+    // token authorization fails first, with an empty-bodied 403, so what this case can pin is the
+    // gate itself: no Bearer caller reaches the setup code, whatever the portal's TFA state.
     [Trait("Bug", "82972")]
     [Fact]
-    public async Task TfaAppGenerateSetupCode_TfaAppDisabled_ShouldReturn405()
+    public async Task TfaAppGenerateSetupCode_TfaAppDisabled_RequiresConfirmToken()
     {
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.TfaAppGenerateSetupCodeAsync(TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(405);
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]

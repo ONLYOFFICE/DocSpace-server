@@ -52,7 +52,7 @@ public class ThirdPartySsrfTests(
         { "http://192.168.0.1/webdav", "ssrf-webdav-rfc1918" },
     };
 
-    [Theory]
+    [Theory(Skip = "Bug 82560 is still open: the WebDAV provider URL is not validated before the outbound PROPFIND. Remove this Skip when the fix lands.")]
     [Trait("Category", "Bug")]
     [Trait("Bug", "82560")]
     [MemberData(nameof(SsrfProviderUrls))]

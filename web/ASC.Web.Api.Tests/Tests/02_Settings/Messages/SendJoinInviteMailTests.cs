@@ -41,10 +41,14 @@ public class SendJoinInviteMailTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    // Commented out for now: the Arrange step (SaveMailDomainSettings) saves the tenant, and on the
-    // integration host (base-domain = localhost) SaveTenantAsync rewrites the portal alias to
-    // 'localhost' and dies on the unique alias index with a 500 — same constraint as the disabled
-    // save/restore cases in GreetingSaveTests. Re-enable when that is resolved.
+    // Commented out for now: the Arrange step of both cases below (SaveMailDomainSettings) saves the
+    // tenant, and on the integration host (base-domain = localhost) SaveTenantAsync rewrites the
+    // portal alias to 'localhost' and dies on the unique alias index with a 500 — same constraint as
+    // the disabled save/restore cases in GreetingSaveTests. Re-enable when that is resolved.
+    //
+    // Until then the anonymous self-registration path this endpoint serves — the login page's
+    // "Register" link, offered while SettingsDto.EnabledJoin is true — has no integration coverage,
+    // which is worth knowing before touching its authorization again.
     /*
     [Fact]
     public async Task SendJoinInviteMail_Owner_AlreadyRegisteredEmail_ThrowsBadRequest()
@@ -69,6 +73,31 @@ public class SendJoinInviteMailTests(
         // Assert
         exception.ErrorCode.Should().Be(400);
         exception.ErrorContent?.ToString().Should().Contain("User with this email is already registered");
+    }
+
+    // The login page's "Register" link is anonymous, and the portal only offers it while a
+    // trusted-domain policy is published — the same condition SettingsDto.EnabledJoin reports to
+    // that page. This is the case that keeps the authorization added for bug 80727 from taking the
+    // login page's self-registration down with it.
+    [Fact]
+    [Trait("Bug", "80727")]
+    public async Task SendJoinInviteMail_Anonymous_TrustedDomainsOpen_ReturnsStringResponse()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        await _commonSettingsApi.SaveMailDomainSettingsAsync(
+            new MailDomainSettingsRequestsDto(TenantTrustedDomainsType.All, [], true), TestContext.Current.CancellationToken);
+
+        await _webApiClient.Authenticate(null);
+        var email = Initializer.FakerMember.Generate().Email;
+
+        // Act
+        var result = await _messagesApi.SendJoinInviteMailAsync(
+            new AdminMessageBaseSettingsRequestsDto(email), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.StatusCode.Should().Be(200);
+        result.Response.Should().NotBeNullOrEmpty();
     }
     */
 

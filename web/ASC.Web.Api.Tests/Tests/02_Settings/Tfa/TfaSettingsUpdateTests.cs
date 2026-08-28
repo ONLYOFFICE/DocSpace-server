@@ -132,27 +132,29 @@ public class TfaSettingsUpdateTests(
         body.Should().Contain("$.mandatoryUsers[0]");
     }
 
-    // BUG 82994: a malformed trustedIps entry is accepted with no format validation (200) and
-    // stored as-is. Every subsequent login attempt by any user on the portal then crashes with 500
-    // (System.FormatException) when TfaEnabledForUserAsync tries to parse it as an IP. The correct
-    // behaviour is that login keeps working (200) regardless of what's stored in trustedIps.
+    // BUG 82994: a malformed trustedIps entry used to be accepted with no format validation (200)
+    // and stored as-is; every subsequent login attempt by any user on the portal then crashed with
+    // 500 (System.FormatException) when TfaEnabledForUserAsync tried to parse it as an IP. The
+    // entry is now rejected on write, so nothing unparseable can reach the login path and login
+    // keeps working.
     [Trait("Bug", "82994")]
     [Fact]
     public async Task UpdateTfaSettings_MalformedTrustedIpsEntry_ShouldNotCrashSubsequentLogin()
     {
-        // Arrange
-        var enable = await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.App, trustedIps: ["not-an-ip"]), TestContext.Current.CancellationToken);
-        enable.Response.Should().BeTrue();
-
         // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _tfaSettingsApi.UpdateTfaSettingsAsync(
+                new TfaRequestsDto(TfaRequestsDtoType.App, trustedIps: ["not-an-ip"]), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+
         await _webApiClient.Authenticate(null);
         var login = await _authenticationApi.AuthenticateMeAsync(
             new AuthRequestsDto(userName: Owner.Email, password: Owner.Password), TestContext.Current.CancellationToken);
 
-        // Assert
         login.Response.Should().NotBeNull();
-        login.Response.Tfa.Should().BeTrue();
+        login.Response.Token.Should().NotBeNullOrEmpty();
     }
 
     [Fact]

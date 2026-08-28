@@ -98,39 +98,47 @@ public class PaymentQuotaInformationTests(
         exception.ErrorCode.Should().Be(403);
     }
 
-    // BUG 81534: the action only checks IsGuestAsync, so a plain RoomAdmin — who should not see
-    // billing/quota information any more than a User should — is let straight through with 200.
+    // BUG 81534 asked for this endpoint to be closed to a RoomAdmin and a User, on the grounds that
+    // neither should see billing information. It cannot be: the client reads it during start-up for
+    // every non-guest (AuthStore.getPaymentInfo) to learn the plan's feature limits, and rethrows on
+    // failure, so denying it leaves those roles on a blank page. The endpoint is role-aware instead
+    // — QuotaHelper.GetFeatures drops admin-only features and withholds the usage figures from a
+    // User — which is what these two cases pin.
     [Trait("Bug", "81534")]
     [Fact]
-    public async Task GetQuotaPaymentInformation_RoomAdmin_ThrowsAccessDenied()
+    public async Task GetQuotaPaymentInformation_RoomAdmin_ReturnsQuota()
     {
         // Arrange
         var roomAdmin = await InviteMember(EmployeeType.RoomAdmin);
         await _webApiClient.Authenticate(roomAdmin);
 
         // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken));
+        var quota = await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        exception.ErrorCode.Should().Be(403);
+        quota.StatusCode.Should().Be(200);
+        quota.Response.Features.Should().NotBeEmpty();
     }
 
-    // BUG 81534: same as RoomAdmin above — a plain User currently gets 200.
     [Trait("Bug", "81534")]
     [Fact]
-    public async Task GetQuotaPaymentInformation_User_ThrowsAccessDenied()
+    public async Task GetQuotaPaymentInformation_User_ReturnsQuotaWithoutUsageFigures()
     {
         // Arrange
         var user = await InviteMember(EmployeeType.User);
         await _webApiClient.Authenticate(user);
 
         // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken));
+        var quota = await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        exception.ErrorCode.Should().Be(403);
+        quota.StatusCode.Should().Be(200);
+        quota.Response.Features.Should().NotBeEmpty();
+
+        // Only the portal's total size is disclosed to a User; no other feature carries a counter.
+        quota.Response.Features
+            .Where(f => f.Used is not null)
+            .Should().OnlyContain(f => f.Id == "total_size");
     }
 
     [Fact]

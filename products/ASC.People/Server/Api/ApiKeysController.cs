@@ -69,7 +69,7 @@ public class ApiKeysController(
 
         if (currentType == EmployeeType.Guest)
         {
-            throw new UnauthorizedAccessException("This operation unavailable for user with guest role");
+            throw new CustomHttpException(HttpStatusCode.Forbidden, "This operation unavailable for user with guest role");
         }
 
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;
@@ -79,7 +79,7 @@ public class ApiKeysController(
             throw new ArgumentException("Permissions are not valid.");
         }
 
-        var result = await apiKeyManager.CreateApiKeyAsync(apiKey.Name,
+        var result = await apiKeyManager.CreateApiKeyAsync(HttpUtility.HtmlEncode(apiKey.Name),
             apiKey.Permissions,
             expiresAt);
 
@@ -103,7 +103,14 @@ public class ApiKeysController(
     [Tags("Api keys")]
     [SwaggerResponse(200, "List of all available permissions for key", typeof(IEnumerable<string>))]
     [HttpGet("permissions")]
-    public IEnumerable<string> GetAllPermissions()
+    public async Task<IEnumerable<string>> GetAllPermissions()
+    {
+        await DemandNotGuestAsync();
+
+        return GetPermissions();
+    }
+
+    private static IEnumerable<string> GetPermissions()
     {
         var scopes = AuthorizationExtension.ScopesMap;
 
@@ -131,6 +138,12 @@ public class ApiKeysController(
     public async IAsyncEnumerable<ApiKeyResponseDto> GetApiKeys()
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+
+        if (currentType == EmployeeType.Guest)
+        {
+            throw new SecurityException("Access denied");
+        }
+
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
 
         IAsyncEnumerable<ApiKey> result;
@@ -192,13 +205,9 @@ public class ApiKeysController(
             return false;
         }
 
-        if (!isAdmin)
+        if (!isAdmin && apiKey.CreateBy != authContext.CurrentAccount.ID)
         {
-
-            if (apiKey.CreateBy != authContext.CurrentAccount.ID)
-            {
-                return false;
-            }
+            throw new SecurityException("Access denied");
         }
 
         if (!IsValidPermission(requestDto.Changed.Permissions))
@@ -237,13 +246,9 @@ public class ApiKeysController(
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
         var apiKey = await apiKeyManager.GetApiKeyAsync(keyId);
 
-        if (!isAdmin)
+        if (!isAdmin && apiKey.CreateBy != authContext.CurrentAccount.ID)
         {
-
-            if (apiKey.CreateBy != authContext.CurrentAccount.ID)
-            {
-                return false;
-            }
+            throw new SecurityException("Access denied");
         }
 
         var result = await apiKeyManager.DeleteApiKeyAsync(keyId);
@@ -253,15 +258,28 @@ public class ApiKeysController(
         return result;
     }
 
-    private bool IsValidPermission(List<string> permission)
+    private static bool IsValidPermission(List<string> permission)
     {
-        if (permission == null || permission.Count == 0)
+        if (permission == null)
         {
             return true;
         }
 
-        var orderedScopes = GetAllPermissions().Union(new List<string> { "*" });
+        if (permission.Count == 0)
+        {
+            return false;
+        }
+
+        var orderedScopes = GetPermissions().Union(new List<string> { "*" });
 
         return permission.All(x => orderedScopes.Contains(x));
+    }
+
+    private async Task DemandNotGuestAsync()
+    {
+        if (await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID) == EmployeeType.Guest)
+        {
+            throw new SecurityException("Access denied");
+        }
     }
 }

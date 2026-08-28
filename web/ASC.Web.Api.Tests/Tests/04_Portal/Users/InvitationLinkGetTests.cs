@@ -112,18 +112,18 @@ public class InvitationLinkGetTests(
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
     }
 
-    // On the Startup (free) plan the limit of paid users (DocSpaceAdmin + RoomAdmin) is 2. Together
-    // with the Owner (who always counts as a paid seat) the total is 3. When this limit is reached
-    // the UI blocks inviting paid roles; the API is supposed to reject the read the same way, but it
-    // currently returns 200 with a link that silently downgrades the role to User.
+    // On the Startup (free) plan the limit of paid users (DocSpaceAdmin + RoomAdmin) is 3. When it
+    // is reached the UI blocks inviting paid roles, and the API rejects the read the same way
+    // instead of returning 200 with a link that silently downgrades the invitee to User. The link
+    // has to be created before the quota is filled, because creating one is gated by the same
+    // check the read is.
     [Trait("Bug", "81564")]
     [Fact]
     public async Task GetInvitationLinkByEmployeeType_DocSpaceAdmin_QuotaReached_ReturnsPaymentRequired()
     {
-        // Arrange — fill the paid-user quota: Owner (1) + 2 DocSpaceAdmins = 3 (Startup limit).
-        await InviteMember(EmployeeType.DocSpaceAdmin);
-        await InviteMember(EmployeeType.DocSpaceAdmin);
+        // Arrange
         await CreateLinkAsOwnerAsync(EmployeeType.DocSpaceAdmin);
+        await FillPaidUserQuotaAsync(EmployeeType.DocSpaceAdmin);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -137,10 +137,9 @@ public class InvitationLinkGetTests(
     [Fact]
     public async Task GetInvitationLinkByEmployeeType_RoomAdmin_QuotaReached_ReturnsPaymentRequired()
     {
-        // Arrange — fill the paid-user quota: Owner (1) + 1 DocSpaceAdmin + 1 RoomAdmin = 3 (Startup limit).
-        await InviteMember(EmployeeType.DocSpaceAdmin);
-        await InviteMember(EmployeeType.RoomAdmin);
+        // Arrange
         await CreateLinkAsOwnerAsync(EmployeeType.RoomAdmin);
+        await FillPaidUserQuotaAsync(EmployeeType.RoomAdmin);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -148,5 +147,39 @@ public class InvitationLinkGetTests(
 
         // Assert
         exception.ErrorCode.Should().Be(402);
+    }
+
+    /// <summary>
+    /// Invites paid members until the portal's <c>manager</c> quota is exhausted, and skips the
+    /// calling test when the portal has no such limit: the integration AppHost registers portals
+    /// with an unlimited <c>manager</c> feature (value <c>-1</c>), so the quota-reached branch does
+    /// not exist there at all. The check being covered lives in
+    /// <c>PortalController.GetInvitationLinkByEmployeeType</c> and fires on any limited plan.
+    /// </summary>
+    private async Task FillPaidUserQuotaAsync(EmployeeType employeeType)
+    {
+        await _webApiClient.Authenticate(Owner);
+
+        var (limit, used) = await ReadPaidUserQuotaAsync();
+
+        Assert.SkipWhen(limit < 0, "The portal's paid-user quota is unlimited, so it cannot be filled.");
+
+        while (used < limit)
+        {
+            await InviteMember(employeeType);
+            await _webApiClient.Authenticate(Owner);
+            (_, used) = await ReadPaidUserQuotaAsync();
+        }
+    }
+
+    /// <summary>Reads the portal's paid-user (<c>manager</c>) limit and current usage.</summary>
+    private async Task<(int Limit, int Used)> ReadPaidUserQuotaAsync()
+    {
+        var quota = await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var manager = quota.Response.Features.Find(f => f.Id == "manager");
+
+        manager.Should().NotBeNull("the paid-user feature is part of every plan");
+
+        return (Convert.ToInt32(manager.Value), Convert.ToInt32(manager.Used?.Value ?? 0));
     }
 }

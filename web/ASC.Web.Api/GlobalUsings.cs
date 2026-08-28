@@ -187,5 +187,6 @@ global using ZiggyCreatures.Caching.Fusion;
 
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
 
+global using DataAnnotationsValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
 global using SecurityContext = ASC.Core.SecurityContext;
 global using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;
