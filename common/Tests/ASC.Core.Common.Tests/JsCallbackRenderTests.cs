@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -46,10 +46,13 @@ public class JsCallbackRenderTests
     //What LoginProfileTransport.ToString produces: Base64Url(InstanceCrypto.Encrypt(profile)).
     private const string ProfileTransport = "Zm9vLWJhci1wcm9maWxl";
 
+    //What HttpRequest.Host.Host carries: the host the request came in on, without the port.
+    private const string Host = "portal.example.com";
+
     [Fact]
     public void RenderCallbackPage_ReturnUrlBreakingOutOfTheStringLiteral_ShouldFallBackToDefault()
     {
-        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "\";alert(document.domain);//", true);
+        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "\";alert(document.domain);//", Host, true);
 
         page.Should().NotContain("alert");
         page.Should().Contain("window.location.href = \"/\";");
@@ -62,7 +65,7 @@ public class JsCallbackRenderTests
     [Fact]
     public void RenderCallbackPage_LocalReturnUrlWithSpecialCharacters_ShouldEncode()
     {
-        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "/rooms?a=\"&b=<script>", true);
+        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "/rooms?a=\"&b=<script>", Host, true);
 
         page.Should().Contain(@"window.location.href = ""/rooms?a=");
         page.Should().NotContain(@"a=""&");
@@ -72,7 +75,7 @@ public class JsCallbackRenderTests
     [Fact]
     public void RenderCallbackPage_JavascriptSchemeReturnUrl_ShouldFallBackToDefault()
     {
-        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "javascript:alert(document.domain)", true);
+        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "javascript:alert(document.domain)", Host, true);
 
         page.Should().NotContain("javascript:alert");
         page.Should().Contain("window.location.href = \"/\";");
@@ -81,7 +84,7 @@ public class JsCallbackRenderTests
     [Fact]
     public void RenderCallbackPage_CallbackInjectingCode_ShouldFallBackToDefault()
     {
-        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, "x,alert(document.domain),x", null, false);
+        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, "x,alert(document.domain),x", null, Host, false);
 
         page.Should().NotContain("alert");
         page.Should().Contain($"window.opener.{JsCallbackHelper.DefaultCallback}(\"{ProfileTransport}\");");
@@ -90,21 +93,30 @@ public class JsCallbackRenderTests
     [Fact]
     public void RenderCallbackPage_ProfileClosingTheScriptBlock_ShouldEncode()
     {
-        var page = JsCallbackHelper.RenderCallbackPage("a</script><script>alert(document.domain)", "loginCallback", null, false);
+        var page = JsCallbackHelper.RenderCallbackPage("a</script><script>alert(document.domain)", "loginCallback", null, Host, false);
 
         page.Should().NotContain("<script>");
         page.Should().Contain("\\u003c/script\\u003e");
     }
 
     [Fact]
-    public void RenderCallbackPage_DesktopFlowReturnUrl_ShouldKeep()
+    public void RenderCallbackPage_DesktopReturnUrlOnTheRequestedHost_ShouldKeep()
     {
-        const string returnUrl = "https://www.example.com/registration?desktop=true#login";
+        const string returnUrl = "https://portal.example.com/registration?desktop=true#login";
 
-        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, returnUrl, true);
+        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, returnUrl, Host, true);
 
         page.Should().Contain("if (true) {");
         page.Should().Contain($"window.location.href = \"{returnUrl}\";");
+    }
+
+    [Fact]
+    public void RenderCallbackPage_DesktopReturnUrlOnAnotherHost_ShouldFallBackToDefault()
+    {
+        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "https://www.example.com/registration?desktop=true#login", Host, true);
+
+        page.Should().NotContain("www.example.com");
+        page.Should().Contain("window.location.href = \"/\";");
     }
 
     /// <remarks>
@@ -114,7 +126,7 @@ public class JsCallbackRenderTests
     [Fact]
     public void RenderCallbackPage_ReturnUrlCarryingAPlaceholderToken_ShouldKeepItVerbatim()
     {
-        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "/rooms%DESKTOP%", true);
+        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "/rooms%DESKTOP%", Host, true);
 
         page.Should().Contain("window.location.href = \"/rooms%DESKTOP%\";");
     }
@@ -122,7 +134,7 @@ public class JsCallbackRenderTests
     [Fact]
     public void RenderCallbackPage_ProfileCarryingAPlaceholderToken_ShouldKeepItVerbatim()
     {
-        var page = JsCallbackHelper.RenderCallbackPage("%CALLBACK%", "loginCallback", null, false);
+        var page = JsCallbackHelper.RenderCallbackPage("%CALLBACK%", "loginCallback", null, Host, false);
 
         page.Should().Contain("window.opener.loginCallback(\"%CALLBACK%\");");
     }
@@ -130,7 +142,7 @@ public class JsCallbackRenderTests
     [Fact]
     public void RenderCallbackPage_PopupMode_ShouldIgnoreTheReturnUrl()
     {
-        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, "loginCallback", "https://www.example.com/", false);
+        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, "loginCallback", "https://www.example.com/", Host, false);
 
         page.Should().Contain("if (false) {");
         page.Should().Contain("window.location.href = \"/\";");

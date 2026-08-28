@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -38,22 +38,28 @@ namespace ASC.Core.Common.Tests;
 /// <c>window.location.href</c>. The value used to be spliced in unquoted, so
 /// <c>?returnurl=";alert(document.domain);//</c> broke out of the string literal; escaping
 /// alone would still leave <c>javascript:</c> urls executable, so the scheme is validated as
-/// well. Cross-host http(s) urls stay allowed — the desktop registration flow returns to the
-/// registration site rather than to the portal.
+/// well — and, since the value is a navigation away from the portal, so is the host.
 /// </summary>
 [Trait("Bug", "82555")]
 public class JsCallbackSafeReturnUrlTests
 {
+    //What HttpRequest.Host.Host carries: the host the request came in on, without the port.
+    private const string Host = "portal.example.com";
+
+    //What federated-login:allowed-return-url-hosts carries.
+    private static readonly string[] _allowedHosts = ["www.example.com"];
+
     [Theory]
     [InlineData("/")]
     [InlineData("/rooms/shared")]
     [InlineData("/rooms/shared?desktop=true#login")]
     [InlineData("https://portal.example.com/rooms")]
     [InlineData("http://portal.example.com/rooms")]
-    [InlineData("https://www.example.com/registration?desktop=true#login")]
-    public void GetSafeReturnUrl_LocalPathOrHttpUrl_ShouldKeep(string returnUrl)
+    [InlineData("https://PORTAL.example.com/rooms")]
+    [InlineData("https://portal.example.com:8443/rooms")]
+    public void GetSafeReturnUrl_LocalPathOrRequestedHost_ShouldKeep(string returnUrl)
     {
-        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be(returnUrl);
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host).Should().Be(returnUrl);
     }
 
     [Theory]
@@ -65,7 +71,17 @@ public class JsCallbackSafeReturnUrlTests
     [InlineData("vbscript:msgbox(1)")]
     public void GetSafeReturnUrl_ScriptScheme_ShouldFallBackToDefault(string returnUrl)
     {
-        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+    }
+
+    [Theory]
+    [InlineData("https://evil.example.com/rooms")]
+    [InlineData("http://evil.example.com/rooms")]
+    [InlineData("https://portal.example.com.evil.example.com/rooms")]
+    [InlineData("https://user:password@evil.example.com/#@portal.example.com/")]
+    public void GetSafeReturnUrl_AnotherHost_ShouldFallBackToDefault(string returnUrl)
+    {
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host).Should().Be(JsCallbackHelper.DefaultReturnUrl);
     }
 
     [Theory]
@@ -75,7 +91,7 @@ public class JsCallbackSafeReturnUrlTests
     [InlineData("\\\\evil.example.com")]
     public void GetSafeReturnUrl_ProtocolRelativeUrl_ShouldFallBackToDefault(string returnUrl)
     {
-        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host).Should().Be(JsCallbackHelper.DefaultReturnUrl);
     }
 
     [Theory]
@@ -85,7 +101,41 @@ public class JsCallbackSafeReturnUrlTests
     [InlineData("rooms/shared")]
     public void GetSafeReturnUrl_MissingOrNotAnAbsoluteUrl_ShouldFallBackToDefault(string? returnUrl)
     {
-        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+    }
+
+    /// <remarks>
+    /// The configured hosts (<c>federated-login:allowed-return-url-hosts</c>) are what keeps the
+    /// desktop registration flow working: it returns to the ONLYOFFICE site, not to the portal.
+    /// </remarks>
+    [Theory]
+    [InlineData("https://www.example.com/registration?desktop=true#login")]
+    [InlineData("http://www.example.com/registration")]
+    [InlineData("https://WWW.EXAMPLE.COM/registration")]
+    public void GetSafeReturnUrl_AllowedHost_ShouldKeep(string returnUrl)
+    {
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host, _allowedHosts).Should().Be(returnUrl);
+    }
+
+    [Theory]
+    [InlineData("https://evil.example.com/rooms")]
+    [InlineData("https://www.example.com.evil.example.com/rooms")]
+    [InlineData("javascript:alert(document.domain)")]
+    [InlineData("//www.example.com")]
+    public void GetSafeReturnUrl_NotAnAllowedHost_ShouldFallBackToDefault(string returnUrl)
+    {
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host, _allowedHosts).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+    }
+
+    /// <remarks>
+    /// A request without a Host header must not turn every absolute url into an allowed one.
+    /// </remarks>
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void GetSafeReturnUrl_NoRequestedHost_ShouldFallBackToDefaultForAnAbsoluteUrl(string? host)
+    {
+        JsCallbackHelper.GetSafeReturnUrl("https://portal.example.com/rooms", host).Should().Be(JsCallbackHelper.DefaultReturnUrl);
     }
 
     /// <remarks>
@@ -100,7 +150,7 @@ public class JsCallbackSafeReturnUrlTests
     {
         var returnUrl = "/" + (char)stripped + "/evil.example.com";
 
-        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host).Should().Be(JsCallbackHelper.DefaultReturnUrl);
     }
 
     [Theory]
@@ -111,7 +161,7 @@ public class JsCallbackSafeReturnUrlTests
     {
         var returnUrl = "/" + (char)stripped + "\\evil.example.com";
 
-        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host).Should().Be(JsCallbackHelper.DefaultReturnUrl);
     }
 
     [Fact]
@@ -119,6 +169,6 @@ public class JsCallbackSafeReturnUrlTests
     {
         var returnUrl = "/rooms" + (char)0x09 + "/shared";
 
-        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be("/rooms/shared");
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl, Host).Should().Be("/rooms/shared");
     }
 }

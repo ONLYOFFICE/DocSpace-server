@@ -37,8 +37,12 @@ namespace ASC.FederatedLogin;
 public class Login(
     IWebHostEnvironment webHostEnvironment,
     ProviderManager providerManager,
-    LoginProfileTransport loginProfileTransport)
+    LoginProfileTransport loginProfileTransport,
+    IConfiguration configuration)
 {
+    //Hosts a return url may point at besides the portal itself.
+    private readonly string[] _allowedReturnUrlHosts = configuration.GetSection("federated-login:allowed-return-url-hosts").Get<string[]>() ?? [];
+
     private string Callback => _params.Get("callback");
     private string Auth => _params.Get("auth");
     private string ReturnUrl => _params.Get("returnurl"); //TODO?? FormsAuthentication.LoginUrl;
@@ -144,7 +148,7 @@ public class Login(
 
     private async Task RenderXrdsAsync(HttpContext context)
     {
-        var returnUrl = Uri.EscapeDataString(JsCallbackHelper.GetSafeReturnUrl(ReturnUrl));
+        var returnUrl = Uri.EscapeDataString(JsCallbackHelper.GetSafeReturnUrl(ReturnUrl, context.Request.Host.Host, _allowedReturnUrlHosts));
         var xrdsloginuri = new Uri(context.Request.Url(), new Uri(context.Request.Url().AbsolutePath, UriKind.Relative)) + "?auth=openid&returnurl=" + returnUrl;
         var xrdsimageuri = new Uri(context.Request.Url(), new Uri(webHostEnvironment.WebRootPath, UriKind.Relative)) + "openid.gif";
         await XrdsHelper.RenderXrdsAsync(context.Response, xrdsloginuri, xrdsimageuri);
@@ -156,7 +160,7 @@ public class Login(
 
         var desktop = Mode == LoginMode.Redirect;
         var profileTransport = await loginProfileTransport.ToString(profile, pureTransport);
-        var pageContent = JsCallbackHelper.RenderCallbackPage(profileTransport, Callback, ReturnUrl, desktop);
+        var pageContent = JsCallbackHelper.RenderCallbackPage(profileTransport, Callback, ReturnUrl, context.Request.Host.Host, desktop, _allowedReturnUrlHosts);
 
         //Render a page
         context.Response.ContentType = "text/html";
