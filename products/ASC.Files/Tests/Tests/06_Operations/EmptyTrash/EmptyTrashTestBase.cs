@@ -117,7 +117,7 @@ public abstract class EmptyTrashTestBase(
     /// </summary>
     protected async Task<List<FileOperationDto>> EmptyTrashAndWaitAsync(bool? single = null)
     {
-        var results = (await _filesOperationsApi.EmptyTrashAsync(single, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesOperationsApi.EmptyTrashAsync(single, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
         {

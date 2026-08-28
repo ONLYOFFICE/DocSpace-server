@@ -176,7 +176,7 @@ public abstract class UsedSpaceTestBase(
 
     protected async Task EmptyTrashAndWait()
     {
-        var results = (await _filesOperationsApi.EmptyTrashAsync(true, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesOperationsApi.EmptyTrashAsync(true, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         await WaitForCompletionAsync(results);
     }
