@@ -166,7 +166,6 @@ public class Login(
         context.Response.ContentType = "text/html";
         await context.Response.WriteAsync(pageContent);
     }
-
 }
 
 public class LoginHandler

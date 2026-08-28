@@ -49,7 +49,16 @@ public static partial class JsCallbackHelper
     [GeneratedRegex("%(PROFILE|CALLBACK|RETURNURL|DESKTOP)%")]
     private static partial Regex PlaceholderRegex();
 
+    //An embedded resource cannot change at runtime, so the template is read once per process
+    //instead of on every callback request.
+    private static readonly string _callbackPage = ReadCallbackPage();
+
     public static string GetCallbackPage()
+    {
+        return _callbackPage;
+    }
+
+    private static string ReadCallbackPage()
     {
         using var reader = new StreamReader(Assembly
             .GetExecutingAssembly()
