@@ -78,4 +78,20 @@ public class JsCallbackSafeCallbackTests
     {
         JsCallbackHelper.GetSafeCallback(callback).Should().Be(JsCallbackHelper.DefaultCallback);
     }
+
+    /// <remarks>
+    /// The pattern is anchored with \A and \z, because a $ anchor still admits one trailing
+    /// newline and would accept "myCallback\n" as an identifier.
+    /// </remarks>
+    [Theory]
+    [InlineData(0x09)]
+    [InlineData(0x0A)]
+    [InlineData(0x0D)]
+    [InlineData(0x20)]
+    public void GetSafeCallback_IdentifierWithATrailingControlCharacter_ShouldFallBackToDefault(int trailing)
+    {
+        var callback = "myCallback" + (char)trailing;
+
+        JsCallbackHelper.GetSafeCallback(callback).Should().Be(JsCallbackHelper.DefaultCallback);
+    }
 }

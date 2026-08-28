@@ -42,7 +42,8 @@ public static partial class JsCallbackHelper
     //(window.opener.<callback>(...)), so it cannot be string-escaped. Only an
     //optionally dotted JS identifier chain is allowed; anything else falls back
     //to the default to prevent script injection.
-    [GeneratedRegex(@"^[A-Za-z_$][A-Za-z0-9_$]*(\.[A-Za-z_$][A-Za-z0-9_$]*)*$")]
+    //\A and \z rather than ^ and $: without Multiline, $ still admits one trailing newline.
+    [GeneratedRegex(@"\A[A-Za-z_$][A-Za-z0-9_$]*(\.[A-Za-z_$][A-Za-z0-9_$]*)*\z")]
     private static partial Regex CallbackRegex();
 
     [GeneratedRegex("%(PROFILE|CALLBACK|RETURNURL|DESKTOP)%")]
