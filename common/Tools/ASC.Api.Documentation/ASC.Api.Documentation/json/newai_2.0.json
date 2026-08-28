@@ -3078,6 +3078,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       }
@@ -5417,6 +5425,10 @@
           "enabled": {
             "type": "boolean",
             "description": "Whether this tool is currently enabled. Disabled tools are hidden from the AI model."
+          },
+          "serverType": {
+            "type": "string",
+            "description": "Server type (MCP server name / host tool group id) this tool belongs to — the key the persisted disabled map is stored under. Set by the source that enumerated the tool, so a caller-supplied tool can still be attributed to its group after being flattened into a single list: that is what lets the engine apply the disabled map to `actionArgs.tools` instead of trusting the caller to pre-filter. Wire-serializable, so it survives a remote (server-side) engine."
           },
           "requireApproval": {
             "type": "boolean",

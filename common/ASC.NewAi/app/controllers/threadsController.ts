@@ -36,6 +36,7 @@ import type {
   Profile,
   OpenOrCreateInput,
   MessagesCursor,
+  MessagesDirection,
   ThreadsCursor,
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
@@ -65,6 +66,13 @@ function parseMessagesCursor(raw: unknown): MessagesCursor | undefined {
     // fall through — not JSON
   }
   return undefined;
+}
+
+// Only an explicit `desc` turns the read around; anything else — absent,
+// misspelled, an array of repeated params — reads forward, which is the
+// behavior every caller had before the parameter existed.
+function parseDirection(raw: unknown): MessagesDirection | undefined {
+  return asString(raw) === "desc" ? "desc" : undefined;
 }
 
 function parseThreadsCursor(raw: unknown): ThreadsCursor | undefined {
@@ -330,7 +338,8 @@ export const threadsController = {
     }
     const count = parseInt10(req.query["count"]);
     const cursor = parseMessagesCursor(req.query["cursor"]);
-    const messages = await engine.readMessages(threadId, count, cursor);
+    const direction = parseDirection(req.query["direction"]);
+    const messages = await engine.readMessages(threadId, count, cursor, direction);
     res.json(messages);
   }),
 

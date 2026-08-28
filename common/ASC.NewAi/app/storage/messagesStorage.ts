@@ -34,7 +34,7 @@
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject, getString, getNumber, getObject, getArray } from "../narrow.js";
 import { PAGE_SIZE } from "@onlyoffice/ai-chat/core";
-import type { MessagesStorage, MessagesCursor } from "@onlyoffice/ai-chat/core";
+import type { MessagesStorage, MessagesCursor, MessagesDirection } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 
 const THREADS_PATH = "/threads";
@@ -45,6 +45,24 @@ const MAX_PAGES = 1000;
 type WireMessagesCursor = { createdAt: string; id: string };
 
 type MessagesPage = { items: ThreadMessageLike[]; next: WireMessagesCursor | null };
+
+// The library's `MessagesCursor` carries an ISO string, but a message that
+// reached the store before this service started sending one (a live round,
+// a cached page) still has an epoch-ms `createdAt` — accept both rather
+// than silently degrade to an unpaginated read.
+function toWireCursor(cursor: MessagesCursor | undefined): WireMessagesCursor | undefined {
+  if (!cursor) {
+    return undefined;
+  }
+  const createdAt: unknown = cursor.createdAt;
+  if (typeof createdAt === "string" && createdAt.length > 0) {
+    return { createdAt, id: cursor.id };
+  }
+  if (typeof createdAt === "number") {
+    return { createdAt: new Date(createdAt).toISOString(), id: cursor.id };
+  }
+  return undefined;
+}
 
 function parseMessagesPage(raw: unknown): MessagesPage {
   const rawItems = Array.isArray(raw) ? raw : isObject(raw) ? (getArray(raw, "items") ?? []) : [];
@@ -103,7 +121,13 @@ function dtoToMessage(raw: unknown): ThreadMessageLike | null {
   const body = parseContents(raw["contents"]);
   const message: ThreadMessageLike = { ...body, id };
   if (timestamp !== undefined) {
-    message["createdAt"] = timestamp;
+    // A `Date`, not the raw epoch ms the C# DTO carries — it reaches the
+    // browser as an ISO string. The library builds the keyset cursor with
+    // `messagesCursorOf`, which keeps only a `Date` or an ISO `string` and
+    // yields `createdAt: null` for anything else; a null cursor is dropped
+    // below, the same first page comes back, and the page walker stops
+    // after 100 messages.
+    message["createdAt"] = new Date(timestamp);
   }
   return message;
 }
@@ -155,18 +179,19 @@ export class HttpMessagesStorage implements MessagesStorage {
     threadId: string,
     count?: number,
     cursor?: MessagesCursor,
+    direction?: MessagesDirection,
   ): Promise<ThreadMessageLike[]> {
     const path = `${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`;
-    const wireCursor: WireMessagesCursor | undefined =
-      cursor && typeof cursor.createdAt === "string"
-        ? { createdAt: cursor.createdAt, id: cursor.id }
-        : undefined;
+    const wireCursor = toWireCursor(cursor);
 
     if (count !== undefined) {
-      const page = await this.readPage(path, count, wireCursor);
+      const page = await this.readPage(path, count, wireCursor, direction);
       return page.items;
     }
 
+    // No page size — the caller wants the whole thread. That read is
+    // always forward: the pages are concatenated in the order they
+    // arrive, so walking backwards would hand back a reversed history.
     const result: ThreadMessageLike[] = [];
     let next = wireCursor ?? null;
     for (let i = 0; i < MAX_PAGES; i++) {
@@ -184,8 +209,12 @@ export class HttpMessagesStorage implements MessagesStorage {
     path: string,
     count: number,
     cursor: WireMessagesCursor | undefined,
+    direction?: MessagesDirection,
   ): Promise<MessagesPage> {
     const params: Record<string, QueryValue> = { count };
+    if (direction === "desc") {
+      params["direction"] = direction;
+    }
     if (cursor) {
       params["cursor.createdAt"] = cursor.createdAt;
       params["cursor.id"] = cursor.id;
