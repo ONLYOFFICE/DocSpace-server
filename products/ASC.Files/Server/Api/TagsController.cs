@@ -174,7 +174,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <summary>Delete recent files</summary>
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "No content", typeof(NoContentResult))]
+    [SwaggerResponse(200, "No content")]
     [HttpDelete("recent")]
     public async Task<NoContentResult> DeleteRecent(BaseBatchRequestDto inDto)
     {

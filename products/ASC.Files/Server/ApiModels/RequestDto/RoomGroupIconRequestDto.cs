@@ -53,6 +53,9 @@ public class RoomGroupIconRequestDto
     public IconRequest Update { get; set; }
 }
 
+/// <summary>
+/// The icon to set on a room group.
+/// </summary>
 public class IconRequest
 {
     /// <summary>

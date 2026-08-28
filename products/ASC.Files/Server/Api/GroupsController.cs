@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -135,7 +135,7 @@ public class GroupsController(
     /// <path>api/2.0/files/group</path>
     [Tags("Rooms / Groups")]
     [HttpGet("")]
-    public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupIdRequestDto inDto)
+    public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupsRequestDto inDto)
     {
         await foreach (var group in fileStorageService.GetGroupsAsync())
         {

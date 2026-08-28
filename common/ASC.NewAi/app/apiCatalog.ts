@@ -93,6 +93,20 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
   { method: "POST", path: "/websearch/v1/contents", tag: "Web search", operationId: "aiWebSearchPassthroughContents", summary: "Web page contents proxied to the portal's active web-search provider", hasBody: true },
 ];
 
+// One-line description for every tag used by `CUSTOM_ROUTE_DOCS` that is not
+// already described by an engine (`Web search` is, so it is absent here).
+// The emitter declares a global `tags` entry for each custom tag; a tag an
+// operation uses but the document does not declare is an OpenAPI lint error
+// (`operation-tag-defined`), so a new custom tag belongs here as well.
+export const CUSTOM_TAG_DOCS: Readonly<Record<string, string>> = {
+  Agents: "AI agent rooms (delegated to the .NET AI service).",
+  Export: "Markdown → docx export.",
+  Settings: "Portal-wide, vectorization and per-user AI settings.",
+  Vectorization: "Vectorization tasks over portal content.",
+  "OpenAI passthrough": "OpenAI-compatible endpoints proxied to a profile's provider.",
+  "Editor tools": "DocSpace tool catalog and execution for the editor AI plugin.",
+};
+
 // Base path the service is mounted under (the DocSpace nginx route). Shared
 // by the router registration and the emitted document's absolute paths.
 export const API_PREFIX = "/api/2.0/ai";

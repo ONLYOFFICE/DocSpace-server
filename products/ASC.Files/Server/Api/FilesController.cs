@@ -779,6 +779,7 @@ public abstract class FilesController<T>(
     /// Returns the encryption information for a file with the specified identifier, including user encryption keys and file-specific encryption keys.
     /// </remarks>
     /// <path>api/2.0/files/file/{fileId}/access</path>
+    /// <param name="fileId">The file unique identifier.</param>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File encryption information", typeof(FileEncryptionInfoDto))]
     [SwaggerResponse(400, "Invalid operation")]

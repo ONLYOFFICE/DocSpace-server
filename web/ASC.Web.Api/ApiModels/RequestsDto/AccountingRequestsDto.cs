@@ -107,13 +107,13 @@ public class CustomerOperationsReportRequestDto
     /// <summary>
     /// The operation type to filter by.
     /// </summary>
-    /// <example>Any</example>
+    /// <example>ServicePayment</example>
     public ASC.Core.Billing.OperationType? Type { get; init; }
 
     /// <summary>
     /// The operation status to filter by.
     /// </summary>
-    /// <example>Any</example>
+    /// <example>Completed</example>
     public OperationStatus? Status { get; init; }
 
     /// <summary>
@@ -170,7 +170,7 @@ public class CustomerServiceUsageReportRequestDto
     /// <summary>
     /// The operation status to filter by.
     /// </summary>
-    /// <example>Any</example>
+    /// <example>Completed</example>
     public OperationStatus? Status { get; init; }
 
     /// <summary>

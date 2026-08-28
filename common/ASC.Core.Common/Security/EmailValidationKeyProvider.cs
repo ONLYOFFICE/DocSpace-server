@@ -33,12 +33,12 @@
 
 namespace ASC.Security.Cryptography;
 
-/// <summary>
-/// The confirmation result.
-/// </summary>
 [Scope]
 public class EmailValidationKeyProvider
 {
+    /// <summary>
+    /// The confirmation result.
+    /// </summary>
     public enum ValidationResult
     {
         [Description("Ok")]

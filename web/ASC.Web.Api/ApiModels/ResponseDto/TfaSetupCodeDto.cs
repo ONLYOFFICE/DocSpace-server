@@ -31,49 +31,50 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.ApiModels.RequestDto;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The request parameters for updating a group.
+/// The setup TFA code parameters.
 /// </summary>
-public class UpdateRoomGroupRequestDto
+/// <example>
+/// {
+///   "account": "john.doe@onlyoffice.com",
+///   "manualEntryKey": "JBSWY3DPEHPK3PXP",
+///   "qrCodeSetupImageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGMAAgAABAABiCEmiQAAAABJRU5ErkJggg=="
+/// }
+/// </example>
+public class TfaSetupCodeDto
 {
     /// <summary>
-    /// The group ID.
+    /// The account for which the setup code is generated.
     /// </summary>
-    /// <example>1</example>
-    [FromRoute(Name = "id")]
-    public required int Id { get; set; }
+    /// <example>john.doe@onlyoffice.com</example>
+    public string Account { get; private set; }
 
     /// <summary>
-    /// The request for updating a group.
+    /// The manual entry key.
     /// </summary>
-    /// <example>{"groupName": "New Group Name"}</example>
-    [FromBody]
-    public required UpdateRoomGroupRequest UpdateRoom { get; set; }
-}
-
-/// <summary>
-/// The changes to apply to a room group: its name and the rooms to add or remove.
-/// </summary>
-public class UpdateRoomGroupRequest
-{
-    /// <summary>
-    /// The list of room IDs to add to the group.
-    /// </summary>
-    /// <example>[1, 2, 3]</example>
-    public List<JsonElement> RoomsToAdd { get; set; }
+    /// <example>JBSWY3DPEHPK3PXP</example>
+    public string ManualEntryKey { get; private set; }
 
     /// <summary>
-    /// The list of room IDs to remove from the group.
+    /// The QR-code setup image URL (base64-encoded PNG image).
     /// </summary>
-    /// <example>[1, 2, 3]</example>
-    public List<JsonElement> RoomsToRemove { get; set; }
+    /// <example>data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGMAAgAABAABiCEmiQAAAABJRU5ErkJggg==</example>
+    public string QrCodeSetupImageUrl { get; private set; }
 
     /// <summary>
-    /// The group name.
+    /// Creates the setup TFA code parameters from the generated setup code.
     /// </summary>
-    /// <example>New Group Name</example>
-    [StringLength(128)]
-    public string GroupName { get; set; }
+    /// <param name="setupCode">The generated setup code.</param>
+    /// <returns>The setup TFA code parameters.</returns>
+    public static TfaSetupCodeDto FromSetupCode(SetupCode setupCode)
+    {
+        return new TfaSetupCodeDto
+        {
+            Account = setupCode.Account,
+            ManualEntryKey = setupCode.ManualEntryKey,
+            QrCodeSetupImageUrl = setupCode.QrCodeSetupImageUrl
+        };
+    }
 }

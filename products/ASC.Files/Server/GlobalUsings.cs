@@ -41,6 +41,7 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
+global using ASC.Api.Collections;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;

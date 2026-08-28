@@ -33,6 +33,16 @@
 
 namespace ASC.Api.Core.Extensions;
 
+// The four headers every rate-limited response carries. They are written once into
+// components/headers and referenced from the responses, so the names must match on both sides.
+internal static class RateLimitHeaderNames
+{
+    public const string Limit = "X-RateLimit-Limit";
+    public const string Remaining = "X-RateLimit-Remaining";
+    public const string Reset = "X-RateLimit-Reset";
+    public const string RetryAfter = "Retry-After";
+}
+
 public class RateLimitDocumentFilter(
     IOptions<RateLimiterSettings> rateLimiterOptions,
     IOptions<RateLimiterOptions> limiterOptions) : IDocumentFilter
@@ -51,10 +61,10 @@ public class RateLimitDocumentFilter(
 
         document.Components ??= new OpenApiComponents();
         document.Components.Headers ??= new Dictionary<string, IOpenApiHeader>();
-        document.Components.Headers["X-RateLimit-Limit"]     = headers.Limit;
-        document.Components.Headers["X-RateLimit-Remaining"] = headers.Remaining;
-        document.Components.Headers["X-RateLimit-Reset"]     = headers.Reset;
-        document.Components.Headers["Retry-After"]           = headers.RetryAfter;
+        document.Components.Headers[RateLimitHeaderNames.Limit]      = headers.Limit;
+        document.Components.Headers[RateLimitHeaderNames.Remaining]  = headers.Remaining;
+        document.Components.Headers[RateLimitHeaderNames.Reset]      = headers.Reset;
+        document.Components.Headers[RateLimitHeaderNames.RetryAfter] = headers.RetryAfter;
     }
 }
 
@@ -71,8 +81,7 @@ public class RateLimitOperationFilter(
             .OfType<EnableRateLimitingAttribute>()
             .FirstOrDefault();
 
-        (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) headers = default;
-
+        (IOpenApiHeader Limit, IOpenApiHeader Remaining, IOpenApiHeader Reset, IOpenApiHeader RetryAfter) headers = default;
 
         if (rateLimitAttr is not null)
         {
@@ -83,9 +92,14 @@ public class RateLimitOperationFilter(
                 RateLimiterPolicy.EmailInvitationApi => BuildEmailInvitationHeaders(_settings.MaxEmailInvitationsPerDay),
                 _ => default
             };
-        } else if (_hasGlobalLimiter)
+        }
+        else if (_hasGlobalLimiter)
         {
-            headers = BuildGlobalHeaders(_settings);
+            // Every operation that falls back to the global limiter carries the very same four
+            // headers, and RateLimitDocumentFilter already registers them under components/headers.
+            // Reference those instead of repeating the objects in each response: inlining them left
+            // the component entries unreferenced and copied the same text ~500 times per document.
+            headers = _globalHeaderReferences;
         }
 
         if (headers == default)
@@ -101,9 +115,9 @@ public class RateLimitOperationFilter(
         if (operation.Responses.TryGetValue("200", out var okResponse) && okResponse is OpenApiResponse concreteOkResponse)
         {
             concreteOkResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
-            concreteOkResponse.Headers["X-RateLimit-Limit"]     = headers.Limit;
-            concreteOkResponse.Headers["X-RateLimit-Remaining"] = headers.Remaining;
-            concreteOkResponse.Headers["X-RateLimit-Reset"]     = headers.Reset;
+            concreteOkResponse.Headers[RateLimitHeaderNames.Limit]     = headers.Limit;
+            concreteOkResponse.Headers[RateLimitHeaderNames.Remaining] = headers.Remaining;
+            concreteOkResponse.Headers[RateLimitHeaderNames.Reset]     = headers.Reset;
         }
 
         operation.Responses["429"] = new OpenApiResponse
@@ -111,10 +125,20 @@ public class RateLimitOperationFilter(
             Description = "Too Many Requests.",
             Headers = new Dictionary<string, IOpenApiHeader>
             {
-                ["Retry-After"] = headers.RetryAfter
+                [RateLimitHeaderNames.RetryAfter] = headers.RetryAfter
             }
         };
     }
+
+    // Built once: a header reference carries nothing but its target name and is never mutated
+    // here, so the same four objects can be shared by every operation in every document.
+    private static readonly (IOpenApiHeader Limit, IOpenApiHeader Remaining, IOpenApiHeader Reset, IOpenApiHeader RetryAfter) _globalHeaderReferences =
+    (
+        new OpenApiHeaderReference(RateLimitHeaderNames.Limit),
+        new OpenApiHeaderReference(RateLimitHeaderNames.Remaining),
+        new OpenApiHeaderReference(RateLimitHeaderNames.Reset),
+        new OpenApiHeaderReference(RateLimitHeaderNames.RetryAfter)
+    );
 
     internal static (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) BuildGlobalHeaders(RateLimiterSettings settings) =>
     (

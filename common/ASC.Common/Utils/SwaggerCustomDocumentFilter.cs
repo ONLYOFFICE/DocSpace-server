@@ -146,6 +146,20 @@ public class LowercaseDocumentFilter : IDocumentFilter
 
 public class TagDescriptionsDocumentFilter : IDocumentFilter
 {
+    // openapi-tags-alphabetical checks the order of the global tags with javascript's String.localeCompare, i.e.
+    // ICU collation - so the comparison here is culture-aware, not ordinal: ordinal would sort "Settings / SSO"
+    // before "Settings / Security", and the rule would still fire. InvariantCulture
+    // was verified to produce the same order as localeCompare on the tag sets of all four documents.
+    // A sorted set rather than a one-off sort of the sequence, so a tag added to _tagDescriptions later cannot
+    // bring the finding back.
+    private static readonly IComparer<string> _tagNameComparer =
+        Comparer<string>.Create((x, y) => string.Compare(x, y, StringComparison.InvariantCulture));
+
+    // The same rule lifted to the tag object. One comparison for both the global tags and the nested
+    // x-tagGroups lists below, so the two orders cannot drift apart.
+    private static readonly IComparer<OpenApiTag> _tagComparer =
+        Comparer<OpenApiTag>.Create((x, y) => _tagNameComparer.Compare(x.Name, y.Name));
+
     private readonly Dictionary<string, string> _tagDescriptions = new()
     {
         { "People", "Operations for working with people" },
@@ -161,10 +175,12 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Files / Settings", "Operations for working with file settings." },
         { "Files / Third-party integration", "Operations for working with third-party integrations." },
         { "Files / Sharing", "Operations for working with sharing."},
+        { "Rooms / Privacy room", "Operations for working with private rooms and their encryption keys." },
         { "Group", "Operations for working with groups." },
         { "Group / Rooms", "Operations for getting groups with access rights to a room." },
         { "Group / Search", "Operations for searching groups." },
         { "People / Contacts", "Operations for working with user contacts." },
+        { "People / Email", "Operations for working with user email addresses." },
         { "People / Password", "Operations for working with user passwords." },
         { "People / Photos", "Operations for working with user photos." },
         { "People / Profiles", "Operations  for working with user profiles." },
@@ -178,6 +194,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "People / Guests", "Operations for workig with guests" },
         { "Authentication", "Operations for authenticating users." },
         { "Capabilities", "Operations for getting information about portal capabilities." },
+        { "Apps", "Operations for working with portal applications." },
         { "Migration", "Operations for performing migration." },
         { "ThirdParty", "Operations for working with third-party." },
         { "Portal / Quota", "Operations for getting information about portal quota." },
@@ -198,6 +215,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / Common settings", "Operations for working with common settings." },
         { "Settings / Cookies", "Operations for working with cookies settings." },
         { "Settings / Custom Navigation", "Operations for working with custom navigation settings." },
+        { "Settings / DocsCloud", "Operations for working with DocsCloud settings." },
         { "Settings / Encryption", "Operations for working with encryption settings." },
         { "Settings / Greeting settings", "Operations for working with greeting settings." },
         { "Settings / IP restrictions", "Operations for working with IP restriction settings." },
@@ -247,7 +265,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
             }
         }
 
-        swaggerDoc.Tags = customTags
+        swaggerDoc.Tags = new SortedSet<OpenApiTag>(customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
             .Select(tag =>
             {
@@ -263,25 +281,29 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
                 openApiTag.Extensions.Add("x-displayName", new JsonNodeExtension(displayName));
 
                 return openApiTag;
-            }).ToHashSet();
+            }), _tagComparer);
 
-        var groupTag = customTags
+        // Both levels ordered with the same _tagNameComparer as the global tags above: the grouping source is a
+        // HashSet, so the nested lists used to come out in path traversal order while tags next to them were sorted.
+        // The group order was alphabetical only by accident of that traversal - sorting it makes it a guarantee.
+        var groups = customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
             .GroupBy(tag => tag.Split(" / ")[0])
-            .ToDictionary(group => group.Key, group => group.ToList());
+            .OrderBy(group => group.Key, _tagNameComparer)
+            .Select(group => (Name: group.Key, Tags: group.OrderBy(tag => tag, _tagNameComparer)));
 
         var tagGroups = new JsonArray();
-        foreach (var group in groupTag)
+        foreach (var group in groups)
         {
             var groupObject = new JsonObject();
             var tagsArray = new JsonArray();
 
-            foreach (var tag in group.Value)
+            foreach (var tag in group.Tags)
             {
                 tagsArray.Add(tag);
             }
 
-            groupObject["name"] = group.Key;
+            groupObject["name"] = group.Name;
             groupObject["tags"] = tagsArray;
             tagGroups.Add(groupObject);
         }

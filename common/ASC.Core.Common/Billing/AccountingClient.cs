@@ -457,6 +457,9 @@ public class Balance
     }
 }
 
+/// <summary>
+/// The currency an amount is expressed in.
+/// </summary>
 public class CurrencyCode
 {
     /// <summary>
@@ -466,6 +469,9 @@ public class CurrencyCode
     public string Currency { get; init; }
 }
 
+/// <summary>
+/// An amount of money together with its currency.
+/// </summary>
 public class CurrencyAmount : CurrencyCode
 {
     /// <summary>
