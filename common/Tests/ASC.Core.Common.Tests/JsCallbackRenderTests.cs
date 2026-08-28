@@ -107,6 +107,26 @@ public class JsCallbackRenderTests
         page.Should().Contain($"window.location.href = \"{returnUrl}\";");
     }
 
+    /// <remarks>
+    /// The values are substituted in one pass: a sequential replacement would let a value
+    /// carrying a placeholder token of its own be rewritten by a later substitution.
+    /// </remarks>
+    [Fact]
+    public void RenderCallbackPage_ReturnUrlCarryingAPlaceholderToken_ShouldKeepItVerbatim()
+    {
+        var page = JsCallbackHelper.RenderCallbackPage(ProfileTransport, null, "/rooms%DESKTOP%", true);
+
+        page.Should().Contain("window.location.href = \"/rooms%DESKTOP%\";");
+    }
+
+    [Fact]
+    public void RenderCallbackPage_ProfileCarryingAPlaceholderToken_ShouldKeepItVerbatim()
+    {
+        var page = JsCallbackHelper.RenderCallbackPage("%CALLBACK%", "loginCallback", null, false);
+
+        page.Should().Contain("window.opener.loginCallback(\"%CALLBACK%\");");
+    }
+
     [Fact]
     public void RenderCallbackPage_PopupMode_ShouldIgnoreTheReturnUrl()
     {

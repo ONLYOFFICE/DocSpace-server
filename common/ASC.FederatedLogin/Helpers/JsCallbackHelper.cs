@@ -45,6 +45,9 @@ public static partial class JsCallbackHelper
     [GeneratedRegex(@"^[A-Za-z_$][A-Za-z0-9_$]*(\.[A-Za-z_$][A-Za-z0-9_$]*)*$")]
     private static partial Regex CallbackRegex();
 
+    [GeneratedRegex("%(PROFILE|CALLBACK|RETURNURL|DESKTOP)%")]
+    private static partial Regex PlaceholderRegex();
+
     public static string GetCallbackPage()
     {
         using var reader = new StreamReader(Assembly
@@ -60,11 +63,20 @@ public static partial class JsCallbackHelper
         //JavaScript context to prevent XSS. The callback is a code identifier rather than a
         //string literal, so it is validated instead of escaped; the return url is assigned
         //to window.location.href, where encoding alone is not enough, so it is validated too.
-        return GetCallbackPage()
-            .Replace("%PROFILE%", HttpUtility.JavaScriptStringEncode(profileTransport, true))
-            .Replace("%CALLBACK%", GetSafeCallback(callback))
-            .Replace("%RETURNURL%", HttpUtility.JavaScriptStringEncode(desktop ? GetSafeReturnUrl(returnUrl) : DefaultReturnUrl, true))
-            .Replace("%DESKTOP%", desktop.ToString().ToLowerInvariant());
+        var profile = HttpUtility.JavaScriptStringEncode(profileTransport, true);
+        var safeCallback = GetSafeCallback(callback);
+        var safeReturnUrl = HttpUtility.JavaScriptStringEncode(desktop ? GetSafeReturnUrl(returnUrl) : DefaultReturnUrl, true);
+        var desktopLiteral = desktop.ToString().ToLowerInvariant();
+
+        //One pass over the template: with sequential replacements a value carrying a
+        //placeholder token of its own would be rewritten by a later substitution.
+        return PlaceholderRegex().Replace(GetCallbackPage(), match => match.Groups[1].Value switch
+        {
+            "PROFILE" => profile,
+            "CALLBACK" => safeCallback,
+            "RETURNURL" => safeReturnUrl,
+            _ => desktopLiteral
+        });
     }
 
     public static string GetSafeCallback(string callback)
