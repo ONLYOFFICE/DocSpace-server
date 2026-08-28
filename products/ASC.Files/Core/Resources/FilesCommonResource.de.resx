@@ -500,7 +500,7 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
     <value>Inhaltsersteller</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace-Administrator</value>
+    <value>Vollständiger Administrator</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redakteur</value>

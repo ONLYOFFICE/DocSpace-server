@@ -41,6 +41,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string ThreadsPath = "/internal/ai/threads";
     protected const string MessagesPath = "/internal/ai/messages";
     protected const string McpServersPath = "/internal/ai/mcp-servers";
+    protected const string PromptsPath = "/internal/ai/prompts";
+    protected const string PromptFoldersPath = "/internal/ai/prompt-folders";
     protected const string PreferencesPath = "/internal/ai/preferences";
     protected const string ToolPrefsPath = "/internal/ai/tool-prefs";
 
@@ -59,7 +61,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected User Owner => _clients.Owner;
 
     protected HttpClient _aiClient = null!;
-    protected AiApiClient _ai = null!;
+    protected RawApiClient _ai = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -86,34 +88,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// <summary>
     /// Creates and registers a new member of the given type in the current test's portal.
     /// </summary>
-    protected async Task<User> InviteContact(EmployeeType employeeType, CancellationToken cancellationToken)
+    protected Task<User> InviteContact(EmployeeType employeeType, CancellationToken cancellationToken)
     {
-        await _clients.PeopleHttpClient.Authenticate(Owner);
-
-        var email = Initializer.Faker.Person.Email;
-        var firstName = Initializer.Faker.Person.FirstName;
-        var lastName = Initializer.Faker.Person.LastName;
-        var password = Initializer.Faker.Internet.Password(10, false);
-
-        var memberSw = Stopwatch.StartNew();
-        using var createResponse = await _clients.PeopleApi.PostAsync(
-            "/api/2.0/people",
-            new
-            {
-                cultureName = "en-US",
-                spam = false,
-                email,
-                password,
-                firstName,
-                lastName,
-                type = (int)employeeType
-            },
-            cancellationToken);
-
-        var created = await _clients.PeopleApi.ReadAsync<CreatedUserDto>(createResponse, cancellationToken);
-        Timing.Write($"invite.addMember({employeeType})", memberSw.ElapsedMilliseconds);
-
-        return new User(email, password) { Id = created.Id };
+        return Invitations.InviteContactAsync(_clients.ProfilesApi, _clients.PeopleHttpClient, employeeType, Owner, cancellationToken);
     }
 
     protected static CreateProfileRequestDto BuildCreateDto(string? name = null) =>
@@ -166,7 +143,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<Guid?>>(
+        var wrapper = await response.Content.ReadFromJsonAsync<RawApiResponse<Guid?>>(
             _readJsonOptions,
             TestContext.Current.CancellationToken);
         return wrapper?.Response;
@@ -298,7 +275,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var wrapper = await response.Content.ReadFromJsonAsync<ApiResponse<PreferencesDto>>(
+        var wrapper = await response.Content.ReadFromJsonAsync<RawApiResponse<PreferencesDto>>(
             _readJsonOptions,
             TestContext.Current.CancellationToken);
         return wrapper?.Response;
@@ -382,9 +359,37 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<List<McpServerDto>>(response, TestContext.Current.CancellationToken);
     }
 
+    protected async Task<PromptFolderDto> CreatePromptFolderAsync(string? name = null)
+    {
+        using var response = await _ai.PostAsync(
+            PromptFoldersPath,
+            new { name = name ?? $"folder-{Guid.NewGuid():N}" },
+            TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<PromptFolderDto>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<PromptFolderDto> ReadPromptFolderAsync(Guid id)
+    {
+        using var response = await _ai.GetAsync($"{PromptFoldersPath}/{id}", TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<PromptFolderDto>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<PromptDto> CreatePromptAsync(string? name = null, string? text = null, Guid? folderId = null)
+    {
+        using var response = await _ai.PostAsync(
+            PromptsPath,
+            new { name = name ?? $"prompt-{Guid.NewGuid():N}", text = text ?? "body", folderId },
+            TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<PromptDto>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<PromptDto> ReadPromptAsync(Guid id)
+    {
+        using var response = await _ai.GetAsync($"{PromptsPath}/{id}", TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<PromptDto>(response, TestContext.Current.CancellationToken);
+    }
+
     private sealed record RoomFolderDto(int Id);
 
     private sealed record FolderContentDto(RoomFolderDto Current);
-
-    private sealed record CreatedUserDto(Guid Id);
 }

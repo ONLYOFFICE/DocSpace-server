@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The parameters for managing room tags.
 /// </summary>
-public class BatchTagsRequestDto
+public class BatchTagsRequestDto : IValidatableObject
 {
     /// <summary>
     /// The list of tag names.
@@ -44,6 +44,30 @@ public class BatchTagsRequestDto
     /// <example>["tag1", "tag2", "tag3"]</example>
     [Required]
     public List<string> Names { get; set; }
+
+    /// <summary>
+    /// A tag name is never blank. An empty list is still allowed — it simply means there is
+    /// nothing to do — but a list holding an empty, whitespace-only or null entry is a bad request,
+    /// and so is one holding a name longer than a tag can ever be.
+    /// </summary>
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (Names == null)
+        {
+            yield break;
+        }
+
+        if (Names.Exists(string.IsNullOrWhiteSpace))
+        {
+            yield return new ValidationResult("Tag names cannot be empty or consist of whitespace only.", [nameof(Names)]);
+        }
+
+        if (Names.Exists(name => name is { Length: > CreateTagRequestDto.MaxNameLength }))
+        {
+            yield return new ValidationResult(
+                $"A tag name cannot be longer than {CreateTagRequestDto.MaxNameLength} characters.", [nameof(Names)]);
+        }
+    }
 }
 
 

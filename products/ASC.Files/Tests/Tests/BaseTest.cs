@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -58,11 +58,13 @@ public class BaseTest(
     protected FilesApi _filesApi = null!;
     protected OperationsApi _filesOperationsApi = null!;
     protected RoomsApi _roomsApi = null!;
+    protected GroupsApi _roomGroupsApi = null!;
     protected SettingsApi _filesSettingsApi = null!;
     protected QuotaApi _quotaApi = null!;
     protected PaymentApi _paymentApi = null!;
     protected SharingApi _sharingApi = null!;
     protected PrivacyroomApi _privacyRoomApi = null!;
+    protected ThirdPartyIntegrationApi _thirdPartyApi = null!;
 
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
@@ -114,11 +116,13 @@ public class BaseTest(
         _filesApi = _clients.FilesApi;
         _filesOperationsApi = _clients.OperationsApi;
         _roomsApi = _clients.RoomsApi;
+        _roomGroupsApi = _clients.RoomGroupsApi;
         _filesSettingsApi = _clients.SettingsApi;
         _quotaApi = _clients.QuotaApi;
         _paymentApi = _clients.PaymentApi;
         _sharingApi = _clients.SharingApi;
         _privacyRoomApi = _clients.PrivacyroomApi;
+        _thirdPartyApi = _clients.ThirdPartyIntegrationApi;
 
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;
@@ -146,70 +150,14 @@ public class BaseTest(
     /// <summary>
     /// Invites and registers a new member of the given type into the current test's portal.
     /// </summary>
-    protected async Task<User> InviteContact(EmployeeType employeeType, User? user = null)
+    protected Task<User> InviteContact(EmployeeType employeeType, User? user = null)
     {
-        user ??= Owner;
-        await _peopleClient.Authenticate(user);
-
-        var fakeMember = Initializer.FakerMember.Generate();
-
-        var memberSw = Stopwatch.StartNew();
-        var createMemberResponse = await _clients.ProfilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
-        {
-            CultureName = "en-US",
-            Spam = false,
-            Email = fakeMember.Email,
-            Password = fakeMember.Password,
-            FirstName = fakeMember.FirstName,
-            LastName = fakeMember.LastName,
-            Type = employeeType,
-        }, TestContext.Current.CancellationToken);
-        Timing.Write($"invite.addMember({employeeType})", memberSw.ElapsedMilliseconds);
-
-        if (createMemberResponse.StatusCode != HttpStatusCode.OK)
-        {
-            throw new HttpRequestException($"Unable to invite user {employeeType}");
-        }
-
-        return new User(fakeMember.Email, fakeMember.Password) { Id = createMemberResponse.Data.Response.Id };
+        return Invitations.InviteContactAsync(_clients.ProfilesApi, _peopleClient, employeeType, user ?? Owner, TestContext.Current.CancellationToken);
     }
 
-
-    protected async Task<User> InviteGuest(User? user = null)
+    protected Task<User> InviteGuest(User? user = null)
     {
-        user ??= Owner;
-        await _peopleClient.Authenticate(user);
-
-        var fakeGuest = Initializer.FakerMember.Generate();
-
-        var payload = JsonSerializer.Serialize(new
-        {
-            firstName = fakeGuest.FirstName,
-            lastName = fakeGuest.LastName,
-            email = fakeGuest.Email,
-            password = fakeGuest.Password,
-            type = nameof(EmployeeType.Guest),
-            cultureName = "en-US",
-            spam = false
-        });
-
-        using var content = new StringContent(payload, Encoding.UTF8, "application/json");
-
-        var guestSw = Stopwatch.StartNew();
-        using var response = await _peopleClient.PostAsync("api/2.0/people/active", content, TestContext.Current.CancellationToken);
-        Timing.Write($"invite.guest({user.Email})", guestSw.ElapsedMilliseconds);
-
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"Unable to create a guest ({(int)response.StatusCode}): {body}");
-        }
-
-        using var json = JsonDocument.Parse(body);
-        var guestId = json.RootElement.GetProperty("response").GetProperty("id").GetGuid();
-
-        return new User(fakeGuest.Email, fakeGuest.Password) { Id = guestId };
+        return Invitations.InviteGuestAsync(_peopleClient, user ?? Owner, TestContext.Current.CancellationToken);
     }
 
     protected async Task<FileDtoInteger> GetFile(int fileId)
@@ -272,59 +220,162 @@ public class BaseTest(
 
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, int folderId)
     {
-        return (await _foldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
+        var sw = Stopwatch.StartNew();
+        var result = (await _foldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"createFolder({folderName})", sw.ElapsedMilliseconds);
+        return result;
     }
 
     protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, bool indexing = true)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: indexing, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, indexing: indexing, roomType: RoomType.VirtualDataRoom));
     }
 
     protected async Task<FolderDtoInteger> CreateCustomRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.CustomRoom));
     }
 
     protected async Task<FolderDtoInteger> CreateCollaborationRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.EditingRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.EditingRoom));
     }
 
     protected async Task<FolderDtoInteger> CreateFillingFormsRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.FillingFormsRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.FillingFormsRoom));
     }
 
     protected async Task<FolderDtoInteger> CreatePublicRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom));
+    }
+
+    protected async Task<FolderDtoInteger> CreateAiRoom(string roomTitle)
+    {
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.AiRoom));
+    }
+
+    /// <summary>
+    /// The single place every room is created through, so that room creation - one of the slowest
+    /// calls in the suite - is measured the same way whatever type the caller asked for.
+    /// </summary>
+    private async Task<FolderDtoInteger> CreateRoom(CreateRoomRequestDto request)
+    {
+        var sw = Stopwatch.StartNew();
+        var result = (await _roomsApi.CreateRoomAsync(request, TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"createRoom({request.RoomType})", sw.ElapsedMilliseconds);
+        return result;
+    }
+
+    /// <summary>
+    /// Returns the id of the first cover from the built-in cover gallery. The gallery is the same
+    /// for every portal, so any test that needs a valid cover can take the first one.
+    /// </summary>
+    protected async Task<string> GetFirstCoverId()
+    {
+        var covers = (await _roomsApi.GetRoomCoversAsync(TestContext.Current.CancellationToken)).Response;
+
+        return covers[0].Id;
     }
 
     protected async Task<FolderDtoInteger> CreateVDRRoom(string roomTitle)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom));
     }
 
+    /// <summary>
+    /// Ensures the currently authenticated user has an encryption key pair, which is a prerequisite
+    /// for creating private rooms. Idempotent: keys are only set when none exist.
+    /// </summary>
+    protected async Task EnsureEncryptionKeys()
+    {
+        var sw = Stopwatch.StartNew();
+
+        var keys = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response;
+
+        if (keys == null)
+        {
+            await _privacyRoomApi.SetKeysAsync(
+                new EncryptionKeyRequestDto(Guid.Empty, $"pk-{Guid.NewGuid():N}", $"prv-{Guid.NewGuid():N}"),
+                TestContext.Current.CancellationToken);
+        }
+
+        Timing.Write("ensureEncryptionKeys", sw.ElapsedMilliseconds);
+    }
+
+    /// <summary>
+    /// Creates a private (encrypted) room, setting up the caller's encryption keys first.
+    /// </summary>
+    protected async Task<FolderDtoInteger> CreatePrivateRoom(string title, RoomType roomType)
+    {
+        await EnsureEncryptionKeys();
+
+        return await CreateRoom(new CreateRoomRequestDto(title, roomType: roomType, @private: true));
+    }
+
+    /// <summary>
+    /// Polls the room-template creation status until it completes, then returns the new template id.
+    /// </summary>
+    protected async Task<int> WaitForRoomTemplate()
+    {
+        var sw = Stopwatch.StartNew();
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            var status = (await _roomsApi.GetRoomTemplateCreatingStatusAsync(TestContext.Current.CancellationToken)).Response;
+
+            if (status is { IsCompleted: true })
+            {
+                Timing.Write("waitRoomTemplate", sw.ElapsedMilliseconds);
+                return status.TemplateId;
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                // The deadline ends the loop with an assertion carrying the last status. Cancelling
+                // the call itself would kill the test with TaskCanceledException instead.
+                status.Should().NotBeNull("the room template creation status must be reported within 30 seconds");
+                status.IsCompleted.Should().BeTrue(
+                    "the room template must be created within 30 seconds (progress {0}, error '{1}')", status.Progress, status.Error);
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <remarks>
+    /// An <b>empty</b> status list is a terminal state, not "not started yet": publishing an
+    /// operation writes it into the distributed cache before the triggering HTTP call returns
+    /// (<c>DistributedTaskQueue.PublishTask</c>), and reading the statuses prunes every finished
+    /// operation (<c>FileOperationsManagerHolder.GetOperationResults</c> dequeues it and leaves it
+    /// out of the same response). So once the caller's request has returned, "nothing listed" can
+    /// only mean "everything finished" — waiting further would just burn the whole deadline, which
+    /// is exactly what every fast operation used to do here for 30 seconds.
+    /// </remarks>
     protected async Task<List<FileOperationDto>?> WaitLongOperation(string? operationId = null)
     {
         List<FileOperationDto>? statuses;
 
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            timeoutCts.Token,
-            TestContext.Current.CancellationToken);
+        var sw = Stopwatch.StartNew();
+        var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {
-            statuses = (await _filesOperationsApi.GetOperationStatusesAsync(id: operationId, cancellationToken: linkedCts.Token)).Response;
+            statuses = (await _filesOperationsApi.GetOperationStatusesAsync(id: operationId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-            if (statuses.Count > 0 && statuses.TrueForAll(r => r.Finished) || linkedCts.Token.IsCancellationRequested)
+            // On the deadline the last observed statuses are returned as they are, so the caller's
+            // own assertion reports what the operation was actually doing.
+            if (statuses.TrueForAll(r => r.Finished) || DateTime.UtcNow >= deadline)
             {
                 break;
             }
 
-            await Task.Delay(100, linkedCts.Token);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
         }
+
+        Timing.Write($"waitOperation({operationId ?? "all"})", sw.ElapsedMilliseconds);
 
         return statuses;
     }
@@ -348,7 +399,9 @@ public class BaseTest(
             initialLinkParams.ExpirationDate = new ApiDateTime { UtcTime = expirationDate.Value };
         }
 
+        var linkSw = Stopwatch.StartNew();
         var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"createExternalLink({file.Id})", linkSw.ElapsedMilliseconds);
 
         return (initialLink.SharedLink.RequestToken, file.Id);
     }
@@ -373,7 +426,10 @@ public class BaseTest(
             return null!;
         }
 
+        var openSw = Stopwatch.StartNew();
         var openEditResult = (await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        Timing.Write($"openEdit({fileId})", openSw.ElapsedMilliseconds);
+
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
         return openEditResult.File;
     }
@@ -416,8 +472,29 @@ public class BaseTest(
                     Timing.Write($"getForms({user.Email})", rootSw.ElapsedMilliseconds);
                     return recentFolder.Response.Current.Id;
                 }
+            case FolderType.SHARE:
+                {
+                    var shareFolderId = await GetSectionRootIdAsync("api/2.0/files/@share");
+                    Timing.Write($"getShare({user.Email})", rootSw.ElapsedMilliseconds);
+                    return shareFolderId;
+                }
+            case FolderType.VirtualRooms:
+                {
+                    var rooms = await _roomsApi.GetRoomsFolderAsync(count: 1, cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getRooms({user.Email})", rootSw.ElapsedMilliseconds);
+                    return rooms.Response.Current.Id;
+                }
+            case FolderType.Archive:
+                {
+                    var archive = await _roomsApi.GetRoomsFolderAsync(searchArea: SearchArea.Archive, count: 1, cancellationToken: TestContext.Current.CancellationToken);
+                    Timing.Write($"getArchive({user.Email})", rootSw.ElapsedMilliseconds);
+                    return archive.Response.Current.Id;
+                }
         }
 
+        // The fallback is by far the most expensive call in the suite: @root builds the full content of
+        // every section just to hand back one folder id. Every type that has a cheaper way to its root
+        // is handled above; anything landing here has none.
         var rootFolder = (await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         Timing.Write($"getRoot({user.Email})", rootSw.ElapsedMilliseconds);
 
@@ -425,4 +502,70 @@ public class BaseTest(
 
         return folderId;
     }
+
+    /// <summary>
+    /// Reads the id of a section's root folder straight from its endpoint, for sections the generated
+    /// SDK has no method for. <c>@share</c>, <c>@common</c>, <c>@projects</c> and <c>@templates</c> are
+    /// all marked <c>[ApiExplorerSettings(IgnoreApi = true)]</c>, so they never made it into Swagger and
+    /// therefore not into the client either.
+    /// </summary>
+    private async Task<int> GetSectionRootIdAsync(string path)
+    {
+        using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
+
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Unable to read {path} ({(int)response.StatusCode}): {body}");
+        }
+
+        using var json = JsonDocument.Parse(body);
+
+        return json.RootElement.GetProperty("response").GetProperty("current").GetProperty("id").GetInt32();
+    }
+    /// <summary>
+    /// Adds a member of the given type to the portal. Guests cannot be created through
+    /// <see cref="InviteContact"/> — they only come into existence by being invited into a room by
+    /// e-mail, which is what <see cref="InviteGuest"/> does. This dispatcher keeps the
+    /// role-parameterised theories working with a single call site.
+    /// </summary>
+    protected async Task<User> InviteMember(EmployeeType employeeType)
+    {
+        return employeeType == EmployeeType.Guest
+            ? await InviteGuest()
+            : await InviteContact(employeeType);
+    }
+
+    /// <summary>Invites an existing portal member into a room with the given access level.</summary>
+    protected async Task InviteToRoom(int roomId, User user, FileShare access)
+    {
+        await _roomsApi.SetRoomSecurityAsync(
+            roomId,
+            new RoomInvitationRequest
+            {
+                Invitations = [new RoomInvitation { Id = user.Id, Access = access }],
+                Notify = false
+            },
+            cancellationToken: TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Archives a room and waits for the asynchronous operation to finish.</summary>
+    protected async Task ArchiveRoom(int roomId)
+    {
+        await _roomsApi.ArchiveRoomAsync(roomId, new ArchiveRoomRequest(false), TestContext.Current.CancellationToken);
+        await WaitLongOperation();
+    }
+
+    /// <summary>Terminates a portal member, acting as the portal owner.</summary>
+    protected async Task TerminateUser(User user)
+    {
+        await _peopleClient.Authenticate(Owner);
+
+        await _userStatusApi.UpdateUserStatusAsync(
+            EmployeeStatus.Terminated,
+            new UpdateMembersRequestDto([user.Id], resendAll: false),
+            TestContext.Current.CancellationToken);
+    }
+
 }

@@ -120,7 +120,7 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Ciao, $UserName!
 
-Benvenuto in ${LetterLogoText} DocSpace! Il tuo profilo utente è stato aggiunto con successo a "${__VirtualRootPath}":"${__VirtualRootPath}". Ora puoi:
+Benvenuto in ${LetterLogoText}! Il tuo profilo utente è stato aggiunto con successo a "${__VirtualRootPath}":"${__VirtualRootPath}". Ora puoi:
 
 * Lavorare con altri utenti nella stanza in cui sei invitato*: stanze di collaborazione per la creazione condivisa in tempo reale o stanze personalizzate con impostazioni flessibili per qualsiasi scopo*.
 
@@ -146,7 +146,7 @@ L'eliminazione dei dati personali ha permesso di liberare $DocsSpace</value>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Il nuovo portale è stato registrato
 
-# URL del portale: "${__VirtualRootPath}":"$ {__VirtualRootPath}"
+# URL del portale: "${__VirtualRootPath}":"${__VirtualRootPath}"
 # Nome: $UserName
 # Cognome: $UserLastName
 # Email: $UserEmail

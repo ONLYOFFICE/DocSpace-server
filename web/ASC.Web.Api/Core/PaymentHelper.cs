@@ -473,7 +473,7 @@ public class PaymentHelper(
             Image = icons[m.OwnedBy.ToLower()],
             Alias = m.Alias,
             Provider = m.Provider,
-            Price = new AiImagePriceDto { Prompt = m.Price.Prompt, Image = m.Price.Image },
+            Price = new AiImagePriceDto { Prompt = m.Price.Prompt, Completion = m.Price.Completion, Image = m.Price.Image },
             Link = m.Link
         }).ToList();
 

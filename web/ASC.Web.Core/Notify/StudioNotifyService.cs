@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -30,8 +30,6 @@
 // Public License v3.
 //
 // SPDX-License-Identifier: AGPL-3.0-only
-
-using ASC.AuditTrail.Models;
 
 using Constants = ASC.Core.Configuration.Constants;
 
@@ -113,6 +111,15 @@ public class StudioNotifyService(
         passwordChangedNotifyAction.Init(userInfo, auditEvent);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(passwordChangedNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
+    }
+
+    public async Task SendSuspiciousLoginAsync(UserInfo userInfo, BaseEvent loginEvent)
+    {
+        var suspiciousLoginNotifyAction = serviceProvider.GetService<SuspiciousLoginNotifyAction>();
+        suspiciousLoginNotifyAction.Init(userInfo, loginEvent);
+
+        var recipient = new DirectRecipient(userInfo.Id.ToString(), null, [userInfo.Email], false);
+        await studioNotifyServiceHelper.SendNoticeToAsync(suspiciousLoginNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
     }
 
     #endregion
@@ -476,18 +483,9 @@ public class StudioNotifyService(
             throw new ArgumentException("User is not activated yet!");
         }
 
-        if (tenantExtra.Enterprise)
+        if (!tenantExtra.Saas)
         {
             return;
-            //var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(_settingsManager);
-            //notifyAction = defaultRebranding ? Actions.EnterpriseAdminWelcomeV1 : Actions.EnterpriseWhitelabelAdminWelcomeV1;
-        }
-
-        if (tenantExtra.Opensource)
-        {
-            return;
-            //notifyAction = Actions.OpensourceAdminWelcomeV1;
-            //tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
         }
 
         var saasAdminWelcomeV1NotifyAction = serviceProvider.GetService<SaasAdminWelcomeV1NotifyAction>();
@@ -908,34 +906,6 @@ public class StudioNotifyService(
 
     #endregion
 
-
-    #region Migration Personal to Docspace
-
-    public async Task MigrationPersonalToDocspaceAsync(UserInfo userInfo)
-    {
-        var auditEventDate = DateTime.UtcNow;
-
-        auditEventDate = new DateTime(
-            auditEventDate.Year,
-            auditEventDate.Month,
-            auditEventDate.Day,
-            auditEventDate.Hour,
-            auditEventDate.Minute,
-            auditEventDate.Second,
-            0,
-            DateTimeKind.Utc);
-
-        var migrationPersonalToDocspaceNotifyAction = serviceProvider.GetService<MigrationPersonalToDocspaceNotifyAction>();
-        await migrationPersonalToDocspaceNotifyAction.Init(userInfo, auditEventDate);
-
-        await studioNotifyServiceHelper.SendNoticeToAsync(migrationPersonalToDocspaceNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
-
-        var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
-
-        messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
-    }
-
-    #endregion
 
 
     #region API Keys

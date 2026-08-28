@@ -34,37 +34,30 @@
 using DocSpace.API.SDK.Api.Privacyroom;
 
 using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
-using SettingsApi = DocSpace.API.SDK.Api.Files.SettingsApi;
 using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
+using SettingsApi = DocSpace.API.SDK.Api.Files.SettingsApi;
 
 namespace ASC.Files.Tests.ApiFactories;
 
 /// <summary>
-/// A self-contained set of HTTP/API clients bound to a single portal via the <c>Origin</c> header.
-/// Each test owns one instance, which makes tests fully independent and safe to run in parallel.
+/// The Files suite's per-portal API clients.
 /// </summary>
-public sealed class PortalClients : IDisposable
+public sealed class PortalClients : PortalClientsBase
 {
-    /// <summary>The portal (tenant) alias these clients are bound to.</summary>
-    public string PortalName { get; }
-
-    /// <summary>The owner of this portal. Its Id is unique per portal.</summary>
-    public User Owner { get; }
-
     public HttpClient FilesHttpClient { get; }
     public HttpClient PeopleHttpClient { get; }
-    public HttpClient WebApiHttpClient { get; }
 
     // Files service
     public FoldersApi FoldersApi { get; }
     public FilesApi FilesApi { get; }
     public OperationsApi OperationsApi { get; }
     public RoomsApi RoomsApi { get; }
+    public GroupsApi RoomGroupsApi { get; }
     public SettingsApi SettingsApi { get; }
     public QuotaApi QuotaApi { get; }
-    public PaymentApi PaymentApi { get; }
     public SharingApi SharingApi { get; }
     public PrivacyroomApi PrivacyroomApi { get; }
+    public ThirdPartyIntegrationApi ThirdPartyIntegrationApi { get; }
 
     // People service
     public ProfilesApi ProfilesApi { get; }
@@ -77,57 +70,36 @@ public sealed class PortalClients : IDisposable
     public CommonSettingsApi CommonSettingsApi { get; }
     public UsersApi PortalUsersApi { get; }
     public DocSpace.API.SDK.Api.Settings.QuotaApi SettingsQuotaApi { get; }
+    public PaymentApi PaymentApi { get; }
 
-    public PortalClients(Uri filesBaseAddress, Uri peopleBaseAddress, Uri webApiBaseAddress, string portalName, User owner, Func<Uri, string?, HttpClient> createClient)
+    public PortalClients(PortalContext context) : base(context)
     {
-        PortalName = portalName;
-        Owner = owner;
+        FilesHttpClient = CreateClient(ResourceNames.Files);
+        PeopleHttpClient = CreateClient(ResourceNames.People);
 
-        var origin = $"http://{portalName}";
-
-        // The clients are per-test (own Origin/Auth headers) but share the fixture's connection pool.
-        FilesHttpClient = createClient(filesBaseAddress, origin);
-        PeopleHttpClient = createClient(peopleBaseAddress, origin);
-        WebApiHttpClient = createClient(webApiBaseAddress, origin);
-
-        var filesConfig = new Configuration { BasePath = filesBaseAddress.ToString().TrimEnd('/') };
+        var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
         FilesApi = new FilesApi(FilesHttpClient, filesConfig);
         OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
         RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
+        RoomGroupsApi = new GroupsApi(FilesHttpClient, filesConfig);
         SettingsApi = new SettingsApi(FilesHttpClient, filesConfig);
         QuotaApi = new QuotaApi(FilesHttpClient, filesConfig);
         SharingApi = new SharingApi(FilesHttpClient, filesConfig);
         PrivacyroomApi = new PrivacyroomApi(FilesHttpClient, filesConfig);
+        ThirdPartyIntegrationApi = new ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
 
-        var peopleConfig = new Configuration { BasePath = peopleBaseAddress.ToString().TrimEnd('/') };
+        var peopleConfig = new Configuration { BasePath = BasePathOf(ResourceNames.People) };
         ProfilesApi = new ProfilesApi(PeopleHttpClient, peopleConfig);
         GroupApi = new GroupApi(PeopleHttpClient, peopleConfig);
         UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
         PhotosApi = new PhotosApi(PeopleHttpClient, peopleConfig);
 
-        var webApiConfig = new Configuration { BasePath = webApiBaseAddress.ToString().TrimEnd('/') };
+        var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         AuthenticationApi = new AuthenticationApi(WebApiHttpClient, webApiConfig);
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
         PortalUsersApi = new UsersApi(WebApiHttpClient, webApiConfig);
         SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(WebApiHttpClient, webApiConfig);
         PaymentApi = new PaymentApi(WebApiHttpClient, webApiConfig);
-
-        // Associate every client with this portal's authentication endpoint so the
-        // HttpClient.Authenticate(user) extension knows where to sign in.
-        Initializer.RegisterAuthApi(FilesHttpClient, AuthenticationApi);
-        Initializer.RegisterAuthApi(PeopleHttpClient, AuthenticationApi);
-        Initializer.RegisterAuthApi(WebApiHttpClient, AuthenticationApi);
-    }
-
-    public void Dispose()
-    {
-        Initializer.UnregisterAuthApi(FilesHttpClient);
-        Initializer.UnregisterAuthApi(PeopleHttpClient);
-        Initializer.UnregisterAuthApi(WebApiHttpClient);
-
-        FilesHttpClient.Dispose();
-        PeopleHttpClient.Dispose();
-        WebApiHttpClient.Dispose();
     }
 }

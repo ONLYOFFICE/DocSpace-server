@@ -500,7 +500,7 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
     <value>Məzmun yaradıcısı</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace Administratoru</value>
+    <value>Tam administrator</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>

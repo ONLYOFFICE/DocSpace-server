@@ -35,8 +35,19 @@ namespace ASC.AI.Core.MdTextToDocx;
 
 internal abstract class Target
 {
-    public static async Task<Target> InitializeAsync(IDaoFactory daoFactory, FileSecurity fileSecurity, int folderId, string? thirdpartyFolderId)
+    public static async Task<Target> InitializeAsync(
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity,
+        UserManager userManager,
+        AuthContext authContext,
+        int folderId,
+        string? thirdpartyFolderId)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+
         Target target;
 
         if (!string.IsNullOrEmpty(thirdpartyFolderId))

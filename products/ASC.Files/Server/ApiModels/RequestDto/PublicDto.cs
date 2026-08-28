@@ -43,6 +43,7 @@ public class PublicDto
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
+    [Range(1, int.MaxValue)]
     public required int Id { get; set; }
 }
 
@@ -55,6 +56,7 @@ public class SetPublicDto
     /// The room template ID.
     /// </summary>
     /// <example>1</example>
+    [Range(1, int.MaxValue)]
     public required int Id { get; set; }
 
     /// <summary>

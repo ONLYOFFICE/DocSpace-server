@@ -211,7 +211,7 @@
     <value>Quota de espaço do agente de IA excedida</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a quota por agente de IA. O valor introduzido é superior ao armazenamento total do DocSpace.</value>
+    <value>Falha ao definir a quota por agente de IA. O valor introduzido é superior ao armazenamento total.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Renovação automática</value>
@@ -1120,7 +1120,7 @@
     <value>Cota de espaço da sala excedida</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir cota por quarto. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+    <value>Falha ao definir cota por quarto. O valor inserido é maior do que o armazenamento total.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Ásia-Pacífico (Singapura)</value>
@@ -1285,7 +1285,7 @@
     <value>Ocorreu um erro inesperado. Tente novamente.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Você conectou com sucesso o Telegram para receber notificações do seu DocSpace.</value>
+    <value>Você conectou com sucesso o Telegram para receber notificações do seu espaço de trabalho.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Código incorreto</value>
@@ -1300,7 +1300,7 @@
     <value>Cota de espaço do usuário excedida</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a cota por utilizador. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+    <value>Falha ao definir a cota por utilizador. O valor inserido é maior do que o armazenamento total.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Região Oeste dos EUA (Oregon)</value>
@@ -1321,7 +1321,7 @@
     <value>Pesquisa web</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Pesquisa web</value>
+    <value>Pesquisa com IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Créditos de IA</value>

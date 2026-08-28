@@ -1,6 +1,6 @@
 ---
 name: run-tests
-description: "Running DocSpace tests: ASC.Tests.slnx, MTP filters for xUnit v3, Aspire fixtures, reading failed-test logs, telling a regression from a flake. USE FOR: run tests, run a specific test, test filter, failing tests, figure out why a test fails. DO NOT USE FOR: writing new tests, running the application (aspire skill)."
+description: "Running DocSpace tests: ASC.Tests.slnx, MTP filters for xUnit v3, Aspire fixtures, reading failed-test logs, telling a regression from a flake. USE FOR: run tests, run a specific test, test filter, failing tests, figure out why a test fails. DO NOT USE FOR: writing new tests (tests rule), running the application locally (`dotnet run --project common/ASC.AppHost`)."
 ---
 
 # Running Tests
@@ -14,6 +14,8 @@ description: "Running DocSpace tests: ASC.Tests.slnx, MTP filters for xUnit v3, 
 ```bash
 dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filter-class "*Metadata*"
 dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filter-method "*TestName*"
+dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filter-namespace "*_03_Rooms.Covers*"
+dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filter-trait "Bug=82519"
 ```
 
 ## Infrastructure

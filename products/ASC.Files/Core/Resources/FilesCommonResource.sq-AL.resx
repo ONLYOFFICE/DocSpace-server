@@ -500,7 +500,7 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
     <value>Krijuesi i përmbajtjes</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Administratori i DocSpace</value>
+    <value>Administrator i plotë</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>

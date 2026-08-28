@@ -7051,7 +7051,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasOne("ASC.Files.Core.EF.DbFolder", "InternalRoom")
                         .WithMany()
-                        .HasForeignKey("InternalRoomId");
+                        .HasForeignKey("InternalRoomId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

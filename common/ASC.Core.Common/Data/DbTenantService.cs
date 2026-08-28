@@ -530,11 +530,16 @@ public class DbTenantService(
 
         if (tenant != null)
         {
-            var count = await tenantDbContext.TenantsCountAsync(tenant.Alias + postfix);
+            var baseAlias = tenant.Alias + postfix;
+
+            var takenAliases = await tenantDbContext.Tenants
+                .Where(r => r.Alias.StartsWith(baseAlias))
+                .Select(r => r.Alias)
+                .ToListAsync();
 
             var now = DateTime.UtcNow;
 
-            tenant.Alias = tenant.Alias + postfix + (count > 0 ? count.ToString() : "");
+            tenant.Alias = GetFreeAlias(baseAlias, takenAliases);
             tenant.Status = TenantStatus.RemovePending;
             tenant.LastModified = now;
 
@@ -549,6 +554,48 @@ public class DbTenantService(
         }
 
         return tenant;
+    }
+
+    /// <summary>
+    /// Picks the first unused <c>{baseAlias}{n}</c> name for a tenant being removed.
+    /// </summary>
+    /// <remarks>
+    /// The suffix used to be the number of rows whose alias starts with <paramref name="baseAlias"/>, which
+    /// produces an already taken name as soon as one of them is purged and leaves a gap: with
+    /// <c>x_deleted</c>, <c>x_deleted1</c>, <c>x_deleted3</c> and <c>x_deleted4</c> present the count is 4,
+    /// so it yields <c>x_deleted4</c> and the unique index on <c>alias</c> rejects it. Continuing past the
+    /// highest index instead keeps the name free of a purged tenant's history.
+    /// </remarks>
+    internal static string GetFreeAlias(string baseAlias, IEnumerable<string> takenAliases)
+    {
+        // -1 means nothing is taken at all; the bare alias counts as index 0.
+        var maxIndex = -1;
+
+        foreach (var alias in takenAliases)
+        {
+            // The alias column is utf8_general_ci, so uniqueness is case-insensitive and this has to be too.
+            if (!alias.StartsWith(baseAlias, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var suffix = alias[baseAlias.Length..];
+
+            if (suffix.Length == 0)
+            {
+                maxIndex = Math.Max(maxIndex, 0);
+
+                continue;
+            }
+
+            // Anything but a plain number merely shares the prefix — "x_deleted2_deleted" is not index 2.
+            if (suffix.All(char.IsAsciiDigit) && int.TryParse(suffix, out var index))
+            {
+                maxIndex = Math.Max(maxIndex, index);
+            }
+        }
+
+        return maxIndex < 0 ? baseAlias : baseAlias + (maxIndex + 1);
     }
 }
 

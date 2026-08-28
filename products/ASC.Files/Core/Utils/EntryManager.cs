@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -30,8 +30,6 @@
 // Public License v3.
 //
 // SPDX-License-Identifier: AGPL-3.0-only
-
-using System.Security.Authentication;
 
 namespace ASC.Web.Files.Utils;
 
@@ -410,21 +408,42 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var fileDao = daoFactory.GetFileDao<T>();
             var userId = authContext.CurrentAccount.ID;
+            var recentOrderBy = new OrderBy(SortedByType.LastOpened, false);
 
             total = 0;
-            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0,  folderType, new OrderBy(SortedByType.LastOpened, false), from, count);
 
-            await foreach (var e in fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => t.Item1))
+            var providerFiles = await GetThirdPartyFilesByTagAsync<T>(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject,
+                location, 0, folderType, recentOrderBy);
+
+            if (providerFiles.Count == 0)
             {
-                total++;
+                var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0,  folderType, recentOrderBy, from, count);
 
-                if (total > from && total <= from + count)
+                await foreach (var e in fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => t.Item1))
                 {
-                    entries.Add(e);
+                    total++;
+
+                    if (total > from && total <= from + count)
+                    {
+                        entries.Add(e);
+                    }
                 }
+
+                await entryStatusManager.SetFileStatusAsync(entries.OfType<File<T>>().ToList());
+                return (entries, total);
             }
 
-            await entryStatusManager.SetFileStatusAsync(entries.OfType<File<T>>().ToList());
+            var dbFiles = await fileSecurity.CanReadAsync(fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent,
+                    excludeSubject, location, 0, folderType, recentOrderBy, 0, -1))
+                .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
+
+            var allFiles = dbFiles.Concat(providerFiles).ToList();
+            total = allFiles.Count;
+
+            entries.AddRange(Paginate(await SortEntries<T>(allFiles, recentOrderBy, false), from, count));
+
+            await SetStatusAsync(entries);
+
             return (entries, total);
         }
         else if (parent.FolderType == FolderType.Favorites)
@@ -436,43 +455,71 @@ public class EntryManager(IDaoFactory daoFactory,
             var trashId = await globalFolderHelper.FolderTrashAsync;
             total = 0;
 
-            var allFoldersCountTask = 0;
-            var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, from, count);
-            List<Folder<T>> folders = [];
+            var providerFolders = await GetThirdPartyFoldersByTagAsync<T>(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId,
+                folderType, orderBy);
+            var providerFiles = await GetThirdPartyFilesByTagAsync<T>(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject,
+                location, trashId, folderType, orderBy);
 
-            await foreach (var e in fileSecurity.CanReadAsync(foldersFromDb).Where(r => r.Item2).Select(t => t.Item1))
+            if (providerFolders.Count == 0 && providerFiles.Count == 0)
             {
-                total++;
-                allFoldersCountTask++;
+                var allFoldersCountTask = 0;
+                var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, from, count);
+                List<Folder<T>> folders = [];
 
-                if (total > from && total <= from + count)
+                await foreach (var e in fileSecurity.CanReadAsync(foldersFromDb).Where(r => r.Item2).Select(t => t.Item1))
                 {
-                    folders.Add((Folder<T>)e);
-                    entries.Add(e);
+                    total++;
+                    allFoldersCountTask++;
+
+                    if (total > from && total <= from + count)
+                    {
+                        folders.Add((Folder<T>)e);
+                        entries.Add(e);
+                    }
                 }
+
+                var filesCount = count - folders.Count;
+                var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - allFoldersCountTask, 0);
+
+                var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, filesOffset, filesCount);
+                List<File<T>> files = [];
+
+                await foreach (var e in fileSecurity.CanReadAsync(filesFromDb).Where(r => r.Item2).Select(t => t.Item1))
+                {
+                    total++;
+
+                    if (total > from && total <= from + count)
+                    {
+                        files.Add((File<T>)e);
+                        entries.Add(e);
+                    }
+                }
+
+                var setFilesStatus = entryStatusManager.SetFileStatusAsync(files);
+                var setFavorites = entryStatusManager.SetIsFavoriteFoldersAsync(folders);
+
+                await Task.WhenAll(setFilesStatus, setFavorites);
+
+                return (entries, total);
             }
 
-            var filesCount = count - folders.Count;
-            var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - allFoldersCountTask, 0);
+            var dbFolders = await fileSecurity.CanReadAsync(folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject,
+                    location, trashId, folderType, orderBy, 0, -1))
+                .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
 
-            var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, filesOffset, filesCount);
-            List<File<T>> files = [];
+            var dbFiles = await fileSecurity.CanReadAsync(fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent,
+                    excludeSubject, location, trashId, folderType, orderBy, 0, -1))
+                .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
 
-            await foreach (var e in fileSecurity.CanReadAsync(filesFromDb).Where(r => r.Item2).Select(t => t.Item1))
-            {
-                total++;
+            var sortedFolders = await SortEntries<T>(dbFolders.Concat(providerFolders).ToList(), orderBy, false);
+            var sortedFiles = await SortEntries<T>(dbFiles.Concat(providerFiles).ToList(), orderBy, false);
 
-                if (total > from && total <= from + count)
-                {
-                    files.Add((File<T>)e);
-                    entries.Add(e);
-                }
-            }
+            var favorites = sortedFolders.Concat(sortedFiles).ToList();
+            total = favorites.Count;
 
-            var setFilesStatus = entryStatusManager.SetFileStatusAsync(files);
-            var setFavorites = entryStatusManager.SetIsFavoriteFoldersAsync(folders);
+            entries.AddRange(Paginate(favorites, from, count));
 
-            await Task.WhenAll(setFilesStatus, setFavorites);
+            await SetStatusAsync(entries);
 
             return (entries, total);
         }
@@ -811,6 +858,63 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
+    /// <summary>
+    /// Returns the readable third-party files marked with the specified tags. Entries of the rooms with a connected third-party storage
+    /// are not stored in the database, so they have to be requested from the provider separately from the internal ones.
+    /// </summary>
+    private async Task<List<FileEntry>> GetThirdPartyFilesByTagAsync<T>(Guid userId, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
+        string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy)
+    {
+        if (typeof(T) == typeof(string) || !await filesSettingsHelper.GetEnableThirdParty())
+        {
+            return [];
+        }
+
+        var files = daoFactory.GetFileDao<string>()
+            .GetFilesByTagAsync(userId, tagType, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, 0, -1);
+
+        return await fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
+    }
+
+    /// <summary>
+    /// Returns the readable third-party folders marked with the specified tags.
+    /// </summary>
+    private async Task<List<FileEntry>> GetThirdPartyFoldersByTagAsync<T>(Guid userId, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
+        bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy)
+    {
+        if (typeof(T) == typeof(string) || !await filesSettingsHelper.GetEnableThirdParty())
+        {
+            return [];
+        }
+
+        var folders = daoFactory.GetFolderDao<string>()
+            .GetFoldersByTagAsync(userId, tagType, filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, 0, -1);
+
+        return await fileSecurity.CanReadAsync(folders).Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
+    }
+
+    /// <summary>
+    /// Sets the status of the entries of a virtual folder, which holds the internal and the third-party entries at the same time.
+    /// </summary>
+    private async Task SetStatusAsync(List<FileEntry> entries)
+    {
+        await Task.WhenAll(
+            entryStatusManager.SetFileStatusAsync([.. entries.OfType<File<int>>()]),
+            entryStatusManager.SetIsFavoriteFoldersAsync([.. entries.OfType<Folder<int>>()]),
+            entryStatusManager.SetFileStatusAsync([.. entries.OfType<File<string>>()]),
+            entryStatusManager.SetIsFavoriteFoldersAsync([.. entries.OfType<Folder<string>>()]));
+    }
+
+    private static IEnumerable<FileEntry> Paginate(IEnumerable<FileEntry> entries, int from, int count)
+    {
+        if (from > 0)
+        {
+            entries = entries.Skip(from);
+        }
+
+        return count > 0 ? entries.Take(count) : entries;
+    }
+
     public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(IFolderDao<T> folderDao, IFileDao<T> fileDao, FilterType filter, bool subjectGroup, Guid subjectId, string searchText,
         string[] extension, bool searchInContent)
     {
@@ -995,8 +1099,15 @@ public class EntryManager(IDaoFactory daoFactory,
                 var cmp = 0;
                 if (x.FileEntryType == FileEntryType.File && y.FileEntryType == FileEntryType.File)
                 {
-                    cmp = c * ((File<T>)x).ContentLength.CompareTo(((File<T>)y).ContentLength);
+                    cmp = c * GetContentLength(x).CompareTo(GetContentLength(y));
                 }
+
+                return cmp == 0 ? x.Title.EnumerableComparer(y.Title) : cmp;
+            }
+            ,
+            SortedByType.LastOpened => (x, y) =>
+            {
+                var cmp = c * Nullable.Compare(GetLastOpened(x), GetLastOpened(y));
 
                 return cmp == 0 ? x.Title.EnumerableComparer(y.Title) : cmp;
             }
@@ -1049,6 +1160,16 @@ public class EntryManager(IDaoFactory daoFactory,
             _ => (x, y) => c * x.Title.EnumerableComparer(y.Title)
         };
 
+        // The DAOs return rows in unspecified order, so a comparer that rates two entries equal
+        // (e.g. titles differing only by case) would let the database decide the page boundary
+        // and repeated paged reads could return different slices. Ids give a total order.
+        var baseSorter = sorter;
+        sorter = (x, y) =>
+        {
+            var cmp = baseSorter(x, y);
+            return cmp != 0 ? cmp : string.CompareOrdinal(GetEntryIdKey(x), GetEntryIdKey(y));
+        };
+
         var comparer = Comparer<FileEntry>.Create(sorter);
 
         if (orderBy.SortedBy != SortedByType.New)
@@ -1098,6 +1219,36 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         return entries.OrderBy(r => r, comparer);
+    }
+
+    private static string GetEntryIdKey(FileEntry entry)
+    {
+        return entry switch
+        {
+            FileEntry<int> internalEntry => internalEntry.Id.ToString(CultureInfo.InvariantCulture),
+            FileEntry<string> thirdPartyEntry => thirdPartyEntry.Id,
+            _ => entry.Title
+        };
+    }
+
+    private static long GetContentLength(FileEntry entry)
+    {
+        return entry switch
+        {
+            File<int> internalFile => internalFile.ContentLength,
+            File<string> thirdPartyFile => thirdPartyFile.ContentLength,
+            _ => 0
+        };
+    }
+
+    private static DateTime? GetLastOpened(FileEntry entry)
+    {
+        return entry switch
+        {
+            File<int> internalFile => internalFile.LastOpened,
+            File<string> thirdPartyFile => thirdPartyFile.LastOpened,
+            _ => null
+        };
     }
 
     public Folder<string> GetFakeThirdpartyFolder(IProviderInfo providerInfo, string parentFolderId = null)
@@ -1498,7 +1649,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
                 var rootFolder = int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1 ?
-                    await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull() :
+                    (await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)))).NotFoundIfNull() :
                     await documentServiceHelper.GetRootFolderAsync(file);
 
                 switch (rootFolder.FolderType)

@@ -211,7 +211,7 @@
     <value>Kvota prostora AI agenta je prekoračena</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Neuspešno podešavanje kvote po AI agentu. Uneta vrednost je veća od ukupnog DocSpace skladišta.</value>
+    <value>Neuspešno podešavanje kvote po AI agentu. Uneta vrednost je veća od ukupnog skladišta.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatska obnova</value>
@@ -1120,7 +1120,7 @@
     <value>Kvota prostora za sobu prekoračena</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Podešavanje kvote po sobi nije uspelo. Unesena vrednost je veća od ukupnog DocSpace skladišta.</value>
+    <value>Podešavanje kvote po sobi nije uspelo. Unesena vrednost je veća od ukupnog skladišta.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Azija Pacifik (Singapur)</value>
@@ -1285,7 +1285,7 @@
     <value>Došlo je do neočekivane greške. Molimo pokušajte ponovo.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Uspešno ste povezali Telegram da primate obaveštenja iz svog DocSpace-a.</value>
+    <value>Uspešno ste povezali Telegram da primate obaveštenja iz svog radnog prostora.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Netačan kod</value>
@@ -1300,7 +1300,7 @@
     <value>Korisnička kvota prostora prekoračena</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Podešavanje kvote po sobi nije uspelo. Unesena vrednost je veća od ukupnog DocSpace skladišta.</value>
+    <value>Podešavanje kvote po korisniku nije uspelo. Unesena vrednost je veća od ukupnog skladišta.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Zapadna Regija SAD (Oregon)</value>
@@ -1321,7 +1321,7 @@
     <value>Pretraga weba</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Pretraga weba</value>
+    <value>AI pretraga</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI krediti</value>

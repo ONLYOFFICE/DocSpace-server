@@ -36,19 +36,35 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The request parameters for creating a tag.
 /// </summary>
-public class UpdateTagRequestDto
+public class UpdateTagRequestDto : IValidatableObject
 {
     /// <summary>
     /// The old tag name.
     /// </summary>
     /// <example>old-tag</example>
-    [StringLength(255)]
+    [StringLength(CreateTagRequestDto.MaxNameLength)]
     public required string OldName { get; set; }
 
     /// <summary>
     /// The new tag name.
     /// </summary>
     /// <example>new-tag</example>
-    [StringLength(255)]
+    [StringLength(CreateTagRequestDto.MaxNameLength)]
     public required string NewName { get; set; }
+
+    /// <summary>
+    /// Neither end of a rename may be blank — the same rule that applies when the tag is created.
+    /// </summary>
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (string.IsNullOrWhiteSpace(OldName))
+        {
+            yield return new ValidationResult("A tag name cannot be empty or consist of whitespace only.", [nameof(OldName)]);
+        }
+
+        if (string.IsNullOrWhiteSpace(NewName))
+        {
+            yield return new ValidationResult("A tag name cannot be empty or consist of whitespace only.", [nameof(NewName)]);
+        }
+    }
 }

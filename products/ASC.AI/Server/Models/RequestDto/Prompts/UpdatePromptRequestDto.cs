@@ -44,6 +44,7 @@ public class UpdatePromptRequestDto
 
 public class UpdatePromptBody
 {
+    [MaxLength(AiIntegrationLimits.MaxNameLength)]
     public string? Name { get; init; }
     public string? Text { get; init; }
     public bool ChangeFolder { get; init; }

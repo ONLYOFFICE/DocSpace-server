@@ -74,8 +74,8 @@ public class Bucket4jConfiguration {
     /** Indicates whether SSL is enabled for the Redis connection. */
     private boolean ssl;
 
-    /** Command timeout for Redis operations. Defaults to 2 seconds. */
-    private Duration timeout = Duration.ofSeconds(1);
+    /** Command timeout for Redis operations. Defaults to 10 seconds. */
+    private Duration timeout = Duration.ofSeconds(10);
   }
 
   /** Configuration properties for rate limiting. */

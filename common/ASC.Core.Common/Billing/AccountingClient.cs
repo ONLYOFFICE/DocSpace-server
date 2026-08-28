@@ -354,6 +354,7 @@ public class OperationFilter : PagedFilter
 /// </summary>
 public class MonthlyUsageFilter : DateRangeFilter
 {
+    public string TimeZome { get; init; }
 }
 
 /// <summary>

@@ -133,7 +133,7 @@ public class OperationController(
     }
 
     /// <remarks>
-    /// Deletes all the files and folders from the "Trash" folder.
+    /// Deletes all the files and folders from the "Trash" folder. If the folder types are specified, only the items originally located in the sections of these types are deleted.
     /// </remarks>
     /// <summary>Empty the "Trash" folder</summary>
     /// <path>api/2.0/files/fileops/emptytrash</path>
@@ -143,7 +143,7 @@ public class OperationController(
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrash(EmptyTrashRequestDto inDto)
     {
-        var (foldersId, filesId) = await fileStorageService.GetTrashContentAsync();
+        var (foldersId, filesId) = await fileStorageService.GetTrashContentAsync(inDto.FolderType);
 
         var taskId = await fileDeleteOperationsManager.Publish(foldersId, filesId, false, true, false, true);
 
@@ -284,6 +284,11 @@ public class OperationController(
     public async Task<CheckDestFolderDto> CheckMoveOrCopyDestFolder([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
+
+        if (inDto.DestFolderId.ValueKind == JsonValueKind.Undefined)
+        {
+            throw new ArgumentException();
+        }
 
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {

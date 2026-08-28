@@ -215,6 +215,7 @@ public class FoldersControllerInternal(
     }
 }
 
+[ConstraintRoute("thirdparty", AffectsOrder = false)]
 public class FoldersControllerThirdparty(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
@@ -347,7 +348,7 @@ public abstract class FoldersController<T>(
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfo(FolderIdRequestDto<T> inDto)
     {
-        var folder = await fileStorageService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
+        var folder = (await fileStorageService.GetFolderAsync(inDto.FolderId)).NotFoundIfNull("Folder not found");
 
         return await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
     }

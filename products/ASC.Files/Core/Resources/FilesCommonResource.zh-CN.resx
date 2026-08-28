@@ -494,7 +494,7 @@
     <value>内容创作者</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>协作空间管理员</value>
+    <value>完全管理员</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>编辑者</value>

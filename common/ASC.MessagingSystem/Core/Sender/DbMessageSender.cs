@@ -38,13 +38,15 @@ public class DbMessageSender : IMessageSender
 {
     private readonly ILogger _logger;
     private readonly MessagesRepository _messagesRepository;
+    private readonly AuditLogSender _auditLogSender;
     private readonly bool _messagingEnabled;
 
-    public DbMessageSender(IConfiguration configuration, MessagesRepository messagesRepository, ILoggerFactory loggerFactory)
+    public DbMessageSender(IConfiguration configuration, MessagesRepository messagesRepository, AuditLogSender auditLogSender, ILoggerFactory loggerFactory)
     {
         var setting = configuration["messaging:enabled"];
         _messagingEnabled = !string.IsNullOrEmpty(setting) && setting == "true";
         _messagesRepository = messagesRepository;
+        _auditLogSender = auditLogSender;
         _logger = loggerFactory.CreateLogger("ASC.Messaging");
     }
 
@@ -61,6 +63,8 @@ public class DbMessageSender : IMessageSender
             {
                 return 0;
             }
+
+            _auditLogSender.Send(message);
 
             return await _messagesRepository.AddAsync(message);
         }

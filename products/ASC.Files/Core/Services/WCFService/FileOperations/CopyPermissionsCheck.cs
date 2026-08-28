@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Services.WCFService.FileOperations;
@@ -364,7 +364,7 @@ public class PermissionCheckStarter<T, TTo>(
         var toFolderRoom = parentFolders.FirstOrDefault(f => f.IsRoom);
 
         if (!isRoom &&
-            toFolderRoom != null &&
+            toFolderRoom is { ProviderEntry: false } &&
             !string.Equals(parentRoomId, toFolderRoom.Id.ToString()))
         {
             TenantEntityQuotaSettings quotaSettings = toFolderRoom.FolderType is FolderType.AiRoom
@@ -442,7 +442,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (!isRoom && (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive))
+        if (!isRoom && (toFolder.FolderType is FolderType.VirtualRooms or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             if (check)
@@ -534,12 +534,12 @@ public class PermissionCheckStarter<T, TTo>(
         {
             if (toFolder.ProviderId == folder.ProviderId && _folderDao.UseRecursiveOperation(folder.Id, toFolder.Id))
             {
-                if (!copy && checkPermissions && !await security.CanMoveAsync(folder))
+                if (!copy && !await security.CanMoveAsync(folder))
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
                 }
             }
-            else if (conflictFolder != null && resolveType != FileConflictResolveType.Overwrite && !copy && checkPermissions && !await security.CanMoveAsync(folder))
+            else if (conflictFolder != null && resolveType != FileConflictResolveType.Overwrite && !copy && !await security.CanMoveAsync(folder))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
             }
@@ -551,7 +551,7 @@ public class PermissionCheckStarter<T, TTo>(
 
         var files = await _fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
 
-        errorMsg = await CheckFilesSecurityPermissionsAsync(files, checkPermissions);
+        errorMsg = await CheckFilesSecurityPermissionsAsync(files, false);
         if (errorMsg != null)
         {
             throw new SecurityException(errorMsg);
@@ -595,7 +595,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive)
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)

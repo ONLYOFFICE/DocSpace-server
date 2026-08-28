@@ -31,6 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import type { DocspaceFolderInfo } from "./storage/docspaceFilesApi.js";
+
 export type ForwardedHeaders = Record<string, string>;
 
 export interface RequestContext {
@@ -45,6 +47,14 @@ export interface RequestContext {
   // every in-stream tool call runs within the same HTTP request as the
   // `getTools` that resolved them.
   resolvedFormId?: number;
+  // Names of the custom MCP servers resolved for this round's scope — see
+  // setCustomServerNames in requestContext.ts.
+  customServerNames?: string[];
+  // In-flight `GET /files/folder/{id}` reads, keyed by folder id. A round
+  // reads the same folder for its instruction and its entity metadata; the
+  // DTO cannot change within one request, so the second reader joins the
+  // first fetch (see `getFolderInfoOnce`).
+  folderInfoCache?: Map<string, Promise<DocspaceFolderInfo | undefined>>;
 }
 
 export interface AppConfig {

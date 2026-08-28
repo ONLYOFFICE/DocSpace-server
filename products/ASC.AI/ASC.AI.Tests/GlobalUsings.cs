@@ -35,44 +35,33 @@ extern alias ASCAi;
 
 global using System.Diagnostics;
 global using System.Net;
-global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
-global using System.Runtime.CompilerServices;
-global using System.Text;
 global using System.Text.Json;
-global using System.Text.Json.Serialization;
-
-global using ASC.AI.Tests.ApiFactories;
-global using ASC.AI.Tests.Data;
-
-global using Aspire.Hosting;
-global using Aspire.Hosting.ApplicationModel;
-global using Aspire.Hosting.Testing;
-
-global using Bogus;
-
-global using FluentAssertions;
-
-global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-
-global using Xunit;
-
-// Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
-global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;
-
-global using User = ASC.AI.Tests.Data.User;
 
 global using ASC.AI.Integration.Profiles;
 global using ASC.AI.Integration.ToolPrefs;
-global using ASC.Core.Users;
+global using ASC.AI.Tests.ApiFactories;
+global using ASC.Tests.Common.ApiFactories;
+global using ASC.Tests.Common.Data;
+
+global using DocSpace.API.SDK.Api.People;
+global using DocSpace.API.SDK.Client;
+
+global using FluentAssertions;
+
+global using Xunit;
 
 global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfileRequestDto;
 global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfilesRequestDto;
+// The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
+global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;
 global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.MessageDto;
 global using PreferencesDto = ASCAi::ASC.AI.Models.ResponseDto.PreferencesDto;
 global using ProfileDto = ASCAi::ASC.AI.Models.ResponseDto.ProfileDto;
+global using PromptDto = ASCAi::ASC.AI.Models.ResponseDto.PromptDto;
+global using PromptFolderDto = ASCAi::ASC.AI.Models.ResponseDto.PromptFolderDto;
+global using Task = System.Threading.Tasks.Task;
 global using ThreadDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadDto;
 global using UpdateProfileBody = ASCAi::ASC.AI.Models.RequestDto.Profiles.UpdateProfileBody;
-
-global using Task = System.Threading.Tasks.Task;
+global using User = ASC.Tests.Common.Data.User;

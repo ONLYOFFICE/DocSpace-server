@@ -482,7 +482,9 @@ public class FileEntryDtoHelper(
             }
         }
 
-        if (entry.ModifiedOn.Equals(default) || !Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync))
+        // The RootFolderType check must come first: FolderTrashAsync creates the user's trash root
+        // when it does not exist yet, and only entries already in the trash can match it anyway.
+        if (entry.ModifiedOn.Equals(default) || entry.RootFolderType != FolderType.TRASH || !Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync))
         {
             return default;
         }

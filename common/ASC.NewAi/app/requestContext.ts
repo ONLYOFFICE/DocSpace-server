@@ -35,6 +35,7 @@ import { AsyncLocalStorage } from "async_hooks";
 import type { IncomingHttpHeaders } from "http";
 import type { Request, Response, NextFunction } from "express";
 import type { ForwardedHeaders, RequestContext } from "./types.js";
+import type { DocspaceFolderInfo } from "./storage/docspaceFilesApi.js";
 
 const HOP_BY_HOP = new Set<string>([
   "host",
@@ -50,6 +51,24 @@ const HOP_BY_HOP = new Set<string>([
   "upgrade",
   "expect",
   "accept-encoding",
+  // A caller's `x-session-id` must never be forwarded to the provider. The
+  // engine derives this header itself from the round's thread id
+  // (`ActionArgs.threadId` -> `ProviderCredentials.sessionId`, attached by
+  // `OnlyOfficeProvider`), and its own rule is that an explicit `x-session-id`
+  // already present in `profile.headers` wins. Forwarded caller headers are
+  // merged into exactly that set for `onlyoffice` profiles
+  // (`profilesStorage.withOnlyofficeProviderOverrides`), so a client-supplied
+  // value would silently displace the thread id and collapse every thread of
+  // that caller into one upstream session. The thread id is the only
+  // trustworthy source, so the caller's copy is dropped here.
+  "x-session-id",
+  // A caller's `Mcp-Session-Id` must never be forwarded upstream. The shared
+  // docspace-mcp container binds the target portal + credentials to a session
+  // at `initialize`, so relaying a client-supplied session id makes a request
+  // attach to a foreign session and inherit its portal — a cross-tenant leak,
+  // and the cause of tool calls reaching a stale portal. The MCP client threads
+  // its own session id through its call arguments, so stripping this is safe.
+  "mcp-session-id",
 ]);
 
 const als = new AsyncLocalStorage<RequestContext>();
@@ -75,6 +94,7 @@ function pickForwardableHeaders(rawHeaders: IncomingHttpHeaders | undefined): Fo
 export function requestContextMiddleware(req: Request, _res: Response, next: NextFunction): void {
   const ctx: RequestContext = {
     headers: pickForwardableHeaders(req.headers),
+    folderInfoCache: new Map(),
   };
   als.run(ctx, () => next());
 }
@@ -110,4 +130,29 @@ export function setResolvedFormId(formId: number): void {
 
 export function getResolvedFormId(): number | undefined {
   return als.getStore()?.resolvedFormId;
+}
+
+// Names of the custom MCP servers resolved for the current round's scope.
+// Set by the custom-tools resolver (app/tools/customTools.ts) whenever it
+// runs; read by the engine's `systemServerTypes` callback, which is
+// synchronous and therefore cannot resolve the registry itself. The send
+// handlers prime the resolver before calling the engine so the value is
+// present when the callback fires. Request-scoped: dies with the request.
+export function setCustomServerNames(names: string[]): void {
+  const store = als.getStore();
+  if (store) {
+    store.customServerNames = names;
+  }
+}
+
+export function getCustomServerNames(): string[] {
+  return als.getStore()?.customServerNames ?? [];
+}
+
+// Per-request folder-info memoization store (see RequestContext). Undefined
+// outside a request context, where callers fall back to a direct fetch.
+export function getFolderInfoCache():
+  | Map<string, Promise<DocspaceFolderInfo | undefined>>
+  | undefined {
+  return als.getStore()?.folderInfoCache;
 }

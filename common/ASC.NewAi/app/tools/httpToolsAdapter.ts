@@ -46,16 +46,14 @@ const CALL_PATH = "/tools/call";
 // DocSpace tools are a single logical source, so they share one serverType.
 // Distinct from the MCP server name ("docspace") so Object.assign in
 // composeToolsAdapters does not overwrite the 23 MCP tools with these 3.
-const SERVER_TYPE = "docspace-integration";
+// Canonical values live in config/index.ts (see the note there); re-exported
+// here so existing importers keep working.
+import {
+  DOCSPACE_INTEGRATION_SERVER_TYPE as SERVER_TYPE,
+  DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+} from "../../config/index.js";
 
-// Tools that must surface a UI approval dialog before running. The engine
-// gates approval per serverType (a serverType listed in `systemServerTypes`
-// requires approval), so these tools are emitted under a dedicated
-// serverType (`DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE`) which the engine
-// is configured to treat as approval-required; everything else stays under
-// `SERVER_TYPE` and runs in-engine without a round-trip.
-export const DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE =
-    "docspace-integration-approval";
+export { DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE };
 
 const APPROVAL_TOOL_NAMES = new Set<string>([
     "docspace_generate_docx",

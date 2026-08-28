@@ -331,7 +331,7 @@ public class SocketManager(
             });
         }
 
-        if (sharedUsers != null)
+        if (sharedUsers != null && sharedUsers.Any())
         {
             var sharedFolder = await globalFolderHelper.GetFolderShareAsync<T>();
 
