@@ -75,7 +75,8 @@ public static partial class JsCallbackHelper
             "PROFILE" => profile,
             "CALLBACK" => safeCallback,
             "RETURNURL" => safeReturnUrl,
-            _ => desktopLiteral
+            "DESKTOP" => desktopLiteral,
+            _ => throw new UnreachableException($"No value for the {match.Value} placeholder of the callback page")
         });
     }
 
