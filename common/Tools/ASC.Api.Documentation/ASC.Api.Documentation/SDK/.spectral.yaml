@@ -1,54 +1,44 @@
-# Spectral ruleset for the DocSpace service documents.
+# Spectral ruleset for the five DocSpace service documents (../json/*_2.0.json).
+# An inventory tool: nothing runs it automatically, it gates no build.
 #
-# Scope: the five service documents under ASC.Api.Documentation/json/ - the OpenAPI
-# documents emitted by the service builds. NOT the generator input (SDK/json/api-docs.json,
-# deliberately distorted for openapi-generator) and NOT the published contract
-# (sdk/docspace-api-spec/docspace-backend.yaml).
+# ONE ruleset, and it reports EVERYTHING that is still open - 146 findings as of 2026-08-27.
+# Nothing is hidden from the report. A finding stops being shown only when a rule here says so
+# explicitly (`off`), and the only such rule is a proven false positive, not debt.
 #
-# Nothing runs this automatically. It is an inventory tool: a person runs it when the need
-# arises and reads the report. It gates no build and blocks no pipeline.
+# Prerequisite: npm i -g @stoplight/spectral-cli   (in PowerShell call `spectral.cmd`, not `spectral`)
+# Run from common/Tools/ASC.Api.Documentation/ASC.Api.Documentation, with lint/ already created:
 #
-# Cross-document invariants are NOT here and cannot be - Spectral lints one document at a
-# time. OpenapiJoiner owns them and throws: duplicate path+method, empty or colliding
-# operationId (case-insensitive, across services), lowercase tags, component name conflicts.
-# Do not move those checks here; they would silently stop working.
+#   spectral lint -r SDK/.spectral.yaml --fail-severity hint -f html --output.html lint/report.html -f markdown --output.markdown lint/report.md json/api_2.0.json json/files_2.0.json json/people_2.0.json json/backup_2.0.json json/newai_2.0.json
 #
-# Prerequisite (same class of global tool as openapi-generator-cli, see scripts/installTools.bat):
-#   npm i -g @stoplight/spectral-cli
+# The open population as of 2026-08-27: path-segment-camel-case 70, schema-property-description 65,
+# schema-description 7, oas3-parameter-description 4. Most of it is blocked rather than untouched -
+# closing it would rename a public route, change request binding or need a release of
+# @onlyoffice/ai-chat. That is what the per-rule notes and lint-memory.md 3 and 9 are for; it is not
+# a reason to stop reporting it.
 #
-# Run from common/Tools/ASC.Api.Documentation/ASC.Api.Documentation (one line, any shell):
-#
-#   spectral lint -r SDK/.spectral.yaml -f html --output.html lint/report.html -f markdown --output.markdown lint/errors.md json/api_2.0.json json/files_2.0.json json/people_2.0.json json/backup_2.0.json json/newai_2.0.json
-#
-# In PowerShell call `spectral.cmd`, not `spectral`: the machine execution policy is AllSigned,
-# which blocks npm's unsigned spectral.ps1 shim. The .cmd shim is unaffected.
-#
-# Create lint/ first if missing; --output does not create directories. Exit code 1 means
-# findings at severity error were present - that is the tool working, not failing.
-#
-# List the five documents explicitly. Do NOT use the glob json/*_2.0.json: it also matches
-# json/ai_2.0.json, a dead file referenced by no config, csproj or script.
-#
-# Two outputs on purpose: report.html is the full inventory (every finding, thousands of
-# rows); errors.md carries only severity=error - the markdown formatter drops warn and
-# below - and is the artifact worth reading end to end or handing to someone else.
-#
-# Ratchet: rules start at the severity their debt justifies and are raised to `error` as the
-# debt is paid. Do not add a rule at `error` while its violation count is above zero.
+# Rationale, measurements, tool traps, ratchet log and the record behind every line below:
+# .claude/skills/spectral-lint/lint-memory.md - 5 tool traps, 6 closed debt, 3 and 9 open findings.
 
 extends:
   - [spectral:oas, all]
 
 rules:
-  # `servers[0].variables.baseUrl.default` is empty at this stage by design - it is filled in
-  # only for the published contract, by OpenApiServer.ApplyBaseUrlDefault. Fires once per
-  # document, always falsely.
+  # False positive: `servers[0].variables.baseUrl.default` is empty at this stage by design.
   oas3-server-variables: off
 
-  # ---------------------------------------------------------------------------------------
-  # Custom rules. spectral:oas has no rule for any of these.
-  # Counts below were measured 2026-08-17 across all five service documents.
-  # ---------------------------------------------------------------------------------------
+  oas3-operation-security-defined: error # measured: 0 violations
+  info-description: error # measured: 0 violations (2026-08-25)
+  info-license: error # measured: 0 violations (2026-08-25)
+  license-url: error # measured: 0 violations (2026-08-25)
+  info-contact: error # measured: 0 violations (2026-08-26)
+  operation-tag-defined: error # measured: 0 violations (2026-08-25)
+  oas3-valid-media-example: error # measured: 0 violations (2026-08-25)
+  oas3-unused-component: error # measured: 0 violations (2026-08-25)
+  openapi-tags-alphabetical: error # measured: 0 violations (2026-08-26)
+  path-params: error # measured: 0 violations (2026-08-26)
+  operation-description: error # measured: 0 violations (2026-08-26); was 103
+
+  # Custom rules - spectral:oas has no rule for any of these.
 
   operation-summary:
     description: Every operation needs a summary.
@@ -67,7 +57,9 @@ rules:
       @forms, @search, @self).
     message: 'Route segment is not camelCase: {{property}}'
     given: $.paths
-    severity: warn # measured: 74 paths (72 kebab-case, 2 snake_case; 69 of them in newai)
+    severity: warn # measured: 70 of 536 paths (68 kebab-case, 2 snake_case; 65 of them in newai)
+    # Blocked, not untouched: the only fix is renaming a public route, which moves the wire.
+    # 65 belong to @onlyoffice/ai-chat, 3 to api, 2 to files (lint-memory.md 9.9).
     then:
       field: '@key'
       function: pattern
@@ -77,7 +69,9 @@ rules:
   schema-description:
     description: Every component schema needs a description.
     given: $.components.schemas[*]
-    severity: warn # measured: 278 of 831
+    severity: warn # measured: 7 of 829 (2026-08-27) - 6 newai + 1 files; was 8, 9, 10, 12, 13
+    # Blocked: the 6 are declarations of @onlyoffice/ai-chat and close only with a release of that
+    # package; the 1 is KeyValuePairStringStringValues (lint-memory.md 9.7, 9.5).
     then:
       field: description
       function: truthy
@@ -85,20 +79,12 @@ rules:
   schema-property-description:
     description: Every schema property needs a description.
     given: $.components.schemas[*].properties[*]
-    severity: warn # measured: 403 of 3333
+    # `resolved: false` on purpose - the SDK generator reads the raw document, so a bare `$ref`
+    # property is a finding and a description beside a `$ref` is not (lint-memory.md 3.2).
+    resolved: false
+    severity: warn # measured: 65 of 3343 (2026-08-27) - 63 newai + 2 files; was 67, 70, 72, 83, 147
+    # Blocked for the same two reasons as schema-description above (lint-memory.md 9.7, 9.5).
     then:
       field: description
       function: truthy
 
-overrides:
-  # newai_2.0.json is generated by `yarn openapi` from the ASC.NewAi Node service, not by
-  # Swashbuckle from C# XML docs. It therefore carries the entire debt on descriptions and
-  # route casing, and no compiler check can ever cover it - Spectral is the only tool that
-  # can. Held at `warn` so that raising these rules to `error` for the four C# documents is
-  # not blocked by one service.
-  - files:
-      - '**/newai_2.0.json'
-    rules:
-      operation-description: warn # measured: 103 of 103
-      oas3-parameter-description: warn # measured: 41 of 41
-      path-segment-camel-case: warn # measured: 69 of 74
