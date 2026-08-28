@@ -56,7 +56,7 @@ public class MessageStorageController(MessageStorageService messageStorageServic
     [HttpGet("threads/{threadId}/messages")]
     public async Task<MessagesPageDto> ReadByThreadAsync(ReadMessagesByThreadRequestDto inDto)
     {
-        var page = await messageStorageService.ReadByThreadAsync(inDto.ThreadId, inDto.Count, inDto.Cursor?.ToCursor());
+        var page = await messageStorageService.ReadByThreadAsync(inDto.ThreadId, inDto.Count, inDto.Cursor?.ToCursor(), inDto.Direction);
         return MessagesPageMapper.MapToDto(page);
     }
 

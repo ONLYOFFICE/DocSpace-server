@@ -65,13 +65,17 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
         return entity == null ? null : ToThreadMessageEntity(entity);
     }
 
-    public async Task<List<Message>> ReadByThreadAsync(int tenantId, Guid threadId, int count, MessagesCursor? cursor = null)
+    public async Task<List<Message>> ReadByThreadAsync(int tenantId, Guid threadId, int count, MessagesCursor? cursor = null, MessagesDirection direction = MessagesDirection.Asc)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var messages = cursor == null
-            ? context.GetMessagesByThreadAsync(tenantId, threadId, count)
-            : context.GetMessagesByThreadFromCursorAsync(tenantId, threadId, cursor.Timestamp, cursor.Id, count);
+        var messages = (cursor, direction) switch
+        {
+            (null, MessagesDirection.Asc) => context.GetMessagesByThreadAsync(tenantId, threadId, count),
+            (null, _) => context.GetMessagesByThreadDescAsync(tenantId, threadId, count),
+            (not null, MessagesDirection.Asc) => context.GetMessagesByThreadFromCursorAsync(tenantId, threadId, cursor.Timestamp, cursor.Id, count),
+            (not null, _) => context.GetMessagesByThreadFromCursorDescAsync(tenantId, threadId, cursor.Timestamp, cursor.Id, count)
+        };
 
         return await messages
             .Select(ToDomainEntity)

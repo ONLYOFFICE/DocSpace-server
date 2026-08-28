@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Integration.Messages;
-
 using Message = ASC.AI.Integration.Messages.Message;
 
 namespace ASC.AI.Service;
@@ -60,13 +58,13 @@ public class MessageStorageService(
         return threadMessage.Message;
     }
 
-    public async Task<MessagesPage> ReadByThreadAsync(Guid threadId, int count, MessagesCursor? cursor = null)
+    public async Task<MessagesPage> ReadByThreadAsync(Guid threadId, int count, MessagesCursor? cursor = null, MessagesDirection direction = MessagesDirection.Asc)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
 
         var thread = await threadStorageService.ReadByIdAsync(threadId);
 
-        var messages = await storage.ReadByThreadAsync(tenantManager.GetCurrentTenantId(), thread.Id, count + 1, cursor);
+        var messages = await storage.ReadByThreadAsync(tenantManager.GetCurrentTenantId(), thread.Id, count + 1, cursor, direction);
 
         if (messages.Count <= count)
         {
