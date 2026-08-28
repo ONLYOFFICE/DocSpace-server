@@ -101,11 +101,6 @@ public static partial class JsCallbackHelper
             .Replace("\n", string.Empty)
             .Trim();
 
-        if (url.Length == 0)
-        {
-            return DefaultReturnUrl;
-        }
-
         //A site-relative path is always safe, but "//host" and "/\host" are
         //protocol-relative urls pointing at another origin, not local paths.
         if (url.StartsWith('/'))
