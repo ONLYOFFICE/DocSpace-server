@@ -79,19 +79,33 @@ public static partial class JsCallbackHelper
             return DefaultReturnUrl;
         }
 
+        //Browsers drop every ASCII tab and newline from a url before parsing it, so
+        //"/<tab>/host" is navigated to as "//host". Validate and return what the browser
+        //will actually parse rather than what the caller sent.
+        var url = returnUrl
+            .Replace("\t", string.Empty)
+            .Replace("\r", string.Empty)
+            .Replace("\n", string.Empty)
+            .Trim();
+
+        if (url.Length == 0)
+        {
+            return DefaultReturnUrl;
+        }
+
         //A site-relative path is always safe, but "//host" and "/\host" are
         //protocol-relative urls pointing at another origin, not local paths.
-        if (returnUrl.StartsWith('/'))
+        if (url.StartsWith('/'))
         {
-            return returnUrl.StartsWith("//") || returnUrl.StartsWith("/\\") ? DefaultReturnUrl : returnUrl;
+            return url.StartsWith("//") || url.StartsWith("/\\") ? DefaultReturnUrl : url;
         }
 
         //The url is assigned to window.location.href, so a "javascript:" or "data:" url would
         //execute as script in the portal origin. Redirects to another host are legitimate here,
         //so only the scheme is restricted.
-        return Uri.TryCreate(returnUrl, UriKind.Absolute, out var uri)
+        return Uri.TryCreate(url, UriKind.Absolute, out var uri)
             && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
-            ? returnUrl
+            ? url
             : DefaultReturnUrl;
     }
 }

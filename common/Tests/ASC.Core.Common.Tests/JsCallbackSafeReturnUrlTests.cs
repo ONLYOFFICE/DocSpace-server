@@ -87,4 +87,38 @@ public class JsCallbackSafeReturnUrlTests
     {
         JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be(JsCallbackHelper.DefaultReturnUrl);
     }
+
+    /// <remarks>
+    /// Browsers drop every ASCII tab and newline from a url before parsing it, so a value that
+    /// only looks site-relative — "/&lt;tab&gt;/host" — is navigated to as "//host".
+    /// </remarks>
+    [Theory]
+    [InlineData(0x09)]
+    [InlineData(0x0A)]
+    [InlineData(0x0D)]
+    public void GetSafeReturnUrl_ProtocolRelativeUrlHiddenByAStrippedCharacter_ShouldFallBackToDefault(int stripped)
+    {
+        var returnUrl = "/" + (char)stripped + "/evil.example.com";
+
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+    }
+
+    [Theory]
+    [InlineData(0x09)]
+    [InlineData(0x0A)]
+    [InlineData(0x0D)]
+    public void GetSafeReturnUrl_BackslashUrlHiddenByAStrippedCharacter_ShouldFallBackToDefault(int stripped)
+    {
+        var returnUrl = "/" + (char)stripped + "\\evil.example.com";
+
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be(JsCallbackHelper.DefaultReturnUrl);
+    }
+
+    [Fact]
+    public void GetSafeReturnUrl_LocalPathWithAStrippedCharacter_ShouldReturnWhatTheBrowserParses()
+    {
+        var returnUrl = "/rooms" + (char)0x09 + "/shared";
+
+        JsCallbackHelper.GetSafeReturnUrl(returnUrl).Should().Be("/rooms/shared");
+    }
 }
