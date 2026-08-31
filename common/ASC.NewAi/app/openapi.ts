@@ -160,6 +160,8 @@ const PARAM_DOCS: Readonly<Record<string, string>> = {
   count: "The maximum number of items to return in one page.",
   cursor:
     "The keyset pagination cursor: the JSON-encoded sort key of the last item already received. Omit for the first page.",
+  direction:
+    'The order the message page is read in. Only "desc" turns the read around and pages back from the newest message; omit for the forward read.',
   entityId:
     "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
   folderId: "The prompt folder identifier. Omit to list the prompts that sit outside any folder.",

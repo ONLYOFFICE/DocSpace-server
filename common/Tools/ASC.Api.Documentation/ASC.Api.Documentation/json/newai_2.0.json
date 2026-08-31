@@ -1854,7 +1854,7 @@
                     },
                     "providerType": {
                       "$ref": "#/components/schemas/AiProviderType",
-                      "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
+                      "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
                     },
                     "basedOn": {
                       "$ref": "#/components/schemas/AiBuiltinProviderType",
@@ -1882,7 +1882,7 @@
                     },
                     "useResponsesApi": {
                       "type": "boolean",
-                      "description": "Result of the live Responses-API probe (parallel to  {@link  canUseTool  } ). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+                      "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
                     },
                     "isCloudProvider": {
                       "type": "boolean",
@@ -1890,7 +1890,7 @@
                     },
                     "useProxy": {
                       "type": "boolean",
-                      "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the  {@link  PlatformAdapter.fetchProxy  }  is not configured."
+                      "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
                     },
                     "createdAt": {
                       "type": "number",
@@ -3200,6 +3200,7 @@
           {
             "name": "direction",
             "in": "query",
+            "description": "The order the message page is read in. Only \"desc\" turns the read around and pages back from the newest message; omit for the forward read.",
             "required": true,
             "schema": {
               "type": "string"
@@ -5641,7 +5642,8 @@
           "ImageGeneration",
           "OCR",
           "Vision"
-        ]
+        ],
+        "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
       },
       "AiThreadMessageLike": {
         "type": "object",
@@ -5750,7 +5752,7 @@
         "description": "Shared body of the two streaming send endpoints (`sendWithStream` and its OpenAI-framed twin) — the `Chat` action is implied, so there is no `actionType`."
       },
       "AiChatEvent": {
-        "description": "Discriminated event emitted by the streaming methods of  {@link  AIEngine } . The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a  {@link  ChatEvent }  so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via  {@link  AIEngine.approveToolCall }  or  {@link  AIEngine.denyToolCall } .\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant   reply lifecycle.\n- `message-incomplete` — the provider returned an error or   incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
+        "description": "Discriminated event emitted by the streaming methods of `AIEngine`. The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a `ChatEvent` so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via `AIEngine.approveToolCall` or `AIEngine.denyToolCall`.\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant reply lifecycle.\n- `message-incomplete` — the provider returned an error or incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
         "type": "object",
         "properties": {
           "type": {
@@ -5767,16 +5769,20 @@
             "description": "Emitted once per `sendWithStream` call, immediately after the user message has been persisted by storage and before the assistant stream starts. Carries the storage-assigned `id` and `createdAt`. The UI uses it to render the user bubble — no client-side optimistic placeholder is needed, which keeps the runtime tree free of phantom nodes from index-fallback ids."
           },
           "message": {
-            "$ref": "#/components/schemas/AiThreadMessageLike"
+            "$ref": "#/components/schemas/AiThreadMessageLike",
+            "description": "The message the event is about, in the state it has reached."
           },
           "messageId": {
-            "type": "string"
+            "type": "string",
+            "description": "The storage identifier of that message."
           },
           "idx": {
-            "type": "number"
+            "type": "number",
+            "description": "The zero-based position of the pending tool call within the message."
           },
           "threadId": {
-            "type": "string"
+            "type": "string",
+            "description": "The thread the event belongs to."
           },
           "autoAllow": {
             "type": "boolean",
@@ -5787,10 +5793,12 @@
             "description": "Set when the tool is served by a server-side system source: the consumer must NOT execute it locally — only show the approval UI (unless `autoAllow`) and resume via `approveToolCall` (no `result` needed) / `denyToolCall`. The engine runs it in-engine."
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "The generated thread title."
           },
           "profileId": {
-            "type": "string"
+            "type": "string",
+            "description": "The profile that generated the title, when one was used."
           }
         },
         "required": [
@@ -5812,23 +5820,28 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "The completion identifier, stable across every chunk of one response."
           },
           "object": {
             "type": "string",
-            "const": "chat.completion.chunk"
+            "const": "chat.completion.chunk",
+            "description": "Always `chat.completion.chunk`."
           },
           "created": {
-            "type": "number"
+            "type": "number",
+            "description": "When the completion started, in Unix seconds."
           },
           "model": {
-            "type": "string"
+            "type": "string",
+            "description": "The model that produced the completion - the resolved profile's model."
           },
           "choices": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiOpenAIChunkChoice"
-            }
+            },
+            "description": "The choices carried by this chunk. This service emits exactly one."
           }
         },
         "required": [
@@ -5838,19 +5851,23 @@
           "model",
           "choices"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "One `chat.completion.chunk` of an OpenAI-compatible streaming response. Only the fields this service can populate are emitted - an OpenAI client tolerates the rest as absent."
       },
       "AiOpenAIChunkChoice": {
         "type": "object",
         "properties": {
           "index": {
-            "type": "number"
+            "type": "number",
+            "description": "The zero-based position of the choice. This service emits a single choice, so always 0."
           },
           "delta": {
-            "$ref": "#/components/schemas/AiOpenAIChoiceDelta"
+            "$ref": "#/components/schemas/AiOpenAIChoiceDelta",
+            "description": "What this chunk adds to the choice."
           },
           "finish_reason": {
-            "$ref": "#/components/schemas/AiOpenAIFinishReason"
+            "$ref": "#/components/schemas/AiOpenAIFinishReason",
+            "description": "Why the completion stopped, or null while it is still streaming."
           }
         },
         "required": [
@@ -5858,42 +5875,50 @@
           "delta",
           "finish_reason"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "One choice of a streaming completion, carrying the part this chunk adds."
       },
       "AiOpenAIChoiceDelta": {
         "type": "object",
         "properties": {
           "role": {
             "type": "string",
-            "const": "assistant"
+            "const": "assistant",
+            "description": "Sent on the first chunk only, always `assistant`."
           },
           "content": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "The text this chunk appends. Null when the chunk carries no text."
           },
           "tool_calls": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiOpenAIToolCallDelta"
-            }
+            },
+            "description": "The tool calls the model requested, emitted in place of text."
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The incremental part of one choice - what this chunk adds to the assistant message."
       },
       "AiOpenAIToolCallDelta": {
         "type": "object",
         "properties": {
           "index": {
-            "type": "number"
+            "type": "number",
+            "description": "The zero-based position of the tool call within the message."
           },
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "The tool call identifier, quoted back when its result is submitted."
           },
           "type": {
             "type": "string",
-            "const": "function"
+            "const": "function",
+            "description": "Always `function` - the only tool kind the API defines."
           },
           "function": {
             "type": "object",
@@ -5905,13 +5930,15 @@
                 "type": "string"
               }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "The call itself: the function name and its JSON-encoded arguments."
           }
         },
         "required": [
           "index"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The incremental part of one tool call the model requested."
       },
       "AiOpenAIFinishReason": {
         "type": [
@@ -5925,7 +5952,7 @@
           "content_filter",
           null
         ],
-        "description": "OpenAI Chat Completions streaming shapes.\n\n {@link  toOpenAIChatCompletionStream }  maps the engine's transport-agnostic  {@link  ChatEvent }  stream onto these chunks so a host can expose an OpenAI-compatible `POST /v1/chat/completions` (`stream: true`) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent."
+        "description": "OpenAI Chat Completions streaming shapes.\n\n `toOpenAIChatCompletionStream` maps the engine's transport-agnostic `ChatEvent` stream onto these chunks so a host can expose an OpenAI-compatible `POST /v1/chat/completions` (`stream: true`) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent."
       },
       "AiOpenAIStreamError": {
         "type": "object",
@@ -5958,7 +5985,8 @@
               "code",
               "param"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "The error that ended the stream: its message, type, code and the offending parameter."
           }
         },
         "required": [
@@ -6012,10 +6040,12 @@
         "type": "object",
         "properties": {
           "profileId": {
-            "type": "string"
+            "type": "string",
+            "description": "The identifier of the resolved profile."
           },
           "profile": {
-            "$ref": "#/components/schemas/AiProfile"
+            "$ref": "#/components/schemas/AiProfile",
+            "description": "The resolved profile itself."
           }
         },
         "required": [
@@ -6038,7 +6068,7 @@
           },
           "providerType": {
             "$ref": "#/components/schemas/AiProviderType",
-            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
+            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
           },
           "basedOn": {
             "$ref": "#/components/schemas/AiBuiltinProviderType",
@@ -6057,7 +6087,7 @@
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from  {@link  key  } . Honoured by the OpenAI-family providers."
+            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from `key`. Honoured by the OpenAI-family providers."
           },
           "modelId": {
             "type": "string",
@@ -6077,7 +6107,7 @@
           },
           "useResponsesApi": {
             "type": "boolean",
-            "description": "Result of the live Responses-API probe (parallel to  {@link  canUseTool  } ). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+            "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
           },
           "isCloudProvider": {
             "type": "boolean",
@@ -6085,7 +6115,7 @@
           },
           "useProxy": {
             "type": "boolean",
-            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the  {@link  PlatformAdapter.fetchProxy  }  is not configured."
+            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
           },
           "createdAt": {
             "type": "number",
@@ -6137,14 +6167,16 @@
         "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
       },
       "AiAssignmentMutationResult": {
-        "description": "Outcome of  {@link  AssignmentsEngine.assign }  /  {@link  AssignmentsEngine.unassign } . Either a success or a field-scoped error suitable for displaying in the profile editor.",
+        "description": "Outcome of `AssignmentsEngine.assign` / `AssignmentsEngine.unassign`. Either a success or a field-scoped error suitable for displaying in the profile editor.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the assignment was persisted."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the assignment was rejected. Present on failure."
           }
         },
         "required": [
@@ -6160,24 +6192,28 @@
               "key",
               "url",
               "name"
-            ]
+            ],
+            "description": "The rejected field."
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "The human-readable reason the field was rejected."
           }
         },
         "required": [
           "field",
           "message"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "A field-scoped validation error: which form field was rejected, and why."
       },
       "AiBulkAssignmentResult": {
-        "description": "Outcome of  {@link  AssignmentsEngine.bulkAssign } . Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
+        "description": "Outcome of `AssignmentsEngine.bulkAssign`. Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when every entry was persisted."
           },
           "errors": {
             "type": "array",
@@ -6196,7 +6232,8 @@
                 "error"
               ],
               "additionalProperties": false
-            }
+            },
+            "description": "What was rejected, per action. Present on failure - and then no entry was persisted."
           }
         },
         "required": [
@@ -6305,7 +6342,7 @@
           },
           "providerType": {
             "$ref": "#/components/schemas/AiProviderType",
-            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
+            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
           },
           "basedOn": {
             "$ref": "#/components/schemas/AiBuiltinProviderType",
@@ -6324,7 +6361,7 @@
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from  {@link  key  } . Honoured by the OpenAI-family providers."
+            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from `key`. Honoured by the OpenAI-family providers."
           },
           "modelId": {
             "type": "string",
@@ -6344,7 +6381,7 @@
           },
           "useResponsesApi": {
             "type": "boolean",
-            "description": "Result of the live Responses-API probe (parallel to  {@link  canUseTool  } ). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+            "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
           },
           "isCloudProvider": {
             "type": "boolean",
@@ -6352,7 +6389,7 @@
           },
           "useProxy": {
             "type": "boolean",
-            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the  {@link  PlatformAdapter.fetchProxy  }  is not configured."
+            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
           }
         },
         "required": [
@@ -6362,20 +6399,23 @@
           "modelId"
         ],
         "additionalProperties": false,
-        "description": "Input for creating a new profile — the same shape as  {@link  Profile }  without the engine-generated fields (`id`, `createdAt`)."
+        "description": "Input for creating a new profile — the same shape as `Profile` without the engine-generated fields (`id`, `createdAt`)."
       },
       "AiProfileMutationResult": {
         "description": "Outcome of `create` / `update` — either a success carrying the persisted profile, or a failure with a field-level error description from the name check or the provider credential check.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the profile was persisted."
           },
           "profile": {
-            "$ref": "#/components/schemas/AiProfile"
+            "$ref": "#/components/schemas/AiProfile",
+            "description": "The persisted profile. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the profile was rejected - the name check or the provider credential check. Present on failure."
           }
         },
         "required": [
@@ -6403,7 +6443,7 @@
           },
           "capabilities": {
             "type": "number",
-            "description": "Bitmask of model capabilities (Chat, Image, Vision, Tools, etc.). Used to filter models per  {@link  ActionType  } ."
+            "description": "Bitmask of model capabilities (Chat, Image, Vision, Tools, etc.). Used to filter models per `ActionType`."
           }
         },
         "required": [
@@ -6418,16 +6458,19 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "The prompt name."
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "description": "The prompt body."
           },
           "folderId": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "The folder to file the prompt under. Omit or send null to leave it outside any folder."
           }
         },
         "required": [
@@ -6442,13 +6485,16 @@
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the prompt was persisted."
           },
           "prompt": {
-            "$ref": "#/components/schemas/AiPrompt"
+            "$ref": "#/components/schemas/AiPrompt",
+            "description": "The persisted prompt. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the prompt was rejected. Present on failure."
           }
         },
         "required": [
@@ -6498,13 +6544,16 @@
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the folder was persisted."
           },
           "folder": {
-            "$ref": "#/components/schemas/AiPromptFolder"
+            "$ref": "#/components/schemas/AiPromptFolder",
+            "description": "The persisted folder. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the folder was rejected. Present on failure."
           }
         },
         "required": [
@@ -6545,19 +6594,22 @@
         "properties": {
           "version": {
             "type": "number",
-            "const": 1
+            "const": 1,
+            "description": "The bundle format version, so an import can migrate an older export."
           },
           "folders": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiPromptFolder"
-            }
+            },
+            "description": "Every exported prompt folder."
           },
           "prompts": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiPrompt"
-            }
+            },
+            "description": "Every exported prompt."
           }
         },
         "required": [
@@ -6574,14 +6626,15 @@
           "replace",
           "merge"
         ],
-        "description": "Mode passed to  {@link  PromptsEngine.importBundle } ."
+        "description": "Mode passed to `PromptsEngine.importBundle`."
       },
       "AiImportResult": {
-        "description": "Outcome of  {@link  PromptsEngine.importBundle } . Either every entry persisted with counts, or no entries persisted plus a per-entry error report.",
+        "description": "Outcome of `PromptsEngine.importBundle`. Either every entry persisted with counts, or no entries persisted plus a per-entry error report.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the whole bundle was imported."
           },
           "imported": {
             "type": "object",
@@ -6597,13 +6650,15 @@
               "folders",
               "prompts"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "How many folders and prompts were created. Present on success."
           },
           "errors": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiImportError"
-            }
+            },
+            "description": "What was rejected, per entry. Present on failure - and then nothing was imported."
           }
         },
         "required": [
@@ -6622,10 +6677,12 @@
             "description": "`\"folder\"` or `\"prompt\"`, plus the offending name or id."
           },
           "ref": {
-            "type": "string"
+            "type": "string",
+            "description": "The offending entry - its name or its id."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the entry was rejected."
           }
         },
         "required": [
@@ -6634,7 +6691,7 @@
           "error"
         ],
         "additionalProperties": false,
-        "description": "Per-entry error reported by  {@link  PromptsEngine.importBundle } ."
+        "description": "Per-entry error reported by `PromptsEngine.importBundle`."
       },
       "AiThread": {
         "type": "object",
@@ -6661,7 +6718,7 @@
           },
           "profileId": {
             "type": "string",
-            "description": "ID of the profile used for this thread. Links to  {@link  Profile.id } ."
+            "description": "ID of the profile used for this thread. Links to `Profile.id`."
           }
         },
         "required": [
@@ -6702,7 +6759,8 @@
         "type": "object",
         "properties": {
           "threadId": {
-            "type": "string"
+            "type": "string",
+            "description": "The thread that was opened, or the one just created."
           },
           "title": {
             "type": "string",
@@ -6712,7 +6770,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiThreadMessageLike"
-            }
+            },
+            "description": "The messages already in the thread - empty for a thread that was just created."
           }
         },
         "required": [
@@ -6721,7 +6780,7 @@
           "priorMessages"
         ],
         "additionalProperties": false,
-        "description": "Resolved thread state returned by  {@link  ThreadsEngine.openOrCreate } ."
+        "description": "Resolved thread state returned by `ThreadsEngine.openOrCreate`."
       },
       "AiMcpServerConfig": {
         "type": "object",
@@ -6732,10 +6791,12 @@
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the MCP server was persisted."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the MCP server was rejected. Present on failure."
           }
         },
         "required": [
@@ -6743,11 +6804,12 @@
         ]
       },
       "AiToolsBulkResult": {
-        "description": "Outcome of  {@link  ToolsEngine.replaceAllCustomServers }  — either every entry persisted, or no entries persisted plus a per-key error report.",
+        "description": "Outcome of `ToolsEngine.replaceAllCustomServers` — either every entry persisted, or no entries persisted plus a per-key error report.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when every custom MCP server was persisted."
           },
           "errors": {
             "type": "array",
@@ -6766,7 +6828,8 @@
                 "error"
               ],
               "additionalProperties": false
-            }
+            },
+            "description": "What was rejected, per server. Present on failure - and then no server was persisted."
           }
         },
         "required": [
@@ -6807,17 +6870,20 @@
         "description": "Web-search provider configuration. Credentials and provider selection for the built-in web-search tool group."
       },
       "AiWebSearchMutationResult": {
-        "description": "Outcome of  {@link  WebSearchEngine.configure }  — either the persisted config or a field-scoped error suitable for the settings form.",
+        "description": "Outcome of `WebSearchEngine.configure` — either the persisted config or a field-scoped error suitable for the settings form.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the configuration was persisted."
           },
           "config": {
-            "$ref": "#/components/schemas/AiWebSearchConfig"
+            "$ref": "#/components/schemas/AiWebSearchConfig",
+            "description": "The persisted web-search configuration. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the configuration was rejected. Present on failure."
           }
         },
         "required": [
