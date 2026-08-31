@@ -241,7 +241,7 @@
     <value>Applicatie Klant ID</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Activeer dat deze toepassing zich met een Apple ID account aanmeldt bij het portaal.</value>
+    <value>Meld u aan bij uw werkruimte met een Apple ID-account</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met Apple ID kunnen aanmelden bij {LogoText}. {0}Ga naar Apple Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -286,7 +286,7 @@
     <value>Boxsleutel</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Verbind de applicatie om bestanden en mappen in Box te beheren.</value>
+    <value>Beheer bestanden en mappen in Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw Box account met de module Documenten te verbinden. U kunt bestanden uit Box beheren, bewerken en delen met gebruikers van {LogoText}. {0}Meld u aan bij uw account op de Box ontwikkelaars pagina en maak een nieuwe app voor de {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Verbind de applicatie om bestanden en mappen in Dropbox te beheren.</value>
+    <value>Beheer bestanden en mappen in Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw Dropbox account met de module Documenten te verbinden. U kunt bestanden van Dropbox beheren, bewerken en delen met gebruikers van {LogoText}. {0}Meld u aan bij uw account op de Dropbox Developers-website en maak een nieuwe app voor {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -361,7 +361,7 @@
     <value>Facebook Sleutel</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een Facebook-account.</value>
+    <value>Meld u aan bij uw werkruimte met een Facebook-account</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun Facebook kunnen aanmelden bij {LogoText} en de Facebook accounts van hun klanten kunnen koppelen aan de CRM module. {0}Ga naar de Facebook Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Verbind het project door in te loggen op het portaal met een Google-account en beheer Google Drive-bestanden en mappen.</value>
+    <value>Meld u aan bij uw werkruimte met een Google-account en beheer Google Drive-bestanden en mappen</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw Google Drive account met de module Documenten te verbinden. U kunt bestanden van Google Drive beheren, bewerken en delen met gebruikers van {LogoText}. {0}Ga naar de Google APIs console en maak een nieuw project aan voor de {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een LinkedIn-account.</value>
+    <value>Meld u aan bij uw werkruimte met een LinkedIn-account</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun LinkedIn-accounts kunnen aanmelden bij {LogoText}. {0}Ga naar de LinkedIn Developers website en maak een nieuwe app {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -553,7 +553,7 @@
     <value>Client Geheim</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Verbind de applicatie om bestanden en mappen in OneDrive te beheren.</value>
+    <value>Beheer bestanden en mappen in OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw OneDrive account met de module Documenten te verbinden. You’ll be able to manage, edit, and share files from OneDrive with {LogoText} users. {0}Sign in to your Microsoft Azure account and create a new app for {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -583,7 +583,7 @@
     <value>Bot token</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Verbind Telegram account om portaalmeldingen via Telegram te ontvangen.</value>
+    <value>Ontvang meldingen via Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Schakel Telegram bot in om portaalmeldingen via Telegram te ontvangen. U kunt een nieuwe bot maken met BotFather in Telegram Desktop. Om deze bot te gebruiken, moeten portaalgebruikers Telegram meldingen inschakelen op hun Profielpagina. {0}Plak de gebruikersnaam van de bot en het token dat u hebt ontvangen in de onderstaande velden.</value>
@@ -616,7 +616,7 @@
     <value>Klant ID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een X-account.</value>
+    <value>Meld u aan bij uw werkruimte met een X-account</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun X kunnen aanmelden bij {LogoText} en de X accounts van hun klanten kunnen koppelen aan de CRM module. {0}Ga naar de X Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -655,7 +655,7 @@
     <value>Client Geheim</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
+    <value>Meld u aan bij uw werkruimte met een WeChat-account</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
@@ -715,7 +715,7 @@
     <value>Zoom client secret</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Activeer dat deze toepassing zich met een Zoom account aanmeldt bij het portaal.</value>
+    <value>Meld u aan bij uw werkruimte met een Zoom-account</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun Zoom-accounts kunnen aanmelden bij {LogoText}. {0}Ga naar de Zoom Developers website en maak een nieuwe app {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -1360,7 +1360,7 @@
     <value>Databaseverbinding</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Sla formulierresultaten op in een externe database zoals MySQL of SQLite.</value>
+    <value>Sla formulierresultaten op in een externe database zoals MySQL of SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Verbind een externe database om formulierresultaten op te slaan.</value>
@@ -1384,7 +1384,7 @@
     <value>Client Geheim</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Sta de toepassing toe in te loggen op het portaal met een Nextcloud-account.</value>
+    <value>Meld u aan bij uw werkruimte met een Nextcloud-account</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Sta de toepassing toe in te loggen op het portaal met een Nextcloud-account.</value>

@@ -241,7 +241,7 @@
     <value>Գործադիր հաճախորդի ID</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Ակտիվացրեք հավելվածին մուտք գործել պորտալ՝ օգտագործելով Apple ID հաշիվ.</value>
+    <value>Մուտք գործեք ձեր աշխատանքային տարածք՝ օգտագործելով Apple ID հաշիվ</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը, որպեսզի ձեր օգտատերերին թույլ տա մուտք գործել {LogoText}՝ օգտագործելով Apple ID-ն. {0} Գնացեք Apple Developers Պորտալ և ստեղծեք նոր հավելված {LogoText} ինտեգրում: Տեղադրեք ստորև ստացված տվյալները:</value>
@@ -286,7 +286,7 @@
     <value>Box(տուփի) Բանալի</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Միացրեք հավելվածը Box(տուփ) ֆայլերն թղթապանակները կառավարելու համար.</value>
+    <value>Կառավարեք Box ֆայլերն ու թղթապանակները</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը՝ ձեր Box հաշիվը Փաստաթղթերի մոդուլին միացնելու համար: Դուք կկարողանաք կառավարել, խմբագրել և համօգտագործել Box-ի ֆայլերը {LogoText}-ի օգտատերերի հետ: {0}Մուտք գործեք ձեր հաշիվ Box մշակողների էջում և ստեղծեք նոր հավելված {LogoText}-ի ինտեգրման համար: Տեղադրեք ստորև ստացված տվյալները.</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Միացրեք հավելվածը՝ Dropbox ֆայլերն ու թղթապանակները կառավարելու համար.</value>
+    <value>Կառավարեք Dropbox ֆայլերն ու թղթապանակները</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը՝ ձեր Dropbox հաշիվը Փաստաթղթերի մոդուլին միացնելու համար: Դուք կկարողանաք կառավարել, խմբագրել և համօգտագործել ֆայլերը Dropbox-ից {LogoText} օգտվողների հետ: {0}Մուտք գործեք ձեր հաշիվ Dropbox Developers կայքում և ստեղծեք նոր հավելված {LogoText}-ի ինտեգրման համար: Տեղադրեք ստորև ստացված տվյալները.</value>
@@ -361,7 +361,7 @@
     <value>Facebook Բանալի</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Միացրեք հավելվածին Facebook-ի հաշվի միջոցով պորտալ մուտք գործելու համար.</value>
+    <value>Մուտք գործեք ձեր աշխատանքային տարածք՝ օգտագործելով Facebook հաշիվ</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը, որպեսզի ձեր օգտատերերին թույլ տա մուտք գործել {LogoText}՝ օգտագործելով Facebook-ը և կապել իրենց հաճախորդների Facebook հաշիվները CRM մոդուլին: {0}Գնացեք Facebook Developers Portal և ստեղծեք նոր հավելված {LogoText} ինտեգրում: Տեղադրեք ստորև ստացված տվյալները.</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Միացրեք նախագիծը, որպեսզի մուտք գործեք պորտալ՝ օգտագործելով Google հաշիվ և կառավարեք Google Drive-ի ֆայլերն ու պանակները.</value>
+    <value>Մուտք գործեք ձեր աշխատանքային տարածք՝ օգտագործելով Google հաշիվ և կառավարեք Google Drive-ի ֆայլերն ու պանակները</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը՝ ձեր Google Drive հաշիվը Փաստաթղթերի մոդուլին միացնելու համար: Դուք կկարողանաք կառավարել, խմբագրել և համօգտագործել ֆայլերը Google Drive-ով {LogoText} օգտվողների հետ: {0}Գնացեք Google API-ների վահանակ և ստեղծեք նոր նախագիծ {LogoText}-ի ինտեգրման համար: Տեղադրեք ստացված տվյալները ստորև.</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Թույլ տվեք հավելվածին մուտք գործել պորտալ՝ օգտագործելով LinkedIn հաշիվը.</value>
+    <value>Մուտք գործեք ձեր աշխատանքային տարածք՝ օգտագործելով LinkedIn հաշիվ</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը, որպեսզի ձեր օգտատերերին թույլ տա մուտք գործել {LogoText}՝ օգտագործելով իրենց LinkedIn հաշիվները: {0}Գնացեք LinkedIn Developers-ի կայք և ստեղծեք նոր հավելված՝ {LogoText} ինտեգրում: Տեղադրեք ստացված տվյալները ստորև.</value>
@@ -553,7 +553,7 @@
     <value>Հաճախորդի գաղտնիք</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Միացրեք հավելվածը OneDrive ֆայլերը և պանակներ կառավարելու համար.</value>
+    <value>Կառավարեք OneDrive ֆայլերն ու թղթապանակները</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը՝ ձեր OneDrive հաշիվը Փաստաթղթերի մոդուլին միացնելու համար: Դուք կկարողանաք կառավարել, խմբագրել և համօգտագործել ֆայլերը OneDrive-ով {LogoText} օգտատերերի հետ: &lt;b&gt;{0}Մուտք գործեք ձեր Microsoft Azure հաշիվ և ստեղծեք նոր հավելված {LogoText}-ի ինտեգրման համար:&lt;/b&gt; &lt;b&gt;Տեղադրեք ստացված տվյալները ստորև.</value>
@@ -583,7 +583,7 @@
     <value>Բոտի նշան</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Միացրեք Telegram հաշիվը՝ Telegram-ի միջոցով պորտալի ծանուցումներ ստանալու համար.</value>
+    <value>Ստացեք ծանուցումներ Telegram-ի միջոցով</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Telegram-ի միջոցով պորտալի ծանուցումներ ստանալու համար միացրեք Telegram bot-ը: Դուք կարող եք ստեղծել նոր բոտ՝ օգտագործելով BotFather-ը Telegram Desktop-ում: Այս բոտն օգտագործելու համար պորտալի օգտատերերը պետք է միացնեն Telegram-ի ծանուցումները իրենց պրոֆիլի էջում: {0}Տեղադրեք բոտի օգտանունը և ձեր ստացած նշանը ստորև դաշտերում.</value>
@@ -616,7 +616,7 @@
     <value>Հաճախորդի ID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Միացրեք հավելվածին պորտալ մուտք գործելու համար՝ օգտագործելով Twitter-ի օգտահաշիվը</value>
+    <value>Մուտք գործեք ձեր աշխատանքային տարածք՝ օգտագործելով X հաշիվ</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը՝ թույլ տալու ձեր օգտատերերին մուտք գործել {LogoText}՝ օգտագործելով իրենց Twitter-ը և կապել իրենց հաճախորդների Twitter հաշիվները CRM մոդուլին: {0}Գնացեք Twitter Developers Portal և ստեղծեք նոր հավելված {LogoText} ինտեգրում: Տեղադրեք ստորև ստացված տվյալները՝</value>
@@ -655,7 +655,7 @@
     <value>Հաճախորդի գաղտնիք</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Միացրեք հավելվածը՝ մուտք գործելու պորտալը օգտագործելով WeChat հաշիվ։</value>
+    <value>Մուտք գործեք ձեր աշխատանքային տարածք՝ օգտագործելով WeChat հաշիվ</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Միացրեք հավելվածը՝ մուտք գործելու պորտալը օգտագործելով WeChat հաշիվ։</value>
@@ -715,7 +715,7 @@
     <value>Մեծացնել հաճախորդի գաղտնիությունը</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Ակտիվացրեք հավելվածին մուտք գործել պորտալ՝ օգտագործելով Մեծացնել հաշիվը:</value>
+    <value>Մուտք գործեք ձեր աշխատանքային տարածք՝ օգտագործելով Zoom հաշիվ</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը, որպեսզի ձեր օգտատերերին թույլ տա մուտք գործել {LogoText}՝ օգտագործելով իրենց Մեծացնել  հաշիվները:{0}Գնացեք Մեծացնել ծրագրավորողների կայք և ստեղծեք նոր հավելված {LogoText} ինտեգրում: Տեղադրեք ստորև ստացված տվյալները.</value>
@@ -1360,7 +1360,7 @@
     <value>Տվյալների բազայի կապ</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Պահպանեք ձևի արդյունքները արտաքին տվյալների բազայում, օրինակ MySQL կամ SQLite:</value>
+    <value>Պահպանեք ձևի արդյունքները արտաքին տվյալների բազայում, օրինակ՝ MySQL կամ SQLite</value>
   </data>
   <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
     <value>SQLite-ը հասանելի է միայն ինքնուրույն տեղադրումներում:</value>
@@ -1384,7 +1384,7 @@
     <value>Հաճախորդի գաղտնիք</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Թույլ տվեք հավելվածին մուտք գործել պորտալ Nextcloud հաշվի միջոցով:</value>
+    <value>Մուտք գործեք ձեր աշխատանքային տարածք՝ օգտագործելով Nextcloud հաշիվ</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Թույլ տվեք հավելվածին մուտք գործել պորտալ Nextcloud հաշվի միջոցով:</value>

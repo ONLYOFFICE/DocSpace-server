@@ -241,7 +241,7 @@
     <value>Sovelluksen Client ID</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Ota sovellus käyttöön kirjautuaksesi sisään portaaliin käyttäen Apple ID-tiliä.</value>
+    <value>Kirjaudu sisään työtilaasi Apple ID-tilillä</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Ota tämä sovellus käyttöön antaaksesi käyttäjillesi mahdollisuuden kirjautua {LogoText}:en käyttäen Apple ID:tä. {0} Mene Apple-kehittäjät-portaaliin ja luo uusi sovellus {LogoText}-integraatioon. Syötä alle saamasi tiedot:</value>
@@ -286,7 +286,7 @@
     <value>Laatikon avain</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voi hallita Laatikon tiedostoja ja kansioita.</value>
+    <value>Hallitse Box tiedostoja ja kansioita</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Ota tämä sovellus käyttöön yhdistääksesi Box-tilisi Asiakirjat-moduuliin. Pystyt hallinnoimaan, muokkaamaan ja jakamaan tiedostoja Boxista {LogoText}-käyttäjien kanssa. {0} Kirjaudu sisään tiliisi Boxin kehittäjät-sivulla ja luo uusi sovellus {LogoText}- integraatioon. Syötä saamasi tiedot alle:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit hallita Dropbox tiedostoja ja kansioita.</value>
+    <value>Hallitse Dropbox tiedostoja ja kansioita</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Ota tämä sovellus käyttöön yhdistääksesi DropBox-tilisi Asiakirjat-mobuulissa. Pystyt hallitsemaan, muokkaamaan ja jakamaan tiedostoja DropBoxista {LogoText}-käyttäjien kanssa. {0}Kirjaudu sisään tilillesi Dropboxin Kehittäjät-verkkosivustolla ja luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
@@ -361,7 +361,7 @@
     <value>Facebook avain</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit kirjautua portaaliin Facebook tilin kautta.</value>
+    <value>Kirjaudu sisään työtilaasi Facebook-tilillä</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Ota tämä sovellus käyttöön antaaksesi käyttäjiesi kirjautua sisään {LogoText}:een käyttäen Facebookia ja linkittää heidän asiakkaidensa Facebook-tilejä CRM-moduuliin. {0}Mene Facebookin Kehittäjät-portaaliit ja luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Yhdistä projekti, jotta voi kirjautua sisään käyttämällä Google tiliä ja hallinnoida Google Drive tiedostoja ja kansioita.</value>
+    <value>Kirjaudu sisään työtilaasi Google-tilillä ja hallitse Google Drive tiedostoja ja kansioita</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Ota käyttöön tämä sovellus yhdistääksesi Google Drive-tilisi Asiakirjat-moduulissa. Pystyt hallinnoimaan, muokkaamaan ja jakamaan kansioita Google Drivesta {LogoText}-käyttäjille. {0}Mene Google APIs-konsoliin ja luo uusi projekti {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä LinkedIn tiliä.</value>
+    <value>Kirjaudu sisään työtilaasi LinkedIn-tilillä</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Ota käyttöön tämä sovellus saadaksesi ystäväsi kirjautumaan {LogoText}:en käyttäen LinkedIn-tiliä. {0}Mene LinkedIn-kehittäjät verkkosivustolle ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
@@ -553,7 +553,7 @@
     <value>Asiakassalaisuus</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit hallita OneDrive tiedostoja ja kansioita.</value>
+    <value>Hallitse OneDrive tiedostoja ja kansioita</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Ota tämä sovellus käyttöön OneDrive-tilisi Asiakirjat-moduulissa. Pystyt hallitsemaan, ja jakamaan tiedostoja OneDrivestä {LogoText}-käyttäjien kanssa. {0}Kirjaudu sisään Microsoft Azure-tiliisi ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
@@ -583,7 +583,7 @@
     <value>Bot-merkki</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Yhdistä Telegram-tili saadaksesi ilmoituksia Telegramin kautta.</value>
+    <value>Vastaanota ilmoituksia Telegramin kautta</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Ota käyttöön Telegram-botti saadaksesi ilmoituksia Telegramin kautta. Voit luoda uuden botin käyttäen BotFatheria Telegramin työpöydällä. Käyttäjien tulee ottaa käyttöön Telegram-ilmoitukset profiilisivullaan käyttääkseen tätä bottia. {0} Syötä botin käyttäjänimi ja saamasi merkki alla oleviin kenttiin.</value>
@@ -616,7 +616,7 @@
     <value>Asiakas ID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä X tiliä.</value>
+    <value>Kirjaudu sisään työtilaasi X-tilillä</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi voivat kirjautua sisään {LogoText}:en käyttämällä X ja linkittää heidän asiakkaidensa X-tilit CRM-moduuliin. {0} Mene X-kehittäjien portaaliin ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
@@ -655,7 +655,7 @@
     <value>Asiakassalaisuus</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen WeChat-tiliä.</value>
+    <value>Kirjaudu sisään työtilaasi WeChat-tilillä</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen WeChat-tiliä.</value>
@@ -715,7 +715,7 @@
     <value>Zoom-asiakassecret</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Ota käyttöön kirjautuminen portaaliin Zoom-tilin kautta.</value>
+    <value>Kirjaudu sisään työtilaasi Zoom-tilillä</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Ota käyttöön {LogoText}:en kirjautuminen Zoom-tilien kautta. {0}Mene Zoom-kehittäjien verkkosivustolle ja luo uusi sovellus ONLY OFFICE-integraatiolle. Syötä alla olevat tiedot:</value>
@@ -1360,7 +1360,7 @@
     <value>Tietokantayhteys</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Tallenna lomakkeen tulokset ulkoiseen tietokantaan, kuten MySQL tai SQLite.</value>
+    <value>Tallenna lomakkeen tulokset ulkoiseen tietokantaan, kuten MySQL tai SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Yhdistä ulkoinen tietokanta lomakkeen tulosten tallentamiseksi.</value>
@@ -1384,7 +1384,7 @@
     <value>Asiakassalaisuus</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Salli sovelluksen kirjautua portaaliin Nextcloud-tilillä.</value>
+    <value>Kirjaudu sisään työtilaasi Nextcloud-tilillä</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Salli sovelluksen kirjautua portaaliin Nextcloud-tilillä.</value>

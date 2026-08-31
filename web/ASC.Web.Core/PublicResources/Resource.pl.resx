@@ -241,7 +241,7 @@
     <value>ID klienta aplikacji</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta Apple ID.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem Apple ID. {0}Przejdź do Apple Developers Center i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -286,7 +286,7 @@
     <value>Box Klucz</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Podłącz aplikację do zarządzania plikami i folderami.</value>
+    <value>Zarządzaj plikami i folderami Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby połączyć swoje konto Box z modułem Dokumenty. Będziesz w stanie zarządzać plikami z Box, edytować je i udostępniać użytkownikom {LogoText}. {0}Zaloguj się na swoim koncie na stronie dla programistów Box i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Podłącz aplikację do zarządzania plikami i folderami programu Dropbox.</value>
+    <value>Zarządzaj plikami i folderami Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby połączyć swoje konto Dropbox z modułem Dokumenty. Będziesz w stanie zarządzać plikami z Dropbox, edytować je i udostępniać użytkownikom {LogoText}. {0} Zaloguj się na swoje konto na stronie dla programistów Dropbox i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -361,7 +361,7 @@
     <value>Klucz Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta Facebook.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem Facebooka i łączenie kont swoich klientów na Facebooku z modułem CRM. {0}Przejdź na swoje konto Meta for Developers i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Połącz projekt, aby zalogować się do portalu za pomocą konta Google i zarządzać plikami i folderami na Dysku Google.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Google i zarządzaj plikami i folderami na Dysku Google</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby połączyć swój Dysk Google z modułem Dokumenty. Będziesz w stanie zarządzać plikami z Dysku Google, edytować je i udostępniać użytkownikom {LogoText}. {0}Przejdź do konsoli Google APIs i utwórz nowy projekt do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta LinkedIn.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem konta LinkedIn. {0}Przejdź na stronę LinkedIn dla programistów i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -553,7 +553,7 @@
     <value>Sekret klienta</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Podłączanie aplikacji do zarządzania plikami i folderami OneDrive.</value>
+    <value>Zarządzaj plikami i folderami OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby połączyć swoje konto OneDrive z modułem Dokumenty. Będziesz w stanie zarządzać plikami z OneDrive, edytować je i udostępniać użytkownikom {LogoText}. {0}Zaloguj się na swoje konto Microsoft Azure i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -583,7 +583,7 @@
     <value>Token bota</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Podłącz konto na Telegramie, aby otrzymywać powiadomienia z portalu za pośrednictwem Telegrama.</value>
+    <value>Otrzymuj powiadomienia za pośrednictwem Telegrama</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Aby otrzymywać powiadomienia z portalu za pośrednictwem Telegrama, włącz bota na Telegramie. Możesz utworzyć nowego bota za pomocą BotFather w aplikacji Telegram. Aby móc korzystać z tego bota, użytkownicy portalu muszą włączyć powiadomienia Telegram na swojej stronie profilowej. {0}Wklej nazwę bota i otrzymany token w poniższych polach.</value>
@@ -616,7 +616,7 @@
     <value>ID klienta</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta X.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem X i łączenie kont swoich klientów na X z modułem CRM. {0}Przejdź do portalu X dla programistów i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -655,7 +655,7 @@
     <value>Sekret klienta</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta WeChat.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Sekret klienta Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta Zoom.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem konta Zoom. {0}Przejdź na stronę Zoom dla programistów i utwórz nową aplikację dla integracji z {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -1360,7 +1360,7 @@
     <value>Połączenie z bazą danych</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Przechowuj wyniki formularza w zewnętrznej bazie danych, takiej jak MySQL lub SQLite.</value>
+    <value>Przechowuj wyniki formularza w zewnętrznej bazie danych, takiej jak MySQL lub SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Połącz zewnętrzną bazę danych, aby przechowywać wyniki formularza.</value>
@@ -1384,7 +1384,7 @@
     <value>Sekret klienta</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Zezwól aplikacji na logowanie do portalu za pomocą konta Nextcloud.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Zezwól aplikacji na logowanie do portalu za pomocą konta Nextcloud.</value>

@@ -241,7 +241,7 @@
     <value>アプリケーションクライアント ID</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>アプリケーションがApple IDを使用してポータルにサインインできるようにする。</value>
+    <value>Apple IDアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、ユーザーはApple IDを使って{LogoText}にサインインできるようになります。{0}Apple Developersポータルにアクセスし、新規アプリ{LogoText} integrationを作成します。以下、受け取ったデータを挿入してください：</value>
@@ -286,7 +286,7 @@
     <value>Boxキー</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Boxファイルとフォルダを管理するように、アプリを接続します。</value>
+    <value>Boxのファイルとフォルダを管理</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、Boxアカウントを文書モジュールに接続して、Boxの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Box開発者ページでサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Dropboxファイルとフォルダを管理するように、アプリを接続します。</value>
+    <value>Dropboxのファイルとフォルダを管理</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、Dropboxアカウントを文書モジュールに接続して、Dropboxの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Dropbox開発者ページでサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -361,7 +361,7 @@
     <value>Facebook キー</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>アプリを{LogoText}に接続すると、Facebookでポータルにサインインし、コンタクトを検索できます。</value>
+    <value>Facebookアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、Facebookを使用して{LogoText}にサインイン、またはCRMモジュールで顧客のFacebookアカウントをリンクできます。{0}Facebook開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud jsonファイル</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>プロジェクトを接続して、Googleアカウントを介してポータルにサインインしたり、Google Driveファイルとフォルダーを管理したりすることだできます。</value>
+    <value>Googleアカウントでワークスペースにサインインし、Google Driveのファイルとフォルダを管理</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、Google Driveアカウントを文書モジュールに接続して、Google Driveの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0} Google Drive APIsコンソールで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>アプリを{LogoText}に接続して、LinkedInでポータルにサインインします。</value>
+    <value>LinkedInアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>このアプリを有効にして、ユーザーがLinkedInアカウントを使用して{LogoText}にサインインできるようにします。{0}LinkedIn開発者ウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。受け取ったデータを以下に挿入してください：</value>
@@ -553,7 +553,7 @@
     <value>クライアントのシークレット</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>OneDriveファイルとフォルダを管理するように、アプリを接続します。</value>
+    <value>OneDriveのファイルとフォルダを管理</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、OneDriveアカウントを文書モジュールに接続して、OneDriveの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Microsoft Azureアカウントにサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -583,7 +583,7 @@
     <value>ボットのトークン</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>ポータル通知を受けるように、Telegramアカウントを接続します。</value>
+    <value>Telegram経由で通知を受け取る</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Telegramを使用してポータル通知を受けるように、Telegram用のボットを有効にしてください。新しいボットを作成するためにTelegramデスクトップでBotFatherを使用してください。そのボットを使用を使用するように、各ユーザがプロフィールのページでTelegram通知を有効にしなければなりません。{0}ボットのユーザ名とトークンを以下のフィールドに入力してください。</value>
@@ -616,7 +616,7 @@
     <value>クライアントID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Xアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
+    <value>Xアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>このアプリを接続すると、Xを使用して{LogoText}にサインイン、またはCRMモジュールでお客様のXアカウントをリンクできます。{0} X開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -655,7 +655,7 @@
     <value>クライアントのシークレット</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
+    <value>WeChatアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
@@ -715,7 +715,7 @@
     <value>Zoomクライアントのシクレット</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Zoomアカウントを使用してポータルにサインインするアプリケーションを有効にします。</value>
+    <value>Zoomアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>ユーザーがZoomアカウントを使って{LogoText}にサインインできるように、このアプリを有効にしてください。{0}Zoom開発者向けウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。以下に受け取ったデータを挿入してください：</value>
@@ -1360,7 +1360,7 @@
     <value>データベース接続</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>MySQLやSQLiteなどの外部データベースにフォーム結果を保存します。</value>
+    <value>フォームの結果をMySQLやSQLiteなどの外部データベースに保存</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>フォーム結果を保存するために外部データベースを接続します。</value>
@@ -1378,7 +1378,7 @@
     <value>NextcloudインスタンスのURLアドレスを入力してください。</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>アプリケーションがNextcloudアカウントを使用してポータルにサインインできるようにします。</value>
+    <value>Nextcloudアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>アプリケーションがNextcloudアカウントを使用してポータルにサインインできるようにします。</value>

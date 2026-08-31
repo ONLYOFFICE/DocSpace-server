@@ -241,7 +241,7 @@
     <value>ID-ja e klientit të aplikacionit</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari Apple ID.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur Apple ID. {0}Shkoni te portali i zhvilluesve të Apple dhe krijoni një integrim të ri të aplikacionit {LogoText}. Futni të dhënat:</value>
@@ -286,7 +286,7 @@
     <value>Çelësi i Box</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin për të menaxhuar skedarët dhe dosjet e Box.</value>
+    <value>Menaxhoni skedarët dhe dosjet e Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tënde Box me modulin Dokumentet. Ju do të jeni në gjendje të menaxhoni, modifikoni dhe ndani skedarë nga Box me përdoruesit e {LogoText}. {0}Identifikohuni në llogarinë tënde në faqen e zhvilluesve të Box dhe krijoni një aplikacion të ri për integrimin e {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin për të menaxhuar skedarët dhe dosjet e Dropbox.</value>
+    <value>Menaxhoni skedarët dhe dosjet e Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tuaj Dropbox me modulin Documents. Ju do të jeni në gjendje të menaxhoni, modifikoni dhe ndani skedarë nga Dropbox me përdoruesit e {LogoText}. {0}Identifikohu në llogarinë tënde në faqen e internetit të Zhvilluesve të Dropbox dhe krijoni një aplikacion të ri për integrimin e {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -361,7 +361,7 @@
     <value>Çelësi i Facebook-ut</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari në Facebook.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur Facebook dhe të lidhni llogaritë e klientëve të tyre në Facebook me modulin CRM. {0}Shkoni te portali i zhvilluesve të Facebook dhe krijoni një integrim të ri aplikacioni {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Lidhni projektin për t’u identifikuar në portal duke përdorur një llogari Google dhe për të menaxhuar skedarët dhe dosjet e Diskut të Google.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Google dhe menaxhoni skedarët dhe dosjet e Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tënde të Google Drive me modulin e Dokumenteve. Do të mundni të menaxhoni, modifikoni dhe ndani skedarët nga Google Drive me përdoruesit e {LogoText}. {0}Shkoni te tastiera e API-ve të Google dhe krijoni një projekt të ri për integrimin e {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari në LinkedIn.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur llogaritë e tyre në LinkedIn {0}Shkoni në faqen e internetit të Zhvilluesve të LinkedIn dhe krijoni një të re. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -553,7 +553,7 @@
     <value>Sekreti i klientit</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të menaxhojë skedarët dhe dosjet e OneDrive.</value>
+    <value>Menaxhoni skedarët dhe dosjet e OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tuaj OneDrive me modulin e Dokumenteve. Ju do të jeni në gjendje të menaxhoni, modifikoni dhe ndani skedarët nga OneDrive me përdoruesit e {LogoText}. {0}Identifikohu në llogarinë tënde të Microsoft Azure dhe krijoni aplikacionin e ri për integrimin {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
@@ -583,7 +583,7 @@
     <value>Shtrirja e robotit</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Lidhni llogarinë Telegram për të marrë njoftimet e portalit përmes Telegram-it.</value>
+    <value>Merrni njoftime përmes Telegramit</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Për të marrë njoftimet e portalit përmes Telegramit, aktivizoni Telegram bot. Mund të krijoni një bot të ri duke përdorur BotFatjer në Telegram për Desktop. Për të përdorur këtë bot, përdoruesit e portalit duhet të aktivizojnë njoftimet e Telegramit në faqen e tyre të profilit. {0}Ngjitni emrin e përdoruesit të robotit dhe kodin që keni marrë në fushat me poshtë.</value>
@@ -616,7 +616,7 @@
     <value>ID e klientit</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari X.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen ne {LogoText} duke përdorur X-in e tyre dhe të lidhin llogaritë e tyre në X të klientëve të tyre me modulin CRM. {0}Shkoni te portali i zhvilluesve të X dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -655,7 +655,7 @@
     <value>Sekreti i klientit</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Sekreti i klientit në Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari në Zoom.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur llogaritë e tyre në Zoom.{0}Shkoni te faqja e internetit të zhvilluesve të Zoom-it dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -1360,7 +1360,7 @@
     <value>Lidhja me bazën e të dhënave</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Ruani rezultatet e formularit në një bazë të dhënash të jashtme si MySQL ose SQLite.</value>
+    <value>Ruani rezultatet e formularit në një bazë të dhënash të jashtme si MySQL ose SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Lidhni një bazë të dhënash të jashtme për të ruajtur rezultatet e formularit.</value>
@@ -1384,7 +1384,7 @@
     <value>Sekreti i klientit</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Lejoni aplikacionin të hyjë në portal duke përdorur një llogari Nextcloud.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Lejoni aplikacionin të hyjë në portal duke përdorur një llogari Nextcloud.</value>

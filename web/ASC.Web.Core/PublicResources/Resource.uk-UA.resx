@@ -241,7 +241,7 @@
     <value>Ідентифікатор клієнта застосунку</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису Apple ID.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою Apple ID. {0}Перейдіть на портал Apple Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -286,7 +286,7 @@
     <value>Ключ скриньки</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Підключіть програму для управління файлами та папками пошти.</value>
+    <value>Керуйте файлами та папками Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис Box до модуля «Документи». Ви зможете керувати файлами з Box, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Увійдіть до свого облікового запису на сторінці для розробників Box і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Підключіть програму для управління файлами та папками Dropbox.</value>
+    <value>Керуйте файлами та папками Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис Dropbox до модуля «Документи». Ви зможете керувати файлами з Dropbox, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Увійдіть до свого облікового запису на вебсайті Dropbox Developers і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -361,7 +361,7 @@
     <value>Ключ Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису Facebook.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою Facebook і під’єднувати облікові записи Facebook своїх клієнтів до модуля CRM. {0}Перейдіть до порталу Facebook Developers і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Підключіть проект до входу на портал за допомогою облікового запису Google і управління файлами та папками Google Диска.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Google та керуйте файлами й папками Google Диска</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис Google Диск до модуля «Документи». Ви зможете керувати файлами з Google Диск, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Перейдіть до консолі API Google і створіть новий проєкт для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису LinkedIn.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою своїх облікових записів LinkedIn. {0}Перейдіть на вебсайт LinkedIn Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -553,7 +553,7 @@
     <value>Секрет клієнта</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Підключіть програму для управління файлами та папками OneDrive.</value>
+    <value>Керуйте файлами та папками OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис OneDrive до модуля «Документи». Ви зможете керувати файлами з OneDrive, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Увійдіть до свого облікового запису Microsoft Azure і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -583,7 +583,7 @@
     <value>Маркер бота</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Під’єднайте обліковий запис Telegram, щоб отримувати сповіщення порталу в Telegram.</value>
+    <value>Отримуйте сповіщення через Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Щоб отримувати сповіщення порталу в Telegram, увімкніть Telegram-бота. Ви можете створити нового бота за допомогою BotFather у настільній версії Telegram. Щоб використовувати цього бота, користувачі порталу мають увімкнути сповіщення Telegram на сторінці свого профілю. {0}Вставте ім’я користувача бота та отриманий маркер у поля нижче.</value>
@@ -616,7 +616,7 @@
     <value>Ідентифікатор клієнта</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису X.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою X і пов’язувати облікові записи X своїх клієнтів із модулем CRM. {0}Перейдіть до порталу X Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -655,7 +655,7 @@
     <value>Секрет клієнта</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Секретний ключ клієнта Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису Zoom.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою облікових записів Zoom. {0}Перейдіть на сайт Zoom для розробників і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -1377,6 +1377,9 @@
   <data name="ConsumersNextcloud" xml:space="preserve">
     <value>Nextcloud</value>
   </data>
+  <data name="ConsumersNextcloudDescription" xml:space="preserve">
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Nextcloud</value>
+  </data>
   <data name="AccountingCustomerOperationAgent" xml:space="preserve">
     <value>Агент</value>
   </data>
@@ -1420,7 +1423,7 @@
     <value>Підключення до бази даних</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Зберігайте результати форми у зовнішній базі даних, наприклад MySQL або SQLite.</value>
+    <value>Зберігайте результати форми у зовнішній базі даних, наприклад MySQL або SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Підключіть зовнішню базу даних для зберігання результатів форми.</value>

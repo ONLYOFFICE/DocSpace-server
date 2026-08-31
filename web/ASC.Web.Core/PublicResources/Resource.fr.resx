@@ -241,7 +241,7 @@
     <value>Clé d'application du client</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Autoriser l’application de se connecter au portail avec un compte Apple ID.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre à vos utilisateurs de se connecter à {LogoText} avec Apple ID. {0}Allez au portail de développeur Apple et créez une nouvelle application d’intégration {LogoText}. Insérer les données que vous avez reçues ci-dessous :</value>
@@ -286,7 +286,7 @@
     <value>clé de Box</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Connecter l'application pour gérer les fichiers et dossiers Box.</value>
+    <value>Gérer les fichiers et dossiers Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Activez cette application pour connecter votre compte Box au module Documents. Vous serez en mesure de gérer, éditer et partager les fichiers stockés sur Box avec les utilisateurs d'{LogoText}. {0}Connectez-vous à votre compte Box, passez à la page pour les développeurs et créez une nouvelle appliction d'intégration pour {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -325,7 +325,7 @@
     <value>Dropbox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Connecter l'application pour gérer les fichiers et dossiers Dropbox.</value>
+    <value>Gérer les fichiers et dossiers Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Activez cette application pour connecter votre compte Dropbox au module Documents. Vous serez en mesure de gérer, éditer et partager les fichiers stockés sur Dropbox avec les utilisateurs d'{LogoText}. {0}Connectez-vous à votre compte Dropbox, passez à la page pour les développeurs et créez une nouvelle appliction d'intégration pour {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -361,7 +361,7 @@
     <value>Clé de Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Connecter l'application pour accèder au portail en utilisant le compte Facebook.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre aux utilisateurs de se connecter à {LogoText} via Facebook et relier les comptes Facebook des clients au module CRM. {0}Passez au portail des développeurs Facebook et créez une nouvelle application d'intégration {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -415,7 +415,7 @@
     <value>Code JSON de GoogleCloud</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Se connecter au projet pour accéder au portail en utilisant le compte Google et pour gérer les fichiers et les dossiers Google Drive.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Google et gérez les fichiers et dossiers Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Activez cette application pour connecter votre compte Google Drive au module Documents. Vous serez en mesure de gérer, éditer et partager les fichiers stockés sur Google Drive avec les utilisateurs d'{LogoText}. {0}Passez à la console Google APIs et créez un nouveau projet d'intégration avec {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Se connecter à l'application pour accéder au portail en utilisant le compte LinkedIn.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre aux utilisateurs de se connecter à {LogoText} via leurs comptes LinkedIn.  {0}Passez au site web des développeurs LinkedIn et créez une nouvelle application d'intégration {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -553,7 +553,7 @@
     <value>Clé secrète client</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Connecter l'application pour gérer les fichiers et dossiers OneDrive.</value>
+    <value>Gérer les fichiers et dossiers OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Activez cette application pour connecter votre compte OneDrive au module Documents. Vous serez en mesure de gérer, éditer et partager vos fichiers stockés à OneDrive avec les utilisateurs {LogoText}. {0}Connectez-vous à votre compte Microsoft Azure et créez une nouvelle application d'intégration pour {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -583,7 +583,7 @@
     <value>Jeton de bot</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Connectez votre compte Telegram pour recevoir les notifications du portail via Telegram.</value>
+    <value>Recevoir les notifications via Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Pour recevoir les notifications du portail via Telegram, activez le bot Telegram. Vous pouvez créer un nouveau bot à l'aide de BotFather dans Telegram Desktop. Pour utiliser ce bot, les utilisateurs du portail doivent activer les notifications Telegram sur leur page de profil. {0}Collez le nom d'utilisateur du bot et le jeton que vous avez reçu dans les champs ci-dessous.</value>
@@ -616,7 +616,7 @@
     <value>ID client</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Se connecter à l'application pour accéder au portail en utilisant le compte X.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre aux utilisateurs de se connecter à {LogoText} via leur X et reliez les comptes X de vos clients à votre module CRM. {0}Passez au portail des développeurs X et créez une nouvelle application d'intégration {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -655,7 +655,7 @@
     <value>Clé secrète client</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Activez l'application pour se connecter au portail avec un compte WeChat.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Activez l'application pour se connecter au portail avec un compte WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Secret du client Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Permettre à l'application de se connecter au portail à l'aide d'un compte Zoom.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre à vos utilisateurs de se connecter à {LogoText} en utilisant leurs comptes Zoom. {0}Allez sur le site Zoom Developers et créez une nouvelle application d'intégration {LogoText}. Insérez les données que vous avez reçues ci-dessous :</value>
@@ -1360,7 +1360,7 @@
     <value>Connexion à la base de données</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Stocker les résultats du formulaire dans une base de données externe telle que MySQL ou SQLite.</value>
+    <value>Stocker les résultats du formulaire dans une base de données externe telle que MySQL ou SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Connectez une base de données externe pour stocker les résultats du formulaire.</value>
@@ -1384,7 +1384,7 @@
     <value>Clé secrète client</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Permettre à l'application de se connecter au portail à l'aide d'un compte Nextcloud.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Permettre à l'application de se connecter au portail à l'aide d'un compte Nextcloud.</value>

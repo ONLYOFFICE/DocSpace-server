@@ -241,7 +241,7 @@
     <value>ID ứng dụng khách</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Apple ID.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Apple ID. {0}Truy cập Cổng thông tin Nhà phát triển Apple và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -286,7 +286,7 @@
     <value>Box Key</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để quản lý các file và thư mục Box.</value>
+    <value>Quản lý các file và thư mục Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để kết nối tài khoản Box của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Box với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Box và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để quản lý các file và thư mục Dropbox.</value>
+    <value>Quản lý các file và thư mục Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để kết nối tài khoản Dropbox của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ Dropbox với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Dropbox và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -361,7 +361,7 @@
     <value>Facebook Key</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Facebook.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Facebook và liên kết tài khoản Facebook của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Facebook và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Kết nối dự án để đăng nhập vào cổng thông tin bằng tài khoản Google và quản lý file và thư mục Google Drive.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Google và quản lý file và thư mục Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để kết nối tài khoản Google Drive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Google Drive với người dùng {LogoText}. {0}Chuyển đến bảng điều khiển Google APIs và tạo một dự án mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản LinkedIn.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản LinkedIn của họ. {0}Truy cập trang web của Nhà phát triển LinkedIn và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -553,7 +553,7 @@
     <value>Client secret</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để quản lý file và thư mục OneDrive.</value>
+    <value>Quản lý file và thư mục OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để kết nối tài khoản OneDrive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ OneDrive với người dùng {LogoText}. {0}Đăng nhập vào tài khoản Microsoft Azure của bạn và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -583,7 +583,7 @@
     <value>Token Bot</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Kết nối tài khoản Telegram để nhận thông báo cổng thông tin qua Telegram.</value>
+    <value>Nhận thông báo qua Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Để nhận thông báo cổng thông tin qua Telegram, hãy bật Telegram bot. Bạn có thể tạo một bot mới bằng cách sử dụng BotFather trong Telegram cho máy tính. Để sử dụng bot này, người dùng cổng thông tin cần bật thông báo Telegram trên Trang hồ sơ của họ. {0}Dán tên người dùng bot và mã token bạn nhận được trong các trường bên dưới.</value>
@@ -616,7 +616,7 @@
     <value>ID Khách hàng</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản X.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng X và liên kết tài khoản X của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển X và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -655,7 +655,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Zoom client secret</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Zoom.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản Zoom của họ. {0}Truy cập trang web của Nhà phát triển Zoom và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -1360,7 +1360,7 @@
     <value>Kết nối cơ sở dữ liệu</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Lưu trữ kết quả biểu mẫu trong cơ sở dữ liệu bên ngoài như MySQL hoặc SQLite.</value>
+    <value>Lưu trữ kết quả biểu mẫu trong cơ sở dữ liệu bên ngoài như MySQL hoặc SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Kết nối cơ sở dữ liệu bên ngoài để lưu trữ kết quả biểu mẫu.</value>
@@ -1384,7 +1384,7 @@
     <value>Client secret</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Nextcloud.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Nextcloud.</value>

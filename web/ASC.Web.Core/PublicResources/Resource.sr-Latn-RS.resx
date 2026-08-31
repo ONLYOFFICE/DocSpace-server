@@ -241,7 +241,7 @@
     <value>ID aplikacije</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Omogućite aplikaciji da se prijavi na portal koristeći Apple ID nalog.</value>
+    <value>Prijavite se u svoj radni prostor pomoću Apple ID naloga</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Omogućite ovoj aplikaciji da omogući korisnicima da se prijave na {LogoText} koristeći Apple ID. {0}Idite na Apple Developers Portal i kreirajte novu aplikaciju za {LogoText} integraciju. Unesite podatke koje ste dobili ispod:</value>
@@ -286,7 +286,7 @@
     <value>Box ključ</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Omogućite aplikaciji upravljanje Box datotekama i folderima.</value>
+    <value>Upravljajte Box datotekama i folderima</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Omogućite ovoj aplikaciji da poveže vaš Box nalog sa modulom Dokumenti. Moći ćete upravljati, uređivati i deliti datoteke sa Box korisnicima {LogoText}-a. {0}Prijavite se na svoj nalog na Box developers stranici i kreirajte novu aplikaciju za {LogoText} integraciju. Unesite podatke koje ste dobili ispod:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Omogući aplikaciju da upravljaš Dropbox datotekama i folderima.</value>
+    <value>Upravljajte Dropbox datotekama i folderima</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Omogućite ovoj aplikaciji da poveže vaš Dropbox nalog sa modulom Dokumenti. Moći ćete upravljati, uređivati i deliti datoteke sa Dropbox korisnicima {LogoText}-a. {0}Prijavite se na svoj nalog na Dropbox Developers veb sajtu i kreirajte novu aplikaciju za {LogoText} integraciju. Unesite podatke koje ste dobili ispod:</value>
@@ -361,7 +361,7 @@
     <value>Facebook ključ</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Omogućite aplikaciji da se prijavi na portal koristeći Facebook nalog.</value>
+    <value>Prijavite se u svoj radni prostor pomoću Facebook naloga</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Omogućite ovoj aplikaciji da omogući vašim korisnicima da se prijave na {LogoText} koristeći Facebook i povežu svoje Facebook naloge kupaca sa CRM modulom. {0}Idite na Facebook Developers Portal i kreirajte novu aplikaciju za {LogoText} integraciju. Unesite podatke koje ste dobili ispod:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Povežite projekat da biste se prijavili na portal pomoću Google naloga i upravljali datotekama i folderima Google Drive-a.</value>
+    <value>Prijavite se u svoj radni prostor pomoću Google naloga i upravljajte Google Drive datotekama i folderima</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Omogućite ovu aplikaciju da povežete svoj nalog na Google Drive sa modulom Dokumenti. Moći ćete da upravljate, menjate i delite datoteke sa Google Drive-a sa {LogoText} korisnicima. {0}Idite na konzolu Google API-ja i napravite novi projekat za {LogoText} integraciju. Unesite podatke koje ste dobili ispod:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Omogućite aplikaciji da se prijavi na portal pomoću LinkedIn naloga.</value>
+    <value>Prijavite se u svoj radni prostor pomoću LinkedIn naloga</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da se prijave na {LogoText} koristeći svoje LinkedIn naloge. {0}Idite na veb lokaciju LinkedIn Developers i napravite novu integraciju aplikacije {LogoText}. Unesite podatke koje ste dobili ispod:</value>
@@ -553,7 +553,7 @@
     <value>Tajna klijenta</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Omogućite aplikaciji da upravlja OneDrive datotekama i folderima.</value>
+    <value>Upravljajte OneDrive datotekama i folderima</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Omogućite ovu aplikaciju da povežete svoj OneDrive nalog sa modulom Dokumenti. Moći ćete da upravljate, menjate i delite datoteke sa OneDrive-a sa {LogoText} korisnicima. {0}Prijavite se na svoj Microsoft Azure nalog i napravite novu aplikaciju za {LogoText} integraciju. Unesite podatke koje ste dobili ispod:</value>
@@ -583,7 +583,7 @@
     <value>Bot token</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Povežite Telegram nalog da biste primali obaveštenja portala putem Telegrama.</value>
+    <value>Primajte obaveštenja putem Telegrama</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Da biste dobijali obaveštenja portala preko Telegrama, omogućite Telegram bot. Možete kreirati novog bota koristeći BotFather u Telegram Desktop. Da bi koristili ovog bota, korisnici portala treba da omoguće Telegram obaveštenja na svojoj stranici profila. {0}Nalepite korisničko ime bota i token koji ste primili u polja u nastavku.</value>
@@ -616,7 +616,7 @@
     <value>ID klijenta</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Omogućite aplikaciju da biste se prijavili na portal koristeći X nalog.</value>
+    <value>Prijavite se u svoj radni prostor pomoću X naloga</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da se prijave na {LogoText} koristeći svoj X i povežu X naloge svojih klijenata sa CRM modulom. {0}Idite na X Developers portal i napravite novu integraciju aplikacije {LogoText}. Unesite podatke koje ste primili ispod:</value>
@@ -655,7 +655,7 @@
     <value>Tajna klijenta</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Omogući aplikaciji da se prijavi na portal pomoću WeChat naloga.</value>
+    <value>Prijavite se u svoj radni prostor pomoću WeChat naloga</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Omogući aplikaciji da se prijavi na portal pomoću WeChat naloga.</value>
@@ -715,7 +715,7 @@
     <value>Tajna Zoom klijenta</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Omogućite aplikaciju da se prijavi na portal koristeći Zoom nalog.</value>
+    <value>Prijavite se u svoj radni prostor pomoću Zoom naloga</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da se prijave na {LogoText} koristeći svoje Zoom naloge. {0}Idite na veb sajt Zoom Developers i napravite novu integraciju aplikacije {LogoText}. Unesite podatke koje ste dobili ispod:</value>
@@ -1360,7 +1360,7 @@
     <value>Veza sa bazom podataka</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Čuvajte rezultate formulara u eksternoj bazi podataka kao što je MySQL ili SQLite.</value>
+    <value>Čuvajte rezultate formulara u eksternoj bazi podataka kao što je MySQL ili SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Povežite eksternu bazu podataka za čuvanje rezultata formulara.</value>
@@ -1384,7 +1384,7 @@
     <value>Tajna klijenta</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Omogućite aplikaciji da se prijavi na portal pomoću Nextcloud naloga.</value>
+    <value>Prijavite se u svoj radni prostor pomoću Nextcloud naloga</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Omogućite aplikaciji da se prijavi na portal pomoću Nextcloud naloga.</value>

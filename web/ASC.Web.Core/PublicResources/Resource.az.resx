@@ -241,7 +241,7 @@
     <value>Tətbiq Müştəri ID-si</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Apple ID hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
+    <value>Apple ID hesabı ilə iş sahənizə daxil olun</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>İstifadəçilərinizə Apple ID-dən istifadə edərək {LogoText}-a daxil olmaq üçün bu proqramı aktivləşdirin. {0}Apple Developers Portalına keçin və yeni tətbiq {LogoText} inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
@@ -286,7 +286,7 @@
     <value>Box açarı</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Box fayl və qovluqlarını idarə etmək üçün tətbiqi aktivləşdirin.</value>
+    <value>Box fayl və qovluqlarını idarə edin</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Box hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz {LogoText} istifadəçiləri ilə Box-dan faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Box tərtibatçıları səhifəsində hesabınıza daxil olun və {LogoText} inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Dropbox fayl və qovluqlarını idarə etmək üçün tətbiqi aktivləşdirin.</value>
+    <value>Dropbox fayl və qovluqlarını idarə edin</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Dropbox hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz {LogoText} istifadəçiləri ilə Dropbox-dan faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Dropbox Developers vebsaytında hesabınıza daxil olun və {LogoText} inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
@@ -361,7 +361,7 @@
     <value>Facebook açarı</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Facebook hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
+    <value>Facebook hesabı ilə iş sahənizə daxil olun</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>İstifadəçilərinizə Facebook-dan istifadə edərək {LogoText}-a daxil olmaq və müştərilərinin Facebook hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı aktivləşdirin. {0}Facebook Developers Portalına keçin və {LogoText} inteqrasiyası üçün yeni tətbiq yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Google hesabından istifadə edərək portala daxil olmaq və Google Disk fayl və qovluqlarını idarə etmək üçün layihəni qoşun.</value>
+    <value>Google hesabı ilə iş sahənizə daxil olun və Google Disk fayl və qovluqlarını idarə edin</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Google Disk hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz {LogoText} istifadəçiləri ilə Google Diskdən faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Google API konsoluna keçin və {LogoText} inteqrasiyası üçün yeni layihə yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>LinkedIn hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
+    <value>LinkedIn hesabı ilə iş sahənizə daxil olun</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>İstifadəçilərinizə LinkedIn hesabından istifadə edərək {LogoText}-a daxil olmağa icazə vermək üçün bu proqramı aktiv edin. {0}LinkedIn Developers vebsaytına keçin və yeni {LogoText} inteqrasiyası tətbiqi yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
@@ -553,7 +553,7 @@
     <value>Müştəri sirri</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>OneDrive fayl və qovluqlarını idarə etmək üçün tətbiqi aktivləşdirin.</value>
+    <value>OneDrive fayl və qovluqlarını idarə edin</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>OneDrive hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz {LogoText} istifadəçiləri ilə OneDrive-dan faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Microsoft Azure hesabınıza daxil olun və {LogoText} inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
@@ -583,7 +583,7 @@
     <value>Bot nişanı</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Telegram vasitəsilə portal bildirişləri almaq üçün Telegram hesabını qoşun.</value>
+    <value>Bildirişləri Telegram vasitəsilə alın</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Telegram vasitəsilə portal bildirişləri almaq üçün Telegram botunu aktiv edin. Telegram Desktop-da BotFather istifadə edərək yeni bot yarada bilərsiniz. Bu botdan istifadə etmək üçün portal istifadəçiləri öz Profil Səhifələrində Telegram bildirişlərini aktivləşdirməlidirlər. {0}Aşağıdakı sahələrə botun istifadəçi adını və aldığınız nişanı yerləşdirin.</value>
@@ -616,7 +616,7 @@
     <value>Müştəri İD</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>X hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
+    <value>X hesabı ilə iş sahənizə daxil olun</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>İstifadəçilərinizə X-dən istifadə edərək {LogoText}-a daxil olmaq və müştərilərinin X hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı işə salın. {0}X Developers Portalına keçin və yeni tətbiq {LogoText} inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
@@ -655,7 +655,7 @@
     <value>Müştəri Sirri</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>WeChat hesabınızdan istifadə edərək portala daxil olmaq üçün proqramı aktivləşdirin.</value>
+    <value>WeChat hesabı ilə iş sahənizə daxil olun</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>WeChat hesabınızdan istifadə edərək portala daxil olmaq üçün proqramı aktivləşdirin.</value>
@@ -715,7 +715,7 @@
     <value>Zoom müştəri sirri</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Zoom hesabından istifadə edərək portala daxil olmanı təmin edin.</value>
+    <value>Zoom hesabı ilə iş sahənizə daxil olun</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>İstifadəçilərinizə Zoom hesablarından istifadə edərək {LogoText}-a daxil olmaq üçün bu proqramı aktiv edin. {0}Zoom Developers veb-saytına keçin və yeni {LogoText} inteqrasiyası tətbiqi yaradın. Aldığınız məlumatları aşağıda əlavə edin:</value>
@@ -1360,7 +1360,7 @@
     <value>Verilənlər bazası bağlantısı</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Forma nəticələrini MySQL və ya SQLite kimi xarici verilənlər bazasında saxlayın.</value>
+    <value>Forma nəticələrini MySQL və ya SQLite kimi xarici verilənlər bazasında saxlayın</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Forma nəticələrini saxlamaq üçün xarici verilənlər bazasını qoşun.</value>
@@ -1384,7 +1384,7 @@
     <value>Müştəri Sirri</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Tətbiqin Nextcloud hesabı ilə portala daxil olmasına icazə verin.</value>
+    <value>Nextcloud hesabı ilə iş sahənizə daxil olun</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Tətbiqin Nextcloud hesabı ilə portala daxil olmasına icazə verin.</value>

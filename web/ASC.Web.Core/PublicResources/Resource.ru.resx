@@ -241,7 +241,7 @@
     <value>ID клиента приложения</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Apple ID.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Apple ID. {0}Перейдите на портал Apple Developers и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -286,7 +286,7 @@
     <value>Ключ Box</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Подключите приложение для управления файлами и папками Box.</value>
+    <value>Управляйте файлами и папками Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы подключить свой аккаунт Box к модулю "Документы". Вы сможете управлять документами из Box, редактировать их и предоставлять к ним доступ для пользователей {LogoText}. {0}Войдите в свою учетную запись на странице для разработчиков Box и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -325,7 +325,7 @@
     <value>Dropbox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Подключите приложение для управления файлами и папками Dropbox.</value>
+    <value>Управляйте файлами и папками Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы подключить свой аккаунт Dropbox к модулю "Документы". Вы сможете управлять документами из Dropbox, редактировать их и предоставлять к ним доступ для пользователей {LogoText}. {0}Войдите в свою учетную запись на сайте для разработчиков Dropbox Developers и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -361,7 +361,7 @@
     <value>Ключ Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Facebook.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Facebook, и привязывать Facebook-аккаунты клиентов в модуле CRM. {0}Перейдите на портал для разработчиков Facebook и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -415,7 +415,7 @@
     <value>json-файл GoogleCloud</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Подключите проект для входа на портал по учетной записи Google и для управления файлами и папками Google Drive.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Google и управляйте файлами и папками Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы подключить свой аккаунт Google Drive к модулю "Документы". Вы сможете управлять документами из Google Drive, редактировать их и предоставлять к ним доступ для пользователей {LogoText}. {0}Перейдите в консоль API Google и создайте новый проект для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи LinkedIn.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя свои аккаунты в LinkedIn. {0}Перейдите на сайт Сеть разработчиков LinkedIn и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -553,7 +553,7 @@
     <value>Секрет клиента</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Подключите приложение для управления файлами и папками OneDrive.</value>
+    <value>Управляйте файлами и папками OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы подключить свой аккаунт OneDrive к модулю "Документы". Вы сможете управлять документами из OneDrive, редактировать их и предоставлять к ним доступ для пользователей {LogoText}. {0}Войдите в свою учетную запись Microsoft Azure и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -583,7 +583,7 @@
     <value>Токен бота</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Подключите аккаунт Telegram для получения оповещений портала через Telegram.</value>
+    <value>Получайте уведомления через Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Чтобы получать оповещения портала через Telegram, включите бота Telegram. Вы можете создать нового бота, используя BotFather в десктопном приложении Telegram. Чтобы использовать этого бота, пользователи портала должны включить оповещения Telegram на странице своего профиля. {0}Вставьте полученные имя пользователя бота и токен в поля ниже.</value>
@@ -616,7 +616,7 @@
     <value>ID клиента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи X.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя X, и привязывать X-аккаунты клиентов в модуле CRM. {0}Перейдите на портал для разработчиков X и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -655,7 +655,7 @@
     <value>Секрет клиента</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
+    <value>Входите в рабочее пространство с помощью учетной записи WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
@@ -715,7 +715,7 @@
     <value>Секрет клиента Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Zoom.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Zoom. {0}Перейдите на сайт Сеть разработчиков Zoom и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -1363,7 +1363,7 @@
     <value>Подключение к базе данных</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Сохраняйте результаты заполнения форм во внешней базе данных, такой как MySQL или SQLite.</value>
+    <value>Храните результаты заполнения форм во внешней базе данных, такой как MySQL или SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Подключите внешнюю базу данных для хранения результатов заполнения форм.</value>
@@ -1390,7 +1390,7 @@
     <value>Секрет клиента</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Разрешить приложению входить на портал с использованием учетной записи Nextcloud.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Разрешить приложению входить на портал с использованием учетной записи Nextcloud.</value>

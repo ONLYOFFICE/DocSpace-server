@@ -241,7 +241,7 @@
     <value>ID do Cliente da Aplicação</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Ativar a aplicação para iniciar sessão no portal utilizando uma conta Apple ID.</value>
+    <value>Iniciar sessão no seu espaço de trabalho com uma conta Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão no {LogoText} utilizando o Apple ID. {0}Aceda ao Portal Apple Developers e crie uma nova aplicação de integração do {LogoText}. Insira os dados que recebeu abaixo:</value>
@@ -286,7 +286,7 @@
     <value>Chave da Caixa</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Ative esta aplicação para gerir ficheiros Box e pastas.</value>
+    <value>Gerir ficheiros e pastas do Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Ative esta aplicação para conectar sua conta Box ao módulo Documentos. Poderá gerir, editar e compartilhar arquivos do Box com utilizadores da {LogoText}. {0}Entre na sua conta na página de desenvolvedores do Box e crie uma nova aplicação para a integração do {LogoText}. Insira os dados que recebeu abaixo:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Permitir que a aplicação gerencie ficheiros e pastas do Dropbox.</value>
+    <value>Gerir ficheiros e pastas do Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Ative esta app para ligar a sua conta do Dropbox ao módulo Documentos. Poderá gerenciar, editar e compartilhar arquivos do Dropbox com utilizadores do {LogoText}. {0}Inicie sessão na sua conta no site Dropbox Developers e crie uma nova aplicação para integração com o {LogoText}. Insira os dados que recebeu abaixo:</value>
@@ -361,7 +361,7 @@
     <value>Chave do Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Ative esta aplicação para iniciar sessão no portal utilizando uma conta de Facebook.</value>
+    <value>Iniciar sessão no seu espaço de trabalho com uma conta do Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Ative esta app para permitir que os utilizadores iniciem sessão no {LogoText} através do Facebook e ligue as contas de Facebook dos clientes ao módulo do CRM. {0}Vá ao Portal Facebook Developers e crie uma nova integração de app para a {LogoText}. Introduza os dados que recebeu abaixo:</value>
@@ -415,7 +415,7 @@
     <value>Json da GoogleCloud</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Ligue o projeto para iniciar sessão no portal utilizando uma conta Google e para gerir ficheiros e pastas do Google Drive.</value>
+    <value>Iniciar sessão no seu espaço de trabalho com uma conta Google e gerir ficheiros e pastas do Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Ative esta aplicação para ligar a sua conta Google Drive ao módulo dos Documentos. Poderá gerir, editar, e partilhar ficheiros do Google Drive com utilizadores da {LogoText}.{0}Vá para a Consola de APIs da Google e crie um novo projeto para a integração do {LogoText}. Introduza os dados que recebeu abaixo:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Ative a aplicação para iniciar sessão no portal utilizando uma conta LinkedIn.</value>
+    <value>Iniciar sessão no seu espaço de trabalho com uma conta LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão na {LogoText} utilizando as suas contas de LinkedIn. {0}Vá para o website do LinkedIn Developers e crie uma nova integração de app para a {LogoText}. Introduza os dados que recebeu abaixo:</value>
@@ -553,7 +553,7 @@
     <value>Segredo do cliente</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Ative a aplicação para gerir ficheiros e pastas do OneDrive.</value>
+    <value>Gerir ficheiros e pastas do OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Ative esta aplicação para associar a sua conta do OneDrive a módulo dos Documentos. Poderá gerir, editar e partilhar ficheiros do OneDrive com os utilizadores da {LogoText}. {0}Inicie sessão na sua conta Microsoft Azure e crie uma nova aplicação para a integração da {LogoText}. Introduza os dados que recebeu abaixo:</value>
@@ -583,7 +583,7 @@
     <value>Token do bot</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Associe a sua conta do Telegram para receber notificações sobre o portal através do Telegram.</value>
+    <value>Receber notificações através do Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Para receber notificações do portal através do Telegram, ative o bot do Telegram. Pode criar um novo bot utilizando o BotFather no ambiente de trabalho do Telegram. Para utilizar este bot, os utilizadores do portal têm de ativar as notificações do Telegram na sua página de perfil. {0}Cole o nome de utilizador do bot e o token que recebeu nos campos abaixo.</value>
@@ -616,7 +616,7 @@
     <value>ID do cliente</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Ative esta aplicação para iniciar sessão no portal através de uma conta X.</value>
+    <value>Iniciar sessão no seu espaço de trabalho com uma conta X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão na {LogoText} utilizando o seu X, e para que liguem as contas X dos seus clientes ao módulo CRM. {0}Aceda ao Portal de Programadores do X e crie uma nova aplicação de integração para a {LogoText}. Introduza os dados que recebeu abaixo:</value>
@@ -655,7 +655,7 @@
     <value>Segredo do cliente</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Habilite a aplicação para iniciar sessão no portal usando uma conta WeChat.</value>
+    <value>Iniciar sessão no seu espaço de trabalho com uma conta WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Habilite a aplicação para iniciar sessão no portal usando uma conta WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Segredo do cliente Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Habilite o aplicativo para fazer login no portal usando uma conta Zoom.</value>
+    <value>Iniciar sessão no seu espaço de trabalho com uma conta Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Ative este aplicativo para permitir que seus usuários façam login no {LogoText} usando suas contas Zoom. {0}Acesse o site do Zoom Developers e crie um novo aplicativo de integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
@@ -1360,7 +1360,7 @@
     <value>Ligação à base de dados</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Armazene os resultados de formulários numa base de dados externa, como MySQL ou SQLite.</value>
+    <value>Armazenar os resultados de formulários numa base de dados externa, como MySQL ou SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Ligue uma base de dados externa para armazenar os resultados de formulários.</value>
@@ -1378,7 +1378,7 @@
     <value>Introduza o endereço URL da instância do Nextcloud.</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Ative a aplicação para iniciar sessão no portal com uma conta Nextcloud.</value>
+    <value>Iniciar sessão no seu espaço de trabalho com uma conta Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Ative a aplicação para iniciar sessão no portal com uma conta Nextcloud.</value>

@@ -241,7 +241,7 @@
     <value>ID odjemalca aplikacije</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Omogočite aplikacijo za prijavo v portal z računom Apple ID.</value>
+    <value>Prijavite se v svoj delovni prostor z računom Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo, da svojim uporabnikom ponudite prijavo v {LogoText} z uporabo Apple ID. {0}Pojdite na Apple Developers Portal in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
@@ -286,7 +286,7 @@
     <value>Box Kľúč</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Omogočite aplikacijo za upravljanje Box datotek in map.</value>
+    <value>Upravljajte datoteke in mape Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo za povezavo svojega Box računa z modulom Dokumenti. Datoteke iz Box boste lahko upravljali, urejali in delili z uporabniki {LogoText}. {0}Prijavite se v svoj račun na strani za razvijalce Box in ustvarite novo aplikacijo za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Omogočite aplikacijo za upravljanje datotek in map Dropbox.</value>
+    <value>Upravljajte datoteke in mape Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo za povezavo svojega računa Dropbox z modulom Dokumenti. Datoteke iz Dropbox boste lahko upravljali, urejali in delili z uporabniki {LogoText}. {0}Vpišite se v svoj račun na spletnem mestu Dropbox razvijalcev in ustvarite novo aplikacijo za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
@@ -361,7 +361,7 @@
     <value>Facebook ključ</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Omogočite aplikacijo za prijavo v portal z uporabo Facebook računa.</value>
+    <value>Prijavite se v svoj delovni prostor z računom Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v {LogoText} prek Facebooka in povežete Facebook račune svojih strank z modulom CRM. {0}Pojdite na Facebook Developers Portal in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Povežite projekt za prijavo v portal z Google Računom in upravljajte datoteke in mape na Google Drive.</value>
+    <value>Prijavite se v svoj delovni prostor z računom Google in upravljajte datoteke in mape Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo za povezavo svojega računa Google Drive z modulom Dokumenti. Datoteke iz storitve Google Drive boste lahko upravljali, urejali in delili z uporabniki {LogoText}. {0}Pojdite na konzolo Google API in ustvarite nov projekt za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Omogočite aplikacijo za prijavo v portal z računom LinkedIn.</value>
+    <value>Prijavite se v svoj delovni prostor z računom LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v {LogoText} s svojimi računi LinkedIn. {0}Pojdite na spletno mesto za razvijalce LinkedIn in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
@@ -553,7 +553,7 @@
     <value>Skrivnost klienta</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Omogočite aplikacijo za upravljanje datotek in map OneDrive.</value>
+    <value>Upravljajte datoteke in mape OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo, da povežete svoj račun OneDrive z modulom Dokumenti. Datoteke iz storitve OneDrive boste lahko upravljali, urejali in delili z uporabniki {LogoText}. {0}Vpišite se v svoj račun Microsoft Azure in ustvarite novo aplikacijo za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
@@ -583,7 +583,7 @@
     <value>Žeton bota</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Povežite račun Telegram za prejemanje obvestil portala prek Telegrama.</value>
+    <value>Prejemajte obvestila prek Telegrama</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Če želite prejemati obvestila portala prek Telegrama, omogočite Telegram bot. Nov bot lahko ustvarite z uporabo BotFather v Telegram namizju. Za uporabo tega bota morajo uporabniki portala omogočiti obvestila Telegram na svoji profilni strani. {0}V spodnja polja prilepite uporabniško ime bota in žeton, ki ste ga prejeli.</value>
@@ -616,7 +616,7 @@
     <value>ID klienta</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Omogočite aplikaciji prijavo na portal z uporabo Twitter računa.</value>
+    <value>Prijavite se v svoj delovni prostor z računom X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v {LogoText} s svojim Twitter računom in povežite Twitter račune svojih strank z modulom CRM. {0}Pojdite na Twitter portal za razvijalce in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
@@ -655,7 +655,7 @@
     <value>Skrivnost klienta</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Omogočite aplikaciji prijavo v portal z računom WeChat.</value>
+    <value>Prijavite se v svoj delovni prostor z računom WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Omogočite aplikaciji prijavo v portal z računom WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Skrivnost klienta Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Omogočite aplikaciji prijavo v portal z računom Zoom.</value>
+    <value>Prijavite se v svoj delovni prostor z računom Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v {LogoText} s svojimi računi Zoom. {0}Pojdite na spletno mesto Zoom Developers in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
@@ -1360,7 +1360,7 @@
     <value>Povezava z bazo podatkov</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Shranite rezultate obrazca v zunanjo bazo podatkov, kot je MySQL ali SQLite.</value>
+    <value>Shranite rezultate obrazca v zunanjo bazo podatkov, kot je MySQL ali SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Povežite zunanjo bazo podatkov za shranjevanje rezultatov obrazca.</value>
@@ -1384,7 +1384,7 @@
     <value>Skrivnost klienta</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Omogočite aplikaciji prijavo v portal z računom Nextcloud.</value>
+    <value>Prijavite se v svoj delovni prostor z računom Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Omogočite aplikaciji prijavo v portal z računom Nextcloud.</value>

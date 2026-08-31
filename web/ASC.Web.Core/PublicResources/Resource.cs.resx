@@ -241,7 +241,7 @@
     <value>ID klienta aplikace</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Povolte aplikaci přihlášení k portálu pomocí účtu Apple ID.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Povolením této aplikace umožníte uživatelům přihlásit se do {LogoText} pomocí Apple ID. {0}Přejděte na portál Apple Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -286,7 +286,7 @@
     <value>Box Klíč</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Připojte aplikaci ke správě Box souborů a složek.</value>
+    <value>Spravujte soubory a složky Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Povolením této aplikace propojíte svůj účet služby Box s modulem Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby Box s uživateli služby {LogoText}. {0}Přihlaste se ke svému účtu na stránce pro vývojáře aplikace Box a vytvořte novou aplikaci pro integraci s aplikací {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Připojte aplikaci ke správě Dropbox souborů a složek.</value>
+    <value>Spravujte soubory a složky Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Povolením této aplikace propojíte svůj účet Dropbox s modulem Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby Dropbox s uživateli aplikace {LogoText}. {0}Přihlaste se ke svému účtu na webu Dropbox Developers a vytvořte novou aplikaci pro integraci s {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -361,7 +361,7 @@
     <value>Facebook klíč</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálů pomocí Facebookového účtu.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Zapnutím této aplikace umožníte uživatelům přihlásit se do {LogoText} pomocí Facebooku a propojit účty zákazníků na Facebooku s modulem CRM. {0}Přejděte na portál Facebook Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Připojit projekt k přihlášení do portálu pomocí Google účtu a spravujte Google Drive soubory a složky.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Google a spravujte soubory a složky Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Povolením této aplikace připojíte svůj účet Disku Google k modulu Dokumenty. Budete moci spravovat, upravovat a sdílet soubory z Disku Google s uživateli aplikace {LogoText}. {0}Přejděte do konzoly Google API a vytvořte nový projekt pro integraci {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálu pomocí LinkedIn účtu.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Povolte tuto aplikaci, aby se vaši uživatelé mohli přihlásit do {LogoText} pomocí svých účtů LinkedIn. {0}Přejděte na webové stránky LinkedIn Developers a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -553,7 +553,7 @@
     <value>Tajný klíč klienta</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Připojte aplikaci ke správě OneDrive souborů a složek.</value>
+    <value>Spravujte soubory a složky OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Povolením této aplikace připojíte svůj účet OneDrive k modulu Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby OneDrive s uživateli služby {LogoText}. {0}Přihlaste se ke svému účtu Microsoft Azure a vytvořte novou aplikaci pro integraci {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -583,7 +583,7 @@
     <value>Token bota</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Připojte účet Telegram a přijímejte oznámení portálu prostřednictvím Telegramu.</value>
+    <value>Přijímejte oznámení prostřednictvím Telegramu</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Chcete-li dostávat oznámení portálu prostřednictvím služby Telegram, povolte funkci bota Telegramu- Nového bota můžete vytvořit pomocí nástroje BotFather v aplikaci Telegram Desktop. Pro použití tohoto bota musí uživatelé portálu povolit oznámení Telegram na své profilové stránce. {0}Vložení uživatelského jména bota a tokenu, který jste obdrželi, do polí níže.</value>
@@ -616,7 +616,7 @@
     <value>ID klienta</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálu pomocí X.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Zapnutím této aplikace umožníte svým uživatelům přihlásit se do {LogoText} pomocí X a propojit účty X svých zákazníků s modulem CRM. {0}Přejděte na portál X Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -655,7 +655,7 @@
     <value>Tajný klíč klienta</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Povolte aplikaci přihlášení k portálu pomocí účtu WeChat.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Povolte aplikaci přihlášení k portálu pomocí účtu WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Tajemství klienta Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Povolte aplikaci přihlášení k portálu pomocí účtu Zoom.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Povolením této aplikace umožníte uživatelům přihlásit se do {LogoText} pomocí jejich účtů Zoom. {0}Přejděte na webové stránky Zoom Developers a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -1360,7 +1360,7 @@
     <value>Připojení k databázi</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Uložte výsledky formuláře do externí databáze, například MySQL nebo SQLite.</value>
+    <value>Uložte výsledky formuláře do externí databáze, například MySQL nebo SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Připojte externí databázi pro ukládání výsledků formuláře.</value>
@@ -1399,7 +1399,7 @@
     <value>Ověření uživatele se nezdařilo</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Povolte aplikaci přihlásit se k portálu pomocí účtu Nextcloud.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Povolte aplikaci přihlásit se k portálu pomocí účtu Nextcloud.</value>

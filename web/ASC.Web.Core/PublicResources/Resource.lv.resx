@@ -241,7 +241,7 @@
     <value>Lietojumprogrammas klienta ID</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Iespējojiet lietojumprogrammu, lai pierakstītos portālā, izmantojot Apple ID kontu.</value>
+    <value>Pierakstieties savā darbvietā ar Apple ID kontu</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietojumprogrammu, lai ļautu lietotājiem pierakstīties {LogoText}, izmantojot Apple ID. {0}Dodieties uz Apple izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
@@ -286,7 +286,7 @@
     <value>Box atslēga</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai pārvaldītu Box failus un mapes.</value>
+    <value>Pārvaldiet Box failus un mapes</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietojumprogrammu, lai savienotu savu Box kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Box failus ar {LogoText} lietotājiem. {0}Pierakstieties savā kontā Box izstrādātāju lapā un izveidojiet jaunu lietojumprogrammu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai pārvaldītu Dropbox failus un mapes.</value>
+    <value>Pārvaldiet Dropbox failus un mapes</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietojumprogrammu, lai savienotu savu Box kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Dropbox failus ar {LogoText} lietotājiem. {0}Pierakstieties savā kontā Dropbox izstrādātāju tīmekļa vietnē un izveidojiet jaunu lietojumprogrammu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
@@ -361,7 +361,7 @@
     <value>Facebook atslēga</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar Facebook kontu.</value>
+    <value>Pierakstieties savā darbvietā ar Facebook kontu</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot Facebook, un saistīt savu klientu Facebook kontus ar CRM moduli. {0}Dodieties uz Facebook izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Pievienojiet projektu, lai ieietu portālā ar Google kontu un pārvaldītu Google Drive failus un mapes.</value>
+    <value>Pierakstieties savā darbvietā ar Google kontu un pārvaldiet Google Drive failus un mapes</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai savienotu savu Google Drive kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Google Drive failus ar {LogoText} lietotājiem. {0}Dodieties uz Google API konsoli un izveidojiet jaunu projektu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar LinkedIn kontu.</value>
+    <value>Pierakstieties savā darbvietā ar LinkedIn kontu</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai ļautu lietotājiem pierakstīties {LogoText}, izmantojot savus LinkedIn kontus. {0}Dodieties uz LinkedIn izstrādātāju tīmekļa vietni un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
@@ -553,7 +553,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai pārvaldītu OneDrive failus un mapes.</value>
+    <value>Pārvaldiet OneDrive failus un mapes</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai savienotu savu OneDrive kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot OneDrive failus ar {LogoText} lietotājiem. {0}Pierakstieties savā Microsoft Azure kontā un izveidojiet jaunu lietojumprogrammu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
@@ -583,7 +583,7 @@
     <value>Bota marķieris</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Pievienojiet Telegram kontu, lai saņemtu portāla paziņojumus, izmantojot Telegram.</value>
+    <value>Saņemiet paziņojumus, izmantojot Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Lai saņemtu portāla paziņojumus, izmantojot Telegram, iespējojiet Telegram botu. Jūs varat izveidot jaunu robotu, izmantojot BotFather programmā Telegram Desktop. Lai izmantotu šo robotu, portāla lietotājiem savā profila lapā ir jāiespējo Telegram paziņojumi. {0}Zemāk esošajos laukos ielīmējiet robota lietotājvārdu un saņemto marķieri.</value>
@@ -616,7 +616,7 @@
     <value>Klienta ID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar X kontu.</value>
+    <value>Pierakstieties savā darbvietā ar X kontu</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot viņu X, un saistīt savu klientu X kontus ar CRM moduli. {0}Dodieties uz X izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
@@ -655,7 +655,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Iespējojiet opciju lietojumprogrammai pierakstīties portālā, izmantojot WeChat kontu.</value>
+    <value>Pierakstieties savā darbvietā ar WeChat kontu</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Iespējojiet opciju lietojumprogrammai pierakstīties portālā, izmantojot WeChat kontu.</value>
@@ -715,7 +715,7 @@
     <value>Tālummaiņas klienta noslēpums</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Iespējojiet lietojumprogrammu, lai pierakstītos portālā, izmantojot tālummaiņas kontu.</value>
+    <value>Pierakstieties savā darbvietā ar Zoom kontu</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai jūsu lietotāji varētu pierakstīties pakalpojumā {LogoText}, izmantojot savus tālummaiņas kontus. {0}Dodieties uz Zoom Developers tīmekļa vietni un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievietojiet saņemtos datus:</value>
@@ -1360,7 +1360,7 @@
     <value>Savienojums ar datu bāzi</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Saglabājiet veidlapas rezultātus ārējā datu bāzē, piemēram, MySQL vai SQLite.</value>
+    <value>Saglabājiet veidlapas rezultātus ārējā datu bāzē, piemēram, MySQL vai SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Pievienojiet ārējo datu bāzi, lai saglabātu veidlapas rezultātus.</value>
@@ -1384,7 +1384,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Ļaujiet lietojumprogrammai pieteikties portālā, izmantojot Nextcloud kontu.</value>
+    <value>Pierakstieties savā darbvietā ar Nextcloud kontu</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Ļaujiet lietojumprogrammai pieteikties portālā, izmantojot Nextcloud kontu.</value>

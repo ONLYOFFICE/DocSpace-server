@@ -277,7 +277,7 @@
     <value>Application Client ID</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using an Apple ID account.</value>
+    <value>Sign in to your workspace with an Apple ID account</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Enable this app to allow your users to sign in to {LogoText} using Apple ID. {0}Go to Apple Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
@@ -322,7 +322,7 @@
     <value>Box Key</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Enable the application to manage Box files and folders.</value>
+    <value>Manage Box files and folders</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Enable this app to connect your Box account to the Documents module. You’ll be able to manage, edit, and share files from Box with {LogoText} users. {0}Sign in to your account on the Box developers page and create a new app for {LogoText} integration. Insert the data you received below:</value>
@@ -361,7 +361,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Enable the application to manage Dropbox files and folders.</value>
+    <value>Manage Dropbox files and folders</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Enable this app to connect your Dropbox account to the Documents module. You’ll be able to manage, edit, and share files from Dropbox with {LogoText} users. {0}Sign in to your account on the Dropbox Developers website and create a new app for {LogoText} integration. Insert the data you received below:</value>
@@ -397,7 +397,7 @@
     <value>Facebook Key</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a Facebook account.</value>
+    <value>Sign in to your workspace with a Facebook account</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Enable this app to allow your users to sign in to {LogoText} using Facebook and link their customers’ Facebook accounts to the CRM module. {0}Go to Facebook Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
@@ -451,7 +451,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Connect the project to sign in to the portal using a Google account and manage Google Drive files and folders.</value>
+    <value>Sign in to your workspace with a Google account and manage Google Drive files and folders</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Enable this app to connect your Google Drive account to the Documents module. You’ll be able to manage, edit, and share files from Google Drive with {LogoText} users. {0}Go to Google APIs console and create a new project for {LogoText} integration. Insert the data you received below:</value>
@@ -460,7 +460,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a LinkedIn account.</value>
+    <value>Sign in to your workspace with a LinkedIn account</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Enable this app to allow your users to sign in to {LogoText} using their LinkedIn accounts. {0}Go to the LinkedIn Developers website and create a new app {LogoText} integration. Insert the data you received below:</value>
@@ -589,7 +589,7 @@
     <value>Client secret</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Enable the application to manage OneDrive files and folders.</value>
+    <value>Manage OneDrive files and folders</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Enable this app to connect your OneDrive account to the Documents module. You’ll be able to manage, edit, and share files from OneDrive with {LogoText} users. {0}Sign in to your Microsoft Azure account and create a new app for {LogoText} integration. Insert the data you received below:</value>
@@ -619,7 +619,7 @@
     <value>Bot token</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Connect Telegram account to receive portal notifications via Telegram.</value>
+    <value>Receive notifications via Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>To receive portal notifications via Telegram, enable Telegram bot. You can create a new bot using BotFather in Telegram Desktop. To use this bot, portal users need to enable Telegram notifications on their Profile Page. {0}Paste bot’s username and the token you received in the fields below.</value>
@@ -652,7 +652,7 @@
     <value>Client ID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a X account.</value>
+    <value>Sign in to your workspace with a X account</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Enable this app to allow your users to sign in to {LogoText} using their X and link their customers’ X accounts to the CRM module. {0}Go to X Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
@@ -691,7 +691,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a WeChat account.</value>
+    <value>Sign in to your workspace with a WeChat account</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Enable the application to sign in to the portal using a WeChat account.</value>
@@ -751,7 +751,7 @@
     <value>Zoom client secret</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a Zoom account.</value>
+    <value>Sign in to your workspace with a Zoom account</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Enable this app to allow your users to sign in to {LogoText} using their Zoom accounts. {0}Go to the Zoom Developers website and create a new app {LogoText} integration. Insert the data you received below:</value>
@@ -1357,7 +1357,7 @@
     <value>Database connection</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Store form results in an external database such as MySQL or SQLite.</value>
+    <value>Store form results in an external database like MySQL or SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Connect an external database to store form results.</value>
@@ -1396,7 +1396,7 @@
     <value>Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a Nextcloud account.</value>
+    <value>Sign in to your workspace with a Nextcloud account</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Enable the application to sign in to the portal using a Nextcloud account.</value>

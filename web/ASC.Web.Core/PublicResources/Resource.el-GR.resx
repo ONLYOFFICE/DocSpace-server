@@ -241,7 +241,7 @@
     <value>Αναγνωριστικό πελάτη εφαρμογής</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό Apple ID.</value>
+    <value>Συνδεθείτε στον χώρο εργασίας σας με έναν λογαριασμό Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο {LogoText} χρησιμοποιώντας το Apple ID. {0}Πηγαίνετε στην Πύλη προγραμματιστών της Apple και δημιουργήστε μια νέα ενσωμάτωση εφαρμογής {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
@@ -286,7 +286,7 @@
     <value>Κλειδί Box</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Ενεργοποιήστε την εφαρμογή για τη διαχείριση αρχείων και φακέλων Box.</value>
+    <value>Διαχείριση αρχείων και φακέλων Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε αυτήν την εφαρμογή για να συνδέσετε τον λογαριασμό Box σας με την ενότητα εγγράφων. Θα μπορείτε να διαχειρίζεστε, να επεξεργάζεστε και να μοιράζεστε αρχεία από το Box με τους χρήστες του {LogoText}. {0}Συνδεθείτε στον λογαριασμό σας στη σελίδα προγραμματιστών του Box και δημιουργήστε μια νέα εφαρμογή για την ενσωμάτωση του {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
@@ -325,7 +325,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Να επιτρέπεται στην εφαρμογή να διαχειρίζεται αρχεία και φακέλους του Dropbox.</value>
+    <value>Διαχείριση αρχείων και φακέλων Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε αυτήν την εφαρμογή για να συνδέσετε τον λογαριασμό Dropbox σας με την ενότητα εγγράφων. Θα μπορείτε να διαχειρίζεστε, να επεξεργάζεστε και να μοιράζεστε αρχεία από το Dropbox με τους χρήστες του {LogoText}. {0}Συνδεθείτε στον λογαριασμό σας στον ιστότοπο Dropbox Developers και δημιουργήστε μια νέα εφαρμογή για την ενσωμάτωση του {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
@@ -361,7 +361,7 @@
     <value>Κλειδί Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό στο Facebook.</value>
+    <value>Συνδεθείτε στον χώρο εργασίας σας με έναν λογαριασμό Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο {LogoText} χρησιμοποιώντας το Facebook και να συνδέσουν τους λογαριασμούς Facebook των πελατών τους με την ενότητα CRM. {0}Πηγαίνετε στην πύλη προγραμματιστών του Facebook και δημιουργήστε μια νέα ενσωμάτωση εφαρμογής {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Συνδέστε το έργο για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό Google και να διαχειριστείτε τα αρχεία και τους φακέλους του Google Drive.</value>
+    <value>Συνδεθείτε στον χώρο εργασίας σας με έναν λογαριασμό Google και διαχειριστείτε τα αρχεία και τους φακέλους του Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε αυτήν την εφαρμογή για να συνδέσετε τον λογαριασμό σας στο Google Drive με την ενότητα εγγράφων. Θα μπορείτε να διαχειρίζεστε, να επεξεργάζεστε και να μοιράζεστε αρχεία από το Google Drive με τους χρήστες του {LogoText}. {0}Πηγαίνετε στην κονσόλα Google API και δημιουργήστε ένα νέο έργο για την ενσωμάτωση του {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό LinkedIn.</value>
+    <value>Συνδεθείτε στον χώρο εργασίας σας με έναν λογαριασμό LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο {LogoText} χρησιμοποιώντας τους λογαριασμούς τους στο LinkedIn. {0}Μπείτε στον ιστότοπο LinkedIn Developers και δημιουργήστε μια νέα ενσωμάτωση εφαρμογής {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
@@ -553,7 +553,7 @@
     <value>Μυστικός κωδικός πελάτη</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Να επιτρέπεται στην εφαρμογή να διαχειρίζεται αρχεία και φακέλους του OneDrive.</value>
+    <value>Διαχείριση αρχείων και φακέλων OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε αυτήν την εφαρμογή για να συνδέσετε τον λογαριασμό σας OneDrive με την ενότητα εγγράφων. Θα μπορείτε να διαχειρίζεστε, να επεξεργάζεστε και να μοιράζεστε αρχεία από το OneDrive με τους χρήστες του {LogoText}. {0}Συνδεθείτε στον λογαριασμό σας στο Microsoft Azure και δημιουργήστε μια νέα εφαρμογή για την ενσωμάτωση του {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
@@ -583,7 +583,7 @@
     <value>Διακριτικό bot</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Συνδέστε τον λογαριασμό Telegram για να λαμβάνετε ειδοποιήσεις της πύλης μέσω του Telegram.</value>
+    <value>Λάβετε ειδοποιήσεις μέσω Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Για να λαμβάνετε ειδοποιήσεις πύλης μέσω Telegram, ενεργοποιήστε το bot Telegram. Μπορείτε να δημιουργήσετε ένα νέο bot χρησιμοποιώντας το BotFather στο Telegram για υπολογιστές. Για να χρησιμοποιήσετε αυτό το bot, οι χρήστες της πύλης πρέπει να ενεργοποιήσουν τις ειδοποιήσεις Telegram στη σελίδα προφίλ τους. {0}Επικολλήστε το όνομα χρήστη του bot και το διακριτικό που λάβατε στα παρακάτω πεδία.</value>
@@ -616,7 +616,7 @@
     <value>Αναγνωριστικό πελάτη</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό X.</value>
+    <value>Συνδεθείτε στον χώρο εργασίας σας με έναν λογαριασμό X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο {LogoText} χρησιμοποιώντας το X τους και να συνδέσουν τους λογαριασμούς X των πελατών τους με την ενότητα CRM. {0}Πηγαίνετε στην πύλη προγραμματιστών του X και δημιουργήστε μια νέα ενσωμάτωση εφαρμογής {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
@@ -655,7 +655,7 @@
     <value>Μυστικός κωδικός πελάτη</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό WeChat.</value>
+    <value>Συνδεθείτε στον χώρο εργασίας σας με έναν λογαριασμό WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Μυστικό κλειδί πελάτη Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό Zoom.</value>
+    <value>Συνδεθείτε στον χώρο εργασίας σας με έναν λογαριασμό Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο {LogoText} χρησιμοποιώντας τους λογαριασμούς τους στο Zoom. {0}Μπείτε στον ιστότοπο Zoom Developers και δημιουργήστε μια νέα εφαρμογή ολοκλήρωσης {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
@@ -1360,7 +1360,7 @@
     <value>Σύνδεση βάσης δεδομένων</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Αποθηκεύστε τα αποτελέσματα φόρμας σε εξωτερική βάση δεδομένων όπως MySQL ή SQLite.</value>
+    <value>Αποθηκεύστε τα αποτελέσματα φόρμας σε εξωτερική βάση δεδομένων όπως MySQL ή SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Συνδέστε μια εξωτερική βάση δεδομένων για αποθήκευση αποτελεσμάτων φόρμας.</value>
@@ -1384,7 +1384,7 @@
     <value>Μυστικός κωδικός πελάτη</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Επιτρέψτε στην εφαρμογή να συνδεθεί στην πύλη χρησιμοποιώντας λογαριασμό Nextcloud.</value>
+    <value>Συνδεθείτε στον χώρο εργασίας σας με έναν λογαριασμό Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Επιτρέψτε στην εφαρμογή να συνδεθεί στην πύλη χρησιμοποιώντας λογαριασμό Nextcloud.</value>

@@ -241,7 +241,7 @@
     <value>ID applicazione client</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Consenti all'applicazione di accedere al portale utilizzando un account Apple ID.</value>
+    <value>Accedi al tuo spazio di lavoro con un account Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Attiva questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando Apple ID. {0}Vai al Portale per gli sviluppatori Apple e crea una nuova integrazione per l'app {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -286,7 +286,7 @@
     <value>Chiave Box</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Collega l'applicazione per gestire Box Files e cartelle.</value>
+    <value>Gestisci file e cartelle di Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Abilita questa app per connettere il tuo account Box al modulo Documenti. Potrai gestire, modificare e condividere file da Box con gli utenti {LogoText}. {0}Accedi al tuo account nella pagina degli sviluppatori di Box e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -325,7 +325,7 @@
     <value>Dropbox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Connetti l'applicazione per gestire file e cartelle di Dropbox.</value>
+    <value>Gestisci file e cartelle di Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Attiva questa app per connettere il tuo account Dropbox al modulo Documenti. Potrai gestire, modificare e condividere file da Dropbox con gli utenti {LogoText}. {0}Accedi al tuo account sul sito web degli sviluppatori di Dropbox e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -361,7 +361,7 @@
     <value>Chiave di Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Collega l'applicazione per registrarsi al portale usando l'account Facebook.</value>
+    <value>Accedi al tuo spazio di lavoro con un account Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando Facebook e collegare gli account Facebook dei loro clienti al modulo CRM. {0}Vai al portale Facebook Developers e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -415,7 +415,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Collega il progetto per registrarsi al portale usando l'account Google e gestire così file e cartelle in Google Drive.</value>
+    <value>Accedi al tuo spazio di lavoro con un account Google e gestisci i file e le cartelle di Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Abilita questa app per connettere il tuo account Google Drive al modulo Documenti. Potrai gestire, modificare e condividere file da Google Drive con gli utenti di {LogoText}. {0}Vai alla console delle API di Google e crea un nuovo progetto per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -424,7 +424,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Collega l'applicazione per registrarsi al portale usando l'account Linkedin.</value>
+    <value>Accedi al tuo spazio di lavoro con un account LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando i loro account LinkedIn. {0}Vai al sito web di LinkedIn Developers e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -553,7 +553,7 @@
     <value>Segreto client</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Collega l'applicazione per gestire file e cartelle in OneDrive.</value>
+    <value>Gestisci file e cartelle di OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Abilita questa app per connettere il tuo account OneDrive al modulo Documenti. Potrai gestire, modificare e condividere file da OneDrive con gli utenti di {LogoText}. {0}Accedi al tuo account Microsoft Azure e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -583,7 +583,7 @@
     <value>Token del bot</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Collega l'account Telegram per ricevere le notifiche del portale tramite Telegram.</value>
+    <value>Ricevi le notifiche tramite Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Per ricevere le notifiche del portale tramite Telegram, abilita il bot di Telegram. Puoi creare un nuovo bot usando BotFather in Telegram Desktop. Per utilizzare questo bot, gli utenti del portale devono abilitare le notifiche di Telegram sulla loro pagina del profilo. {0}Incolla il nome utente del bot e il token che hai ricevuto nei campi sottostanti.</value>
@@ -616,7 +616,7 @@
     <value>ID client</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Collega l'applicazione per registrarsi al portale utilizzando l'account X.</value>
+    <value>Accedi al tuo spazio di lavoro con un account X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} usando il loro X e collegare gli account X dei loro clienti al modulo CRM. {0}Vai su X Developers Portal e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -655,7 +655,7 @@
     <value>Segreto client</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
+    <value>Accedi al tuo spazio di lavoro con un account WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
@@ -715,7 +715,7 @@
     <value>Segreto del client Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Abilita l'applicazione ad accedere al portale utilizzando un account Zoom.</value>
+    <value>Accedi al tuo spazio di lavoro con un account Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando i loro account Zoom. {0}Vai al sito web Zoom Developers e crea una nuova integrazione dell'app {LogoText}. Inserisci i dati che hai ricevuto qui sotto:</value>
@@ -1360,7 +1360,7 @@
     <value>Connessione al database</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Archivia i risultati del modulo in un database esterno come MySQL o SQLite.</value>
+    <value>Archivia i risultati del modulo in un database esterno come MySQL o SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Connetti un database esterno per archiviare i risultati del modulo.</value>
@@ -1384,7 +1384,7 @@
     <value>Segreto client</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Consenti all'applicazione di accedere al portale utilizzando un account Nextcloud.</value>
+    <value>Accedi al tuo spazio di lavoro con un account Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Consenti all'applicazione di accedere al portale utilizzando un account Nextcloud.</value>
