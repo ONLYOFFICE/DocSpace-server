@@ -38,12 +38,8 @@ public class Login(
     IWebHostEnvironment webHostEnvironment,
     ProviderManager providerManager,
     LoginProfileTransport loginProfileTransport,
-    IConfiguration configuration)
+    FederatedLoginSettings settings)
 {
-    //The complete allow-list for absolute return urls, including the portal's own host if an
-    //absolute (rather than relative) return url to it is ever required — nothing is implicitly allowed.
-    private readonly string[] _allowedReturnUrlHosts = configuration.GetSection("federated-login:allowed-return-url-hosts").Get<string[]>() ?? [];
-
     private string Callback => _params.Get("callback");
     private string Auth => _params.Get("auth");
     private string ReturnUrl => _params.Get("returnurl"); //TODO?? FormsAuthentication.LoginUrl;
@@ -149,7 +145,7 @@ public class Login(
 
     private async Task RenderXrdsAsync(HttpContext context)
     {
-        var returnUrl = Uri.EscapeDataString(JsCallbackHelper.GetSafeReturnUrl(ReturnUrl, _allowedReturnUrlHosts));
+        var returnUrl = Uri.EscapeDataString(JsCallbackHelper.GetSafeReturnUrl(ReturnUrl, settings.AllowedReturnUrlHosts));
         var xrdsloginuri = new Uri(context.Request.Url(), new Uri(context.Request.Url().AbsolutePath, UriKind.Relative)) + "?auth=openid&returnurl=" + returnUrl;
         var xrdsimageuri = new Uri(context.Request.Url(), new Uri(webHostEnvironment.WebRootPath, UriKind.Relative)) + "openid.gif";
         await XrdsHelper.RenderXrdsAsync(context.Response, xrdsloginuri, xrdsimageuri);
@@ -161,7 +157,7 @@ public class Login(
 
         var desktop = Mode == LoginMode.Redirect;
         var profileTransport = await loginProfileTransport.ToString(profile, pureTransport);
-        var pageContent = JsCallbackHelper.RenderCallbackPage(profileTransport, Callback, ReturnUrl, desktop, _allowedReturnUrlHosts);
+        var pageContent = JsCallbackHelper.RenderCallbackPage(profileTransport, Callback, ReturnUrl, desktop, settings.AllowedReturnUrlHosts);
 
         //Render a page
         context.Response.ContentType = "text/html";
