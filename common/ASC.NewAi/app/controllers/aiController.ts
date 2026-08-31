@@ -651,6 +651,20 @@ export const aiController = {
         req.body.profileId = thread.profileId;
       }
     }
+    // The caller's explicit profileId must reference an existing profile
+    // even when an agent's assignment overrides it for the round below —
+    // otherwise a bogus id is silently swapped for the agent's model and
+    // the request looks honored (Bug 83160 reopen: the regular-room 400
+    // never fired in agent scope because the substitution ran first).
+    // Billing is not checked here: it applies to the effective profile,
+    // which the post-substitution pre-flight still validates.
+    {
+      const callerError = await unknownProfileIdError(req.body.profileId);
+      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
+        res.status(400).json({ error: callerError });
+        return;
+      }
+    }
     // The agent's assigned profile is authoritative for rounds in its scope:
     // substitute it over whatever the caller (or the thread prefill above)
     // put in profileId, so an agent's chat cannot be re-run on a different
@@ -706,6 +720,15 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
+    // Reject a caller-supplied unknown profileId before the agent
+    // substitution masks it — see sendWithStream (Bug 83160 reopen).
+    {
+      const callerError = await unknownProfileIdError(req.body.profileId);
+      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
+        res.status(400).json({ error: callerError });
+        return;
+      }
+    }
     // Agent scope pins the model — see sendWithStream (Bug 82914).
     {
       const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
