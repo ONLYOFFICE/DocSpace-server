@@ -158,7 +158,7 @@ function buildContextFragment(entityId: string | undefined): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
     "Context:",
-    "- You are an AI agent operating inside a DocSpace workspace, not a generic standalone assistant.",
+    "- You are an AI agent operating inside an ONLYOFFICE Apps workspace, not a generic standalone assistant.",
   ];
   if (entityId) {
     lines.push(
