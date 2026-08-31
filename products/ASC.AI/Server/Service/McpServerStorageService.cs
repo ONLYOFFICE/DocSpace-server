@@ -74,6 +74,11 @@ public class McpServerStorageService(
     {
         var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
+        return await ReadAllVerifiedAsync(entryId);
+    }
+
+    internal async Task<IReadOnlyList<McpServer>> ReadAllVerifiedAsync(int? entryId)
+    {
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
     }
 

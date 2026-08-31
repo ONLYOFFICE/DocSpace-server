@@ -100,13 +100,18 @@ public class ProfileStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
+        return await ReadAllVerifiedAsync();
+    }
+
+    internal async Task<List<Profile>> ReadAllVerifiedAsync()
+    {
         if (!_aiGateway.Configured)
         {
             return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
         }
 
         var profiles = await GetGatewayProfilesAsync();
-        return profiles.ToList();
+        return [.. profiles];
     }
 
     public async Task<Profile> UpdateAsync(Profile profile)

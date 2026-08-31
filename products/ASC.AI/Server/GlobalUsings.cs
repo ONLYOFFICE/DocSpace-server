@@ -47,6 +47,7 @@ global using ASC.AI.Models.RequestDto;
 global using ASC.AI.Models.RequestDto.Agents;
 global using ASC.AI.Models.RequestDto.Assignments;
 global using ASC.AI.Models.RequestDto.Attachments;
+global using ASC.AI.Models.RequestDto.ChatContext;
 global using ASC.AI.Models.RequestDto.McpServers;
 global using ASC.AI.Models.RequestDto.Messages;
 global using ASC.AI.Models.RequestDto.Preferences;

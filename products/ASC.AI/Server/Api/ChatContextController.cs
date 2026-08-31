@@ -31,45 +31,17 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Preferences = ASC.AI.Integration.Preferences.Preferences;
-
-namespace ASC.AI.Service;
+namespace ASC.AI.Api;
 
 [Scope]
-public class PreferencesStorageService(
-    UserManager userManager,
-    AuthContext authContext,
-    TenantManager tenantManager,
-    PreferencesStorage storage,
-    IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
-    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
+[ApiEndpoint("ai", Internal = true)]
+[AiFeature]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class ChatContextController(ChatContextService chatContextService) : ControllerBase
 {
-    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
-
-    public async Task<Preferences?> ReadAsync(string? entityId = null)
+    [HttpGet("chat-context")]
+    public async Task<ChatContextDto> ReadAsync(ReadChatContextRequestDto inDto)
     {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
-
-        return await ReadVerifiedAsync(entryId);
-    }
-
-    internal async Task<Preferences?> ReadVerifiedAsync(int? entryId)
-    {
-        return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
-    }
-
-    public async Task UpsertAsync(Preferences preferences, string? entityId = null)
-    {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
-
-        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, preferences, entryId);
-    }
-
-    public async Task DeleteAsync(string? entityId = null)
-    {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
-
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
+        return await chatContextService.ReadAsync(inDto.ThreadId, inDto.EntityId, inDto.ContextEntityId, inDto.IncludeMessages);
     }
 }

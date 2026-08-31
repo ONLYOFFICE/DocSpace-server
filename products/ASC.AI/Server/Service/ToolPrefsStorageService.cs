@@ -49,6 +49,11 @@ public class ToolPrefsStorageService(
     {
         var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
+        return await ReadVerifiedAsync(entryId);
+    }
+
+    internal async Task<IReadOnlyDictionary<string, ToolPreference>> ReadVerifiedAsync(int? entryId)
+    {
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
 

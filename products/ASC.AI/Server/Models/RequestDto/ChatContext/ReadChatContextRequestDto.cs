@@ -31,45 +31,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Preferences = ASC.AI.Integration.Preferences.Preferences;
+namespace ASC.AI.Models.RequestDto.ChatContext;
 
-namespace ASC.AI.Service;
-
-[Scope]
-public class PreferencesStorageService(
-    UserManager userManager,
-    AuthContext authContext,
-    TenantManager tenantManager,
-    PreferencesStorage storage,
-    IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
-    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
+public class ReadChatContextRequestDto
 {
-    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
+    [FromQuery(Name = "threadId")]
+    public Guid? ThreadId { get; init; }
 
-    public async Task<Preferences?> ReadAsync(string? entityId = null)
-    {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
+    [FromQuery(Name = "entityId")]
+    public string? EntityId { get; init; }
 
-        return await ReadVerifiedAsync(entryId);
-    }
+    [FromQuery(Name = "contextEntityId")]
+    public string? ContextEntityId { get; init; }
 
-    internal async Task<Preferences?> ReadVerifiedAsync(int? entryId)
-    {
-        return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
-    }
-
-    public async Task UpsertAsync(Preferences preferences, string? entityId = null)
-    {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
-
-        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, preferences, entryId);
-    }
-
-    public async Task DeleteAsync(string? entityId = null)
-    {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
-
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
-    }
+    [FromQuery(Name = "includeMessages")]
+    public bool IncludeMessages { get; init; } = true;
 }

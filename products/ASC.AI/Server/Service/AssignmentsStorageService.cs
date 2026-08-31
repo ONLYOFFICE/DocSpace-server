@@ -79,6 +79,11 @@ public class AssignmentsStorageService(
     {
         var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
+        return await ReadAllVerifiedAsync(entryId);
+    }
+
+    internal async Task<Dictionary<ActionType, Guid>> ReadAllVerifiedAsync(int? entryId)
+    {
         var stored = await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
 
         return await resolver.ResolveAsync(stored, applyDefaults: entryId == null);

@@ -31,45 +31,36 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Preferences = ASC.AI.Integration.Preferences.Preferences;
+namespace ASC.AI.Models.ResponseDto;
 
-namespace ASC.AI.Service;
-
-[Scope]
-public class PreferencesStorageService(
-    UserManager userManager,
-    AuthContext authContext,
-    TenantManager tenantManager,
-    PreferencesStorage storage,
-    IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
-    AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
+public class ChatContextDto
 {
-    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
+    public required AiSettingsDto Config { get; init; }
+    public required List<ProfileDto> Profiles { get; init; }
+    public required ChatContextScopeDto Global { get; init; }
+    public ChatContextScopeDto? Entity { get; init; }
+    public ChatContextScopeDto? ContextEntity { get; init; }
+    public ThreadDto? Thread { get; init; }
+    public List<MessageDto>? Messages { get; init; }
+    public WebSearchConfigDto? WebSearch { get; init; }
+}
 
-    public async Task<Preferences?> ReadAsync(string? entityId = null)
-    {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
+public class ChatContextScopeDto
+{
+    public string? EntityId { get; init; }
+    public ChatContextFolderDto? Folder { get; init; }
+    public required Dictionary<string, Guid> Assignments { get; init; }
+    public PreferencesDto? Preferences { get; init; }
+    public required IReadOnlyDictionary<string, ToolPreference> ToolPrefs { get; init; }
+    public required List<McpServerDto> McpServers { get; init; }
+}
 
-        return await ReadVerifiedAsync(entryId);
-    }
-
-    internal async Task<Preferences?> ReadVerifiedAsync(int? entryId)
-    {
-        return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
-    }
-
-    public async Task UpsertAsync(Preferences preferences, string? entityId = null)
-    {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
-
-        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, preferences, entryId);
-    }
-
-    public async Task DeleteAsync(string? entityId = null)
-    {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
-
-        await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
-    }
+public class ChatContextFolderDto
+{
+    public required int Id { get; init; }
+    public required string Title { get; init; }
+    public required int FolderType { get; init; }
+    public required bool IsAgent { get; init; }
+    public string? Prompt { get; init; }
+    public bool? CanCreate { get; init; }
 }

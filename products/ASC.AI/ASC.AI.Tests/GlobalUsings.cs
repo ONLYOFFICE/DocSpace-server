@@ -51,6 +51,7 @@ global using FluentAssertions;
 
 global using Xunit;
 
+global using ChatContextDto = ASCAi::ASC.AI.Models.ResponseDto.ChatContextDto;
 global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfileRequestDto;
 global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfilesRequestDto;
 // The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
