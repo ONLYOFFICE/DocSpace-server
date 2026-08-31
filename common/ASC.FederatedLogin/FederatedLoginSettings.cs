@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,30 +31,22 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.Collections.Concurrent;
-global using System.ComponentModel.DataAnnotations;
-global using System.Net;
-global using System.Security.Cryptography;
-global using System.Text;
-global using System.Text.Json;
-global using System.Xml.Linq;
+namespace ASC.FederatedLogin;
 
-global using ASC.Api.Core.Middleware;
-global using ASC.Common.Caching;
-global using ASC.Core.Billing;
-global using ASC.Core.Common.Security;
-global using ASC.Core.Data;
-global using ASC.Core.Tenants;
-global using ASC.FederatedLogin.Helpers;
-global using ASC.Notify.Cron;
-
-global using FluentAssertions;
-
-global using Microsoft.AspNetCore.Http;
-global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Configuration;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Logging.Abstractions;
-
-global using Polly;
-global using Polly.Retry;
+/// <summary>
+/// Configuration of the login handler, bound once per process: <see cref="Login"/> itself is
+/// scoped, so binding it there would run the configuration binder on every request.
+/// </summary>
+[Singleton]
+public class FederatedLoginSettings(IConfiguration configuration)
+{
+    /// <summary>
+    /// The complete allow-list for absolute return urls — nothing is implicitly allowed, so a
+    /// deployment that hands out an absolute (rather than relative) return url to the portal
+    /// itself has to list its own host here as well. The host of the current request is
+    /// deliberately not one of them: with <c>ForwardedHeaders.XForwardedHost</c> enabled it
+    /// comes from a client-controlled header.
+    /// </summary>
+    public IReadOnlyCollection<string> AllowedReturnUrlHosts { get; } =
+        configuration.GetSection("federated-login:allowed-return-url-hosts").Get<string[]>() ?? [];
+}
