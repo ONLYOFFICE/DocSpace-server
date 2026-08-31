@@ -19359,9 +19359,10 @@
                     "examples": [
                       "multipart/form-data"
                     ],
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/KeyValuePairStringStringValues"
+                    "type": "object",
+                    "additionalProperties": {
+                      "description": "A single form part carrying the file content.",
+                      "contentMediaType": "application/octet-stream"
                     },
                     "description": "The image data."
                   }
@@ -32279,24 +32280,6 @@
           }
         },
         "description": "The successful API response containing the ItemKeyValuePairBooleanString object."
-      },
-      "KeyValuePairStringStringValues": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "value": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
       },
       "LinkType": {
         "oneOf": [

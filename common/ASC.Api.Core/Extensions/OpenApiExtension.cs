@@ -144,6 +144,22 @@ public static class OpenApiExtension
                     ["contentMediaType"] = new JsonNodeExtension(JsonValue.Create(BinaryContentMediaType))
                 }
             });
+            // Reflecting IFormCollection leaks its dictionary shape into the contract as an array of
+            // KeyValuePair<string, StringValues>, which describes ASP.NET internals rather than the wire.
+            // A multipart body is a set of parts under caller-chosen field names, so document it as that.
+            c.MapType<IFormCollection>(() => new OpenApiSchema
+            {
+                Type = JsonSchemaType.Object,
+                Description = "The multipart form parts sent with the request. The field names are not fixed.",
+                AdditionalProperties = new OpenApiSchema
+                {
+                    Description = "A single form part carrying the file content.",
+                    Extensions = new Dictionary<string, IOpenApiExtension>
+                    {
+                        ["contentMediaType"] = new JsonNodeExtension(JsonValue.Create(BinaryContentMediaType))
+                    }
+                }
+            });
             // ApiDateTimeConverter writes and reads a single ISO-8601 string, and the type converter binds
             // query values the same way, so the reflected `utcTime`/`timeZoneOffset` object never hits the wire.
             c.MapType<ApiDateTime>(() => new OpenApiSchema
