@@ -3196,6 +3196,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       }

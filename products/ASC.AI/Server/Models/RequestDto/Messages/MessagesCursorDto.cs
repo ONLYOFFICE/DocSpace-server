@@ -31,21 +31,35 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.AI.Integration.Messages;
+
 namespace ASC.AI.Models.RequestDto.Messages;
 
-public class ReadMessagesByThreadRequestDto
+public class MessagesCursorDto
 {
-    [FromRoute(Name = "threadId")]
-    public required Guid ThreadId { get; init; }
-
-    [FromQuery(Name = "count")]
+    [FromQuery(Name = "createdAt")]
     [BindRequired]
-    [Range(1, 1000)]
-    public required int Count { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
 
-    [FromQuery(Name = "cursor")]
-    public MessagesCursorDto? Cursor { get; init; }
+    [FromQuery(Name = "id")]
+    [BindRequired]
+    public Guid Id { get; init; }
 
-    [FromQuery(Name = "direction")]
-    public MessagesDirection Direction { get; init; } = MessagesDirection.Asc;
+    public MessagesCursor ToCursor()
+    {
+        return new MessagesCursor
+        {
+            Timestamp = CreatedAt.UtcDateTime,
+            Id = Id
+        };
+    }
+
+    public static MessagesCursorDto FromCursor(MessagesCursor cursor)
+    {
+        return new MessagesCursorDto
+        {
+            CreatedAt = new DateTimeOffset(DateTime.SpecifyKind(cursor.Timestamp, DateTimeKind.Utc)),
+            Id = cursor.Id
+        };
+    }
 }
