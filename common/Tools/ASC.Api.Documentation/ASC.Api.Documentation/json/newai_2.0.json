@@ -586,7 +586,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -645,7 +645,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -881,7 +881,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1387,7 +1387,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1527,7 +1527,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2222,7 +2222,7 @@
             "name": "folderId",
             "in": "query",
             "description": "The prompt folder identifier. Omit to list the prompts that sit outside any folder.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3101,7 +3101,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3110,7 +3110,7 @@
             "name": "count",
             "in": "query",
             "description": "The maximum number of items to return in one page.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3119,7 +3119,7 @@
             "name": "cursor",
             "in": "query",
             "description": "The keyset pagination cursor: the JSON-encoded sort key of the last item already received. Omit for the first page.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3128,7 +3128,7 @@
             "name": "query",
             "in": "query",
             "description": "The full-text query the thread list is filtered by.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3183,7 +3183,7 @@
             "name": "count",
             "in": "query",
             "description": "The maximum number of items to return in one page.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3192,7 +3192,7 @@
             "name": "cursor",
             "in": "query",
             "description": "The keyset pagination cursor: the JSON-encoded sort key of the last item already received. Omit for the first page.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3201,7 +3201,7 @@
             "name": "direction",
             "in": "query",
             "description": "The order the message page is read in. Only \"desc\" turns the read around and pages back from the newest message; omit for the forward read.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3630,7 +3630,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3676,7 +3676,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3725,7 +3725,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3894,7 +3894,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3955,7 +3955,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -4064,7 +4064,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -4125,7 +4125,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -4175,7 +4175,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -4218,7 +4218,7 @@
             "name": "entityId",
             "in": "query",
             "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }

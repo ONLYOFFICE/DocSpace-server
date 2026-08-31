@@ -139,7 +139,31 @@ function tag(name: string): string {
 
 // Query params known to be optional; everything else in a `RouteSpec.params`
 // list is treated as required. Numeric params get an `integer` schema.
-const OPTIONAL_QUERY_PARAMS = new Set(["limit", "startIndex"]);
+//
+// `RouteSpec.params` is a bare list of names with no optionality attached, so
+// required-by-default is the safe assumption - but it has to be corrected here
+// for every name the handlers do not in fact insist on, or the document claims
+// a stricter contract than the service enforces and the generated SDK forces
+// callers to pass an argument the server ignores when absent.
+//
+// The list below is what the controllers actually do: a required query param
+// is rejected with an explicit 400 (`actionType`, `id`, `name`, `profileId`,
+// `providerType`, `baseUrl`, `threadId`, `messageId`, and the
+// `serverType`/`toolName` pair), while these six are read through
+// `asString`/`parseInt10`/`parseThreadsCursor`/`parseMessagesCursor`/
+// `parseDirection`, which all yield `undefined` on an absent value and let the
+// engine apply its own default. A name means the same thing wherever it
+// appears, as with `PARAM_DOCS` - none of the six is guarded in any operation.
+const OPTIONAL_QUERY_PARAMS = new Set([
+  "limit",
+  "startIndex",
+  "count",
+  "cursor",
+  "direction",
+  "entityId",
+  "folderId",
+  "query",
+]);
 const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex"]);
 
 // One-line description per parameter name. Engine routes declare their inputs
