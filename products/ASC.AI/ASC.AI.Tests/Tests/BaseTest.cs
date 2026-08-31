@@ -90,34 +90,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// <summary>
     /// Creates and registers a new member of the given type in the current test's portal.
     /// </summary>
-    protected async Task<User> InviteContact(EmployeeType employeeType, CancellationToken cancellationToken)
+    protected Task<User> InviteContact(EmployeeType employeeType, CancellationToken cancellationToken)
     {
-        await _clients.PeopleHttpClient.Authenticate(Owner);
-
-        var email = Initializer.Faker.Person.Email;
-        var firstName = Initializer.Faker.Person.FirstName;
-        var lastName = Initializer.Faker.Person.LastName;
-        var password = Initializer.Faker.Internet.Password(10, false);
-
-        var memberSw = Stopwatch.StartNew();
-        using var createResponse = await _clients.PeopleApi.PostAsync(
-            "/api/2.0/people",
-            new
-            {
-                cultureName = "en-US",
-                spam = false,
-                email,
-                password,
-                firstName,
-                lastName,
-                type = (int)employeeType
-            },
-            cancellationToken);
-
-        var created = await _clients.PeopleApi.ReadAsync<CreatedUserDto>(createResponse, cancellationToken);
-        Timing.Write($"invite.addMember({employeeType})", memberSw.ElapsedMilliseconds);
-
-        return new User(email, password) { Id = created.Id };
+        return Invitations.InviteContactAsync(_clients.ProfilesApi, _clients.PeopleHttpClient, employeeType, Owner, cancellationToken);
     }
 
     protected static CreateProfileRequestDto BuildCreateDto(string? name = null) =>
@@ -454,6 +429,4 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     private sealed record RoomFolderDto(int Id);
 
     private sealed record FolderContentDto(RoomFolderDto Current);
-
-    private sealed record CreatedUserDto(Guid Id);
 }

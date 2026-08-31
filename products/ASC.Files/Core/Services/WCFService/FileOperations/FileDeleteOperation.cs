@@ -209,6 +209,14 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
             var errorMsg = await permissionsManager.CheckFolderPermissionsAsync(
                 [folder], _immediately, checkPermissions, !_ignoreException);
+
+            if (errorMsg == null && !_ignoreException)
+            {
+                // one blocked file (e.g. open for editing) fails the whole folder up front,
+                // so the subtree is not left half-deleted; lenient flows keep the old behavior
+                errorMsg = await permissionsManager.CheckSubtreeFilesPermissionsAsync(folder, checkPermissions);
+            }
+
             if (errorMsg != null)
             {
                 if (!_ignoreException && checkPermissions && !canDelete)
@@ -852,6 +860,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         }
 
         long archiveSize = 0, trashSize = 0;
+        var userParentSizes = new Dictionary<int, long>();
 
         foreach (var file in deleted)
         {
@@ -864,6 +873,11 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                     break;
                 case FolderType.TRASH:
                     trashSize += file.ContentLength;
+                    break;
+                case FolderType.USER when file.ParentId is int userParentId:
+                    // hard delete from My Documents: nothing else on this path decrements the
+                    // USER tree counter (soft delete moves the size to trash instead)
+                    userParentSizes[userParentId] = userParentSizes.GetValueOrDefault(userParentId) + file.ContentLength;
                     break;
             }
 
@@ -915,6 +929,11 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             if (trashSize != 0)
             {
                 await folderDao.ChangeTreeFolderSizeAsync(_trashId, -trashSize);
+            }
+
+            foreach (var (parentId, size) in userParentSizes)
+            {
+                await folderDao.ChangeTreeFolderSizeAsync(parentId, -size);
             }
         }
         catch (Exception e)

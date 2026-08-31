@@ -367,6 +367,13 @@ public class FileDownloadOperationsManager(
 {
     public async Task<string> Publish(List<JsonElement> folders, List<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
     {
+        // The endpoint is [AllowAnonymous] for link-based download sessions; a caller with neither
+        // a session nor a link key must get 401 instead of the 404 the empty security filter produces.
+        if (!_authContext.IsAuthenticated && await _externalShare.GetLinkIdAsync() == Guid.Empty)
+        {
+            throw new AuthenticationException();
+        }
+
         await _fileOperationsManagerHolder.CheckRunning(await GetUserIdAsync(), FileOperationType.Download);
         if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {

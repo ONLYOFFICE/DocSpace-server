@@ -347,7 +347,7 @@ public abstract class Migrator(
         {
             newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
-                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, 0, null, false, null, null, null, null, null);
             Log(MigrationResource.CreateRootFolder);
         }
         else
@@ -365,7 +365,7 @@ public abstract class Migrator(
             {
                 if (storage.Type == FolderType.BUNCH && parentEntry.Id == -1)
                 {
-                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, folder.Private ? RoomType.EditingRoom : RoomType.CustomRoom, false, false, null, 0, null, false, null, null, null, null, null);
+                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, folder.Private ? RoomType.EditingRoom : RoomType.CustomRoom, false, false, 0, null, false, null, null, null, null, null);
 
                     if (MigrationInfo.Users.TryGetValue(folder.Owner, out var owner))
                     {

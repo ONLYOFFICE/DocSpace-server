@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The parameters for creating a room from a template.
 /// </summary>
-public class CreateRoomFromTemplateDto
+public class CreateRoomFromTemplateDto : IValidatableObject
 {
     /// <summary>
     /// The template ID from which the room to be created.
@@ -48,6 +48,7 @@ public class CreateRoomFromTemplateDto
     /// The room title.
     /// </summary>
     /// <example>My Room From Template</example>
+    [StringLength(RoomTitleMaxLength)]
     public required string Title { get; set; }
 
     /// <summary>
@@ -117,4 +118,18 @@ public class CreateRoomFromTemplateDto
     /// </summary>
     /// <example>false</example>
     public bool? Private { get; set; }
+
+    /// <summary>
+    /// The room this creates is an ordinary room, so its title obeys the ordinary room title limit
+    /// (<c>CreateRoomRequestDto.Title</c>) and, like it, is never blank.
+    /// </summary>
+    private const int RoomTitleMaxLength = 170;
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (string.IsNullOrWhiteSpace(Title))
+        {
+            yield return new ValidationResult("A room title cannot be empty or consist of whitespace only.", [nameof(Title)]);
+        }
+    }
 }

@@ -644,6 +644,15 @@ public class FileUtility(
                 ".pdf"
             }.ToImmutableList();
 
+    /// <summary>
+    /// Extensions the product creates verbatim instead of rewriting to the internal office format:
+    /// they are editable document types whose native format is the point of choosing them.
+    /// </summary>
+    public static readonly ImmutableList<string> ExtsKeepOnCreate = new List<string>
+    {
+                ".md", ".markdown"
+            }.ToImmutableList();
+
     public static readonly ImmutableList<string> ExtsTemplate = new List<string>
     {
                 ".ott", ".ots", ".otp",

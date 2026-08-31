@@ -65,10 +65,20 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var fileDao = daoFactory.GetFileDao<T>();
 
         var file = await fileDao.GetFileAsync(fileId);
-        if (file != null && 0 < version && version < file.Version)
+        if (file != null && 0 < version)
         {
-            file = await fileDao.GetFileAsync(fileId, version);
-            lastVersion = false;
+            // An explicit ?version= is a history read whatever value it names; a caller allowed to
+            // see only the current document must not address versions at all.
+            if (!await fileSecurity.CanReadHistoryAsync(file))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
+            if (version < file.Version)
+            {
+                file = await fileDao.GetFileAsync(fileId, version);
+                lastVersion = false;
+            }
         }
 
         if (file == null)

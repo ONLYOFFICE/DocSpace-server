@@ -136,7 +136,9 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
             request.Headers.Add("x-signature", jwt);
             using var response = await httpClient.SendAsync(request);
 
-            if (!response.IsSuccessStatusCode)
+            // Deleting the clients of a user who has none is idempotent: a 404 must not abort
+            // the user-deletion flow this cleanup is part of.
+            if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NotFound)
             {
                 throw new InvalidOperationException(response.ReasonPhrase);
             }

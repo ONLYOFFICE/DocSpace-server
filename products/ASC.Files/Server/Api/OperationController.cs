@@ -285,6 +285,11 @@ public class OperationController(
     {
         List<object> checkedFiles;
 
+        if (inDto.DestFolderId.ValueKind == JsonValueKind.Undefined)
+        {
+            throw new ArgumentException();
+        }
+
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {
             checkedFiles = await fileStorageService.MoveOrCopyDestFolderCheckAsync(inDto.FileIds.ToList(), inDto.DestFolderId.GetInt32());
