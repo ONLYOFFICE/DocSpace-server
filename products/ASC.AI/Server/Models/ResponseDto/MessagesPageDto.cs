@@ -31,21 +31,24 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.RequestDto.Messages;
+using MessagesPage = ASC.AI.Integration.Messages.MessagesPage;
 
-public class ReadMessagesByThreadRequestDto
+namespace ASC.AI.Models.ResponseDto;
+
+public class MessagesPageDto
 {
-    [FromRoute(Name = "threadId")]
-    public required Guid ThreadId { get; init; }
-
-    [FromQuery(Name = "count")]
-    [BindRequired]
-    [Range(1, 1000)]
-    public required int Count { get; init; }
-
-    [FromQuery(Name = "cursor")]
+    public required List<MessageDto> Items { get; init; }
     public MessagesCursorDto? Cursor { get; init; }
+}
 
-    [FromQuery(Name = "direction")]
-    public MessagesDirection Direction { get; init; } = MessagesDirection.Asc;
+public static class MessagesPageMapper
+{
+    public static MessagesPageDto MapToDto(MessagesPage page)
+    {
+        return new MessagesPageDto
+        {
+            Items = [.. page.Messages.Select(MessageMapper.MapToDto)],
+            Cursor = page.Cursor == null ? null : MessagesCursorDto.FromCursor(page.Cursor)
+        };
+    }
 }

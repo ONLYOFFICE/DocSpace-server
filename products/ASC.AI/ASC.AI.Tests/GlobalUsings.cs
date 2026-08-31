@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -57,11 +57,13 @@ global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles
 global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;
 global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.MessageDto;
+global using MessagesPageDto = ASCAi::ASC.AI.Models.ResponseDto.MessagesPageDto;
 global using PreferencesDto = ASCAi::ASC.AI.Models.ResponseDto.PreferencesDto;
 global using ProfileDto = ASCAi::ASC.AI.Models.ResponseDto.ProfileDto;
 global using PromptDto = ASCAi::ASC.AI.Models.ResponseDto.PromptDto;
 global using PromptFolderDto = ASCAi::ASC.AI.Models.ResponseDto.PromptFolderDto;
 global using Task = System.Threading.Tasks.Task;
 global using ThreadDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadDto;
+global using ThreadsPageDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadsPageDto;
 global using UpdateProfileBody = ASCAi::ASC.AI.Models.RequestDto.Profiles.UpdateProfileBody;
 global using User = ASC.Tests.Common.Data.User;
