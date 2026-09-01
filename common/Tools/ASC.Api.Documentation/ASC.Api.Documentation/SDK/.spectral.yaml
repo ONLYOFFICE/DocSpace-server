@@ -8,7 +8,11 @@
 # Prerequisite: npm i -g @stoplight/spectral-cli   (in PowerShell call `spectral.cmd`, not `spectral`)
 # Run from common/Tools/ASC.Api.Documentation/ASC.Api.Documentation, with lint/ already created:
 #
-#   spectral lint -r SDK/.spectral.yaml --fail-severity hint -f html --output.html lint/report.html -f markdown --output.markdown lint/report.md json/api_2.0.json json/files_2.0.json json/people_2.0.json json/backup_2.0.json json/newai_2.0.json
+#   spectral lint -r SDK/.spectral.yaml --fail-severity hint -f html --output.html lint/report.html -f markdown --output.markdown lint/report.md -f json --output.json lint/report.json json/api_2.0.json json/files_2.0.json json/people_2.0.json json/backup_2.0.json json/newai_2.0.json
+#
+# Three formats on purpose: markdown is read and diffed, html is its complete twin, and json is what
+# count.py aggregates - it carries the rule code, path and severity as data instead of as rendered
+# table cells.
 #
 # The open population as of 2026-09-01: path-segment-camel-case 68, and nothing else. It is blocked
 # rather than untouched - the only fix is renaming a public route, which moves the wire. That is not

@@ -24,10 +24,24 @@ operation's title and its description throughout the published contract and ever
 
 **The mechanism is Swashbuckle's built-in XML-comments filter**, installed by
 `c.IncludeXmlComments(() => doc)` in `common/ASC.Api.Core/Extensions/OpenApiExtension.cs` — two call
-sites, at lines 262 and 278 (verified 2026-08-28). Line 283 carries a load-bearing comment: the
+sites, at lines 292 and 308 (re-verified 2026-09-01; they were 262 and 278 on 2026-08-28, so grep for
+the call rather than trusting the number). Line 313 carries a load-bearing comment: the
 `XmlCommentsMemberDescriptionSchemaFilter` on the next line must stay after every `IncludeXmlComments`
 call. An `info`-level fix, an envelope fix and an XML-doc fix therefore all meet in this one file, so
 read it before reordering anything in it.
+
+**An XML `<param>` tag cannot describe a route placeholder that no DTO property binds.** Swashbuckle
+matches `<param name="x">` against the *method's* own parameters, and these controllers take a single
+DTO argument — so a tag naming a route placeholder matches nothing, reaches no document, and costs two
+compiler warnings on the way (`CS1572` for the tag with no parameter, plus `CS1573` on the DTO
+argument, which the tag has just made "partially documented"). Measured 2026-09-01 on
+`SaveFormRoleMapping`: tag added, project rebuilt, the emitted parameter still had no `description`.
+
+The place to put that text is `[SwaggerPathParameter(name, description)]` on the action, read by
+`SwaggerPathParameterFilter` in `common/ASC.Common/Utils/SwaggerCustomOperationFilter.cs`. It is
+fill-in only, so it never fights a description that arrives some other way. Reach for it **only** when
+the placeholder genuinely cannot be bound: if a DTO property can carry the value, `[FromRoute]` plus an
+XML `<summary>` on that property both documents the parameter and binds it, which is strictly better.
 
 **An operation can carry a `description` and no `summary`.** It then looks perfectly documented to
 anyone skimming the document, and `operation-description` stays silent, because it is a separate rule
@@ -71,8 +85,8 @@ The consequence for this loop: step 6's check of the built `.xml` is the only ch
 this class of defect before a regeneration, because the build, the style check and a reading of the
 diff all pass.
 
-**Spectral prints nothing when both output flags are set.** With `--output.html` and
-`--output.markdown` given, a successful run writes the two files and says nothing at all, while
+**Spectral prints nothing when the output flags are set.** With `--output.html`, `--output.markdown`
+and `--output.json` given, a successful run writes the three files and says nothing at all, while
 `--fail-severity hint` makes it exit 1 whenever any finding exists. A silent run that exits 1 is the
 normal, successful outcome. Do not read that exit code through a pipe — a pipe hands you the last
 command's status instead.
@@ -80,6 +94,19 @@ command's status instead.
 **The build's success line is localised; the document line is not.** Grepping build output for "Build
 succeeded" can find nothing on a perfectly successful build. `Writing document named '2.0'` stays
 English, which is another reason it is the line to look for.
+
+**A "top offending rules" summary in an HTML report did not come from Spectral.** The built-in HTML
+formatter renders a bare "Spectral Report" heading and one collapsible group per document, nothing
+else. A report with severity tiles and per-rule/per-file bar charts was rendered by
+`npx @api-common/spectral-reporter <spectral -f json output> -o <file>` (Apache-2.0, no dependencies,
+reads the JSON and writes HTML — it never touches the documents or the ruleset). Worth knowing in two
+directions: it is what to run when somebody asks to *look at* the findings rather than close one, and
+it is how to date an unfamiliar report someone shows you — a rule listed in such a summary may since
+have been closed or switched `off`. It also takes `--totals <file>`, a sidecar of
+`{"rules": {"<rule>": {"checked": N, "passed": N}}}`, which adds a compliance scoreboard; nothing
+generates that sidecar today, but it is the natural home for the ruleset's `# measured: 0` notes,
+since `checked 829 / passed 829` is evidence a check ran and held and an empty report never is.
+(2026-09-01.)
 
 **Compare the ruleset header's stated count against the report's actual TOTAL, early.** The header
 carries a hand-maintained "N findings as of <date>" figure. When it disagrees with what `count.py`

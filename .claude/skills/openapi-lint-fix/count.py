@@ -1,32 +1,59 @@
-"""Aggregate a Spectral markdown report into the counts lint-memory.md section 2 is built from.
+"""Aggregate a Spectral JSON report into the counts lint-memory.md section 2 is built from.
 
-Usage: python .claude/skills/openapi-lint-fix/count.py [lint/report.md]
+Usage: python .claude/skills/openapi-lint-fix/count.py [lint/report.json]
+
+Reads the `-f json` output, not the markdown one. The markdown table was the original input and
+parsing it worked, but every field arrived needing repair: the rule code came wrapped in a markdown
+link for `spectral:oas` rules and bare for custom ones, the JSON path came backslash-escaped, and the
+severity came as a word whose spelling the formatter owns. The JSON carries all four as data. Emitted
+output is unchanged, so the numbers quoted in SKILL.md and the ruleset's `# measured:` comments still
+mean the same thing.
 """
 
 import collections
-import re
+import json
 import sys
 
-BS = chr(92)
+# Spectral's DiagnosticSeverity, in the spelling the markdown formatter used, so that a count copied
+# into a ruleset comment reads the same as it always has.
+SEVERITY = {0: "Error", 1: "Warning", 2: "Information", 3: "Hint"}
+
+
+def json_path(segments):
+    """Render Spectral's path array the way the report renders it, so the two can be grepped alike.
+
+    Numeric segments are array indices and the markdown formatter writes them `[0]`, not `.0`.
+    Spectral sends them as strings, so test the value rather than the type.
+    """
+    out = ""
+    for segment in segments:
+        text = str(segment)
+        if text.isdigit():
+            out += f"[{text}]"
+        else:
+            out += f".{text}" if out else text
+    return out
 
 
 def rows(path):
     with open(path, encoding="utf-8") as f:
-        for i, line in enumerate(f):
-            if i < 2 or not line.startswith("|"):
-                continue
-            cells = [c.strip() for c in line.strip().strip("|").split("|")]
-            if len(cells) < 7:
-                continue
-            code, jsonpath, message, severity, start, _end, source = cells[:7]
-            # `code` is a markdown link for spectral:oas rules, bare text for custom ones.
-            code = re.sub(r"^\[([^\]]+)\].*", r"\1", code)
-            document = source.replace(BS, "").split("/")[-1]
-            yield code, jsonpath.replace(BS, ""), message, severity, start, document
+        findings = json.load(f)
+
+    for finding in findings:
+        start = finding.get("range", {}).get("start", {})
+        yield (
+            finding.get("code", ""),
+            json_path(finding.get("path", [])),
+            finding.get("message", ""),
+            SEVERITY.get(finding.get("severity"), str(finding.get("severity"))),
+            f"{start.get('line', '')}:{start.get('character', '')}",
+            # `source` is an absolute path whose separator follows the platform Spectral ran on.
+            finding.get("source", "").replace(chr(92), "/").split("/")[-1],
+        )
 
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else "lint/report.md"
+    path = sys.argv[1] if len(sys.argv) > 1 else "lint/report.json"
     by_severity = collections.Counter()
     by_document = collections.Counter()
     by_document_severity = collections.Counter()

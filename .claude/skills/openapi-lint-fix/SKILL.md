@@ -113,7 +113,7 @@ Two properties of the report change what "the first finding" means:
   population:
 
   ```bash
-  python ../../../../.claude/skills/openapi-lint-fix/count.py lint/report.md
+  python ../../../../.claude/skills/openapi-lint-fix/count.py lint/report.json
   ```
 
   It prints TOTAL, the per-severity and per-document splits, one line per rule, and every Error
@@ -134,7 +134,8 @@ was fixed. Follow the finding back to whatever generated it:
 | `info`, `servers`, security schemes, SDK-installation extension | `common/ASC.Api.Core/Extensions/OpenApiExtension.cs` (`AddOpenApi`) |
 | response envelopes, examples, nullable/3.1 rewrites, tags, rate-limit headers | the filters registered in that same `AddOpenApi` — `SwaggerSuccessApiResponseFilter`, `OpenApi31SchemaDocumentFilter`, `TagDescriptionsDocumentFilter`, the `RateLimit*Filter`s |
 | a schema or property description | the `<summary>`/`<param>` XML doc on the DTO — plus `GenerateDocumentationFile=True` in the owning csproj, without which the xml is never produced and every type in that assembly comes out undescribed |
-| route casing, path parameters, an operation's tags or summary | the controller: `[ApiEndpoint]`, the route template, `[Tags]`, the XML doc comment |
+| route casing, an operation's tags or summary | the controller: `[ApiEndpoint]`, the route template, `[Tags]`, the XML doc comment |
+| a path parameter with no description | whichever DTO property binds the placeholder — and if none does, `[SwaggerPathParameter]` on the action. **Not** an XML `<param>` tag: it reaches nothing here and costs two warnings, see `references/project-facts.md` |
 | anything in `newai_2.0.json` | the Node service `common/ASC.NewAi` — `scripts/schema/schemaTypes.ts`, `scripts/schema/shims.d.ts`, JSDoc on the local types. No C# edit can reach this document |
 | a framework or vendor type surfacing in the public API (`NoContentResult`, `KeyValuePair*`, third-party package types) | the **signature**, not the documentation |
 
@@ -345,7 +346,7 @@ lines of document is telling you the edit reached further than you thought.
 
 Then re-lint. **The command lives in the header comment of `SDK/.spectral.yaml` — read it and run it
 verbatim** rather than reconstructing it. That header is the single source of truth for the document
-list, the two output formats and the severity flag, and it records why each part is there. Four things
+list, the three output formats and the severity flag, and it records why each part is there. Four things
 it says that decide whether a run is usable at all:
 
 - Call `spectral.cmd`, not `spectral`. On Windows the bare name resolves to npm's unsigned
@@ -370,6 +371,13 @@ them. There is precedent for a report describing a tree state that no longer exi
 ```bash
 ls -la --time-style=+%Y-%m-%d_%H:%M json/*_2.0.json lint/report.md
 ```
+
+The header command writes three files and each has one job: `report.md` is what step 8 greps and
+diffs, `report.html` is its complete twin, and `report.json` is what `count.py` aggregates. None of
+them is meant for showing to anyone. When the ask is to *look at* the findings rather than to close
+one, render a fourth artefact from the json with `@api-common/spectral-reporter`, written out under
+**Tool traps** in `references/project-facts.md`. That is an addition, never a replacement: step 8's
+checks are written against the three above, so produce those as usual.
 
 ## 8. Prove the target finding is gone
 
