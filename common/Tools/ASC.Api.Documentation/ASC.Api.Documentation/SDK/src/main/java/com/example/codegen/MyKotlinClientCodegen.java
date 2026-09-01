@@ -76,6 +76,8 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
         ));
+
+        supportingFiles.add(new SupportingFile("sample.mustache", "samples", "sample.kt"));
     }
 
     @Override
@@ -130,6 +132,15 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
                         String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
                         op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
                     }
+                    // Retrofit forbids @Body on @DELETE/@GET/@HEAD shorthands; such operations
+                    // must use @HTTP(method = ..., hasBody = true) instead.
+                    String httpMethod = op.httpMethod == null ? "" : op.httpMethod.toUpperCase(Locale.ROOT);
+                    boolean bodyDisallowingMethod = httpMethod.equals("DELETE")
+                        || httpMethod.equals("GET")
+                        || httpMethod.equals("HEAD");
+                    if (bodyDisallowingMethod && op.bodyParam != null) {
+                        op.vendorExtensions.put("x-retrofit-http-with-body", true);
+                    }
                     if ("GET".equalsIgnoreCase(op.httpMethod)) {
                         boolean allAreQueryParams = op.allParams.stream()
                             .allMatch(p -> Boolean.TRUE.equals(p.isQueryParam));
@@ -178,6 +189,7 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
             CodegenModel model = mo.getModel();
 
             for (CodegenProperty prop : model.vars) {
+                normalizeEnumBackingType(prop);
                 if ("version_Changed".equalsIgnoreCase(prop.baseName)) {
                     prop.name = "versionChangedField";
                     prop.baseName = "versionChangedField";
@@ -238,6 +250,63 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
         }
 
         return objs;
+    }
+
+    /**
+     * Kotlin's `Enum` already declares `name`, `ordinal` and — through the generated enum class —
+     * `value`, so a specification value that maps onto one of those names does not compile.
+     */
+    private static final Set<String> RESERVED_ENUM_MEMBERS =
+        new HashSet<>(Arrays.asList("name", "ordinal", "value", "entries", "values", "valueOf"));
+
+    @Override
+    public String toEnumVarName(String value, String datatype) {
+        String varName = super.toEnumVarName(value, datatype);
+        if (varName != null && RESERVED_ENUM_MEMBERS.contains(varName)) {
+            return varName + "Field";
+        }
+        return varName;
+    }
+
+    /**
+     * The enum template feeds the same literal to `@Json(name = ...)` and to the enum constant, so a
+     * `number` enum backed by `java.math.BigDecimal` gets a `kotlin.String` argument and fails to
+     * compile. The backing type is declared as `kotlin.String` instead; the Moshi
+     * `ValueEnumJsonAdapterFactory` still accepts the numeric JSON form.
+     */
+    private void normalizeEnumBackingType(CodegenProperty prop) {
+        if (prop == null) {
+            return;
+        }
+        if (prop.isEnum && prop.dataType != null && prop.dataType.startsWith("java.math.")) {
+            prop.dataType = "kotlin.String";
+        }
+        if (prop.items != null) {
+            normalizeEnumBackingType(prop.items);
+        }
+    }
+
+    /**
+     * When the specification declares more than one HTTP bearer scheme, the bearer import, the
+     * bearer constructor and `setBearerToken`/`setOAuthCredentials` are emitted once per scheme,
+     * which does not compile. Only the first bearer scheme carries the marker the template guards
+     * those members with; every scheme still takes part in the auth-name mapping.
+     */
+    @Override
+    public List<CodegenSecurity> fromSecurity(Map<String, io.swagger.v3.oas.models.security.SecurityScheme> securitySchemeMap) {
+        List<CodegenSecurity> securities = super.fromSecurity(securitySchemeMap);
+        if (securities == null) {
+            return securities;
+        }
+        boolean bearerSeen = false;
+        for (CodegenSecurity security : securities) {
+            if (!Boolean.TRUE.equals(security.isBasicBearer)) {
+                continue;
+            }
+            security.vendorExtensions.put("x-first-basic-bearer", !bearerSeen);
+            bearerSeen = true;
+        }
+        return securities;
     }
 
     @Override

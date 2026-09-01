@@ -1,0 +1,275 @@
+package {{packageName}}.infrastructure
+
+{{#moshi}}
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.ToJson
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Types
+import java.lang.reflect.Type
+{{#enumUnknownDefaultCase}}
+import com.squareup.moshi.adapters.EnumJsonAdapter
+{{/enumUnknownDefaultCase}}
+{{^moshiCodeGen}}
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+{{/moshiCodeGen}}
+{{/moshi}}
+{{#gson}}
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+{{^threetenbp}}
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+{{/threetenbp}}
+{{#threetenbp}}
+import org.threeten.bp.LocalDate
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.OffsetDateTime
+{{/threetenbp}}
+{{#kotlinx-datetime}}
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+{{/kotlinx-datetime}}
+import java.util.UUID
+{{/gson}}
+{{#jackson}}
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+{{/jackson}}
+{{#kotlinx_serialization}}
+import java.math.BigDecimal
+import java.math.BigInteger
+{{^threetenbp}}
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+{{/threetenbp}}
+{{#threetenbp}}
+import org.threeten.bp.LocalDate
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.OffsetDateTime
+{{/threetenbp}}
+import java.util.UUID
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonBuilder
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.SerializersModuleBuilder
+import java.net.URI
+import java.net.URL
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
+{{/kotlinx_serialization}}
+
+{{#nonPublicApi}}internal {{/nonPublicApi}}{{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}object Serializer {
+{{#moshi}}
+    @JvmStatic
+    {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}val moshiBuilder: Moshi.Builder = Moshi.Builder()
+        .add(ValueEnumJsonAdapterFactory())
+        .add(OffsetDateTimeAdapter())
+        {{#kotlinx-datetime}}
+        .add(InstantAdapter())
+        .add(LocalDateAdapter())
+        .add(LocalTimeAdapter())
+        {{/kotlinx-datetime}}
+        .add(LocalDateTimeAdapter())
+        .add(LocalDateAdapter())
+        .add(UUIDAdapter())
+        .add(ByteArrayAdapter())
+        .add(URIAdapter())
+        {{^moshiCodeGen}}
+        .add(KotlinJsonAdapterFactory())
+        {{/moshiCodeGen}}
+        .add(BigDecimalAdapter())
+        .add(BigIntegerAdapter())
+
+    @JvmStatic
+    {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}val moshi: Moshi by lazy {
+{{#enumUnknownDefaultCase}}
+        SerializerHelper.addEnumUnknownDefaultCase(moshiBuilder)
+{{/enumUnknownDefaultCase}}
+        moshiBuilder.build()
+    }
+{{/moshi}}
+{{#gson}}
+    @JvmStatic
+    val gsonBuilder: GsonBuilder = GsonBuilder()
+        .registerTypeAdapter(OffsetDateTime::class.java, OffsetDateTimeAdapter())
+        {{#kotlinx-datetime}}
+        .registerTypeAdapter(Instant::class.java, InstantAdapter())
+        .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
+        .registerTypeAdapter(LocalTime::class.java, LocalTimeAdapter())
+        {{/kotlinx-datetime}}
+        .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
+        .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
+        .registerTypeAdapter(ByteArray::class.java, ByteArrayAdapter())
+        {{#generateOneOfAnyOfWrappers}}
+        {{#models}}
+        {{#model}}
+        {{^isEnum}}
+        {{^hasChildren}}
+        .registerTypeAdapterFactory({{modelPackage}}.{{{classname}}}.CustomTypeAdapterFactory())
+        {{/hasChildren}}
+        {{/isEnum}}
+        {{/model}}
+        {{/models}}
+        {{/generateOneOfAnyOfWrappers}}
+
+    @JvmStatic
+    val gson: Gson by lazy {
+        gsonBuilder.create()
+    }
+{{/gson}}
+{{#jackson}}
+    @JvmStatic
+    val jacksonObjectMapper: ObjectMapper = jacksonObjectMapper()
+        .findAndRegisterModules()
+        .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
+        {{#enumUnknownDefaultCase}}
+        .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE, true)
+        {{/enumUnknownDefaultCase}}
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, {{failOnUnknownProperties}})
+{{/jackson}}
+{{#kotlinx_serialization}}
+    private var isAdaptersInitialized = false
+
+    @JvmStatic
+    val kotlinxSerializationAdapters: SerializersModule by lazy {
+        isAdaptersInitialized = true
+        SerializersModule {
+            contextual(BigDecimal::class, BigDecimalAdapter)
+            contextual(BigInteger::class, BigIntegerAdapter)
+            {{^kotlinx-datetime}}
+            contextual(LocalDate::class, LocalDateAdapter)
+            contextual(LocalDateTime::class, LocalDateTimeAdapter)
+            contextual(OffsetDateTime::class, OffsetDateTimeAdapter)
+            {{/kotlinx-datetime}}
+            contextual(UUID::class, UUIDAdapter)
+            contextual(AtomicInteger::class, AtomicIntegerAdapter)
+            contextual(AtomicLong::class, AtomicLongAdapter)
+            contextual(AtomicBoolean::class, AtomicBooleanAdapter)
+            contextual(URI::class, URIAdapter)
+            contextual(URL::class, URLAdapter)
+            contextual(StringBuilder::class, StringBuilderAdapter)
+
+            apply(kotlinxSerializationAdaptersConfiguration)
+        }
+    }
+
+    var kotlinxSerializationAdaptersConfiguration: SerializersModuleBuilder.() -> Unit = {}
+        set(value) {
+            check(!isAdaptersInitialized) {
+                "Cannot configure kotlinxSerializationAdaptersConfiguration after kotlinxSerializationAdapters has been initialized."
+            }
+            field = value
+        }
+
+    private var isJsonInitialized = false
+
+    @JvmStatic
+    val kotlinxSerializationJson: Json by lazy {
+        isJsonInitialized = true
+        Json {
+            serializersModule = kotlinxSerializationAdapters
+            encodeDefaults = true
+            ignoreUnknownKeys = true
+            isLenient = true
+
+            apply(kotlinxSerializationJsonConfiguration)
+        }
+    }
+
+    var kotlinxSerializationJsonConfiguration: JsonBuilder.() -> Unit = {}
+        set(value) {
+            check(!isJsonInitialized) {
+                "Cannot configure kotlinxSerializationJsonConfiguration after kotlinxSerializationJson has been initialized."
+            }
+            field = value
+        }
+{{/kotlinx_serialization}}
+}
+{{#moshi}}
+
+/**
+ * Moshi adapter factory for the generated value-backed enums.
+ *
+ * The API represents these enums by their underlying value (e.g. the integer `1`), while
+ * Moshi's default [com.squareup.moshi.adapters.EnumJsonAdapter] only matches the `@Json`
+ * string name and therefore fails when the server sends the value as a JSON number.
+ *
+ * This factory targets every enum that exposes a `value` property (all generated enums do)
+ * and resolves the constant by that value, accepting both numeric and string JSON tokens on
+ * input and emitting the value in its natural JSON type on output.
+ */
+{{#nonPublicApi}}internal {{/nonPublicApi}}{{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}class ValueEnumJsonAdapterFactory : JsonAdapter.Factory {
+    override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
+        val rawType = Types.getRawType(type)
+        if (!rawType.isEnum) {
+            return null
+        }
+        val valueGetter = try {
+            rawType.getMethod("getValue")
+        } catch (e: NoSuchMethodException) {
+            return null
+        }
+        val constants = rawType.enumConstants ?: return null
+
+        val constantByKey = LinkedHashMap<String, Any>()
+        val valueByConstant = LinkedHashMap<Any, Any?>()
+        var numeric = true
+        for (constant in constants) {
+            val value = valueGetter.invoke(constant)
+            if (value !is Number) {
+                numeric = false
+            }
+            constantByKey[normalizeKey(value)] = constant
+            valueByConstant[constant] = value
+        }
+        val isNumeric = numeric
+
+        return object : JsonAdapter<Any>() {
+            override fun fromJson(reader: JsonReader): Any? {
+                if (reader.peek() == JsonReader.Token.NULL) {
+                    return reader.nextNull()
+                }
+                val raw = reader.readJsonValue() ?: return null
+                val key = normalizeKey(raw)
+                return constantByKey[key]
+                    ?: throw JsonDataException(
+                        "Unknown value '$raw' for enum ${rawType.name} at ${reader.path}"
+                    )
+            }
+
+            override fun toJson(writer: JsonWriter, value: Any?) {
+                if (value == null) {
+                    writer.nullValue()
+                    return
+                }
+                val raw = valueByConstant[value]
+                if (isNumeric && raw is Number) {
+                    writer.value(raw.toLong())
+                } else {
+                    writer.value(raw?.toString())
+                }
+            }
+        }
+    }
+
+    private fun normalizeKey(value: Any?): String = when (value) {
+        is Number -> {
+            val asDouble = value.toDouble()
+            if (asDouble % 1.0 == 0.0) value.toLong().toString() else value.toString()
+        }
+        else -> value.toString()
+    }
+}
+{{/moshi}}
