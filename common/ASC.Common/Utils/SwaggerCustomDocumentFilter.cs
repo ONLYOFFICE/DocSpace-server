@@ -49,11 +49,23 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
 
 public class ErrorResponseFilter : IDocumentFilter
 {
+    // The body CustomExceptionHandler writes on every failure it handles: it serializes an
+    // ErrorApiResponse with WriteAsJsonAsync, so an error status carries exactly this shape. Until
+    // it was documented the document declared error statuses with no body at all, which left the
+    // generated SDKs with no error type to deserialize into.
+    private const string ErrorSchemaId = "ErrorApiResponse";
+
+    // 502/503 are excluded on purpose - they come from the reverse proxy, never reach this
+    // handler, and their body may be HTML (their descriptions below say so).
+    private static readonly string[] _handlerStatuses =
+        ["400", "401", "402", "403", "404", "405", "409", "413", "415", "429", "500", "501"];
+
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
         swaggerDoc.Components ??= new OpenApiComponents();
         swaggerDoc.Components.Headers ??= new Dictionary<string, IOpenApiHeader>();
-
+        swaggerDoc.Components.Schemas ??= new Dictionary<string, IOpenApiSchema>();
+        swaggerDoc.Components.Schemas[ErrorSchemaId] = BuildErrorSchema();
 
         foreach (var operation in swaggerDoc.Paths.Values.Where(path => path.Operations != null).SelectMany(path => path.Operations.Values))
         {
@@ -62,10 +74,59 @@ public class ErrorResponseFilter : IDocumentFilter
                 continue;
             }
 
+            // Every operation can fail this way: an exception nothing maps ends up a 500 here.
+            operation.Responses.TryAdd("500", new OpenApiResponse { Description = "Internal Server Error." });
+
+            // 400, in contrast, is only reachable where there is something to reject - model binding
+            // and validation run against parameters and a request body. Declaring it on an operation
+            // that takes neither would document a response that cannot happen.
+            if (operation.Parameters is { Count: > 0 } || operation.RequestBody != null)
+            {
+                operation.Responses.TryAdd("400", new OpenApiResponse { Description = "Bad Request." });
+            }
+
             operation.Responses.TryAdd("502", new OpenApiResponse { Description = "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON." });
             operation.Responses.TryAdd("503", new OpenApiResponse { Description = "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON." });
+
+            foreach (var status in _handlerStatuses)
+            {
+                if (operation.Responses.TryGetValue(status, out var response) &&
+                    response is OpenApiResponse { Content: null } concrete)
+                {
+                    concrete.Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        ["application/json"] = new() { Schema = new OpenApiSchemaReference(ErrorSchemaId) }
+                    };
+                }
+            }
         }
     }
+
+    // Hand-built rather than reflected off ErrorApiResponse: the type lives in ASC.Api.Core, which
+    // this assembly does not reference, and a generated schema would carry no prose anyway - the
+    // ruleset requires a description on the component and on every property.
+    private static OpenApiSchema BuildErrorSchema() => new()
+    {
+        Type = JsonSchemaType.Object,
+        Description = "The error body returned with every failed request.",
+        Properties = new Dictionary<string, IOpenApiSchema>
+        {
+            ["status"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The response status flag. Always 1 on an error, as opposed to 0 on success." },
+            ["statusCode"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The HTTP status code of the response, repeated in the body." },
+            ["error"] = new OpenApiSchema
+            {
+                Type = JsonSchemaType.Object,
+                Description = "What went wrong.",
+                Properties = new Dictionary<string, IOpenApiSchema>
+                {
+                    ["message"] = new OpenApiSchema { Type = JsonSchemaType.String, Description = "The human-readable error message." },
+                    ["type"] = new OpenApiSchema { Type = JsonSchemaType.String, Description = "The .NET type of the underlying exception. Only sent when stack traces are enabled." },
+                    ["stack"] = new OpenApiSchema { Type = JsonSchemaType.String, Description = "The stack trace of the underlying exception. Only sent when stack traces are enabled." },
+                    ["hresult"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The HRESULT of the underlying exception. Only sent when stack traces are enabled." }
+                }
+            }
+        }
+    };
 }
 
 public class DerivedSchemaFilter : ISchemaFilter
@@ -146,6 +207,20 @@ public class LowercaseDocumentFilter : IDocumentFilter
 
 public class TagDescriptionsDocumentFilter : IDocumentFilter
 {
+    // openapi-tags-alphabetical checks the order of the global tags with javascript's String.localeCompare, i.e.
+    // ICU collation - so the comparison here is culture-aware, not ordinal: ordinal would sort "Settings / SSO"
+    // before "Settings / Security", and the rule would still fire. InvariantCulture
+    // was verified to produce the same order as localeCompare on the tag sets of all four documents.
+    // A sorted set rather than a one-off sort of the sequence, so a tag added to _tagDescriptions later cannot
+    // bring the finding back.
+    private static readonly IComparer<string> _tagNameComparer =
+        Comparer<string>.Create((x, y) => string.Compare(x, y, StringComparison.InvariantCulture));
+
+    // The same rule lifted to the tag object. One comparison for both the global tags and the nested
+    // x-tagGroups lists below, so the two orders cannot drift apart.
+    private static readonly IComparer<OpenApiTag> _tagComparer =
+        Comparer<OpenApiTag>.Create((x, y) => _tagNameComparer.Compare(x.Name, y.Name));
+
     private readonly Dictionary<string, string> _tagDescriptions = new()
     {
         { "People", "Operations for working with people" },
@@ -161,10 +236,12 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Files / Settings", "Operations for working with file settings." },
         { "Files / Third-party integration", "Operations for working with third-party integrations." },
         { "Files / Sharing", "Operations for working with sharing."},
+        { "Rooms / Privacy room", "Operations for working with private rooms and their encryption keys." },
         { "Group", "Operations for working with groups." },
         { "Group / Rooms", "Operations for getting groups with access rights to a room." },
         { "Group / Search", "Operations for searching groups." },
         { "People / Contacts", "Operations for working with user contacts." },
+        { "People / Email", "Operations for working with user email addresses." },
         { "People / Password", "Operations for working with user passwords." },
         { "People / Photos", "Operations for working with user photos." },
         { "People / Profiles", "Operations  for working with user profiles." },
@@ -178,6 +255,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "People / Guests", "Operations for workig with guests" },
         { "Authentication", "Operations for authenticating users." },
         { "Capabilities", "Operations for getting information about portal capabilities." },
+        { "Apps", "Operations for working with portal applications." },
         { "Migration", "Operations for performing migration." },
         { "ThirdParty", "Operations for working with third-party." },
         { "Portal / Quota", "Operations for getting information about portal quota." },
@@ -198,6 +276,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / Common settings", "Operations for working with common settings." },
         { "Settings / Cookies", "Operations for working with cookies settings." },
         { "Settings / Custom Navigation", "Operations for working with custom navigation settings." },
+        { "Settings / DocsCloud", "Operations for working with DocsCloud settings." },
         { "Settings / Encryption", "Operations for working with encryption settings." },
         { "Settings / Greeting settings", "Operations for working with greeting settings." },
         { "Settings / IP restrictions", "Operations for working with IP restriction settings." },
@@ -247,7 +326,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
             }
         }
 
-        swaggerDoc.Tags = customTags
+        swaggerDoc.Tags = new SortedSet<OpenApiTag>(customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
             .Select(tag =>
             {
@@ -263,25 +342,29 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
                 openApiTag.Extensions.Add("x-displayName", new JsonNodeExtension(displayName));
 
                 return openApiTag;
-            }).ToHashSet();
+            }), _tagComparer);
 
-        var groupTag = customTags
+        // Both levels ordered with the same _tagNameComparer as the global tags above: the grouping source is a
+        // HashSet, so the nested lists used to come out in path traversal order while tags next to them were sorted.
+        // The group order was alphabetical only by accident of that traversal - sorting it makes it a guarantee.
+        var groups = customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
             .GroupBy(tag => tag.Split(" / ")[0])
-            .ToDictionary(group => group.Key, group => group.ToList());
+            .OrderBy(group => group.Key, _tagNameComparer)
+            .Select(group => (Name: group.Key, Tags: group.OrderBy(tag => tag, _tagNameComparer)));
 
         var tagGroups = new JsonArray();
-        foreach (var group in groupTag)
+        foreach (var group in groups)
         {
             var groupObject = new JsonObject();
             var tagsArray = new JsonArray();
 
-            foreach (var tag in group.Value)
+            foreach (var tag in group.Tags)
             {
                 tagsArray.Add(tag);
             }
 
-            groupObject["name"] = group.Key;
+            groupObject["name"] = group.Name;
             groupObject["tags"] = tagsArray;
             tagGroups.Add(groupObject);
         }

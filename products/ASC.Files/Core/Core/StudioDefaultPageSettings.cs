@@ -33,6 +33,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The settings that define the folder opened by default after sign-in.
+/// </summary>
 public class StudioDefaultPageSettings : ISettings<StudioDefaultPageSettings>
 {
     /// <summary>

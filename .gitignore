@@ -34,6 +34,7 @@ common/*/docker-entrypoint.py
 # every SDK command reads.
 /common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/target
 /common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/json/api-docs.json
+/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/lint/
 
 # DocStore copies (source: common/resources/DocStore submodule)
 products/ASC.AI/Server/DocStore/

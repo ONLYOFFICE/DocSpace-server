@@ -316,12 +316,12 @@ public class TfaappController(
     /// <summary>Generate setup code</summary>
     /// <path>api/2.0/settings/tfaapp/setup</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Setup code", typeof(SetupCode))]
+    [SwaggerResponse(200, "Setup code", typeof(TfaSetupCodeDto))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaapp/setup")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")]
-    public async Task<SetupCode> TfaAppGenerateSetupCode()
+    public async Task<TfaSetupCodeDto> TfaAppGenerateSetupCode()
     {
         await securityContext.AuthByClaimAsync();
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -338,7 +338,7 @@ public class TfaappController(
             throw new InvalidOperationException("Not available.");
         }
 
-        return await tfaManager.GenerateSetupCodeAsync(currentUser);
+        return TfaSetupCodeDto.FromSetupCode(await tfaManager.GenerateSetupCodeAsync(currentUser));
     }
 
     /// <remarks>
