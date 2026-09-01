@@ -42,15 +42,15 @@ import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { UndiciInstrumentation } from "@opentelemetry/instrumentation-undici";
 import nconf from "../../config/index.js";
 import logger from "../log.js";
-import { isObject, parseInt10 } from "../narrow.js";
+import { parseInt10 } from "../narrow.js";
 
-function otelSection(): Record<string, unknown> {
-  const section: unknown = nconf.get("openTelemetry");
-  return isObject(section) ? section : {};
+function otelEnabled(): boolean {
+  const value: unknown = nconf.get("openTelemetry:enable");
+  return value === true || value === "true";
 }
 
 function resolveServiceName(): string {
-  const fromConfig = otelSection()["ServiceName"];
+  const fromConfig: unknown = nconf.get("openTelemetry:ServiceName");
   if (typeof fromConfig === "string" && fromConfig.length > 0) {
     return fromConfig;
   }
@@ -91,7 +91,7 @@ function resolveOtelSetting(key: string): string | undefined {
 
 const otlpEndpoint = resolveOtelSetting("OTEL_EXPORTER_OTLP_ENDPOINT");
 
-if (otelSection()["enable"] === true && otlpEndpoint) {
+if (otelEnabled() && otlpEndpoint) {
   const protocol = resolveOtelSetting("OTEL_EXPORTER_OTLP_PROTOCOL")?.trim() || "http/protobuf";
   const { traceExporter, metricExporter } = await createExporters(protocol, otlpEndpoint);
   const serviceName = resolveServiceName();

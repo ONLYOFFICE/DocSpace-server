@@ -336,6 +336,7 @@ public class ProjectConfigurator(
 
             AddBaseBind(resourceBuilder);
 
+            resourceBuilder.WithEnvironment("openTelemetry:enable", "true");
             resourceBuilder.WithOtlpExporter();
             ApplyServiceName(resourceBuilder);
             ApplyCustomOtlpEndpoint(resourceBuilder);
@@ -352,6 +353,7 @@ public class ProjectConfigurator(
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
+            resourceBuilder.WithEnvironment("openTelemetry:enable", "true");
             resourceBuilder.WithOtlpExporter();
             ApplyServiceName(resourceBuilder);
             ApplyCustomOtlpEndpoint(resourceBuilder);
