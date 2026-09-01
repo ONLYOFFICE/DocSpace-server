@@ -106,8 +106,8 @@ public class FileSecurityInfoSimpleRequestDto<T>
     /// The file ID.
     /// </summary>
     /// <example>1</example>
-    [FromRoute(Name = "fileId")]
-    public required T FileId { get; set; }
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
 
     /// <summary>
     /// The parameters of the security information simple request.
@@ -125,8 +125,8 @@ public class FolderSecurityInfoSimpleRequestDto<T>
     /// The folder ID.
     /// </summary>
     /// <example>1</example>
-    [FromRoute(Name = "folderId")]
-    public required T FolderId { get; set; }
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
 
     /// <summary>
     /// The parameters of the security information simple request.

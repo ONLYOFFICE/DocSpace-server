@@ -82,7 +82,7 @@ public abstract class SecurityController<T>(
     /// Returns the detailed information about the shared file with the ID specified in the request.
     /// </remarks>
     /// <summary>Get the shared file information</summary>
-    /// <path>api/2.0/files/file/{fileId}/share</path>
+    /// <path>api/2.0/files/file/{id}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
@@ -111,7 +111,7 @@ public abstract class SecurityController<T>(
     /// Returns the detailed information about the shared folder with the ID specified in the request.
     /// </remarks>
     /// <summary>Get the shared folder information</summary>
-    /// <path>api/2.0/files/folder/{folderId}/share</path>
+    /// <path>api/2.0/files/folder/{id}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
@@ -140,11 +140,11 @@ public abstract class SecurityController<T>(
     /// Sets the sharing settings to a file with the ID specified in the request.
     /// </remarks>
     /// <summary>Share a file</summary>
-    /// <path>api/2.0/files/file/{fileId}/share</path>
+    /// <path>api/2.0/files/file/{id}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not", typeof(IAsyncEnumerable<FileShareDto>))]
-    [HttpPut("file/{fileId}/share")]
+    [HttpPut("file/{id}/share")]
     public IAsyncEnumerable<FileShareDto> SetFileSecurityInfo(FileSecurityInfoSimpleRequestDto<T> inDto)
     {
         string text = null;
@@ -156,18 +156,18 @@ public abstract class SecurityController<T>(
             text = htmlDoc.DocumentNode.InnerText;
         }
 
-        return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
+        return securityControllerHelper.SetSecurityInfoAsync([inDto.Id], [], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
     }
 
     /// <remarks>
     /// Sets the sharing settings to a folder with the ID specified in the request.
     /// </remarks>
     /// <summary>Share a folder</summary>
-    /// <path>api/2.0/files/folder/{folderId}/share</path>
+    /// <path>api/2.0/files/folder/{id}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared folder information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not", typeof(IAsyncEnumerable<FileShareDto>))]
-    [HttpPut("folder/{folderId}/share")]
+    [HttpPut("folder/{id}/share")]
     public IAsyncEnumerable<FileShareDto> SetFolderSecurityInfo(FolderSecurityInfoSimpleRequestDto<T> inDto)
     {
         string text = null;
@@ -179,7 +179,7 @@ public abstract class SecurityController<T>(
             text = htmlDoc.DocumentNode.InnerText;
         }
 
-        return securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
+        return securityControllerHelper.SetSecurityInfoAsync([], [inDto.Id], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
     }
 
     /// <remarks>

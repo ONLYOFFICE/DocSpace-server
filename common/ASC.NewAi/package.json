@@ -19,7 +19,7 @@
     "@aws-sdk/client-cloudwatch-logs": "^3.199.0",
     "@google/genai": "^1.30.0",
     "@mistralai/mistralai": "^1.11.0",
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.5.71.tgz",
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.5.82.tgz",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/exporter-metrics-otlp-grpc": "^0.222.0",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.222.0",

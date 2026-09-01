@@ -33,6 +33,9 @@
 
 namespace ASC.FederatedLogin;
 
+/// <summary>
+/// The OAuth 2.0 token issued by a third-party provider.
+/// </summary>
 [DebuggerDisplay("{AccessToken} (expired: {IsExpired})")]
 public class OAuth20Token
 {
