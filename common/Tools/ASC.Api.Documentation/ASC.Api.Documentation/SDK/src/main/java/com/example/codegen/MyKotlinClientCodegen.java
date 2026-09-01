@@ -269,20 +269,75 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
     }
 
     /**
-     * The enum template feeds the same literal to `@Json(name = ...)` and to the enum constant, so a
-     * `number` enum backed by `java.math.BigDecimal` gets a `kotlin.String` argument and fails to
-     * compile. The backing type is declared as `kotlin.String` instead; the Moshi
-     * `ValueEnumJsonAdapterFactory` still accepts the numeric JSON form.
+     * The enum template quotes the literal for `@Json(name = ...)` but passes it to the enum
+     * constant as it stands, so a `number` enum backed by `java.math.BigDecimal` — whose literal
+     * `toEnumValue` has already quoted — is handed a `kotlin.String` where the constructor expects a
+     * number and fails to compile. Declaring the backing type as `kotlin.String` would compile but
+     * change the wire format: `ValueEnumJsonAdapterFactory` derives `isNumeric` from the runtime
+     * type of `value`, so the property would be written back as the JSON string `"1"` instead of the
+     * number `1` the specification declares. The literals are unquoted and the backing type retyped
+     * to `kotlin.Long` instead — the shape every `integer` enum already generates.
+     *
+     * A fractional value has no such shape (the adapter writes every number through `toLong()` and
+     * would truncate it), so those keep the `kotlin.String` backing type.
      */
     private void normalizeEnumBackingType(CodegenProperty prop) {
-        if (prop == null) {
+        if (prop == null || !prop.isEnum) {
             return;
         }
-        if (prop.isEnum && prop.dataType != null && prop.dataType.startsWith("java.math.")) {
-            prop.dataType = "kotlin.String";
+        CodegenProperty backing = prop;
+        while (backing.items != null) {
+            backing = backing.items;
         }
-        if (prop.items != null) {
-            normalizeEnumBackingType(prop.items);
+        if (backing.dataType == null || !backing.dataType.startsWith("java.math.")) {
+            return;
+        }
+        List<Map<String, Object>> enumVars = enumVarsOf(prop.allowableValues);
+        boolean integral = !enumVars.isEmpty();
+        for (Map<String, Object> enumVar : enumVars) {
+            if (!isIntegralLiteral(unquote(String.valueOf(enumVar.get("value"))))) {
+                integral = false;
+            }
+        }
+        if (!integral) {
+            backing.dataType = "kotlin.String";
+        } else {
+            unquoteEnumValues(prop.allowableValues);
+            if (backing != prop) {
+                unquoteEnumValues(backing.allowableValues);
+            }
+            backing.dataType = "kotlin.Long";
+        }
+        if (prop.mostInnerItems != null) {
+            prop.mostInnerItems.dataType = backing.dataType;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> enumVarsOf(Map<String, Object> allowableValues) {
+        Object enumVars = allowableValues == null ? null : allowableValues.get("enumVars");
+        return enumVars instanceof List ? (List<Map<String, Object>>) enumVars : Collections.emptyList();
+    }
+
+    private static void unquoteEnumValues(Map<String, Object> allowableValues) {
+        for (Map<String, Object> enumVar : enumVarsOf(allowableValues)) {
+            enumVar.put("value", unquote(String.valueOf(enumVar.get("value"))));
+        }
+    }
+
+    private static String unquote(String value) {
+        if (value.length() > 1 && value.startsWith("\"") && value.endsWith("\"")) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
+    }
+
+    private static boolean isIntegralLiteral(String value) {
+        try {
+            Long.parseLong(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

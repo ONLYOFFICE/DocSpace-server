@@ -73,7 +73,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
     public void processOpts() {
         super.processOpts();
 
-        this.outputFolder = "D:/ruby-sdk/docspace-api-sdk-ruby";
+        this.outputFolder = "../../../../../sdk/docspace-api-sdk-ruby";
 
         supportingFiles.removeIf(file ->
             "README.md".equals(file.getDestinationFilename())
