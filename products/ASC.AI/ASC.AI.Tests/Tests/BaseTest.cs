@@ -277,17 +277,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     {
         await _clients.FilesHttpClient.Authenticate(Owner);
 
-        var body = new
-        {
-            title = title ?? $"room-{Guid.NewGuid():N}",
-            roomType = "AiRoom"
-        };
+        var request = new CreateRoomRequestDto(title ?? $"room-{Guid.NewGuid():N}", roomType: RoomType.AiRoom);
+        var room = (await _clients.RoomsApi.CreateRoomAsync(request, TestContext.Current.CancellationToken)).Response;
 
-        using var response = await _clients.FilesApi.PostAsync(
-            "/api/2.0/files/rooms",
-            body,
-            TestContext.Current.CancellationToken);
-        var room = await _clients.FilesApi.ReadAsync<RoomFolderDto>(response, TestContext.Current.CancellationToken);
         return room.Id;
     }
 
@@ -298,8 +290,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     {
         await _clients.FilesHttpClient.Authenticate(Owner);
 
-        using var response = await _clients.FilesApi.GetAsync("/api/2.0/files/@my", TestContext.Current.CancellationToken);
-        var content = await _clients.FilesApi.ReadAsync<FolderContentDto>(response, TestContext.Current.CancellationToken);
+        var content = (await _clients.FoldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+
         return content.Current.Id;
     }
 
@@ -425,8 +417,4 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         using var response = await _ai.GetAsync($"{PromptsPath}/{id}", TestContext.Current.CancellationToken);
         return await _ai.ReadAsync<PromptDto>(response, TestContext.Current.CancellationToken);
     }
-
-    private sealed record RoomFolderDto(int Id);
-
-    private sealed record FolderContentDto(RoomFolderDto Current);
 }
