@@ -33,8 +33,18 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The encryption information of a file: the user key pairs and the per-user file keys.
+/// </summary>
 public class FileEncryptionInfoDto
 {
+    /// <summary>
+    /// The key pairs of the users who have access to the file.
+    /// </summary>
     public List<EncryptionKeyDto> UserKeys { get; set; }
+
+    /// <summary>
+    /// The file keys issued to those users.
+    /// </summary>
     public List<FileKeys> FileKeys { get; set; }
 }

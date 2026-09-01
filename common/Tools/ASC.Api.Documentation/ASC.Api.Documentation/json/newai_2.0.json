@@ -3,12 +3,21 @@
   "info": {
     "title": "ONLYOFFICE DocSpace AI Service API",
     "version": "2.0",
-    "description": "HTTP API of the AI service. Requests are authenticated with the DocSpace `asc_auth_key` session cookie or an `Authorization` header and forwarded to the AI engine and the .NET AI integration service."
+    "description": "HTTP API of the AI service. Requests are authenticated with the DocSpace `asc_auth_key` session cookie or an `Authorization` header and forwarded to the AI engine and the .NET AI integration service.",
+    "contact": {
+      "name": "API Support",
+      "email": "support@onlyoffice.com",
+      "url": "https://helpdesk.onlyoffice.com/hc/en-us"
+    },
+    "license": {
+      "name": "AGPL-3.0-only",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.html"
+    }
   },
   "servers": [
     {
       "url": "{baseUrl}",
-      "description": "Server configuration",
+      "description": "The production DocSpace portal, at the customer's own domain.",
       "variables": {
         "baseUrl": {
           "default": "",
@@ -27,6 +36,11 @@
   ],
   "tags": [
     {
+      "name": "AI / Agents",
+      "description": "AI agent rooms (delegated to the .NET AI service).",
+      "x-displayName": "Agents"
+    },
+    {
       "name": "AI / AI",
       "description": "Chat completions and tool-call approval.",
       "x-displayName": "AI"
@@ -40,6 +54,21 @@
       "name": "AI / Attachments",
       "description": "Message file and image attachments.",
       "x-displayName": "Attachments"
+    },
+    {
+      "name": "AI / Editor tools",
+      "description": "DocSpace tool catalog and execution for the editor AI plugin.",
+      "x-displayName": "Editor tools"
+    },
+    {
+      "name": "AI / Export",
+      "description": "Markdown → docx export.",
+      "x-displayName": "Export"
+    },
+    {
+      "name": "AI / OpenAI passthrough",
+      "description": "OpenAI-compatible endpoints proxied to a profile's provider.",
+      "x-displayName": "OpenAI passthrough"
     },
     {
       "name": "AI / Preferences",
@@ -57,6 +86,11 @@
       "x-displayName": "Prompts"
     },
     {
+      "name": "AI / Settings",
+      "description": "Portal-wide, vectorization and per-user AI settings.",
+      "x-displayName": "Settings"
+    },
+    {
       "name": "AI / Threads",
       "description": "Chat threads and their messages.",
       "x-displayName": "Threads"
@@ -67,36 +101,35 @@
       "x-displayName": "Tools"
     },
     {
+      "name": "AI / Vectorization",
+      "description": "Vectorization tasks over portal content.",
+      "x-displayName": "Vectorization"
+    },
+    {
       "name": "AI / Web search",
       "description": "Web-search provider configuration.",
       "x-displayName": "Web search"
-    },
-    {
-      "name": "AI / Agents",
-      "description": "AI agent rooms (delegated to the .NET AI service).",
-      "x-displayName": "Agents"
-    },
-    {
-      "name": "AI / Export",
-      "description": "Markdown → docx export.",
-      "x-displayName": "Export"
     }
   ],
   "x-tagGroups": [
     {
       "name": "AI",
       "tags": [
+        "AI / Agents",
         "AI / AI",
         "AI / Assignments",
         "AI / Attachments",
+        "AI / Editor tools",
+        "AI / Export",
+        "AI / OpenAI passthrough",
         "AI / Preferences",
         "AI / Profiles",
         "AI / Prompts",
+        "AI / Settings",
         "AI / Threads",
         "AI / Tools",
-        "AI / Web search",
-        "AI / Agents",
-        "AI / Export"
+        "AI / Vectorization",
+        "AI / Web search"
       ]
     }
   ],
@@ -108,6 +141,7 @@
         ],
         "operationId": "aiAiSend",
         "summary": "Send",
+        "description": "Runs one AI action: the profile bound to `actionType` (falling back to the `Default` slot) is dispatched against a single-message history. Nothing is persisted - no thread, no title generation, no storage writes.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -146,7 +180,8 @@
                     "description": "The user turn to send."
                   },
                   "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs"
+                    "$ref": "#/components/schemas/AiAiActionArgs",
+                    "description": "Per-request engine options: extra tools, reasoning, prompt override."
                   },
                   "entityId": {
                     "type": "string",
@@ -171,6 +206,7 @@
         ],
         "operationId": "aiAiSendCustom",
         "summary": "Send custom",
+        "description": "Runs a free-form one-turn call against a caller-supplied system prompt. No thread, no history and no persistence. The profile is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -213,7 +249,8 @@
                     "$ref": "#/components/schemas/AiThreadMessageLike"
                   },
                   "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs"
+                    "$ref": "#/components/schemas/AiAiActionArgs",
+                    "description": "Per-request engine options: extra tools, reasoning, prompt override."
                   }
                 },
                 "required": [
@@ -235,6 +272,7 @@
         ],
         "operationId": "aiAiSendWithStream",
         "summary": "Send with stream",
+        "description": "Starts a chat round and streams it back as newline-delimited `ChatEvent` objects. The thread is opened or created, the user message and the reply are persisted, a new thread gets a generated title, and a tool call pauses the round until it is approved or denied.",
         "responses": {
           "200": {
             "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
@@ -276,6 +314,7 @@
         ],
         "operationId": "aiAiSendWithStreamOpenAI",
         "summary": "Send with stream open ai",
+        "description": "The same chat round as `send-with-stream`, re-encoded as an OpenAI Chat Completions stream of `chat.completion.chunk` objects. Storage, title generation and tool-call pauses are identical - only the wire shape differs; a tool call ends the stream with `finish_reason: \"tool_calls\"`.",
         "responses": {
           "200": {
             "description": "Server-sent events stream of OpenAI `chat.completion.chunk` objects, terminated by a `[DONE]` sentinel.",
@@ -317,6 +356,7 @@
         ],
         "operationId": "aiAiRegenerateStream",
         "summary": "Regenerate stream",
+        "description": "Re-rolls the last assistant reply in an existing thread: every message after the last user message (the previous reply plus any tool-call hops) is dropped and a fresh reply is streamed against the unchanged prompt. The thread must already exist and no title is generated.",
         "responses": {
           "200": {
             "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
@@ -351,13 +391,16 @@
                     "description": "Target thread (must already exist)."
                   },
                   "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs"
+                    "$ref": "#/components/schemas/AiAiActionArgs",
+                    "description": "Per-request engine options: extra tools, reasoning, prompt override."
                   },
                   "entityId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Optional entity (room) scope for profile resolution."
                   },
                   "profileId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Session-level profile override for this request only."
                   }
                 },
                 "required": [
@@ -377,6 +420,7 @@
         ],
         "operationId": "aiAiApproveToolCall",
         "summary": "Approve tool call",
+        "description": "Resumes a chat round paused on a tool call. The supplied result is persisted onto the assistant message that issued the call and the stream continues with the augmented history.",
         "responses": {
           "200": {
             "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
@@ -431,13 +475,16 @@
                     "description": "Snapshot of the assistant message at the time the tool call surfaced."
                   },
                   "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs"
+                    "$ref": "#/components/schemas/AiAiActionArgs",
+                    "description": "Per-request engine options: extra tools, reasoning, prompt override."
                   },
                   "entityId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Optional entity (room) scope for profile resolution."
                   },
                   "profileId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Session-level profile override for this request only."
                   }
                 },
                 "required": [
@@ -460,6 +507,7 @@
         ],
         "operationId": "aiAiDenyToolCall",
         "summary": "Deny tool call",
+        "description": "Denies the pending tool call and resumes the chat immediately, with `\"User deny tool call\"` standing in for the tool result.",
         "responses": {
           "200": {
             "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
@@ -501,6 +549,7 @@
         ],
         "operationId": "aiAssignmentsResolveForAction",
         "summary": "Resolve for action",
+        "description": "Resolves the profile bound to an AI action, falling back to the `Default` slot when the action itself has none. Fails when neither slot is set or the bound profile no longer exists - use `try-resolve-for-action` for an empty answer instead.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -527,6 +576,7 @@
           {
             "name": "actionType",
             "in": "query",
+            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\".",
             "required": true,
             "schema": {
               "type": "string"
@@ -535,7 +585,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -550,6 +601,7 @@
         ],
         "operationId": "aiAssignmentsTryResolveForAction",
         "summary": "Try resolve for action",
+        "description": "Resolves the profile bound to an AI action exactly like `resolve-for-action`, but answers with an empty result instead of failing when nothing is configured.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -583,6 +635,7 @@
           {
             "name": "actionType",
             "in": "query",
+            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\".",
             "required": true,
             "schema": {
               "type": "string"
@@ -591,7 +644,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -606,6 +660,7 @@
         ],
         "operationId": "aiAssignmentsAssign",
         "summary": "Assign",
+        "description": "Binds a profile to an AI action, creating the assignment or updating it in place. The profile's declared capabilities are validated against the action, except for the `Default` slot.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -662,6 +717,7 @@
         ],
         "operationId": "aiAssignmentsUnassign",
         "summary": "Unassign",
+        "description": "Removes the profile binding of an AI action. Does nothing when that slot is already empty.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -703,6 +759,7 @@
         ],
         "operationId": "aiAssignmentsBulkAssign",
         "summary": "Bulk assign",
+        "description": "Applies many action-to-profile bindings at once. Every entry is validated first and nothing is written if any of them fails, so the assignment set is never left half-written.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -747,6 +804,7 @@
         ],
         "operationId": "aiAssignmentsGetAssignment",
         "summary": "Get assignment",
+        "description": "Returns the profile bound to one AI action, without the `Default` fallback.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -776,6 +834,7 @@
           {
             "name": "actionType",
             "in": "query",
+            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\".",
             "required": true,
             "schema": {
               "type": "string"
@@ -791,6 +850,7 @@
         ],
         "operationId": "aiAssignmentsGetAllAssignments",
         "summary": "Get all assignments",
+        "description": "Returns the full action-to-profile assignment map of the scope.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -820,7 +880,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -835,6 +896,7 @@
         ],
         "operationId": "aiAssignmentsCascadeProfileDelete",
         "summary": "Cascade profile delete",
+        "description": "Cleans up the assignments pointing at a profile that is about to be deleted: the `Default` slot is promoted to the first remaining profile (or dropped when none is left), and every other slot holding that profile is unbound.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -876,6 +938,7 @@
         ],
         "operationId": "aiAttachmentsSaveFile",
         "summary": "Save file",
+        "description": "Stores one file attachment as a draft, carrying the host-extracted text of the file. Prefer `save-files-many` when adding several files at once so they land as one round trip.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -955,6 +1018,7 @@
         ],
         "operationId": "aiAttachmentsSaveFilesMany",
         "summary": "Save files many",
+        "description": "Stores a batch of file attachments as drafts in a single round trip. The returned records keep the order of the input.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1039,6 +1103,7 @@
         ],
         "operationId": "aiAttachmentsGet",
         "summary": "Get",
+        "description": "Returns one attachment by identifier.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1087,6 +1152,7 @@
         ],
         "operationId": "aiAttachmentsGetMany",
         "summary": "Get many",
+        "description": "Returns a batch of attachments, preserving the requested order; an identifier that no longer exists comes back empty.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1141,6 +1207,7 @@
         ],
         "operationId": "aiAttachmentsDelete",
         "summary": "Delete",
+        "description": "Permanently deletes one attachment, whether it is still a draft or already linked to a message.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1182,6 +1249,7 @@
         ],
         "operationId": "aiAttachmentsDeleteMany",
         "summary": "Delete many",
+        "description": "Permanently deletes a batch of attachments in a single round trip.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1226,6 +1294,7 @@
         ],
         "operationId": "aiAttachmentsLinkToMessage",
         "summary": "Link to message",
+        "description": "Binds draft attachments to the chat message that owns them, once that message has been persisted, so deleting the message removes them too. Identifiers that no longer exist are skipped.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1290,6 +1359,7 @@
         ],
         "operationId": "aiPreferencesGetDeepMode",
         "summary": "Get deep mode",
+        "description": "Returns the deep-mode toggle of the scope, falling back to the configured default when nothing has been persisted.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1316,7 +1386,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1331,6 +1402,7 @@
         ],
         "operationId": "aiPreferencesSetDeepMode",
         "summary": "Set deep mode",
+        "description": "Persists the deep-mode toggle of the scope. Idempotent - there is no need to check whether a value already exists.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1385,6 +1457,7 @@
         ],
         "operationId": "aiPreferencesClearDeepMode",
         "summary": "Clear deep mode",
+        "description": "Drops the persisted deep-mode toggle of the scope, so later reads fall back to the configured default.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1426,6 +1499,7 @@
         ],
         "operationId": "aiPreferencesIsDeepModeSet",
         "summary": "Is deep mode set",
+        "description": "Tells whether the scope has an explicitly persisted deep-mode value, whichever way that value is set.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1452,7 +1526,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1467,6 +1542,7 @@
         ],
         "operationId": "aiProfilesCreate",
         "summary": "Create",
+        "description": "Creates an AI provider profile. The name must be unique and the credentials are validated against the provider before the profile is stored; the portal's first profile also takes the `Default` assignment slot.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1508,6 +1584,7 @@
         ],
         "operationId": "aiProfilesUpdate",
         "summary": "Update",
+        "description": "Updates an AI provider profile, re-checking name uniqueness and the provider credentials.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1549,6 +1626,7 @@
         ],
         "operationId": "aiProfilesDelete",
         "summary": "Delete",
+        "description": "Deletes an AI provider profile and cleans up the assignments pointing at it - the `Default` slot moves to the first remaining profile, the other slots are unbound.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1590,6 +1668,7 @@
         ],
         "operationId": "aiProfilesListModels",
         "summary": "List models",
+        "description": "Lists the models the given profile's provider offers, as reported by the provider itself.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1619,6 +1698,7 @@
           {
             "name": "profileId",
             "in": "query",
+            "description": "The AI provider profile identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1634,6 +1714,7 @@
         ],
         "operationId": "aiProfilesListProviderModels",
         "summary": "List provider models",
+        "description": "Lists the models a provider offers for the supplied endpoint and key, before any profile is created from them.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1698,6 +1779,7 @@
         ],
         "operationId": "aiProfilesTestConnection",
         "summary": "Test connection",
+        "description": "Checks a stored profile's credentials against its provider and reports the provider's own error when the call fails. Nothing is written.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1753,6 +1835,7 @@
         ],
         "operationId": "aiProfilesGetById",
         "summary": "Get by id",
+        "description": "Returns one AI provider profile, or an empty result when the identifier is unknown.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1771,7 +1854,7 @@
                     },
                     "providerType": {
                       "$ref": "#/components/schemas/AiProviderType",
-                      "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
+                      "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
                     },
                     "basedOn": {
                       "$ref": "#/components/schemas/AiBuiltinProviderType",
@@ -1799,7 +1882,7 @@
                     },
                     "useResponsesApi": {
                       "type": "boolean",
-                      "description": "Result of the live Responses-API probe (parallel to  {@link  canUseTool  } ). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+                      "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
                     },
                     "isCloudProvider": {
                       "type": "boolean",
@@ -1807,7 +1890,7 @@
                     },
                     "useProxy": {
                       "type": "boolean",
-                      "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the  {@link  PlatformAdapter.fetchProxy  }  is not configured."
+                      "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
                     },
                     "createdAt": {
                       "type": "number",
@@ -1841,6 +1924,7 @@
           {
             "name": "id",
             "in": "query",
+            "description": "The AI provider profile identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1856,6 +1940,7 @@
         ],
         "operationId": "aiProfilesList",
         "summary": "List",
+        "description": "Lists the portal's AI provider profiles.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1890,6 +1975,7 @@
         ],
         "operationId": "aiPromptsCreate",
         "summary": "Create",
+        "description": "Saves a new prompt. The name must be non-empty and unique inside its folder, and `folderId` must point at an existing folder - omit it for the root.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -1931,6 +2017,7 @@
         ],
         "operationId": "aiPromptsUpdate",
         "summary": "Update",
+        "description": "Updates a saved prompt. The name and the folder reference are re-validated whenever either of them changes.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2002,6 +2089,7 @@
         ],
         "operationId": "aiPromptsMove",
         "summary": "Move",
+        "description": "Moves a saved prompt into another folder, or to the root. The name is re-validated in the target folder, so the move fails when a prompt of that name is already there.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2061,6 +2149,7 @@
         ],
         "operationId": "aiPromptsDelete",
         "summary": "Delete",
+        "description": "Deletes a saved prompt. Does nothing when it no longer exists.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2102,6 +2191,7 @@
         ],
         "operationId": "aiPromptsList",
         "summary": "List",
+        "description": "Lists saved prompts. Scope the answer to one folder, ask for the root-level prompts only, or omit the folder to get every prompt newest first.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2131,7 +2221,8 @@
           {
             "name": "folderId",
             "in": "query",
-            "required": true,
+            "description": "The prompt folder identifier. Omit to list the prompts that sit outside any folder.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2146,6 +2237,7 @@
         ],
         "operationId": "aiPromptsCreateFolder",
         "summary": "Create folder",
+        "description": "Creates a prompt folder. The name must be non-empty and unique across the portal - prompt folders do not nest.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2187,6 +2279,7 @@
         ],
         "operationId": "aiPromptsRenameFolder",
         "summary": "Rename folder",
+        "description": "Renames a prompt folder, validating the new name against the existing folders.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2243,6 +2336,7 @@
         ],
         "operationId": "aiPromptsDeleteFolder",
         "summary": "Delete folder",
+        "description": "Deletes a prompt folder together with the prompts inside it.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2284,6 +2378,7 @@
         ],
         "operationId": "aiPromptsListFolders",
         "summary": "List folders",
+        "description": "Lists the prompt folders, newest first.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2318,6 +2413,7 @@
         ],
         "operationId": "aiPromptsExport",
         "summary": "Export",
+        "description": "Builds a self-contained, versioned bundle of every saved prompt and folder, ready for `import-bundle`.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2349,6 +2445,7 @@
         ],
         "operationId": "aiPromptsImportBundle",
         "summary": "Import bundle",
+        "description": "Restores a prompt bundle. `replace` wipes the current prompts and folders before writing the bundle, `merge` writes the bundle on top of what is already there; both validate the folder references inside the bundle before any write, so a corrupt bundle is rejected whole.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2410,6 +2507,7 @@
         ],
         "operationId": "aiPromptsGetById",
         "summary": "Get by id",
+        "description": "Returns one saved prompt, or an empty result when the identifier is unknown.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2443,6 +2541,7 @@
           {
             "name": "id",
             "in": "query",
+            "description": "The saved prompt identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2458,6 +2557,7 @@
         ],
         "operationId": "aiPromptsGetFolderById",
         "summary": "Get folder by id",
+        "description": "Returns one prompt folder, or an empty result when the identifier is unknown.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2491,6 +2591,7 @@
           {
             "name": "id",
             "in": "query",
+            "description": "The prompt folder identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2506,6 +2607,7 @@
         ],
         "operationId": "aiThreadsCreate",
         "summary": "Create",
+        "description": "Creates a chat thread with a caller-supplied title. Use `open-or-create` instead when the title should be generated from the first user message.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2565,6 +2667,7 @@
         ],
         "operationId": "aiThreadsOpenOrCreate",
         "summary": "Open or create",
+        "description": "Opens a chat thread and returns its history, or creates one with a title generated from the supplied first message. That first message is not persisted - the caller decides whether to follow up with `append-user-message`.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2645,6 +2748,7 @@
         ],
         "operationId": "aiThreadsAppendUserMessage",
         "summary": "Append user message",
+        "description": "Persists a user message in a thread and bumps the thread's last-edit date so it resurfaces in the sidebar. Optionally rebinds the thread to another profile when the model changed mid-conversation.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2703,6 +2807,7 @@
         ],
         "operationId": "aiThreadsTouch",
         "summary": "Touch",
+        "description": "Bumps a thread's last-edit date, and optionally rebinds it to another profile, when something other than a new message - a model switch, say - should resurface it.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2756,6 +2861,7 @@
         ],
         "operationId": "aiThreadsRename",
         "summary": "Rename",
+        "description": "Renames a chat thread and bumps its last-edit date so the new title shows up in the sidebar.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2811,6 +2917,7 @@
         ],
         "operationId": "aiThreadsDelete",
         "summary": "Delete",
+        "description": "Deletes a chat thread together with its messages.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2852,6 +2959,7 @@
         ],
         "operationId": "aiThreadsClearMessages",
         "summary": "Clear messages",
+        "description": "Drops every message of a thread while keeping the thread itself, and bumps its last-edit date.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2893,6 +3001,7 @@
         ],
         "operationId": "aiThreadsRegenerateTitle",
         "summary": "Regenerate title",
+        "description": "Generates a fresh title from the thread's first user message and persists it. Fails when the thread has no user message yet.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2961,6 +3070,7 @@
         ],
         "operationId": "aiThreadsList",
         "summary": "List",
+        "description": "Lists the chat threads of the scope, most recently edited first. Supports cursor pagination and a server-side case-insensitive title search.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2990,7 +3100,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2998,7 +3109,8 @@
           {
             "name": "count",
             "in": "query",
-            "required": true,
+            "description": "The maximum number of items to return in one page.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3006,7 +3118,8 @@
           {
             "name": "cursor",
             "in": "query",
-            "required": true,
+            "description": "The keyset pagination cursor: the JSON-encoded sort key of the last item already received. Omit for the first page.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3014,7 +3127,8 @@
           {
             "name": "query",
             "in": "query",
-            "required": true,
+            "description": "The full-text query the thread list is filtered by.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3029,6 +3143,7 @@
         ],
         "operationId": "aiThreadsReadMessages",
         "summary": "Read messages",
+        "description": "Reads the messages of a thread, with the same cursor pagination as the thread list.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3058,6 +3173,7 @@
           {
             "name": "threadId",
             "in": "query",
+            "description": "The chat thread identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -3066,7 +3182,8 @@
           {
             "name": "count",
             "in": "query",
-            "required": true,
+            "description": "The maximum number of items to return in one page.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3074,7 +3191,8 @@
           {
             "name": "cursor",
             "in": "query",
-            "required": true,
+            "description": "The keyset pagination cursor: the JSON-encoded sort key of the last item already received. Omit for the first page.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3082,7 +3200,8 @@
           {
             "name": "direction",
             "in": "query",
-            "required": true,
+            "description": "The order the message page is read in. Only \"desc\" turns the read around and pages back from the newest message; omit for the forward read.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3097,6 +3216,7 @@
         ],
         "operationId": "aiThreadsGetById",
         "summary": "Get by id",
+        "description": "Returns one chat thread, or an empty result when the identifier is unknown.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3130,6 +3250,7 @@
           {
             "name": "threadId",
             "in": "query",
+            "description": "The chat thread identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -3145,6 +3266,7 @@
         ],
         "operationId": "aiThreadsGetMessageById",
         "summary": "Get message by id",
+        "description": "Returns one chat message by its globally unique identifier.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3178,6 +3300,7 @@
           {
             "name": "messageId",
             "in": "query",
+            "description": "The globally unique chat message identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -3193,6 +3316,7 @@
         ],
         "operationId": "aiThreadsUpdateMessage",
         "summary": "Update message",
+        "description": "Replaces the content of a chat message - used by the edit and regenerate flows that change a message outside the streaming lifecycle.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3248,6 +3372,7 @@
         ],
         "operationId": "aiThreadsDeleteMessage",
         "summary": "Delete message",
+        "description": "Deletes one chat message, leaving the rest of the thread untouched.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3289,6 +3414,7 @@
         ],
         "operationId": "aiToolsAddCustomServer",
         "summary": "Add custom server",
+        "description": "Registers a custom MCP server in the scope under the given name.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3348,6 +3474,7 @@
         ],
         "operationId": "aiToolsUpdateCustomServer",
         "summary": "Update custom server",
+        "description": "Updates the configuration of a registered custom MCP server.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3405,6 +3532,7 @@
         ],
         "operationId": "aiToolsRemoveCustomServer",
         "summary": "Remove custom server",
+        "description": "Removes a custom MCP server from the registry.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3458,6 +3586,7 @@
         ],
         "operationId": "aiToolsGetCustomServer",
         "summary": "Get custom server",
+        "description": "Returns the configuration of one custom MCP server, or an empty result when it is not registered.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3491,6 +3620,7 @@
           {
             "name": "name",
             "in": "query",
+            "description": "The custom MCP server name.",
             "required": true,
             "schema": {
               "type": "string"
@@ -3499,7 +3629,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3514,6 +3645,7 @@
         ],
         "operationId": "aiToolsListCustomServers",
         "summary": "List custom servers",
+        "description": "Lists the custom MCP servers registered in the scope, keyed by name.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3543,7 +3675,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3558,6 +3691,7 @@
         ],
         "operationId": "aiToolsListSystemTools",
         "summary": "List system tools",
+        "description": "Lists the tools of the host-configured system MCP servers, grouped by server type. The servers are connected and listed server-side, so the client renders its permission cards from one request and never opens an MCP connection of its own.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3590,7 +3724,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3605,6 +3740,7 @@
         ],
         "operationId": "aiToolsReplaceAllCustomServers",
         "summary": "Replace all custom servers",
+        "description": "Replaces the whole custom MCP server registry of the scope with the supplied map.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3662,6 +3798,7 @@
         ],
         "operationId": "aiToolsSetDisabled",
         "summary": "Set disabled",
+        "description": "Marks the listed tools of one server type as switched off, so the model is no longer offered them.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3723,6 +3860,7 @@
         ],
         "operationId": "aiToolsGetDisabled",
         "summary": "Get disabled",
+        "description": "Returns the switched-off tools of the scope, grouped by server type.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3755,7 +3893,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3770,6 +3909,7 @@
         ],
         "operationId": "aiToolsIsToolDisabled",
         "summary": "Is tool disabled",
+        "description": "Tells whether one tool of a server type is switched off.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3796,6 +3936,7 @@
           {
             "name": "serverType",
             "in": "query",
+            "description": "The MCP server type the tool belongs to.",
             "required": true,
             "schema": {
               "type": "string"
@@ -3804,6 +3945,7 @@
           {
             "name": "toolName",
             "in": "query",
+            "description": "The tool name.",
             "required": true,
             "schema": {
               "type": "string"
@@ -3812,7 +3954,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3827,6 +3970,7 @@
         ],
         "operationId": "aiToolsSetAllowAlways",
         "summary": "Set allow always",
+        "description": "Adds a tool to the always-allow list, or removes it - the tools on that list run without an approval dialog.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3889,6 +4033,7 @@
         ],
         "operationId": "aiToolsGetAllowAlways",
         "summary": "Get allow always",
+        "description": "Lists the tools on the always-allow list of the scope.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3918,7 +4063,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3933,6 +4079,7 @@
         ],
         "operationId": "aiToolsIsAllowAlways",
         "summary": "Is allow always",
+        "description": "Tells whether one tool is on the always-allow list.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -3959,6 +4106,7 @@
           {
             "name": "serverType",
             "in": "query",
+            "description": "The MCP server type the tool belongs to.",
             "required": true,
             "schema": {
               "type": "string"
@@ -3967,6 +4115,7 @@
           {
             "name": "toolName",
             "in": "query",
+            "description": "The tool name.",
             "required": true,
             "schema": {
               "type": "string"
@@ -3975,7 +4124,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -3990,6 +4140,7 @@
         ],
         "operationId": "aiWebSearchGetActiveConfig",
         "summary": "Get active config",
+        "description": "Returns the web-search configuration active in the scope, or an empty result when web search is not configured.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4023,7 +4174,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -4038,6 +4190,7 @@
         ],
         "operationId": "aiWebSearchIsConfigured",
         "summary": "Is configured",
+        "description": "Tells whether web search is configured in the scope.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4064,7 +4217,8 @@
           {
             "name": "entityId",
             "in": "query",
-            "required": true,
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -4079,6 +4233,7 @@
         ],
         "operationId": "aiWebSearchTestConnection",
         "summary": "Test connection",
+        "description": "Checks a web-search configuration against the live provider without storing it - for a Test button that must not commit on success.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4134,6 +4289,7 @@
         ],
         "operationId": "aiWebSearchConfigure",
         "summary": "Configure",
+        "description": "Validates a web-search configuration against the live provider and stores it only when the provider answers, replacing the previous one in a single write.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4187,6 +4343,7 @@
         ],
         "operationId": "aiWebSearchSetActiveConfig",
         "summary": "Set active config",
+        "description": "Stores a web-search configuration without contacting the provider first, for forms that validate locally.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4240,6 +4397,7 @@
         ],
         "operationId": "aiWebSearchClear",
         "summary": "Clear",
+        "description": "Removes the web-search configuration of the scope. Does nothing when web search was not configured there.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4281,6 +4439,7 @@
         ],
         "operationId": "aiExportTextToDocx",
         "summary": "Start markdown → docx export",
+        "description": "Starts an asynchronous markdown-to-docx export. The response only acknowledges the task: the AI Worker converts the content and saves the .docx into the target folder (an agent room resolves to its result-storage subfolder), and completion reaches the client as the usual folder-modified socket event.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4355,6 +4514,7 @@
         ],
         "operationId": "aiAgentsList",
         "summary": "List agents",
+        "description": "Lists the portal's AI agent rooms. Query parameters are forwarded unchanged to the .NET AI service, which answers with its folder-content payload.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4384,6 +4544,7 @@
         ],
         "operationId": "aiAgentsCreate",
         "summary": "Create an agent",
+        "description": "Creates an AI agent room in the .NET AI service and binds the supplied `profileId` to it as a `Chat` assignment. The instruction is stored on the room as a prompt-only chat setting; a failed binding is reported as an error even though the room already exists.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4498,6 +4659,7 @@
         ],
         "operationId": "aiAgentsNews",
         "summary": "List agent news items",
+        "description": "Lists the new items across the caller's AI agent rooms.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4529,6 +4691,7 @@
         ],
         "operationId": "aiAgentsGet",
         "summary": "Get an agent",
+        "description": "Returns one AI agent room, enriched with the `profileId` bound to it so an edit form can prefill the profile selector. A missing assignment simply leaves `profileId` out.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4555,6 +4718,7 @@
           {
             "name": "id",
             "in": "path",
+            "description": "The agent identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -4568,6 +4732,7 @@
         ],
         "operationId": "aiAgentsUpdate",
         "summary": "Update an agent",
+        "description": "Updates an AI agent room - title, tags, instruction. `profileId` is not part of the room contract: it is stripped from the forwarded body and re-bound as the agent's assignment afterwards.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4594,6 +4759,7 @@
           {
             "name": "id",
             "in": "path",
+            "description": "The agent identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -4679,6 +4845,7 @@
         ],
         "operationId": "aiAgentsDelete",
         "summary": "Delete an agent",
+        "description": "Deletes an AI agent room.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4705,6 +4872,7 @@
           {
             "name": "id",
             "in": "path",
+            "description": "The agent identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -4737,6 +4905,7 @@
         ],
         "operationId": "aiAgentsUpdateQuota",
         "summary": "Update agents' quota",
+        "description": "Changes the storage quota of the given AI agent rooms.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4800,6 +4969,7 @@
         ],
         "operationId": "aiAgentsResetQuota",
         "summary": "Reset agents' quota",
+        "description": "Resets the storage quota of the given AI agent rooms.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4858,6 +5028,7 @@
         ],
         "operationId": "aiSettingsGet",
         "summary": "Get AI settings",
+        "description": "Reports the portal's combined AI configuration and readiness.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4889,6 +5060,7 @@
         ],
         "operationId": "aiSettingsGetVectorization",
         "summary": "Get vectorization settings",
+        "description": "Returns the portal's vectorization settings.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4918,6 +5090,7 @@
         ],
         "operationId": "aiSettingsSetVectorization",
         "summary": "Update vectorization settings",
+        "description": "Updates the portal's vectorization settings.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4960,6 +5133,7 @@
         ],
         "operationId": "aiSettingsGetUser",
         "summary": "Get user AI settings",
+        "description": "Returns the current user's AI settings.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -4989,6 +5163,7 @@
         ],
         "operationId": "aiSettingsSetUser",
         "summary": "Update user AI settings",
+        "description": "Updates the current user's AI settings.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -5031,6 +5206,7 @@
         ],
         "operationId": "aiVectorizationStartTask",
         "summary": "Start a vectorization task",
+        "description": "Starts a vectorization task over the supplied portal files. The indexing itself runs asynchronously on the .NET side.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -5073,6 +5249,7 @@
         ],
         "operationId": "aiOpenaiChatCompletions",
         "summary": "OpenAI-compatible chat completions proxied to the profile's provider",
+        "description": "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider verbatim - the payload is owned by the plugin's SDK on one end and the provider on the other. A client disconnect cancels the provider call.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -5099,6 +5276,7 @@
           {
             "name": "profileId",
             "in": "path",
+            "description": "The AI provider profile identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -5125,6 +5303,7 @@
         ],
         "operationId": "aiOpenaiImagesGenerations",
         "summary": "OpenAI-compatible image generation proxied to the profile's provider",
+        "description": "OpenAI-compatible image generation for the document editor's AI plugin. As with the chat-completions passthrough, the profile's credentials are attached server-side and the body reaches the provider unchanged.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -5151,6 +5330,7 @@
           {
             "name": "profileId",
             "in": "path",
+            "description": "The AI provider profile identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -5177,6 +5357,7 @@
         ],
         "operationId": "aiEditorToolsList",
         "summary": "Sanitized DocSpace tool catalog for the editor AI plugin",
+        "description": "Returns the sanitized catalog of DocSpace tools available to the document editor's AI plugin - the same composed tool set the DocSpace chat sees, minus the web-search pair the editor already has through its own passthrough. Only the name, description, parameters and approval flag of each tool are exposed; transport details never reach the browser.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -5208,6 +5389,7 @@
         ],
         "operationId": "aiEditorToolsCall",
         "summary": "Execute a DocSpace tool on behalf of the editor AI plugin",
+        "description": "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and with the caller's forwarded credentials. Whatever the tool produced is returned for the plugin to relay to the model; a failure comes back as an error payload.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -5250,6 +5432,7 @@
         ],
         "operationId": "aiWebSearchPassthroughSearch",
         "summary": "Web search proxied to the portal's active web-search provider",
+        "description": "Runs a web search on behalf of the document editor's AI plugin. The plugin only holds a placeholder configuration; the portal's active provider and its key are resolved here and never reach the browser.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -5292,6 +5475,7 @@
         ],
         "operationId": "aiWebSearchPassthroughContents",
         "summary": "Web page contents proxied to the portal's active web-search provider",
+        "description": "Fetches web page contents on behalf of the document editor's AI plugin, against the portal's active web-search provider, the same way as the search passthrough.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -5347,7 +5531,8 @@
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Always true — the mutation completed."
           }
         },
         "required": [
@@ -5360,7 +5545,8 @@
         "type": "object",
         "properties": {
           "error": {
-            "type": "string"
+            "type": "string",
+            "description": "The error message, ready to be shown to the caller."
           }
         },
         "required": [
@@ -5405,7 +5591,8 @@
             "description": "Override the action's baked-in system prompt (replace or append)."
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Wire-serializable subset of the engine's `ActionArgs` — drops the engine-injected `signal`/`fetch`; `profile`/`messages` are owned by the engine and never sent by the caller."
       },
       "AiTMCPItem": {
         "type": "object",
@@ -5455,7 +5642,8 @@
           "ImageGeneration",
           "OCR",
           "Vision"
-        ]
+        ],
+        "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
       },
       "AiThreadMessageLike": {
         "type": "object",
@@ -5530,7 +5718,8 @@
           "role",
           "content"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "A single chat message as it travels on the wire."
       },
       "AiAiSendStreamBody": {
         "type": "object",
@@ -5544,7 +5733,8 @@
             "description": "The user turn to send."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
           },
           "entityId": {
             "type": "string",
@@ -5558,10 +5748,11 @@
         "required": [
           "userMessage"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Shared body of the two streaming send endpoints (`sendWithStream` and its OpenAI-framed twin) — the `Chat` action is implied, so there is no `actionType`."
       },
       "AiChatEvent": {
-        "description": "Discriminated event emitted by the streaming methods of  {@link  AIEngine } . The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a  {@link  ChatEvent }  so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via  {@link  AIEngine.approveToolCall }  or  {@link  AIEngine.denyToolCall } .\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant   reply lifecycle.\n- `message-incomplete` — the provider returned an error or   incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
+        "description": "Discriminated event emitted by the streaming methods of `AIEngine`. The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a `ChatEvent` so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via `AIEngine.approveToolCall` or `AIEngine.denyToolCall`.\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant reply lifecycle.\n- `message-incomplete` — the provider returned an error or incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
         "type": "object",
         "properties": {
           "type": {
@@ -5578,16 +5769,20 @@
             "description": "Emitted once per `sendWithStream` call, immediately after the user message has been persisted by storage and before the assistant stream starts. Carries the storage-assigned `id` and `createdAt`. The UI uses it to render the user bubble — no client-side optimistic placeholder is needed, which keeps the runtime tree free of phantom nodes from index-fallback ids."
           },
           "message": {
-            "$ref": "#/components/schemas/AiThreadMessageLike"
+            "$ref": "#/components/schemas/AiThreadMessageLike",
+            "description": "The message the event is about, in the state it has reached."
           },
           "messageId": {
-            "type": "string"
+            "type": "string",
+            "description": "The storage identifier of that message."
           },
           "idx": {
-            "type": "number"
+            "type": "number",
+            "description": "The zero-based position of the pending tool call within the message."
           },
           "threadId": {
-            "type": "string"
+            "type": "string",
+            "description": "The thread the event belongs to."
           },
           "autoAllow": {
             "type": "boolean",
@@ -5598,10 +5793,12 @@
             "description": "Set when the tool is served by a server-side system source: the consumer must NOT execute it locally — only show the approval UI (unless `autoAllow`) and resume via `approveToolCall` (no `result` needed) / `denyToolCall`. The engine runs it in-engine."
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "The generated thread title."
           },
           "profileId": {
-            "type": "string"
+            "type": "string",
+            "description": "The profile that generated the title, when one was used."
           }
         },
         "required": [
@@ -5623,23 +5820,28 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "The completion identifier, stable across every chunk of one response."
           },
           "object": {
             "type": "string",
-            "const": "chat.completion.chunk"
+            "const": "chat.completion.chunk",
+            "description": "Always `chat.completion.chunk`."
           },
           "created": {
-            "type": "number"
+            "type": "number",
+            "description": "When the completion started, in Unix seconds."
           },
           "model": {
-            "type": "string"
+            "type": "string",
+            "description": "The model that produced the completion - the resolved profile's model."
           },
           "choices": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiOpenAIChunkChoice"
-            }
+            },
+            "description": "The choices carried by this chunk. This service emits exactly one."
           }
         },
         "required": [
@@ -5649,19 +5851,23 @@
           "model",
           "choices"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "One `chat.completion.chunk` of an OpenAI-compatible streaming response. Only the fields this service can populate are emitted - an OpenAI client tolerates the rest as absent."
       },
       "AiOpenAIChunkChoice": {
         "type": "object",
         "properties": {
           "index": {
-            "type": "number"
+            "type": "number",
+            "description": "The zero-based position of the choice. This service emits a single choice, so always 0."
           },
           "delta": {
-            "$ref": "#/components/schemas/AiOpenAIChoiceDelta"
+            "$ref": "#/components/schemas/AiOpenAIChoiceDelta",
+            "description": "What this chunk adds to the choice."
           },
           "finish_reason": {
-            "$ref": "#/components/schemas/AiOpenAIFinishReason"
+            "$ref": "#/components/schemas/AiOpenAIFinishReason",
+            "description": "Why the completion stopped, or null while it is still streaming."
           }
         },
         "required": [
@@ -5669,42 +5875,50 @@
           "delta",
           "finish_reason"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "One choice of a streaming completion, carrying the part this chunk adds."
       },
       "AiOpenAIChoiceDelta": {
         "type": "object",
         "properties": {
           "role": {
             "type": "string",
-            "const": "assistant"
+            "const": "assistant",
+            "description": "Sent on the first chunk only, always `assistant`."
           },
           "content": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "The text this chunk appends. Null when the chunk carries no text."
           },
           "tool_calls": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiOpenAIToolCallDelta"
-            }
+            },
+            "description": "The tool calls the model requested, emitted in place of text."
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The incremental part of one choice - what this chunk adds to the assistant message."
       },
       "AiOpenAIToolCallDelta": {
         "type": "object",
         "properties": {
           "index": {
-            "type": "number"
+            "type": "number",
+            "description": "The zero-based position of the tool call within the message."
           },
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "The tool call identifier, quoted back when its result is submitted."
           },
           "type": {
             "type": "string",
-            "const": "function"
+            "const": "function",
+            "description": "Always `function` - the only tool kind the API defines."
           },
           "function": {
             "type": "object",
@@ -5716,13 +5930,15 @@
                 "type": "string"
               }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "The call itself: the function name and its JSON-encoded arguments."
           }
         },
         "required": [
           "index"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The incremental part of one tool call the model requested."
       },
       "AiOpenAIFinishReason": {
         "type": [
@@ -5736,7 +5952,7 @@
           "content_filter",
           null
         ],
-        "description": "OpenAI Chat Completions streaming shapes.\n\n {@link  toOpenAIChatCompletionStream }  maps the engine's transport-agnostic  {@link  ChatEvent }  stream onto these chunks so a host can expose an OpenAI-compatible `POST /v1/chat/completions` (`stream: true`) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent."
+        "description": "OpenAI Chat Completions streaming shapes.\n\n `toOpenAIChatCompletionStream` maps the engine's transport-agnostic `ChatEvent` stream onto these chunks so a host can expose an OpenAI-compatible `POST /v1/chat/completions` (`stream: true`) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent."
       },
       "AiOpenAIStreamError": {
         "type": "object",
@@ -5769,7 +5985,8 @@
               "code",
               "param"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "The error that ended the stream: its message, type, code and the offending parameter."
           }
         },
         "required": [
@@ -5798,13 +6015,16 @@
             "description": "Snapshot of the assistant message at the time the tool call surfaced."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs"
+            "$ref": "#/components/schemas/AiAiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
           },
           "entityId": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional entity (room) scope for profile resolution."
           },
           "profileId": {
-            "type": "string"
+            "type": "string",
+            "description": "Session-level profile override for this request only."
           }
         },
         "required": [
@@ -5813,16 +6033,19 @@
           "idx",
           "message"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Identifies a pending tool call to resume — mirrors the library `ToolCallData` (its serializable fields)."
       },
       "AiResolvedAssignment": {
         "type": "object",
         "properties": {
           "profileId": {
-            "type": "string"
+            "type": "string",
+            "description": "The identifier of the resolved profile."
           },
           "profile": {
-            "$ref": "#/components/schemas/AiProfile"
+            "$ref": "#/components/schemas/AiProfile",
+            "description": "The resolved profile itself."
           }
         },
         "required": [
@@ -5845,7 +6068,7 @@
           },
           "providerType": {
             "$ref": "#/components/schemas/AiProviderType",
-            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
+            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
           },
           "basedOn": {
             "$ref": "#/components/schemas/AiBuiltinProviderType",
@@ -5864,7 +6087,7 @@
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from  {@link  key  } . Honoured by the OpenAI-family providers."
+            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from `key`. Honoured by the OpenAI-family providers."
           },
           "modelId": {
             "type": "string",
@@ -5884,7 +6107,7 @@
           },
           "useResponsesApi": {
             "type": "boolean",
-            "description": "Result of the live Responses-API probe (parallel to  {@link  canUseTool  } ). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+            "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
           },
           "isCloudProvider": {
             "type": "boolean",
@@ -5892,7 +6115,7 @@
           },
           "useProxy": {
             "type": "boolean",
-            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the  {@link  PlatformAdapter.fetchProxy  }  is not configured."
+            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
           },
           "createdAt": {
             "type": "number",
@@ -5944,14 +6167,16 @@
         "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
       },
       "AiAssignmentMutationResult": {
-        "description": "Outcome of  {@link  AssignmentsEngine.assign }  /  {@link  AssignmentsEngine.unassign } . Either a success or a field-scoped error suitable for displaying in the profile editor.",
+        "description": "Outcome of `AssignmentsEngine.assign` / `AssignmentsEngine.unassign`. Either a success or a field-scoped error suitable for displaying in the profile editor.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the assignment was persisted."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the assignment was rejected. Present on failure."
           }
         },
         "required": [
@@ -5967,24 +6192,28 @@
               "key",
               "url",
               "name"
-            ]
+            ],
+            "description": "The rejected field."
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "The human-readable reason the field was rejected."
           }
         },
         "required": [
           "field",
           "message"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "A field-scoped validation error: which form field was rejected, and why."
       },
       "AiBulkAssignmentResult": {
-        "description": "Outcome of  {@link  AssignmentsEngine.bulkAssign } . Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
+        "description": "Outcome of `AssignmentsEngine.bulkAssign`. Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when every entry was persisted."
           },
           "errors": {
             "type": "array",
@@ -6003,7 +6232,8 @@
                 "error"
               ],
               "additionalProperties": false
-            }
+            },
+            "description": "What was rejected, per action. Present on failure - and then no entry was persisted."
           }
         },
         "required": [
@@ -6112,7 +6342,7 @@
           },
           "providerType": {
             "$ref": "#/components/schemas/AiProviderType",
-            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
+            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
           },
           "basedOn": {
             "$ref": "#/components/schemas/AiBuiltinProviderType",
@@ -6131,7 +6361,7 @@
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from  {@link  key  } . Honoured by the OpenAI-family providers."
+            "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from `key`. Honoured by the OpenAI-family providers."
           },
           "modelId": {
             "type": "string",
@@ -6151,7 +6381,7 @@
           },
           "useResponsesApi": {
             "type": "boolean",
-            "description": "Result of the live Responses-API probe (parallel to  {@link  canUseTool  } ). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+            "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
           },
           "isCloudProvider": {
             "type": "boolean",
@@ -6159,7 +6389,7 @@
           },
           "useProxy": {
             "type": "boolean",
-            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the  {@link  PlatformAdapter.fetchProxy  }  is not configured."
+            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
           }
         },
         "required": [
@@ -6169,20 +6399,23 @@
           "modelId"
         ],
         "additionalProperties": false,
-        "description": "Input for creating a new profile — the same shape as  {@link  Profile }  without the engine-generated fields (`id`, `createdAt`)."
+        "description": "Input for creating a new profile — the same shape as `Profile` without the engine-generated fields (`id`, `createdAt`)."
       },
       "AiProfileMutationResult": {
         "description": "Outcome of `create` / `update` — either a success carrying the persisted profile, or a failure with a field-level error description from the name check or the provider credential check.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the profile was persisted."
           },
           "profile": {
-            "$ref": "#/components/schemas/AiProfile"
+            "$ref": "#/components/schemas/AiProfile",
+            "description": "The persisted profile. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the profile was rejected - the name check or the provider credential check. Present on failure."
           }
         },
         "required": [
@@ -6210,7 +6443,7 @@
           },
           "capabilities": {
             "type": "number",
-            "description": "Bitmask of model capabilities (Chat, Image, Vision, Tools, etc.). Used to filter models per  {@link  ActionType  } ."
+            "description": "Bitmask of model capabilities (Chat, Image, Vision, Tools, etc.). Used to filter models per `ActionType`."
           }
         },
         "required": [
@@ -6225,16 +6458,19 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "The prompt name."
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "description": "The prompt body."
           },
           "folderId": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "The folder to file the prompt under. Omit or send null to leave it outside any folder."
           }
         },
         "required": [
@@ -6249,13 +6485,16 @@
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the prompt was persisted."
           },
           "prompt": {
-            "$ref": "#/components/schemas/AiPrompt"
+            "$ref": "#/components/schemas/AiPrompt",
+            "description": "The persisted prompt. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the prompt was rejected. Present on failure."
           }
         },
         "required": [
@@ -6305,13 +6544,16 @@
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the folder was persisted."
           },
           "folder": {
-            "$ref": "#/components/schemas/AiPromptFolder"
+            "$ref": "#/components/schemas/AiPromptFolder",
+            "description": "The persisted folder. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the folder was rejected. Present on failure."
           }
         },
         "required": [
@@ -6352,19 +6594,22 @@
         "properties": {
           "version": {
             "type": "number",
-            "const": 1
+            "const": 1,
+            "description": "The bundle format version, so an import can migrate an older export."
           },
           "folders": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiPromptFolder"
-            }
+            },
+            "description": "Every exported prompt folder."
           },
           "prompts": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiPrompt"
-            }
+            },
+            "description": "Every exported prompt."
           }
         },
         "required": [
@@ -6381,14 +6626,15 @@
           "replace",
           "merge"
         ],
-        "description": "Mode passed to  {@link  PromptsEngine.importBundle } ."
+        "description": "Mode passed to `PromptsEngine.importBundle`."
       },
       "AiImportResult": {
-        "description": "Outcome of  {@link  PromptsEngine.importBundle } . Either every entry persisted with counts, or no entries persisted plus a per-entry error report.",
+        "description": "Outcome of `PromptsEngine.importBundle`. Either every entry persisted with counts, or no entries persisted plus a per-entry error report.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the whole bundle was imported."
           },
           "imported": {
             "type": "object",
@@ -6404,13 +6650,15 @@
               "folders",
               "prompts"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "How many folders and prompts were created. Present on success."
           },
           "errors": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiImportError"
-            }
+            },
+            "description": "What was rejected, per entry. Present on failure - and then nothing was imported."
           }
         },
         "required": [
@@ -6429,10 +6677,12 @@
             "description": "`\"folder\"` or `\"prompt\"`, plus the offending name or id."
           },
           "ref": {
-            "type": "string"
+            "type": "string",
+            "description": "The offending entry - its name or its id."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the entry was rejected."
           }
         },
         "required": [
@@ -6441,7 +6691,7 @@
           "error"
         ],
         "additionalProperties": false,
-        "description": "Per-entry error reported by  {@link  PromptsEngine.importBundle } ."
+        "description": "Per-entry error reported by `PromptsEngine.importBundle`."
       },
       "AiThread": {
         "type": "object",
@@ -6468,7 +6718,7 @@
           },
           "profileId": {
             "type": "string",
-            "description": "ID of the profile used for this thread. Links to  {@link  Profile.id } ."
+            "description": "ID of the profile used for this thread. Links to `Profile.id`."
           }
         },
         "required": [
@@ -6509,7 +6759,8 @@
         "type": "object",
         "properties": {
           "threadId": {
-            "type": "string"
+            "type": "string",
+            "description": "The thread that was opened, or the one just created."
           },
           "title": {
             "type": "string",
@@ -6519,7 +6770,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiThreadMessageLike"
-            }
+            },
+            "description": "The messages already in the thread - empty for a thread that was just created."
           }
         },
         "required": [
@@ -6528,7 +6780,7 @@
           "priorMessages"
         ],
         "additionalProperties": false,
-        "description": "Resolved thread state returned by  {@link  ThreadsEngine.openOrCreate } ."
+        "description": "Resolved thread state returned by `ThreadsEngine.openOrCreate`."
       },
       "AiMcpServerConfig": {
         "type": "object",
@@ -6539,10 +6791,12 @@
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the MCP server was persisted."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the MCP server was rejected. Present on failure."
           }
         },
         "required": [
@@ -6550,11 +6804,12 @@
         ]
       },
       "AiToolsBulkResult": {
-        "description": "Outcome of  {@link  ToolsEngine.replaceAllCustomServers }  — either every entry persisted, or no entries persisted plus a per-key error report.",
+        "description": "Outcome of `ToolsEngine.replaceAllCustomServers` — either every entry persisted, or no entries persisted plus a per-key error report.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when every custom MCP server was persisted."
           },
           "errors": {
             "type": "array",
@@ -6573,7 +6828,8 @@
                 "error"
               ],
               "additionalProperties": false
-            }
+            },
+            "description": "What was rejected, per server. Present on failure - and then no server was persisted."
           }
         },
         "required": [
@@ -6614,17 +6870,20 @@
         "description": "Web-search provider configuration. Credentials and provider selection for the built-in web-search tool group."
       },
       "AiWebSearchMutationResult": {
-        "description": "Outcome of  {@link  WebSearchEngine.configure }  — either the persisted config or a field-scoped error suitable for the settings form.",
+        "description": "Outcome of `WebSearchEngine.configure` — either the persisted config or a field-scoped error suitable for the settings form.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the configuration was persisted."
           },
           "config": {
-            "$ref": "#/components/schemas/AiWebSearchConfig"
+            "$ref": "#/components/schemas/AiWebSearchConfig",
+            "description": "The persisted web-search configuration. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData"
+            "$ref": "#/components/schemas/AiTErrorData",
+            "description": "Why the configuration was rejected. Present on failure."
           }
         },
         "required": [
@@ -6635,6 +6894,7 @@
         "type": "object",
         "properties": {
           "response": {
+            "description": "The AiUserSettingsDto object returned by the operation.",
             "$ref": "#/components/schemas/AiAiUserSettingsDto"
           },
           "count": {
@@ -6669,7 +6929,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the AiUserSettingsDto object."
       },
       "AiAiUserSettingsDto": {
         "type": "object",
@@ -6689,6 +6950,7 @@
         "type": "object",
         "properties": {
           "response": {
+            "description": "The VectorizationSettingsDto object returned by the operation.",
             "$ref": "#/components/schemas/AiVectorizationSettingsDto"
           },
           "count": {
@@ -6723,7 +6985,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the VectorizationSettingsDto object."
       },
       "AiVectorizationSettingsDto": {
         "type": "object",
@@ -6778,12 +7041,14 @@
             ]
           }
         ],
+        "description": "The embedding provider type used for document vectorization.",
         "x-enum-type": "integer"
       },
       "AiAiSettingsWrapper": {
         "type": "object",
         "properties": {
           "response": {
+            "description": "The AiSettingsDto object returned by the operation.",
             "$ref": "#/components/schemas/AiAiSettingsDto"
           },
           "count": {
@@ -6818,7 +7083,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the AiSettingsDto object."
       },
       "AiAiSettingsDto": {
         "required": [
@@ -6885,7 +7151,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiFolderDtoInteger"
-            }
+            },
+            "description": "The list of FolderDtoInteger objects returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -6919,7 +7186,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the list of FolderDtoInteger objects."
       },
       "AiFolderDtoInteger": {
         "allOf": [
@@ -7942,8 +8210,15 @@
                 "description": "Specifies if the folder can be accessed via an external link or not."
               },
               "expirationDate": {
+                "examples": [
+                  "2021-01-01T00:00:00Z"
+                ],
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "description": "Represents the expiration date of the file entry.",
-                "$ref": "#/components/schemas/AiApiDateTime"
+                "format": "date-time"
               },
               "isLinkExpired": {
                 "examples": [
@@ -7960,31 +8235,6 @@
         ],
         "additionalProperties": false,
         "description": "The generic file entry information."
-      },
-      "AiApiDateTime": {
-        "type": "object",
-        "properties": {
-          "utcTime": {
-            "examples": [
-              "2018-01-01T00:00:00.0000000Z"
-            ],
-            "type": "string",
-            "description": "The time in UTC format.",
-            "format": "date-time",
-            "readOnly": true
-          },
-          "timeZoneOffset": {
-            "examples": [
-              "00:00:00"
-            ],
-            "type": "string",
-            "description": "The time zone offset.",
-            "format": "date-span",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "The API date and time parameters."
       },
       "AiFileEntryBaseDto": {
         "type": "object",
@@ -8051,20 +8301,41 @@
             "format": "uri"
           },
           "created": {
+            "examples": [
+              "2021-01-01T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The creation date and time of the file entry.",
-            "$ref": "#/components/schemas/AiApiDateTime"
+            "format": "date-time"
           },
           "createdBy": {
             "description": "The file entry author.",
             "$ref": "#/components/schemas/AiEmployeeDto"
           },
           "updated": {
+            "examples": [
+              "2021-01-01T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The last date and time when the file entry was updated.",
-            "$ref": "#/components/schemas/AiApiDateTime"
+            "format": "date-time"
           },
           "autoDelete": {
+            "examples": [
+              "2021-01-01T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The date and time when the file entry will be automatically deleted.",
-            "$ref": "#/components/schemas/AiApiDateTime"
+            "format": "date-time"
           },
           "rootFolderType": {
             "description": "The root folder type of the file entry.",
@@ -8341,6 +8612,7 @@
         "type": "object",
         "properties": {
           "response": {
+            "description": "The FileOperationDto object returned by the operation.",
             "$ref": "#/components/schemas/AiFileOperationDto"
           },
           "count": {
@@ -8375,7 +8647,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the FileOperationDto object."
       },
       "AiFileOperationDto": {
         "required": [
@@ -8532,6 +8805,7 @@
             ]
           }
         ],
+        "description": "The status of the distributed task.",
         "x-enum-type": "integer"
       },
       "AiFileOperationType": {
@@ -8591,7 +8865,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiNewItemsDtoAgentNewItemsDto"
-            }
+            },
+            "description": "The list of NewItemsDtoAgentNewItemsDto objects returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -8625,7 +8900,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the list of NewItemsDtoAgentNewItemsDto objects."
       },
       "AiNewItemsDtoAgentNewItemsDto": {
         "required": [
@@ -8635,8 +8911,15 @@
         "type": "object",
         "properties": {
           "date": {
+            "examples": [
+              "2025-01-01T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
             "description": "The date and time when the new item was created.",
-            "$ref": "#/components/schemas/AiApiDateTime"
+            "format": "date-time"
           },
           "items": {
             "type": [
@@ -8661,7 +8944,7 @@
         "type": "object",
         "properties": {
           "agent": {
-            "description": "The file entry information.",
+            "description": "The agent file entry.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "items": {
@@ -8683,6 +8966,7 @@
         "type": "object",
         "properties": {
           "response": {
+            "description": "The FolderDtoInteger object returned by the operation.",
             "$ref": "#/components/schemas/AiFolderDtoInteger"
           },
           "count": {
@@ -8717,12 +9001,14 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the FolderDtoInteger object."
       },
       "AiFolderContentIntegerWrapper": {
         "type": "object",
         "properties": {
           "response": {
+            "description": "The FolderContentDtoInteger object returned by the operation.",
             "$ref": "#/components/schemas/AiFolderContentDtoInteger"
           },
           "count": {
@@ -8757,7 +9043,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the FolderContentDtoInteger object."
       },
       "AiFolderContentDtoInteger": {
         "required": [
