@@ -649,7 +649,7 @@ export const aiController = {
       return;
     }
     if (isAsyncIterable(result)) {
-      await streamNdjson(res, logStreamErrors("ai/send-custom", result));
+      await streamNdjson(res, tapStream("ai/send-custom", result));
       return;
     }
     res.json(await result);
