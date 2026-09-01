@@ -53,6 +53,9 @@ public class UpdateRoomGroupRequestDto
     public required UpdateRoomGroupRequest UpdateRoom { get; set; }
 }
 
+/// <summary>
+/// The changes to apply to a room group: its name and the rooms to add or remove.
+/// </summary>
 public class UpdateRoomGroupRequest
 {
     /// <summary>

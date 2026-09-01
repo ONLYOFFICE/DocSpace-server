@@ -244,7 +244,7 @@ public class WhitelabelController(
             {
                 Type = logoType,
                 Name = logoType.ToStringFast(),
-                Size = TenantWhiteLabelSettings.GetSize(logoType)
+                Size = WhiteLabelItemSizeDto.FromGeometry(TenantWhiteLabelSettings.GetSize(logoType))
             };
 
             if (inQueryDto is { IsDark: not null })

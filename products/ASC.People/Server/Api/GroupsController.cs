@@ -252,7 +252,7 @@ public class GroupController(
     /// </summary>
     /// <path>api/2.0/group/{id}</path>
     [Tags("Group")]
-    [SwaggerResponse(200, "No content", typeof(NoContentResult))]
+    [SwaggerResponse(200, "No content")]
     [SwaggerResponse(404, "Group not found")]
     [HttpDelete("{id:guid}")]
     public async Task<NoContentResult> DeleteGroup(GetGroupByIdRequestDto inDto)

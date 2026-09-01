@@ -138,6 +138,37 @@ function contextScopeOf(body: unknown): string | undefined {
   return typeof body["entityId"] === "string" ? body["entityId"] : undefined;
 }
 
+// Attachment refs from the thread's persisted history, newest message first
+// so the most recently attached form wins. Best-effort — a failed read carries
+// no prior context rather than erroring the round.
+async function historyAttachmentRefIds(threadId: unknown): Promise<string[]> {
+  if (typeof threadId !== "string" || threadId.length === 0) {
+    return [];
+  }
+  let history: unknown[];
+  try {
+    history = await storage.messages.readByThread(threadId);
+  } catch (err) {
+    logger.warn(
+      `withToolsPrompt: thread ${threadId} history read failed, form context not carried over: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return [];
+  }
+  const ids: string[] = [];
+  const seen = new Set<string>();
+  for (let i = history.length - 1; i >= 0; i--) {
+    for (const ref of extractAttachmentRefIds(history[i])) {
+      if (!seen.has(ref)) {
+        seen.add(ref);
+        ids.push(ref);
+      }
+    }
+  }
+  return ids;
+}
+
 async function withToolsPrompt<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
@@ -146,7 +177,13 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
   // for the round, so it follows the round's context scope (the agent when
   // one is picked), unlike the location fragment below.
   const contextScope = contextScopeOf(body);
-  const attachmentId = extractAttachmentRefIds(body["userMessage"]);
+  // Keep form-data tools active for the whole conversation: when the current
+  // message has no attachment of its own, fall back to the form(s) already in
+  // the thread history so follow-up questions still resolve it.
+  let attachmentId = extractAttachmentRefIds(body["userMessage"]);
+  if (attachmentId.length === 0) {
+    attachmentId = await historyAttachmentRefIds(body["threadId"]);
+  }
   const fragment = await safeGetToolsPrompt(toolsAdapter, contextScope, attachmentId);
   return fragment ? appendActionPrompt(body, fragment) : body;
 }
