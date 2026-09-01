@@ -1181,12 +1181,13 @@ public class FileSecurity(
             return false;
         }
 
-        if (file != null && action == FilesSecurityActions.Edit && file.Category == (int)FilterType.Pdf && file.IsCompletedForm)
+        var room = parentFolders.FirstOrDefault(r => r.IsRoom);
+
+        if (file != null && action == FilesSecurityActions.Edit && file.Category == (int)FilterType.Pdf && file.IsCompletedForm
+            && room is not { FolderType: FolderType.VirtualDataRoom })
         {
             return false;
         }
-
-        var room = parentFolders.FirstOrDefault(r => r.IsRoom);
 
         if (room is { FolderType: FolderType.VirtualDataRoom })
         {

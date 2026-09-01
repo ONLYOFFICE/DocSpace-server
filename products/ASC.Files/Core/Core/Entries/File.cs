@@ -168,7 +168,7 @@ public class File<T> : FileEntry<T>
                 FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
                 FileType.Archive => FilterType.ArchiveOnly,
                 FileType.Audio or FileType.Video => FilterType.MediaOnly,
-                FileType.Pdf => IsForm ? FilterType.PdfForm : FilterType.Pdf,
+                FileType.Pdf => (FilterType)Category == FilterType.PdfForm ? FilterType.PdfForm : FilterType.Pdf,
                 FileType.Diagram => FilterType.DiagramsOnly,
                 _ => FilterType.None
             };
@@ -210,7 +210,7 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// Specifies if the file is a form or not.
     /// </summary>
-    public bool IsForm => (FilterType)Category == FilterType.PdfForm;
+    public bool IsForm => FileUtility.GetFileTypeByFileName(Title) == FileType.Pdf;
 
     /// <summary>
     /// Specifies if a Custom Filter editing mode is enabled for a file or not.

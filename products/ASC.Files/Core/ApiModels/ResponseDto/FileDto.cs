@@ -291,7 +291,6 @@ public class FileDtoHelper(
     FileDateTime fileDateTime,
     ExternalShare externalShare,
     BreadCrumbsManager breadCrumbsManager,
-    FileChecker fileChecker,
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
@@ -563,10 +562,6 @@ public class FileDtoHelper(
             }
 
             result.IsForm = file.IsForm;
-            if (fileType == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
-            {
-                result.IsForm = await fileChecker.IsFormPDFFile(file);
-            }
 
             if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType))
             {

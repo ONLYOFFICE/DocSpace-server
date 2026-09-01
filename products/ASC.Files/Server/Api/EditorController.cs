@@ -210,6 +210,14 @@ public abstract class EditorController<T>(
 
             formOpenSetup.RootFolder = rootFolder;
 
+            // Third-party PDF forms are fillable but misbehave in the embedded editor; keep embed
+            // only for native forms and open the rest in the regular editor.
+            if (formOpenSetup.EditorType == EditorType.Embedded && await documentServiceHelper.IsThirdPartyFormAsync(file))
+            {
+                formOpenSetup.EditorType = inDto.EditorType;
+                formOpenSetup.DisableEmbeddedConfig = false;
+            }
+
             if (inDto.Edit && rootFolder.FolderType == FolderType.FillingFormsRoom)
             {
                 await fileStorageService.ManageFormFilling(file.Id, FormFillingManageAction.Edit);

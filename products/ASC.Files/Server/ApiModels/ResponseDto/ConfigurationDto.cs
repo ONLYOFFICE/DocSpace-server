@@ -449,7 +449,7 @@ public class DocumentConfigDto
     /// Indicates whether this is a form.
     /// </summary>
     /// <example>false</example>
-    public bool IsForm { get; set; }
+    public bool? IsForm { get; set; }
 
     /// <summary>
     /// The options of the document.
@@ -728,13 +728,10 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter, 
             Options = source.Options
         };
 
-        if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
+        if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf
+            && await fileChecker.IsFormPDFFile(file))
         {
-            result.IsForm = await fileChecker.IsFormPDFFile(file);
-        }
-        else
-        {
-            result.IsForm = file.IsForm;
+            result.IsForm = true;
         }
 
         return result;

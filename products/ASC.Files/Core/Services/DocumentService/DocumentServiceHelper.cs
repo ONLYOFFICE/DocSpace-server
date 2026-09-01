@@ -39,6 +39,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileSecurity fileSecurity,
         FileUtility fileUtility,
+        FileChecker fileChecker,
         FilesLinkUtility filesLinkUtility,
         MachinePseudoKeys machinePseudoKeys,
         Global global,
@@ -87,6 +88,13 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
+    }
+
+    // A third-party PDF form: a fillable PDF without the embedded template that native PDF forms carry.
+    public async Task<bool> IsThirdPartyFormAsync<T>(File<T> file)
+    {
+        return FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf
+            && !await fileChecker.IsFormPDFFile(file);
     }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,

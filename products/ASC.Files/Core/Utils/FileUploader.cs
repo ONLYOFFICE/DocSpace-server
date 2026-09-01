@@ -321,10 +321,6 @@ public class FileUploader(
 
             if (isFirstChunk)
             {
-                var folderDao = daoFactory.GetFolderDao<T>();
-                var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
-                var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
-
                 var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
 
@@ -340,15 +336,6 @@ public class FileUploader(
                 }
 
                 uploadSession.File.Category = isForm ? (int)FilterType.PdfForm : (int)FilterType.Pdf;
-
-                if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
-                {
-                    var currentRoom = await folderDao.GetFolderAsync(roomId);
-                    if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)//
-                    {
-                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UploadToFormRoom);
-                    }
-                }
 
                 var cloneStreamForSave = await tempStream.CloneMemoryStream(memoryStream);
                 try
