@@ -33,20 +33,47 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The encrypted file key issued to one user.
+/// </summary>
 public class FileKeys
 {
     public FileKeys() { }
 
+    /// <summary>
+    /// The identifier of the user the file key was issued to.
+    /// </summary>
+    /// <example>9924256B-447C-4F19-9dbd-8ad8c39e8ff5</example>
     public Guid UserId { get; set; }
 
+    /// <summary>
+    /// The identifier of the key pair the file key is encrypted for.
+    /// </summary>
+    /// <example>9924256B-447C-4F19-9dbd-8ad8c39e8ff5</example>
     public Guid PublicKeyId { get; set; }
 
+    /// <summary>
+    /// The file key, encrypted with the public key of the pair.
+    /// </summary>
+    /// <example>U2FsdGVkX1+Lm3s...</example>
     public string PrivateKeyEnc { get; set; }
 
+    /// <summary>
+    /// The identifier of the portal the file belongs to.
+    /// </summary>
+    /// <example>1</example>
     public int TenantId { get; set; }
 
+    /// <summary>
+    /// The identifier of the file the key unlocks.
+    /// </summary>
+    /// <example>9846</example>
     public int FileId { get; set; }
 
+    /// <summary>
+    /// The date and time when the file key was issued.
+    /// </summary>
+    /// <example>2025-01-01T00:00:00</example>
     public DateTime CreateOn { get; set; }
 }
 

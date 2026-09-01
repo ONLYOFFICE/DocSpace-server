@@ -38,6 +38,7 @@ namespace ASC.Api.Documents;
 /// </summary>
 [Scope]
 [ApiEndpoint("privacyroom")]
+[Tags("Rooms / Privacy room")]
 public class PrivacyRoomControllerCommon(
     AuthContext authContext,
     PermissionContext permissionContext,

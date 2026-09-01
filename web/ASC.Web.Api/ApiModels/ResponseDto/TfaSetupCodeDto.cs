@@ -31,35 +31,50 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-#nullable enable
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The metadata of a single form field.
+/// The setup TFA code parameters.
 /// </summary>
-public class FormMetadata
+/// <example>
+/// {
+///   "account": "john.doe@onlyoffice.com",
+///   "manualEntryKey": "JBSWY3DPEHPK3PXP",
+///   "qrCodeSetupImageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGMAAgAABAABiCEmiQAAAABJRU5ErkJggg=="
+/// }
+/// </example>
+public class TfaSetupCodeDto
 {
     /// <summary>
-    /// The form field key.
+    /// The account for which the setup code is generated.
     /// </summary>
-    /// <example>name</example>
-    public string Key { get; set; } = "";
+    /// <example>john.doe@onlyoffice.com</example>
+    public string Account { get; private set; }
 
     /// <summary>
-    /// The form field type.
+    /// The manual entry key.
     /// </summary>
-    /// <example>text</example>
-    public string Type { get; set; } = "";
+    /// <example>JBSWY3DPEHPK3PXP</example>
+    public string ManualEntryKey { get; private set; }
 
     /// <summary>
-    /// The form field format.
+    /// The QR-code setup image URL (base64-encoded PNG image).
     /// </summary>
-    /// <example>date</example>
-    public string? Format { get; set; }
+    /// <example>data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGMAAgAABAABiCEmiQAAAABJRU5ErkJggg==</example>
+    public string QrCodeSetupImageUrl { get; private set; }
 
     /// <summary>
-    /// The list of possible values for the form field.
+    /// Creates the setup TFA code parameters from the generated setup code.
     /// </summary>
-    /// <example>[]</example>
-    public List<string>? PossibleValues { get; set; }
+    /// <param name="setupCode">The generated setup code.</param>
+    /// <returns>The setup TFA code parameters.</returns>
+    public static TfaSetupCodeDto FromSetupCode(SetupCode setupCode)
+    {
+        return new TfaSetupCodeDto
+        {
+            Account = setupCode.Account,
+            ManualEntryKey = setupCode.ManualEntryKey,
+            QrCodeSetupImageUrl = setupCode.QrCodeSetupImageUrl
+        };
+    }
 }
