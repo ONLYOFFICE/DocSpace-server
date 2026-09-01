@@ -335,10 +335,15 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             AddBaseBind(resourceBuilder);
+
+            resourceBuilder.WithEnvironment("openTelemetry:enable", "true");
+            resourceBuilder.WithOtlpExporter();
+            ApplyServiceName(resourceBuilder);
+            ApplyCustomOtlpEndpoint(resourceBuilder);
         }
         else
         {
-            builder.AddJavaScriptApp(name, path, "dev")
+            var resourceBuilder = builder.AddJavaScriptApp(name, path, "dev")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
                 // `__` form, not `:` — NewAi's nconf would otherwise nest a
@@ -347,6 +352,11 @@ public class ProjectConfigurator(
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            resourceBuilder.WithEnvironment("openTelemetry:enable", "true");
+            resourceBuilder.WithOtlpExporter();
+            ApplyServiceName(resourceBuilder);
+            ApplyCustomOtlpEndpoint(resourceBuilder);
         }
 
         return this;

@@ -51,6 +51,8 @@ import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { aiService } from "../storage/httpClient.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
+import { observeChatStream } from "../telemetry/chatStream.js";
+import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
@@ -512,6 +514,15 @@ async function* logStreamErrors<T>(
   }
 }
 
+// Telemetry (span + metrics) outside, error logging inside.
+function tapStream<T>(
+  route: string,
+  iter: AsyncIterable<T>,
+  dialect?: StreamDialect,
+): AsyncIterable<T> {
+  return observeChatStream(route, logStreamErrors(route, iter), dialect);
+}
+
 // A user message must carry some non-whitespace text before a stream is
 // opened. `content` is either a plain string or an array of parts; text
 // lives on `{ type: "text", text }` parts (and bare string parts), mirroring
@@ -631,14 +642,14 @@ export const aiController = {
     const result = engine.sendCustom(body);
     if (body.isStream) {
       if (isAsyncIterable(result)) {
-        await streamNdjson(res, logStreamErrors("ai/send-custom", result));
+        await streamNdjson(res, tapStream("ai/send-custom", result));
       } else {
         res.json(await result);
       }
       return;
     }
     if (isAsyncIterable(result)) {
-      await streamNdjson(res, logStreamErrors("ai/send-custom", result));
+      await streamNdjson(res, tapStream("ai/send-custom", result));
       return;
     }
     res.json(await result);
@@ -744,7 +755,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      logStreamErrors("ai/send-with-stream", engine.sendWithStream(body)),
+      tapStream("ai/send-with-stream", engine.sendWithStream(body)),
     );
   }),
 
@@ -790,7 +801,7 @@ export const aiController = {
     );
     await streamOpenAiSse(
       res,
-      logStreamErrors("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body)),
+      tapStream("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body), "openai"),
     );
   }),
 
@@ -809,7 +820,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      logStreamErrors("ai/regenerate-stream", engine.regenerateStream(body)),
+      tapStream("ai/regenerate-stream", engine.regenerateStream(body)),
     );
   }),
 
@@ -822,7 +833,7 @@ export const aiController = {
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
-      logStreamErrors("ai/approve-tool-call", engine.approveToolCall(body)),
+      tapStream("ai/approve-tool-call", engine.approveToolCall(body)),
     );
   }),
 
@@ -835,7 +846,7 @@ export const aiController = {
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
-      logStreamErrors("ai/deny-tool-call", engine.denyToolCall(body)),
+      tapStream("ai/deny-tool-call", engine.denyToolCall(body)),
     );
   }),
 };
