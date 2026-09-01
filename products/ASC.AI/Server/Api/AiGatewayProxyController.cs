@@ -37,6 +37,7 @@ namespace ASC.AI.Api;
 [ApiEndpoint("ai")]
 [ApiExplorerSettings(IgnoreApi = true)]
 [AiFeature]
+[DisableResponseWrapper]
 public class AiGatewayProxyController(
     IHttpClientFactory httpClientFactory,
     AiGateway aiGateway,

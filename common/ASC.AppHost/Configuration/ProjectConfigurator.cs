@@ -403,6 +403,9 @@ public class ProjectConfigurator(
             .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityAuthorizationContainer, 9999).ToString())
             .WithHttpEndpoint(Constants.IdentityRegistrationPort, Constants.IdentityRegistrationPort, isProxied: false)
             .WithBuildArg("MODULE", "registration/registration-container")
+            // Spring boots long after the container reports Running; without this, anything waiting
+            // for the resource to go healthy (the integration-test fixtures) starts too early.
+            .WithHttpHealthCheck("/health")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(registrationBuilder);
@@ -420,6 +423,7 @@ public class ProjectConfigurator(
             .WithEnvironment("GRPC_CLIENT_REGISTRATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
             .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
             .WithBuildArg("MODULE", "authorization/authorization-container")
+            .WithHttpHealthCheck("/health")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(authorizationBuilder);

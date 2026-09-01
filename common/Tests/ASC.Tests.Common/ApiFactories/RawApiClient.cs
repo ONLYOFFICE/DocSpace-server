@@ -65,6 +65,16 @@ public class RawApiClient(HttpClient client)
         return await client.PutAsync(path, content, cancellationToken);
     }
 
+    /// <summary>
+    /// PUT with a verbatim JSON body — for payloads the serializer settings above cannot produce,
+    /// e.g. an explicit <c>null</c> for a property that <see cref="_jsonOptions"/> would omit.
+    /// </summary>
+    public async Task<HttpResponseMessage> PutRawAsync(string path, string rawJson, CancellationToken cancellationToken)
+    {
+        using var content = new StringContent(rawJson, Encoding.UTF8, "application/json");
+        return await client.PutAsync(path, content, cancellationToken);
+    }
+
     public async Task<HttpResponseMessage> PatchAsync(string path, object? body, CancellationToken cancellationToken)
     {
         using var request = new HttpRequestMessage(HttpMethod.Patch, path)
