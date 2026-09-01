@@ -200,6 +200,7 @@ public class QuotaHelper(
             result.Id = feature.Name;
 
             object used = null;
+            var hasStat = false;
             var availableFeature = true;
             var isUsedAvailable = employeeType != EmployeeType.Guest &&
                                   (employeeType != EmployeeType.User ||
@@ -251,11 +252,13 @@ public class QuotaHelper(
 
             if (getUsed)
             {
-                if (used != null)
+                // "used" carries a required value, so it is left out entirely rather than emitted
+                // empty for a caller who is not shown the figure.
+                if (hasStat && isUsedAvailable)
                 {
                     result.Used = new FeatureUsedDto
                     {
-                        Value = isUsedAvailable ? used : null,
+                        Value = used,
                         Title = Resource.ResourceManager.GetString($"TariffsFeature_used_{featureName}")
                     };
                 }
@@ -285,7 +288,18 @@ public class QuotaHelper(
             {
                 var statisticProvider = (ITenantQuotaFeatureStat<T>)serviceProvider.GetService(typeof(ITenantQuotaFeatureStat<,>).MakeGenericType(feature.GetType(), typeof(T)));
 
-                if (statisticProvider != null)
+                if (statisticProvider == null)
+                {
+                    return;
+                }
+
+                hasStat = true;
+
+                // A Guest sees no usage numbers at all and a User sees only the total size, so for
+                // everything else the figure is computed and then thrown away — a portal-wide count
+                // per feature, and one that some providers are not even allowed to run for such a
+                // caller, which used to surface as an unhandled error instead of a quota.
+                if (isUsedAvailable)
                 {
                     used = await statisticProvider.GetValueAsync();
                 }

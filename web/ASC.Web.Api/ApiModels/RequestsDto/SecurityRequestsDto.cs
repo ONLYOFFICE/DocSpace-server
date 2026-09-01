@@ -65,12 +65,17 @@ public class SecurityRequestsDto
 /// <summary>
 /// The request parameters for retrieving the security settings across the multiple modules.
 /// </summary>
-public class SecuritySettingsRequestDto
+public class SecuritySettingsRequestDto : IValidatableObject
 {
     /// <summary>
     /// The list of module identifiers for which to retrieve the security settings.
     /// </summary>
-    /// <example>["item1", "item2"]</example>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     [FromQuery(Name = "ids")]
     public IEnumerable<string> Ids { get; set; }
+
+    public IEnumerable<DataAnnotationsValidationResult> Validate(ValidationContext validationContext)
+    {
+        return WebItemIdValidator.Validate(Ids, nameof(Ids));
+    }
 }
