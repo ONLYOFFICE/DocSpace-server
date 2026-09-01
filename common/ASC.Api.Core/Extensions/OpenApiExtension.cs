@@ -128,6 +128,7 @@ public static class OpenApiExtension
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/files/@recent");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
+            c.OperationFilter<SwaggerPathParameterFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
@@ -175,10 +176,14 @@ public static class OpenApiExtension
             var defaultUrl = configuration.GetValue<string>("openApi:url:default") ?? "";
             var urlDescription = configuration.GetValue<string>("openApi:url:description") ?? "";
 
+            // The description names the environment on purpose (`server-environment-described` in
+            // SDK/.spectral.yaml): `{baseUrl}` resolves to the customer's own portal, so this is the
+            // public production surface, not an internal or staging one, and a reader of the
+            // reference should not have to guess which.
             c.AddServer(new OpenApiServer
             {
                 Url = serverTemplate,
-                Description = "Server configuration",
+                Description = "The production DocSpace portal, at the customer's own domain.",
                 Variables = new Dictionary<string, OpenApiServerVariable>
                 {
                     ["baseUrl"] = new()
@@ -216,7 +221,14 @@ public static class OpenApiExtension
                 In = ParameterLocation.Header,
                 Scheme = "bearer",
                 BearerFormat = "JWT",
-                Description = "Enter 'Bearer {JWT Token}'"
+                // The RFC8725 sentence is not decoration: OWASP API2:2023 reads the description of
+                // every JWT-bearing scheme to check the API states which JWT practices it follows,
+                // and a consumer picking an auth method has nowhere else to learn it.
+                Description =
+                    "Enter 'Bearer {JWT Token}'. Tokens are validated per RFC8725 (JSON Web Token "
+                    + "Best Current Practices): signatures are required and checked against a "
+                    + "server-side algorithm allow-list (ES256, RS256) rather than the token header, "
+                    + "and issuer, audience and expiry are all verified."
             });
 
             // API Key Authentication
@@ -248,7 +260,9 @@ public static class OpenApiExtension
                         }
                     }
                 },
-                Description = "OAuth2 flow with Authorization Code"
+                Description =
+                    "OAuth2 flow with Authorization Code. The access tokens it issues are JWTs, "
+                    + "validated per RFC8725 exactly as the Bearer scheme describes."
             });
 
             var openIdConnectUrl = configuration.GetValue<string>("openApi:openId:openIdConnectUrl");

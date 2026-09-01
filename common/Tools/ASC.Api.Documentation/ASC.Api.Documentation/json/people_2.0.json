@@ -34,7 +34,7 @@
   "servers": [
     {
       "url": "{baseUrl}",
-      "description": "Server configuration",
+      "description": "The production DocSpace portal, at the customer's own domain.",
       "variables": {
         "baseUrl": {
           "default": "",
@@ -72,7 +72,10 @@
                   "examples": [
                     5
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Remaining": {
@@ -81,7 +84,10 @@
                   "examples": [
                     1
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Reset": {
@@ -90,7 +96,9 @@
                   "examples": [
                     1750000000
                   ],
-                  "type": "integer"
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             },
@@ -103,7 +111,14 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -114,7 +129,37 @@
                   "examples": [
                     30
                   ],
-                  "type": "integer"
+                  "maximum": 900,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -180,13 +225,37 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -253,13 +322,37 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -326,13 +419,37 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -426,13 +543,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -512,13 +663,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -667,13 +852,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -748,13 +967,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -850,13 +1103,47 @@
             "description": "Group not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -951,13 +1238,47 @@
             "description": "Group not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -1033,13 +1354,47 @@
             "description": "Group not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -1121,13 +1476,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -1225,13 +1614,47 @@
             "description": "Group not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -1325,13 +1748,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -1426,13 +1883,47 @@
             "description": "Group not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -1527,13 +2018,47 @@
             "description": "Group not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -1630,13 +2155,47 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -1769,13 +2328,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -1908,13 +2501,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -2047,13 +2674,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -2134,7 +2795,10 @@
                   "examples": [
                     5
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Remaining": {
@@ -2143,7 +2807,10 @@
                   "examples": [
                     1
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Reset": {
@@ -2152,7 +2819,9 @@
                   "examples": [
                     1750000000
                   ],
-                  "type": "integer"
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             },
@@ -2174,7 +2843,14 @@
             "description": "The user could not be found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -2185,7 +2861,27 @@
                   "examples": [
                     30
                   ],
-                  "type": "integer"
+                  "maximum": 900,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -2250,7 +2946,10 @@
                   "examples": [
                     5
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Remaining": {
@@ -2259,7 +2958,10 @@
                   "examples": [
                     1
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Reset": {
@@ -2268,7 +2970,9 @@
                   "examples": [
                     1750000000
                   ],
-                  "type": "integer"
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             },
@@ -2290,7 +2994,14 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -2301,7 +3012,27 @@
                   "examples": [
                     30
                   ],
-                  "type": "integer"
+                  "maximum": 900,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -2414,13 +3145,37 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -2493,13 +3248,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -2582,13 +3371,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -2669,7 +3492,10 @@
                   "examples": [
                     5
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Remaining": {
@@ -2678,7 +3504,10 @@
                   "examples": [
                     1
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Reset": {
@@ -2687,7 +3516,9 @@
                   "examples": [
                     1750000000
                   ],
-                  "type": "integer"
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             },
@@ -2709,7 +3540,14 @@
             "description": "The user could not be found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -2720,7 +3558,27 @@
                   "examples": [
                     30
                   ],
-                  "type": "integer"
+                  "maximum": 900,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -2785,7 +3643,10 @@
                   "examples": [
                     5
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Remaining": {
@@ -2794,7 +3655,10 @@
                   "examples": [
                     1
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Reset": {
@@ -2803,7 +3667,9 @@
                   "examples": [
                     1750000000
                   ],
-                  "type": "integer"
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             },
@@ -2827,7 +3693,37 @@
                   "examples": [
                     30
                   ],
-                  "type": "integer"
+                  "maximum": 900,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -2904,13 +3800,47 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -2997,13 +3927,47 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -3088,13 +4052,47 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -3191,13 +4189,47 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -3326,13 +4358,37 @@
             "description": "Unknown image file type"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -3399,13 +4455,37 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -3485,13 +4565,47 @@
             "description": "The invitation link is invalid or its validity has expired"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -3637,13 +4751,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -3718,7 +4866,24 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "502": {
             "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
@@ -3778,7 +4943,10 @@
                   "examples": [
                     5
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Remaining": {
@@ -3787,7 +4955,10 @@
                   "examples": [
                     1
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Reset": {
@@ -3796,7 +4967,9 @@
                   "examples": [
                     1750000000
                   ],
-                  "type": "integer"
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             },
@@ -3812,7 +4985,14 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -3823,7 +5003,37 @@
                   "examples": [
                     30
                   ],
-                  "type": "integer"
+                  "maximum": 900,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -3911,13 +5121,47 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4002,13 +5246,37 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4108,13 +5376,37 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4187,13 +5479,37 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4258,13 +5574,37 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4372,13 +5712,37 @@
             "description": "Incorrect email"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4464,13 +5828,37 @@
             "description": "Data reassign process is not complete"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4571,13 +5959,37 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4660,13 +6072,37 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4752,13 +6188,47 @@
             "description": "Conflict - system user quota cannot be reset"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -4981,13 +6451,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -5210,13 +6714,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -5439,13 +6977,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -5560,13 +7132,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -5890,13 +7496,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -5976,13 +7616,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -6088,13 +7762,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -6418,13 +8126,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -6647,13 +8389,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -6876,13 +8652,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -7105,13 +8915,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -7178,13 +9022,37 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -7259,13 +9127,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -7383,6 +9285,33 @@
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
             }
           },
           "502": {
@@ -7431,13 +9360,47 @@
             "description": "Error not allowed option"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -7525,6 +9488,23 @@
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
             }
           },
           "502": {
@@ -7573,13 +9553,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -7661,13 +9675,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -7747,13 +9795,37 @@
             "description": "Can not reassign data to user or from user"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -7830,13 +9902,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -7926,13 +10032,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8014,13 +10154,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8074,7 +10248,10 @@
                   "examples": [
                     5
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Remaining": {
@@ -8083,7 +10260,10 @@
                   "examples": [
                     1
                   ],
-                  "type": "integer"
+                  "maximum": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "X-RateLimit-Reset": {
@@ -8092,7 +10272,9 @@
                   "examples": [
                     1750000000
                   ],
-                  "type": "integer"
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             },
@@ -8108,7 +10290,14 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -8119,7 +10308,27 @@
                   "examples": [
                     30
                   ],
-                  "type": "integer"
+                  "maximum": 900,
+                  "minimum": 0,
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -8206,13 +10415,37 @@
             "description": "User not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8282,13 +10515,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8358,13 +10625,37 @@
             "description": "Access denied"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8431,13 +10722,37 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8595,13 +10910,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8696,13 +11045,37 @@
             "description": "No permissions to perform this action or cannot change status for a specific user (yourself, owner, LDAP ...)"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8793,13 +11166,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8893,13 +11300,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -8982,13 +11423,37 @@
             "description": "Access denied"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -9070,13 +11535,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -9153,13 +11652,47 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -9247,13 +11780,47 @@
             "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
               }
             }
           },
@@ -10770,6 +13337,45 @@
           }
         },
         "description": "The successful API response containing the EmployeeDto object."
+      },
+      "ErrorApiResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The response status flag. Always 1 on an error, as opposed to 0 on success.",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "The HTTP status code of the response, repeated in the body.",
+            "format": "int32"
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "The human-readable error message."
+              },
+              "type": {
+                "type": "string",
+                "description": "The .NET type of the underlying exception. Only sent when stack traces are enabled."
+              },
+              "stack": {
+                "type": "string",
+                "description": "The stack trace of the underlying exception. Only sent when stack traces are enabled."
+              },
+              "hresult": {
+                "type": "integer",
+                "description": "The HRESULT of the underlying exception. Only sent when stack traces are enabled.",
+                "format": "int32"
+              }
+            },
+            "description": "What went wrong."
+          }
+        },
+        "description": "The error body returned with every failed request."
       },
       "FileUploadResultDto": {
         "type": "object",
@@ -12624,7 +15230,10 @@
           "examples": [
             1500
           ],
-          "type": "integer"
+          "maximum": 1500,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
         }
       },
       "X-RateLimit-Remaining": {
@@ -12633,7 +15242,10 @@
           "examples": [
             1
           ],
-          "type": "integer"
+          "maximum": 1500,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
         }
       },
       "X-RateLimit-Reset": {
@@ -12642,7 +15254,9 @@
           "examples": [
             1750000000
           ],
-          "type": "integer"
+          "minimum": 0,
+          "type": "integer",
+          "format": "int64"
         }
       },
       "Retry-After": {
@@ -12651,7 +15265,10 @@
           "examples": [
             30
           ],
-          "type": "integer"
+          "maximum": 86400,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -12669,7 +15286,7 @@
       },
       "Bearer": {
         "type": "http",
-        "description": "Enter 'Bearer {JWT Token}'",
+        "description": "Enter 'Bearer {JWT Token}'. Tokens are validated per RFC8725 (JSON Web Token Best Current Practices): signatures are required and checked against a server-side algorithm allow-list (ES256, RS256) rather than the token header, and issuer, audience and expiry are all verified.",
         "scheme": "bearer",
         "bearerFormat": "JWT"
       },
@@ -12681,7 +15298,7 @@
       },
       "OAuth2": {
         "type": "oauth2",
-        "description": "OAuth2 flow with Authorization Code",
+        "description": "OAuth2 flow with Authorization Code. The access tokens it issues are JWTs, validated per RFC8725 exactly as the Bearer scheme describes.",
         "flows": {
           "authorizationCode": {
             "authorizationUrl": "",

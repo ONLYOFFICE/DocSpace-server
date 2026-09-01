@@ -49,11 +49,23 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
 
 public class ErrorResponseFilter : IDocumentFilter
 {
+    // The body CustomExceptionHandler writes on every failure it handles: it serializes an
+    // ErrorApiResponse with WriteAsJsonAsync, so an error status carries exactly this shape. Until
+    // it was documented the document declared error statuses with no body at all, which left the
+    // generated SDKs with no error type to deserialize into.
+    private const string ErrorSchemaId = "ErrorApiResponse";
+
+    // 502/503 are excluded on purpose - they come from the reverse proxy, never reach this
+    // handler, and their body may be HTML (their descriptions below say so).
+    private static readonly string[] _handlerStatuses =
+        ["400", "401", "402", "403", "404", "405", "409", "413", "415", "429", "500", "501"];
+
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
         swaggerDoc.Components ??= new OpenApiComponents();
         swaggerDoc.Components.Headers ??= new Dictionary<string, IOpenApiHeader>();
-
+        swaggerDoc.Components.Schemas ??= new Dictionary<string, IOpenApiSchema>();
+        swaggerDoc.Components.Schemas[ErrorSchemaId] = BuildErrorSchema();
 
         foreach (var operation in swaggerDoc.Paths.Values.Where(path => path.Operations != null).SelectMany(path => path.Operations.Values))
         {
@@ -62,10 +74,59 @@ public class ErrorResponseFilter : IDocumentFilter
                 continue;
             }
 
+            // Every operation can fail this way: an exception nothing maps ends up a 500 here.
+            operation.Responses.TryAdd("500", new OpenApiResponse { Description = "Internal Server Error." });
+
+            // 400, in contrast, is only reachable where there is something to reject - model binding
+            // and validation run against parameters and a request body. Declaring it on an operation
+            // that takes neither would document a response that cannot happen.
+            if (operation.Parameters is { Count: > 0 } || operation.RequestBody != null)
+            {
+                operation.Responses.TryAdd("400", new OpenApiResponse { Description = "Bad Request." });
+            }
+
             operation.Responses.TryAdd("502", new OpenApiResponse { Description = "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON." });
             operation.Responses.TryAdd("503", new OpenApiResponse { Description = "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON." });
+
+            foreach (var status in _handlerStatuses)
+            {
+                if (operation.Responses.TryGetValue(status, out var response) &&
+                    response is OpenApiResponse { Content: null } concrete)
+                {
+                    concrete.Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        ["application/json"] = new() { Schema = new OpenApiSchemaReference(ErrorSchemaId) }
+                    };
+                }
+            }
         }
     }
+
+    // Hand-built rather than reflected off ErrorApiResponse: the type lives in ASC.Api.Core, which
+    // this assembly does not reference, and a generated schema would carry no prose anyway - the
+    // ruleset requires a description on the component and on every property.
+    private static OpenApiSchema BuildErrorSchema() => new()
+    {
+        Type = JsonSchemaType.Object,
+        Description = "The error body returned with every failed request.",
+        Properties = new Dictionary<string, IOpenApiSchema>
+        {
+            ["status"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The response status flag. Always 1 on an error, as opposed to 0 on success." },
+            ["statusCode"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The HTTP status code of the response, repeated in the body." },
+            ["error"] = new OpenApiSchema
+            {
+                Type = JsonSchemaType.Object,
+                Description = "What went wrong.",
+                Properties = new Dictionary<string, IOpenApiSchema>
+                {
+                    ["message"] = new OpenApiSchema { Type = JsonSchemaType.String, Description = "The human-readable error message." },
+                    ["type"] = new OpenApiSchema { Type = JsonSchemaType.String, Description = "The .NET type of the underlying exception. Only sent when stack traces are enabled." },
+                    ["stack"] = new OpenApiSchema { Type = JsonSchemaType.String, Description = "The stack trace of the underlying exception. Only sent when stack traces are enabled." },
+                    ["hresult"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The HRESULT of the underlying exception. Only sent when stack traces are enabled." }
+                }
+            }
+        }
+    };
 }
 
 public class DerivedSchemaFilter : ISchemaFilter

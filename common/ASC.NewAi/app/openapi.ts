@@ -710,10 +710,14 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
   // Shared `{baseUrl}` server template (default empty = same origin),
   // matching the .NET service documents. Paths already carry the full
   // `/api/2.0/ai/...` route, so requests resolve to the proxied URL.
+  // The description names the environment on purpose (`server-environment-described` in the
+  // documentation tool's SDK/.spectral.yaml): `{baseUrl}` resolves to the customer's own portal,
+  // so this is the public production surface. Kept identical to the .NET service documents so the
+  // joiner sees one server, not two.
   const servers: Json = [
     {
       url: "{baseUrl}",
-      description: "Server configuration",
+      description: "The production DocSpace portal, at the customer's own domain.",
       variables: { baseUrl: { default: "", description: "Default URL" } },
     },
   ];

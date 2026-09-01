@@ -108,6 +108,9 @@ public class AuthenticationController(
     [SwaggerResponse(403, "Auth code is not available")]
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment, AllowAnonymous]
+    // AuthWithCodeRequestsDto carries `code` in the body, so the route placeholder is unbound; the
+    // client (loginWithTfaCode) puts the same code in both.
+    [SwaggerPathParameter("code", "The two-factor authentication code. Send the same value as the `code` of the request body, which is the one the handler reads.")]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthWithCodeRequestsDto inDto)
     {

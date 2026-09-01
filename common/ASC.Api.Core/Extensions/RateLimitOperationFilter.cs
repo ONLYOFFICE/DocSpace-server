@@ -140,12 +140,37 @@ public class RateLimitOperationFilter(
         new OpenApiHeaderReference(RateLimitHeaderNames.RetryAfter)
     );
 
+    // A rate-limit header is the only integer this generator emits on its own, so it is also the
+    // only one whose bounds are known here rather than in a DTO. They are the real bounds, not
+    // placeholders put there to satisfy a linter: a remaining-request count cannot exceed the
+    // configured limit, and a retry delay cannot exceed the window it waits out. `X-RateLimit-Reset`
+    // is the exception - a Unix timestamp is non-negative and has no meaningful ceiling, so it
+    // declares none and stays int64.
+    private const int SecondsPerDay = 86400;
+
+    private static OpenApiSchema BoundedCount(int example, int maximum) => new()
+    {
+        Type = JsonSchemaType.Integer,
+        Format = "int32",
+        Minimum = "0",
+        Maximum = maximum.ToString(CultureInfo.InvariantCulture),
+        Example = example
+    };
+
+    private static OpenApiSchema UnixTimestamp(long example) => new()
+    {
+        Type = JsonSchemaType.Integer,
+        Format = "int64",
+        Minimum = "0",
+        Example = example
+    };
+
     internal static (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) BuildGlobalHeaders(RateLimiterSettings settings) =>
     (
         new OpenApiHeader
         {
             Description =  $"Sliding window rate limit: {settings.SlidingWindowLimit} requests per minute per user/IP.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = settings.SlidingWindowLimit }
+            Schema = BoundedCount(settings.SlidingWindowLimit, settings.SlidingWindowLimit)
         },
         new OpenApiHeader
         {
@@ -153,18 +178,18 @@ public class RateLimitOperationFilter(
                 $"Number of requests remaining in the current sliding window ({settings.SlidingWindowLimit} req/min). " +
                 $"Concurrent limits also apply: {settings.ConcurrentGetLimit} parallel GET requests, " +
                 $"{settings.DefaultConcurrencyWriteRequests} parallel POST/PUT requests.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1 }
+            Schema = BoundedCount(1, settings.SlidingWindowLimit)
         },
         new OpenApiHeader
         {
             Description = "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1750000000 }
+            Schema = UnixTimestamp(1750000000)
         },
         new OpenApiHeader
         {
             Description =  $"Seconds to wait before retrying. " +
                            $"Up to 60s for the sliding window ({settings.SlidingWindowLimit} req/min), up to 86400s for the daily POST/PUT limit ({settings.DailyWriteLimit}/day).",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 }
+            Schema = BoundedCount(30, SecondsPerDay)
         }
     );
 
@@ -173,22 +198,22 @@ public class RateLimitOperationFilter(
         new OpenApiHeader
         {
             Description = $"Rate limit: {limitValue} requests per {timeValue} minutes per user/IP.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = limitValue }
+            Schema = BoundedCount(limitValue, limitValue)
         },
         new OpenApiHeader
         {
             Description = $"Requests remaining in the current {timeValue}-minute window.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1 }
+            Schema = BoundedCount(1, limitValue)
         },
         new OpenApiHeader
         {
             Description = $"Unix timestamp (seconds) when the current {timeValue}-minute window resets.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1750000000 }
+            Schema = UnixTimestamp(1750000000)
         },
         new OpenApiHeader
         {
             Description = $"Seconds to wait before retrying ({limitValue} req / {timeValue} min limit per user/IP).",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 }
+            Schema = BoundedCount(30, timeValue * 60)
         }
     );
 
@@ -203,22 +228,22 @@ public class RateLimitOperationFilter(
             new OpenApiHeader
             {
                 Description = $"Rate limit: {limitValue.Value} invitations per day per tenant.",
-                Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = limitValue.Value }
+                Schema = BoundedCount(limitValue.Value, limitValue.Value)
             },
             new OpenApiHeader
             {
                 Description = $"Invitations remaining today per tenant.",
-                Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1 }
+                Schema = BoundedCount(1, limitValue.Value)
             },
             new OpenApiHeader
             {
                 Description = "Unix timestamp (seconds) when the daily invitation limit resets.",
-                Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1750000000 }
+                Schema = UnixTimestamp(1750000000)
             },
             new OpenApiHeader
             {
                 Description = $"Seconds to wait before retrying ({limitValue.Value} invitations/day limit per tenant).",
-                Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 }
+                Schema = BoundedCount(30, SecondsPerDay)
             }
         );
     }
