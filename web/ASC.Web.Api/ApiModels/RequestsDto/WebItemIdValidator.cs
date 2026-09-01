@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,26 +31,24 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace Textile.Blocks;
+namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-public class NoTextileBlockModifier : BlockModifier
+/// <summary>
+/// Rejects a module identifier that is not a GUID before it reaches the security store, which
+/// parses it without guarding and would otherwise fail the request with an unhandled error.
+/// </summary>
+public static class WebItemIdValidator
 {
-    public override string ModifyLine(string line)
+    public static IEnumerable<DataAnnotationsValidationResult> Validate(IEnumerable<string> ids, string memberName)
     {
-        line = NoTextileEncoder.EncodeNoTextileZones(line, @"(?<=^|\s)<notextile>", @"</notextile>(?=(\s|$)?)");
-        line = NoTextileEncoder.EncodeNoTextileZones(line, "==", "==");
-        return line;
-    }
+        if (ids == null)
+        {
+            yield break;
+        }
 
-    public override string Conclude(string line)
-    {
-        // Recode everything except "<" and ">", the same way CodeBlockModifier does. A no-textile
-        // zone is where every interpolated tag value lands (NVelocityPatternFormatter wraps each one
-        // in "=="), so restoring the angle brackets handed whatever the value carried straight to the
-        // mail client as live markup — and undid the .HtmlEncode() the actions apply, right at the
-        // last step.
-        line = NoTextileEncoder.DecodeNoTextileZones(line, @"(?<=^|\s)<notextile>", @"</notextile>(?=(\s|$)?)", ["<", ">"]);
-        line = NoTextileEncoder.DecodeNoTextileZones(line, "==", "==", ["<", ">"]);
-        return line;
+        foreach (var id in ids.Where(id => !Guid.TryParse(id, out _)))
+        {
+            yield return new DataAnnotationsValidationResult($"The module ID \"{id}\" is not a valid identifier.", [memberName]);
+        }
     }
 }

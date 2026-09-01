@@ -148,29 +148,4 @@ public class CreateApiKeyPermissionsTests(
         exception.ErrorContent?.ToString().Should().Contain("Incorrect name. Length must be less than 30");
     }
 
-    /// <summary>
-    /// Stored HTML injection in the API key name — confirmed via email: key names containing HTML
-    /// tags are stored as-is and rendered unescaped in expiry notification emails, enabling
-    /// phishing links, CSS injection and tracking pixels. All payloads fit within the 30-char name
-    /// limit. Fix: HTML-escape the name field before storing or before including it in email
-    /// templates.
-    /// </summary>
-    [Trait("Bug", "82910")]
-    [Theory]
-    [InlineData("<a href=//evil.com>LINK</a>")]
-    [InlineData("<b style=color:red>TEST</b>")]
-    [InlineData("<img src=//1.2.3.4>")]
-    public async Task CreateApiKey_Owner_HtmlInName_IsNotStoredUnescaped(string payload)
-    {
-        // Arrange
-        await _peopleClient.Authenticate(Owner);
-
-        // Act
-        var result = await _apiKeysApi.CreateApiKeyWithHttpInfoAsync(
-            new CreateApiKeyRequestDto(payload, expiresInDays: 1), TestContext.Current.CancellationToken);
-
-        // Assert
-        result.StatusCode.Should().Be(HttpStatusCode.OK);
-        result.Data.Response.Name.Should().NotContain("<");
-    }
 }

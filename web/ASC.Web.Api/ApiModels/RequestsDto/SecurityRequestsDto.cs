@@ -79,23 +79,3 @@ public class SecuritySettingsRequestDto : IValidatableObject
         return WebItemIdValidator.Validate(Ids, nameof(Ids));
     }
 }
-
-/// <summary>
-/// Rejects a module identifier that is not a GUID before it reaches the security store, which
-/// parses it without guarding and would otherwise fail the request with an unhandled error.
-/// </summary>
-public static class WebItemIdValidator
-{
-    public static IEnumerable<DataAnnotationsValidationResult> Validate(IEnumerable<string> ids, string memberName)
-    {
-        if (ids == null)
-        {
-            yield break;
-        }
-
-        foreach (var id in ids.Where(id => !Guid.TryParse(id, out _)))
-        {
-            yield return new DataAnnotationsValidationResult($"The module ID \"{id}\" is not a valid identifier.", [memberName]);
-        }
-    }
-}

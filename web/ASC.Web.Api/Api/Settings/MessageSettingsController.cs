@@ -192,35 +192,29 @@ public class MessageSettingsController(
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "Message about sending a link to confirm joining the DocSpace", typeof(string))]
     [SwaggerResponse(400, "Incorrect email or email already exists")]
-    [SwaggerResponse(401, "Self-registration is not open on this portal")]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(405, "Joining the portal is not available")]
     [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
     public async Task<string> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)
     {
-        var tenant = tenantManager.GetCurrentTenant();
-
-        // Two callers share this endpoint. The "Register" link on the login page is anonymous, and
-        // the portal offers it only while a trusted-domain policy is published - the very condition
-        // SettingsDto.EnabledJoin reports to that page. Everyone else has to be an administrator:
-        // an authenticated member has the invitation flow instead.
-        var selfRegistrationOpen =
-            (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom && tenant.TrustedDomains.Count > 0) ||
-            tenant.TrustedDomainsType == TenantTrustedDomainsType.All;
-
-        if (authContext.IsAuthenticated)
-        {
-            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        }
-        else if (!selfRegistrationOpen)
-        {
-            throw new System.Security.Authentication.AuthenticationException("Self-registration is not open on this portal");
-        }
-
         try
         {
+            var tenant = tenantManager.GetCurrentTenant();
             var email = inDto.Email;
+
+            // Joining is what this endpoint serves - the "Register" link the login page shows an
+            // anonymous visitor - so it exists only while the portal publishes a trusted-domain
+            // policy, the same condition SettingsDto.EnabledJoin reports to that page. Saying so with
+            // 405 rather than letting an unmapped MethodAccessException surface as 500.
+            if (!(
+                (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
+                tenant.TrustedDomains.Count > 0) ||
+                tenant.TrustedDomainsType == TenantTrustedDomainsType.All))
+            {
+                throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, "Method not available");
+            }
 
             if (!email.TestEmailRegex() || email.TestEmailPunyCode())
             {
@@ -252,21 +246,29 @@ public class MessageSettingsController(
                 employeeType = EmployeeType.User;
             }
 
-            // A custom trusted-domain list narrows which addresses may be invited at all; every
-            // other mode leaves the choice to whoever is allowed to reach this point.
-            if (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom && tenant.TrustedDomains.Count > 0)
+            switch (tenant.TrustedDomainsType)
             {
-                var address = new MailAddress(email);
-                if (!tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    throw new ArgumentException(Resource.ErrorEmailDomainNotAllowed);
-                }
+                case TenantTrustedDomainsType.Custom:
+                    {
+                        var address = new MailAddress(email);
+                        if (tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
+                        {
+                            await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
+                            messageService.Send(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                            return Resource.FinishInviteJoinEmailMessage;
+                        }
+
+                        throw new ArgumentException(Resource.ErrorEmailDomainNotAllowed);
+                    }
+                case TenantTrustedDomainsType.All:
+                    {
+                        await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
+                        messageService.Send(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                        return Resource.FinishInviteJoinEmailMessage;
+                    }
+                default:
+                    throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
-
-            await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
-            messageService.Send(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
-
-            return Resource.FinishInviteJoinEmailMessage;
         }
         catch (FormatException)
         {

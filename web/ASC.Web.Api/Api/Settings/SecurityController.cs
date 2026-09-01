@@ -74,6 +74,10 @@ public class SecurityController(
 
         var subItemList = WebItemManager.GetItemsAll().Where(item => item.IsSubItem()).Select(i => i.ID.ToString()).ToList();
 
+        // The same subject shows up under many modules, and without ids that is every module the
+        // portal has — the visibility check is asked once per subject instead of once per pair.
+        var visible = new Dictionary<Guid, bool>();
+
         foreach (var r in inDto.Ids)
         {
             var i = await webItemSecurity.GetSecurityInfoAsync(r);
@@ -94,7 +98,13 @@ public class SecurityController(
 
             foreach (var e in i.Users)
             {
-                if (!await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, e.Id))
+                if (!visible.TryGetValue(e.Id, out var canView))
+                {
+                    canView = await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, e.Id);
+                    visible[e.Id] = canView;
+                }
+
+                if (!canView)
                 {
                     continue;
                 }

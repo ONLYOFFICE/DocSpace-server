@@ -34,11 +34,10 @@
 namespace ASC.Web.Api.Tests.Tests._06_ApiKeys;
 
 /// <summary>
-/// POST /api/2.0/keys — a key name carrying HTML/script content is accepted for every role, but
-/// it is HTML-encoded on the way in, so nothing that renders it later (the expiry notification
-/// email, most of all) can be made to execute it. Before bug 82910 was fixed the name round-tripped
-/// verbatim; the encoding itself is pinned by the <c>Permissions/CreateApiKeyPermissionsTests</c>
-/// "Bug 82910" cases.
+/// POST /api/2.0/keys — the key name is stored and echoed back verbatim, including HTML/script
+/// content, for every role: it is what the user typed and what every screen shows them. Making it
+/// safe belongs to whatever renders it into markup — the expiry notification email, which bug 82910
+/// was about, escapes it there (ApiKeyExpiredLetterTests in ASC.Notify.Tests).
 /// </summary>
 [Trait("Category", "ApiKeys")]
 public class CreateApiKeySpecialCharacterNameTests(
@@ -46,7 +45,6 @@ public class CreateApiKeySpecialCharacterNameTests(
     : ApiKeysTestBase(fixture)
 {
     private const string SpecialName = "<script>alert('xss')</script>";
-    private const string EncodedName = "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;";
 
     [Theory]
     [MemberData(nameof(ApiKeyActorData.AllRoles), MemberType = typeof(ApiKeyActorData))]
@@ -62,6 +60,6 @@ public class CreateApiKeySpecialCharacterNameTests(
         // Assert
         result.StatusCode.Should().Be(HttpStatusCode.OK);
         result.Data.Response.Id.Should().NotBeEmpty();
-        result.Data.Response.Name.Should().Be(EncodedName);
+        result.Data.Response.Name.Should().Be(SpecialName);
     }
 }

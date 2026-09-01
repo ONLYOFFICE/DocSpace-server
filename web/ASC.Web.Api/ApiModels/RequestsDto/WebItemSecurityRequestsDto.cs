@@ -76,7 +76,7 @@ public class WebItemsSecurityRequestsDto : IValidatableObject
     /// <summary>
     /// The list of module security configurations.
     /// </summary>
-    /// <example>["item1", "item2"]</example>
+    /// <example>[{"key":"00000000-0000-0000-0000-000000000000","value":true}]</example>
     public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
 
     public IEnumerable<DataAnnotationsValidationResult> Validate(ValidationContext validationContext)

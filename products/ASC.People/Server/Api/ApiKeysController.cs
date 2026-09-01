@@ -79,7 +79,7 @@ public class ApiKeysController(
             throw new ArgumentException("Permissions are not valid.");
         }
 
-        var result = await apiKeyManager.CreateApiKeyAsync(HttpUtility.HtmlEncode(apiKey.Name),
+        var result = await apiKeyManager.CreateApiKeyAsync(apiKey.Name,
             apiKey.Permissions,
             expiresAt);
 
