@@ -51,6 +51,8 @@ global using Bogus;
 global using Bogus.DataSets;
 
 global using DocSpace.API.SDK.Api.People;
+global using DocSpace.API.SDK.Api.Settings;
+global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
 
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
