@@ -173,7 +173,7 @@ public class RoomGroupReadTests(
         await CreateRoomGroup("Only Group", [roomId]);
 
         // Act
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(true, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         list.Should().HaveCount(1);
