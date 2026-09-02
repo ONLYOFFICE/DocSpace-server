@@ -208,21 +208,39 @@ export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknow
 // `ERR_INCOMPLETE_CHUNKED_ENCODING`. Keep this well under that timeout.
 const STREAM_HEARTBEAT_MS = 10_000;
 
+// How often the idle check runs. It has to be a fraction of the threshold, not
+// the threshold itself: on an equal interval a beat lands anywhere between one
+// and two thresholds after the last write (activity just before a tick pushes
+// the beat to the tick after it), and a skipped beat adds another full
+// interval — which would put a 10s keep-alive at 30s, the very limit it exists
+// to stay under.
+const STREAM_HEARTBEAT_CHECK_MS = STREAM_HEARTBEAT_MS / 4;
+
 // Emit `frame` whenever the stream has been idle for `STREAM_HEARTBEAT_MS`.
 // `frame` must be something the client's stream parser ignores: a blank line
-// for ndjson (`readNdjson` skips empty lines), an SSE comment for SSE. Returns
-// `touch` (call after every real write to reset the idle timer) and `stop`.
-function startStreamHeartbeat(res: Response, frame: string): { touch: () => void; stop: () => void } {
+// for ndjson (`readNdjson` skips empty lines), an SSE comment for SSE,
+// whitespace ahead of a JSON body. Returns `touch` (call after every real
+// write to reset the idle timer) and `stop`.
+// `canWrite` gates a beat: a relaying caller (the OpenAI passthrough) forwards
+// provider bytes verbatim and must not splice a frame into a half-written one.
+export function startStreamHeartbeat(
+  res: Response,
+  frame: string,
+  canWrite?: () => boolean,
+): { touch: () => void; stop: () => void } {
   let lastActivity = Date.now();
   const timer = setInterval(() => {
     if (res.writableEnded || res.destroyed) {
+      return;
+    }
+    if (canWrite && !canWrite()) {
       return;
     }
     if (Date.now() - lastActivity >= STREAM_HEARTBEAT_MS) {
       res.write(frame);
       lastActivity = Date.now();
     }
-  }, STREAM_HEARTBEAT_MS);
+  }, STREAM_HEARTBEAT_CHECK_MS);
   timer.unref?.();
   return {
     touch: () => { lastActivity = Date.now(); },
