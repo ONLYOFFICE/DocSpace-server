@@ -11980,12 +11980,29 @@
         "x-enum-type": "integer"
       },
       "ApiDateTime": {
-        "examples": [
-          "2021-01-01T00:00:00.0000000Z"
-        ],
-        "type": "string",
-        "description": "The API date and time parameters.",
-        "format": "date-time"
+        "type": "object",
+        "properties": {
+          "utcTime": {
+            "examples": [
+              "2018-01-01T00:00:00.0000000Z"
+            ],
+            "type": "string",
+            "description": "The time in UTC format.",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "timeZoneOffset": {
+            "examples": [
+              "00:00:00"
+            ],
+            "type": "string",
+            "description": "The time zone offset.",
+            "format": "date-span",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The API date and time parameters."
       },
       "ApiKeyResponseArrayWrapper": {
         "type": "object",

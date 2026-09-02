@@ -131,6 +131,7 @@ public static class OpenApiExtension
             c.OperationFilter<SwaggerPathParameterFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
+            c.OperationFilter<ApiDateTimeParameterFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
@@ -163,8 +164,6 @@ public static class OpenApiExtension
             });
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
-            // Must run after the filters that fill the reflected shape in: it replaces that shape wholesale.
-            c.SchemaFilter<ApiDateTimeSchemaFilter>();
 
             var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
 
@@ -565,31 +564,29 @@ public static class OpenApiExtension
     }
 
     /// <summary>
-    /// Keeps <see cref="ApiDateTime"/> a named component - the sdk generators and the api reference name the
-    /// type - while giving it the shape that actually goes over the wire. ApiDateTimeConverter writes and reads
-    /// a single ISO-8601 string, and the type converter binds query values the same way, so the reflected
-    /// `utcTime`/`timeZoneOffset` object never appears in a request or a response.
+    /// Describes an <see cref="ApiDateTime"/> carried in a query, path or header as the ISO-8601 string it
+    /// actually is. ApiDateTimeTypeConverter binds such a value from a single string, so pointing the parameter
+    /// at the object component would both misdescribe the wire and make the string `example` invalid against
+    /// it. Request and response bodies keep the component: there the json converter round-trips the whole type.
     /// </summary>
-    private class ApiDateTimeSchemaFilter : ISchemaFilter
+    private class ApiDateTimeParameterFilter : IOperationFilter
     {
-        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
-        {
-            if (context.Type != typeof(ApiDateTime) || schema is not OpenApiSchema openApiSchema)
-            {
-                return;
-            }
+        private static readonly string _apiDateTimeSchemaId = CustomSchemaId(typeof(ApiDateTime));
 
-            openApiSchema.Type = JsonSchemaType.String;
-            openApiSchema.Format = "date-time";
-            openApiSchema.Example = "2021-01-01T00:00:00.0000000Z";
-            openApiSchema.Properties = null;
-            openApiSchema.Required = null;
-            openApiSchema.AdditionalProperties = null;
-            // Swashbuckle emits `additionalProperties: false` for the object it reflected; on a string it is noise.
-            openApiSchema.AdditionalPropertiesAllowed = true;
-            openApiSchema.AllOf = null;
-            openApiSchema.AnyOf = null;
-            openApiSchema.OneOf = null;
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            foreach (var parameter in operation.Parameters ?? [])
+            {
+                if (parameter is OpenApiParameter openApiParameter &&
+                    (openApiParameter.Schema as OpenApiSchemaReference)?.Reference.Id == _apiDateTimeSchemaId)
+                {
+                    openApiParameter.Schema = new OpenApiSchema
+                    {
+                        Type = JsonSchemaType.String,
+                        Format = "date-time"
+                    };
+                }
+            }
         }
     }
 

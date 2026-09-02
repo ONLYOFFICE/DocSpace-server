@@ -1353,7 +1353,8 @@
             "in": "query",
             "description": "The start date of the history.",
             "schema": {
-              "$ref": "#/components/schemas/ApiDateTime"
+              "type": "string",
+              "format": "date-time"
             },
             "example": "2025-01-01T00:00:00.0000000Z"
           },
@@ -1362,7 +1363,8 @@
             "in": "query",
             "description": "The end date of the history.",
             "schema": {
-              "$ref": "#/components/schemas/ApiDateTime"
+              "type": "string",
+              "format": "date-time"
             },
             "example": "2025-12-31T23:59:59.0000000Z"
           },
@@ -6755,7 +6757,8 @@
             "in": "query",
             "description": "The start date of the history request.",
             "schema": {
-              "$ref": "#/components/schemas/ApiDateTime"
+              "type": "string",
+              "format": "date-time"
             },
             "example": "2025-01-01T00:00:00.0000000Z"
           },
@@ -6764,7 +6767,8 @@
             "in": "query",
             "description": "The end date of the history request.",
             "schema": {
-              "$ref": "#/components/schemas/ApiDateTime"
+              "type": "string",
+              "format": "date-time"
             },
             "example": "2025-12-31T23:59:59.0000000Z"
           },
@@ -27665,12 +27669,29 @@
         "description": "The anonymous config parameters."
       },
       "ApiDateTime": {
-        "examples": [
-          "2021-01-01T00:00:00.0000000Z"
-        ],
-        "type": "string",
-        "description": "The API date and time parameters.",
-        "format": "date-time"
+        "type": "object",
+        "properties": {
+          "utcTime": {
+            "examples": [
+              "2018-01-01T00:00:00.0000000Z"
+            ],
+            "type": "string",
+            "description": "The time in UTC format.",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "timeZoneOffset": {
+            "examples": [
+              "00:00:00"
+            ],
+            "type": "string",
+            "description": "The time zone offset.",
+            "format": "date-span",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The API date and time parameters."
       },
       "ApplyFilterOption": {
         "oneOf": [
