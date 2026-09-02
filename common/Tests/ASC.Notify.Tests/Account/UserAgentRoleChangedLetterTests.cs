@@ -39,7 +39,10 @@ namespace ASC.Notify.Tests.Account;
 /// </summary>
 public class UserAgentRoleChangedLetterTests : LetterTestBase<UserAgentRoleChangedNotifyAction>
 {
-    private const string AgentTitle = "Agent title";
+    // Caller-supplied and rendered as ${RoomTitle}, so the letter has to escape it.
+    private const string AgentTitle = "<a href=//evil.com>Agent title</a>";
+    private const string EncodedAgentTitle = "&lt;a href=//evil.com&gt;Agent title&lt;/a&gt;";
+
     private const string UserRole = "Editor";
 
     /// <summary>The access rights article the letter points at.</summary>
@@ -63,10 +66,11 @@ public class UserAgentRoleChangedLetterTests : LetterTestBase<UserAgentRoleChang
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should()
-            .Contain(AgentTitle)
-            .And.Contain(AgentUrl(scope))
+            .Contain(AgentUrl(scope))
             .And.Contain(UserRole)
             .And.Contain(HelpCenterUrl(scope.Culture));
+
+        letter.Body.Should().Contain(EncodedAgentTitle).And.NotContain(AgentTitle);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)

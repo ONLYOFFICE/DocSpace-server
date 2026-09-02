@@ -44,9 +44,14 @@ public class PasswordChangedLetterTests : LetterTestBase<PasswordChangedNotifyAc
 
     private const string Ip = "203.0.113.7";
     private const string Device = "Windows";
-    private const string Browser = "Chrome 140";
     private const string Country = "Latvia";
     private const string City = "Riga";
+
+    // The audit event reads the browser off the request's User-Agent, so it is whatever the client chose
+    // to send — and this letter prints it. Escaped by Init, like every other value that arrives from
+    // outside; see ApiKeyExpiredLetterTests for the same check on a name the user types.
+    private const string Browser = "<a href=//evil.com>Chrome 140</a>";
+    private const string EncodedBrowser = "&lt;a href=//evil.com&gt;Chrome 140&lt;/a&gt;";
 
     protected override Task InitAsync(PasswordChangedNotifyAction action, LetterScope scope)
     {
@@ -75,10 +80,11 @@ public class PasswordChangedLetterTests : LetterTestBase<PasswordChangedNotifyAc
             .And.Contain(changedOn)
             .And.Contain(Ip)
             .And.Contain(Device)
-            .And.Contain(Browser)
             .And.Contain($"{Country}, {City}")
             .And.Contain(Resource("ButtonOpenDocSpace", scope.Culture)
                 .Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText));
+
+        letter.Body.Should().Contain(EncodedBrowser).And.NotContain(Browser);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
