@@ -167,7 +167,7 @@ public class ThirdpartyController(
     /// <path>api/2.0/people/thirdparty/signup</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Third-party accounts")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "The newly created user linked to the third-party account", typeof(EmployeeDto))]
     [SwaggerResponse(400, "Incorrect email")]
     [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [AllowAnonymous]
