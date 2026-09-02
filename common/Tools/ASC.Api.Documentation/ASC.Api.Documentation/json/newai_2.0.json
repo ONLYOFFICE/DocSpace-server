@@ -8210,15 +8210,8 @@
                 "description": "Specifies if the folder can be accessed via an external link or not."
               },
               "expirationDate": {
-                "examples": [
-                  "2021-01-01T00:00:00Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "Represents the expiration date of the file entry.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/AiApiDateTime"
               },
               "isLinkExpired": {
                 "examples": [
@@ -8235,6 +8228,14 @@
         ],
         "additionalProperties": false,
         "description": "The generic file entry information."
+      },
+      "AiApiDateTime": {
+        "examples": [
+          "2021-01-01T00:00:00.0000000Z"
+        ],
+        "type": "string",
+        "description": "The API date and time parameters.",
+        "format": "date-time"
       },
       "AiFileEntryBaseDto": {
         "type": "object",
@@ -8301,41 +8302,20 @@
             "format": "uri"
           },
           "created": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The creation date and time of the file entry.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/AiApiDateTime"
           },
           "createdBy": {
             "description": "The file entry author.",
             "$ref": "#/components/schemas/AiEmployeeDto"
           },
           "updated": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The last date and time when the file entry was updated.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/AiApiDateTime"
           },
           "autoDelete": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the file entry will be automatically deleted.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/AiApiDateTime"
           },
           "rootFolderType": {
             "description": "The root folder type of the file entry.",
@@ -8911,15 +8891,8 @@
         "type": "object",
         "properties": {
           "date": {
-            "examples": [
-              "2025-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the new item was created.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/AiApiDateTime"
           },
           "items": {
             "type": [

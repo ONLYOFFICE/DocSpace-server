@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -161,15 +161,10 @@ public static class OpenApiExtension
                     }
                 }
             });
-            // ApiDateTimeConverter writes and reads a single ISO-8601 string, and the type converter binds
-            // query values the same way, so the reflected `utcTime`/`timeZoneOffset` object never hits the wire.
-            c.MapType<ApiDateTime>(() => new OpenApiSchema
-            {
-                Type = JsonSchemaType.String,
-                Format = "date-time"
-            });
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
+            // Must run after the filters that fill the reflected shape in: it replaces that shape wholesale.
+            c.SchemaFilter<ApiDateTimeSchemaFilter>();
 
             var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
 
@@ -566,6 +561,35 @@ public static class OpenApiExtension
             {
                 schema.Description = memberSummary;
             }
+        }
+    }
+
+    /// <summary>
+    /// Keeps <see cref="ApiDateTime"/> a named component - the sdk generators and the api reference name the
+    /// type - while giving it the shape that actually goes over the wire. ApiDateTimeConverter writes and reads
+    /// a single ISO-8601 string, and the type converter binds query values the same way, so the reflected
+    /// `utcTime`/`timeZoneOffset` object never appears in a request or a response.
+    /// </summary>
+    private class ApiDateTimeSchemaFilter : ISchemaFilter
+    {
+        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
+        {
+            if (context.Type != typeof(ApiDateTime) || schema is not OpenApiSchema openApiSchema)
+            {
+                return;
+            }
+
+            openApiSchema.Type = JsonSchemaType.String;
+            openApiSchema.Format = "date-time";
+            openApiSchema.Example = "2021-01-01T00:00:00.0000000Z";
+            openApiSchema.Properties = null;
+            openApiSchema.Required = null;
+            openApiSchema.AdditionalProperties = null;
+            // Swashbuckle emits `additionalProperties: false` for the object it reflected; on a string it is noise.
+            openApiSchema.AdditionalPropertiesAllowed = true;
+            openApiSchema.AllOf = null;
+            openApiSchema.AnyOf = null;
+            openApiSchema.OneOf = null;
         }
     }
 
