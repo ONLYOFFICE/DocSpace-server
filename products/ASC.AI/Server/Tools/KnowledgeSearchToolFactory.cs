@@ -42,13 +42,13 @@ public class KnowledgeSearchToolFactory(
     FileSecurity fileSecurity,
     AiAccessibility aiAccessibility) : IAiToolFactory
 {
-    private const string Name = "docspace_knowledge_search";
+    private const string Name = "onlyoffice_knowledge_search";
 
     private const string Description =
-        "Search the DocSpace knowledge base using semantic search to find relevant information from documents " +
+        "Search the OnlyOffice Apps knowledge base using semantic search to find relevant information from documents " +
         "and resources stored in the workspace. Finds content based on meaning and context, not just exact " +
         "keyword matches. Use for questions about company policies, procedures, reports, documentation, and " +
-        "other organizational knowledge stored in DocSpace.";
+        "other organizational knowledge stored in OnlyOffice Apps.";
 
     private const string Prompt =
         """
