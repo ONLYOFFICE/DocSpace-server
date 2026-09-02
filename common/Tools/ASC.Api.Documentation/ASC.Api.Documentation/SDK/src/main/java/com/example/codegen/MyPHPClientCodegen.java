@@ -73,6 +73,8 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
         ));
+
+        supportingFiles.add(new SupportingFile("sample.mustache", "samples", "main.php"));
     }
 
     @Override

@@ -125,6 +125,34 @@ public class FoldersMoveTests(
     }
 
     [Fact]
+    public async Task MoveFolder_ToAiAgentsRoot_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var sourceFolder = await CreateFolderInMy("source_folder", Owner);
+
+        var aiAgentsRootId = await GetFolderIdAsync(FolderType.AiAgents, Owner);
+
+        // Act
+        var moveParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(aiAgentsRootId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [],
+            FolderIds = [new(sourceFolder.Id)],
+            ReturnSingleOperation = true
+        };
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesOperationsApi.MoveBatchItemsAsync(
+                moveParams,
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
     public async Task CopyFolder_BetweenUserFolders_ReturnsValidFolder()
     {
         // Arrange

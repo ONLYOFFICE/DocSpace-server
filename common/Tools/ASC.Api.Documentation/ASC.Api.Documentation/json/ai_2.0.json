@@ -12,7 +12,7 @@
       "name": "AGPL-3.0-only",
       "url": "https://www.gnu.org/licenses/agpl-3.0.html"
     },
-    "version": "3.7.0",
+    "version": "4.0.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -1928,6 +1928,31 @@
         },
         "description": "The successful API response containing the AiUserSettingsDto object."
       },
+      "ApiDateTime": {
+        "type": "object",
+        "properties": {
+          "utcTime": {
+            "examples": [
+              "2018-01-01T00:00:00.0000000Z"
+            ],
+            "type": "string",
+            "description": "The time in UTC format.",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "timeZoneOffset": {
+            "examples": [
+              "00:00:00"
+            ],
+            "type": "string",
+            "description": "The time zone offset.",
+            "format": "date-span",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The API date and time parameters."
+      },
       "ChatSettings": {
         "type": "object",
         "properties": {
@@ -2438,41 +2463,20 @@
             "format": "uri"
           },
           "created": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The creation date and time of the file entry.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "createdBy": {
             "description": "The file entry author.",
             "$ref": "#/components/schemas/EmployeeDto"
           },
           "updated": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The last date and time when the file entry was updated.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "autoDelete": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the file entry will be automatically deleted.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "rootFolderType": {
             "description": "The root folder type of the file entry.",
@@ -2882,15 +2886,8 @@
                 "description": "Specifies if the folder can be accessed via an external link or not."
               },
               "expirationDate": {
-                "examples": [
-                  "2021-01-01T00:00:00Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "Represents the expiration date of the file entry.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/ApiDateTime"
               },
               "isLinkExpired": {
                 "examples": [
@@ -4012,15 +4009,8 @@
         "type": "object",
         "properties": {
           "date": {
-            "examples": [
-              "2025-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the new item was created.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "items": {
             "type": [
