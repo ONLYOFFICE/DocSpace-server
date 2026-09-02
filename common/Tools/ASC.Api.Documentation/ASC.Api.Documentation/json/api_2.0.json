@@ -12,7 +12,7 @@
       "name": "AGPL-3.0-only",
       "url": "https://www.gnu.org/licenses/agpl-3.0.html"
     },
-    "version": "3.7.0",
+    "version": "4.0.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -10095,24 +10095,20 @@
             "in": "query",
             "description": "The starting date and time for filtering audit events.",
             "schema": {
-              "examples": [
-                "2024-01-01T00:00:00Z"
-              ],
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2024-01-01T00:00:00Z"
           },
           {
             "name": "to",
             "in": "query",
             "description": "The ending date and time for filtering audit events.",
             "schema": {
-              "examples": [
-                "2024-01-31T23:59:59Z"
-              ],
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2024-01-31T23:59:59Z"
           },
           {
             "name": "count",
@@ -11771,24 +11767,20 @@
             "in": "query",
             "description": "The starting date and time for filtering login events.",
             "schema": {
-              "examples": [
-                "2024-01-15T10:30:00Z"
-              ],
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2024-01-15T10:30:00Z"
           },
           {
             "name": "to",
             "in": "query",
             "description": "The ending date and time for filtering login events.",
             "schema": {
-              "examples": [
-                "2024-01-15T10:30:00Z"
-              ],
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2024-01-15T10:30:00Z"
           },
           {
             "name": "count",
@@ -19043,6 +19035,9 @@
           "403": {
             "description": "No permissions to perform this action"
           },
+          "405": {
+            "description": "Joining the portal is not available"
+          },
           "429": {
             "description": "Request limit is exceeded",
             "headers": {
@@ -22305,8 +22300,7 @@
             "schema": {
               "examples": [
                 [
-                  "item1",
-                  "item2"
+                  "00000000-0000-0000-0000-000000000000"
                 ]
               ],
               "type": "array",
@@ -28364,15 +28358,8 @@
             "description": "The active connection platform."
           },
           "date": {
-            "examples": [
-              "2024-01-15T10:30:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The active connection date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "page": {
             "examples": [
@@ -29264,6 +29251,31 @@
         "additionalProperties": false,
         "description": "The pricing of a single web search provider, per request."
       },
+      "ApiDateTime": {
+        "type": "object",
+        "properties": {
+          "utcTime": {
+            "examples": [
+              "2018-01-01T00:00:00.0000000Z"
+            ],
+            "type": "string",
+            "description": "The time in UTC format.",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "timeZoneOffset": {
+            "examples": [
+              "00:00:00"
+            ],
+            "type": "string",
+            "description": "The time zone offset.",
+            "format": "date-span",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The API date and time parameters."
+      },
       "AppArrayWrapper": {
         "type": "object",
         "properties": {
@@ -29456,15 +29468,8 @@
             "format": "int32"
           },
           "date": {
-            "examples": [
-              "2024-01-15T10:30:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The audit event date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "user": {
             "examples": [
@@ -35318,15 +35323,8 @@
             "$ref": "#/components/schemas/EmployeeType"
           },
           "expiration": {
-            "examples": [
-              "2024-01-15T10:30:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The expiration date of the invitation link.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "isExpired": {
             "examples": [
@@ -35839,15 +35837,8 @@
             "format": "int32"
           },
           "date": {
-            "examples": [
-              "2024-01-15T10:30:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The login event date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "user": {
             "examples": [
@@ -37476,6 +37467,15 @@
             "description": "The list of failed archives."
           },
           "users": {
+            "examples": [
+              [
+                {
+                  "id": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+                  "email": "user@example.com",
+                  "shouldImport": true
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -37487,6 +37487,14 @@
             "description": "The list of migrating users."
           },
           "withoutEmailUsers": {
+            "examples": [
+              [
+                {
+                  "id": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+                  "shouldImport": false
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -37498,6 +37506,15 @@
             "description": "The list of migrating users without email."
           },
           "existUsers": {
+            "examples": [
+              [
+                {
+                  "id": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+                  "email": "existing@example.com",
+                  "shouldImport": true
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -37509,6 +37526,15 @@
             "description": "The list of existing migrating users."
           },
           "groups": {
+            "examples": [
+              [
+                {
+                  "id": "1",
+                  "name": "Group1",
+                  "shouldImport": true
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -38001,15 +38027,8 @@
         "type": "object",
         "properties": {
           "date": {
-            "examples": [
-              "2024-01-15T10:30:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date when the operation took place.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "service": {
             "examples": [
@@ -39613,6 +39632,12 @@
         "type": "object",
         "properties": {
           "models": {
+            "examples": [
+              [
+                "gpt-4o",
+                "claude-3-opus"
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -44696,15 +44721,8 @@
             "description": "The quota applies to the wallet or not."
           },
           "dueDate": {
-            "examples": [
-              "2026-07-08T11:39:43.0000000+03:00"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The due date of the upcoming payment in the portal time zone.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "amount": {
             "examples": [
@@ -45445,8 +45463,10 @@
           "items": {
             "examples": [
               [
-                "item1",
-                "item2"
+                {
+                  "key": "00000000-0000-0000-0000-000000000000",
+                  "value": true
+                }
               ]
             ],
             "type": [

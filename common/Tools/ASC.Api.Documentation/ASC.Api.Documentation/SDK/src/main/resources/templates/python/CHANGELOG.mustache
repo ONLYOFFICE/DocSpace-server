@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.0.0
+
+### Added
+
+- Added the reworked AI API surface in `docspace_api_sdk/api/ai/`: `ai_api`, `assignments_api`, `attachments_api`, `editor_tools_api`, `export_api`, `open_ai_passthrough_api`, `preferences_api`, `profiles_api`, `prompts_api`, `threads_api`, `tools_api`, `web_search_api`
+- Added per-user AI settings endpoints and the matching models `AiAiUserSettingsDto`, `AiAiUserSettingsWrapper`, `AiAiSettingsDto`, `AiAiSettingsWrapper`
+
+### Removed
+
+- Removed the superseded AI API modules `chat_api`, `mcp_api`, `messages_api` and `providers_api` from `docspace_api_sdk/api/ai/`
+
 ## 3.7.0
 
 ### Added

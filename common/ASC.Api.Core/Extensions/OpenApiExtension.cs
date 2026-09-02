@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -71,7 +71,7 @@ public static class OpenApiExtension
             var openApiInfo = new OpenApiInfo
             {
                 Title = "Api",
-                Version = "3.7.0",
+                Version = "4.0.0",
                 // One Info object serves every service document (a single AddOpenApi call site in
                 // BaseStartup), so the text has to hold for all of them - do not make it service-specific.
                 Description = "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, " +
@@ -131,6 +131,7 @@ public static class OpenApiExtension
             c.OperationFilter<SwaggerPathParameterFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
+            c.OperationFilter<ApiDateTimeParameterFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
@@ -161,15 +162,9 @@ public static class OpenApiExtension
                     }
                 }
             });
-            // ApiDateTimeConverter writes and reads a single ISO-8601 string, and the type converter binds
-            // query values the same way, so the reflected `utcTime`/`timeZoneOffset` object never hits the wire.
-            c.MapType<ApiDateTime>(() => new OpenApiSchema
-            {
-                Type = JsonSchemaType.String,
-                Format = "date-time"
-            });
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
+            c.SchemaFilter<OpenObjectSchemaFilter>();
 
             var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
 
@@ -566,6 +561,67 @@ public static class OpenApiExtension
             {
                 schema.Description = memberSummary;
             }
+        }
+    }
+
+    /// <summary>
+    /// Describes an <see cref="ApiDateTime"/> carried in a query, path or header as the ISO-8601 string it
+    /// actually is. ApiDateTimeTypeConverter binds such a value from a single string, so pointing the parameter
+    /// at the object component would both misdescribe the wire and make the string `example` invalid against
+    /// it. Request and response bodies keep the component: there the json converter round-trips the whole type.
+    /// </summary>
+    private class ApiDateTimeParameterFilter : IOperationFilter
+    {
+        private static readonly string _apiDateTimeSchemaId = CustomSchemaId(typeof(ApiDateTime));
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            foreach (var parameter in operation.Parameters ?? [])
+            {
+                if (parameter is OpenApiParameter openApiParameter &&
+                    (openApiParameter.Schema as OpenApiSchemaReference)?.Reference.Id == _apiDateTimeSchemaId)
+                {
+                    openApiParameter.Schema = new OpenApiSchema
+                    {
+                        Type = JsonSchemaType.String,
+                        Format = "date-time"
+                    };
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Drops the <c>additionalProperties: false</c> the generator puts on every object schema, keeping it only
+    /// where the type really refuses unmapped members.
+    /// </summary>
+    /// <remarks>
+    /// The keyword does not compose: inside an <c>allOf</c> branch - and <see cref="CustomInheritanceSchemaFilter"/>
+    /// turns every derived type into one - it sees that branch's own <c>properties</c> alone and rejects every
+    /// field the sibling branches contribute, so a closed base or a closed composite documents a model with no
+    /// fields at all. Whether a schema ends up in an <c>allOf</c> depends on which derived types a given service
+    /// happens to generate, so the decision cannot be made there: a base left closed in one document and opened
+    /// in another is the same component described two ways, which the joiner rejects outright. Hence the rule is
+    /// a property of the type and nothing else.
+    /// </remarks>
+    private class OpenObjectSchemaFilter : ISchemaFilter
+    {
+        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
+        {
+            // A dictionary carries its value schema in `additionalProperties` and leaves the flag alone; only the
+            // `false` written by the object generator is up for removal.
+            if (schema is not OpenApiSchema { AdditionalPropertiesAllowed: false, AdditionalProperties: null } openApiSchema)
+            {
+                return;
+            }
+
+            if (context.Type.GetCustomAttribute<JsonUnmappedMemberHandlingAttribute>()?.UnmappedMemberHandling
+                == JsonUnmappedMemberHandling.Disallow)
+            {
+                return;
+            }
+
+            openApiSchema.AdditionalPropertiesAllowed = true;
         }
     }
 

@@ -95,6 +95,11 @@ public static partial class JsCallbackHelper
         return !string.IsNullOrEmpty(callback) && CallbackRegex().IsMatch(callback) ? callback : DefaultCallback;
     }
 
+    /// <param name="returnUrl">
+    /// The URL to redirect the user to after authentication. Can be a site-relative path
+    /// (starting with a single forward slash) or an absolute URL with a host from the
+    /// allowed list. Falls back to the default if the URL is unsafe.
+    /// </param>
     /// <param name="allowedHosts">
     /// The hosts an absolute return url may point at — the desktop flow returns to the
     /// registration site rather than to the portal. Empty by default, which leaves only
