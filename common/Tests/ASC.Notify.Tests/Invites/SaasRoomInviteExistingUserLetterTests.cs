@@ -41,7 +41,11 @@ namespace ASC.Notify.Tests.Invites;
 /// </summary>
 public class SaasRoomInviteExistingUserLetterTests : LetterTestBase<SaasRoomInviteExistingUserNotifyAction>
 {
-    private const string RoomTitle = "Room title";
+    // A room is named by whoever creates it, and the name reaches this letter as ${Message}. The letter
+    // is the place that has to make it safe to render, the same way the API key name is escaped for
+    // api_key_expired, so the title under test carries markup.
+    private const string RoomTitle = "<a href=//evil.com>Room title</a>";
+    private const string EncodedRoomTitle = "&lt;a href=//evil.com&gt;Room title&lt;/a&gt;";
 
     private static string RoomUrl(LetterScope scope)
     {
@@ -59,8 +63,9 @@ public class SaasRoomInviteExistingUserLetterTests : LetterTestBase<SaasRoomInvi
     {
         letter.Body.Should().Contain(Resource("ButtonJoinRoom", scope.Culture))
             .And.Contain(RoomUrl(scope))
-            .And.Contain(RoomTitle)
             .And.Contain(scope.PortalUrl);
+
+        letter.Body.Should().Contain(EncodedRoomTitle).And.NotContain(RoomTitle);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)

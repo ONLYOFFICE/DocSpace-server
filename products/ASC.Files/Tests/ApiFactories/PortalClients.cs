@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using DocSpace.API.SDK.Api.Privacyroom;
-
 using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
 using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
 using SettingsApi = DocSpace.API.SDK.Api.Files.SettingsApi;
@@ -56,7 +54,7 @@ public sealed class PortalClients : PortalClientsBase
     public SettingsApi SettingsApi { get; }
     public QuotaApi QuotaApi { get; }
     public SharingApi SharingApi { get; }
-    public PrivacyroomApi PrivacyroomApi { get; }
+    public PrivacyRoomApi PrivacyroomApi { get; }
     public ThirdPartyIntegrationApi ThirdPartyIntegrationApi { get; }
 
     // People service
@@ -86,7 +84,7 @@ public sealed class PortalClients : PortalClientsBase
         SettingsApi = new SettingsApi(FilesHttpClient, filesConfig);
         QuotaApi = new QuotaApi(FilesHttpClient, filesConfig);
         SharingApi = new SharingApi(FilesHttpClient, filesConfig);
-        PrivacyroomApi = new PrivacyroomApi(FilesHttpClient, filesConfig);
+        PrivacyroomApi = new PrivacyRoomApi(FilesHttpClient, filesConfig);
         ThirdPartyIntegrationApi = new ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
 
         var peopleConfig = new Configuration { BasePath = BasePathOf(ResourceNames.People) };

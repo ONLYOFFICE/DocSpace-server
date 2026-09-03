@@ -473,7 +473,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/tariff</path>
     [Tags("Portal / Quota")]
-    [SwaggerResponse(200, "Current portal tariff", typeof(Tariff))]
+    [SwaggerResponse(200, "Current portal tariff", typeof(TariffDto))]
     [AllowNotPayment]
     [HttpGet("tariff")]
     public async Task<TariffDto> GetPortalTariff(CurrentPortalTariffRequestDto inDto)

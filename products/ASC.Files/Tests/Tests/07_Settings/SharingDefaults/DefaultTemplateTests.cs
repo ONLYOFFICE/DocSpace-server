@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -77,6 +77,35 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("You don't have enough permission to perform the operation");
+
+        await _filesClient.Authenticate(Owner);
+    }
+
+    /// <summary>
+    /// BUG 79905: setting a <c>.pptx</c> file as the default template for the <c>.docx</c> extension
+    /// was accepted instead of rejected, so the extension mismatch between the selected file and the
+    /// requested <c>fileExtension</c> is expected to answer 400.
+    /// </summary>
+    /// <remarks>
+    /// Still red here, for a narrower reason than the original bug: the mismatch IS refused now, but
+    /// <c>DefaultTemplateSettingsHelper.CheckAndCopyFile</c> signals it with an
+    /// <c>InvalidOperationException</c>, which the global handler maps to 403 rather than to the 400 a
+    /// bad request body deserves.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "79905")]
+    public async Task SetDefaultTemplate_FileExtensionMismatchesSelectedFile_ReturnsBadRequest()
+    {
+        // Arrange
+        var file = await CreateFileInMy("Autotest Mismatched Template.pptx", Owner);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.SetDefaultTemplateAsync(
+                new DefaultTemplateSettingsRequestDto(new DefaultTemplateSettingsRequestDtoSelectedFile(file.Id), ".docx"),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
     }
 
     /// <summary>

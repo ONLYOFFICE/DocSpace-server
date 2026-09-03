@@ -41,10 +41,34 @@ public class FileEncryptionInfoDto
     /// <summary>
     /// The key pairs of the users who have access to the file.
     /// </summary>
+    /// <example>
+    /// [
+    ///   {
+    ///     "id": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+    ///     "userId": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+    ///     "date": "2025-01-01T00:00:00",
+    ///     "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBg...",
+    ///     "privateKeyEnc": "U2FsdGVkX1+Lm3s...",
+    ///     "cryptoEngineId": "defaultCryptoEngine"
+    ///   }
+    /// ]
+    /// </example>
     public List<EncryptionKeyDto> UserKeys { get; set; }
 
     /// <summary>
     /// The file keys issued to those users.
     /// </summary>
+    /// <example>
+    /// [
+    ///   {
+    ///     "userId": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+    ///     "publicKeyId": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+    ///     "privateKeyEnc": "U2FsdGVkX1+Lm3s...",
+    ///     "tenantId": 1,
+    ///     "fileId": 9846,
+    ///     "createOn": "2025-01-01T00:00:00"
+    ///   }
+    /// ]
+    /// </example>
     public List<FileKeys> FileKeys { get; set; }
 }

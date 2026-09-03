@@ -76,6 +76,8 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
         ));
+
+        supportingFiles.add(new SupportingFile("sample.mustache", "samples", "sample.kt"));
     }
 
     @Override
@@ -130,6 +132,15 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
                         String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
                         op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
                     }
+                    // Retrofit forbids @Body on @DELETE/@GET/@HEAD shorthands; such operations
+                    // must use @HTTP(method = ..., hasBody = true) instead.
+                    String httpMethod = op.httpMethod == null ? "" : op.httpMethod.toUpperCase(Locale.ROOT);
+                    boolean bodyDisallowingMethod = httpMethod.equals("DELETE")
+                        || httpMethod.equals("GET")
+                        || httpMethod.equals("HEAD");
+                    if (bodyDisallowingMethod && op.bodyParam != null) {
+                        op.vendorExtensions.put("x-retrofit-http-with-body", true);
+                    }
                     if ("GET".equalsIgnoreCase(op.httpMethod)) {
                         boolean allAreQueryParams = op.allParams.stream()
                             .allMatch(p -> Boolean.TRUE.equals(p.isQueryParam));
@@ -178,6 +189,7 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
             CodegenModel model = mo.getModel();
 
             for (CodegenProperty prop : model.vars) {
+                normalizeEnumBackingType(prop);
                 if ("version_Changed".equalsIgnoreCase(prop.baseName)) {
                     prop.name = "versionChangedField";
                     prop.baseName = "versionChangedField";
@@ -238,6 +250,118 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
         }
 
         return objs;
+    }
+
+    /**
+     * Kotlin's `Enum` already declares `name`, `ordinal` and — through the generated enum class —
+     * `value`, so a specification value that maps onto one of those names does not compile.
+     */
+    private static final Set<String> RESERVED_ENUM_MEMBERS =
+        new HashSet<>(Arrays.asList("name", "ordinal", "value", "entries", "values", "valueOf"));
+
+    @Override
+    public String toEnumVarName(String value, String datatype) {
+        String varName = super.toEnumVarName(value, datatype);
+        if (varName != null && RESERVED_ENUM_MEMBERS.contains(varName)) {
+            return varName + "Field";
+        }
+        return varName;
+    }
+
+    /**
+     * The enum template quotes the literal for `@Json(name = ...)` but passes it to the enum
+     * constant as it stands, so a `number` enum backed by `java.math.BigDecimal` — whose literal
+     * `toEnumValue` has already quoted — is handed a `kotlin.String` where the constructor expects a
+     * number and fails to compile. Declaring the backing type as `kotlin.String` would compile but
+     * change the wire format: `ValueEnumJsonAdapterFactory` derives `isNumeric` from the runtime
+     * type of `value`, so the property would be written back as the JSON string `"1"` instead of the
+     * number `1` the specification declares. The literals are unquoted and the backing type retyped
+     * to `kotlin.Long` instead — the shape every `integer` enum already generates.
+     *
+     * A fractional value has no such shape (the adapter writes every number through `toLong()` and
+     * would truncate it), so those keep the `kotlin.String` backing type.
+     */
+    private void normalizeEnumBackingType(CodegenProperty prop) {
+        if (prop == null || !prop.isEnum) {
+            return;
+        }
+        CodegenProperty backing = prop;
+        while (backing.items != null) {
+            backing = backing.items;
+        }
+        if (backing.dataType == null || !backing.dataType.startsWith("java.math.")) {
+            return;
+        }
+        List<Map<String, Object>> enumVars = enumVarsOf(prop.allowableValues);
+        boolean integral = !enumVars.isEmpty();
+        for (Map<String, Object> enumVar : enumVars) {
+            if (!isIntegralLiteral(unquote(String.valueOf(enumVar.get("value"))))) {
+                integral = false;
+            }
+        }
+        if (!integral) {
+            backing.dataType = "kotlin.String";
+        } else {
+            unquoteEnumValues(prop.allowableValues);
+            if (backing != prop) {
+                unquoteEnumValues(backing.allowableValues);
+            }
+            backing.dataType = "kotlin.Long";
+        }
+        if (prop.mostInnerItems != null) {
+            prop.mostInnerItems.dataType = backing.dataType;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> enumVarsOf(Map<String, Object> allowableValues) {
+        Object enumVars = allowableValues == null ? null : allowableValues.get("enumVars");
+        return enumVars instanceof List ? (List<Map<String, Object>>) enumVars : Collections.emptyList();
+    }
+
+    private static void unquoteEnumValues(Map<String, Object> allowableValues) {
+        for (Map<String, Object> enumVar : enumVarsOf(allowableValues)) {
+            enumVar.put("value", unquote(String.valueOf(enumVar.get("value"))));
+        }
+    }
+
+    private static String unquote(String value) {
+        if (value.length() > 1 && value.startsWith("\"") && value.endsWith("\"")) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
+    }
+
+    private static boolean isIntegralLiteral(String value) {
+        try {
+            Long.parseLong(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * When the specification declares more than one HTTP bearer scheme, the bearer import, the
+     * bearer constructor and `setBearerToken`/`setOAuthCredentials` are emitted once per scheme,
+     * which does not compile. Only the first bearer scheme carries the marker the template guards
+     * those members with; every scheme still takes part in the auth-name mapping.
+     */
+    @Override
+    public List<CodegenSecurity> fromSecurity(Map<String, io.swagger.v3.oas.models.security.SecurityScheme> securitySchemeMap) {
+        List<CodegenSecurity> securities = super.fromSecurity(securitySchemeMap);
+        if (securities == null) {
+            return securities;
+        }
+        boolean bearerSeen = false;
+        for (CodegenSecurity security : securities) {
+            if (!Boolean.TRUE.equals(security.isBasicBearer)) {
+                continue;
+            }
+            security.vendorExtensions.put("x-first-basic-bearer", !bearerSeen);
+            bearerSeen = true;
+        }
+        return securities;
     }
 
     @Override

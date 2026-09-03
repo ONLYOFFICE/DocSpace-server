@@ -12,7 +12,7 @@
       "name": "AGPL-3.0-only",
       "url": "https://www.gnu.org/licenses/agpl-3.0.html"
     },
-    "version": "3.7.0",
+    "version": "4.0.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -11979,6 +11979,31 @@
         "description": "The account login type.",
         "x-enum-type": "integer"
       },
+      "ApiDateTime": {
+        "type": "object",
+        "properties": {
+          "utcTime": {
+            "examples": [
+              "2018-01-01T00:00:00.0000000Z"
+            ],
+            "type": "string",
+            "description": "The time in UTC format.",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "timeZoneOffset": {
+            "examples": [
+              "00:00:00"
+            ],
+            "type": "string",
+            "description": "The time zone offset.",
+            "format": "date-span",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The API date and time parameters."
+      },
       "ApiKeyResponseArrayWrapper": {
         "type": "object",
         "properties": {
@@ -12090,41 +12115,20 @@
             "description": "The list of permissions granted to the API key."
           },
           "lastUsed": {
-            "examples": [
-              "2025-06-15T10:30:00.0000000Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the API key was last used.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "createOn": {
-            "examples": [
-              "2025-06-15T10:30:00.0000000Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the API key was created.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "createBy": {
             "description": "The identifier of the user who created the API key.",
             "$ref": "#/components/schemas/EmployeeDto"
           },
           "expiresAt": {
-            "examples": [
-              "2025-06-15T10:30:00.0000000Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the API key expires.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "isActive": {
             "examples": [
@@ -12915,15 +12919,8 @@
                 "$ref": "#/components/schemas/EmployeeActivationStatus"
               },
               "terminated": {
-                "examples": [
-                  "2025-06-01T00:00:00.0000000Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "The date when the user account was terminated.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/ApiDateTime"
               },
               "department": {
                 "examples": [
@@ -13136,15 +13133,8 @@
                 "$ref": "#/components/schemas/EmployeeDto"
               },
               "registrationDate": {
-                "examples": [
-                  "2020-01-01T00:00:00.0000000Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "The user registration date.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/ApiDateTime"
               },
               "hasPersonalFolder": {
                 "examples": [
