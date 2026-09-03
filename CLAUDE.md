@@ -51,14 +51,15 @@ server/
 ## Build & Run
 
 **Solution files:**
-- `ASC.Web.sln` — main solution (a parallel `ASC.Web.slnx` exists but is out of sync with the `.sln` — prefer `ASC.Web.sln`)
+- `ASC.Web.slnx` — main solution. Use this one
+- `ASC.Web.sln` — **deprecated**, kept for tooling that cannot read `.slnx` yet. As of 2026-09-03 it still mirrors the `.slnx` exactly (the same 48 projects, `Solution Items` and `migrations` folder, the same Debug/Release configurations), but it is no longer the source of truth: add new projects to `ASC.Web.slnx`, and only mirror them into the `.sln` if you actually need it
 - `ASC.Tests.slnx` — test solution (there is NO `ASC.Tests.sln`)
 - `ASC.Migrations.sln` — database migrations
 - `thirdparty.sln` — third-party libraries
 
 **Common commands:**
 ```bash
-dotnet build ASC.Web.sln
+dotnet build ASC.Web.slnx
 dotnet test ASC.Tests.slnx
 dotnet run --project common/ASC.AppHost --launch-profile development  # Run via Aspire orchestration
 cd common/Tools/ASC.Migration.Runner && dotnet run                    # Apply DB migrations
