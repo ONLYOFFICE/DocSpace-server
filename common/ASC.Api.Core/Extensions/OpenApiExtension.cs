@@ -164,6 +164,7 @@ public static class OpenApiExtension
             });
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
+            c.SchemaFilter<OpenObjectSchemaFilter>();
 
             var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
 
@@ -587,6 +588,40 @@ public static class OpenApiExtension
                     };
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Drops the <c>additionalProperties: false</c> the generator puts on every object schema, keeping it only
+    /// where the type really refuses unmapped members.
+    /// </summary>
+    /// <remarks>
+    /// The keyword does not compose: inside an <c>allOf</c> branch - and <see cref="CustomInheritanceSchemaFilter"/>
+    /// turns every derived type into one - it sees that branch's own <c>properties</c> alone and rejects every
+    /// field the sibling branches contribute, so a closed base or a closed composite documents a model with no
+    /// fields at all. Whether a schema ends up in an <c>allOf</c> depends on which derived types a given service
+    /// happens to generate, so the decision cannot be made there: a base left closed in one document and opened
+    /// in another is the same component described two ways, which the joiner rejects outright. Hence the rule is
+    /// a property of the type and nothing else.
+    /// </remarks>
+    private class OpenObjectSchemaFilter : ISchemaFilter
+    {
+        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
+        {
+            // A dictionary carries its value schema in `additionalProperties` and leaves the flag alone; only the
+            // `false` written by the object generator is up for removal.
+            if (schema is not OpenApiSchema { AdditionalPropertiesAllowed: false, AdditionalProperties: null } openApiSchema)
+            {
+                return;
+            }
+
+            if (context.Type.GetCustomAttribute<JsonUnmappedMemberHandlingAttribute>()?.UnmappedMemberHandling
+                == JsonUnmappedMemberHandling.Disallow)
+            {
+                return;
+            }
+
+            openApiSchema.AdditionalPropertiesAllowed = true;
         }
     }
 

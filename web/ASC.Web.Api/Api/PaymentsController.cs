@@ -1414,7 +1414,7 @@ public class PaymentController(
     /// </remarks>
     /// <path>api/2.0/portal/payment/ai-prices</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
+    [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()
