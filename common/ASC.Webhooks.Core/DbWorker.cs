@@ -415,6 +415,6 @@ public class WebhookCache(IFusionCacheProvider cacheProvider)
 
     public async Task ClearAsync(string key)
     {
-        await _cache.RemoveAsync(key);
+        await _cache.RemoveAndNotifyAsync(key);
     }
 }

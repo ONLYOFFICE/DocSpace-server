@@ -148,7 +148,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
     {
         if (id == null)
         {
-            await _cache.RemoveByTagAsync(CacheExtention.GetProviderTag(selector, thirdId));
+            await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetProviderTag(selector, thirdId));
         }
         else
         {
@@ -156,16 +156,16 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
             {
                 if (isFile.Value)
                 {
-                    await _cache.RemoveByTagAsync(CacheExtention.GetProviderFileTag(selector, thirdId, id));
+                    await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetProviderFileTag(selector, thirdId, id));
                 }
                 else
                 {
-                    await _cache.RemoveByTagAsync(CacheExtention.GetProviderFolderTag(selector, thirdId, id));
+                    await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetProviderFolderTag(selector, thirdId, id));
                 }
             }
             else
             {
-                await _cache.RemoveByTagAsync(CacheExtention.GetProviderFolderItemsTag(selector, thirdId, id));
+                await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetProviderFolderItemsTag(selector, thirdId, id));
             }
         }
     }

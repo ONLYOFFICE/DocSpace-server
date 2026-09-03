@@ -138,7 +138,7 @@ public class AccountLinker(
 
     public async Task RemoveFromCacheAsync(string obj)
     {
-        await _cache.RemoveAsync(obj);
+        await _cache.RemoveAndNotifyAsync(obj);
     }
 
     public async Task<List<LoginProfile>> GetFromCacheAsync(string obj, Func<string, Task<List<LoginProfile>>> fromDb)

@@ -48,7 +48,7 @@ public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
 
     public async Task ClearCacheAsync(int tenantId)
     {
-        await _cache.RemoveByTagAsync(CacheExtention.GetWebItemSecurityTag(tenantId));
+        await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetWebItemSecurityTag(tenantId));
     }
 
     public async Task<Dictionary<string, bool>> GetAsync(int tenantId)
