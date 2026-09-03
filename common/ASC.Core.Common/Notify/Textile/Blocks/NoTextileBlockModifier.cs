@@ -44,13 +44,16 @@ public class NoTextileBlockModifier : BlockModifier
 
     public override string Conclude(string line)
     {
-        // Recode everything except "<" and ">", the same way CodeBlockModifier does. A no-textile
-        // zone is where every interpolated tag value lands (NVelocityPatternFormatter wraps each one
-        // in "=="), so restoring the angle brackets handed whatever the value carried straight to the
-        // mail client as live markup — and undid the .HtmlEncode() the actions apply, right at the
-        // last step.
-        line = NoTextileEncoder.DecodeNoTextileZones(line, @"(?<=^|\s)<notextile>", @"</notextile>(?=(\s|$)?)", ["<", ">"]);
-        line = NoTextileEncoder.DecodeNoTextileZones(line, "==", "==", ["<", ">"]);
+        // Recode everything, unlike CodeBlockModifier: a "==" zone means "hand this through as it is",
+        // not "show it literally". Every interpolated tag value lands in one (NVelocityPatternFormatter
+        // wraps each one in "=="), and some of them — the orange button, the signature, the item tables
+        // in TagValues — are markup the letter is built out of, so leaving the angle brackets escaped
+        // prints the markup to the reader instead of rendering it.
+        //
+        // What keeps user input safe is the .HtmlEncode() the actions apply: NoTextileEncoder escapes
+        // the ampersand around the round trip, so a value that arrives escaped stays escaped here.
+        line = NoTextileEncoder.DecodeNoTextileZones(line, @"(?<=^|\s)<notextile>", @"</notextile>(?=(\s|$)?)");
+        line = NoTextileEncoder.DecodeNoTextileZones(line, "==", "==");
         return line;
     }
 }

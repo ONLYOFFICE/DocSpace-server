@@ -442,7 +442,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (!isRoom && (toFolder.FolderType is FolderType.VirtualRooms or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive))
+        if (!isRoom && (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             if (check)
@@ -595,7 +595,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive)
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)

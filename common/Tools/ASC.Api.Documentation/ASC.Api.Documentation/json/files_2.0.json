@@ -12,7 +12,7 @@
       "name": "AGPL-3.0-only",
       "url": "https://www.gnu.org/licenses/agpl-3.0.html"
     },
-    "version": "3.7.0",
+    "version": "4.0.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -1353,24 +1353,20 @@
             "in": "query",
             "description": "The start date of the history.",
             "schema": {
-              "examples": [
-                "2025-01-01T00:00:00.0000000Z"
-              ],
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2025-01-01T00:00:00.0000000Z"
           },
           {
             "name": "toDate",
             "in": "query",
             "description": "The end date of the history.",
             "schema": {
-              "examples": [
-                "2025-12-31T23:59:59.0000000Z"
-              ],
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2025-12-31T23:59:59.0000000Z"
           },
           {
             "name": "count",
@@ -6761,24 +6757,20 @@
             "in": "query",
             "description": "The start date of the history request.",
             "schema": {
-              "examples": [
-                "2025-01-01T00:00:00.0000000Z"
-              ],
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2025-01-01T00:00:00.0000000Z"
           },
           {
             "name": "toDate",
             "in": "query",
             "description": "The end date of the history request.",
             "schema": {
-              "examples": [
-                "2025-12-31T23:59:59.0000000Z"
-              ],
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "example": "2025-12-31T23:59:59.0000000Z"
           },
           {
             "name": "count",
@@ -12235,7 +12227,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileOperationWrapper"
+                  "$ref": "#/components/schemas/FileOperationArrayWrapper"
                 }
               }
             }
@@ -27676,6 +27668,31 @@
         "additionalProperties": false,
         "description": "The anonymous config parameters."
       },
+      "ApiDateTime": {
+        "type": "object",
+        "properties": {
+          "utcTime": {
+            "examples": [
+              "2018-01-01T00:00:00.0000000Z"
+            ],
+            "type": "string",
+            "description": "The time in UTC format.",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "timeZoneOffset": {
+            "examples": [
+              "00:00:00"
+            ],
+            "type": "string",
+            "description": "The time zone offset.",
+            "format": "date-span",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The API date and time parameters."
+      },
       "ApplyFilterOption": {
         "oneOf": [
           {
@@ -31301,12 +31318,8 @@
             "$ref": "#/components/schemas/EditHistoryAuthor"
           },
           "created": {
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The creation date and time of the file version.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "documentSha256": {
             "examples": [
@@ -31483,15 +31496,8 @@
             "$ref": "#/components/schemas/EditHistoryAuthor"
           },
           "created": {
-            "examples": [
-              "2021-01-01T00:00:00.0000000Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The document version creation date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "changesHistory": {
             "examples": [
@@ -32058,15 +32064,8 @@
                 "$ref": "#/components/schemas/EmployeeActivationStatus"
               },
               "terminated": {
-                "examples": [
-                  "2025-06-01T00:00:00.0000000Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "The date when the user account was terminated.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/ApiDateTime"
               },
               "department": {
                 "examples": [
@@ -32279,15 +32278,8 @@
                 "$ref": "#/components/schemas/EmployeeDto"
               },
               "registrationDate": {
-                "examples": [
-                  "2020-01-01T00:00:00.0000000Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "The user registration date.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/ApiDateTime"
               },
               "hasPersonalFolder": {
                 "examples": [
@@ -33373,26 +33365,12 @@
                 "description": "The file accessibility."
               },
               "lastOpened": {
-                "examples": [
-                  "2021-01-01T00:00:00Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "The time when the file was last opened.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/ApiDateTime"
               },
               "expired": {
-                "examples": [
-                  "2025-12-31T23:59:59Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "The date when the file will be expired.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/ApiDateTime"
               },
               "vectorizationStatus": {
                 "description": "The vectorization status of the file.",
@@ -33422,6 +33400,18 @@
         "type": "object",
         "properties": {
           "userKeys": {
+            "examples": [
+              [
+                {
+                  "id": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+                  "userId": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+                  "date": "2025-01-01T00:00:00",
+                  "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBg...",
+                  "privateKeyEnc": "U2FsdGVkX1+Lm3s...",
+                  "cryptoEngineId": "defaultCryptoEngine"
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -33433,6 +33423,18 @@
             "description": "The key pairs of the users who have access to the file."
           },
           "fileKeys": {
+            "examples": [
+              [
+                {
+                  "userId": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+                  "publicKeyId": "9924256B-447C-4F19-9dbd-8ad8c39e8ff5",
+                  "privateKeyEnc": "U2FsdGVkX1+Lm3s...",
+                  "tenantId": 1,
+                  "fileId": 9846,
+                  "createOn": "2025-01-01T00:00:00"
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -33599,41 +33601,20 @@
             "format": "uri"
           },
           "created": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The creation date and time of the file entry.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "createdBy": {
             "description": "The file entry author.",
             "$ref": "#/components/schemas/EmployeeDto"
           },
           "updated": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The last date and time when the file entry was updated.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "autoDelete": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the file entry will be automatically deleted.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "rootFolderType": {
             "description": "The root folder type of the file entry.",
@@ -34085,15 +34066,8 @@
                 "description": "Specifies if the folder can be accessed via an external link or not."
               },
               "expirationDate": {
-                "examples": [
-                  "2021-01-01T00:00:00Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "Represents the expiration date of the file entry.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/ApiDateTime"
               },
               "isLinkExpired": {
                 "examples": [
@@ -34449,15 +34423,8 @@
                 "description": "Specifies if the folder can be accessed via an external link or not."
               },
               "expirationDate": {
-                "examples": [
-                  "2021-01-01T00:00:00Z"
-                ],
-                "type": [
-                  "null",
-                  "string"
-                ],
                 "description": "Represents the expiration date of the file entry.",
-                "format": "date-time"
+                "$ref": "#/components/schemas/ApiDateTime"
               },
               "isLinkExpired": {
                 "examples": [
@@ -34754,15 +34721,8 @@
             "$ref": "#/components/schemas/FileShare"
           },
           "expirationDate": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The link expiration date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "title": {
             "examples": [
@@ -35526,12 +35486,8 @@
             "description": "The URL for accessing the shared content."
           },
           "expirationDate": {
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date when the shared link expires.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "linkType": {
             "description": "The sharing link type (e.g., Invitation).",
@@ -37723,15 +37679,8 @@
             "$ref": "#/components/schemas/FileShare"
           },
           "expirationDate": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The link expiration date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "title": {
             "examples": [
@@ -38896,15 +38845,8 @@
             "$ref": "#/components/schemas/EmployeeDto"
           },
           "date": {
-            "examples": [
-              "2021-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when an action on the file was performed.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "data": {
             "description": "The history data.",
@@ -40875,15 +40817,8 @@
         "type": "object",
         "properties": {
           "date": {
-            "examples": [
-              "2025-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the new item was created.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "items": {
             "type": [
@@ -40908,15 +40843,8 @@
         "type": "object",
         "properties": {
           "date": {
-            "examples": [
-              "2025-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the new item was created.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "items": {
             "type": [
@@ -42172,15 +42100,8 @@
             "$ref": "#/components/schemas/FileShare"
           },
           "expirationDate": {
-            "examples": [
-              "2026-12-31T23:59:59.0000000+00:00"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The link expiration date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "internal": {
             "examples": [
@@ -43078,15 +42999,8 @@
             "description": "The relative path to the file."
           },
           "createOn": {
-            "examples": [
-              "2025-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
             "description": "The date and time when the file was created.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "encrypted": {
             "examples": [

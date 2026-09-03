@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -71,7 +71,7 @@ public static class OpenApiExtension
             var openApiInfo = new OpenApiInfo
             {
                 Title = "Api",
-                Version = "3.7.0",
+                Version = "4.0.0",
                 // One Info object serves every service document (a single AddOpenApi call site in
                 // BaseStartup), so the text has to hold for all of them - do not make it service-specific.
                 Description = "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, " +
@@ -131,6 +131,7 @@ public static class OpenApiExtension
             c.OperationFilter<SwaggerPathParameterFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
+            c.OperationFilter<ApiDateTimeParameterFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
@@ -160,13 +161,6 @@ public static class OpenApiExtension
                         ["contentMediaType"] = new JsonNodeExtension(JsonValue.Create(BinaryContentMediaType))
                     }
                 }
-            });
-            // ApiDateTimeConverter writes and reads a single ISO-8601 string, and the type converter binds
-            // query values the same way, so the reflected `utcTime`/`timeZoneOffset` object never hits the wire.
-            c.MapType<ApiDateTime>(() => new OpenApiSchema
-            {
-                Type = JsonSchemaType.String,
-                Format = "date-time"
             });
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
@@ -565,6 +559,33 @@ public static class OpenApiExtension
             if (_memberSummaries.TryGetValue(XmlCommentsNodeNameHelper.GetMemberNameForFieldOrProperty(memberInfo), out var memberSummary))
             {
                 schema.Description = memberSummary;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Describes an <see cref="ApiDateTime"/> carried in a query, path or header as the ISO-8601 string it
+    /// actually is. ApiDateTimeTypeConverter binds such a value from a single string, so pointing the parameter
+    /// at the object component would both misdescribe the wire and make the string `example` invalid against
+    /// it. Request and response bodies keep the component: there the json converter round-trips the whole type.
+    /// </summary>
+    private class ApiDateTimeParameterFilter : IOperationFilter
+    {
+        private static readonly string _apiDateTimeSchemaId = CustomSchemaId(typeof(ApiDateTime));
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            foreach (var parameter in operation.Parameters ?? [])
+            {
+                if (parameter is OpenApiParameter openApiParameter &&
+                    (openApiParameter.Schema as OpenApiSchemaReference)?.Reference.Id == _apiDateTimeSchemaId)
+                {
+                    openApiParameter.Schema = new OpenApiSchema
+                    {
+                        Type = JsonSchemaType.String,
+                        Format = "date-time"
+                    };
+                }
             }
         }
     }
