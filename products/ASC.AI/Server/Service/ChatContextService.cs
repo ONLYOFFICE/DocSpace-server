@@ -31,6 +31,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using McpServer = ASC.AI.Integration.McpServers.McpServer;
+using Preferences = ASC.AI.Integration.Preferences.Preferences;
+
 namespace ASC.AI.Service;
 
 /// <summary>
@@ -58,39 +61,64 @@ public class ChatContextService(
     ThreadStorageService threadStorageService,
     MessageStorageService messageStorageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
+    private readonly AiGateway _gateway = gateway;
+
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async Task<ChatContextDto> ReadAsync(Guid? threadId, string? entityId, string? contextEntityId, bool includeMessages)
     {
         await AssertUserHasAccessAsync(_readTypes);
 
+        var modelsTask = ReadModelsAsync();
         var configTask = ReadConfigAsync();
-        var profilesTask = ReadProfilesAsync();
-        var globalTask = BuildScopeAsync(null, null);
-        var entityTask = TryBuildScopeAsync(entityId);
-        var contextEntityTask = contextEntityId != entityId
-            ? TryBuildScopeAsync(contextEntityId)
-            : Task.FromResult<ChatContextScopeDto?>(null);
+        var profilesTask = ReadProfilesAsync(modelsTask);
         var threadTask = ReadThreadAsync(threadId, includeMessages);
         var webSearchTask = webSearchStorageService.ReadVerifiedAsync();
+        var entityFolderTask = TryReadFolderAsync(entityId);
+        var contextFolderTask = contextEntityId != entityId
+            ? TryReadFolderAsync(contextEntityId)
+            : Task.FromResult<Folder<int>?>(null);
 
-        await Task.WhenAll(configTask, profilesTask, globalTask, entityTask, contextEntityTask, threadTask, webSearchTask);
+        var entityFolder = await entityFolderTask;
+        var contextFolder = await contextFolderTask;
+        var models = await modelsTask;
 
+        var assignmentsTask = assignmentsStorageService.ReadByScopesVerifiedAsync(entityFolder?.Id, contextFolder?.Id, models);
+        var preferencesTask = preferencesStorageService.ReadByScopesVerifiedAsync(entityFolder?.Id, contextFolder?.Id);
+        var toolPrefsTask = toolPrefsStorageService.ReadByScopesVerifiedAsync(entityFolder?.Id, contextFolder?.Id);
+        var mcpServersTask = mcpServerStorageService.ReadByScopesVerifiedAsync(entityFolder?.Id, contextFolder?.Id);
+        var entityFolderDtoTask = BuildFolderAsync(entityFolder);
+        var contextFolderDtoTask = BuildFolderAsync(contextFolder);
+
+        await Task.WhenAll(configTask, profilesTask, threadTask, webSearchTask, assignmentsTask, preferencesTask, toolPrefsTask, mcpServersTask, entityFolderDtoTask, contextFolderDtoTask);
+
+        var scopes = new ScopeSources(await assignmentsTask, await preferencesTask, await toolPrefsTask, await mcpServersTask);
         var webSearch = await webSearchTask;
-
         var (thread, messages) = await threadTask;
 
         return new ChatContextDto
         {
             Config = await configTask,
             Profiles = await profilesTask,
-            Global = await globalTask,
-            Entity = await entityTask,
-            ContextEntity = await contextEntityTask,
+            Global = scopes.Build(null, null, null),
+            Entity = entityFolder is null ? null : scopes.Build(entityId, entityFolder.Id, await entityFolderDtoTask),
+            ContextEntity = contextFolder is null ? null : scopes.Build(contextEntityId, contextFolder.Id, await contextFolderDtoTask),
             Thread = thread,
             Messages = messages,
             WebSearch = webSearch is null ? null : WebSearchConfigMapper.MapToDto(webSearch)
         };
+    }
+
+    private async Task<List<Model>?> ReadModelsAsync()
+    {
+        if (!_gateway.Configured)
+        {
+            return null;
+        }
+
+        var response = await _gateway.GetModelsAsync();
+
+        return [.. response.Data];
     }
 
     private async Task<AiSettingsDto> ReadConfigAsync()
@@ -98,9 +126,9 @@ public class ChatContextService(
         return (await aiSettingsService.GetAiSettingsAsync()).MapToDto();
     }
 
-    private async Task<List<ProfileDto>> ReadProfilesAsync()
+    private async Task<List<ProfileDto>> ReadProfilesAsync(Task<List<Model>?> modelsTask)
     {
-        return (await profileStorageService.ReadAllVerifiedAsync()).Select(ProfileMapper.MapToDto).ToList();
+        return (await profileStorageService.ReadAllVerifiedAsync(await modelsTask)).Select(ProfileMapper.MapToDto).ToList();
     }
 
     private async Task<(ThreadDto? Thread, List<MessageDto>? Messages)> ReadThreadAsync(Guid? threadId, bool includeMessages)
@@ -126,55 +154,30 @@ public class ChatContextService(
         return (thread, list.Select(MessageMapper.MapToDto).ToList());
     }
 
-    private async Task<ChatContextScopeDto?> TryBuildScopeAsync(string? entityId)
+    private async Task<Folder<int>?> TryReadFolderAsync(string? entityId)
     {
         if (string.IsNullOrEmpty(entityId))
         {
             return null;
         }
 
-        Folder<int>? folder;
         try
         {
-            folder = await AssertUserHasAccessToFolderAsync(_readTypes, entityId);
+            return await AssertUserHasAccessToFolderAsync(_readTypes, entityId);
         }
         catch (Exception e) when (e is ItemNotFoundException or SecurityException or ArgumentException)
         {
             return null;
         }
-
-        return folder is null ? null : await BuildScopeAsync(entityId, folder);
     }
 
-    private async Task<ChatContextScopeDto> BuildScopeAsync(string? entityId, Folder<int>? folder)
+    private async Task<ChatContextFolderDto?> BuildFolderAsync(Folder<int>? folder)
     {
-        var entryId = folder?.Id;
-
-        var assignmentsTask = assignmentsStorageService.ReadAllVerifiedAsync(entryId);
-        var preferencesTask = preferencesStorageService.ReadVerifiedAsync(entryId);
-        var toolPrefsTask = toolPrefsStorageService.ReadVerifiedAsync(entryId);
-        var mcpServersTask = mcpServerStorageService.ReadAllVerifiedAsync(entryId);
-        var folderTask = folder is null
-            ? Task.FromResult<ChatContextFolderDto?>(null)
-            : BuildFolderAsync(folder);
-
-        await Task.WhenAll(assignmentsTask, preferencesTask, toolPrefsTask, mcpServersTask, folderTask);
-
-        var preferences = await preferencesTask;
-
-        return new ChatContextScopeDto
+        if (folder is null)
         {
-            EntityId = entityId,
-            Folder = await folderTask,
-            Assignments = (await assignmentsTask).ToDictionary(x => x.Key.ToStringFast(), x => x.Value),
-            Preferences = preferences is null ? null : PreferencesMapper.MapToDto(preferences),
-            ToolPrefs = await toolPrefsTask,
-            McpServers = (await mcpServersTask).Select(McpServerMapper.MapToDto).ToList()
-        };
-    }
+            return null;
+        }
 
-    private async Task<ChatContextFolderDto?> BuildFolderAsync(Folder<int> folder)
-    {
         var canCreateTask = FileSecurity.CanCreateAsync(folder);
 
         string? prompt = null;
@@ -193,5 +196,32 @@ public class ChatContextService(
             Prompt = prompt,
             CanCreate = await canCreateTask
         };
+    }
+
+    private sealed record ScopeSources(
+        ScopedValues<Dictionary<ActionType, Guid>> Assignments,
+        ScopedValues<Preferences?> Preferences,
+        ScopedValues<Dictionary<string, ToolPreference>> ToolPrefs,
+        ScopedValues<List<McpServer>> McpServers)
+    {
+        public ChatContextScopeDto Build(string? entityId, int? entryId, ChatContextFolderDto? folder)
+        {
+            var preferences = Pick(Preferences, entryId);
+
+            return new ChatContextScopeDto
+            {
+                EntityId = entityId,
+                Folder = folder,
+                Assignments = Pick(Assignments, entryId).ToDictionary(x => x.Key.ToStringFast(), x => x.Value),
+                Preferences = preferences is null ? null : PreferencesMapper.MapToDto(preferences),
+                ToolPrefs = Pick(ToolPrefs, entryId),
+                McpServers = [.. Pick(McpServers, entryId).Select(McpServerMapper.MapToDto)]
+            };
+        }
+
+        private static T Pick<T>(ScopedValues<T> values, int? entryId)
+        {
+            return entryId.HasValue ? values.ByEntry[entryId.Value] : values.Global;
+        }
     }
 }

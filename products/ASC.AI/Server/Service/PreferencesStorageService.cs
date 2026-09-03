@@ -54,11 +54,6 @@ public class PreferencesStorageService(
         return await ReadVerifiedAsync(entryId);
     }
 
-    internal async Task<Preferences?> ReadVerifiedAsync(int? entryId)
-    {
-        return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
-    }
-
     public async Task UpsertAsync(Preferences preferences, string? entityId = null)
     {
         var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
@@ -71,5 +66,15 @@ public class PreferencesStorageService(
         var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
         await storage.DeleteAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
+    }
+
+    internal async Task<ScopedValues<Preferences?>> ReadByScopesVerifiedAsync(int? firstEntryId, int? secondEntryId)
+    {
+        return await storage.ReadByScopesAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, firstEntryId, secondEntryId);
+    }
+
+    private async Task<Preferences?> ReadVerifiedAsync(int? entryId)
+    {
+        return await storage.ReadAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
 }

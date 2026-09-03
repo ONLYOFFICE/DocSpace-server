@@ -103,17 +103,6 @@ public class ProfileStorageService(
         return await ReadAllVerifiedAsync();
     }
 
-    internal async Task<List<Profile>> ReadAllVerifiedAsync()
-    {
-        if (!_aiGateway.Configured)
-        {
-            return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
-        }
-
-        var profiles = await GetGatewayProfilesAsync();
-        return [.. profiles];
-    }
-
     public async Task<Profile> UpdateAsync(Profile profile)
     {
         await AssertUserHasAccessAsync(_writeTypes);
@@ -146,11 +135,27 @@ public class ProfileStorageService(
         }
     }
 
+    internal async Task<List<Profile>> ReadAllVerifiedAsync(IEnumerable<Model>? models = null)
+    {
+        if (!_aiGateway.Configured)
+        {
+            return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
+        }
+
+        var profiles = models is null ? await GetGatewayProfilesAsync() : MapGatewayProfiles(models);
+        return [.. profiles];
+    }
+
     private async Task<IEnumerable<Profile>> GetGatewayProfilesAsync()
     {
         var response = await _aiGateway.GetModelsAsync();
 
-        return response.Data
+        return MapGatewayProfiles(response.Data);
+    }
+
+    private IEnumerable<Profile> MapGatewayProfiles(IEnumerable<Model> models)
+    {
+        return models
             .Where(m => !string.Equals(m.Type, "embedding", StringComparison.OrdinalIgnoreCase))
             .Select(m => new Profile
             {

@@ -60,6 +60,12 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<DbMcpServer> GetAllMcpServersByScopesAsync(int tenantId, int? firstEntryId, int? secondEntryId)
+    {
+        return McpServerQueriesContainer.GetAllMcpServersByScopesAsync(this, tenantId, firstEntryId, secondEntryId);
+    }
+
+    [PreCompileQuery]
     public Task<int> UpdateMcpServerConfigAsync(int tenantId, string name, string config)
     {
         return McpServerQueriesContainer.UpdateMcpServerConfigAsync(this, tenantId, name, config);
@@ -121,6 +127,14 @@ static file class McpServerQueriesContainer
             (AiIntegrationContext ctx, int tenantId, int entryId) =>
                 ctx.McpServers
                     .Where(x => x.TenantId == tenantId && x.EntryId == entryId)
+                    .OrderBy(x => x.Name)
+                    .AsQueryable());
+
+    public static readonly Func<AiIntegrationContext, int, int?, int?, IAsyncEnumerable<DbMcpServer>> GetAllMcpServersByScopesAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, int? firstEntryId, int? secondEntryId) =>
+                ctx.McpServers
+                    .Where(x => x.TenantId == tenantId && (x.EntryId == null || x.EntryId == firstEntryId || x.EntryId == secondEntryId))
                     .OrderBy(x => x.Name)
                     .AsQueryable());
 
