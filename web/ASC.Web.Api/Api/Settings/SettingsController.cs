@@ -636,11 +636,11 @@ public partial class SettingsController(
     /// <summary>Get hostname</summary>
     /// <path>api/2.0/settings/machine</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal hostname", typeof(object))]
+    [SwaggerResponse(200, "Portal hostname", typeof(string))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
-    public object GetPortalHostname()
+    public string GetPortalHostname()
     {
         return Request.Host.Value;
     }
