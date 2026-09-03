@@ -34,6 +34,7 @@
 global using ASC.Api.Core;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
+global using ASC.Api.Core.Middleware;
 global using ASC.Api.Utils;
 
 global using ASC.AI.Integration;
@@ -43,6 +44,7 @@ global using ASC.AI.Integration.Preferences;
 global using ASC.AI.Integration.Profiles;
 global using ASC.AI.Integration.Prompts;
 global using ASC.AI.Integration.ToolPrefs;
+global using ASC.AI.Integration.Threads;
 global using ASC.AI.Models.ResponseDto;
 global using ASC.AI.Models.RequestDto;
 global using ASC.AI.Models.RequestDto.Agents;
@@ -64,6 +66,7 @@ global using ASC.AI.Models.RequestDto.Vectorization;
 global using ASC.AI.Models.RequestDto.WebSearch;
 global using ASC.AI.Core.Settings;
 global using ASC.AI.Integration.McpServers;
+global using ASC.AI.Integration.Messages;
 global using ASC.AI.Integration.WebSearch;
 global using ASC.AI.Service;
 global using ASC.AI.Tools.Core;
@@ -105,6 +108,7 @@ global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
 
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.AI;
 

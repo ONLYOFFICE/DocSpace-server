@@ -58,6 +58,9 @@ public class AccessRequestDto<T>
     public IEnumerable<AccessRequestKeyDto> Keys { get; set; }
 }
 
+/// <summary>
+/// The encryption key granting one user access to a file.
+/// </summary>
 public class AccessRequestKeyDto
 {
     /// <summary>

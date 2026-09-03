@@ -51,14 +51,15 @@ server/
 ## Build & Run
 
 **Solution files:**
-- `ASC.Web.sln` — main solution (a parallel `ASC.Web.slnx` exists but is out of sync with the `.sln` — prefer `ASC.Web.sln`)
+- `ASC.Web.slnx` — main solution. Use this one
+- `ASC.Web.sln` — **deprecated**, kept for tooling that cannot read `.slnx` yet. As of 2026-09-03 it still mirrors the `.slnx` exactly (the same 48 projects, `Solution Items` and `migrations` folder, the same Debug/Release configurations), but it is no longer the source of truth: add new projects to `ASC.Web.slnx`, and only mirror them into the `.sln` if you actually need it
 - `ASC.Tests.slnx` — test solution (there is NO `ASC.Tests.sln`)
 - `ASC.Migrations.sln` — database migrations
 - `thirdparty.sln` — third-party libraries
 
 **Common commands:**
 ```bash
-dotnet build ASC.Web.sln
+dotnet build ASC.Web.slnx
 dotnet test ASC.Tests.slnx
 dotnet run --project common/ASC.AppHost --launch-profile development  # Run via Aspire orchestration
 cd common/Tools/ASC.Migration.Runner && dotnet run                    # Apply DB migrations
@@ -92,7 +93,7 @@ Conventions for writing integration tests (per-test portal, roles, `ApiException
 - **Infrastructure**: integration tests do NOT use Testcontainers — they boot the real Aspire AppHost via `Aspire.Hosting.Testing` (`DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>` with the `integration-test` launch profile), which provides MySQL/PostgreSQL/RabbitMQ/Redis/OpenSearch containers. The harness is shared: `common/Tests/ASC.Tests.Common` holds `AspireHostFixture<TClients>`, `PortalClientsBase`, `Initializer` and `RawApiClient`; each suite only derives a thin `AspireAppFixture`/`PortalClients` pair in its own `ApiFactories/` folder
 - **Fake data**: Bogus
 - **DB cleanup**: Respawn
-- **Test locations**: `products/*/Tests/` and `common/Tests/ASC.Core.Common.Tests`. The other 5 projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`
+- **Test locations**: `products/*/Tests/`, `web/ASC.Web.Api.Tests/` (Web.Api REST suite) and `common/Tests/` (`ASC.Core.Common.Tests`, `ASC.Notify.Tests` letter suite, `ASC.Data.Backup.Core.Tests`). The remaining projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`
 
 ```bash
 dotnet test ASC.Tests.slnx

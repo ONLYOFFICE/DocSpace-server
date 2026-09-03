@@ -1,7 +1,4 @@
 {
-  "enabledPlugins": {
-    "csharp-lsp@claude-plugins-official": true
-  },
   "permissions": {
     "allow": [
       "Bash(dotnet build *)",
@@ -14,5 +11,20 @@
       "../Logs",
       "../tests"
     ]
+  },
+  "extraKnownMarketplaces": {
+    "dotnet-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "dotnet/skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "csharp-lsp@claude-plugins-official": true,
+    "microsoft-docs@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "dotnet-diag@dotnet-agent-skills": true,
+    "dotnet-msbuild@dotnet-agent-skills": true
   }
 }

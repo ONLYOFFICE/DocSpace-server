@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -49,6 +49,7 @@ public class GroupsController(
     /// <summary>Add a new room group</summary>
     /// <path>api/2.0/files/group</path>
     [Tags("Rooms / Groups")]
+    [SwaggerResponse(200, "The newly created room group", typeof(RoomGroupDto))]
     [HttpPost("")]
     public async Task<RoomGroupDto> AddRoomGroup(RoomGroupRequestDto inDto)
     {
@@ -88,6 +89,7 @@ public class GroupsController(
     /// <summary>Get room group info</summary>
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
+    [SwaggerResponse(200, "The room group with the detailed information", typeof(RoomGroupDto))]
     [HttpGet("{id:int}")]
     public async Task<RoomGroupDto> GetRoomGroupInfo(RoomGroupIdRequestDto inDto)
     {
@@ -101,6 +103,7 @@ public class GroupsController(
     /// <summary>Update room group</summary>
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
+    [SwaggerResponse(200, "The updated room group", typeof(RoomGroupDto))]
     [HttpPut("{id:int}")]
     public async Task<RoomGroupDto> UpdateRoomGroup(UpdateRoomGroupRequestDto inDto)
     {
@@ -153,6 +156,7 @@ public class GroupsController(
     /// <summary>Change group icon</summary>
     /// <path>api/2.0/files/group/{id}/icon</path>
     [Tags("Rooms / Groups")]
+    [SwaggerResponse(200, "The room group with the updated icon", typeof(RoomGroupDto))]
     [HttpPost("{id:int}/icon")]
     public async Task<RoomGroupDto> ChangeRoomGroupIcon(RoomGroupIconRequestDto inDto)
     {
@@ -165,9 +169,11 @@ public class GroupsController(
     /// </remarks>
     /// <summary>List room groups</summary>
     /// <path>api/2.0/files/group</path>
+    /// <collection>list</collection>
     [Tags("Rooms / Groups")]
+    [SwaggerResponse(200, "List of room groups", typeof(IAsyncEnumerable<RoomGroupDto>))]
     [HttpGet("")]
-    public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupIdRequestDto inDto)
+    public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupsRequestDto inDto)
     {
         await foreach (var group in fileStorageService.GetGroupsAsync())
         {

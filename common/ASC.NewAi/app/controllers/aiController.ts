@@ -51,6 +51,8 @@ import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { aiService } from "../storage/httpClient.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
+import { observeChatStream } from "../telemetry/chatStream.js";
+import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
@@ -138,6 +140,37 @@ function contextScopeOf(body: unknown): string | undefined {
   return typeof body["entityId"] === "string" ? body["entityId"] : undefined;
 }
 
+// Attachment refs from the thread's persisted history, newest message first
+// so the most recently attached form wins. Best-effort — a failed read carries
+// no prior context rather than erroring the round.
+async function historyAttachmentRefIds(threadId: unknown): Promise<string[]> {
+  if (typeof threadId !== "string" || threadId.length === 0) {
+    return [];
+  }
+  let history: unknown[];
+  try {
+    history = await storage.messages.readByThread(threadId);
+  } catch (err) {
+    logger.warn(
+      `withToolsPrompt: thread ${threadId} history read failed, form context not carried over: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return [];
+  }
+  const ids: string[] = [];
+  const seen = new Set<string>();
+  for (let i = history.length - 1; i >= 0; i--) {
+    for (const ref of extractAttachmentRefIds(history[i])) {
+      if (!seen.has(ref)) {
+        seen.add(ref);
+        ids.push(ref);
+      }
+    }
+  }
+  return ids;
+}
+
 async function withToolsPrompt<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
@@ -146,7 +179,13 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
   // for the round, so it follows the round's context scope (the agent when
   // one is picked), unlike the location fragment below.
   const contextScope = contextScopeOf(body);
-  const attachmentId = extractAttachmentRefIds(body["userMessage"]);
+  // Keep form-data tools active for the whole conversation: when the current
+  // message has no attachment of its own, fall back to the form(s) already in
+  // the thread history so follow-up questions still resolve it.
+  let attachmentId = extractAttachmentRefIds(body["userMessage"]);
+  if (attachmentId.length === 0) {
+    attachmentId = await historyAttachmentRefIds(body["threadId"]);
+  }
   const fragment = await safeGetToolsPrompt(toolsAdapter, contextScope, attachmentId);
   return fragment ? appendActionPrompt(body, fragment) : body;
 }
@@ -158,7 +197,7 @@ function buildContextFragment(entityId: string | undefined): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
     "Context:",
-    "- You are an AI agent operating inside a DocSpace workspace, not a generic standalone assistant.",
+    "- You are an AI agent operating inside an ONLYOFFICE Apps workspace, not a generic standalone assistant.",
   ];
   if (entityId) {
     lines.push(
@@ -475,6 +514,15 @@ async function* logStreamErrors<T>(
   }
 }
 
+// Telemetry (span + metrics) outside, error logging inside.
+function tapStream<T>(
+  route: string,
+  iter: AsyncIterable<T>,
+  dialect?: StreamDialect,
+): AsyncIterable<T> {
+  return observeChatStream(route, logStreamErrors(route, iter), dialect);
+}
+
 // A user message must carry some non-whitespace text before a stream is
 // opened. `content` is either a plain string or an array of parts; text
 // lives on `{ type: "text", text }` parts (and bare string parts), mirroring
@@ -594,14 +642,14 @@ export const aiController = {
     const result = engine.sendCustom(body);
     if (body.isStream) {
       if (isAsyncIterable(result)) {
-        await streamNdjson(res, logStreamErrors("ai/send-custom", result));
+        await streamNdjson(res, tapStream("ai/send-custom", result));
       } else {
         res.json(await result);
       }
       return;
     }
     if (isAsyncIterable(result)) {
-      await streamNdjson(res, logStreamErrors("ai/send-custom", result));
+      await streamNdjson(res, tapStream("ai/send-custom", result));
       return;
     }
     res.json(await result);
@@ -651,6 +699,20 @@ export const aiController = {
         req.body.profileId = thread.profileId;
       }
     }
+    // The caller's explicit profileId must reference an existing profile
+    // even when an agent's assignment overrides it for the round below —
+    // otherwise a bogus id is silently swapped for the agent's model and
+    // the request looks honored (Bug 83160 reopen: the regular-room 400
+    // never fired in agent scope because the substitution ran first).
+    // Billing is not checked here: it applies to the effective profile,
+    // which the post-substitution pre-flight still validates.
+    {
+      const callerError = await unknownProfileIdError(req.body.profileId);
+      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
+        res.status(400).json({ error: callerError });
+        return;
+      }
+    }
     // The agent's assigned profile is authoritative for rounds in its scope:
     // substitute it over whatever the caller (or the thread prefill above)
     // put in profileId, so an agent's chat cannot be re-run on a different
@@ -693,7 +755,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      logStreamErrors("ai/send-with-stream", engine.sendWithStream(body)),
+      tapStream("ai/send-with-stream", engine.sendWithStream(body)),
     );
   }),
 
@@ -706,6 +768,15 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
+    // Reject a caller-supplied unknown profileId before the agent
+    // substitution masks it — see sendWithStream (Bug 83160 reopen).
+    {
+      const callerError = await unknownProfileIdError(req.body.profileId);
+      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
+        res.status(400).json({ error: callerError });
+        return;
+      }
+    }
     // Agent scope pins the model — see sendWithStream (Bug 82914).
     {
       const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
@@ -730,7 +801,7 @@ export const aiController = {
     );
     await streamOpenAiSse(
       res,
-      logStreamErrors("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body)),
+      tapStream("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body), "openai"),
     );
   }),
 
@@ -749,7 +820,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      logStreamErrors("ai/regenerate-stream", engine.regenerateStream(body)),
+      tapStream("ai/regenerate-stream", engine.regenerateStream(body)),
     );
   }),
 
@@ -762,7 +833,7 @@ export const aiController = {
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
-      logStreamErrors("ai/approve-tool-call", engine.approveToolCall(body)),
+      tapStream("ai/approve-tool-call", engine.approveToolCall(body)),
     );
   }),
 
@@ -775,7 +846,7 @@ export const aiController = {
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
-      logStreamErrors("ai/deny-tool-call", engine.denyToolCall(body)),
+      tapStream("ai/deny-tool-call", engine.denyToolCall(body)),
     );
   }),
 };

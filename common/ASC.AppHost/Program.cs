@@ -75,7 +75,8 @@ switch (launchProfile)
             .AddProject<ASC_Web_Api>(Constants.WebApiPort)
             .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
             .AddProject<ASC_AI>(Constants.AiPort)
-            .AddSocketIO();
+            .AddSocketIO()
+            .AddIdentity();
 
         break;
     case "notify-test":

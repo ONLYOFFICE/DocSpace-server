@@ -182,7 +182,7 @@ function withoutPortalServer(
 // The DocSpace integration tools are one logical source split over two group
 // keys only because the engine gates approval per serverType (the approval
 // tools live under the `-approval` group). A user disabling e.g.
-// docspace_generate_docx cannot know which of the two keys the tool is
+// onlyoffice_generate_docx cannot know which of the two keys the tool is
 // grouped under — the split is an implementation detail — so on read the two
 // disabled lists are merged and served under BOTH keys: a name disabled
 // under either takes effect regardless of the group the tool is emitted in

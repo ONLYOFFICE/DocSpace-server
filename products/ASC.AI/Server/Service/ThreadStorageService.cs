@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Integration.Threads;
-
 using Thread = ASC.AI.Integration.Threads.Thread;
 
 namespace ASC.AI.Service;
@@ -82,11 +80,37 @@ public class ThreadStorageService(
         return thread;
     }
 
-    public async Task<IEnumerable<Thread>> ReadAllAsync(string? entityId = null)
+    public async Task<ThreadsPage> ReadAllAsync(
+        int count,
+        ThreadsCursor? cursor = null,
+        string? entityId = null,
+        string? query = null)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
+
         var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
-        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var checkCount = count + 1;
+
+        var threads = string.IsNullOrWhiteSpace(query)
+            ? await storage.ReadAllAsync(tenantId, CurrentUserId, checkCount, entryId, cursor)
+            : await storage.SearchAsync(tenantId, CurrentUserId, query, checkCount, entryId, cursor);
+
+        if (threads.Count <= count)
+        {
+            return new ThreadsPage { Threads = threads };
+        }
+
+        threads.RemoveAt(count);
+        var last = threads[^1];
+
+        return new ThreadsPage
+        {
+            Threads = threads,
+            Cursor = new ThreadsCursor { LastEditDate = last.LastEditDate, Id = last.Id }
+        };
     }
 
     public async Task UpdateAsync(Guid id, string? title)

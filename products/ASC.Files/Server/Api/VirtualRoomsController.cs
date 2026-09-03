@@ -1035,6 +1035,9 @@ public class VirtualRoomsCommonController(
     [Tags("Rooms")]
     [SwaggerResponse(200, "True if tag has links, false otherwise", typeof(bool))]
     [SwaggerResponse(404, "Tag not found")]
+    // HasTagLinksRequestDto binds `tagName` `[FromQuery]`, so the route placeholder of the same name
+    // is unbound and the value has to be sent twice - which is what the generated SDKs already do.
+    [SwaggerPathParameter("tagName", "The tag being checked. Send the same value as the `tagName` query parameter, which is the one the handler reads.")]
     [HttpGet("tags/{tagName}/haslinks")]
     public async Task<bool> HasTagLinks(HasTagLinksRequestDto requestDto)
     {
