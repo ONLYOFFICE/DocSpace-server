@@ -129,23 +129,4 @@ static file class ToolPrefsQueriesContainer
                 ctx.ToolPrefs
                     .Where(x => x.TenantId == tenantId && x.ServerType == serverType && x.EntryId == entryId)
                     .ExecuteDelete());
-
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> ClearToolPrefsDisabledAsync =
-        (AiIntegrationContext ctx, int tenantId, Guid createdBy) =>
-            ctx.ToolPrefs
-                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Disabled != null)
-                .ExecuteUpdateAsync(s => s.SetProperty(x => x.Disabled, (HashSet<string>?)null));
-
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> ClearToolPrefsAllowAlwaysAsync =
-        (AiIntegrationContext ctx, int tenantId, Guid createdBy) =>
-            ctx.ToolPrefs
-                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.AllowAlways != null)
-                .ExecuteUpdateAsync(s => s.SetProperty(x => x.AllowAlways, (HashSet<string>?)null));
-
-    public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteEmptyToolPrefsAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid createdBy) =>
-                ctx.ToolPrefs
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Disabled == null && x.AllowAlways == null)
-                    .ExecuteDelete());
 }
