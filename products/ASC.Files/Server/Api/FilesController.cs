@@ -722,6 +722,9 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated information about form role mappings")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    // The handler reads the id from the body (`formId`), not from the route, so nothing binds this
+    // placeholder; the client sends the same value in both places.
+    [SwaggerPathParameter("fileId", "The form the role mapping belongs to. Send the same value as the `formId` of the request body, which is the one the handler reads.")]
     [HttpPost("file/{fileId}/formrolemapping")]
     public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
     {
@@ -752,6 +755,9 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully processed the form filling action")]
     [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    // Same shape as formrolemapping above: the id travels in the body, the route placeholder is
+    // unbound, and the client fills both with the same value.
+    [SwaggerPathParameter("fileId", "The form the action applies to. Send the same value as the `formId` of the request body, which is the one the handler reads.")]
     [HttpPut("file/{fileId}/manageformfilling")]
     public async Task ManageFormFilling(ManageFormFillingDto<T> inDto)
     {
@@ -764,7 +770,7 @@ public abstract class FilesController<T>(
     /// <summary>Get form submission results</summary>
     /// <path>api/2.0/files/file/{fileId}/submissions</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Form submission results were successfully retrieved")]
+    [SwaggerResponse(200, "Form submission results were successfully retrieved", typeof(FormSubmissionsDto))]
     [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
     [HttpGet("file/{fileId}/submissions")]
     public Task<FormSubmissionsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
@@ -779,6 +785,7 @@ public abstract class FilesController<T>(
     /// Returns the encryption information for a file with the specified identifier, including user encryption keys and file-specific encryption keys.
     /// </remarks>
     /// <path>api/2.0/files/file/{fileId}/access</path>
+    /// <param name="fileId">The file unique identifier.</param>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File encryption information", typeof(FileEncryptionInfoDto))]
     [SwaggerResponse(400, "Invalid operation")]

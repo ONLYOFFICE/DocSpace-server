@@ -320,13 +320,18 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     {
         // The password-hash salt is derived from the machine key and is identical for every portal,
         // so it is fetched once from the default tenant (no Origin header) and shared by all tests.
-        using var defaultClient = CreateRawClient(_baseAddresses[ResourceNames.WebApi], origin: null);
-        var api = new RawApiClient(defaultClient);
+        var baseAddress = _baseAddresses[ResourceNames.WebApi];
+        using var defaultClient = CreateRawClient(baseAddress, origin: null);
 
-        using var response = await api.GetAsync("/api/2.0/settings?withPassword=true", TestContext.Current.CancellationToken);
-        var settings = await api.ReadAsync<WizardSettingsResponse>(response, TestContext.Current.CancellationToken);
+        var settingsApi = new CommonSettingsApi(
+            defaultClient,
+            new Configuration { BasePath = baseAddress.ToString().TrimEnd('/') });
 
-        Initializer.InitializePasswordHasher(settings.PasswordHash!);
+        var settings = (await settingsApi.GetPortalSettingsAsync(
+            withpassword: true,
+            TestContext.Current.CancellationToken)).Response;
+
+        Initializer.InitializePasswordHasher(settings.PasswordHash);
     }
 
     /// <summary>

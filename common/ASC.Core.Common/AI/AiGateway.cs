@@ -205,60 +205,183 @@ public class AiGatewayNotConfiguredException(string message = "AI gateway is not
 
 public class AiServiceDisabledException(string message = "AI service is disabled") : Exception(message);
 
+/// <summary>
+/// The currency the AI prices are quoted in.
+/// </summary>
 public record CurrencyInfo
 {
+    /// <summary>
+    /// The ISO 4217 code of the currency the prices are quoted in.
+    /// </summary>
+    /// <example>USD</example>
     public required string Code { get; init; }
+
+    /// <summary>
+    /// The display symbol of the currency.
+    /// </summary>
+    /// <example>$</example>
     public required string Symbol { get; init; }
 }
 
+/// <summary>
+/// The AI price list: per-model pricing for every model kind, in a single currency.
+/// </summary>
 public record AiPricesResponse
 {
+    /// <summary>
+    /// The pricing of every available chat model.
+    /// </summary>
     public required IEnumerable<AiChatModelPricing> Chat { get; init; }
+
+    /// <summary>
+    /// The pricing of every available embedding model.
+    /// </summary>
     public required IEnumerable<AiEmbeddingModelPricing> Embedding { get; init; }
+
+    /// <summary>
+    /// The pricing of every available image model.
+    /// </summary>
     public required IEnumerable<AiImageModelPricing> Image { get; init; }
+
+    /// <summary>
+    /// The pricing of every available web search provider.
+    /// </summary>
     public required IEnumerable<AiWebSearchPricing> Search { get; init; }
+
     public required CurrencyInfo Currency { get; init; }
 }
 
 public abstract record AiModelPricing<TPrice>
 {
+    /// <summary>
+    /// The identifier of the model, as the provider expects it on the wire.
+    /// </summary>
+    /// <example>gpt-4o</example>
     public required string Id { get; init; }
+
+    /// <summary>
+    /// The display name of the model.
+    /// </summary>
+    /// <example>GPT-4o</example>
     public string Alias { get; init; }
+
+    /// <summary>
+    /// The owner of the model, as reported by the provider.
+    /// </summary>
+    /// <example>openai</example>
     public string OwnedBy { get; init; }
+
+    /// <summary>
+    /// The provider that serves the model.
+    /// </summary>
+    /// <example>openai</example>
     public string Provider { get; init; }
+
+    /// <summary>
+    /// The link to the pricing page of the model.
+    /// </summary>
+    /// <example>https://openai.com/api/pricing</example>
     public string Link { get; init; }
+
     public required TPrice Price { get; init; }
 }
 
+/// <summary>
+/// The pricing of a single chat model.
+/// </summary>
 public record AiChatModelPricing : AiModelPricing<AiChatPrice>;
 
+/// <summary>
+/// The price of a chat model, per token.
+/// </summary>
 public record AiChatPrice
 {
+    /// <summary>
+    /// The price of a single prompt token.
+    /// </summary>
+    /// <example>0.0000025</example>
     public decimal Prompt { get; init; }
+
+    /// <summary>
+    /// The price of a single completion token.
+    /// </summary>
+    /// <example>0.00001</example>
     public decimal Completion { get; init; }
 }
 
+/// <summary>
+/// The pricing of a single embedding model.
+/// </summary>
 public record AiEmbeddingModelPricing : AiModelPricing<AiEmbeddingPrice>;
 
+/// <summary>
+/// The price of an embedding model, per token.
+/// </summary>
 public record AiEmbeddingPrice
 {
+    /// <summary>
+    /// The price of a single input token.
+    /// </summary>
+    /// <example>0.00000002</example>
     public decimal Prompt { get; init; }
 }
 
+/// <summary>
+/// The pricing of a single image model.
+/// </summary>
 public record AiImageModelPricing : AiModelPricing<AiImagePrice>;
 
+/// <summary>
+/// The price of an image model: per prompt token and per generated image.
+/// </summary>
 public record AiImagePrice
 {
+    /// <summary>
+    /// The price of a single prompt token.
+    /// </summary>
+    /// <example>0.00001</example>
     public decimal Prompt { get; init; }
+
+    /// <summary>
+    /// The cost associated with the completion of a prompt in an AI model.
+    /// </summary>
+    /// <example>0.00001</example>
     public decimal Completion { get; init; }
+
+    /// <summary>
+    /// The price of a single generated image.
+    /// </summary>
+    /// <example>0.04</example>
     public decimal Image { get; init; }
 }
 
+/// <summary>
+/// The pricing of a single web search provider, per request.
+/// </summary>
 public record AiWebSearchPricing
 {
+    /// <summary>
+    /// The identifier of the web search provider.
+    /// </summary>
+    /// <example>brave</example>
     public string Id { get; init; }
+
+    /// <summary>
+    /// The provider that serves the web search requests.
+    /// </summary>
+    /// <example>brave</example>
     public string Provider { get; init; }
+
+    /// <summary>
+    /// The price of a single web search request.
+    /// </summary>
+    /// <example>0.005</example>
     public decimal Price { get; init; }
+
+    /// <summary>
+    /// The link to the pricing page of the provider.
+    /// </summary>
+    /// <example>https://brave.com/search/api</example>
     public string Link { get; init; }
 }
 
@@ -267,8 +390,15 @@ public class SetRestrictedModelsRequest
     public required HashSet<string> Models { get; init; }
 }
 
+/// <summary>
+/// The AI models the portal is not allowed to use.
+/// </summary>
 public record RestrictedModelsResponse
 {
+    /// <summary>
+    /// The identifiers of the models the portal is not allowed to use.
+    /// </summary>
+    /// <example>["gpt-4o", "claude-3-opus"]</example>
     public required List<string> Models { get; init; }
 }
 

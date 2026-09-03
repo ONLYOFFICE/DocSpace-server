@@ -138,6 +138,11 @@ public class McpServerStorageService(
         }
     }
 
+    internal async Task<ScopedValues<List<McpServer>>> ReadByScopesVerifiedAsync(int? firstEntryId, int? secondEntryId)
+    {
+        return await storage.ReadByScopesAsync(tenantManager.GetCurrentTenantId(), firstEntryId, secondEntryId);
+    }
+
     private async Task SendCreatedAsync(string name, Folder<int>? folder)
     {
         if (folder is null)

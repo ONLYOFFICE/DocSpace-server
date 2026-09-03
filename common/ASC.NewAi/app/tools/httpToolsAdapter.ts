@@ -56,9 +56,9 @@ import {
 export { DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE };
 
 const APPROVAL_TOOL_NAMES = new Set<string>([
-    "docspace_generate_docx",
-    "docspace_generate_presentation",
-    "docspace_generate_form",
+    "onlyoffice_generate_docx",
+    "onlyoffice_generate_presentation",
+    "onlyoffice_generate_form",
 ]);
 
 type ToolsList = {
@@ -150,14 +150,11 @@ async function resolveFormId(attachmentId: string[] | undefined): Promise<number
     return 0;
 }
 
-// Form features are scoped to the CURRENT user message only: the controller
-// (`withToolsPrompt`) extracts the message's attachment refs and resolves
-// them here before the stream starts; the resolved formId is kept in the
-// per-request context so the engine's later `getTools` and same-turn
-// `callTool` (whose signatures carry no current-message refs) see the same
-// value. A form that only lives in the thread history must NOT re-activate
-// the form tools, which is why the engine-supplied `config.attachmentId`
-// (collected across the whole history) is deliberately ignored.
+// Resolve the round's form context from the attachment refs the controller
+// passes — the current message's own, or the thread history's when it has none
+// (see `withToolsPrompt`). The resolved formId is cached in the per-request
+// context so the engine's later `getTools` and same-turn `callTool` (whose
+// signatures carry no attachment refs) reuse the same value.
 async function toContext(
     entityId: string | undefined,
     attachmentId?: string[],
@@ -219,8 +216,9 @@ function parseList(raw: unknown): ToolsList {
  * dialog before running them.
  */
 export class HttpToolsAdapter implements ToolsAdapter {
-    // `_config.attachmentId` (the engine's ref collection over the whole
-    // thread) is intentionally unused — see `toContext`.
+    // `_config.attachmentId` (the engine's whole-thread ref collection) is
+    // unused: the controller already resolved the formId into the request
+    // context, which this `list` reads back through `toContext`.
     async getTools(
         entityId?: string,
         _config?: { attachmentId: string[] },

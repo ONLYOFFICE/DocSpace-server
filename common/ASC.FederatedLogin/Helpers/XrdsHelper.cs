@@ -37,14 +37,20 @@ public static class XrdsHelper
 {
     internal static async Task RenderXrdsAsync(HttpResponse responce, string location, string iconlink)
     {
-        var xrds =
+        await responce.WriteAsync(GetXrds(location, iconlink));
+    }
+
+    public static string GetXrds(string location, string iconlink)
+    {
+        //Both urls are spliced into element content, so they are XML-escaped: the return_to
+        //one carries the caller-supplied returnurl, where a "<" or "&" would otherwise break
+        //the document apart or inject sibling elements into it.
+        return
             @"<xrds:XRDS xmlns:xrds=""xri://$xrds"" xmlns:openid=""http://openid.net/xmlns/1.0"" " +
             @"xmlns=""xri://$xrd*($v*2.0)""><XRD><Service " +
             @"priority=""1""><Type>http://specs.openid.net/auth/2.0/return_to</Type><URI " +
-            $@"priority=""1"">{location}</URI></Service><Service><Type>http://specs.openid.net/extensions/ui/icon</Type><UR" +
-            $"I>{iconlink}</URI></Service></XRD></xrds:XRDS>";
-
-        await responce.WriteAsync(xrds);
+            $@"priority=""1"">{SecurityElement.Escape(location)}</URI></Service><Service><Type>http://specs.openid.net/extensions/ui/icon</Type><UR" +
+            $"I>{SecurityElement.Escape(iconlink)}</URI></Service></XRD></xrds:XRDS>";
     }
 
     //TODO

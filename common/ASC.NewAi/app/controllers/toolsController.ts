@@ -211,17 +211,30 @@ export const toolsController = {
     // markers), so a plain spread cannot clobber a group.
     const [tools, custom] = await Promise.all([
       engine.listSystemTools(entityId),
-      customToolsSource.getTools(entityId),
+      // The richer enumeration also says why a registered server delivered
+      // no tools — the client shows that message on the permission card
+      // (the browser has no local access to a server-executed MCP server).
+      customToolsSource.getToolsWithErrors(entityId),
     ]);
+    // This engine's source exposes plain getTools only, so the system half
+    // always comes back as the legacy grouped map.
+    const systemGroups = (
+      isObject(tools) && "groups" in (tools as Record<string, unknown>)
+        ? (tools as { groups: Record<string, unknown> }).groups
+        : tools
+    ) as Record<string, unknown>;
     // Hide the portal MCP server from every management surface (the MCP
     // settings page's permission cards, the agent dialog's server picker):
     // it is always enabled with all tools and cannot be configured. The
     // chat engine's tool context does not go through this listing, so the
     // tools themselves stay available everywhere.
-    if (isObject(tools)) {
-      delete (tools as Record<string, unknown>)[PORTAL_MCP_SERVER_NAME];
+    if (isObject(systemGroups)) {
+      delete systemGroups[PORTAL_MCP_SERVER_NAME];
     }
-    res.json({ ...tools, ...custom });
+    res.json({
+      groups: { ...systemGroups, ...custom.groups },
+      errors: custom.errors,
+    });
   }),
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {

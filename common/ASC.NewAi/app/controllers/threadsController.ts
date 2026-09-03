@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { ThreadsEngine, AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
@@ -36,6 +36,8 @@ import type {
   Profile,
   OpenOrCreateInput,
   MessagesCursor,
+  MessagesDirection,
+  ThreadsCursor,
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
@@ -59,6 +61,33 @@ function parseMessagesCursor(raw: unknown): MessagesCursor | undefined {
     const parsed: unknown = JSON.parse(raw);
     if (isObject(parsed) && getString(parsed, "id") !== undefined) {
       return parsed as unknown as MessagesCursor;
+    }
+  } catch {
+    // fall through — not JSON
+  }
+  return undefined;
+}
+
+// Only an explicit `desc` turns the read around; anything else — absent,
+// misspelled, an array of repeated params — reads forward, which is the
+// behavior every caller had before the parameter existed.
+function parseDirection(raw: unknown): MessagesDirection | undefined {
+  return asString(raw) === "desc" ? "desc" : undefined;
+}
+
+function parseThreadsCursor(raw: unknown): ThreadsCursor | undefined {
+  if (typeof raw !== "string" || raw.length === 0) {
+    return undefined;
+  }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isObject(parsed)) {
+      return undefined;
+    }
+    const id = getString(parsed, "id") ?? getString(parsed, "threadId");
+    const lastEditDate = parsed["lastEditDate"];
+    if (id !== undefined && (typeof lastEditDate === "number" || lastEditDate === null)) {
+      return { lastEditDate, threadId: id, id };
     }
   } catch {
     // fall through — not JSON
@@ -103,10 +132,7 @@ export async function assertThreadCreatable(
   ) {
     return;
   }
-  const resolved = await assignmentsEngine.tryResolveForAction(
-    ActionType.Chat,
-    entityId,
-  );
+  const resolved = await assignmentsEngine.tryResolveForAction(ActionType.Chat, entityId);
   if (resolved?.profile) {
     return;
   }
@@ -297,7 +323,10 @@ export const threadsController = {
 
   list: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    const threads = await engine.list(entityId);
+    const count = parseInt10(req.query["count"]);
+    const cursor = parseThreadsCursor(req.query["cursor"]);
+    const query = asString(req.query["query"]);
+    const threads = await engine.list(entityId, count, cursor, query);
     res.json(threads);
   }),
 
@@ -309,7 +338,8 @@ export const threadsController = {
     }
     const count = parseInt10(req.query["count"]);
     const cursor = parseMessagesCursor(req.query["cursor"]);
-    const messages = await engine.readMessages(threadId, count, cursor);
+    const direction = parseDirection(req.query["direction"]);
+    const messages = await engine.readMessages(threadId, count, cursor, direction);
     res.json(messages);
   }),
 

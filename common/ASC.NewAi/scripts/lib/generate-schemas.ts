@@ -34,6 +34,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createGenerator } from "ts-json-schema-generator";
 import { toOpenApiSchemas } from "./draft-to-openapi.js";
+import { applySchemaDocs, cleanOperationDescriptions } from "./schemaDocs.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -58,10 +59,7 @@ function namespacedName(name: string): string {
   return isOperationScoped(name) ? name : `${SCHEMA_NAMESPACE}${name}`;
 }
 
-function rewriteRefs(
-  node: unknown,
-  rename: (name: string) => string,
-): unknown {
+function rewriteRefs(node: unknown, rename: (name: string) => string): unknown {
   if (Array.isArray(node)) {
     return node.map((n) => rewriteRefs(n, rename));
   }
@@ -70,9 +68,7 @@ function rewriteRefs(
     for (const [key, value] of Object.entries(node)) {
       if (key === "$ref" && typeof value === "string") {
         const match = value.match(/^#\/components\/schemas\/(.+)$/);
-        out[key] = match
-          ? `#/components/schemas/${rename(match[1]!)}`
-          : value;
+        out[key] = match ? `#/components/schemas/${rename(match[1]!)}` : value;
       } else {
         out[key] = rewriteRefs(value, rename);
       }
@@ -83,9 +79,7 @@ function rewriteRefs(
 }
 
 // Namespace shared schema names and rewrite every `$ref` accordingly.
-function namespaceSchemas(
-  schemas: Record<string, unknown>,
-): Record<string, unknown> {
+function namespaceSchemas(schemas: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [name, schema] of Object.entries(schemas)) {
     out[namespacedName(name)] = rewriteRefs(schema, namespacedName);
@@ -158,5 +152,16 @@ export function generateOpenApiSchemas(): OpenApiSchemaBundle {
   }).createSchema("*");
 
   const definitions = (schema.definitions ?? {}) as Record<string, unknown>;
-  return splitBundle(namespaceSchemas(toOpenApiSchemas(definitions)));
+  const bundle = splitBundle(namespaceSchemas(toOpenApiSchemas(definitions)));
+
+  // Last: the descriptions the library does not declare are filled in here,
+  // keyed by the namespaced component names this pipeline has just settled on.
+  const { components, unused } = applySchemaDocs(bundle.components);
+  for (const entry of unused) {
+    const target =
+      entry.property === undefined ? entry.schema : `${entry.schema}.${entry.property}`;
+    console.warn(`SCHEMA_DOCS entry changed nothing: ${target} (${entry.reason})`);
+  }
+
+  return { components, operations: cleanOperationDescriptions(bundle.operations) };
 }
