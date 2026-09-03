@@ -509,7 +509,7 @@ __metadata:
 
 "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.82.tgz::locator=asc-new-ai%40workspace%3A.":
   version: 0.5.82
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.82.tgz#onlyoffice-ai-chat-0.5.82.tgz::hash=433c06&locator=asc-new-ai%40workspace%3A."
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.82.tgz#onlyoffice-ai-chat-0.5.82.tgz::hash=716a1f&locator=asc-new-ai%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -602,7 +602,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/779a3f603c9d03d2d888a3cfdc803201b7dfa2618ea1c00e8fbd4a1a8d40b190215cd4355ce6c312120c570ea0a1e39b189c30ce4f1cba2f747399ecfceb8b0e
+  checksum: 10/4fdd814e52c2a15abd6b16e7791d5fdd4e6114887f485b84a92685b09ca5b45e36338d5b8ff79cad88bd29ed375b33f41a68fd28d1505868a3938db5e0ac032a
   languageName: node
   linkType: hard
 
