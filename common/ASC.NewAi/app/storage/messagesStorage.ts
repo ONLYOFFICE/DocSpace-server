@@ -35,6 +35,11 @@ import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { MessagesStorage, MessagesCursor } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
+import {
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const THREADS_PATH = "/threads";
 const MESSAGES_PATH = "/messages";
@@ -61,7 +66,7 @@ function parseContents(contents: unknown): Record<string, unknown> {
   }
 }
 
-function dtoToMessage(raw: unknown): ThreadMessageLike | null {
+export function dtoToMessage(raw: unknown): ThreadMessageLike | null {
   if (!isObject(raw)) {
     return null;
   }
@@ -87,6 +92,7 @@ export class HttpMessagesStorage implements MessagesStorage {
       `${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`,
       { contents: serializeContents(message) },
     );
+    invalidateChatContext("messages");
     const result = dtoToMessage(raw);
     if (!result) {
       throw new Error("ai service returned invalid message");
@@ -135,6 +141,15 @@ export class HttpMessagesStorage implements MessagesStorage {
     _count?: number,
     _cursor?: MessagesCursor,
   ): Promise<ThreadMessageLike[]> {
+    const snapshot = readChatContext("messages");
+    if (
+      snapshot
+      && snapshot.messages !== null
+      && threadId === snapshot.requested.threadId
+    ) {
+      return [...snapshot.messages];
+    }
+    reportChatContextMiss(`messages.readByThread(${threadId})`);
     const raw = await aiService.get(
       `${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`,
     );
@@ -155,9 +170,11 @@ export class HttpMessagesStorage implements MessagesStorage {
     await aiService.put(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`, {
       contents: serializeContents(message),
     });
+    invalidateChatContext("messages");
   }
 
   async delete(messageId: string): Promise<void> {
+    invalidateChatContext("messages");
     try {
       await aiService.delete(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
     } catch (err) {
@@ -169,6 +186,7 @@ export class HttpMessagesStorage implements MessagesStorage {
   }
 
   async deleteByThread(threadId: string): Promise<void> {
+    invalidateChatContext("messages");
     try {
       await aiService.delete(`${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`);
     } catch (err) {

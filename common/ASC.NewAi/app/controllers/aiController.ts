@@ -46,7 +46,9 @@ import { agentAssignedProfileId } from "./agentProfile.js";
 import {
   markForwardHeadersToProvider,
   getCustomServerNames,
+  getChatContextSnapshot,
 } from "../requestContext.js";
+import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { aiService } from "../storage/httpClient.js";
@@ -463,7 +465,8 @@ async function* logStreamErrors<T>(
             .join(", ")
         : "<none>";
     logger.info(
-      `${route}: stream completed after ${eventCount} event(s); toolCalls=${toolSummary}`,
+      `${route}: stream completed after ${eventCount} event(s); toolCalls=${toolSummary}; ` +
+        describeChatContextUsage(),
     );
   } catch (err) {
     logger.error(
@@ -550,6 +553,11 @@ async function aiToolsUnpaidError(
   if (providerType !== "onlyoffice") {
     return null;
   }
+  // The round's aggregate already carries the portal's AI settings.
+  const primed = getChatContextSnapshot()?.aiReady;
+  if (primed !== undefined) {
+    return primed ? null : AI_TOOLS_UNPAID_ERROR;
+  }
   const config = await aiService.get("/config").catch(() => undefined);
   if (isObject(config) && config["aiReady"] === false) {
     return AI_TOOLS_UNPAID_ERROR;
@@ -565,6 +573,10 @@ export const aiController = {
     // Mirrors sendWithStream. (No profile pinning here: SendInput carries no
     // profileId, so there is nothing for a caller to override.)
     markForwardHeadersToProvider();
+    await primeChatContext({
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -577,6 +589,7 @@ export const aiController = {
     // As with `send`, the forwarded headers must be marked before the
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
+    await primeChatContext({ entityId: customScopeOf(req.body) });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -609,6 +622,14 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // One aggregate read for the whole round — every storage read below
+    // (profiles, assignments, prefs, MCP servers, thread, history, folder
+    // metadata) is served from it. See storage/chatContext.ts.
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -702,6 +723,11 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -736,6 +762,11 @@ export const aiController = {
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -755,6 +786,11 @@ export const aiController = {
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -768,6 +804,11 @@ export const aiController = {
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.

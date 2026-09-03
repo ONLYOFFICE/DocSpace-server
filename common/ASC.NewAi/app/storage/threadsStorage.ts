@@ -36,6 +36,11 @@ import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { ThreadsStorage } from "@onlyoffice/ai-chat/core";
 import type { Thread } from "@onlyoffice/ai-chat/core";
+import {
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const PATH = "/threads";
 
@@ -43,7 +48,7 @@ function entityIdQuery(entityId: string | undefined): Record<string, QueryValue>
   return entityId ? { entityId } : undefined;
 }
 
-function dtoToThread(raw: unknown): Thread | null {
+export function dtoToThread(raw: unknown): Thread | null {
   if (!isObject(raw)) {
     return null;
   }
@@ -81,6 +86,13 @@ export class HttpThreadsStorage implements ThreadsStorage {
   }
 
   async readById(threadId: string): Promise<Thread | null> {
+    // The aggregate carries exactly the round's thread; `null` there means
+    // the thread is absent or foreign, the same answer the 404 path gives.
+    const snapshot = readChatContext("thread");
+    if (snapshot && threadId === snapshot.requested.threadId) {
+      return snapshot.thread;
+    }
+    reportChatContextMiss(`threads.readById(${threadId})`);
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(threadId)}`);
       return dtoToThread(raw);
@@ -113,6 +125,7 @@ export class HttpThreadsStorage implements ThreadsStorage {
       return;
     }
     await aiService.put(`${PATH}/${encodeURIComponent(threadId)}`, { title });
+    invalidateChatContext("thread");
   }
 
   async touch(
@@ -133,9 +146,11 @@ export class HttpThreadsStorage implements ThreadsStorage {
       }
     }
     await aiService.patch(`${PATH}/${encodeURIComponent(threadId)}/touch`, body);
+    invalidateChatContext("thread");
   }
 
   async delete(threadId: string): Promise<void> {
+    invalidateChatContext("thread");
     try {
       await aiService.delete(`${PATH}/${encodeURIComponent(threadId)}`);
     } catch (err) {
