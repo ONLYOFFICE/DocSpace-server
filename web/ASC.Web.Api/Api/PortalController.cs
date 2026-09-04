@@ -629,9 +629,9 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/path</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "Portal path", typeof(object))]
+    [SwaggerResponse(200, "Portal path", typeof(string))]
     [HttpGet("path")]
-    public object GetPortalPath(PortalPathRequestDto inDto)
+    public string GetPortalPath(PortalPathRequestDto inDto)
     {
         return commonLinkUtility.GetFullAbsolutePath(inDto.VirtualPath);
     }

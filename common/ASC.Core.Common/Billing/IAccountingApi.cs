@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -69,4 +69,7 @@ public interface IAccountingApi
 
     [Get("/service/{serviceName}/name")]
     Task<ServiceInfo> GetServiceInfoAsync(string serviceName);
+
+    [Get("/price/service/{serviceId}")]
+    Task<List<ServicePriceInfo>> GetServicePricesAsync(int serviceId, [Query] bool active);
 }

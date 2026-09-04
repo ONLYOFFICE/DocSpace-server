@@ -352,12 +352,12 @@
             </condition>
             <if>
                 <then>
-                    <root level="ERROR">
+                    <root level="WARN">
                         <appender-ref ref="JSON_FILE"/>
                     </root>
                 </then>
                 <else>
-                    <root level="ERROR">
+                    <root level="WARN">
                         <appender-ref ref="JSON_CONSOLE_ASYNC"/>
                     </root>
                 </else>
@@ -367,7 +367,7 @@
 
     <springProfile name="production,prod,p">
         <springProfile name="saas">
-            <root level="ERROR">
+            <root level="WARN">
                 <appender-ref ref="CLOUDWATCH_ASYNC"/>
             </root>
         </springProfile>

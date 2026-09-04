@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -183,14 +183,14 @@ public class SecurityController(
     /// </summary>
     /// <path>api/2.0/security/audit/types</path>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "Audit trail types", typeof(object))]
+    [SwaggerResponse(200, "Audit trail types", typeof(AuditTrailTypesDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("audit/types")]
-    public async Task<object> GetAuditTrailTypes()
+    public async Task<AuditTrailTypesDto> GetAuditTrailTypes()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return new
+        return new AuditTrailTypesDto
         {
             Actions = MessageActionExtensions.GetNames(),
             ActionTypes = ActionTypeExtensions.GetNames(),
@@ -207,25 +207,26 @@ public class SecurityController(
     /// Get audit trail mappers
     /// </summary>
     /// <path>api/2.0/security/audit/mappers</path>
+    /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "Audit trail mappers", typeof(object))]
+    [SwaggerResponse(200, "Audit trail mappers", typeof(IEnumerable<AuditTrailProductMapperDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("audit/mappers")]
-    public async Task<object> GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
+    public async Task<IEnumerable<AuditTrailProductMapperDto>> GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         return auditActionMapper.Mappers
             .Where(r => !inDto.ProductType.HasValue || r.Product == inDto.ProductType.Value)
-            .Select(r => new
+            .Select(r => new AuditTrailProductMapperDto
             {
                 ProductType = r.Product.ToStringFast(),
                 Modules = r.Mappers
                 .Where(m => !inDto.LocationType.HasValue || m.Location == inDto.LocationType.Value)
-                .Select(x => new
+                .Select(x => new AuditTrailModuleMapperDto
                 {
                     ModuleType = x.Location.ToStringFast(),
-                    Actions = x.Actions.Select(a => new
+                    Actions = x.Actions.Select(a => new AuditTrailActionMapperDto
                     {
                         MessageAction = a.Key.ToString(),
                         ActionType = a.Value.ActionType.ToStringFast(),

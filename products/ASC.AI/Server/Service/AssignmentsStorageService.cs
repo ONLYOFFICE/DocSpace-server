@@ -79,6 +79,11 @@ public class AssignmentsStorageService(
     {
         var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
+        return await ReadAllVerifiedAsync(entryId);
+    }
+
+    internal async Task<Dictionary<ActionType, Guid>> ReadAllVerifiedAsync(int? entryId)
+    {
         var stored = await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
 
         return await resolver.ResolveAsync(stored, applyDefaults: entryId == null);
@@ -165,6 +170,15 @@ public class AssignmentsStorageService(
                 messageService.Send(MessageAction.AiProfileUnassigned, actionType.ToStringFast());
             }
         }
+    }
+
+    internal async Task<ScopedValues<Dictionary<ActionType, Guid>>> ReadByScopesVerifiedAsync(int? firstEntryId, int? secondEntryId, List<Model>? models)
+    {
+        var stored = await storage.ReadByScopesAsync(tenantManager.GetCurrentTenantId(), firstEntryId, secondEntryId);
+
+        return new ScopedValues<Dictionary<ActionType, Guid>>(
+            AssignmentsResolver.Resolve(stored.Global, applyDefaults: true, models),
+            stored.ByEntry.ToDictionary(x => x.Key, x => AssignmentsResolver.Resolve(x.Value, applyDefaults: false, models)));
     }
 
     private async Task SendAssignedAsync(ActionType actionType, Guid profileId, Folder<int>? folder)

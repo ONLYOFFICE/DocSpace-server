@@ -113,6 +113,22 @@ public class AssignmentsStorage(
         return await assignments.ToDictionaryAsync(x => x.ActionType, x => x.ProfileId);
     }
 
+    public async Task<ScopedValues<Dictionary<ActionType, Guid>>> ReadByScopesAsync(int tenantId, int? firstEntryId, int? secondEntryId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var global = new Dictionary<ActionType, Guid>();
+        var byEntry = ScopedValues.CreateEntryBuckets(firstEntryId, secondEntryId, () => new Dictionary<ActionType, Guid>());
+
+        await foreach (var entity in context.GetAllAssignmentsByScopesAsync(tenantId, firstEntryId, secondEntryId))
+        {
+            var target = entity.EntryId.HasValue ? byEntry[entity.EntryId.Value] : global;
+            target[entity.ActionType] = entity.ProfileId;
+        }
+
+        return new ScopedValues<Dictionary<ActionType, Guid>>(global, byEntry);
+    }
+
     public async Task<bool> UpdateAsync(int tenantId, ActionType actionType, Guid profileId, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();

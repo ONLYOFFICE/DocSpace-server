@@ -36,6 +36,7 @@ import type { IncomingHttpHeaders } from "http";
 import type { Request, Response, NextFunction } from "express";
 import type { ForwardedHeaders, RequestContext } from "./types.js";
 import type { DocspaceFolderInfo } from "./storage/docspaceFilesApi.js";
+import type { ChatContextSnapshot } from "./storage/chatContextSnapshot.js";
 
 const HOP_BY_HOP = new Set<string>([
   "host",
@@ -155,4 +156,66 @@ export function getFolderInfoCache():
   | Map<string, Promise<DocspaceFolderInfo | undefined>>
   | undefined {
   return als.getStore()?.folderInfoCache;
+}
+
+// The round's aggregate read (see RequestContext.chatContext). Set once by the
+// send handlers after `GET internal/ai/chat-context`; read by every storage
+// read method. Undefined outside a request context and on non-round routes.
+export function setChatContextSnapshot(snapshot: ChatContextSnapshot | undefined): void {
+  const store = als.getStore();
+  if (store) {
+    store.chatContext = snapshot;
+  }
+}
+
+export function getChatContextSnapshot(): ChatContextSnapshot | undefined {
+  return als.getStore()?.chatContext;
+}
+
+// Per-request count of GET requests that reached the AI service. With a
+// primed snapshot a round should end at exactly one (the aggregate itself);
+// anything above is a read the snapshot does not cover yet.
+export function countUpstreamRead(): void {
+  const store = als.getStore();
+  if (store) {
+    store.upstreamReads = (store.upstreamReads ?? 0) + 1;
+  }
+}
+
+export function getUpstreamReadCount(): number {
+  return als.getStore()?.upstreamReads ?? 0;
+}
+
+export function countUpstreamCall(method: string): void {
+  const store = als.getStore();
+  if (store) {
+    const calls = (store.upstreamCalls ??= {});
+    calls[method] = (calls[method] ?? 0) + 1;
+  }
+}
+
+export function getUpstreamCalls(): Record<string, number> {
+  return als.getStore()?.upstreamCalls ?? {};
+}
+
+export function countFilesApiRead(): void {
+  const store = als.getStore();
+  if (store) {
+    store.filesApiReads = (store.filesApiReads ?? 0) + 1;
+  }
+}
+
+export function getFilesApiReadCount(): number {
+  return als.getStore()?.filesApiReads ?? 0;
+}
+
+export function noteChatContextMiss(label: string): void {
+  const store = als.getStore();
+  if (store) {
+    (store.chatContextMisses ??= []).push(label);
+  }
+}
+
+export function getChatContextMisses(): string[] {
+  return als.getStore()?.chatContextMisses ?? [];
 }

@@ -107,11 +107,11 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/tokendiagnostics</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Claims", typeof(object))]
+    [SwaggerResponse(200, "Claims", typeof(TokenDiagnosticsDto))]
     [HttpGet("tokendiagnostics")]
-    public object GetClaims()
+    public TokenDiagnosticsDto GetClaims()
     {
-        var result = new
+        var result = new TokenDiagnosticsDto
         {
             Name = User.Identity?.Name ?? "Unknown Name",
             Claims = (from c in User.Claims select c.Type + ":" + c.Value).ToList()

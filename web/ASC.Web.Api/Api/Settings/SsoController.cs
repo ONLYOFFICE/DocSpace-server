@@ -115,19 +115,11 @@ public class SsoController(
     /// </summary>
     /// <path>api/2.0/settings/ssov2/constants</path>
     [Tags("Settings / SSO")]
-    [SwaggerResponse(200, "The SSO settings constants: SSO name ID format type, SSO binding type, SSO signing algorithm type, SSO SP certificate action type, SSO IDP certificate action type", typeof(object))]
+    [SwaggerResponse(200, "The SSO settings constants: SSO name ID format type, SSO binding type, SSO signing algorithm type, SSO SP certificate action type, SSO IDP certificate action type", typeof(SsoSettingsV2ConstantsDto))]
     [HttpGet("constants")]
-    public object GetSsoSettingsV2Constants()
+    public SsoSettingsV2ConstantsDto GetSsoSettingsV2Constants()
     {
-        return new
-        {
-            SsoNameIdFormatType = new SsoNameIdFormatType(),
-            SsoBindingType = new SsoBindingType(),
-            SsoSigningAlgorithmType = new SsoSigningAlgorithmType(),
-            SsoEncryptAlgorithmType = new SsoEncryptAlgorithmType(),
-            SsoSpCertificateActionType = new SsoSpCertificateActionType(),
-            SsoIdpCertificateActionType = new SsoIdpCertificateActionType()
-        };
+        return new SsoSettingsV2ConstantsDto();
     }
 
     /// <remarks>
