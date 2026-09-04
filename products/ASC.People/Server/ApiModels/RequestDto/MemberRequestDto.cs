@@ -442,7 +442,9 @@ public class Culture
 public class UpdatePhotoMemberRequest
 {
     /// <summary>
-    /// The avatar photo URL.
+    /// The address the portal downloads the new avatar from. It has to be absolute or relative to the portal, and it
+    /// has to use HTTPS unless the request itself came over HTTP; an address the portal refuses to fetch is rejected.
+    /// It is required - an empty value is answered with 400 rather than clearing the avatar.
     /// </summary>
     /// <example>https://example.com/avatar.jpg</example>
     public string Files { get; set; }
@@ -454,14 +456,15 @@ public class UpdatePhotoMemberRequest
 public class UpdatePhotoMemberRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The profile whose avatar is replaced, taken from the route. Either the ID of the account or its user name is
+    /// accepted, and it has to be the calling account, because a profile photo can only be changed by its owner.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]
     public required string UserId { get; set; }
 
     /// <summary>
-    /// The request parameters for updating a photo.
+    /// The address of the image to use as the new avatar.
     /// </summary>
     /// <example>{"files": "https://example.com/avatar.jpg"}</example>
     [FromBody]

@@ -34,36 +34,39 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The thumbnail request.
+/// The crop rectangle to apply to an avatar image.
 /// </summary>
 public class ThumbnailsRequest
 {
     /// <summary>
-    /// The path to the temporary thumbnail file.
+    /// The temporary image to crop, as returned in the `data` of an upload made with `autosave` off. Only the file
+    /// name part of the value is used. Omit it to re-crop the photo the profile already has.
     /// </summary>
-    /// <example>/tmp/photo_temp_123.jpg</example>
+    /// <example>photo_temp_123.jpg</example>
     public string TmpFile { get; set; }
 
     /// <summary>
-    /// The thumbnail horizontal coordinate.
+    /// The distance in pixels from the left edge of the original image to the left edge of the crop rectangle.
     /// </summary>
     /// <example>100</example>
     public int X { get; set; }
 
     /// <summary>
-    /// The thumbnail vertical coordinate.
+    /// The distance in pixels from the top edge of the original image to the top edge of the crop rectangle.
     /// </summary>
     /// <example>50</example>
     public int Y { get; set; }
 
     /// <summary>
-    /// The thumbnail width.
+    /// The width of the crop rectangle in pixels. Passing 0 together with `height` and `tmpFile` keeps the whole
+    /// uploaded image instead of cropping it.
     /// </summary>
     /// <example>200</example>
     public uint Width { get; set; }
 
     /// <summary>
-    /// The thumbnail height.
+    /// The height of the crop rectangle in pixels. Passing 0 together with `width` and `tmpFile` keeps the whole
+    /// uploaded image instead of cropping it.
     /// </summary>
     /// <example>200</example>
     public uint Height { get; set; }
@@ -75,16 +78,17 @@ public class ThumbnailsRequest
 public class ThumbnailsRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The profile whose avatar is cropped, taken from the route. Either the ID of the account or its user name is
+    /// accepted, and it has to be the calling account, because a profile photo can only be changed by its owner.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]
     public required string UserId { get; set; }
 
     /// <summary>
-    /// The thumbnail request.
+    /// The crop rectangle, and optionally the temporary image to crop.
     /// </summary>
-    /// <example>{"tmpFile":"/tmp/photo.jpg","x":0,"y":0,"width":200,"height":200}</example>
+    /// <example>{"tmpFile":"photo_temp_123.jpg","x":0,"y":0,"width":200,"height":200}</example>
     [FromBody]
     public required ThumbnailsRequest Thumbnails { get; set; }
 }
