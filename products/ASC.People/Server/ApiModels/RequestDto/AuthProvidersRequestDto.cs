@@ -39,30 +39,36 @@ namespace ASC.People.ApiModels.RequestDto;
 public class AuthProvidersRequestDto
 {
     /// <summary>
-    /// Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers.
+    /// Set it to true when the list is rendered on an invitation page: the providers that cannot be used to accept an
+    /// invitation, `twitter` and `appleid`, are then left out. It defaults to false, which returns every enabled
+    /// provider.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "inviteView")]
     public bool InviteView { get; set; }
 
     /// <summary>
-    /// Specifies whether to display the provider settings in a pop-up window (true) or redirect them to the desktop application (false).
+    /// Set it to true when the list is rendered on a settings page, to get login URLs that open in a popup window.
+    /// With the default false the URL still opens in a popup for a desktop browser, and switches to a redirect only
+    /// for a mobile browser or for the DocSpace desktop application.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "settingsView")]
     public bool SettingsView { get; set; }
 
     /// <summary>
-    /// The method that is called after authentication.
+    /// The name of the client-side function the popup calls back when the provider authorization finishes. It is
+    /// placed into the returned URLs as they are, and it is only used by the popup mode.
     /// </summary>
     /// <example>onAuthCallback</example>
     [FromQuery(Name = "clientCallback")]
     public string ClientCallback { get; set; }
 
     /// <summary>
-    /// The provider name if a response is required only from this provider.
+    /// Keeps only the named provider, compared case-insensitively against the lowercase provider names such as
+    /// `google` or `microsoft`; the special value `openid` selects `google`. Omit it to get every enabled provider.
     /// </summary>
-    /// <example>Google</example>
+    /// <example>google</example>
     [FromQuery(Name = "fromOnly")]
     public string FromOnly { get; set; }
 }

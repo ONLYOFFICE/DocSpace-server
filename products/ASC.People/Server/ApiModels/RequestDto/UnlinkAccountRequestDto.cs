@@ -39,9 +39,11 @@ namespace ASC.People.ApiModels.RequestDto;
 public class UnlinkAccountRequestDto
 {
     /// <summary>
-    /// The provider name.
+    /// The name of the provider to unlink, in the lowercase form `GET api/2.0/people/thirdparty/providers` returns,
+    /// such as `google` or `microsoft`. A name that is not linked to the calling profile is accepted and changes
+    /// nothing.
     /// </summary>
-    /// <example>Google</example>
+    /// <example>google</example>
     [FromQuery(Name = "provider")]
     public string Provider { get; set; }
 }
