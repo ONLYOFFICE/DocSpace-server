@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -39,7 +39,9 @@ namespace ASC.People.ApiModels.RequestDto;
 public class EmailMemberRequestDto
 {
     /// <summary>
-    /// The user email address.
+    /// The address to send the password recovery link to. It is required and validated even by
+    /// `POST api/2.0/people/guests/share/approve`, which then ignores its value and takes the account from the
+    /// confirmation token instead.
     /// </summary>
     /// <example>john.doe@example.com</example>
     [Required]
@@ -48,9 +50,11 @@ public class EmailMemberRequestDto
     public string Email { get; set; }
 
     /// <summary>
-    /// The type of CAPTCHA validation used.
+    /// Which CAPTCHA the `recaptchaResponse` comes from: `Default` for the web reCAPTCHA, `AndroidV2` or `iOSV2` for
+    /// the mobile ones, and `hCaptcha` when the portal is configured with hCaptcha. It matters only for an
+    /// unauthenticated request on a portal that has a CAPTCHA.
     /// </summary>
-    /// <example>0</example>
+    /// <example>Default</example>
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>
@@ -66,15 +70,20 @@ public class EmailMemberRequestDto
 public class ChangePasswordRequest
 {
     /// <summary>
-    /// The user password.
+    /// The new password in plain text. It is checked against the portal password policy and rejected with 400 when
+    /// it is too weak, then hashed by the portal. Send it only over a secure connection, and prefer `passwordHash`
+    /// when the client can compute it.
     /// </summary>
     /// <example>P@ssw0rd</example>
     public string Password { get; set; }
 
     /// <summary>
-    /// The user password hash.
+    /// The new password already hashed by the client, which is what the portal stores. It is a PBKDF2-HMACSHA256
+    /// hash of the plain password, computed with the salt, the iteration count and the key size the portal settings
+    /// publish, and written as lowercase hexadecimal. When it is sent, `password` is ignored and the password policy
+    /// is not applied.
     /// </summary>
-    /// <example>5f4dcc3b5aa765d61d8327deb882cf99</example>
+    /// <example>c1ba1a0bcbe0f0f42b6c86e1b41a1b4a4a9b4b0e3f2b7d2c1a0e9f8d7c6b5a49</example>
     public string PasswordHash { get; set; }
 }
 
@@ -84,14 +93,15 @@ public class ChangePasswordRequest
 public class ChangePasswordByIdRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The ID of the account whose password is set, taken from the route. It has to match the account the
+    /// confirmation token was issued for, and the account has to be active.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]
     public required Guid UserId { get; set; }
 
     /// <summary>
-    /// The request parameters for updating a user password.
+    /// The new password, sent either in plain text or already hashed. Exactly one of the two fields is needed.
     /// </summary>
     /// <example>{"password": "P@ssw0rd"}</example>
     [FromBody]
@@ -104,7 +114,8 @@ public class ChangePasswordByIdRequestDto
 public class ChangeEmailRequest
 {
     /// <summary>
-    /// The user email address.
+    /// The new address in plain text, up to 255 characters. It is stored in lowercase, and one of this field and
+    /// `encEmail` is required.
     /// </summary>
     /// <example>john.doe@example.com</example>
     [EmailAddress]
@@ -112,7 +123,8 @@ public class ChangeEmailRequest
     public string Email { get; set; }
 
     /// <summary>
-    /// The user encrypted email address.
+    /// The new address in the encrypted form the confirmation link carries. Pass the value from the link unchanged;
+    /// it is used only when `email` is empty.
     /// </summary>
     /// <example>encrypted_email_string</example>
     public string EncEmail { get; init; }
@@ -124,16 +136,17 @@ public class ChangeEmailRequest
 public class ChangeEmailByIdRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The ID of the account whose address is set, taken from the route. It has to match the account the
+    /// confirmation token was issued for, and the account has to be active.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]
     public required Guid UserId { get; set; }
 
     /// <summary>
-    /// The request parameters for updating a user email.
+    /// The new address, in plain text or in the encrypted form the confirmation link carries.
     /// </summary>
-    /// <example>{"password": "P@ssw0rd", "email": "john.doe@example.com"}</example>
+    /// <example>{"email": "john.doe@example.com"}</example>
     [FromBody]
     public required ChangeEmailRequest ChangeEmailData { get; set; }
 }
@@ -607,7 +620,8 @@ public class ContactsRequestDto
 public class GuestShareRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The ID of the guest to be handed over, taken from the route. The account has to exist, has to be a guest, and
+    /// has to be one the caller can see.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]

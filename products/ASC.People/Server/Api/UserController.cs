@@ -567,15 +567,25 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sets a new password to the user with the ID specified in the request.
+    /// Sets a new password on an account, which is the step that completes a password change or a password
+    /// recovery.
+    /// The request has to carry the confirmation token from the emailed link rather than an ordinary session, and an
+    /// expired or already used token is answered with 401.
+    /// The account has to exist and be `Active`, so the password of a disabled account or of an open invitation
+    /// cannot be set, and only the portal owner may set the owner's own password.
+    /// Send either `passwordHash`, which is taken as it is, or a plain `password`, which is checked against the
+    /// portal password policy; sending neither, or a password the policy rejects, answers 400.
+    /// The change ends every other session of that account and emails it a notice that the password was changed.
+    /// The answer is the profile, which does not carry the password in any form.
+    /// To have the recovery link sent in the first place, use `POST api/2.0/people/password`.
     /// </remarks>
     /// <summary>Change a user password</summary>
     /// <path>api/2.0/people/{userid}/password</path>
     [Tags("People / Password")]
-    [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect userId or password")]
-    [SwaggerResponse(403, "The link is invalid or no permissions to perform this action")]
-    [SwaggerResponse(404, "The user could not be found")]
+    [SwaggerResponse(200, "The profile whose password was changed", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The user ID is empty, no password was sent, or the password does not meet the portal policy")]
+    [SwaggerResponse(403, "The account is not active, or only its owner may change this password")]
+    [SwaggerResponse(404, "No account has the specified ID")]
     [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -648,15 +658,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sets a new email to the user with the ID specified in the request.
+    /// Sets a new email address on an account, which is the step that completes an email change.
+    /// The request has to carry the confirmation token from the emailed link rather than an ordinary session, and an
+    /// expired or already used token is answered with 401.
+    /// The account has to exist and be `Active`, and only the portal owner may change the owner's own address.
+    /// Pass the address either in plain text as `email` or, as it arrives inside the confirmation link, encrypted as
+    /// `encEmail`; an empty or malformed address answers 400.
+    /// An address equal to the current one is accepted and changes nothing, while a new one is stored in lowercase
+    /// and marks the account `Activated`, because following the link proves the address works.
+    /// The answer is the profile with its new address.
+    /// The change is requested through `POST api/2.0/people/email`, which is what sends the link.
     /// </remarks>
     /// <summary>Change a user email</summary>
     /// <path>api/2.0/people/{userid}/email</path>
     [Tags("People / Email")]
-    [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect userId or email")]
-    [SwaggerResponse(403, "The link is invalid or no permissions to perform this action")]
-    [SwaggerResponse(404, "The user could not be found")]
+    [SwaggerResponse(200, "The profile with its new address", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The user ID is empty, or the address is missing or malformed")]
+    [SwaggerResponse(403, "The account is not active, or only its owner may change this address")]
+    [SwaggerResponse(404, "No account has the specified ID")]
     [AllowNotPayment]
     [HttpPut("{userid:guid}/email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -865,15 +884,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Deletes guests from the list and excludes them from rooms to which they were invited.
+    /// Removes the listed guests from the caller's own list of guests and withdraws the access the caller had
+    /// granted them.
+    /// It does not delete the accounts: each guest keeps its profile and any access other members gave it, and only
+    /// the link to the caller and the caller's own shares disappear.
+    /// The caller has to be a room admin or a DocSpace admin, and every listed account has to exist, be an active
+    /// guest and be one of the caller's own guests - a single entry that is not rejects the whole call with 403 and
+    /// changes nothing.
+    /// The call returns no body; read `GET api/2.0/people/filter` with `area` set to `Guests` to see what is left.
+    /// To delete a guest account for good, disable it and then use `DELETE api/2.0/people/{userid}`.
     /// </remarks>
     /// <summary>
-    /// Delete guests
+    /// Remove guest relations
     /// </summary>
     /// <path>api/2.0/people/guests</path>
-    [SwaggerResponse(200, "Request parameters for deleting guests")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
     [Tags("People / Guests")]
+    [SwaggerResponse(200, "The guests are no longer linked to the caller. No content is returned")]
+    [SwaggerResponse(400, "The userIds field is missing")]
+    [SwaggerResponse(403, "The caller is not an admin, or an entry is not an active guest of the caller")]
     [HttpDelete("guests")]
     public async Task DeleteGuests(UpdateMembersRequestDto inDto)
     {
@@ -912,16 +940,25 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a link to share a guest with another user.
+    /// Builds a link that lets another member of the portal take over the caller's guest, so that the guest becomes
+    /// visible to them as well.
+    /// The account in the route has to exist and be a guest - any other type is rejected with 400 - and the caller
+    /// has to be able to see it and must not be a guest itself.
+    /// The call is read-only: it only mints the link and changes nothing, and it can be repeated as often as needed.
+    /// The answer is a shortened confirmation URL as plain text; hand it to the person who should get the guest, and
+    /// their client completes the hand-over with `POST api/2.0/people/guests/share/approve`.
+    /// The link carries a confirmation token and therefore expires, so mint it when it is about to be used rather
+    /// than storing it.
     /// </remarks>
     /// <summary>
     /// Get a guest sharing link
     /// </summary>
     /// <path>api/2.0/people/guests/{userid}/share</path>
     [Tags("Portal / Guests")]
-    [SwaggerResponse(200, "User share link", typeof(string))]
-    [SwaggerResponse(404, "User not found")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The shortened confirmation link, as plain text", typeof(string))]
+    [SwaggerResponse(400, "The account is not a guest")]
+    [SwaggerResponse(403, "The caller is a guest, or is not allowed to see that account")]
+    [SwaggerResponse(404, "No account has the specified ID")]
     [HttpGet("guests/{userid:guid}/share")]
     public async Task<string> GetGuestSharingLink(GuestShareRequestDto inDto)
     {
@@ -953,16 +990,25 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Approves a guest sharing link and returns the detailed information about a guest.
+    /// Accepts a guest that another member shared, which links that guest to the calling account and makes it
+    /// visible in the caller's list of guests.
+    /// Everything the operation needs comes from the confirmation token of the link produced by
+    /// `GET api/2.0/people/guests/{userid}/share`: the request body is not read at all, so there is nothing to fill
+    /// in, and an expired or already used token is answered with 401.
+    /// The caller has to be a room admin or a DocSpace admin; a member or a guest gets 403.
+    /// The account the token names has to exist and still be a guest, otherwise the operation answers 404 or 400.
+    /// The call is idempotent: a guest that is already linked to the caller is simply returned again.
+    /// The answer is the full profile of the guest.
     /// </remarks>
     /// <summary>
     /// Approve a guest sharing link
     /// </summary>
     /// <path>api/2.0/people/guests/share/approve</path>
     [Tags("People / Guests")]
-    [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(404, "User not found")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The full profile of the guest now linked to the caller", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The account named by the token is not a guest")]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
+    [SwaggerResponse(404, "The account named by the token no longer exists")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "GuestShareLink")]
     [HttpPost("guests/share/approve")]
@@ -1724,14 +1770,21 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a theme which is set to the current portal.
+    /// Returns the interface theme the calling account has chosen: `Base` for the light theme, `Dark` for the dark
+    /// one, or `System` to follow whatever the operating system asks for.
+    /// The setting belongs to the account and not to the portal, despite the name of the route, so it describes the
+    /// caller alone and cannot be read for anybody else.
+    /// It needs no permission and is read-only.
+    /// A caller that has never chosen a theme gets the portal default rather than an empty answer.
+    /// The same value is also reported as `theme` by `GET api/2.0/people/@self`, so a client that reads the profile
+    /// on start-up does not need this operation as well.
     /// </remarks>
     /// <summary>
     /// Get the portal theme
     /// </summary>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
+    [SwaggerResponse(200, "The interface theme of the calling account", typeof(DarkThemeSettings))]
     [HttpGet("theme")]
     public async Task<DarkThemeSettings> GetPortalTheme()
     {
@@ -1739,14 +1792,21 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes the current portal theme.
+    /// Sets the interface theme of the calling account to `Base` for the light theme, `Dark` for the dark one, or
+    /// `System` to follow whatever the operating system asks for.
+    /// The setting belongs to the account and not to the portal, despite the name of the route, so it changes
+    /// nothing for anybody else and cannot be set on another account.
+    /// It needs no permission, takes effect at once and is idempotent - sending the theme that is already in use
+    /// changes nothing.
+    /// The answer echoes the theme that was stored, which is the value the request asked for.
+    /// The same value is reported as `theme` by `GET api/2.0/people/@self`.
     /// </remarks>
     /// <summary>
     /// Change the portal theme
     /// </summary>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
+    [SwaggerResponse(200, "The interface theme that was stored", typeof(DarkThemeSettings))]
     [HttpPut("theme")]
     public async Task<DarkThemeSettings> ChangePortalTheme(DarkThemeSettingsRequestDto inDto)
     {
@@ -1814,17 +1874,27 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sends a message to the user email with the instructions to change the email address connected to the portal.
+    /// Starts changing the email address of an account, and what it actually does depends on who calls it.
+    /// A caller acting on their own account only gets a confirmation letter sent to the new address, and the address
+    /// stays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userid}/email`.
+    /// A DocSpace administrator acting on somebody else changes the address immediately instead: the account is
+    /// marked as not activated, every session of it is ended, and activation instructions are sent to the new
+    /// address - and passing the address the account already has is then rejected with 400.
+    /// A caller who is not an administrator may only address their own account, nobody but the owner may change the
+    /// owner's address, and only the owner may change the address of another DocSpace administrator.
+    /// The target has to be an account that is neither disabled nor a pending invitation, otherwise the operation
+    /// answers 404, and an address that already belongs to somebody answers 400.
+    /// The answer is a ready-to-display message naming the address the letter was sent to.
     /// </remarks>
     /// <summary>
     /// Send instructions to change email
     /// </summary>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Email")]
-    [SwaggerResponse(200, "Message text", typeof(string))]
-    [SwaggerResponse(400, "Incorrect userId or email")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(200, "The message stating which address the letter was sent to", typeof(string))]
+    [SwaggerResponse(400, "The user ID is empty, the address is missing, malformed, already taken, or equal to the current one")]
+    [SwaggerResponse(403, "The caller may not change the address of that account")]
+    [SwaggerResponse(404, "The account does not exist, is disabled, or is a pending invitation")]
     [AllowNotPayment]
     [HttpPost("email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1914,7 +1984,18 @@ public class UserController(
 
     /// <remarks>
     /// Sends a password recovery email to the specified user address.
-    /// For unauthenticated requests, CAPTCHA validation is required when CAPTCHA is enabled in the configuration.
+    /// Emails a password recovery link to an address, and is the entry point of the recovery flow rather than the
+    /// operation that changes anything.
+    /// It needs no authentication, which is how a person who cannot sign in uses it; when the portal has a CAPTCHA
+    /// configured, an unauthenticated request has to pass it and answers 403 if it does not.
+    /// An unauthenticated caller always gets the same success message, whether or not the address belongs to an
+    /// account, so the answer cannot be used to find out which addresses are registered.
+    /// An authenticated caller does get told: a failure is answered with 403, and asking for somebody else requires
+    /// DocSpace administrator rights, while the owner's password can be asked for by the owner alone and another
+    /// administrator's only by the owner.
+    /// The link that is sent leads to `PUT api/2.0/people/{userid}/password`, which is where the new password is
+    /// set; no password is ever sent by email despite the wording of the message.
+    /// Repeated calls are throttled.
     /// </remarks>
     /// <summary>
     /// Remind a user password
@@ -1922,8 +2003,8 @@ public class UserController(
     /// <path>api/2.0/people/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
-    [SwaggerResponse(200, "Email with the password", typeof(string))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The message stating that the recovery link was sent to the address", typeof(string))]
+    [SwaggerResponse(403, "The CAPTCHA was not passed, or an authenticated caller may not ask for that account")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
