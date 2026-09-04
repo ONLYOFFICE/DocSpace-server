@@ -157,19 +157,25 @@ public class ChangeEmailByIdRequestDto
 public class MemberRequestDto
 {
     /// <summary>
-    /// The user password.
+    /// The password in plain text. It is checked against the portal password policy and rejected with 400 when it is
+    /// too weak. When neither this field nor `passwordHash` is sent, a random password is generated and nobody
+    /// learns it, so the account can only be used after a password recovery.
     /// </summary>
     /// <example>P@ssw0rd</example>
     public string Password { get; set; }
 
     /// <summary>
-    /// The user password hash.
+    /// The password already hashed by the client, which is what the portal stores. It is a PBKDF2-HMACSHA256 hash of
+    /// the plain password, computed with the salt, the iteration count and the key size the portal settings publish,
+    /// and written as lowercase hexadecimal. When it is sent, `password` is ignored and the password policy is not
+    /// applied.
     /// </summary>
-    /// <example>5f4dcc3b5aa765d61d8327deb882cf99</example>
+    /// <example>c1ba1a0bcbe0f0f42b6c86e1b41a1b4a4a9b4b0e3f2b7d2c1a0e9f8d7c6b5a49</example>
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// The user email address.
+    /// The email address of the new account, up to 255 characters. It is required in practice and has to be a real
+    /// address, and it becomes the sign-in name of the account.
     /// </summary>
     /// <example>john.doe@example.com</example>
     [EmailAddress]
@@ -177,33 +183,39 @@ public class MemberRequestDto
     public string Email { get; set; }
 
     /// <summary>
-    /// The user type.
+    /// The type of the new account: `User`, `RoomAdmin` or `DocSpaceAdmin`. `Guest` is not accepted here, and the
+    /// value is ignored entirely when `fromInviteLink` is set, because the invitation link decides the type. When no
+    /// paid seat is free, the account is created as `User` whatever was asked for.
     /// </summary>
-    /// <example>1</example>
+    /// <example>RoomAdmin</example>
     public EmployeeType Type { get; set; }
 
     /// <summary>
-    /// Specifies if this is a guest or a user.
+    /// Only chooses which entry the operation writes to the audit trail - the one for a guest or the one for a
+    /// member. It does not change the type of the account; `type` and the invitation link do that.
     /// </summary>
     /// <example>true</example>
     public bool? IsUser { get; set; }
 
     /// <summary>
-    /// The user first name.
+    /// The first name, up to 255 characters. It is checked together with `lastName`, and a pair the portal does not
+    /// accept as a name answers 400.
     /// </summary>
     /// <example>John</example>
     [StringLength(255)]
     public string FirstName { get; set; }
 
     /// <summary>
-    /// The user last name.
+    /// The last name, up to 255 characters. It is checked together with `firstName`, and a pair the portal does not
+    /// accept as a name answers 400.
     /// </summary>
     /// <example>Doe</example>
     [StringLength(255)]
     public string LastName { get; set; }
 
     /// <summary>
-    /// The list of the user departments IDs.
+    /// The groups to put the new account into, by group ID. Read the IDs from `GET api/2.0/group`; an ID that
+    /// matches no group is skipped without an error.
     /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public Guid[] Department { get; set; }
@@ -216,7 +228,7 @@ public class MemberRequestDto
     // public string Title { get; set; }
 
     /// <summary>
-    /// The user location.
+    /// The free-text location shown on the profile. It is stored as it is given and is not validated.
     /// </summary>
     /// <example>New York</example>
     public string Location { get; set; }
@@ -240,49 +252,58 @@ public class MemberRequestDto
     // public ApiDateTime Worksfrom { get; set; }
 
     /// <summary>
-    /// The user comment.
+    /// The free-text note kept with the profile, shown to administrators. It is stored as it is given.
     /// </summary>
     /// <example>User comment</example>
     public string Comment { get; set; }
 
     /// <summary>
-    /// The list of the user contacts.
+    /// The additional ways to reach the person, each as a type and a value pair. The type is a free-text label such
+    /// as `email`, `phone`, `skype` or `telegram`, and an entry with an empty value is dropped.
     /// </summary>
     /// <example>[{"type": "email", "value": "john.doe@example.com"}]</example>
     public IEnumerable<Contact> Contacts { get; set; }
 
     /// <summary>
-    /// The avatar photo URL.
+    /// The address the portal downloads the avatar from. It has to use HTTPS unless the request itself came over
+    /// HTTP, an address the portal refuses to fetch is rejected, and passing the default avatar path means no
+    /// avatar is downloaded.
     /// </summary>
     /// <example>https://example.com/avatar.jpg</example>
     public string Files { get; set; }
 
     /// <summary>
-    /// Specifies if the user is added via the invitation link or not.
+    /// Set it to true when the account is created by somebody accepting an invitation, which makes `key` required
+    /// and lets the link decide the type. With the default false the caller has to hold the permission to add an
+    /// account of the requested type.
     /// </summary>
     /// <example>false</example>
     public bool FromInviteLink { get; set; }
 
     /// <summary>
-    /// The user key.
+    /// The key of the invitation link being accepted, taken from the link itself. It is read only when
+    /// `fromInviteLink` is true, and an expired or already used key answers 403.
     /// </summary>
     /// <example>user_key_string</example>
     public string Key { get; set; }
 
     /// <summary>
-    /// The user culture code.
+    /// The interface language of the new account, as a culture code. It is applied whether or not the portal has
+    /// that culture enabled, so send a code the portal supports.
     /// </summary>
     /// <example>en-US</example>
     public string CultureName { get; set; }
 
     /// <summary>
-    /// The user target ID.
+    /// Not used. The handler reads nothing from this field, and it is kept only so that existing clients keep
+    /// working.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Target { get; set; }
 
     /// <summary>
-    /// Specifies if tips, updates and offers are allowed to be sent to the user or not.
+    /// Whether the account agrees to receive tips, updates and offers. It defaults to false, which means no such
+    /// mail is sent.
     /// </summary>
     /// <example>false</example>
     public bool? Spam { get; set; }
@@ -294,19 +315,24 @@ public class MemberRequestDto
 public class UpdateMemberRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The account the change applies to. It is read from this body by `POST api/2.0/people/email`, while
+    /// `PUT api/2.0/people/{userid}` takes the account from the route and ignores this field.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public string UserId { get; set; }
 
     /// <summary>
-    /// Specifies whether to disable a user or not.
+    /// Set it to true to give the account the `Terminated` status and end every session it has, and to false to
+    /// bring it back. It is applied only when the caller edits somebody else, and omitting it keeps the current
+    /// status.
     /// </summary>
     /// <example>false</example>
     public bool? Disable { get; set; }
 
     /// <summary>
-    /// The user email address.
+    /// The new email address, up to 255 characters. It is read only by `POST api/2.0/people/email`, which either
+    /// mails a confirmation letter or, for an administrator acting on somebody else, applies the address at once;
+    /// `PUT api/2.0/people/{userid}` ignores it.
     /// </summary>
     /// <example>john.doe@example.com</example>
     [EmailAddress]
@@ -314,27 +340,32 @@ public class UpdateMemberRequestDto
     public string Email { get; set; }
 
     /// <summary>
-    /// Specifies if this is a guest or a user.
+    /// Set it to true to turn the account into a guest and to false to turn it back into a member. Either direction
+    /// takes a seat and can answer 402, it is applied only when the caller edits somebody else, and a request to
+    /// make the portal owner, a DocSpace administrator or a module administrator a guest is ignored.
     /// </summary>
     /// <example>true</example>
     public bool? IsUser { get; set; }
 
     /// <summary>
-    /// The user first name.
+    /// The new first name, up to 255 characters. It is applied only to the caller's own profile, is left alone on an
+    /// LDAP or SSO account, and a pair the portal does not accept as a name answers 400.
     /// </summary>
     /// <example>John</example>
     [StringLength(255)]
     public string FirstName { get; set; }
 
     /// <summary>
-    /// The user last name.
+    /// The new last name, up to 255 characters. It is applied only to the caller's own profile, is left alone on an
+    /// LDAP or SSO account, and a pair the portal does not accept as a name answers 400.
     /// </summary>
     /// <example>Doe</example>
     [StringLength(255)]
     public string LastName { get; set; }
 
     /// <summary>
-    /// The list of the user departments.
+    /// The groups the profile should belong to, by group ID, replacing the current ones. It is applied only to the
+    /// caller's own profile.
     /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public Guid[] Department { get; set; }
@@ -347,7 +378,8 @@ public class UpdateMemberRequestDto
     // public string Title { get; set; }
 
     /// <summary>
-    /// The user location.
+    /// The new free-text location shown on the profile. It is applied only to the caller's own profile and is left
+    /// alone on an LDAP or SSO account.
     /// </summary>
     /// <example>New York</example>
     public string Location { get; set; }
@@ -371,25 +403,30 @@ public class UpdateMemberRequestDto
     // public ApiDateTime Worksfrom { get; set; }
 
     /// <summary>
-    /// The user comment.
+    /// The new free-text note kept with the profile. It is applied only to the caller's own profile.
     /// </summary>
     /// <example>User comment</example>
     public string Comment { get; set; }
 
     /// <summary>
-    /// The list of the user contacts.
+    /// The additional ways to reach the person, replacing the current ones. Each entry is a free-text type such as
+    /// `email`, `phone`, `skype` or `telegram` and its value, an entry with an empty value is dropped, and the field
+    /// is applied only to the caller's own profile.
     /// </summary>
     /// <example>[{"type": "email", "value": "john.doe@example.com"}]</example>
     public IEnumerable<Contact> Contacts { get; set; }
 
     /// <summary>
-    /// The user avatar photo URL.
+    /// The address the portal downloads the new avatar from. It is applied only to the caller's own profile, has to
+    /// use HTTPS unless the request itself came over HTTP, and passing the address the profile already uses
+    /// downloads nothing.
     /// </summary>
     /// <example>https://example.com/avatar.jpg</example>
     public string Files { get; set; }
 
     /// <summary>
-    /// Specifies if tips, updates and offers are allowed to be sent to the user or not.
+    /// Whether the account agrees to receive tips, updates and offers. It is applied only to the caller's own
+    /// profile, and omitting it on such a request stores false rather than keeping the current value.
     /// </summary>
     /// <example>false</example>
     public bool? Spam { get; set; }
