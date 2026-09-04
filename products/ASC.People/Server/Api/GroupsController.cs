@@ -442,6 +442,7 @@ public class GroupController(
 
     /// <remarks>
     /// Makes an account the manager of a group, replacing whoever managed it before.
+    /// The caller needs the permissions to edit groups and to add and remove users.
     /// Both the group and the account have to exist: the operation answers 404 when the ID in the route matches no
     /// live group and also when `userId` matches no account, so the message of the error says which of the two was
     /// not found.
@@ -462,6 +463,8 @@ public class GroupController(
     [HttpPut("{id:guid}/manager")]
     public async Task<GroupDto> SetGroupManager(SetManagerRequestDto inDto)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+
         var group = await GetGroupInfoAsync(inDto.Id);
 
         if (await userManager.UserExistsAsync(inDto.SetManager.UserId))
