@@ -58,6 +58,9 @@ public class AccountsControllerThirdParty(
     UserManager userManager)
     : AccountsController<string>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity, fileSharing, authContext, userManager);
 
+/// <remarks>
+/// Accounts API.
+/// </remarks>
 [Scope]
 [ApiEndpoint("accounts")]
 public class AccountsController<T>(
@@ -71,14 +74,27 @@ public class AccountsController<T>(
     UserManager userManager) : ControllerBase
 {
     /// <remarks>
-    /// Returns the account entries with their sharing settings in a room with the ID specified in request.
+    /// Searches the portal users and groups that can be given access to the room with the ID given in the route, and
+    /// reports for each of them whether it already has access to that room.
+    /// The caller has to be allowed to manage the access of that room, and the ID has to belong to an existing room,
+    /// so the operation answers 403 for a room the caller cannot share and 404 for an ID that matches nothing.
+    /// The search is read-only and needs `filterValue`: while it is empty the operation returns an empty list and a
+    /// total of 0 instead of every account, so it cannot be used to enumerate the portal.
+    /// `filterValue` is matched case-insensitively against the first name, the last name and the email; without
+    /// `filterSeparator` it is split on spaces and every term has to match, and with a separator it is split on that
+    /// separator and any term may match.
+    /// Matching groups are streamed first and users after them, both paged together by `count` and `startIndex`,
+    /// while the number of matches is reported in the total count of the response.
+    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
+    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
     /// </remarks>
-    /// <summary>Get account entries</summary>
+    /// <summary>Search accounts for a room</summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<IAccountEntryDto>))]
+    [SwaggerResponse(200, "The matching users and groups, each with its access state for the room", typeof(IAsyncEnumerable<IAccountEntryDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "No room has the specified ID")]
     [HttpGet("room/{id}/search")]
     public async IAsyncEnumerable<IAccountEntryDto> GetAccountsEntriesWithRoomsShared(AccountsEntriesRequestDto<T> inDto)
     {
@@ -90,14 +106,28 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Returns the account entries with their sharing settings in a folder with the ID specified in request.
+    /// Searches the portal users and groups that can be given access to the folder with the ID given in the route,
+    /// and reports for each of them whether it already has access to that folder.
+    /// The caller has to be allowed to manage the access of that folder, and the ID has to belong to an existing
+    /// folder, so the operation answers 403 for a folder the caller cannot share and 404 for an ID that matches
+    /// nothing.
+    /// The search is read-only and needs `filterValue`: while it is empty the operation returns an empty list and a
+    /// total of 0 instead of every account, so it cannot be used to enumerate the portal.
+    /// `filterValue` is matched case-insensitively against the first name, the last name and the email; without
+    /// `filterSeparator` it is split on spaces and every term has to match, and with a separator it is split on that
+    /// separator and any term may match.
+    /// Matching groups are streamed first and users after them, both paged together by `count` and `startIndex`,
+    /// while the number of matches is reported in the total count of the response.
+    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
+    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
     /// </remarks>
-    /// <summary>Get account entries with folder sharing settings</summary>
+    /// <summary>Search accounts for a folder</summary>
     /// <path>api/2.0/accounts/folder/{id}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<IAccountEntryDto>))]
+    [SwaggerResponse(200, "The matching users and groups, each with its access state for the folder", typeof(IAsyncEnumerable<IAccountEntryDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "No folder has the specified ID")]
     [HttpGet("folder/{id}/search")]
     public async IAsyncEnumerable<IAccountEntryDto> GetAccountsEntriesWithFoldersShared(AccountsEntriesRequestDto<T> inDto)
     {
@@ -109,14 +139,27 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Returns the account entries with their sharing settings for a file with the ID specified in request.
+    /// Searches the portal users and groups that can be given access to the file with the ID given in the route, and
+    /// reports for each of them whether it already has access to that file.
+    /// The caller has to be allowed to manage the access of that file, and the ID has to belong to an existing file,
+    /// so the operation answers 403 for a file the caller cannot share and 404 for an ID that matches nothing.
+    /// The search is read-only and needs `filterValue`: while it is empty the operation returns an empty list and a
+    /// total of 0 instead of every account, so it cannot be used to enumerate the portal.
+    /// `filterValue` is matched case-insensitively against the first name, the last name and the email; without
+    /// `filterSeparator` it is split on spaces and every term has to match, and with a separator it is split on that
+    /// separator and any term may match.
+    /// Matching groups are streamed first and users after them, both paged together by `count` and `startIndex`,
+    /// while the number of matches is reported in the total count of the response.
+    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
+    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
     /// </remarks>
-    /// <summary>Get account entries with file sharing settings</summary>
+    /// <summary>Search accounts for a file</summary>
     /// <path>api/2.0/accounts/file/{id}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<IAccountEntryDto>))]
+    [SwaggerResponse(200, "The matching users and groups, each with its access state for the file", typeof(IAsyncEnumerable<IAccountEntryDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "No file has the specified ID")]
     [HttpGet("file/{id}/search")]
     public async IAsyncEnumerable<IAccountEntryDto> GetAccountsEntriesWithFilesShared(AccountsEntriesRequestDto<T> inDto)
     {
