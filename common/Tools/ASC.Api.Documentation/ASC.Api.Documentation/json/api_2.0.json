@@ -304,7 +304,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/UnknownNullableWrapper"
                 }
               }
             }
@@ -6601,7 +6601,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiPricesResponseWrapper"
+                  "$ref": "#/components/schemas/AiPricesWrapper"
                 }
               }
             }
@@ -7572,7 +7572,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/StringWrapper"
                 }
               }
             }
@@ -10267,7 +10267,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/AuditTrailTypesWrapper"
                 }
               }
             }
@@ -10387,7 +10387,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/AuditTrailProductMapperArrayWrapper"
                 }
               }
             }
@@ -13768,7 +13768,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/StringWrapper"
                 }
               }
             }
@@ -14817,7 +14817,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/SocketSettingsWrapper"
                 }
               }
             }
@@ -17255,7 +17255,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/StringWrapper"
                 }
               }
             }
@@ -22674,7 +22674,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/EnabledModuleArrayWrapper"
                 }
               }
             }
@@ -23838,7 +23838,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/SsoSettingsV2ConstantsWrapper"
                 }
               }
             }
@@ -24881,7 +24881,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/AmazonS3RegionArrayWrapper"
                 }
               }
             }
@@ -28060,7 +28060,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/StringWrapper"
                 }
               }
             }
@@ -28265,7 +28265,6 @@
             "description": "The list of active connection items."
           }
         },
-        "additionalProperties": false,
         "description": "The active connections parameters."
       },
       "ActiveConnectionsItemDto": {
@@ -28372,7 +28371,6 @@
             "description": "The active connection page."
           }
         },
-        "additionalProperties": false,
         "description": "The active connection item parameters."
       },
       "ActiveConnectionsWrapper": {
@@ -28525,7 +28523,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "Represents an active wallet service (quota) of the current portal."
       },
       "AdditionalWhiteLabelSettings": {
@@ -28582,7 +28579,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The additional white label settings."
       },
       "AdditionalWhiteLabelSettingsDto": {
@@ -28647,7 +28643,6 @@
             "description": "Specifies if the additional white label settings are default or not."
           }
         },
-        "additionalProperties": false,
         "description": "The additional white label settings parameters."
       },
       "AdditionalWhiteLabelSettingsDtoWrapper": {
@@ -28742,7 +28737,6 @@
             "$ref": "#/components/schemas/AdditionalWhiteLabelSettings"
           }
         },
-        "additionalProperties": false,
         "description": "The additional white label settings wrapper."
       },
       "AdminMessageBaseSettingsRequestsDto": {
@@ -28775,7 +28769,6 @@
             "description": "The locale identifier for message localization."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for the administrator message configuration."
       },
       "AdminMessageSettingsRequestsDto": {
@@ -28835,101 +28828,52 @@
             "description": "The user's response to the CAPTCHA challenge."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring the administrator message content."
       },
-      "AiChatModelPricing": {
-        "required": [
-          "id",
-          "price"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "examples": [
-              "gpt-4o"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The identifier of the model, as the provider expects it on the wire."
-          },
-          "alias": {
-            "examples": [
-              "GPT-4o"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The display name of the model."
-          },
-          "ownedBy": {
-            "examples": [
-              "openai"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The owner of the model, as reported by the provider."
-          },
-          "provider": {
-            "examples": [
-              "openai"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The provider that serves the model."
-          },
-          "link": {
-            "examples": [
-              "https://openai.com/api/pricing"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The link to the pricing page of the model."
-          },
-          "price": {
-            "description": "The price of a chat model, per token.",
-            "$ref": "#/components/schemas/AiChatPrice"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The pricing of a single chat model."
-      },
-      "AiChatPrice": {
+      "AiChatPriceDto": {
         "type": "object",
         "properties": {
           "prompt": {
             "examples": [
-              0.0000025
+              5.0
             ],
             "type": "number",
-            "description": "The price of a single prompt token.",
+            "description": "Gets the price per one million prompt tokens.",
             "format": "double"
           },
           "completion": {
             "examples": [
-              0.00001
+              15.0
             ],
             "type": "number",
-            "description": "The price of a single completion token.",
+            "description": "Gets the price per one million completion tokens.",
             "format": "double"
           }
         },
-        "additionalProperties": false,
-        "description": "The price of a chat model, per token."
+        "description": "Data transfer object that represents the pricing information for an AI chat interaction."
       },
-      "AiEmbeddingModelPricing": {
+      "AiEmbeddingPriceDto": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "examples": [
+              0.13
+            ],
+            "type": "number",
+            "description": "Gets the price per one million tokens for embedding generation.",
+            "format": "double"
+          }
+        },
+        "description": "Represents a data transfer object that encapsulates pricing information for AI embedding operations.\r\nThis DTO is used to transport cost-related details associated with generating embeddings through AI models."
+      },
+      "AiEntryPricingDtoAiChatPriceDto": {
         "required": [
+          "alias",
           "id",
-          "price"
+          "image",
+          "link",
+          "price",
+          "provider"
         ],
         "type": "object",
         "properties": {
@@ -28941,7 +28885,7 @@
               "null",
               "string"
             ],
-            "description": "The identifier of the model, as the provider expects it on the wire."
+            "description": "Gets the unique identifier for the AI pricing entry."
           },
           "alias": {
             "examples": [
@@ -28951,17 +28895,7 @@
               "null",
               "string"
             ],
-            "description": "The display name of the model."
-          },
-          "ownedBy": {
-            "examples": [
-              "openai"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The owner of the model, as reported by the provider."
+            "description": "Gets the display name (alias) for the AI model or service entry."
           },
           "provider": {
             "examples": [
@@ -28971,45 +28905,43 @@
               "null",
               "string"
             ],
-            "description": "The provider that serves the model."
+            "description": "Gets the provider name for the AI service or model."
           },
-          "link": {
+          "image": {
             "examples": [
-              "https://openai.com/api/pricing"
+              "https://cdn.example.com/providers/openai.png"
             ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The link to the pricing page of the model."
+            "description": "Gets the image URL or identifier associated with the AI model entry."
           },
           "price": {
-            "description": "The price of an embedding model, per token.",
-            "$ref": "#/components/schemas/AiEmbeddingPrice"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The pricing of a single embedding model."
-      },
-      "AiEmbeddingPrice": {
-        "type": "object",
-        "properties": {
-          "prompt": {
+            "description": "Gets the pricing information for the AI entry.",
+            "$ref": "#/components/schemas/AiChatPriceDto"
+          },
+          "link": {
             "examples": [
-              0.00000002
+              "https://openai.com/pricing"
             ],
-            "type": "number",
-            "description": "The price of a single input token.",
-            "format": "double"
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the URL link to the AI model or service entry."
           }
         },
-        "additionalProperties": false,
-        "description": "The price of an embedding model, per token."
+        "description": "Data transfer object that represents pricing information for a specific AI service entry.\r\nContains identification details, provider information, and associated pricing data of generic type T."
       },
-      "AiImageModelPricing": {
+      "AiEntryPricingDtoAiEmbeddingPriceDto": {
         "required": [
+          "alias",
           "id",
-          "price"
+          "image",
+          "link",
+          "price",
+          "provider"
         ],
         "type": "object",
         "properties": {
@@ -29021,7 +28953,7 @@
               "null",
               "string"
             ],
-            "description": "The identifier of the model, as the provider expects it on the wire."
+            "description": "Gets the unique identifier for the AI pricing entry."
           },
           "alias": {
             "examples": [
@@ -29031,17 +28963,7 @@
               "null",
               "string"
             ],
-            "description": "The display name of the model."
-          },
-          "ownedBy": {
-            "examples": [
-              "openai"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The owner of the model, as reported by the provider."
+            "description": "Gets the display name (alias) for the AI model or service entry."
           },
           "provider": {
             "examples": [
@@ -29051,125 +28973,328 @@
               "null",
               "string"
             ],
-            "description": "The provider that serves the model."
+            "description": "Gets the provider name for the AI service or model."
           },
-          "link": {
+          "image": {
             "examples": [
-              "https://openai.com/api/pricing"
+              "https://cdn.example.com/providers/openai.png"
             ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The link to the pricing page of the model."
+            "description": "Gets the image URL or identifier associated with the AI model entry."
           },
           "price": {
-            "description": "The price of an image model: per prompt token and per generated image.",
-            "$ref": "#/components/schemas/AiImagePrice"
+            "description": "Gets the pricing information for the AI entry.",
+            "$ref": "#/components/schemas/AiEmbeddingPriceDto"
+          },
+          "link": {
+            "examples": [
+              "https://openai.com/pricing"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the URL link to the AI model or service entry."
           }
         },
-        "additionalProperties": false,
-        "description": "The pricing of a single image model."
+        "description": "Data transfer object that represents pricing information for a specific AI service entry.\r\nContains identification details, provider information, and associated pricing data of generic type T."
       },
-      "AiImagePrice": {
+      "AiEntryPricingDtoAiImagePriceDto": {
+        "required": [
+          "alias",
+          "id",
+          "image",
+          "link",
+          "price",
+          "provider"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              "gpt-4o"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the unique identifier for the AI pricing entry."
+          },
+          "alias": {
+            "examples": [
+              "GPT-4o"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the display name (alias) for the AI model or service entry."
+          },
+          "provider": {
+            "examples": [
+              "openai"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the provider name for the AI service or model."
+          },
+          "image": {
+            "examples": [
+              "https://cdn.example.com/providers/openai.png"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the image URL or identifier associated with the AI model entry."
+          },
+          "price": {
+            "description": "Gets the pricing information for the AI entry.",
+            "$ref": "#/components/schemas/AiImagePriceDto"
+          },
+          "link": {
+            "examples": [
+              "https://openai.com/pricing"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the URL link to the AI model or service entry."
+          }
+        },
+        "description": "Data transfer object that represents pricing information for a specific AI service entry.\r\nContains identification details, provider information, and associated pricing data of generic type T."
+      },
+      "AiEntryPricingDtoDecimal": {
+        "required": [
+          "alias",
+          "id",
+          "image",
+          "link",
+          "price",
+          "provider"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              "gpt-4o"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the unique identifier for the AI pricing entry."
+          },
+          "alias": {
+            "examples": [
+              "GPT-4o"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the display name (alias) for the AI model or service entry."
+          },
+          "provider": {
+            "examples": [
+              "openai"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the provider name for the AI service or model."
+          },
+          "image": {
+            "examples": [
+              "https://cdn.example.com/providers/openai.png"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the image URL or identifier associated with the AI model entry."
+          },
+          "price": {
+            "examples": [
+              {
+                "prompt": 5.0,
+                "completion": 15.0
+              }
+            ],
+            "type": "number",
+            "description": "Gets the pricing information for the AI entry.",
+            "format": "double"
+          },
+          "link": {
+            "examples": [
+              "https://openai.com/pricing"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Gets the URL link to the AI model or service entry."
+          }
+        },
+        "description": "Data transfer object that represents pricing information for a specific AI service entry.\r\nContains identification details, provider information, and associated pricing data of generic type T."
+      },
+      "AiImagePriceDto": {
         "type": "object",
         "properties": {
           "prompt": {
             "examples": [
-              0.00001
+              8.0
             ],
             "type": "number",
-            "description": "The price of a single prompt token.",
+            "description": "Gets the price per one million prompt tokens.",
             "format": "double"
           },
           "completion": {
             "examples": [
-              0.00001
+              15.0
             ],
             "type": "number",
-            "description": "The cost associated with the completion of a prompt in an AI model.",
+            "description": "Gets the price per one million completion tokens.",
             "format": "double"
           },
           "image": {
             "examples": [
-              0.04
+              30.0
             ],
             "type": "number",
-            "description": "The price of a single generated image.",
+            "description": "Gets the price per generated image.",
             "format": "double"
           }
         },
-        "additionalProperties": false,
-        "description": "The price of an image model: per prompt token and per generated image."
+        "description": "Data transfer object that represents the pricing information for an AI image generation."
       },
-      "AiPricesResponse": {
+      "AiPricesDto": {
         "required": [
           "chat",
           "currency",
           "embedding",
           "image",
-          "search"
+          "webSearch"
         ],
         "type": "object",
         "properties": {
           "chat": {
+            "examples": [
+              [
+                {
+                  "id": "gpt-4o",
+                  "alias": "GPT-4o",
+                  "provider": "openai",
+                  "image": "https://cdn.example.com/providers/openai.png",
+                  "price": {
+                    "prompt": 5.0,
+                    "completion": 15.0
+                  }
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
             ],
             "items": {
-              "description": "The pricing of a single chat model.",
-              "$ref": "#/components/schemas/AiChatModelPricing"
+              "description": "Data transfer object that represents pricing information for a specific AI service entry.\r\nContains identification details, provider information, and associated pricing data of generic type T.",
+              "$ref": "#/components/schemas/AiEntryPricingDtoAiChatPriceDto"
             },
-            "description": "The pricing of every available chat model."
+            "description": "Gets the list of pricing entries for AI chat models."
           },
           "embedding": {
+            "examples": [
+              [
+                {
+                  "id": "text-embedding-3-large",
+                  "alias": "Text Embedding 3 Large",
+                  "provider": "openai",
+                  "image": "https://cdn.example.com/providers/openai.png",
+                  "price": {
+                    "prompt": 0.13
+                  }
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
             ],
             "items": {
-              "description": "The pricing of a single embedding model.",
-              "$ref": "#/components/schemas/AiEmbeddingModelPricing"
+              "description": "Data transfer object that represents pricing information for a specific AI service entry.\r\nContains identification details, provider information, and associated pricing data of generic type T.",
+              "$ref": "#/components/schemas/AiEntryPricingDtoAiEmbeddingPriceDto"
             },
-            "description": "The pricing of every available embedding model."
+            "description": "Gets the list of pricing entries for AI embedding models."
           },
           "image": {
+            "examples": [
+              [
+                {
+                  "id": "gpt-5.4-image-2",
+                  "alias": "GPT 5.4 Image 2",
+                  "provider": "OpenRouter",
+                  "image": "https://cdn.example.com/providers/openai.png",
+                  "price": {
+                    "prompt": 8.0,
+                    "completion": 15.0,
+                    "image": 30.0
+                  }
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
             ],
             "items": {
-              "description": "The pricing of a single image model.",
-              "$ref": "#/components/schemas/AiImageModelPricing"
+              "description": "Data transfer object that represents pricing information for a specific AI service entry.\r\nContains identification details, provider information, and associated pricing data of generic type T.",
+              "$ref": "#/components/schemas/AiEntryPricingDtoAiImagePriceDto"
             },
-            "description": "The pricing of every available image model."
+            "description": "Gets the list of pricing entries for AI image models."
           },
-          "search": {
+          "webSearch": {
+            "examples": [
+              [
+                {
+                  "id": "web-search",
+                  "alias": "Web Search",
+                  "provider": "tavily",
+                  "image": "https://cdn.example.com/providers/tavily.png",
+                  "price": 0.01
+                }
+              ]
+            ],
             "type": [
               "null",
               "array"
             ],
             "items": {
-              "description": "The pricing of a single web search provider, per request.",
-              "$ref": "#/components/schemas/AiWebSearchPricing"
+              "description": "Data transfer object that represents pricing information for a specific AI service entry.\r\nContains identification details, provider information, and associated pricing data of generic type T.",
+              "$ref": "#/components/schemas/AiEntryPricingDtoDecimal"
             },
-            "description": "The pricing of every available web search provider."
+            "description": "Gets the list of pricing entries for AI web search operations."
           },
           "currency": {
-            "description": "The currency the AI prices are quoted in.",
+            "description": "Gets the currency information for the AI pricing data.",
             "$ref": "#/components/schemas/CurrencyInfo"
           }
         },
-        "additionalProperties": false,
-        "description": "The AI price list: per-model pricing for every model kind, in a single currency."
+        "description": "Data transfer object that encapsulates comprehensive pricing information for various AI services.\r\nProvides organized collections of pricing details for chat models, embedding services, and web search functionality,\r\nalong with the currency in which prices are denominated."
       },
-      "AiPricesResponseWrapper": {
+      "AiPricesWrapper": {
         "type": "object",
         "properties": {
           "response": {
-            "description": "The AiPricesResponse object returned by the operation.",
-            "$ref": "#/components/schemas/AiPricesResponse"
+            "description": "The AiPricesDto object returned by the operation.",
+            "$ref": "#/components/schemas/AiPricesDto"
           },
           "count": {
             "type": "integer",
@@ -29204,52 +29329,118 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the AiPricesResponse object."
+        "description": "The successful API response containing the AiPricesDto object."
       },
-      "AiWebSearchPricing": {
+      "AmazonS3RegionArrayWrapper": {
         "type": "object",
         "properties": {
-          "id": {
-            "examples": [
-              "brave"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The identifier of the web search provider."
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AmazonS3RegionDto"
+            },
+            "description": "The list of AmazonS3RegionDto objects returned by the operation."
           },
-          "provider": {
-            "examples": [
-              "brave"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The provider that serves the web search requests."
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
           },
-          "price": {
-            "examples": [
-              0.005
-            ],
-            "type": "number",
-            "description": "The price of a single web search request.",
-            "format": "double"
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
           },
-          "link": {
-            "examples": [
-              "https://brave.com/search/api"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The link to the pricing page of the provider."
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "The pricing of a single web search provider, per request."
+        "description": "The successful API response containing the list of AmazonS3RegionDto objects."
+      },
+      "AmazonS3RegionDto": {
+        "type": "object",
+        "properties": {
+          "systemName": {
+            "examples": [
+              "eu-west-1"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The region system name."
+          },
+          "displayName": {
+            "examples": [
+              "Europe (Ireland)"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The human-readable region name."
+          },
+          "partitionName": {
+            "examples": [
+              "aws"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The name of the AWS partition the region belongs to."
+          },
+          "partitionDnsSuffix": {
+            "examples": [
+              "amazonaws.com"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The DNS suffix of the partition."
+          },
+          "partitionRegionRegex": {
+            "examples": [
+              "^(us|eu|ap|sa|ca|me|af|il|mx)\\-\\w+\\-\\d+$"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The pattern the region names of the partition match."
+          },
+          "hostnameTemplate": {
+            "examples": [
+              "{service}.{region}.{dnsSuffix}"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The template the partition builds service endpoint hostnames from."
+          }
+        },
+        "description": "An Amazon S3 region."
       },
       "ApiDateTime": {
         "type": "object",
@@ -29273,7 +29464,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The API date and time parameters."
       },
       "AppArrayWrapper": {
@@ -29366,7 +29556,6 @@
             "description": "Application-specific settings as a JSON document, or null if no overrides exist."
           }
         },
-        "additionalProperties": false,
         "description": "The portal application information."
       },
       "AppWrapper": {
@@ -29619,7 +29808,6 @@
             "description": "The audit event context."
           }
         },
-        "additionalProperties": false,
         "description": "The audit event parameters."
       },
       "AuditReportFormat": {
@@ -29653,6 +29841,264 @@
         ],
         "description": "The output file format of an audit report.",
         "x-enum-type": "integer"
+      },
+      "AuditTrailActionMapperDto": {
+        "type": "object",
+        "properties": {
+          "messageAction": {
+            "examples": [
+              "FileCreated"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The audit event action name."
+          },
+          "actionType": {
+            "examples": [
+              "Create"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The action type name."
+          },
+          "entity": {
+            "examples": [
+              "File"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The name of the entry type the action targets."
+          }
+        },
+        "description": "One audit trail action and what it does to what."
+      },
+      "AuditTrailModuleMapperDto": {
+        "type": "object",
+        "properties": {
+          "moduleType": {
+            "examples": [
+              "Files"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The module name."
+          },
+          "actions": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "One audit trail action and what it does to what.",
+              "$ref": "#/components/schemas/AuditTrailActionMapperDto"
+            },
+            "description": "The actions of the module."
+          }
+        },
+        "description": "The audit trail actions of one module."
+      },
+      "AuditTrailProductMapperArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditTrailProductMapperDto"
+            },
+            "description": "The list of AuditTrailProductMapperDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of AuditTrailProductMapperDto objects."
+      },
+      "AuditTrailProductMapperDto": {
+        "type": "object",
+        "properties": {
+          "productType": {
+            "examples": [
+              "Documents"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The product name."
+          },
+          "modules": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "The audit trail actions of one module.",
+              "$ref": "#/components/schemas/AuditTrailModuleMapperDto"
+            },
+            "description": "The modules of the product."
+          }
+        },
+        "description": "The audit trail actions of one product, grouped by module."
+      },
+      "AuditTrailTypesDto": {
+        "type": "object",
+        "properties": {
+          "actions": {
+            "examples": [
+              [
+                "FileCreated"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The names of the audit event actions."
+          },
+          "actionTypes": {
+            "examples": [
+              [
+                "Create"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The names of the audit event action types."
+          },
+          "productTypes": {
+            "examples": [
+              [
+                "Documents"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The names of the products an audit event can belong to."
+          },
+          "moduleTypes": {
+            "examples": [
+              [
+                "Files"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The names of the modules an audit event can belong to."
+          },
+          "entryTypes": {
+            "examples": [
+              [
+                "File"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The names of the entry types an audit event can target."
+          }
+        },
+        "description": "The names of every audit trail type, one array per dimension of an audit event."
+      },
+      "AuditTrailTypesWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The AuditTrailTypesDto object returned by the operation.",
+            "$ref": "#/components/schemas/AuditTrailTypesDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the AuditTrailTypesDto object."
       },
       "AuthKey": {
         "required": [
@@ -29725,7 +30171,6 @@
             "description": "The value of ASC.Web.Studio.UserControls.Management.AuthKey.DependsOn key that makes this field visible."
           }
         },
-        "additionalProperties": false,
         "description": "The authorization key parameters."
       },
       "AuthRequestsDto": {
@@ -29837,7 +30282,6 @@
             "description": "The culture code for localization during authentication."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters required for the user authentication requests."
       },
       "AuthServiceRequestsArrayWrapper": {
@@ -29962,7 +30406,6 @@
             "description": "The collection of authorization keys associated with the authorization service."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for handling the authorization service."
       },
       "AuthWithCodeRequestsDto": {
@@ -29986,7 +30429,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The parameters required for the user two-factor authentication requests."
       },
       "AuthenticationTokenDto": {
@@ -30056,7 +30498,6 @@
             "format": "uri"
           }
         },
-        "additionalProperties": false,
         "description": "The authentication token parameters."
       },
       "AuthenticationTokenWrapper": {
@@ -30164,7 +30605,6 @@
             "$ref": "#/components/schemas/TransactionInfo"
           }
         },
-        "additionalProperties": false,
         "description": "Represents a balance with an account number and a list of sub-accounts."
       },
       "BalanceWrapper": {
@@ -30332,7 +30772,6 @@
             "description": "Specifies if an identity server is enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The capabilities parameters."
       },
       "CapabilitiesWrapper": {
@@ -30418,7 +30857,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The CDN storage settings."
       },
       "CdnStorageSettingsWrapper": {
@@ -30478,7 +30916,6 @@
             "description": "Specifies whether the wallet service is enabled."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for changing the tenant wallet service state."
       },
       "CompanyWhiteLabelSettings": {
@@ -30570,7 +31007,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The company white label settings."
       },
       "CompanyWhiteLabelSettingsArrayWrapper": {
@@ -30704,7 +31140,6 @@
             "description": "Specifies if these settings are default or not."
           }
         },
-        "additionalProperties": false,
         "description": "The company white label settings."
       },
       "CompanyWhiteLabelSettingsDtoWrapper": {
@@ -30799,7 +31234,6 @@
             "$ref": "#/components/schemas/CompanyWhiteLabelSettings"
           }
         },
-        "additionalProperties": false,
         "description": "The company white label settings wrapper."
       },
       "ConfirmData": {
@@ -30837,7 +31271,6 @@
             "description": "The unique confirmation key for validating user identity."
           }
         },
-        "additionalProperties": false,
         "description": "The additional confirmation data required for authentication."
       },
       "ConfirmDto": {
@@ -30888,7 +31321,6 @@
             "description": "The confirmation is agent."
           }
         },
-        "additionalProperties": false,
         "description": "The confirmation parameters."
       },
       "ConfirmType": {
@@ -31031,7 +31463,6 @@
             "description": "The reason the connection failed, or null when it succeeded."
           }
         },
-        "additionalProperties": false,
         "description": "The outcome of a connection test against an external database."
       },
       "ConnectionTestResultWrapper": {
@@ -31099,7 +31530,6 @@
             "description": "Specifies if the cookie settings are enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The cookie settings."
       },
       "CookieSettingsRequestsDto": {
@@ -31121,7 +31551,6 @@
             "description": "Specifies whether the cookie settings are enabled or disabled."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing cookie settings."
       },
       "CookieSettingsWrapper": {
@@ -31233,7 +31662,6 @@
             "description": "Target ID"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for creating the webhook configuration."
       },
       "CspDto": {
@@ -31270,7 +31698,6 @@
             "description": "The CSP header."
           }
         },
-        "additionalProperties": false,
         "description": "The CSP (Content Security Policy) parameters."
       },
       "CspRequestsDto": {
@@ -31293,7 +31720,6 @@
             "description": "The collection of allowed domains in the Content Security Policy (CSP)."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring the Content Security Policy (CSP) settings."
       },
       "CspWrapper": {
@@ -31371,7 +31797,6 @@
             "description": "The external resource entries."
           }
         },
-        "additionalProperties": false,
         "description": "The external resource parameters."
       },
       "CultureSpecificExternalResources": {
@@ -31414,7 +31839,6 @@
             "$ref": "#/components/schemas/CultureSpecificExternalResource"
           }
         },
-        "additionalProperties": false,
         "description": "The external resources settings."
       },
       "CurrenciesArrayWrapper": {
@@ -31496,7 +31920,6 @@
             "description": "The currency native name."
           }
         },
-        "additionalProperties": false,
         "description": "The currencies parameters."
       },
       "CurrencyAmount": {
@@ -31518,7 +31941,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "An amount of money together with its currency."
       },
       "CurrencyCode": {
@@ -31535,7 +31957,6 @@
             "description": "The three-character ISO 4217 currency symbol."
           }
         },
-        "additionalProperties": false,
         "description": "The currency an amount is expressed in."
       },
       "CurrencyInfo": {
@@ -31566,7 +31987,6 @@
             "description": "The display symbol of the currency."
           }
         },
-        "additionalProperties": false,
         "description": "The currency the AI prices are quoted in."
       },
       "CurrentLicenseInfo": {
@@ -31592,7 +32012,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The current license information."
       },
       "CustomColorThemesSettingsColorItem": {
@@ -31619,7 +32038,6 @@
             "description": "The button color."
           }
         },
-        "additionalProperties": false,
         "description": "The custom color theme color parameters."
       },
       "CustomColorThemesSettingsDto": {
@@ -31661,7 +32079,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The custom color themes settings."
       },
       "CustomColorThemesSettingsItem": {
@@ -31694,7 +32111,6 @@
             "$ref": "#/components/schemas/CustomColorThemesSettingsColorItem"
           }
         },
-        "additionalProperties": false,
         "description": "The custom color theme settings."
       },
       "CustomColorThemesSettingsRequestsDto": {
@@ -31716,7 +32132,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the portal theme settings."
       },
       "CustomColorThemesSettingsWrapper": {
@@ -31795,7 +32210,6 @@
             "$ref": "#/components/schemas/EmployeeDto"
           }
         },
-        "additionalProperties": false,
         "description": "The customer information."
       },
       "CustomerInfoWrapper": {
@@ -31931,7 +32345,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "Aggregated customer spending for a single calendar month."
       },
       "CustomerMonthlyUsageReportRequestDto": {
@@ -31960,7 +32373,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for generating a customer monthly usage report."
       },
       "CustomerOperationsReportRequestDto": {
@@ -32054,7 +32466,6 @@
             "$ref": "#/components/schemas/OperationOrderType"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for generating a report on client operations."
       },
       "CustomerServiceUsageDto": {
@@ -32140,7 +32551,6 @@
             "description": "Indicates whether the service is subscription-based."
           }
         },
-        "additionalProperties": false,
         "description": "Aggregated customer usage statistics for a service over a period."
       },
       "CustomerServiceUsageReportDto": {
@@ -32206,7 +32616,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "Represents a paged report of customer service usage statistics."
       },
       "CustomerServiceUsageReportRequestDto": {
@@ -32295,7 +32704,6 @@
             "$ref": "#/components/schemas/OperationOrderType"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for generating a customer service usage report."
       },
       "CustomerServiceUsageReportWrapper": {
@@ -32525,7 +32933,6 @@
             "$ref": "#/components/schemas/DbTenantPartner"
           }
         },
-        "additionalProperties": false,
         "description": "The database tenant parameters."
       },
       "DbTenantPartner": {
@@ -32573,7 +32980,6 @@
             "description": "The tenant partner campaign."
           }
         },
-        "additionalProperties": false,
         "description": "The database tenant partner parameters."
       },
       "DeepLinkConfigurationRequestsDto": {
@@ -32584,7 +32990,6 @@
             "$ref": "#/components/schemas/TenantDeepLinkSettings"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the deep link configuration."
       },
       "DeepLinkDto": {
@@ -32626,7 +33031,6 @@
             "description": "The deep link IOS package ID."
           }
         },
-        "additionalProperties": false,
         "description": "The deep link parameters."
       },
       "DeepLinkHandlingMode": {
@@ -32675,7 +33079,6 @@
             "$ref": "#/components/schemas/FolderType"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for setting the default product configuration."
       },
       "DistributedTaskStatus": {
@@ -32740,7 +33143,6 @@
             "description": "Specifies whether the DNS settings are enabled."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the DNS (Domain Name System) settings."
       },
       "DocsCloudConfig": {
@@ -32775,7 +33177,6 @@
             "$ref": "#/components/schemas/DocsCloudIpFilterConfig"
           }
         },
-        "additionalProperties": false,
         "description": "Represents the configuration of a DocsCloud tenant."
       },
       "DocsCloudConfigWrapper": {
@@ -32834,7 +33235,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for switch the DocsCloud subscription to DocsCloudDevPack."
       },
       "DocsCloudIpFilterConfig": {
@@ -32860,7 +33260,6 @@
             "description": "The IP filter rules."
           }
         },
-        "additionalProperties": false,
         "description": "Represents the IP filter configuration of a DocsCloud tenant."
       },
       "DocsCloudIpFilterRule": {
@@ -32886,7 +33285,6 @@
             "description": "Whether the IP address is allowed."
           }
         },
-        "additionalProperties": false,
         "description": "Represents the IP filter rule of a DocsCloud tenant."
       },
       "DocsCloudLicenseInfo": {
@@ -32916,7 +33314,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "Represents the license information of a DocsCloud tenant."
       },
       "DocsCloudPayment": {
@@ -32989,7 +33386,6 @@
             "description": "The three-character ISO 4217 currency symbol of the payment."
           }
         },
-        "additionalProperties": false,
         "description": "Represents the payment information of a DocsCloud tenant."
       },
       "DocsCloudQuota": {
@@ -33034,7 +33430,6 @@
             "description": "The viewer users."
           }
         },
-        "additionalProperties": false,
         "description": "Represents the current user quota of a DocsCloud tenant."
       },
       "DocsCloudQuotaUser": {
@@ -33061,7 +33456,6 @@
             "description": "The expiration date of the user."
           }
         },
-        "additionalProperties": false,
         "description": "Represents a single user entry of a DocsCloud quota."
       },
       "DocsCloudQuotaWrapper": {
@@ -33134,7 +33528,6 @@
             "description": "The security header name."
           }
         },
-        "additionalProperties": false,
         "description": "Represents the security configuration of a DocsCloud tenant."
       },
       "DocsCloudServerConfig": {
@@ -33158,7 +33551,6 @@
             "format": "int64"
           }
         },
-        "additionalProperties": false,
         "description": "Represents the server configuration of a DocsCloud tenant."
       },
       "DocsCloudServerInfo": {
@@ -33193,7 +33585,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "Represents the DocsCloud server information."
       },
       "DocsCloudStats": {
@@ -33216,7 +33607,6 @@
             "$ref": "#/components/schemas/DocsCloudUserStats"
           }
         },
-        "additionalProperties": false,
         "description": "Represents the usage statistics of a DocsCloud tenant for the current period."
       },
       "DocsCloudTenant": {
@@ -33316,7 +33706,6 @@
             "$ref": "#/components/schemas/DocsCloudPayment"
           }
         },
-        "additionalProperties": false,
         "description": "Represents a DocsCloud tenant of a portal."
       },
       "DocsCloudTenantInfo": {
@@ -33339,7 +33728,6 @@
             "$ref": "#/components/schemas/DocsCloudStats"
           }
         },
-        "additionalProperties": false,
         "description": "Represents the license and server information of a DocsCloud tenant, with usage statistics for the current period."
       },
       "DocsCloudTenantInfoWrapper": {
@@ -33446,7 +33834,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "Represents the usage statistics of a DocsCloud tenant."
       },
       "DocsCloudUsageWrapper": {
@@ -33534,7 +33921,6 @@
             "description": "Whether the number of remaining users is critically low."
           }
         },
-        "additionalProperties": false,
         "description": "Represents the usage statistics of a single DocsCloud user category (editor or viewer)."
       },
       "DocsCloudUsersLimit": {
@@ -33557,7 +33943,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "Represents the user limits of a DocsCloud license."
       },
       "DocsCloudWopiConfig": {
@@ -33571,7 +33956,6 @@
             "description": "Whether WOPI is enabled."
           }
         },
-        "additionalProperties": false,
         "description": "Represents the WOPI configuration of a DocsCloud tenant."
       },
       "DocumentBuilderTaskDto": {
@@ -33654,7 +34038,6 @@
             "description": "The result file URL."
           }
         },
-        "additionalProperties": false,
         "description": "The Document Builder task parameters."
       },
       "DocumentBuilderTaskWrapper": {
@@ -33805,7 +34188,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The email activation settings."
       },
       "EmailActivationSettingsWrapper": {
@@ -33924,7 +34306,6 @@
             "description": "The room ID."
           }
         },
-        "additionalProperties": false,
         "description": "The confirmation email parameters."
       },
       "EmployeeActivationStatus": {
@@ -34106,7 +34487,6 @@
             "description": "Specifies if the user is anonymous or not."
           }
         },
-        "additionalProperties": false,
         "description": "The user parameters."
       },
       "EmployeeStatus": {
@@ -34191,6 +34571,77 @@
         "description": "The user type.",
         "x-enum-type": "string"
       },
+      "EnabledModuleArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnabledModuleDto"
+            },
+            "description": "The list of EnabledModuleDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of EnabledModuleDto objects."
+      },
+      "EnabledModuleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              "ASC.Web.Files.Configuration.FilesSpaceUsageStatManager"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The module ID, which is the name of its product class."
+          },
+          "title": {
+            "examples": [
+              "Documents"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The module title."
+          }
+        },
+        "description": "An enabled portal module."
+      },
       "EncryprtionStatus": {
         "oneOf": [
           {
@@ -34254,7 +34705,6 @@
             "description": "Specifies if the users will be notified about the encryption operation or not."
           }
         },
-        "additionalProperties": false,
         "description": "The encryption settings."
       },
       "EncryptionSettingsWrapper": {
@@ -34471,7 +34921,6 @@
             "description": "The path to the database file, used by the SQLite engine only."
           }
         },
-        "additionalProperties": false,
         "description": "The connection parameters of an external database."
       },
       "ExternalDatabaseType": {
@@ -34530,7 +34979,6 @@
             "description": "The used space title."
           }
         },
-        "additionalProperties": false,
         "description": "The used space parameters of the tenant quota feature."
       },
       "FinishDto": {
@@ -34547,7 +34995,6 @@
             "description": "Specifies whether to send a welcome email or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for terminating a process or operation."
       },
       "FireBaseUser": {
@@ -34614,7 +35061,6 @@
             "$ref": "#/components/schemas/DbTenant"
           }
         },
-        "additionalProperties": false,
         "description": "The Firebase user parameters."
       },
       "FireBaseUserWrapper": {
@@ -34753,7 +35199,6 @@
             "description": "The Firebase database URL."
           }
         },
-        "additionalProperties": false,
         "description": "The Firebase parameters."
       },
       "FirebaseRequestsDto": {
@@ -34777,7 +35222,6 @@
             "description": "Specifies whether the user is subscribed to the push notifications or not."
           }
         },
-        "additionalProperties": false,
         "description": "The Firebase-related request parameters."
       },
       "FolderType": {
@@ -34979,7 +35423,6 @@
             "description": "The form gallery upload dashboard."
           }
         },
-        "additionalProperties": false,
         "description": "The form gallery parameters."
       },
       "GreetingSettingsRequestsDto": {
@@ -35001,7 +35444,6 @@
             "description": "The title of the tenant greeting settings."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the greeting settings."
       },
       "GroupSummaryDto": {
@@ -35050,7 +35492,6 @@
             "description": "Indicates whether the group is a system group."
           }
         },
-        "additionalProperties": false,
         "description": "The group summary parameters."
       },
       "IPRestriction": {
@@ -35080,7 +35521,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The IP restiction parameters."
       },
       "IPRestrictionArrayWrapper": {
@@ -35147,7 +35587,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The IP restriction settings."
       },
       "IPRestrictionsSettingsWrapper": {
@@ -35203,7 +35642,6 @@
             "description": "Specifies whether the API entity should be imported."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters of an importable API entity."
       },
       "Int64Wrapper": {
@@ -35283,7 +35721,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for creating an invitation link."
       },
       "InvitationLinkDeleteRequestDto": {
@@ -35301,7 +35738,6 @@
             "format": "uuid"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for deleting an invitation link."
       },
       "InvitationLinkDto": {
@@ -35363,7 +35799,6 @@
             "description": "The URL of the invitation link."
           }
         },
-        "additionalProperties": false,
         "description": "The invitation link parameters."
       },
       "InvitationLinkUpdateRequestDto": {
@@ -35405,7 +35840,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating an invitation link."
       },
       "InvitationLinkWrapper": {
@@ -35474,7 +35908,6 @@
             "description": "Specifies if the IP address is for administrator users only or not."
           }
         },
-        "additionalProperties": false,
         "description": "The IP restiction base parameters."
       },
       "IpRestrictionsDto": {
@@ -35513,7 +35946,6 @@
             "description": "Specifies whether to enable IP restrictions or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for configuring new IP restriction settings."
       },
       "IpRestrictionsWrapper": {
@@ -35628,7 +36060,6 @@
             "description": "Specifies if the white label logo is default or not."
           }
         },
-        "additionalProperties": false,
         "description": "The default white label logo parameters."
       },
       "IsDefaultWhiteLabelLogosWrapper": {
@@ -35688,7 +36119,6 @@
             "description": "The value associated with the key."
           }
         },
-        "additionalProperties": false,
         "description": "A key-value pair of a list item."
       },
       "ItemKeyValuePairStringLogoRequestsDto": {
@@ -35706,7 +36136,6 @@
             "$ref": "#/components/schemas/LogoRequestsDto"
           }
         },
-        "additionalProperties": false,
         "description": "A key-value pair of a list item."
       },
       "ItemKeyValuePairStringString": {
@@ -35727,7 +36156,6 @@
             "description": "The value associated with the key."
           }
         },
-        "additionalProperties": false,
         "description": "A key-value pair of a list item."
       },
       "LocationType": {
@@ -35943,7 +36371,6 @@
             "description": "The login event page."
           }
         },
-        "additionalProperties": false,
         "description": "The login event parameters."
       },
       "LoginProvider": {
@@ -36058,7 +36485,6 @@
             "description": "Specifies whether the login settings are default or not."
           }
         },
-        "additionalProperties": false,
         "description": "The login settings parameters."
       },
       "LoginSettingsRequestDto": {
@@ -36095,7 +36521,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring login security and performance settings."
       },
       "LoginSettingsWrapper": {
@@ -36164,7 +36589,6 @@
             "description": "The URL or base64-encoded image data for the dark theme logo."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for the theme-specific logo configurations."
       },
       "MailDomainSettingsRequestsDto": {
@@ -36203,7 +36627,6 @@
             "description": "Specifies the default permission level for the invited users (visitors or not)."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring trusted mail domains and visitor invitation settings."
       },
       "MessageAction": {
@@ -37301,7 +37724,6 @@
             "format": "int64"
           }
         },
-        "additionalProperties": false,
         "description": "The parameters of the migrating files."
       },
       "MigratingApiGroup": {
@@ -37351,7 +37773,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The migrating group parameters."
       },
       "MigratingApiUser": {
@@ -37424,7 +37845,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The migrating user parameters."
       },
       "MigrationApiInfo": {
@@ -37636,7 +38056,6 @@
             "description": "The list of migration errors."
           }
         },
-        "additionalProperties": false,
         "description": "The migration API information."
       },
       "MigrationStatusDto": {
@@ -37672,7 +38091,6 @@
             "description": "Specifies whether the migration is completed or not."
           }
         },
-        "additionalProperties": false,
         "description": "The migration status parameters."
       },
       "MigrationStatusWrapper": {
@@ -37763,7 +38181,6 @@
             "description": "The user's mobile phone number."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters required for the mobile phone verification."
       },
       "NotificationChannelDto": {
@@ -37791,7 +38208,6 @@
             "description": "Specifies whether the notification channel is enabled."
           }
         },
-        "additionalProperties": false,
         "description": "The notification channel information."
       },
       "NotificationChannelStatusDto": {
@@ -37817,7 +38233,6 @@
             "description": "The list of notification channels."
           }
         },
-        "additionalProperties": false,
         "description": "The notification channel settings."
       },
       "NotificationChannelStatusWrapper": {
@@ -37877,7 +38292,6 @@
             "description": "Specifies if the notification type is enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The notification settings parameters."
       },
       "NotificationSettingsRequestsDto": {
@@ -37898,7 +38312,6 @@
             "description": "Specifies if the specified notification type is enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring notification settings."
       },
       "NotificationSettingsWrapper": {
@@ -37980,48 +38393,6 @@
         ],
         "description": "The notification type.",
         "x-enum-type": "integer"
-      },
-      "ObjectWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "object",
-            "description": "The response payload."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response."
       },
       "OperationDto": {
         "type": "object",
@@ -38149,7 +38520,6 @@
             "$ref": "#/components/schemas/OperationType"
           }
         },
-        "additionalProperties": false,
         "description": "Represents an operation."
       },
       "OperationOrderType": {
@@ -38330,7 +38700,6 @@
             "description": "The owner change instructions message."
           }
         },
-        "additionalProperties": false,
         "description": "The owner change instructions parameters."
       },
       "OwnerChangeInstructionsWrapper": {
@@ -38390,7 +38759,6 @@
             "format": "uuid"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the owner-specific settings."
       },
       "PasswordHasher": {
@@ -38426,7 +38794,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The password hash parameters."
       },
       "PasswordSettingsDto": {
@@ -38512,7 +38879,6 @@
             "description": "The passaword special symbols in the regex string format."
           }
         },
-        "additionalProperties": false,
         "description": "The password settings parameters."
       },
       "PasswordSettingsRequestsDto": {
@@ -38551,7 +38917,6 @@
             "description": "Specifies whether the password should contain the special symbols or not."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring the password complexity requirements."
       },
       "PasswordSettingsWrapper": {
@@ -38634,7 +38999,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The parameters of the calculated payment amount."
       },
       "PaymentCalculationWrapper": {
@@ -38774,7 +39138,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The payment settings parameters."
       },
       "PaymentSettingsWrapper": {
@@ -38863,7 +39226,6 @@
             "description": "The payment quantity."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for the payment URL configuration with quantity information."
       },
       "PluginsDto": {
@@ -38891,7 +39253,6 @@
             "description": "Specifies if the plugins can be deleted or not."
           }
         },
-        "additionalProperties": false,
         "description": "The plugins parameters."
       },
       "PriceDto": {
@@ -38929,7 +39290,6 @@
             "description": "The three-character ISO 4217 currency symbol."
           }
         },
-        "additionalProperties": false,
         "description": "The price parameters."
       },
       "ProductAdministratorDto": {
@@ -38964,7 +39324,6 @@
             "description": "Indicates whether the user has administrator privileges for the product."
           }
         },
-        "additionalProperties": false,
         "description": "The product administrator parameters."
       },
       "ProductAdministratorWrapper": {
@@ -39107,82 +39466,7 @@
             "description": "The mapping of item identifiers to their respective quantities in the payment."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for specifying payment quantity."
-      },
-      "Quota": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "examples": [
-              ""
-            ],
-            "type": "integer",
-            "description": "The quota ID.",
-            "format": "int32"
-          },
-          "quantity": {
-            "examples": [
-              50
-            ],
-            "type": "integer",
-            "description": "The quota quantity.",
-            "format": "int32"
-          },
-          "wallet": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "The quota applies to the wallet or not"
-          },
-          "dueDate": {
-            "examples": [
-              "2026-03-31T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The quota due date.",
-            "format": "date-time"
-          },
-          "nextQuantity": {
-            "examples": [
-              100
-            ],
-            "type": [
-              "null",
-              "integer"
-            ],
-            "description": "The quota next quantity.",
-            "format": "int32"
-          },
-          "additional": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Indicates whether the quota is primary or additional."
-          },
-          "nextQuota": {
-            "examples": [
-              ""
-            ],
-            "type": [
-              "null",
-              "integer"
-            ],
-            "description": "The quota ID to switch to at the next period.",
-            "format": "int32"
-          },
-          "state": {
-            "description": "The quota state.",
-            "$ref": "#/components/schemas/QuotaState"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The quota parameters.\r\n<example>\r\n{\r\n  \"id\": 1,\r\n  \"quantity\": 50,\r\n  \"wallet\": false,\r\n  \"additional\": false,\r\n  \"dueDate\": \"2026-03-31T00:00:00Z\",\r\n  \"nextQuantity\": 100,\r\n  \"state\": \"Active\"\r\n}\r\n</example>"
       },
       "QuotaArrayWrapper": {
         "type": "object",
@@ -39330,7 +39614,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The quota information."
       },
       "QuotaSettingsRequestsDto": {
@@ -39367,7 +39650,6 @@
             "description": "The default storage quota value applied to new users."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the user storage quota configurations."
       },
       "QuotaState": {
@@ -39580,7 +39862,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "Represents a report containing a collection of operations."
       },
       "ReportWrapper": {
@@ -39648,7 +39929,6 @@
             "description": "The identifiers of the models the portal is not allowed to use."
           }
         },
-        "additionalProperties": false,
         "description": "The AI models the portal is not allowed to use."
       },
       "RestrictedModelsResponseWrapper": {
@@ -39714,7 +39994,6 @@
             "description": "The list of rooms with the disabled notifications."
           }
         },
-        "additionalProperties": false,
         "description": "The rooms notification settings."
       },
       "RoomsNotificationSettingsWrapper": {
@@ -39777,7 +40056,6 @@
             "description": "Specifies whether the notifications will be delivered to the specified room or not."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring notification settings for the chat or collaboration rooms."
       },
       "STRINGArrayWrapper": {
@@ -39861,7 +40139,6 @@
             "description": "The details of the sales inquiry or payment request."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for handling sales and payment inquiries in the portal."
       },
       "SecurityArrayWrapper": {
@@ -39974,7 +40251,6 @@
             "description": "Specifies if the module is a subitem or not."
           }
         },
-        "additionalProperties": false,
         "description": "The security information."
       },
       "SecurityRequestsDto": {
@@ -40008,7 +40284,6 @@
             "description": "Specifies whether the user has administrative privileges."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing user security and access permissions."
       },
       "SetAppEnabledBody": {
@@ -40019,7 +40294,6 @@
             "description": "Whether the application should be enabled."
           }
         },
-        "additionalProperties": false,
         "description": "Request body for toggling an application enabled state."
       },
       "SetAppSettingsBody": {
@@ -40043,7 +40317,6 @@
             "description": "Arbitrary JSON document with application-specific settings."
           }
         },
-        "additionalProperties": false,
         "description": "Request body for saving application-specific settings."
       },
       "SetRestrictedAiModelsRequestDto": {
@@ -40067,7 +40340,6 @@
             "description": "The set of restricted AI model IDs."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for setting restricted AI models."
       },
       "SettingsDto": {
@@ -40440,7 +40712,6 @@
             "description": "Specifies if an external database is connected for storing form results."
           }
         },
-        "additionalProperties": false,
         "description": "The settings information."
       },
       "SettingsWrapper": {
@@ -40534,7 +40805,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for tracking SMTP (Simple Mail Transfer Protocol) operation status."
       },
       "SmtpOperationStatusRequestsWrapper": {
@@ -40682,7 +40952,6 @@
             "description": "Specifies if the current settings are default or not."
           }
         },
-        "additionalProperties": false,
         "description": "The SMTP settings parameters."
       },
       "SmtpSettingsWrapper": {
@@ -40726,6 +40995,92 @@
           }
         },
         "description": "The successful API response containing the SmtpSettingsDto object."
+      },
+      "SocketSettingsDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "examples": [
+              "https://example.com/socket.io/"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The hub URL, with a trailing slash, or empty when no hub is configured."
+          }
+        },
+        "description": "The socket settings."
+      },
+      "SocketSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The SocketSettingsDto object returned by the operation.",
+            "$ref": "#/components/schemas/SocketSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the SocketSettingsDto object."
+      },
+      "SsoBindingTypeDto": {
+        "type": "object",
+        "properties": {
+          "saml20HttpPost": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 2.0 HTTP POST binding.",
+            "readOnly": true
+          },
+          "saml20HttpRedirect": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 2.0 HTTP redirect binding.",
+            "readOnly": true
+          }
+        },
+        "description": "The SAML bindings the SSO settings accept."
       },
       "SsoCertificate": {
         "type": "object",
@@ -40794,8 +41149,46 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The SSO certificate parameters."
+      },
+      "SsoEncryptAlgorithmTypeDto": {
+        "type": "object",
+        "properties": {
+          "aes128": {
+            "examples": [
+              "http://www.w3.org/2001/04/xmlenc#aes128-cbc"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The AES-128-CBC encryption algorithm.",
+            "readOnly": true
+          },
+          "aes256": {
+            "examples": [
+              "http://www.w3.org/2001/04/xmlenc#aes256-cbc"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The AES-256-CBC encryption algorithm.",
+            "readOnly": true
+          },
+          "triDec": {
+            "examples": [
+              "http://www.w3.org/2001/04/xmlenc#tripledes-cbc"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The Triple DES CBC encryption algorithm.",
+            "readOnly": true
+          }
+        },
+        "description": "The encryption algorithms the SSO settings accept."
       },
       "SsoFieldMapping": {
         "type": "object",
@@ -40862,8 +41255,46 @@
             "description": "The phone number."
           }
         },
-        "additionalProperties": false,
         "description": "The SSO field mapping."
+      },
+      "SsoIdpCertificateActionTypeDto": {
+        "type": "object",
+        "properties": {
+          "verification": {
+            "examples": [
+              "verification"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Verification only.",
+            "readOnly": true
+          },
+          "decrypt": {
+            "examples": [
+              "decrypt"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Decryption only.",
+            "readOnly": true
+          },
+          "verificationAndDecrypt": {
+            "examples": [
+              "verification and decrypt"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Both verification and decryption.",
+            "readOnly": true
+          }
+        },
+        "description": "What an IDP certificate can be used for."
       },
       "SsoIdpCertificateAdvanced": {
         "type": "object",
@@ -40917,7 +41348,6 @@
             "description": "Specifies if the assertions will be decrypted or not."
           }
         },
-        "additionalProperties": false,
         "description": "The IdP advanced certificate parameters."
       },
       "SsoIdpSettings": {
@@ -40984,8 +41414,123 @@
             "description": "The name ID format."
           }
         },
-        "additionalProperties": false,
         "description": "The SSO IdP settings."
+      },
+      "SsoNameIdFormatTypeDto": {
+        "type": "object",
+        "properties": {
+          "saml11Unspecified": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 1.1 unspecified name ID format.",
+            "readOnly": true
+          },
+          "saml11EmailAddress": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 1.1 email address name ID format.",
+            "readOnly": true
+          },
+          "saml20Entity": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:2.0:nameid-format:entity"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 2.0 entity name ID format.",
+            "readOnly": true
+          },
+          "saml20Transient": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 2.0 transient name ID format.",
+            "readOnly": true
+          },
+          "saml20Persistent": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 2.0 persistent name ID format.",
+            "readOnly": true
+          },
+          "saml20Encrypted": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 2.0 encrypted name ID format.",
+            "readOnly": true
+          },
+          "saml20Unspecified": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 2.0 unspecified name ID format.",
+            "readOnly": true
+          },
+          "saml11X509SubjectName": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 1.1 X.509 subject name name ID format.",
+            "readOnly": true
+          },
+          "saml11WindowsDomainQualifiedName": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 1.1 Windows domain qualified name name ID format.",
+            "readOnly": true
+          },
+          "saml20Kerberos": {
+            "examples": [
+              "urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SAML 2.0 Kerberos name ID format.",
+            "readOnly": true
+          }
+        },
+        "description": "The SAML name ID formats the SSO settings accept."
       },
       "SsoSettingsRequestsDto": {
         "required": [
@@ -41004,7 +41549,6 @@
             "description": "The JSON-serialized SSO configuration settings."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for the Single Sign-On (SSO) configuration settings."
       },
       "SsoSettingsV2": {
@@ -41115,8 +41659,79 @@
             "description": "Specifies if the email verification is disabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The SSO portal settings."
+      },
+      "SsoSettingsV2ConstantsDto": {
+        "type": "object",
+        "properties": {
+          "ssoNameIdFormatType": {
+            "description": "The SAML name ID formats the SSO settings accept.",
+            "$ref": "#/components/schemas/SsoNameIdFormatTypeDto"
+          },
+          "ssoBindingType": {
+            "description": "The SAML bindings the SSO settings accept.",
+            "$ref": "#/components/schemas/SsoBindingTypeDto"
+          },
+          "ssoSigningAlgorithmType": {
+            "description": "The signing algorithms the SSO settings accept.",
+            "$ref": "#/components/schemas/SsoSigningAlgorithmTypeDto"
+          },
+          "ssoEncryptAlgorithmType": {
+            "description": "The encryption algorithms the SSO settings accept.",
+            "$ref": "#/components/schemas/SsoEncryptAlgorithmTypeDto"
+          },
+          "ssoSpCertificateActionType": {
+            "description": "What an SP certificate can be used for.",
+            "$ref": "#/components/schemas/SsoSpCertificateActionTypeDto"
+          },
+          "ssoIdpCertificateActionType": {
+            "description": "What an IDP certificate can be used for.",
+            "$ref": "#/components/schemas/SsoIdpCertificateActionTypeDto"
+          }
+        },
+        "description": "The SSO settings constants: every value the settings accept, by name."
+      },
+      "SsoSettingsV2ConstantsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The SsoSettingsV2ConstantsDto object returned by the operation.",
+            "$ref": "#/components/schemas/SsoSettingsV2ConstantsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the SsoSettingsV2ConstantsDto object."
       },
       "SsoSettingsV2Wrapper": {
         "type": "object",
@@ -41159,6 +41774,84 @@
           }
         },
         "description": "The successful API response containing the SsoSettingsV2 object."
+      },
+      "SsoSigningAlgorithmTypeDto": {
+        "type": "object",
+        "properties": {
+          "rsaSha1": {
+            "examples": [
+              "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The RSA-SHA1 signing algorithm.",
+            "readOnly": true
+          },
+          "rsaSha256": {
+            "examples": [
+              "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The RSA-SHA256 signing algorithm.",
+            "readOnly": true
+          },
+          "rsaSha512": {
+            "examples": [
+              "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The RSA-SHA512 signing algorithm.",
+            "readOnly": true
+          }
+        },
+        "description": "The signing algorithms the SSO settings accept."
+      },
+      "SsoSpCertificateActionTypeDto": {
+        "type": "object",
+        "properties": {
+          "signing": {
+            "examples": [
+              "signing"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Signing only.",
+            "readOnly": true
+          },
+          "encrypt": {
+            "examples": [
+              "encrypt"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Encryption only.",
+            "readOnly": true
+          },
+          "signingAndEncrypt": {
+            "examples": [
+              "signing and encrypt"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Both signing and encryption.",
+            "readOnly": true
+          }
+        },
+        "description": "What an SP certificate can be used for."
       },
       "SsoSpCertificateAdvanced": {
         "type": "object",
@@ -41222,7 +41915,6 @@
             "description": "Specifies if the assertions will be encrypted or not."
           }
         },
-        "additionalProperties": false,
         "description": "The SP advanced certificate parameters."
       },
       "StorageArrayWrapper": {
@@ -41333,7 +42025,6 @@
             "description": "Specifies if this storage can be set or not."
           }
         },
-        "additionalProperties": false,
         "description": "The storage information."
       },
       "StorageEncryptionRequestsDto": {
@@ -41347,7 +42038,6 @@
             "description": "Specifies whether the users receive notifications about the storage encryption operations."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing storage encryption operations and notifications."
       },
       "StorageRequestsDto": {
@@ -41384,7 +42074,6 @@
             "description": "The list of configuration key-value pairs for the storage module."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring the storage module settings."
       },
       "StorageSettings": {
@@ -41428,7 +42117,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The storage settings."
       },
       "StorageSettingsWrapper": {
@@ -41531,7 +42219,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The settings that define the folder opened by default after sign-in."
       },
       "StudioDefaultPageSettingsWrapper": {
@@ -41598,7 +42285,6 @@
             "format": "double"
           }
         },
-        "additionalProperties": false,
         "description": "Represents a sub-account with a specific currency and balance."
       },
       "SubscriptionBalanceInfo": {
@@ -41681,7 +42367,6 @@
             "description": "The three-character ISO 4217 currency symbol of the wallet."
           }
         },
-        "additionalProperties": false,
         "description": "The information about the current subscription and its unused balance."
       },
       "SubscriptionBalanceInfoWrapper": {
@@ -41726,13 +42411,39 @@
         },
         "description": "The successful API response containing the SubscriptionBalanceInfo object."
       },
-      "Tariff": {
-        "required": [
-          "dueDate",
-          "quotas"
-        ],
+      "TariffDto": {
         "type": "object",
         "properties": {
+          "openSource": {
+            "examples": [
+              true
+            ],
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "Specifies whether the tariff is Community or not."
+          },
+          "enterprise": {
+            "examples": [
+              true
+            ],
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "Specifies whether the tariff is Enterprise or not."
+          },
+          "developer": {
+            "examples": [
+              true
+            ],
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "Specifies whether the tariff is Developer or not."
+          },
           "id": {
             "examples": [
               1
@@ -41746,78 +42457,114 @@
             "$ref": "#/components/schemas/TariffState"
           },
           "dueDate": {
-            "examples": [
-              "2026-03-31T00:00:00Z"
-            ],
-            "type": "string",
             "description": "The tariff due date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "delayDueDate": {
-            "examples": [
-              "2026-04-07T00:00:00Z"
-            ],
-            "type": "string",
             "description": "The tariff delay due date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "licenseDate": {
-            "examples": [
-              "2026-03-01T00:00:00Z"
-            ],
-            "type": "string",
             "description": "The tariff license date.",
-            "format": "date-time"
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "customerId": {
             "examples": [
-              "cus_123"
+              "00000000-0000-0000-0000-000000000001"
             ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The tariff customer ID."
+            "description": "The customer ID."
           },
           "quotas": {
             "examples": [
-              {
-                "quotas": [
-                  {
-                    "id": 1,
-                    "quantity": 50,
-                    "wallet": false
-                  }
-                ]
-              }
+              [
+                {
+                  "id": 1,
+                  "title": "Basic Plan"
+                }
+              ]
             ],
             "type": [
               "null",
               "array"
             ],
             "items": {
-              "description": "The quota parameters.\r\n<example>\r\n{\r\n  \"id\": 1,\r\n  \"quantity\": 50,\r\n  \"wallet\": false,\r\n  \"additional\": false,\r\n  \"dueDate\": \"2026-03-31T00:00:00Z\",\r\n  \"nextQuantity\": 100,\r\n  \"state\": \"Active\"\r\n}\r\n</example>",
-              "$ref": "#/components/schemas/Quota"
+              "description": "The tariff quota parameters.",
+              "$ref": "#/components/schemas/TariffQuotaDto"
             },
-            "description": "The list of tariff quotas."
-          },
-          "overdueQuotas": {
-            "examples": [
-              [ ]
-            ],
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "description": "The quota parameters.\r\n<example>\r\n{\r\n  \"id\": 1,\r\n  \"quantity\": 50,\r\n  \"wallet\": false,\r\n  \"additional\": false,\r\n  \"dueDate\": \"2026-03-31T00:00:00Z\",\r\n  \"nextQuantity\": 100,\r\n  \"state\": \"Active\"\r\n}\r\n</example>",
-              "$ref": "#/components/schemas/Quota"
-            },
-            "description": "The list of overdue tariff quotas."
+            "description": "The list of quotas."
           }
         },
-        "additionalProperties": false,
         "description": "The tariff parameters."
+      },
+      "TariffQuotaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              -11
+            ],
+            "type": "integer",
+            "description": "The quota ID.",
+            "format": "int32"
+          },
+          "quantity": {
+            "examples": [
+              500
+            ],
+            "type": "integer",
+            "description": "The quota quantity.",
+            "format": "int32"
+          },
+          "wallet": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "The quota applies to the wallet or not."
+          },
+          "additional": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Indicates whether the quota is primary or additional."
+          },
+          "dueDate": {
+            "description": "The quota due date in the portal time zone. Falls back to the tariff due date when the quota has none.",
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "nextQuantity": {
+            "examples": [
+              100
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "The quota next quantity.",
+            "format": "int32"
+          },
+          "nextQuota": {
+            "examples": [
+              ""
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "The quota ID to switch to at the next period.",
+            "format": "int32"
+          },
+          "state": {
+            "description": "The quota state.",
+            "$ref": "#/components/schemas/QuotaState"
+          }
+        },
+        "description": "The tariff quota parameters."
       },
       "TariffState": {
         "oneOf": [
@@ -41861,8 +42608,8 @@
         "type": "object",
         "properties": {
           "response": {
-            "description": "The Tariff object returned by the operation.",
-            "$ref": "#/components/schemas/Tariff"
+            "description": "The TariffDto object returned by the operation.",
+            "$ref": "#/components/schemas/TariffDto"
           },
           "count": {
             "type": "integer",
@@ -41897,7 +42644,7 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the Tariff object."
+        "description": "The successful API response containing the TariffDto object."
       },
       "TelegramStatusDto": {
         "required": [
@@ -41920,7 +42667,6 @@
             "description": "The Telegram username."
           }
         },
-        "additionalProperties": false,
         "description": "The Telegram connection status parameters."
       },
       "TelegramStatusWrapper": {
@@ -41984,7 +42730,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The tenant-level settings for enabling or disabling all AI functionality in DocSpace."
       },
       "TenantAiAccessSettingsDto": {
@@ -41998,7 +42743,6 @@
             "description": "Specifies whether AI functionality is enabled for the tenant.\r\nSet to `true` to enable all AI features or `false` to disable them tenant-wide."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the tenant-level AI access settings."
       },
       "TenantAiAccessSettingsWrapper": {
@@ -42062,7 +42806,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The AI agent quota settings."
       },
       "TenantAiAgentQuotaSettingsWrapper": {
@@ -42135,7 +42878,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The tenant audit settings parameters."
       },
       "TenantAuditSettingsResponseWrapper": {
@@ -42188,7 +42930,6 @@
             "$ref": "#/components/schemas/TenantAuditSettings"
           }
         },
-        "additionalProperties": false,
         "description": "The tenant audit settings wrapper."
       },
       "TenantBannerSettings": {
@@ -42210,7 +42951,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The visibility settings of the promotional banners."
       },
       "TenantBannerSettingsDto": {
@@ -42224,7 +42964,6 @@
             "description": "The banners visibility flag."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the visibility settings of the promotional banners for the current tenant."
       },
       "TenantBannerSettingsWrapper": {
@@ -42285,7 +43024,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The deep link settings."
       },
       "TenantDeepLinkSettingsWrapper": {
@@ -42349,7 +43087,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The Developer Tools access settings."
       },
       "TenantDevToolsAccessSettingsDto": {
@@ -42363,7 +43100,6 @@
             "description": "Determines if users have restricted access to the Developer Tools."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the Developer Tools access settings for the current tenant."
       },
       "TenantDevToolsAccessSettingsWrapper": {
@@ -42441,7 +43177,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The domain validator."
       },
       "TenantDto": {
@@ -42659,7 +43394,6 @@
             "description": "The tenant AWS region."
           }
         },
-        "additionalProperties": false,
         "description": "The tenant parameters."
       },
       "TenantEntityQuotaSettings": {
@@ -42692,7 +43426,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The tenant entity quota settings."
       },
       "TenantIndustry": {
@@ -43134,7 +43867,6 @@
             "description": "Specifies if the DocsCloudTrial enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The current tenant quota."
       },
       "TenantQuotaFeatureDto": {
@@ -43202,7 +43934,6 @@
             "description": "The price title of the tenant quota feature."
           }
         },
-        "additionalProperties": false,
         "description": "The tenant quota feature parameters."
       },
       "TenantQuotaSettings": {
@@ -43243,7 +43974,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The tenant quota settings."
       },
       "TenantQuotaSettingsRequestsDto": {
@@ -43269,7 +43999,6 @@
             "format": "int64"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the tenant storage quota settings in a multi-tenant system."
       },
       "TenantQuotaSettingsWrapper": {
@@ -43375,7 +44104,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The room quota settings."
       },
       "TenantRoomQuotaSettingsWrapper": {
@@ -43524,7 +44252,6 @@
             "description": "Specifies whether to allow all DocSpace members to invite external guests to the rooms."
           }
         },
-        "additionalProperties": false,
         "description": "The user invitation settings."
       },
       "TenantUserInvitationSettingsRequestDto": {
@@ -43545,7 +44272,6 @@
             "description": "Specifies whether to allow all DocSpace members to invite external guests to the rooms."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating the user invitation settings."
       },
       "TenantUserInvitationSettingsWrapper": {
@@ -43609,7 +44335,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The user quota settings."
       },
       "TenantUserQuotaSettingsWrapper": {
@@ -43771,7 +44496,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The wallet services settings."
       },
       "TenantWalletServiceSettingsWrapper": {
@@ -43880,7 +44604,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The tenant wallet settings."
       },
       "TenantWalletSettingsResponseWrapper": {
@@ -43933,7 +44656,6 @@
             "$ref": "#/components/schemas/TenantWalletSettings"
           }
         },
-        "additionalProperties": false,
         "description": "The wrapper for the tenant wallet settings."
       },
       "TenantWrapper": {
@@ -44044,7 +44766,6 @@
             "description": "The TFA app code."
           }
         },
-        "additionalProperties": false,
         "description": "The TFA app code."
       },
       "TfaConfirmDataDto": {
@@ -44081,7 +44802,6 @@
             "description": "The confirmation cookie value."
           }
         },
-        "additionalProperties": false,
         "description": "The TFA confirmation data."
       },
       "TfaConfirmDataWrapper": {
@@ -44191,7 +44911,6 @@
             "description": "The list group IDs whose members must use TFA."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring the Two-Factor Authentication (TFA) settings."
       },
       "TfaRequestsDtoType": {
@@ -44366,7 +45085,6 @@
             "description": "The list of group IDs whose members are required to use TFA."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters representing the Two-Factor Authentication (TFA) configuration settings."
       },
       "TfaSetupCodeDto": {
@@ -44406,7 +45124,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The setup TFA code parameters."
       },
       "TfaSetupCodeWrapper": {
@@ -44475,7 +45192,6 @@
             "description": "Specifies whether the authentication is session-based."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for validating the two-factor authentication codes."
       },
       "TimezonesRequestsArrayWrapper": {
@@ -44551,7 +45267,6 @@
             "description": "The user-friendly name for the time zone."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing the time zone configurations."
       },
       "TopUpDepositRequestDto": {
@@ -44580,7 +45295,6 @@
             "description": "The three-character ISO 4217 currency symbol."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for putting money on deposit."
       },
       "TransactionInfo": {
@@ -44602,7 +45316,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "Represents information about the transaction applied to an account."
       },
       "TurnOnAdminMessageSettingsRequestDto": {
@@ -44616,8 +45329,49 @@
             "description": "The global switch for the administrator messaging functionality."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for enabling or disabling administrator messaging system."
+      },
+      "UnknownNullableWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "null",
+            "description": "The response payload."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response."
       },
       "UpcomingPaymentArrayWrapper": {
         "type": "object",
@@ -44743,7 +45497,6 @@
             "description": "The three-character ISO 4217 currency symbol of the amount."
           }
         },
-        "additionalProperties": false,
         "description": "The upcoming payment parameters."
       },
       "UpdateWebhooksConfigRequestsDto": {
@@ -44768,7 +45521,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The request parameters for updating the webhook configuration."
       },
       "UsageSpaceStatItemArrayWrapper": {
@@ -44867,7 +45619,6 @@
             "description": "The item URL."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters of the usage space statistics item."
       },
       "UserInfo": {
@@ -45160,7 +45911,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The user information."
       },
       "UserInfoWrapper": {
@@ -45281,7 +46031,6 @@
             "$ref": "#/components/schemas/ProductQuantityType"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for specifying wallet payment quantity."
       },
       "WalletServiceArrayWrapper": {
@@ -45369,7 +46118,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The wallet service information."
       },
       "WalletServiceWrapper": {
@@ -45454,7 +46202,6 @@
             "description": "The collection of user and group identifiers granted access to the module."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring security settings of a single web module."
       },
       "WebItemsSecurityRequestsDto": {
@@ -45480,7 +46227,6 @@
             "description": "The list of module security configurations."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring security settings across multiple web modules."
       },
       "WebPluginArrayWrapper": {
@@ -45748,7 +46494,6 @@
             "description": "The web plugin loading method"
           }
         },
-        "additionalProperties": false,
         "description": "The web plugin information."
       },
       "WebPluginRequests": {
@@ -45777,7 +46522,6 @@
             "description": "The JSON-formatted configuration settings for the web plugin."
           }
         },
-        "additionalProperties": false,
         "description": "The configuration settings for the web plugin instance."
       },
       "WebPluginWrapper": {
@@ -45888,7 +46632,6 @@
             "description": "The list of webhook delivery IDs to retry."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for requesting the webhook delivery retries."
       },
       "WebhookTrigger": {
@@ -46097,7 +46840,6 @@
             "description": "Specifies whether this trigger is available for the current user's role."
           }
         },
-        "additionalProperties": false,
         "description": "The webhook trigger with its availability for the current user."
       },
       "WebhooksConfigDto": {
@@ -46225,7 +46967,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The webhook configuration parameters."
       },
       "WebhooksConfigWithStatusArrayWrapper": {
@@ -46289,7 +47030,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The webhook configuration with its status."
       },
       "WebhooksConfigWrapper": {
@@ -46495,7 +47235,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The webhook log parameters."
       },
       "WebhooksLogWrapper": {
@@ -46611,7 +47350,6 @@
             "$ref": "#/components/schemas/WhiteLabelItemPathDto"
           }
         },
-        "additionalProperties": false,
         "description": "The white label item parameters."
       },
       "WhiteLabelItemPathDto": {
@@ -46638,7 +47376,6 @@
             "description": "The path to the dark theme logo."
           }
         },
-        "additionalProperties": false,
         "description": "The white label item path parameters."
       },
       "WhiteLabelItemSizeDto": {
@@ -46726,7 +47463,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The white label logo size parameters."
       },
       "WhiteLabelLogoType": {
@@ -46836,7 +47572,6 @@
             "description": "The white label tenant IDs with their logos (light or dark)."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for configuring the white label branding settings."
       },
       "WizardRequestsDto": {
@@ -46905,7 +47640,6 @@
             "description": "Specifies whether the user opted in for site communications."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for initial configuration of the setup wizard."
       },
       "WizardSettings": {
@@ -46927,7 +47661,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The Wizard settings."
       },
       "WizardSettingsWrapper": {

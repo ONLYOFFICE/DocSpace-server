@@ -1769,7 +1769,6 @@
             "description": "The list of file entry items."
           }
         },
-        "additionalProperties": false,
         "description": "The agent new item's information."
       },
       "AiSettingsDto": {
@@ -1827,7 +1826,6 @@
             "description": "The identifier of the model recommended for form generation."
           }
         },
-        "additionalProperties": false,
         "description": "The AI module settings."
       },
       "AiSettingsWrapper": {
@@ -1883,7 +1881,6 @@
             "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user."
           }
         },
-        "additionalProperties": false,
         "description": "The per-user AI settings."
       },
       "AiUserSettingsWrapper": {
@@ -1950,7 +1947,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The API date and time parameters."
       },
       "ChatSettings": {
@@ -1993,7 +1989,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The chat settings."
       },
       "ChatSettingsDto": {
@@ -2010,7 +2005,6 @@
             "description": "The system prompt for the chat."
           }
         },
-        "additionalProperties": false,
         "description": "The chat settings parameters."
       },
       "CreateAgentRequestDto": {
@@ -2145,7 +2139,6 @@
             "$ref": "#/components/schemas/ChatSettings"
           }
         },
-        "additionalProperties": false,
         "description": "Request to create a new AI agent room."
       },
       "DeleteRoomRequest": {
@@ -2159,7 +2152,6 @@
             "description": "Specifies whether to delete a room after the editing session is finished or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for deleting a room."
       },
       "DistributedTaskStatus": {
@@ -2219,7 +2211,6 @@
             "format": "email"
           }
         },
-        "additionalProperties": false,
         "description": "The email invitation parameters."
       },
       "EmbeddingProviderType": {
@@ -2356,7 +2347,6 @@
             "description": "Specifies if the user is anonymous or not."
           }
         },
-        "additionalProperties": false,
         "description": "The user parameters."
       },
       "ErrorApiResponse": {
@@ -2546,7 +2536,6 @@
             "$ref": "#/components/schemas/FileEntryType"
           }
         },
-        "additionalProperties": false,
         "description": "The file entry information.",
         "x-derived": true,
         "x-derived-types": [
@@ -2656,7 +2645,6 @@
                     "format": "int32"
                   }
                 },
-                "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry."
               },
               "security": {
@@ -2814,7 +2802,6 @@
                     "type": "boolean"
                   }
                 },
-                "additionalProperties": false,
                 "description": "The actions that can be performed with the file entry."
               },
               "availableShareRights": {
@@ -2862,7 +2849,6 @@
                     }
                   }
                 },
-                "additionalProperties": false,
                 "description": "The available external rights of the file entry."
               },
               "requestToken": {
@@ -2902,7 +2888,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The generic file entry information."
       },
       "FileEntryType": {
@@ -3051,7 +3036,6 @@
             "$ref": "#/components/schemas/DistributedTaskStatus"
           }
         },
-        "additionalProperties": false,
         "description": "The file operation information."
       },
       "FileOperationType": {
@@ -3231,7 +3215,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The collection of file sharing parameters."
       },
       "FolderContentDtoInteger": {
@@ -3323,7 +3306,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The folder content information."
       },
       "FolderContentIntegerWrapper": {
@@ -3594,7 +3576,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The folder parameters."
       },
       "FolderIntegerArrayWrapper": {
@@ -3864,7 +3845,6 @@
             "$ref": "#/components/schemas/LogoCover"
           }
         },
-        "additionalProperties": false,
         "description": "The room logo information."
       },
       "LogoCover": {
@@ -3895,7 +3875,6 @@
             "description": "The logo cover data."
           }
         },
-        "additionalProperties": false,
         "description": "The logo cover information."
       },
       "LogoRequest": {
@@ -3953,7 +3932,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The logo request parameters."
       },
       "NewItemsAgentNewItemsArrayWrapper": {
@@ -4024,7 +4002,6 @@
             "description": "The list of items."
           }
         },
-        "additionalProperties": false,
         "description": "The new item parameters."
       },
       "QuotaFilter": {
@@ -4100,7 +4077,6 @@
             "description": "Specifies whether the room data lifetime setting is enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The room data lifetime information."
       },
       "RoomDataLifetimePeriod": {
@@ -4196,7 +4172,6 @@
             "description": "Indicates whether the recommended model banner is visible in the AI chat. If not specified, the current value is preserved."
           }
         },
-        "additionalProperties": false,
         "description": "Request to update per-user AI recommended model visibility settings."
       },
       "SetEmbeddingConfigRequestBody": {
@@ -4217,7 +4192,6 @@
             "description": "The API key for the selected embedding provider. Pass null to keep the existing key unchanged."
           }
         },
-        "additionalProperties": false,
         "description": "Parameters for configuring the embedding provider."
       },
       "SortOrder": {
@@ -4419,7 +4393,6 @@
             "format": "int64"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating the room quota."
       },
       "UpdateRoomsRoomIdsRequestDtoInteger": {
@@ -4456,7 +4429,6 @@
             "description": "The list of room IDs."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating the rooms."
       },
       "VectorizationSettingsDto": {
@@ -4474,7 +4446,6 @@
             "description": "Indicates whether the embedding provider API key needs to be reconfigured."
           }
         },
-        "additionalProperties": false,
         "description": "The vectorization settings."
       },
       "VectorizationSettingsWrapper": {
@@ -4545,7 +4516,6 @@
             "description": "The set of file identifiers to submit for vectorization."
           }
         },
-        "additionalProperties": false,
         "description": "Parameters for submitting files for vectorization."
       },
       "WatermarkAdditions": {
@@ -4656,7 +4626,6 @@
             "format": "double"
           }
         },
-        "additionalProperties": false,
         "description": "The watermark settings."
       },
       "WatermarkRequestDto": {
@@ -4731,7 +4700,6 @@
             "format": "double"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for adding watermarks."
       }
     },
