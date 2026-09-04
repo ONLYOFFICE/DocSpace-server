@@ -1051,15 +1051,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of profiles for all the portal users.
+    /// Returns a page of the working accounts of the portal, with the full profile of each of them.
+    /// It reports only the accounts whose status is `Active`, so disabled accounts and open invitations are never
+    /// listed - use `GET api/2.0/people/status/{status}` for those, or `GET api/2.0/people/filter` to search across
+    /// every state.
+    /// The caller has to be a room admin, a DocSpace admin or a People module admin; a member or a guest gets 403.
+    /// The call is read-only, paged by `count` and `startIndex`, ordered by `sortBy` and `sortOrder`, and reports
+    /// the number of matches in the total count of the response.
+    /// Narrow it with `filterValue` on the name and the email, and with `filterBy` set to `group` to keep only the
+    /// members of the group whose ID is passed in `filterValue`.
     /// </remarks>
     /// <summary>
-    /// Get profiles
+    /// Get the active profiles
     /// </summary>
     /// <path>api/2.0/people</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(200, "A page of active accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet]
     public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles(GetAllProfilesRequestDto inDto)
     {
@@ -1227,7 +1236,16 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of profiles filtered by the user status.
+    /// Returns a page of the accounts that are in one particular state - the status is taken from the route - with
+    /// the full profile of each of them.
+    /// The caller has to be a room admin, a DocSpace admin or a People module admin; a member or a guest gets 403.
+    /// The call is read-only, paged by `count` and `startIndex`, ordered by `sortBy` and `sortOrder`, and reports
+    /// the number of matches in the total count of the response.
+    /// Narrow it with `filterValue` on the name and the email; setting `filterBy` to `group` makes the same
+    /// `filterValue` the ID of the group to keep the members of, and because the value is then applied as the text
+    /// filter as well, that combination normally matches nothing - use `GET api/2.0/people/filter` with `groupId`
+    /// to filter by group.
+    /// `GET api/2.0/people` is the same operation fixed to the `Active` status.
     /// </remarks>
     /// <summary>
     /// Get profiles by status
@@ -1235,7 +1253,8 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(200, "A page of accounts in the requested state, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
@@ -1966,15 +1985,27 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sets the required activation status to the list of users with the IDs specified in the request.
+    /// Sets the activation state of the calling account, which is how a person finishes confirming their email
+    /// address after following the link they were sent.
+    /// The request has to carry the confirmation token from that link rather than an ordinary session, and the
+    /// account must be allowed to edit its own profile.
+    /// Despite taking a list, it accepts exactly one ID and that ID has to be the calling account: an empty list,
+    /// more than one entry, or somebody else's ID is answered with 400, so it cannot be used to activate other
+    /// people.
+    /// Setting `Activated` on the portal owner sends the administrator welcome email, once per portal.
+    /// The change raises a `UserUpdated` webhook, and the answer holds the profile in its new state - or nothing at
+    /// all when the account has meanwhile disappeared, which is skipped without an error.
+    /// The account status is a different thing and is changed through `PUT api/2.0/people/status/{status}`.
     /// </remarks>
     /// <summary>
-    /// Set an activation status to the users
+    /// Set my activation status
     /// </summary>
     /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(200, "The profile of the caller in its new activation state", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The list is empty, holds more than one ID, or names an account other than the caller")]
+    [SwaggerResponse(403, "The account may not edit its own profile")]
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationstatus}")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,EmailActivation")]
@@ -2262,7 +2293,20 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes a status of the users with the IDs specified in the request.
+    /// Enables or disables several portal accounts at once, which is the way to suspend somebody without deleting
+    /// them and to bring them back later.
+    /// Only `Active` and `Terminated` are accepted in the route; any other status answers 400.
+    /// The caller needs the permission to edit users, and the whole list is checked before anything is applied: a
+    /// system account, an LDAP account, the portal owner, the caller themselves, or - unless the caller is the
+    /// portal owner - a DocSpace administrator rejects the entire call with 403 and changes nothing.
+    /// Disabling ends every session of the account and takes its seat back, while enabling takes a seat again and
+    /// can therefore answer 402 when the tariff or the user quota has none left; the accounts are then processed one
+    /// by one, so a quota failure partway through leaves the earlier ones enabled.
+    /// Enabling only affects accounts that were disabled, and an account that had never filled in its name comes
+    /// back as `Pending` rather than `Active` when it still has an unused invitation, so read the `status` in the
+    /// answer instead of assuming it matches the request.
+    /// Each changed account raises a `UserUpdated` webhook, and disabling is what
+    /// `DELETE api/2.0/people/{userid}` requires before it will delete an account.
     /// </remarks>
     /// <summary>
     /// Change a user status
@@ -2270,9 +2314,10 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "Incorrect status")]
-    [SwaggerResponse(403, "No permissions to perform this action or cannot change status for a specific user (yourself, owner, LDAP ...)")]
+    [SwaggerResponse(200, "The listed accounts with their statuses after the change", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The requested status is neither Active nor Terminated")]
+    [SwaggerResponse(402, "The tariff or the user quota does not allow enabling one more account")]
+    [SwaggerResponse(403, "No permissions to perform this action, or the list names a system, LDAP, owner, self or DocSpace admin account")]
     [HttpPut("status/{status}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserStatus(UpdateMemberStatusRequestDto inDto)
     {
@@ -2641,7 +2686,19 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes a quota limit for the users with the IDs specified in the request.
+    /// Gives the listed accounts their own storage limit, replacing the portal default for each of them.
+    /// The caller needs the permission to edit the portal settings, which in practice means a DocSpace
+    /// administrator or the portal owner.
+    /// `quota` is a whole number of bytes: a value of 0 or more becomes the personal limit, while any negative value
+    /// switches the personal limit off and hands the account back to the portal default.
+    /// The value has to fit the portal: a limit larger than the total storage the tariff allows, or larger than the
+    /// portal-wide quota on a standalone installation, is rejected with 400, and so is a value that is not a whole
+    /// number.
+    /// System accounts are dropped from the list without an error, the accounts are processed one by one, and the
+    /// answer holds the ones that were reached.
+    /// Setting a limit does not free any space and does not delete anything: an account already over its new limit
+    /// simply cannot add more.
+    /// Use `PUT api/2.0/people/resetquota` to return accounts to the portal default.
     /// </remarks>
     /// <summary>
     /// Change a user quota limit
@@ -2649,8 +2706,8 @@ public class UserController(
     /// <path>api/2.0/people/userquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
+    [SwaggerResponse(200, "The accounts whose limit was changed", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The value is not a whole number of bytes, or it exceeds the storage the portal allows")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuota(UpdateMembersQuotaRequestDto inDto)
@@ -2712,7 +2769,18 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Resets a quota limit of users with the IDs specified in the request.
+    /// Drops the personal storage limit of the listed accounts, so that each of them follows the portal default
+    /// again.
+    /// The caller needs the permission to edit the portal settings, which in practice means a DocSpace
+    /// administrator or the portal owner.
+    /// On a hosted portal the tariff has to include the storage statistics feature, otherwise the operation answers
+    /// 402; a standalone installation has no such condition.
+    /// It takes only `userIds` - the `quota` field of the request body is not read here - and system accounts are
+    /// dropped from the list without an error.
+    /// The accounts are processed one by one and the answer holds the ones that were reached, each already showing
+    /// the portal default as its limit.
+    /// Nothing is deleted and no space is freed; only the limit that applies changes.
+    /// Use `PUT api/2.0/people/userquota` to give an account its own limit instead.
     /// </remarks>
     /// <summary>
     /// Reset a user quota limit
@@ -2720,10 +2788,9 @@ public class UserController(
     /// <path>api/2.0/people/resetquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
-    [SwaggerResponse(200, "User detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
-    [SwaggerResponse(409, "Conflict - system user quota cannot be reset")]
+    [SwaggerResponse(200, "The accounts that now follow the portal default limit", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(402, "The tariff of a hosted portal does not include the storage statistics feature")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
     {
