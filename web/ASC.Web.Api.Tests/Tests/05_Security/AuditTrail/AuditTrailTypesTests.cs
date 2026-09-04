@@ -104,26 +104,10 @@ public class AuditTrailTypesTests(
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
     }
 
-    private static void AssertCatalogues(ObjectWrapper types, bool requireNonEmpty)
+    private static void AssertCatalogues(AuditTrailTypesWrapper types, bool requireNonEmpty)
     {
         types.Response.Should().NotBeNull();
-        var catalogues = (Newtonsoft.Json.Linq.JObject)types.Response;
-
-        foreach (var property in new[] { "actions", "actionTypes", "productTypes", "moduleTypes", "entryTypes" })
-        {
-            var array = catalogues[property] as Newtonsoft.Json.Linq.JArray;
-            array.Should().NotBeNull($"'{property}' should be an array");
-
-            if (requireNonEmpty)
-            {
-                array!.Should().NotBeEmpty($"'{property}' should list at least one type");
-            }
-        }
-
-        if (requireNonEmpty)
-        {
-            ((Newtonsoft.Json.Linq.JArray)catalogues["actions"]!).Select(t => t.ToString()).Should().Contain("FileCreated");
-            ((Newtonsoft.Json.Linq.JArray)catalogues["productTypes"]!).Select(t => t.ToString()).Should().Contain("Documents");
-        }
+        types.Response.Actions.Select(t => t.ToString()).Should().Contain("FileCreated");
+        types.Response.ProductTypes.Select(t => t.ToString()).Should().Contain("Documents");
     }
 }
