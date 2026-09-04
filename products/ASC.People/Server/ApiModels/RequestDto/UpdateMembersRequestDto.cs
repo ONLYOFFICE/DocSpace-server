@@ -77,16 +77,18 @@ public class UpdateMemberStatusRequestDto
 public class UpdateMemberTypeRequestDto
 {
     /// <summary>
-    /// The new user type.
+    /// The type to convert the listed accounts to, taken from the route: `User`, `Guest`, `RoomAdmin` or
+    /// `DocSpaceAdmin`. `RoomAdmin` and `DocSpaceAdmin` take a paid seat.
     /// </summary>
-    /// <example>1</example>
+    /// <example>RoomAdmin</example>
     [FromRoute(Name = "type")]
     public required EmployeeType Type { get; set; }
 
     /// <summary>
-    /// The request parameters for updating the user information.
+    /// The accounts to convert. Only `userIds` is read by this operation; `resendAll` belongs to the invitation
+    /// operations and is ignored here.
     /// </summary>
-    /// <example>{"userIds":["00000000-0000-0000-0000-000000000000"],"resendAll":false}</example>
+    /// <example>{"userIds":["00000000-0000-0000-0000-000000000000"]}</example>
     [FromBody]
     public required UpdateMembersRequestDto UpdateMembers { get; set; }
 }
