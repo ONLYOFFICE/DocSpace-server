@@ -59,6 +59,7 @@ public partial class MarkDownStyler : IPatternStyler
             if (lineToAdd.StartsWith("h1.")) { lineToAdd = lineToAdd.Substring("h1.".Length); }
             body += LinkRegex().Replace(lineToAdd, EvalLink) + Environment.NewLine;
         }
+        body = HtmlCommentRegex().Replace(body, "");
         body = PlainTextRegex().Replace(body, "");
         body = HtmlLinkReplacer().Replace(body, @"[$2]($1)");
         body = HttpUtility.HtmlDecode(body);
@@ -92,6 +93,15 @@ public partial class MarkDownStyler : IPatternStyler
 
     [GeneratedRegex(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Compiled | RegexOptions.Singleline)]
     private static partial Regex LinkRegex();
+
+    /// <summary>
+    /// A conditional comment is markup for one mail client, never text for the reader — and the one
+    /// <c>TagValues.OrangeButton</c> carries repeats the button caption inside a VML fallback for
+    /// Outlook. Dropping the comment whole has to happen before the tags are stripped, or that copy
+    /// stays behind and the caption is printed twice, once as plain text and once as the link.
+    /// </summary>
+    [GeneratedRegex(@"<!--.*?-->", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant)]
+    private static partial Regex HtmlCommentRegex();
 
     [GeneratedRegex(@"(<(p|div).*?>)|(<\/(p|div)>)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant)]
     private static partial Regex PlainTextRegex();
