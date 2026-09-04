@@ -81,6 +81,11 @@ public class MessageStorageService(
         };
     }
 
+    internal async Task<List<Message>> ReadByThreadVerifiedAsync(Guid threadId)
+    {
+        return await storage.ReadByThreadAsync(tenantManager.GetCurrentTenantId(), threadId, int.MaxValue);
+    }
+
     public async Task UpdateAsync(Guid messageId, string contents)
     {
         var tenantId = tenantManager.GetCurrentTenantId();

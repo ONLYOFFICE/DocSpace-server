@@ -36,6 +36,11 @@ import { isObject, getString, getNumber, getObject, getArray } from "../narrow.j
 import { PAGE_SIZE } from "@onlyoffice/ai-chat/core";
 import type { MessagesStorage, MessagesCursor, MessagesDirection } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
+import {
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const THREADS_PATH = "/threads";
 const MESSAGES_PATH = "/messages";
@@ -109,7 +114,7 @@ function parseContents(contents: unknown): Record<string, unknown> {
   }
 }
 
-function dtoToMessage(raw: unknown): ThreadMessageLike | null {
+export function dtoToMessage(raw: unknown): ThreadMessageLike | null {
   if (!isObject(raw)) {
     return null;
   }
@@ -140,6 +145,7 @@ export class HttpMessagesStorage implements MessagesStorage {
     const raw = await aiService.post(`${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`, {
       contents: serializeContents(message),
     });
+    invalidateChatContext("messages");
     const result = dtoToMessage(raw);
     if (!result) {
       throw new Error("ai service returned invalid message");
@@ -189,6 +195,21 @@ export class HttpMessagesStorage implements MessagesStorage {
       return page.items;
     }
 
+    // A whole-thread read inside a primed round is answered from the
+    // aggregate, which carries the round's full history in storage order.
+    // Paged reads above (the client's history window) keep hitting the
+    // service — they are never part of a round.
+    const snapshot = readChatContext("messages");
+    if (
+      snapshot
+      && snapshot.messages !== null
+      && wireCursor === undefined
+      && threadId === snapshot.requested.threadId
+    ) {
+      return [...snapshot.messages];
+    }
+    reportChatContextMiss(`messages.readByThread(${threadId})`);
+
     // No page size — the caller wants the whole thread. That read is
     // always forward: the pages are concatenated in the order they
     // arrive, so walking backwards would hand back a reversed history.
@@ -227,9 +248,11 @@ export class HttpMessagesStorage implements MessagesStorage {
     await aiService.put(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`, {
       contents: serializeContents(message),
     });
+    invalidateChatContext("messages");
   }
 
   async delete(messageId: string): Promise<void> {
+    invalidateChatContext("messages");
     try {
       await aiService.delete(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
     } catch (err) {
@@ -241,6 +264,7 @@ export class HttpMessagesStorage implements MessagesStorage {
   }
 
   async deleteByThread(threadId: string): Promise<void> {
+    invalidateChatContext("messages");
     try {
       await aiService.delete(`${THREADS_PATH}/${encodeURIComponent(threadId)}/messages`);
     } catch (err) {

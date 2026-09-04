@@ -54,6 +54,11 @@ public class WebSearchStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
+        return await ReadVerifiedAsync();
+    }
+
+    internal async Task<WebSearchConfig?> ReadVerifiedAsync()
+    {
         if (!_gateway.Configured)
         {
             return await storage.ReadAsync(tenantManager.GetCurrentTenantId());
