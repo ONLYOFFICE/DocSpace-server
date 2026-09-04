@@ -1288,6 +1288,26 @@ public class PaymentController(
     }
 
     /// <summary>
+    /// Get the service prices from the accounting service
+    /// </summary>
+    /// <remarks>
+    /// Returns the list of prices of the specified service from the accounting service.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/accounting/prices/{serviceName}</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The list of the service prices", typeof(List<ServicePriceInfo>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("accounting/prices/{serviceName}")]
+    public async Task<List<ServicePriceInfo>> GetAccountingServicePrices(ServicePricesRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        return await tariffService.GetAccountingServicePricesAsync(inDto.ServiceName, inDto.Active);
+    }
+
+    /// <summary>
     /// Gets the tenant wallet auto top up settings
     /// </summary>
     /// <remarks>
