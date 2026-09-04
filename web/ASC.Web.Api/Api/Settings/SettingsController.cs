@@ -963,7 +963,8 @@ public partial class SettingsController(
             FolderType.SHARE,
             FolderType.Favorites,
             FolderType.Recent,
-            FolderType.Forms
+            FolderType.Forms,
+            FolderType.DEFAULT
         ];
 
         if (!allowedFolderTypes.Contains(inDto.DefaultFolderType) ||

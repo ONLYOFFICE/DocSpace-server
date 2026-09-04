@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,35 +31,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.Collections.Concurrent;
-global using System.ComponentModel.DataAnnotations;
-global using System.Net;
-global using System.Security.Cryptography;
-global using System.Text;
-global using System.Text.Json;
-global using System.Xml.Linq;
+namespace ASC.AI.Integration;
 
-global using ASC.Api.Core.Middleware;
-global using ASC.Common.Caching;
-global using ASC.Common.Notify.Patterns;
-global using ASC.Core.Billing;
-global using ASC.Core.Common.Security;
-global using ASC.Core.Data;
-global using ASC.Core.Tenants;
-global using ASC.FederatedLogin.Helpers;
-global using ASC.Notify.Cron;
-global using ASC.Notify.Messages;
-global using ASC.Notify.Patterns;
-global using ASC.Notify.Recipients;
-global using ASC.Notify.Textile;
+public record ScopedValues<T>(T Global, IReadOnlyDictionary<int, T> ByEntry);
 
-global using FluentAssertions;
+public static class ScopedValues
+{
+    internal static Dictionary<int, T> CreateEntryBuckets<T>(int? firstEntryId, int? secondEntryId, Func<T> factory)
+    {
+        var buckets = new Dictionary<int, T>(2);
 
-global using Microsoft.AspNetCore.Http;
-global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Configuration;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Logging.Abstractions;
+        if (firstEntryId.HasValue)
+        {
+            buckets[firstEntryId.Value] = factory();
+        }
 
-global using Polly;
-global using Polly.Retry;
+        if (secondEntryId.HasValue && !buckets.ContainsKey(secondEntryId.Value))
+        {
+            buckets[secondEntryId.Value] = factory();
+        }
+
+        return buckets;
+    }
+}

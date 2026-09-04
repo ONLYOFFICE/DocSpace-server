@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,35 +31,36 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.Collections.Concurrent;
-global using System.ComponentModel.DataAnnotations;
-global using System.Net;
-global using System.Security.Cryptography;
-global using System.Text;
-global using System.Text.Json;
-global using System.Xml.Linq;
+namespace ASC.AI.Models.ResponseDto;
 
-global using ASC.Api.Core.Middleware;
-global using ASC.Common.Caching;
-global using ASC.Common.Notify.Patterns;
-global using ASC.Core.Billing;
-global using ASC.Core.Common.Security;
-global using ASC.Core.Data;
-global using ASC.Core.Tenants;
-global using ASC.FederatedLogin.Helpers;
-global using ASC.Notify.Cron;
-global using ASC.Notify.Messages;
-global using ASC.Notify.Patterns;
-global using ASC.Notify.Recipients;
-global using ASC.Notify.Textile;
+public class ChatContextDto
+{
+    public required AiSettingsDto Config { get; init; }
+    public required List<ProfileDto> Profiles { get; init; }
+    public required ChatContextScopeDto Global { get; init; }
+    public ChatContextScopeDto? Entity { get; init; }
+    public ChatContextScopeDto? ContextEntity { get; init; }
+    public ThreadDto? Thread { get; init; }
+    public List<MessageDto>? Messages { get; init; }
+    public WebSearchConfigDto? WebSearch { get; init; }
+}
 
-global using FluentAssertions;
+public class ChatContextScopeDto
+{
+    public string? EntityId { get; init; }
+    public ChatContextFolderDto? Folder { get; init; }
+    public required Dictionary<string, Guid> Assignments { get; init; }
+    public PreferencesDto? Preferences { get; init; }
+    public required IReadOnlyDictionary<string, ToolPreference> ToolPrefs { get; init; }
+    public required List<McpServerDto> McpServers { get; init; }
+}
 
-global using Microsoft.AspNetCore.Http;
-global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Configuration;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Logging.Abstractions;
-
-global using Polly;
-global using Polly.Retry;
+public class ChatContextFolderDto
+{
+    public required int Id { get; init; }
+    public required string Title { get; init; }
+    public required int FolderType { get; init; }
+    public required bool IsAgent { get; init; }
+    public string? Prompt { get; init; }
+    public bool? CanCreate { get; init; }
+}

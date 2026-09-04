@@ -74,6 +74,11 @@ public class McpServerStorageService(
     {
         var entryId = await AssertUserHasAccessAsync(_readTypes, entityId);
 
+        return await ReadAllVerifiedAsync(entryId);
+    }
+
+    internal async Task<IReadOnlyList<McpServer>> ReadAllVerifiedAsync(int? entryId)
+    {
         return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), entryId);
     }
 
@@ -131,6 +136,11 @@ public class McpServerStorageService(
         {
             await SendDeletedAsync(name, folder);
         }
+    }
+
+    internal async Task<ScopedValues<List<McpServer>>> ReadByScopesVerifiedAsync(int? firstEntryId, int? secondEntryId)
+    {
+        return await storage.ReadByScopesAsync(tenantManager.GetCurrentTenantId(), firstEntryId, secondEntryId);
     }
 
     private async Task SendCreatedAsync(string name, Folder<int>? folder)

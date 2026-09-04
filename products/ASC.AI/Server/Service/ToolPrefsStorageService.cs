@@ -49,7 +49,7 @@ public class ToolPrefsStorageService(
     {
         var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
-        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
+        return await ReadVerifiedAsync(entryId);
     }
 
     public async Task UpsertDisabledAsync(IReadOnlyDictionary<string, HashSet<string>> disabled, string? entityId = null)
@@ -76,5 +76,15 @@ public class ToolPrefsStorageService(
 
         var items = allowAlways.ToDictionary(kv => kv.Key, kv => new ToolPreference { AllowAlways = kv.Value });
         await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, items, entryId);
+    }
+
+    internal async Task<ScopedValues<Dictionary<string, ToolPreference>>> ReadByScopesVerifiedAsync(int? firstEntryId, int? secondEntryId)
+    {
+        return await storage.ReadByScopesAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, firstEntryId, secondEntryId);
+    }
+
+    private async Task<IReadOnlyDictionary<string, ToolPreference>> ReadVerifiedAsync(int? entryId)
+    {
+        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
     }
 }

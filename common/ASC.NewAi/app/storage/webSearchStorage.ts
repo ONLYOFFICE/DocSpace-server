@@ -45,11 +45,16 @@ import type {
     WebSearchStorage,
     WebSearchConfig,
 } from "@onlyoffice/ai-chat/core";
+import {
+    invalidateChatContext,
+    readChatContext,
+    reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const PATH = "/web-search";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
-function withOnlyofficeProviderOverrides(
+export function withWebSearchProviderOverrides(
     config: WebSearchConfig | null,
 ): WebSearchConfig | null {
     if (
@@ -84,7 +89,7 @@ function toBody(config: WebSearchConfig): Record<string, unknown> {
     return body;
 }
 
-function parseConfig(raw: unknown): WebSearchConfig | null {
+export function parseWebSearchConfig(raw: unknown): WebSearchConfig | null {
     if (!isObject(raw)) {
         return null;
     }
@@ -113,12 +118,18 @@ export class HttpWebSearchStorage implements WebSearchStorage {
     // scoping is not supported server-side and is ignored here.
     async create(config: WebSearchConfig, _entityId?: string): Promise<void> {
         await aiService.put(PATH, toBody(config));
+        invalidateChatContext("webSearch");
     }
 
     async read(_entityId?: string): Promise<WebSearchConfig | null> {
+        const snapshot = readChatContext("webSearch");
+        if (snapshot) {
+            return withWebSearchProviderOverrides(snapshot.webSearch);
+        }
+        reportChatContextMiss("webSearch.read");
         try {
             const raw = await aiService.get(PATH);
-            return withOnlyofficeProviderOverrides(parseConfig(raw));
+            return withWebSearchProviderOverrides(parseWebSearchConfig(raw));
         } catch (err) {
             if (err instanceof AiServiceHttpError && err.status === 404) {
                 return null;
@@ -129,13 +140,16 @@ export class HttpWebSearchStorage implements WebSearchStorage {
 
     async update(config: WebSearchConfig, _entityId?: string): Promise<void> {
         await aiService.put(PATH, toBody(config));
+        invalidateChatContext("webSearch");
     }
 
     async upsert(config: WebSearchConfig, _entityId?: string): Promise<void> {
         await aiService.put(PATH, toBody(config));
+        invalidateChatContext("webSearch");
     }
 
     async delete(_entityId?: string): Promise<void> {
+        invalidateChatContext("webSearch");
         try {
             await aiService.delete(PATH);
         } catch (err) {
