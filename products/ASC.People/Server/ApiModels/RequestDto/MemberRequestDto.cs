@@ -520,23 +520,25 @@ public class GetMemberByEmailRequestDto
 public class GetMemberByQueryRequestDto
 {
     /// <summary>
-    /// The search query.
+    /// The term to look for, taken from the route. Only accounts with the `Active` status are searched.
     /// </summary>
     /// <example>John</example>
     [FromRoute(Name = "query")]
     public required string Query { get; set; }
 
     /// <summary>
-    /// Specifies a filter criteria for the user search query.
+    /// The only recognised value is `group`, which turns `filterValue` into a group ID and keeps only the members of
+    /// that group. Any other value, and omitting the field, applies no group filter.
     /// </summary>
-    /// <example>displayName</example>
+    /// <example>group</example>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
 
     /// <summary>
-    /// The value used for filtering users, allowing additional constraints for the query.
+    /// The group ID to keep the members of, used only when `filterBy` is `group`. It has to be a valid identifier -
+    /// a group name is not accepted.
     /// </summary>
-    /// <example>John</example>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }
@@ -547,7 +549,8 @@ public class GetMemberByQueryRequestDto
 public class GetPeopleByQueryRequestDto
 {
     /// <summary>
-    /// The search query.
+    /// The term to look for. Only accounts with the `Active` status are searched, and this is the only parameter the
+    /// operation reads.
     /// </summary>
     /// <example>John</example>
     [FromQuery(Name = "query")]

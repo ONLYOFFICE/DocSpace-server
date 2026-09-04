@@ -1003,7 +1003,15 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of users matching the status filter and search query.
+    /// Searches the accounts that are in one particular state - the status is taken from the route - and whose name,
+    /// user name, email or contacts contain the search term.
+    /// Only a DocSpace administrator may call it; every other account, including a room admin, gets 403.
+    /// The call is read-only and is not paged: it matches in memory over every account of that status and streams
+    /// all of them, so it is meant for administrative lookups rather than for a user-facing list - use
+    /// `GET api/2.0/people/filter` when a page and a total are needed.
+    /// The term is matched as a case-insensitive substring and is required; `filterBy` set to `group` turns `text`
+    /// into a group ID and keeps only the members of that group, so `text` then has to be a valid identifier.
+    /// The answer holds full profiles, in no particular order.
     /// </remarks>
     /// <summary>
     /// Search users by status filter
@@ -1011,8 +1019,8 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The full profiles of the matching accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByStatus(AdvancedSearchDto inDto)
     {
@@ -1256,16 +1264,27 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of users with full information about them matching the parameters specified in the request.
+    /// Returns a page of portal accounts selected by the full set of account filters, with the complete profile of
+    /// each of them.
+    /// The caller has to be a room admin, a DocSpace admin or a People module admin; a member or a guest gets 403,
+    /// and a DocSpace admin additionally sees the accounts an ordinary admin does not.
+    /// The call is read-only, paged by `count` and `startIndex`, ordered by `sortBy` and `sortOrder`, and reports
+    /// the number of matches in the total count of the response.
+    /// Filters combine as conditions that all have to hold, with three interactions worth knowing: `withoutGroup`
+    /// makes `groupId` irrelevant, `employeeType` wins over `employeeTypes` when both are sent, and `area` set to
+    /// `Guests` or `People` cancels the type filters that contradict it.
+    /// `GET api/2.0/people/simple/filter` accepts exactly the same filters and returns the short profile instead, so
+    /// use that one for pickers and lists and this one when the full profile is really needed.
+    /// It is available on an unpaid portal.
     /// </remarks>
     /// <summary>
-    /// Search users with detailed information by extended filter
+    /// Filter users in detail
     /// </summary>
     /// <path>api/2.0/people/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "A page of matching accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
     [AllowNotPayment]
     [HttpGet("filter")]
     public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByExtendedFilter(SimpleByFilterRequestDto inDto)
@@ -1320,13 +1339,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of users matching the search query. This method uses the query parameters.
+    /// Searches the active accounts of the portal by a term passed in the query string, and is the same search as
+    /// `GET api/2.0/people/@search/{query}`, which takes the term in the path instead.
+    /// Only a DocSpace administrator may call it; every other account, including a room admin, gets 403.
+    /// Only accounts with the `Active` status are searched, so a pending invitation and a disabled account are never
+    /// found - use `GET api/2.0/people/filter` to search across states.
+    /// The call is read-only and is not paged: every match is streamed, without a total.
+    /// It takes the search term and nothing else - the group filter of
+    /// `GET api/2.0/people/@search/{query}` is not reachable here, because the handler forwards only `query` - so
+    /// use that operation when the result has to be narrowed to one group.
+    /// The answer holds full profiles, because the handler passes the request on to the operation that builds the
+    /// complete profile.
     /// </remarks>
-    /// <summary>Search users (using query parameters)</summary>
+    /// <summary>Search users by query</summary>
     /// <path>api/2.0/people/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users", typeof(IAsyncEnumerable<EmployeeDto>))]
+    [SwaggerResponse(200, "The full profiles of the matching active accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("search")]
     public IAsyncEnumerable<EmployeeDto> SearchUsersByQuery(GetPeopleByQueryRequestDto inDto)
     {
@@ -1335,14 +1365,22 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of users matching the search query.
+    /// Searches the active accounts of the portal by a term taken from the path, and is the same search as
+    /// `GET api/2.0/people/search`, which takes the term in the query string instead.
+    /// Only a DocSpace administrator may call it; every other account, including a room admin, gets 403.
+    /// Only accounts with the `Active` status are searched, so a pending invitation and a disabled account are never
+    /// found - use `GET api/2.0/people/filter` to search across states.
+    /// The call is read-only and is not paged: every match is streamed, without a total.
+    /// `filterBy` set to `group` turns `text` into a group ID and keeps only the members of that group, so `text`
+    /// then has to be a valid identifier.
+    /// The answer holds full profiles.
     /// </remarks>
     /// <summary>Search users</summary>
     /// <path>api/2.0/people/@search/{query}</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The full profiles of the matching active accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(GetMemberByQueryRequestDto inDto)
     {
@@ -1366,16 +1404,27 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of users matching the parameters specified in the request.
+    /// Returns a page of portal accounts selected by the full set of account filters, with the short profile of each
+    /// of them - the identifying fields, the avatar and the display name, without the contacts, the groups or the
+    /// quota.
+    /// The caller has to be a room admin, a DocSpace admin or a People module admin; a member or a guest gets 403.
+    /// The call is read-only, paged by `count` and `startIndex`, ordered by `sortBy` and `sortOrder`, and reports
+    /// the number of matches in the total count of the response.
+    /// It accepts exactly the same filters as `GET api/2.0/people/filter` and differs only in how much of each
+    /// profile comes back, so prefer this one for pickers, mentions and any list that shows names, and switch to the
+    /// other only when the full profile is needed.
+    /// Filters combine as conditions that all have to hold, and the same interactions apply: `withoutGroup` makes
+    /// `groupId` irrelevant, `employeeType` wins over `employeeTypes`, and `area` cancels the type filters that
+    /// contradict it.
     /// </remarks>
     /// <summary>
-    /// Search users by extended filter
+    /// Filter users in brief
     /// </summary>
     /// <path>api/2.0/people/simple/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users", typeof(IAsyncEnumerable<EmployeeDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "A page of matching accounts, with their short profiles", typeof(IAsyncEnumerable<EmployeeDto>))]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet("simple/filter")]
     public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(SimpleByFilterRequestDto inDto)
     {
@@ -2996,16 +3045,28 @@ public class UserControllerAdditional<T>(
     : ApiControllerBase
 {
     /// <remarks>
-    /// Returns the users with the sharing settings in a room with the ID specified in request.
+    /// Returns the accounts that are relevant to the room with the ID given in the route, and reports for each of
+    /// them whether it already has access to that room.
+    /// The caller only needs read access to the room, not the right to manage its access, but a guest may not call
+    /// it at all; an ID that matches no room answers 404.
+    /// The call is read-only, works without a filter - leaving `filterValue` empty returns every matching account
+    /// rather than nothing - and is paged by `count` and `startIndex`, with the number of matches in the total count
+    /// of the response.
+    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
+    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
+    /// A DocSpace administrator additionally sees the guests that are not related to the caller.
+    /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
+    /// `GET api/2.0/accounts/room/{id}/search` instead.
     /// </remarks>
     /// <summary>
-    /// Get users with room sharing settings
+    /// Search users for a room
     /// </summary>
     /// <path>api/2.0/people/room/{id}</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The matching accounts, each with its access state for the room", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a guest or cannot read the room")]
+    [SwaggerResponse(404, "No room has the specified ID")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomShared(UsersWithFileEntitySharedRequestDto<T> inDto)
     {
@@ -3017,15 +3078,28 @@ public class UserControllerAdditional<T>(
         }
     }
     /// <remarks>
-    /// Returns the users with the sharing settings in a folder with the ID specified in request.
+    /// Returns the accounts that are relevant to the folder with the ID given in the route, and reports for each of
+    /// them whether it already has access to that folder.
+    /// The caller only needs read access to the folder, not the right to manage its access, but a guest may not call
+    /// it at all; an ID that matches no folder answers 404.
+    /// The call is read-only, works without a filter - leaving `filterValue` empty returns every matching account
+    /// rather than nothing - and is paged by `count` and `startIndex`, with the number of matches in the total count
+    /// of the response.
+    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
+    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
+    /// A DocSpace administrator additionally sees the guests that are not related to the caller.
+    /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
+    /// `GET api/2.0/accounts/folder/{id}/search` instead.
     /// </remarks>
     /// <summary>
-    /// Get users with folder sharing settings
+    /// Search users for a folder
     /// </summary>
     /// <path>api/2.0/people/folder/{id}</path>
+    /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The matching accounts, each with its access state for the folder", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a guest or cannot read the folder")]
+    [SwaggerResponse(404, "No folder has the specified ID")]
     [HttpGet("folder/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithFoldersShared(UsersWithFileEntitySharedRequestDto<T> inDto)
     {
@@ -3037,15 +3111,28 @@ public class UserControllerAdditional<T>(
         }
     }
     /// <remarks>
-    /// Returns the users with the sharing settings in a file with the ID specified in request.
+    /// Returns the accounts that are relevant to the file with the ID given in the route, and reports for each of
+    /// them whether it already has access to that file.
+    /// The caller only needs read access to the file, not the right to manage its access, but a guest may not call
+    /// it at all; an ID that matches no file answers 404.
+    /// The call is read-only, works without a filter - leaving `filterValue` empty returns every matching account
+    /// rather than nothing - and is paged by `count` and `startIndex`, with the number of matches in the total count
+    /// of the response.
+    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
+    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
+    /// A DocSpace administrator additionally sees the guests that are not related to the caller.
+    /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
+    /// `GET api/2.0/accounts/file/{id}/search` instead.
     /// </remarks>
     /// <summary>
-    /// Get users with file sharing settings
+    /// Search users for a file
     /// </summary>
     /// <path>api/2.0/people/file/{id}</path>
+    /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The matching accounts, each with its access state for the file", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a guest or cannot read the file")]
+    [SwaggerResponse(404, "No file has the specified ID")]
     [HttpGet("file/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithFilesShared(UsersWithFileEntitySharedRequestDto<T> inDto)
     {
