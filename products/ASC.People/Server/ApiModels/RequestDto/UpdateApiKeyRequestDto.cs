@@ -40,20 +40,22 @@ namespace ASC.People.ApiModels.RequestDto;
 public class UpdateApiKeyRequest
 {
     /// <summary>
-    /// The new name for the API key.
+    /// The new label of the key, up to 30 characters. Omit it to keep the current name.
     /// </summary>
     /// <example>Updated API Key</example>
     [StringLength(30, ErrorMessage = "Incorrect name. Length must be less than 30")]
     public string Name { get; set; }
 
     /// <summary>
-    /// The new list of permissions for the API key.
+    /// The scopes that replace the current ones. Every value has to come from `GET api/2.0/keys/permissions`, an
+    /// unknown value or an empty array is rejected, and omitting the field keeps the current scopes.
     /// </summary>
-    /// <example>["read", "write", "delete"]</example>
+    /// <example>["rooms:read", "files:write"]</example>
     public List<string> Permissions { get; set; }
 
     /// <summary>
-    /// Indicates whether the API key should be active or not.
+    /// Whether the key may authenticate requests. Set it to false to stop the key without deleting it and to true to
+    /// let it work again; omit it to keep the current state.
     /// </summary>
     /// <example>true</example>
     public bool? IsActive { get; set; }
@@ -65,16 +67,18 @@ public class UpdateApiKeyRequest
 public class UpdateApiKeyRequestDto
 {
     /// <summary>
-    /// The unique identifier of the API key to update.
+    /// The ID of the key to update, taken from the route. Read it from the `id` of an entry of
+    /// `GET api/2.0/keys` - it is not the secret and not the `keyPostfix`.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "keyId")]
     public required Guid KeyId { get; set; }
 
     /// <summary>
-    /// The request parameters for updating an existing API key.
+    /// The fields to change. Every field is optional and the ones that are left out keep their current values, so an
+    /// empty object changes nothing.
     /// </summary>
-    /// <example>{"name":"Updated Key","permissions":["read"],"isActive":true}</example>
+    /// <example>{"name":"Updated Key","permissions":["rooms:read"],"isActive":true}</example>
     [FromBody]
     public required UpdateApiKeyRequest Changed { get; set; }
 }
