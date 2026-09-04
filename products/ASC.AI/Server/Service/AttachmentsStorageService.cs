@@ -43,6 +43,7 @@ public class AttachmentResult
     public int? EntryId { get; init; }
     public string? ThirdpartyEntryId { get; init; }
     public DateTime CreatedAt { get; init; }
+    public bool CanAnalyze { get; init; }
 }
 
 [Scope]
@@ -56,6 +57,8 @@ public class AttachmentsStorageService(
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
+    ExternalDatabaseClient externalDatabaseClient,
+    ILogger<AttachmentsStorageService> logger,
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly TimeSpan _downloadUrlExpiration = TimeSpan.FromHours(1);
@@ -108,7 +111,8 @@ public class AttachmentsStorageService(
 
         foreach (var file in internalFiles)
         {
-            yield return await ToResultAsync(intDao, created[index++], file);
+            var canAnalyze = await CanAnalyzeFormAsync(file);
+            yield return await ToResultAsync(intDao, created[index++], file, canAnalyze);
         }
 
         foreach (var file in thirdpartyFiles)
@@ -160,6 +164,37 @@ public class AttachmentsStorageService(
         await AssertUserHasAccessAsync(_allowedTypes);
 
         await storage.DeleteManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, ids);
+    }
+
+    /// <summary>
+    /// Reports whether an attached file is a started filling-form whose submissions can be analysed by the
+    /// form-data tools. Returns false when the file is not such a form, no external forms database is
+    /// configured, or its submission table does not yet exist.
+    /// </summary>
+    private async Task<bool> CanAnalyzeFormAsync(File<int> file)
+    {
+        if (file is not { IsForm: true } || !externalDatabaseClient.IsEnabled())
+        {
+            return false;
+        }
+
+        try
+        {
+            var properties = await DaoFactory.GetFileDao<int>().GetProperties(file.Id);
+            var formFilling = properties?.FormFilling;
+            if (formFilling?.StartFilling != true || formFilling.OriginalFormId != file.Id)
+            {
+                return false;
+            }
+
+            var tableName = FormFillingReportCreator.GetTableName(file.Id, file.Version);
+            return await externalDatabaseClient.TableExistsAsync(tableName);
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormAnalysisFailed(e, file.Id);
+            return false;
+        }
     }
 
     private async Task<List<File<T>>> LoadFilesAsync<T>(IFileDao<T> fileDao, IReadOnlyCollection<T> entryIds)
@@ -241,13 +276,13 @@ public class AttachmentsStorageService(
         };
     }
 
-    private static async Task<AttachmentResult> ToResultAsync<T>(IFileDao<T> fileDao, Attachment attachment, File<T> file)
+    private static async Task<AttachmentResult> ToResultAsync<T>(IFileDao<T> fileDao, Attachment attachment, File<T> file, bool canAnalyze = false)
     {
         var dataUrl = attachment.Kind == AttachmentKind.Image
             ? await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration)
             : null;
 
-        return ToResult(attachment, dataUrl, file is File<string> thirdpartyFile ? thirdpartyFile.Id : null);
+        return ToResult(attachment, dataUrl, file is File<string> thirdpartyFile ? thirdpartyFile.Id : null, canAnalyze);
     }
 
     private async Task<AttachmentResult> ToResultAsync(Attachment attachment)
@@ -273,7 +308,7 @@ public class AttachmentsStorageService(
         return string.IsNullOrEmpty(entryId) ? null : entryId;
     }
 
-    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl, string? thirdpartyEntryId)
+    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl, string? thirdpartyEntryId, bool canAnalyze = false)
     {
         return new AttachmentResult
         {
@@ -284,7 +319,8 @@ public class AttachmentsStorageService(
             DataUrl = dataUrl,
             EntryId = attachment.EntryId,
             ThirdpartyEntryId = thirdpartyEntryId,
-            CreatedAt = attachment.CreatedAt
+            CreatedAt = attachment.CreatedAt,
+            CanAnalyze = canAnalyze
         };
     }
 
@@ -306,4 +342,10 @@ public class AttachmentsStorageService(
 
         return null;
     }
+}
+
+internal static partial class AttachmentsStorageServiceLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Form analysis check failed for file {fileId}")]
+    public static partial void WarnFormAnalysisFailed(this ILogger<AttachmentsStorageService> logger, Exception exception, int fileId);
 }

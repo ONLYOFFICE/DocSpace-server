@@ -319,6 +319,27 @@ public class CustomerServiceUsageRequestDto
     public OperationOrderType? OrderType { get; init; }
 }
 
+/// <summary>
+/// The request parameters for receiving the prices of the service.
+/// </summary>
+public class ServicePricesRequestDto
+{
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>ai-tools</example>
+    [StringLength(255)]
+    [FromRoute(Name = "serviceName")]
+    public string ServiceName { get; init; }
+
+    /// <summary>
+    /// Specifies whether to return only the active prices. The default value is false.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "active")]
+    public bool Active { get; init; }
+}
+
 
 /// <summary>
 /// Deserializes a value that historically was a single JSON string but is now a list:
