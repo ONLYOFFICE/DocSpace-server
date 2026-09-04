@@ -140,14 +140,15 @@ public class SecurityController(
     /// Get the enabled modules
     /// </summary>
     /// <path>api/2.0/settings/security/modules</path>
+    /// <collection>list</collection>
     [Tags("Settings / Security")]
-    [SwaggerResponse(200, "List of enabled modules", typeof(object))]
+    [SwaggerResponse(200, "List of enabled modules", typeof(IEnumerable<EnabledModuleDto>))]
     [HttpGet("modules")]
-    public async Task<object> GetEnabledModules()
+    public async Task<IEnumerable<EnabledModuleDto>> GetEnabledModules()
     {
         var enabledModules = (await webItemManagerSecurity.GetItemsAsync(WebZoneType.All))
                                     .Where(item => !item.IsSubItem() && item.Visible)
-            .Select(item => new { id = item.ProductClassName.HtmlEncode(), title = item.Name.HtmlEncode() });
+            .Select(item => new EnabledModuleDto { Id = item.ProductClassName.HtmlEncode(), Title = item.Name.HtmlEncode() });
 
         return enabledModules;
     }

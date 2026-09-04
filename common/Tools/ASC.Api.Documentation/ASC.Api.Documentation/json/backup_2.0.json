@@ -1742,7 +1742,6 @@
             "description": "Specifies if a dump will be created or not."
           }
         },
-        "additionalProperties": false,
         "description": "The backup parameters."
       },
       "BackupHistoryRecord": {
@@ -1794,7 +1793,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The backup history parameters."
       },
       "BackupHistoryRecordArrayWrapper": {
@@ -1952,7 +1950,6 @@
             "description": "The task ID."
           }
         },
-        "additionalProperties": false,
         "description": "The backup progress parameters."
       },
       "BackupProgressEnum": {
@@ -2086,7 +2083,6 @@
             "description": "Specifies if a dump will be created or not."
           }
         },
-        "additionalProperties": false,
         "description": "The backup restoring parameters."
       },
       "BackupScheduleDto": {
@@ -2138,7 +2134,6 @@
             "description": "Specifies if a dump will be created or not."
           }
         },
-        "additionalProperties": false,
         "description": "The backup schedule parameters."
       },
       "BackupServiceStateDto": {
@@ -2152,7 +2147,6 @@
             "description": "Specifies if the backup service is enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "Backup service state."
       },
       "BackupServiceStateWrapper": {
@@ -2261,7 +2255,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The number of backups."
       },
       "BackupsCountResultWrapper": {
@@ -2375,7 +2368,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The backup cron parameters."
       },
       "CronParams": {
@@ -2402,7 +2394,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The backup cron parameters."
       },
       "DistributedTaskStatus": {
@@ -2539,7 +2530,6 @@
             "description": "The value associated with the key."
           }
         },
-        "additionalProperties": false,
         "description": "A key-value pair of a list item."
       },
       "ScheduleDto": {
@@ -2603,7 +2593,6 @@
             "description": "Specifies if a dump will be created or not."
           }
         },
-        "additionalProperties": false,
         "description": "The backup schedule parameters."
       },
       "ScheduleWrapper": {

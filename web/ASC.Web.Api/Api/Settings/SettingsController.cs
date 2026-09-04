@@ -636,11 +636,11 @@ public partial class SettingsController(
     /// <summary>Get hostname</summary>
     /// <path>api/2.0/settings/machine</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal hostname", typeof(object))]
+    [SwaggerResponse(200, "Portal hostname", typeof(string))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
-    public object GetPortalHostname()
+    public string GetPortalHostname()
     {
         return Request.Host.Value;
     }
@@ -1041,9 +1041,9 @@ public partial class SettingsController(
     /// <summary>Get the socket settings</summary>
     /// <path>api/2.0/settings/socket</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Socket settings: hub URL", typeof(object))]
+    [SwaggerResponse(200, "Socket settings: hub URL", typeof(SocketSettingsDto))]
     [HttpGet("socket")]
-    public object GetSocketSettings()
+    public SocketSettingsDto GetSocketSettings()
     {
         var hubUrl = configuration["web:hub"] ?? string.Empty;
         if (hubUrl.Length != 0)
@@ -1054,7 +1054,7 @@ public partial class SettingsController(
             }
         }
 
-        return new { Url = hubUrl };
+        return new SocketSettingsDto { Url = hubUrl };
     }
 
     /// <remarks>

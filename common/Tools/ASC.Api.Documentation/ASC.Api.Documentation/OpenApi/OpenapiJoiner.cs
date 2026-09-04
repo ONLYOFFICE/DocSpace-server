@@ -103,7 +103,9 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         // carries workarounds for openapi-generator's incomplete openapi 3.1 support, and those
         // workarounds change what the schemas say: `additionalProperties: false` is dropped and the
         // examples move to a keyword 3.1 does not define. Publishing that as the API contract would
-        // hand everyone else a description the server does not actually implement.
+        // hand everyone else a description the server does not actually implement. `ApiDateTime` runs
+        // the other way round - the object shape is the one the generator needs and the string is what
+        // the wire carries - so it is collapsed for publishing instead.
         if (!string.IsNullOrWhiteSpace(publishPath))
         {
             var published = result.DeepClone().AsObject();
@@ -139,6 +141,11 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         if (applyGeneratorWorkarounds)
         {
             NormalizeNullableTypes(document);
+        }
+        else
+        {
+            // Also first: the passes below key off `$ref` targets, and this one leaves none behind.
+            InlineApiDateTime(document);
         }
 
         EnumCleaner.Clean(document);
@@ -627,6 +634,125 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
 
         schemas.Remove("KeyValuePairStringStringValues");
+    }
+
+    /// <summary>
+    /// Replaces every reference to the <c>ApiDateTime</c> component with the ISO-8601 string the wire actually
+    /// carries, and drops the component itself. <c>ApiDateTimeConverter</c> is declared on the type, and it
+    /// writes a single string and reads a single string, so the reflected <c>utcTime</c>/<c>timeZoneOffset</c>
+    /// object never appears in a body. That object shape is kept in the SDK input on purpose - it is what makes
+    /// openapi-generator emit a named <c>ApiDateTime</c> model, which the generated clients then map to and from
+    /// the string with a converter of their own - but publishing it would describe a payload nobody sends.
+    /// Two names because two emitters: the .NET services call it <c>ApiDateTime</c> and the Node service, whose
+    /// components are all prefixed, calls it <c>AiApiDateTime</c>.
+    /// </summary>
+    private static void InlineApiDateTime(JsonObject document)
+    {
+        if (document["components"]?["schemas"] is not JsonObject schemas)
+        {
+            return;
+        }
+
+        var inlined = new Dictionary<string, JsonObject>();
+
+        foreach (var schemaId in (string[])["ApiDateTime", "AiApiDateTime"])
+        {
+            if (schemas[schemaId] is not JsonObject schema)
+            {
+                continue;
+            }
+
+            var replacement = new JsonObject
+            {
+                ["type"] = "string",
+                ["format"] = "date-time"
+            };
+
+            // The example belongs to the property the component reflected, so it stays in step with the DTO
+            // instead of being spelled out here a second time.
+            if (schema["properties"]?["utcTime"]?["examples"] is JsonArray { Count: > 0 } examples)
+            {
+                replacement["examples"] = new JsonArray(examples[0]?.DeepClone());
+            }
+
+            inlined[$"#/components/schemas/{schemaId}"] = replacement;
+        }
+
+        if (inlined.Count == 0)
+        {
+            return;
+        }
+
+        InlineSchemaRefs(document, inlined);
+
+        foreach (var reference in inlined.Keys)
+        {
+            schemas.Remove(reference["#/components/schemas/".Length..]);
+        }
+    }
+
+    /// <summary>
+    /// Swaps each <c>$ref</c> listed in <paramref name="inlined"/> for its replacement schema, keeping whatever
+    /// the reference site said alongside it - a per-property <c>description</c>, most of the time.
+    /// </summary>
+    private static void InlineSchemaRefs(JsonNode? node, Dictionary<string, JsonObject> inlined)
+    {
+        switch (node)
+        {
+            case JsonObject obj:
+                foreach (var property in obj.ToArray())
+                {
+                    if (TryInlineSchemaRef(property.Value, inlined, out var replacement))
+                    {
+                        obj[property.Key] = replacement;
+                        continue;
+                    }
+
+                    InlineSchemaRefs(property.Value, inlined);
+                }
+
+                return;
+
+            case JsonArray array:
+                for (var i = 0; i < array.Count; i++)
+                {
+                    if (TryInlineSchemaRef(array[i], inlined, out var replacement))
+                    {
+                        array[i] = replacement;
+                        continue;
+                    }
+
+                    InlineSchemaRefs(array[i], inlined);
+                }
+
+                return;
+        }
+    }
+
+    private static bool TryInlineSchemaRef(JsonNode? node, Dictionary<string, JsonObject> inlined, out JsonObject? replacement)
+    {
+        replacement = null;
+
+        if (node is not JsonObject schema
+            || schema["$ref"] is not JsonValue reference
+            || !reference.TryGetValue<string>(out var target)
+            || !inlined.TryGetValue(target, out var template))
+        {
+            return false;
+        }
+
+        replacement = template.DeepClone().AsObject();
+
+        // A sibling of `$ref` is an annotation the reference site adds, so it wins over the template.
+        foreach (var property in schema)
+        {
+            if (property.Key != "$ref")
+            {
+                replacement[property.Key] = property.Value?.DeepClone();
+            }
+        }
+
+        return true;
     }
 
     /// <summary>
