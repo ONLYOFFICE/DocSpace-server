@@ -33,66 +33,43 @@
 
 namespace ASC.ClearEvents.Services;
 
-[Scope]
-public class ClearAuditEventsService(
-    ILogger<ClearAuditEventsService> logger,
-    IServiceScopeFactory serviceScopeFactory,
-    IConfiguration configuration) : BackgroundService
+[Singleton]
+public sealed class ClearAuditEventsService : ActivePassiveBackgroundService<ClearAuditEventsService>
 {
-    private readonly AuditTrailRetentionConfiguration _retention =
-        configuration.GetSection(AuditTrailRetentionConfiguration.SectionName).Get<AuditTrailRetentionConfiguration>() ?? new();
+    private static readonly AuditTrailRetentionConfiguration _defaults = new();
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    private readonly ILogger<ClearAuditEventsService> _logger;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly AuditTrailRetentionConfiguration _retention;
+
+    public ClearAuditEventsService(
+        ILogger<ClearAuditEventsService> logger,
+        IServiceScopeFactory scopeFactory,
+        IConfiguration configuration)
+        : base(logger, scopeFactory)
+    {
+        _logger = logger;
+        _serviceScopeFactory = scopeFactory;
+        _retention = configuration.GetSection(AuditTrailRetentionConfiguration.SectionName).Get<AuditTrailRetentionConfiguration>() ?? new();
+
+        ExecuteTaskPeriod = _retention.Period > TimeSpan.Zero ? _retention.Period : _defaults.Period;
+    }
+
+    protected override TimeSpan ExecuteTaskPeriod { get; set; }
+
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         if (!_retention.Enabled)
         {
-            logger.InformationDisabled();
             return;
         }
 
         if (_retention.PaidLifeTimeDays <= 0 || _retention.FreeLifeTimeDays <= 0 || _retention.BatchSize <= 0 || _retention.Period <= TimeSpan.Zero)
         {
-            logger.WarningInvalidConfiguration(_retention.PaidLifeTimeDays, _retention.FreeLifeTimeDays, _retention.BatchSize, _retention.Period);
+            _logger.WarningInvalidConfiguration(_retention.PaidLifeTimeDays, _retention.FreeLifeTimeDays, _retention.BatchSize, _retention.Period);
             return;
         }
 
-        logger.InformationTimerRunning(_retention.PaidLifeTimeDays, _retention.FreeLifeTimeDays);
-
-        using var timer = new PeriodicTimer(_retention.Period);
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                await RemoveOldAuditEventsAsync(stoppingToken);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                logger.ErrorWithException(ex);
-            }
-
-            try
-            {
-                if (!await timer.WaitForNextTickAsync(stoppingToken))
-                {
-                    break;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-        }
-
-        logger.InformationTimerStopping();
-    }
-
-    private async Task RemoveOldAuditEventsAsync(CancellationToken stoppingToken)
-    {
         var now = DateTime.UtcNow;
 
         var freeThreshold = now.AddDays(-_retention.FreeLifeTimeDays);
@@ -101,7 +78,7 @@ public class ClearAuditEventsService(
         var removed = 0;
         var tenants = 0;
 
-        foreach (var tenantId in await GetTenantIdsAsync(stoppingToken))
+        foreach (var tenantId in await GetTenantIdsToClearAsync(freeThreshold, stoppingToken))
         {
             if (stoppingToken.IsCancellationRequested)
             {
@@ -126,33 +103,32 @@ public class ClearAuditEventsService(
             }
             catch (Exception ex)
             {
-                logger.WarningClearTenantFailed(tenantId, ex);
+                _logger.WarningClearTenantFailed(tenantId, ex);
             }
         }
 
         if (removed > 0)
         {
-            logger.InformationRemovedAuditEvents(removed, tenants);
+            _logger.InformationRemovedAuditEvents(removed, tenants);
         }
     }
 
-    private async Task<List<int>> GetTenantIdsAsync(CancellationToken stoppingToken)
+    private async Task<List<int>> GetTenantIdsToClearAsync(DateTime freeThreshold, CancellationToken stoppingToken)
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var ef = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
 
-        return await ef.Tenants.OrderBy(r => r.Id).Select(r => r.Id).ToListAsync(stoppingToken);
+        return await ef.AuditEvents
+            .GroupBy(r => r.TenantId)
+            .Where(r => r.Min(a => a.Date) < freeThreshold)
+            .Select(r => r.Key)
+            .ToListAsync(stoppingToken);
     }
 
     private async Task<int> RemoveOldAuditEventsAsync(int tenantId, DateTime freeThreshold, DateTime paidThreshold, CancellationToken stoppingToken)
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var ef = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
-
-        if (!await ef.AuditEvents.AnyAsync(r => r.TenantId == tenantId && r.Date < freeThreshold, stoppingToken))
-        {
-            return 0;
-        }
 
         var paid = await IsPaidAsync(scope.ServiceProvider, tenantId);
         var threshold = paid ? paidThreshold : freeThreshold;
@@ -177,7 +153,7 @@ public class ClearAuditEventsService(
 
             if (deleted == 0)
             {
-                break;
+                continue;
             }
 
             removed += deleted;
@@ -185,7 +161,7 @@ public class ClearAuditEventsService(
 
         if (removed > 0)
         {
-            logger.DebugRemovedAuditEvents(removed, threshold, tenantId, paid);
+            _logger.DebugRemovedAuditEvents(removed, threshold, tenantId, paid);
         }
 
         return removed;

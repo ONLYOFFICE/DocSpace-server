@@ -44,6 +44,6 @@ public class Startup(IConfiguration configuration) : BaseWorkerStartup(configura
     {
         await base.ConfigureServices(builder);
 
-        builder.Services.AddClearEventsServices();
+        builder.Services.AddClearEventsServices(Configuration);
     }
 }
