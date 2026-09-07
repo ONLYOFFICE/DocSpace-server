@@ -389,9 +389,11 @@ public class GroupController(
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        // Resolve the group before the payload is validated, so that an unknown ID answers 404 instead of the 400 of
-        // the member check below. Both checks otherwise happen inside RemoveMembersFrom, after that 400.
-        await GetGroupInfoAsync(inDto.Id);
+        // Resolved here, before the payload is validated, so that an unknown ID answers 404 instead of the 400 of
+        // the member check below. The removals and the additions then reuse this instance and go through the private
+        // helpers rather than through AddMembersTo/RemoveMembersFrom: those are endpoints of their own and would
+        // repeat the permission demand, the lookup and the response DTO for every call.
+        var group = await GetGroupInfoAsync(inDto.Id);
 
         var anyValidMembers = await inDto.Members.Members
             .ToAsyncEnumerable()
@@ -402,10 +404,17 @@ public class GroupController(
             throw new ArgumentException(nameof(inDto.Members.Members));
         }
 
-        await RemoveMembersFrom(new MembersRequestDto { Id = inDto.Id, Members = new MembersRequest { Members = (await userManager.GetUsersByGroupAsync(inDto.Id)).Select(x => x.Id) } });
-        await AddMembersTo(inDto);
+        foreach (var user in await userManager.GetUsersByGroupAsync(group.ID))
+        {
+            await RemoveUserFromDepartmentAsync(user.Id, group);
+        }
 
-        return await GetGroup(new DetailedInformationRequestDto { Id = inDto.Id });
+        foreach (var userId in inDto.Members.Members)
+        {
+            await TransferUserToDepartmentAsync(userId, group, false);
+        }
+
+        return await GetGroup(new DetailedInformationRequestDto { Id = group.ID });
     }
 
     /// <remarks>
