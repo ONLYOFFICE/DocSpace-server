@@ -32,7 +32,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using DocSpace.API.SDK.Api.Group;
-using DocSpace.API.SDK.Api.Privacyroom;
 
 using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
 using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
@@ -63,7 +62,7 @@ public class BaseTest(
     protected QuotaApi _quotaApi = null!;
     protected PaymentApi _paymentApi = null!;
     protected SharingApi _sharingApi = null!;
-    protected PrivacyroomApi _privacyRoomApi = null!;
+    protected PrivacyRoomApi _privacyRoomApi = null!;
     protected ThirdPartyIntegrationApi _thirdPartyApi = null!;
 
     protected GroupApi _groupApi = null!;

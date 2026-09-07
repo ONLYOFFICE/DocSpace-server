@@ -50,9 +50,9 @@ public class GreetingSettingsController(
     /// <summary>Get greeting settings</summary>
     /// <path>api/2.0/settings/greetingsettings</path>
     [Tags("Settings / Greeting settings")]
-    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
+    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(string))]
     [HttpGet("")]
-    public object GetGreetingSettings()
+    public string GetGreetingSettings()
     {
         var tenant = tenantManager.GetCurrentTenant();
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;

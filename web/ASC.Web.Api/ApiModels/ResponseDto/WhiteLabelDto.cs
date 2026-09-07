@@ -64,7 +64,7 @@ public class WhiteLabelItemDto
     /// The white label file size.
     /// </summary>
     /// <example>{}</example>
-    public IMagickGeometry Size { get; set; }
+    public WhiteLabelItemSizeDto Size { get; set; }
 
     /// <summary>
     /// The white label file path.
@@ -89,4 +89,99 @@ public class WhiteLabelItemPathDto
     /// </summary>
     /// <example>/images/logo-dark.png</example>
     public string Dark { get; set; }
+}
+
+/// <summary>
+/// The white label logo size parameters.
+/// </summary>
+public class WhiteLabelItemSizeDto
+{
+    /// <summary>
+    /// Specifies whether the size is an aspect ratio.
+    /// </summary>
+    /// <example>false</example>
+    public bool AspectRatio { get; set; }
+
+    /// <summary>
+    /// Specifies whether the logo is resized based on the smallest fitting dimension.
+    /// </summary>
+    /// <example>false</example>
+    public bool FillArea { get; set; }
+
+    /// <summary>
+    /// Specifies whether the logo is resized only if it is greater than the size.
+    /// </summary>
+    /// <example>false</example>
+    public bool Greater { get; set; }
+
+    /// <summary>
+    /// The logo height, in pixels.
+    /// </summary>
+    /// <example>48</example>
+    public uint Height { get; set; }
+
+    /// <summary>
+    /// Specifies whether the logo is resized without preserving the aspect ratio.
+    /// </summary>
+    /// <example>false</example>
+    public bool IgnoreAspectRatio { get; set; }
+
+    /// <summary>
+    /// Specifies whether the width and height are expressed as percentages.
+    /// </summary>
+    /// <example>false</example>
+    public bool IsPercentage { get; set; }
+
+    /// <summary>
+    /// Specifies whether the logo is resized only if it is less than the size.
+    /// </summary>
+    /// <example>false</example>
+    public bool Less { get; set; }
+
+    /// <summary>
+    /// Specifies whether the logo is resized using a pixel area count limit.
+    /// </summary>
+    /// <example>false</example>
+    public bool LimitPixels { get; set; }
+
+    /// <summary>
+    /// The logo width, in pixels.
+    /// </summary>
+    /// <example>422</example>
+    public uint Width { get; set; }
+
+    /// <summary>
+    /// The X offset from the origin, in pixels.
+    /// </summary>
+    /// <example>0</example>
+    public int X { get; set; }
+
+    /// <summary>
+    /// The Y offset from the origin, in pixels.
+    /// </summary>
+    /// <example>0</example>
+    public int Y { get; set; }
+
+    /// <summary>
+    /// Creates the white label logo size from the image geometry.
+    /// </summary>
+    /// <param name="geometry">The image geometry.</param>
+    /// <returns>The white label logo size parameters.</returns>
+    public static WhiteLabelItemSizeDto FromGeometry(IMagickGeometry geometry)
+    {
+        return new WhiteLabelItemSizeDto
+        {
+            AspectRatio = geometry.AspectRatio,
+            FillArea = geometry.FillArea,
+            Greater = geometry.Greater,
+            Height = geometry.Height,
+            IgnoreAspectRatio = geometry.IgnoreAspectRatio,
+            IsPercentage = geometry.IsPercentage,
+            Less = geometry.Less,
+            LimitPixels = geometry.LimitPixels,
+            Width = geometry.Width,
+            X = geometry.X,
+            Y = geometry.Y
+        };
+    }
 }

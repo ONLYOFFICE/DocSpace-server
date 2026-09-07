@@ -1113,7 +1113,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.Forms)
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1797,6 +1797,7 @@ public class FileStorageService //: IFileStorageService
             folder = await folderDao.GetFolderAsync(fileWrapper.ParentId);
             var canCreate = await fileSecurity.CanCreateAsync(folder) &&
                             folder.FolderType != FolderType.VirtualRooms &&
+                            folder.FolderType != FolderType.AiAgents &&
                             folder.FolderType != FolderType.RoomTemplates &&
                             folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive &&

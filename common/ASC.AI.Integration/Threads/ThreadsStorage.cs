@@ -40,7 +40,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var now = DateTime.UtcNow;
+        var now = TruncateToMilliseconds(DateTime.UtcNow);
         var entity = new DbThread
         {
             Id = Guid.CreateVersion7(),
@@ -67,15 +67,53 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         return entity == null ? null : ToDomainEntity(entity);
     }
 
-    public async Task<IEnumerable<Thread>> ReadAllAsync(int tenantId, Guid createdBy, int? entryId = null)
+    public async Task<List<Thread>> ReadAllAsync(int tenantId, Guid createdBy, int count, int? entryId = null, ThreadsCursor? cursor = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var threads = entryId.HasValue
-            ? context.GetAllThreadsByEntryAsync(tenantId, createdBy, entryId.Value)
-            : context.GetAllThreadsAsync(tenantId, createdBy);
+        var threads = cursor == null
+            ? entryId.HasValue
+                ? context.GetThreadsByEntryAsync(tenantId, createdBy, entryId.Value, count)
+                : context.GetThreadsAsync(tenantId, createdBy, count)
+            : entryId.HasValue
+                ? context.GetThreadsByEntryFromCursorAsync(tenantId, createdBy, entryId.Value, cursor.LastEditDate, cursor.Id, count)
+                : context.GetThreadsFromCursorAsync(tenantId, createdBy, cursor.LastEditDate, cursor.Id, count);
 
         return await threads
+            .Select(ToDomainEntity)
+            .ToListAsync();
+    }
+
+    public async Task<List<Thread>> SearchAsync(int tenantId, Guid createdBy, string text, int count, int? entryId = null, ThreadsCursor? cursor = null)
+    {
+        var tokens = BuildSearchTokens(text);
+        if (tokens.Count == 0)
+        {
+            return [];
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var query = context.Threads.Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy);
+
+        query = entryId.HasValue
+            ? query.Where(x => x.EntryId == entryId)
+            : query.Where(x => x.EntryId == null);
+
+        query = tokens.Aggregate(query, (current, token) => current
+            .Where(x => x.Title.ToLower().Replace("ё", "е").Contains(token)));
+
+        if (cursor != null)
+        {
+            query = query.Where(x => x.LastEditDate < cursor.LastEditDate
+                                     || (x.LastEditDate == cursor.LastEditDate && x.Id.CompareTo(cursor.Id) < 0));
+        }
+
+        return await query
+            .OrderByDescending(x => x.LastEditDate)
+            .ThenByDescending(x => x.Id)
+            .Take(count)
+            .AsAsyncEnumerable()
             .Select(ToDomainEntity)
             .ToListAsync();
     }
@@ -88,7 +126,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         }
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
-        await context.UpdateThreadTitleAsync(tenantId, threadId, title);
+        await context.UpdateThreadTitleAsync(tenantId, threadId, title, TruncateToMilliseconds(DateTime.UtcNow));
     }
 
     public async Task TouchAsync(int tenantId, Guid threadId, DateTime lastEditDate, Guid? profileId = null, bool clearProfile = false)
@@ -111,6 +149,22 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         await context.DeleteThreadAsync(tenantId, threadId);
+    }
+
+    private static List<string> BuildSearchTokens(string text)
+    {
+        return
+        [
+            .. text
+                .ToLowerInvariant()
+                .Replace('ё', 'е')
+                .Split([' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        ];
+    }
+
+    private static DateTime TruncateToMilliseconds(DateTime value)
+    {
+        return new DateTime(value.Ticks - value.Ticks % TimeSpan.TicksPerMillisecond, value.Kind);
     }
 
     private static Thread ToDomainEntity(DbThread entity)

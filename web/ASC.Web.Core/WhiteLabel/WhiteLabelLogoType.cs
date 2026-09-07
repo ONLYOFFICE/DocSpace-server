@@ -37,6 +37,9 @@ using NetEscapades.EnumGenerators;
 
 namespace ASC.Web.Core.WhiteLabel;
 
+/// <summary>
+/// The place a white-label logo is shown in.
+/// </summary>
 [EnumExtensions]
 public enum WhiteLabelLogoType
 {

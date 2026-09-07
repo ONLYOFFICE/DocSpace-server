@@ -1019,9 +1019,9 @@ public class VirtualRoomsCommonController(
     /// <path>api/2.0/files/tags</path>
     /// <collection>list</collection>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "List of tag names", typeof(IAsyncEnumerable<object>))]
+    [SwaggerResponse(200, "List of tag names", typeof(IAsyncEnumerable<string>))]
     [HttpGet("tags")]
-    public IAsyncEnumerable<object> GetRoomTagsInfo(GetTagsInfoRequestDto inDto)
+    public IAsyncEnumerable<string> GetRoomTagsInfo(GetTagsInfoRequestDto inDto)
     {
         return customTagsService.GetTagsInfoAsync<int>(inDto.Text, TagType.Custom, inDto.StartIndex, inDto.Count);
     }
@@ -1035,6 +1035,9 @@ public class VirtualRoomsCommonController(
     [Tags("Rooms")]
     [SwaggerResponse(200, "True if tag has links, false otherwise", typeof(bool))]
     [SwaggerResponse(404, "Tag not found")]
+    // HasTagLinksRequestDto binds `tagName` `[FromQuery]`, so the route placeholder of the same name
+    // is unbound and the value has to be sent twice - which is what the generated SDKs already do.
+    [SwaggerPathParameter("tagName", "The tag being checked. Send the same value as the `tagName` query parameter, which is the one the handler reads.")]
     [HttpGet("tags/{tagName}/haslinks")]
     public async Task<bool> HasTagLinks(HasTagLinksRequestDto requestDto)
     {

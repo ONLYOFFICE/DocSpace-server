@@ -42,7 +42,7 @@ import {
   canTakeUpload,
 } from "./docspaceFilesApi.js";
 import { getForwardedHeaders } from "../requestContext.js";
-import { getNumber, getString, isObject } from "../narrow.js";
+import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
 import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
@@ -313,6 +313,11 @@ function dtoToAttachment(raw: unknown): Attachment | null {
   const source = getString(raw, "source");
   if (source === "user" || source === "tool") {
     result.source = source;
+  }
+  // Whether the attached form's submissions can be analysed by the form-data tools (C# `AttachmentDto`).
+  const canAnalyze = getBoolean(raw, "canAnalyze");
+  if (canAnalyze !== undefined) {
+    result.canAnalyze = canAnalyze;
   }
   return result;
 }

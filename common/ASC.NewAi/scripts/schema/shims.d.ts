@@ -6,6 +6,7 @@
 // generator can resolve chat message request/response types without pulling
 // in the UI library. Not compiled into the app.
 declare module "@assistant-ui/react" {
+  /** A single chat message as it travels on the wire. */
   export type ThreadMessageLike = {
     /** Storage-assigned message id (absent on inbound drafts). */
     id?: string;

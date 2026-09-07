@@ -31,7 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
@@ -108,6 +107,9 @@ public class AuthenticationController(
     [SwaggerResponse(403, "Auth code is not available")]
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment, AllowAnonymous]
+    // AuthWithCodeRequestsDto carries `code` in the body, so the route placeholder is unbound; the
+    // client (loginWithTfaCode) puts the same code in both.
+    [SwaggerPathParameter("code", "The two-factor authentication code. Send the same value as the `code` of the request body, which is the one the handler reads.")]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthWithCodeRequestsDto inDto)
     {

@@ -54,10 +54,10 @@ public class MessageStorageController(MessageStorageService messageStorageServic
     }
 
     [HttpGet("threads/{threadId}/messages")]
-    public async Task<List<MessageDto>> ReadByThreadAsync(ReadMessagesByThreadRequestDto inDto)
+    public async Task<MessagesPageDto> ReadByThreadAsync(ReadMessagesByThreadRequestDto inDto)
     {
-        var messages = await messageStorageService.ReadByThreadAsync(inDto.ThreadId, inDto.Limit, inDto.StartIndex);
-        return messages.Select(MessageMapper.MapToDto).ToList();
+        var page = await messageStorageService.ReadByThreadAsync(inDto.ThreadId, inDto.Count, inDto.Cursor?.ToCursor(), inDto.Direction);
+        return MessagesPageMapper.MapToDto(page);
     }
 
     [HttpPut("messages/{id}")]

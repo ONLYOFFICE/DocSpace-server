@@ -110,7 +110,7 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Obsolete]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session")]
+    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<int>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/upload/create_session")]
     public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSession(SessionRequestDto<T> inDto)
@@ -134,7 +134,7 @@ public abstract class UploadController<T>(
     /// <param name="inDto">The request object containing the folder ID and session details, including file name, size, relative path, and additional upload settings.</param>
     /// <returns>A response containing details about the created upload session, such as session ID, expiration information, and upload progress data.</returns>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200)]
+    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponse<int>))]
     [HttpPost("{folderId}/session")]
     public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestDto<T> inDto)
     {
@@ -187,7 +187,7 @@ public abstract class UploadController<T>(
     /// version, title, and additional details), as well as whether the upload process has been completed.
     /// </returns>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200)]
+    [SwaggerResponse(200, "Current state of the upload session and, once the upload is complete, the uploaded file", typeof(UploadSessionResponseDto<int>))]
     [HttpPost("{folderId}/session/{sessionId}")]
     public async Task<UploadSessionResponseDto<T>> UploadSession(UploadSessionRequestDto<T> inDto)
     {
@@ -276,7 +276,7 @@ public abstract class UploadController<T>(
     /// details about the upload session.
     /// </returns>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200)]
+    [SwaggerResponse(200, "Updated information about the upload session, including the current progress", typeof(ChunkedUploadSessionResponse<int>))]
     [HttpPost("{folderId}/session/{sessionId}/upload")]
     public async Task<ChunkedUploadSessionResponse<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
     {
@@ -294,7 +294,7 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/finalize</path>
     /// <returns>An object containing details about the completed upload session, including file metadata and upload status.</returns>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200)]
+    [SwaggerResponse(200, "Details about the completed upload session, including the file metadata", typeof(UploadSessionResponseDto<int>))]
     [HttpPut("{folderId}/session/{sessionId}/finalize")]
     public async Task<UploadSessionResponseDto<T>> FinalizeSession(FinalizeSessionDto<T> inDto)
     {
@@ -367,7 +367,7 @@ public abstract class UploadController<T>(
     /// </remarks>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Information about created session")]
+    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<int>))]
     [SwaggerResponse(403, "You don't have enough permission to edit the file")]
     [HttpPost("file/{fileId}/edit_session")]
     public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)

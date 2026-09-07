@@ -61,23 +61,54 @@ public class RoomFromTemplatePermissionsTests(
     }
 
     /// <remarks>
-    /// A User or a Guest used to be able to create a room from a template even though neither has
-    /// the create-room permission — bug 81662. Fixed by checking access synchronously in the controller, before the background operation is queued.
+    /// A User used to be able to create a room from a template even though they do not have the
+    /// create-room permission — bug 81662. Fixed by checking access synchronously in the
+    /// controller, before the background operation is queued.
     /// </remarks>
-    [Theory]
-    [InlineData(EmployeeType.User)]
-    [InlineData(EmployeeType.Guest)]
+    [Fact]
     [Trait("Bug", "81662")]
-    public async Task CreateRoomFromTemplate_UserOrGuest_Forbidden(EmployeeType employeeType)
+    public async Task CreateRoomFromTemplate_User_Forbidden()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var templateId = await CreateTemplate($"Autotest FromTmpl {employeeType} Template", isPublic: true);
+        var templateId = await CreateTemplate("Autotest FromTmpl User Template", isPublic: true);
 
-        var member = await InviteMember(employeeType);
-        await _filesClient.Authenticate(member);
+        var user = await InviteMember(EmployeeType.User);
+        await _filesClient.Authenticate(user);
 
-        var roomTitle = $"{employeeType} Room";
+        const string roomTitle = "User Room";
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.CreateRoomFromTemplateAsync(
+                new CreateRoomFromTemplateDto(templateId, roomTitle),
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+
+        await _filesClient.Authenticate(Owner);
+        var titles = await GetRoomTitles();
+        titles.Should().NotContain(roomTitle);
+    }
+
+    /// <remarks>
+    /// A Guest used to be able to create a room from a template even though they do not have the
+    /// create-room permission — bug 81663. Fixed by checking access synchronously in the
+    /// controller, before the background operation is queued.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "81663")]
+    public async Task CreateRoomFromTemplate_Guest_Forbidden()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var templateId = await CreateTemplate("Autotest FromTmpl Guest Template", isPublic: true);
+
+        var guest = await InviteMember(EmployeeType.Guest);
+        await _filesClient.Authenticate(guest);
+
+        const string roomTitle = "Guest Room";
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(

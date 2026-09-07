@@ -137,6 +137,34 @@ public class FileMoveTests(
     }
 
     [Fact]
+    public async Task MoveFile_ToAiAgentsRoot_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("source_file.docx", Owner);
+
+        var aiAgentsRootId = await GetFolderIdAsync(FolderType.AiAgents, Owner);
+
+        // Act
+        var moveParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(aiAgentsRootId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesOperationsApi.MoveBatchItemsAsync(
+                moveParams,
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
     public async Task MoveFile_FormToFillingFormsRoom_ReturnsError()
     {
         // Assert

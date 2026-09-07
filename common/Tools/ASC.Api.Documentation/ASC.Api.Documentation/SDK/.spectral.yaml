@@ -1,0 +1,153 @@
+# Spectral ruleset for the five DocSpace service documents (../json/*_2.0.json).
+# An inventory tool: nothing runs it automatically, it gates no build.
+#
+# ONE ruleset, and it reports EVERYTHING that is still open - 68 findings as of 2026-09-01.
+# Nothing is hidden from the report. A finding stops being shown only when a rule here says so
+# explicitly (`off`), and the only such rule is a proven false positive, not debt.
+#
+# Prerequisite: npm i -g @stoplight/spectral-cli   (in PowerShell call `spectral.cmd`, not `spectral`)
+# Run from common/Tools/ASC.Api.Documentation/ASC.Api.Documentation, with lint/ already created:
+#
+#   spectral lint -r SDK/.spectral.yaml --fail-severity hint -f html --output.html lint/report.html -f markdown --output.markdown lint/report.md -f json --output.json lint/report.json json/api_2.0.json json/files_2.0.json json/people_2.0.json json/backup_2.0.json json/newai_2.0.json
+#
+# Three formats on purpose: markdown is read and diffed, html is its complete twin, and json is what
+# count.py aggregates - it carries the rule code, path and severity as data instead of as rendered
+# table cells.
+#
+# The open population as of 2026-09-01: path-segment-camel-case 68, and nothing else. It is blocked
+# rather than untouched - the only fix is renaming a public route, which moves the wire. That is not
+# a reason to stop reporting it.
+#
+# What closed since 2026-08-27, and why the counts above dropped from 146: `operation-description`
+# (103 -> 0), `schema-description` and `schema-property-description` (72 -> 0, prose for the
+# @onlyoffice/ai-chat types now lives in common/ASC.NewAi/scripts/lib/schemaDocs.ts), and the
+# KeyValuePairStringStringValues leak (fixed by MapType<IFormCollection> in OpenApiExtension.cs).
+#
+# SCOPE. This file is `spectral:oas` plus local rules: OpenAPI structure and house style. An OWASP
+# API Security Top 10 (2023) audit of the same five documents on 2026-08-31 reported ~11.9k further
+# findings, and that ruleset is deliberately NOT extended here - it would bury the population above.
+# Three of its checks were paid off in full and are restated below as local rules so they stay paid;
+# the rest is recorded as open debt (largest: per-schema string/integer/array bounds ~5.7k, missing
+# 500 and CORS response declarations ~2.5k, rate-limit headers on 2XX ~1.8k).
+
+extends:
+  - [spectral:oas, all]
+
+rules:
+  # False positive: `servers[0].variables.baseUrl.default` is empty at this stage by design.
+  oas3-server-variables: off
+
+  oas3-operation-security-defined: error # measured: 0 violations
+  info-description: error # measured: 0 violations (2026-08-25)
+  info-license: error # measured: 0 violations (2026-08-25)
+  license-url: error # measured: 0 violations (2026-08-25)
+  info-contact: error # measured: 0 violations (2026-08-26)
+  operation-tag-defined: error # measured: 0 violations (2026-08-25)
+  oas3-valid-media-example: error # measured: 0 violations (2026-08-25)
+  oas3-unused-component: error # measured: 0 violations (2026-08-25)
+  openapi-tags-alphabetical: error # measured: 0 violations (2026-08-26)
+  path-params: error # measured: 0 violations (2026-08-26)
+  operation-description: error # measured: 0 violations (2026-08-26); was 103
+  # The 4 that closed were synthesized route placeholders no DTO property binds; their prose now comes
+  # from [SwaggerPathParameter] on the action (see SwaggerCustomOperationFilter.cs).
+  oas3-parameter-description: error # measured: 0 violations (2026-09-01); was 4, 53, 415
+
+  # Custom rules - spectral:oas has no rule for any of these.
+
+  operation-summary:
+    description: Every operation needs a summary.
+    message: '{{path}} has no summary.'
+    given: $.paths[*][get,put,post,delete,patch,options,head,trace]
+    severity: error # measured: 0 violations in all five documents
+    then:
+      field: summary
+      function: truthy
+
+  path-segment-camel-case:
+    description: >-
+      Route segments are camelCase (.claude/rules/csharp-style.md) - never snake_case or
+      kebab-case. Exempt: templated segments, the api/2.0 prefix, and the @-prefixed virtual
+      folder segments that are part of the API surface (@my, @trash, @root, @favorites,
+      @forms, @search, @self).
+    message: 'Route segment is not camelCase: {{property}}'
+    given: $.paths
+    severity: warn # measured: 68 of 536 paths (66 kebab-case, 2 snake_case; 63 of them in newai)
+    # Blocked, not untouched: the only fix is renaming a public route, which moves the wire.
+    # 63 belong to @onlyoffice/ai-chat, 3 to api, 2 to files.
+    then:
+      field: '@key'
+      function: pattern
+      functionOptions:
+        match: '^(/(api|2\.0|\{[^}]+\}|@[a-z][a-zA-Z0-9]*|[a-z][a-zA-Z0-9]*))+/?$'
+
+  schema-description:
+    description: Every component schema needs a description.
+    given: $.components.schemas[*]
+    severity: error # measured: 0 of 829 (2026-08-31); was 7, 8, 9, 10, 12, 13
+    then:
+      field: description
+      function: truthy
+
+  schema-property-description:
+    description: Every schema property needs a description.
+    given: $.components.schemas[*].properties[*]
+    # `resolved: false` on purpose - the SDK generator reads the raw document, so a bare `$ref`
+    # property is a finding and a description beside a `$ref` is not.
+    resolved: false
+    severity: error # measured: 0 of 3343 (2026-08-31); was 65, 67, 70, 72, 83, 147
+    then:
+      field: description
+      function: truthy
+
+  # Security and inventory - from the OWASP API Security Top 10 (2023) audit of 2026-08-31.
+  # These three are the checks from that audit whose findings were paid off in full; they are
+  # restated here, as local rules rather than by extending the OWASP ruleset, so that closing
+  # them stays closed without pulling ~11.9k open findings into this report. See SCOPE above.
+
+  server-environment-described:
+    description: >-
+      Every server description names the environment it serves (OWASP API9:2023), so a reader can
+      tell a production URL from a staging one without asking.
+    message: '{{path}} names no environment.'
+    given: $.servers[*]
+    severity: error # measured: 0 violations (2026-08-31); was 5, one per document
+    then:
+      field: description
+      function: pattern
+      functionOptions:
+        # `/…/i`, not `(?i)…`: spectral compiles this with the JS RegExp engine, which has no
+        # inline flag groups and throws "Invalid group" on the latter.
+        match: '/(production|staging|development|local|sandbox|test)/i'
+
+  jwt-rfc8725-declared:
+    description: >-
+      A security scheme that carries JWTs states in its description that it follows RFC8725
+      (OWASP API2:2023), so a consumer choosing an auth method can see which JWT pitfalls - `alg`
+      taken from the token header, unverified issuer/audience/expiry - are ruled out. The spelling
+      is the one the OWASP rule matches: `RFC8725`, no space.
+    given:
+      - $.components.securitySchemes[?(@ && @.type=="oauth2")]
+      - $.components.securitySchemes[?(@ && @.bearerFormat=="JWT")]
+    severity: error # measured: 0 violations (2026-08-31); was 8 - Bearer and OAuth2 in 4 documents
+    then:
+      field: description
+      function: pattern
+      functionOptions:
+        match: 'RFC8725'
+
+  response-header-integer-bounded:
+    description: >-
+      Response headers carry a `format` and a `minimum` (OWASP API4:2023). The only headers these
+      documents declare are the rate-limit set, whose bounds RateLimitOperationFilter knows exactly,
+      so they are the real ones. No `maximum` is required: `X-RateLimit-Reset` is a Unix timestamp
+      and has no honest ceiling - the 24 OWASP findings for that remain open on purpose.
+    given:
+      - $.components.headers[*].schema
+      - $.paths[*][*].responses[*].headers[*].schema
+    severity: error # measured: 0 violations (2026-08-31); was 96 of each, all four headers
+    then:
+      - field: format
+        function: truthy
+      - field: minimum
+        function: defined
+

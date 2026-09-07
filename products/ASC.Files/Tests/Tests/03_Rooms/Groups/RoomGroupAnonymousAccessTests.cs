@@ -76,7 +76,7 @@ public class RoomGroupAnonymousAccessTests(
         await _filesClient.Authenticate(null);
 
         // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -167,7 +167,7 @@ public class RoomGroupAnonymousAccessTests(
         UseInvalidToken();
 
         // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);

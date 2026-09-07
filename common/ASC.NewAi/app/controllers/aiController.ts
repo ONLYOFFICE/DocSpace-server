@@ -46,11 +46,15 @@ import { agentAssignedProfileId } from "./agentProfile.js";
 import {
   markForwardHeadersToProvider,
   getCustomServerNames,
+  getChatContextSnapshot,
 } from "../requestContext.js";
+import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { aiService } from "../storage/httpClient.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
+import { observeChatStream } from "../telemetry/chatStream.js";
+import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
@@ -195,7 +199,7 @@ function buildContextFragment(entityId: string | undefined): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
     "Context:",
-    "- You are an AI agent operating inside a DocSpace workspace, not a generic standalone assistant.",
+    "- You are an AI agent operating inside an ONLYOFFICE Apps workspace, not a generic standalone assistant.",
   ];
   if (entityId) {
     lines.push(
@@ -500,7 +504,8 @@ async function* logStreamErrors<T>(
             .join(", ")
         : "<none>";
     logger.info(
-      `${route}: stream completed after ${eventCount} event(s); toolCalls=${toolSummary}`,
+      `${route}: stream completed after ${eventCount} event(s); toolCalls=${toolSummary}; ` +
+        describeChatContextUsage(),
     );
   } catch (err) {
     logger.error(
@@ -510,6 +515,15 @@ async function* logStreamErrors<T>(
     );
     throw err;
   }
+}
+
+// Telemetry (span + metrics) outside, error logging inside.
+function tapStream<T>(
+  route: string,
+  iter: AsyncIterable<T>,
+  dialect?: StreamDialect,
+): AsyncIterable<T> {
+  return observeChatStream(route, logStreamErrors(route, iter), dialect);
 }
 
 // A user message must carry some non-whitespace text before a stream is
@@ -587,6 +601,11 @@ async function aiToolsUnpaidError(
   if (providerType !== "onlyoffice") {
     return null;
   }
+  // The round's aggregate already carries the portal's AI settings.
+  const primed = getChatContextSnapshot()?.aiReady;
+  if (primed !== undefined) {
+    return primed ? null : AI_TOOLS_UNPAID_ERROR;
+  }
   const config = await aiService.get("/config").catch(() => undefined);
   if (isObject(config) && config["aiReady"] === false) {
     return AI_TOOLS_UNPAID_ERROR;
@@ -602,6 +621,10 @@ export const aiController = {
     // Mirrors sendWithStream. (No profile pinning here: SendInput carries no
     // profileId, so there is nothing for a caller to override.)
     markForwardHeadersToProvider();
+    await primeChatContext({
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -614,6 +637,7 @@ export const aiController = {
     // As with `send`, the forwarded headers must be marked before the
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
+    await primeChatContext({ entityId: customScopeOf(req.body) });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -631,14 +655,14 @@ export const aiController = {
     const result = engine.sendCustom(body);
     if (body.isStream) {
       if (isAsyncIterable(result)) {
-        await streamNdjson(res, logStreamErrors("ai/send-custom", result));
+        await streamNdjson(res, tapStream("ai/send-custom", result));
       } else {
         res.json(await result);
       }
       return;
     }
     if (isAsyncIterable(result)) {
-      await streamNdjson(res, logStreamErrors("ai/send-custom", result));
+      await streamNdjson(res, tapStream("ai/send-custom", result));
       return;
     }
     res.json(await result);
@@ -646,6 +670,14 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // One aggregate read for the whole round — every storage read below
+    // (profiles, assignments, prefs, MCP servers, thread, history, folder
+    // metadata) is served from it. See storage/chatContext.ts.
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -686,6 +718,20 @@ export const aiController = {
       const thread = await storage.threads.readById(req.body.threadId);
       if (thread?.profileId) {
         req.body.profileId = thread.profileId;
+      }
+    }
+    // The caller's explicit profileId must reference an existing profile
+    // even when an agent's assignment overrides it for the round below —
+    // otherwise a bogus id is silently swapped for the agent's model and
+    // the request looks honored (Bug 83160 reopen: the regular-room 400
+    // never fired in agent scope because the substitution ran first).
+    // Billing is not checked here: it applies to the effective profile,
+    // which the post-substitution pre-flight still validates.
+    {
+      const callerError = await unknownProfileIdError(req.body.profileId);
+      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
+        res.status(400).json({ error: callerError });
+        return;
       }
     }
     // The agent's assigned profile is authoritative for rounds in its scope:
@@ -730,7 +776,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      logStreamErrors("ai/send-with-stream", engine.sendWithStream(body)),
+      tapStream("ai/send-with-stream", engine.sendWithStream(body)),
     );
   }),
 
@@ -739,10 +785,24 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
+    // Reject a caller-supplied unknown profileId before the agent
+    // substitution masks it — see sendWithStream (Bug 83160 reopen).
+    {
+      const callerError = await unknownProfileIdError(req.body.profileId);
+      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
+        res.status(400).json({ error: callerError });
+        return;
+      }
+    }
     // Agent scope pins the model — see sendWithStream (Bug 82914).
     {
       const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
@@ -767,12 +827,17 @@ export const aiController = {
     );
     await streamOpenAiSse(
       res,
-      logStreamErrors("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body)),
+      tapStream("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body), "openai"),
     );
   }),
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -786,12 +851,17 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      logStreamErrors("ai/regenerate-stream", engine.regenerateStream(body)),
+      tapStream("ai/regenerate-stream", engine.regenerateStream(body)),
     );
   }),
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -799,12 +869,17 @@ export const aiController = {
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
-      logStreamErrors("ai/approve-tool-call", engine.approveToolCall(body)),
+      tapStream("ai/approve-tool-call", engine.approveToolCall(body)),
     );
   }),
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -812,7 +887,7 @@ export const aiController = {
     const body = await withEntityMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
-      logStreamErrors("ai/deny-tool-call", engine.denyToolCall(body)),
+      tapStream("ai/deny-tool-call", engine.denyToolCall(body)),
     );
   }),
 };

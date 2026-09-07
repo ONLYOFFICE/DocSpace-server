@@ -34,6 +34,9 @@
 #nullable enable
 namespace ASC.Files.Core.Services.OFormService;
 
+/// <summary>
+/// The metadata of a single form field.
+/// </summary>
 public class FormMetadata
 {
     /// <summary>

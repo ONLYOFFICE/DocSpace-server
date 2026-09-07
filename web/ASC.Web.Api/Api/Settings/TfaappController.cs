@@ -209,12 +209,12 @@ public class TfaappController(
             case TfaRequestsDtoType.Sms:
                 if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync())
                 {
-                    throw new InvalidOperationException(Resource.SmsNotAvailable);
+                    throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.SmsNotAvailable);
                 }
 
                 if (!smsProviderManager.Enabled())
                 {
-                    throw new InvalidOperationException();
+                    throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.SmsNotAvailable);
                 }
 
                 var smsSettings = await settingsManager.LoadAsync<StudioSmsNotificationSettings>();
@@ -235,7 +235,7 @@ public class TfaappController(
             case TfaRequestsDtoType.App:
                 if (!tfaAppAuthSettingsHelper.IsVisibleSettings)
                 {
-                    throw new InvalidOperationException(Resource.TfaAppNotAvailable);
+                    throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.TfaAppNotAvailable);
                 }
 
                 var appSettings = await settingsManager.LoadAsync<TfaAppAuthSettings>();
@@ -316,12 +316,12 @@ public class TfaappController(
     /// <summary>Generate setup code</summary>
     /// <path>api/2.0/settings/tfaapp/setup</path>
     [Tags("Settings / TFA settings")]
-    [SwaggerResponse(200, "Setup code", typeof(SetupCode))]
+    [SwaggerResponse(200, "Setup code", typeof(TfaSetupCodeDto))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaapp/setup")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")]
-    public async Task<SetupCode> TfaAppGenerateSetupCode()
+    public async Task<TfaSetupCodeDto> TfaAppGenerateSetupCode()
     {
         await securityContext.AuthByClaimAsync();
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -330,7 +330,7 @@ public class TfaappController(
             !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
             await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
         {
-            throw new InvalidOperationException(Resource.TfaAppNotAvailable);
+            throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.TfaAppNotAvailable);
         }
 
         if (await userManager.IsOutsiderAsync(currentUser))
@@ -338,7 +338,7 @@ public class TfaappController(
             throw new InvalidOperationException("Not available.");
         }
 
-        return await tfaManager.GenerateSetupCodeAsync(currentUser);
+        return TfaSetupCodeDto.FromSetupCode(await tfaManager.GenerateSetupCodeAsync(currentUser));
     }
 
     /// <remarks>
@@ -359,7 +359,7 @@ public class TfaappController(
             !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
             !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUserId))
         {
-            throw new InvalidOperationException(Resource.TfaAppNotAvailable);
+            throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.TfaAppNotAvailable);
         }
 
         if (await userManager.IsOutsiderAsync(currentUserId))
@@ -392,7 +392,7 @@ public class TfaappController(
 
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUserId))
         {
-            throw new InvalidOperationException(Resource.TfaAppNotAvailable);
+            throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.TfaAppNotAvailable);
         }
 
         if (await userManager.IsOutsiderAsync(currentUserId))
@@ -428,6 +428,11 @@ public class TfaappController(
 
         var user = await userManager.GetUsersAsync(id);
 
+        if (user.Id == Constants.LostUser.Id)
+        {
+            throw new InvalidOperationException(Resource.ErrorAccessDenied);
+        }
+
         if (!isMe && !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser))
         {
             throw new InvalidOperationException(Resource.ErrorAccessDenied);
@@ -441,7 +446,7 @@ public class TfaappController(
 
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
         {
-            throw new InvalidOperationException(Resource.TfaAppNotAvailable);
+            throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.TfaAppNotAvailable);
         }
 
         if (await userManager.IsOutsiderAsync(user) || user.Status == EmployeeStatus.Terminated)

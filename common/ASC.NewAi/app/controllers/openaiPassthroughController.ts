@@ -30,7 +30,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { Readable } from "node:stream";
+import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { Response } from "express";
 
@@ -39,7 +39,7 @@ import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { safeGetAgentEntity } from "../storage/docspaceFilesApi.js";
 import type { AgentEntityMeta } from "../storage/docspaceFilesApi.js";
-import { asyncHandler } from "./_helpers.js";
+import { asyncHandler, startStreamHeartbeat } from "./_helpers.js";
 import { isObject } from "../narrow.js";
 
 // OpenAI-compatible passthrough for the document editor's AI plugin.
@@ -248,10 +248,116 @@ function withOnlyofficeExtras(
   return spliceMetadata(Buffer.from(JSON.stringify(next), "utf8"), contentType, entity);
 }
 
+// The plugin's round-trip runs browser → CDN/reverse proxy → nginx → here, and
+// a proxy in front of the portal drops a request that has produced no response
+// bytes yet (Cloudflare on SaaS: 30s). A single chat round can legitimately
+// stay silent that long — a whole document in the prompt, a provider queue, an
+// extended-thinking block before the first token — and the plugin's SDK then
+// sees a truncated stream instead of the answer it is waiting for. So the
+// response is kept warm until the provider speaks: SSE comment frames on a
+// streaming round, the same keep-alive the engine routes already emit
+// (`streamOpenAiSse`). Two windows need it: the wait for the provider's
+// headers (nothing is committed yet) and any gap between the chunks being
+// relayed.
+//
+// A one-shot round has no frame to hide a keep-alive in, and image generation
+// routinely runs past 30s — so `images/generations` is padded instead: JSON
+// tolerates leading whitespace, and the SDK's `response.json()` parses the
+// reply exactly as before (the reply was already chunked, since no upstream
+// `Content-Length` is forwarded, so the framing does not change either). The
+// cost is the status line, spent on the 200 that the padding commits, so a
+// provider error arriving after the window reaches the SDK as its envelope in
+// a 200 body instead of an `APIError`.
+//
+// Which is why padding is opt-in per route (`alwaysJson`), not a fallback for
+// every non-streaming request: `images/generations` can never answer with a
+// stream, so committing a JSON content type there is safe whatever comes back.
+// On `chat/completions` a mis-read `stream` flag would commit JSON over an SSE
+// body and break a round that works today, and its non-streaming variant is
+// not a path the plugin takes.
+
+// How long the provider may stay silent before the response is committed and
+// the keep-alive takes over. Counted from the moment the request reached this
+// handler, not from when its body finished uploading: the proxy's clock starts
+// at the request, so a megabyte vision body must not eat into the window. A
+// third of the tightest known limit (Cloudflare, 30s) leaves room for the
+// upload and the profile resolve, and for the first beat after it.
+const UPSTREAM_HEADERS_GRACE_MS = 10_000;
+
+// The padded path waits longer: a ping frame costs nothing, but padding spends
+// the status line, so it is deferred until the proxy limit is genuinely near.
+// Most provider errors (a rejected prompt, a bad size) answer well inside this
+// and keep their status; an image request's own body is a prompt, so nothing
+// of the window is lost to the upload.
+const JSON_PAD_GRACE_MS = 20_000;
+const SSE_PING = ": ping\n\n";
+
+// Keep-alive byte for a padded JSON reply: valid leading whitespace, ignored
+// by every JSON parser. It may only go out BEFORE the body starts — a pad byte
+// spliced into the JSON itself would break the parse — so the heartbeat is
+// always stopped before the first relayed chunk.
+const JSON_PAD = " ";
+
+// A streaming round, decided without parsing: the plugin's SDK serializes its
+// bodies with `JSON.stringify` (and so does the re-serialization above), so a
+// byte match on the flag is exact — and the body on this route can be
+// megabytes of vision data that must not be parsed twice.
+function expectsSse(body: Buffer, accept: string | undefined): boolean {
+  return (
+    body.includes('"stream":true') || (accept ?? "").toLowerCase().includes("text/event-stream")
+  );
+}
+
+function commitSseHeaders(res: Response): void {
+  res.status(200);
+  res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+}
+
+function commitJsonHeaders(res: Response): void {
+  res.status(200);
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+}
+
+// Report a failure that happened after the keep-alive already committed a 200:
+// the status line is spent, so the SDK has to read the error from inside the
+// stream. The provider's own OpenAI-shaped envelope is forwarded when it sent
+// one (compacted to a single line — an SSE frame cannot contain a raw
+// newline); anything else becomes a generic envelope, with the detail left in
+// the server log where it cannot leak the provider URL.
+function writeSseError(res: Response, detail: string, status: number): void {
+  let envelope: unknown;
+  try {
+    const parsed: unknown = JSON.parse(detail);
+    if (isObject(parsed) && isObject(parsed["error"])) {
+      envelope = parsed;
+    }
+  } catch {
+    /* fall through to the generic envelope */
+  }
+  envelope ??= {
+    error: {
+      message: `Upstream request failed with status ${status}`,
+      type: "server_error",
+      code: null,
+      param: null,
+    },
+  };
+  res.write(`data: ${JSON.stringify(envelope)}\n\n`);
+}
+
+const errorEnvelope = (message: string, type: string) => ({
+  error: { message, type, code: null, param: null },
+});
+
 const openAiError = (res: Response, status: number, message: string, type: string) =>
-  res.status(status).json({
-    error: { message, type, code: null, param: null },
-  });
+  res.status(status).json(errorEnvelope(message, type));
 
 // The plugin never sends `Authorization` for external profiles (their key
 // is empty on the client by design); credentials are attached here from
@@ -315,8 +421,10 @@ async function readRequestBody(req: Readable): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-function passthrough(subPath: string, cacheBreakpoints = false) {
+function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = false) {
   return asyncHandler(async (req, res) => {
+    const startedAt = Date.now();
+
     // Forwarded auth headers must be marked before the profile resolve so
     // `onlyoffice`-provider profiles get the caller's credentials merged
     // in (same contract as every aiController method).
@@ -387,44 +495,186 @@ function passthrough(subPath: string, cacheBreakpoints = false) {
       );
     }
 
-    let upstream: globalThis.Response;
-    try {
-      upstream = await fetch(target, {
-        method: "POST",
-        headers: providerHeaders(req.headers["content-type"], profile, sessionIdParam),
-        body,
-        signal: upstreamAbortSignal(res),
+    const streaming = expectsSse(body, req.headers["accept"]);
+
+    // A keep-alive frame may only go out on a line boundary: the bytes here
+    // are the provider's, and splicing a frame into a half-written `data:`
+    // line would corrupt it. A completed line is enough — this route is
+    // OpenAI-compatible by contract, where every event is a single `data:`
+    // line, so the blank line of an injected comment can at worst dispatch an
+    // already-complete event one chunk early.
+    let atFrameBoundary = true;
+    const canPing = () => atFrameBoundary;
+
+    // Settled, not awaited: the grace window below races this promise, and a
+    // rejection reaching the race unhandled would take the process down.
+    const upstreamResult = fetch(target, {
+      method: "POST",
+      headers: providerHeaders(req.headers["content-type"], profile, sessionIdParam),
+      body,
+      signal: upstreamAbortSignal(res),
+    }).then(
+      (response) => ({ response }) as { response: globalThis.Response },
+      (error: unknown) => ({ error }) as { error: unknown },
+    );
+
+    // Keep-alive started before the provider answered. Once it exists the
+    // response is committed as a 200 — SSE or padded JSON, per `earlyKind` —
+    // so every outcome below has to be reported in the body instead of on the
+    // status line.
+    let earlyHeartbeat: { touch: () => void; stop: () => void } | null = null;
+    let earlyKind: "sse" | "json" | null = null;
+
+    // What this round could be kept alive with, if anything: whitespace on a
+    // route whose answer is always a JSON body, an SSE comment on a streaming
+    // round, nothing otherwise. `alwaysJson` wins over the request's own flag:
+    // on such a route a stream cannot come back, so a `stream` flag that only
+    // looks set must not commit an SSE content type over a JSON reply.
+    const keepAlive = alwaysJson ? "json" : streaming ? "sse" : null;
+
+    if (keepAlive) {
+      let graceTimer: ReturnType<typeof setTimeout> | undefined;
+      const graceMs = keepAlive === "sse" ? UPSTREAM_HEADERS_GRACE_MS : JSON_PAD_GRACE_MS;
+      const grace = new Promise<"grace">((resolve) => {
+        graceTimer = setTimeout(
+          () => resolve("grace"),
+          Math.max(0, graceMs - (Date.now() - startedAt)),
+        );
       });
-    } catch (err) {
+      const first = await Promise.race([upstreamResult.then(() => "upstream" as const), grace]);
+      if (graceTimer) {
+        clearTimeout(graceTimer);
+      }
+
+      if (first === "grace" && !res.headersSent && !res.destroyed) {
+        logger.info(
+          `openai passthrough ${subPath}: no provider headers after ${Date.now() - startedAt}ms — keeping the response alive (${keepAlive})`,
+        );
+        if (keepAlive === "sse") {
+          commitSseHeaders(res);
+          res.write(SSE_PING);
+          earlyHeartbeat = startStreamHeartbeat(res, SSE_PING, canPing);
+        } else {
+          commitJsonHeaders(res);
+          res.write(JSON_PAD);
+          earlyHeartbeat = startStreamHeartbeat(res, JSON_PAD);
+        }
+        earlyKind = keepAlive;
+      }
+    }
+
+    const settled = await upstreamResult;
+
+    if ("error" in settled) {
+      const err = settled.error;
       if ((err instanceof Error && err.name === "AbortError") || res.destroyed) {
         // Client is gone; nothing to answer.
+        earlyHeartbeat?.stop();
         return;
       }
       // Detail stays in the log — the error can carry the provider URL.
       logger.error(`openai passthrough: upstream fetch failed: ${err}`);
+      if (earlyHeartbeat) {
+        earlyHeartbeat.stop();
+        if (earlyKind === "sse") {
+          writeSseError(res, "", 502);
+        } else {
+          res.write(JSON.stringify(errorEnvelope("Upstream request failed", "server_error")));
+        }
+        res.end();
+        return;
+      }
       openAiError(res, 502, "Upstream request failed", "server_error");
       return;
     }
 
-    // Provider errors (4xx/5xx) pass through with their status and body so
-    // the plugin's SDK raises a proper APIError instead of a generic one.
-    res.status(upstream.status);
+    const upstream = settled.response;
     const contentType = upstream.headers.get("content-type");
-    if (contentType) {
-      res.setHeader("Content-Type", contentType);
-    }
-    res.setHeader("Cache-Control", "no-cache, no-transform");
-    res.setHeader("X-Accel-Buffering", "no");
-    res.flushHeaders?.();
+    const upstreamIsSse = (contentType ?? "").toLowerCase().includes("text/event-stream");
 
-    if (!upstream.body) {
+    if (earlyKind === "json") {
+      // The padding has to stop before the body starts: a pad byte spliced
+      // into the JSON would break the parse.
+      earlyHeartbeat?.stop();
+      if (upstreamIsSse) {
+        // Unreachable on the routes that enable padding, and unrecoverable if
+        // it ever happens: the JSON content type is already on the wire.
+        logger.error(
+          `openai passthrough ${subPath}: padded reply met a text/event-stream body — the round cannot be relayed`,
+        );
+      } else if (
+        !upstream.ok ||
+        !(contentType ?? "application/json").toLowerCase().includes("json")
+      ) {
+        // The 200 and the JSON content type are on the wire already, so the
+        // reply is relayed as-is and the SDK reads the provider's own error
+        // envelope out of the body.
+        logger.warn(
+          `openai passthrough ${subPath}: provider answered ${upstream.status} ${
+            contentType ?? "no content-type"
+          } after the keep-alive was committed — status downgraded to 200`,
+        );
+      }
+    }
+
+    if (earlyKind === "sse" && !(upstream.ok && upstreamIsSse)) {
+      // The 200 is already on the wire, so neither a provider error nor a
+      // non-stream answer can be relayed as-is: both are re-framed as a
+      // single SSE event the plugin's SDK can raise.
+      earlyHeartbeat?.stop();
+      const detail = await upstream.text().catch(() => "");
+      logger.warn(
+        `openai passthrough ${subPath}: provider answered ${upstream.status} ${
+          contentType ?? "no content-type"
+        } after the keep-alive was committed: ${detail.slice(0, 500)}`,
+      );
+      writeSseError(res, detail, upstream.status);
       res.end();
       return;
     }
 
+    if (!earlyHeartbeat) {
+      // Provider errors (4xx/5xx) pass through with their status and body so
+      // the plugin's SDK raises a proper APIError instead of a generic one.
+      res.status(upstream.status);
+      if (contentType) {
+        res.setHeader("Content-Type", contentType);
+      }
+      res.setHeader("Cache-Control", "no-cache, no-transform");
+      res.setHeader("X-Accel-Buffering", "no");
+      res.flushHeaders?.();
+    }
+
+    // Only an SSE body has a frame the client's parser will ignore, so only
+    // that one keeps a heartbeat running while it is relayed — a padded JSON
+    // reply must receive nothing more until its body is out.
+    const heartbeat =
+      earlyKind === "json"
+        ? null
+        : (earlyHeartbeat ?? (upstreamIsSse ? startStreamHeartbeat(res, SSE_PING, canPing) : null));
+
+    if (!upstream.body) {
+      heartbeat?.stop();
+      res.end();
+      return;
+    }
+
+    // The bytes are relayed by `pipeline` exactly as before — it owns
+    // backpressure and teardown on a client disconnect — with the keep-alive
+    // reading the traffic off a transparent transform on the way through.
+    const relay = new Transform({
+      transform(chunk: Buffer | string, _encoding, callback) {
+        const buf: Buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        heartbeat?.touch();
+        atFrameBoundary = buf.length === 0 || buf.subarray(-1).toString("latin1") === "\n";
+        callback(null, buf);
+      },
+    });
+
     try {
       await pipeline(
         Readable.fromWeb(upstream.body as import("node:stream/web").ReadableStream),
+        relay,
         res,
       );
     } catch (err) {
@@ -432,6 +682,8 @@ function passthrough(subPath: string, cacheBreakpoints = false) {
       // are already sent, so just terminate the response.
       logger.warn(`openai passthrough: stream ended early: ${err}`);
       res.end();
+    } finally {
+      heartbeat?.stop();
     }
   });
 }
@@ -440,5 +692,7 @@ export const openaiPassthroughController = {
   // Prompt-cache breakpoints are chat-only: image generation carries no
   // message list, and the library marks them in `getStream` alone.
   chatCompletions: passthrough("chat/completions", true),
-  imagesGenerations: passthrough("images/generations"),
+  // Padding is enabled here alone: an image round is the one that reliably
+  // outlives a 30s proxy limit, and this route always answers with JSON.
+  imagesGenerations: passthrough("images/generations", false, true),
 };

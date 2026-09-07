@@ -42,21 +42,33 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbThread> GetAllThreadsAsync(int tenantId, Guid createdBy)
+    public IAsyncEnumerable<DbThread> GetThreadsAsync(int tenantId, Guid createdBy, int count)
     {
-        return ThreadQueriesContainer.GetAllThreadsAsync(this, tenantId, createdBy);
+        return ThreadQueriesContainer.GetThreadsAsync(this, tenantId, createdBy, count);
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbThread> GetAllThreadsByEntryAsync(int tenantId, Guid createdBy, int entryId)
+    public IAsyncEnumerable<DbThread> GetThreadsFromCursorAsync(int tenantId, Guid createdBy, DateTime lastEditDate, Guid id, int count)
     {
-        return ThreadQueriesContainer.GetAllThreadsByEntryAsync(this, tenantId, createdBy, entryId);
+        return ThreadQueriesContainer.GetThreadsFromCursorAsync(this, tenantId, createdBy, lastEditDate, id, count);
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateThreadTitleAsync(int tenantId, Guid id, string title)
+    public IAsyncEnumerable<DbThread> GetThreadsByEntryAsync(int tenantId, Guid createdBy, int entryId, int count)
     {
-        return ThreadQueriesContainer.UpdateThreadTitleAsync(this, tenantId, id, title);
+        return ThreadQueriesContainer.GetThreadsByEntryAsync(this, tenantId, createdBy, entryId, count);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<DbThread> GetThreadsByEntryFromCursorAsync(int tenantId, Guid createdBy, int entryId, DateTime lastEditDate, Guid id, int count)
+    {
+        return ThreadQueriesContainer.GetThreadsByEntryFromCursorAsync(this, tenantId, createdBy, entryId, lastEditDate, id, count);
+    }
+
+    [PreCompileQuery]
+    public Task<int> UpdateThreadTitleAsync(int tenantId, Guid id, string title, DateTime lastEditDate)
+    {
+        return ThreadQueriesContainer.UpdateThreadTitleAsync(this, tenantId, id, title, lastEditDate);
     }
 
     [PreCompileQuery]
@@ -91,27 +103,53 @@ static file class ThreadQueriesContainer
             (AiIntegrationContext ctx, int tenantId, Guid id) =>
                 ctx.Threads.FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, IAsyncEnumerable<DbThread>> GetAllThreadsAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, int, IAsyncEnumerable<DbThread>> GetThreadsAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid createdBy) =>
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, int count) =>
                 ctx.Threads
                     .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null)
                     .OrderByDescending(x => x.LastEditDate)
-                    .AsQueryable());
+                    .ThenByDescending(x => x.Id)
+                    .Take(count));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, int, IAsyncEnumerable<DbThread>> GetAllThreadsByEntryAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, DateTime, Guid, int, IAsyncEnumerable<DbThread>> GetThreadsFromCursorAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid createdBy, int entryId) =>
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, DateTime lastEditDate, Guid id, int count) =>
+                ctx.Threads
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null
+                                && (x.LastEditDate < lastEditDate
+                                    || (x.LastEditDate == lastEditDate && x.Id.CompareTo(id) < 0)))
+                    .OrderByDescending(x => x.LastEditDate)
+                    .ThenByDescending(x => x.Id)
+                    .Take(count));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, int, int, IAsyncEnumerable<DbThread>> GetThreadsByEntryAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, int entryId, int count) =>
                 ctx.Threads
                     .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId)
                     .OrderByDescending(x => x.LastEditDate)
-                    .AsQueryable());
+                    .ThenByDescending(x => x.Id)
+                    .Take(count));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, string, Task<int>> UpdateThreadTitleAsync =
-        (AiIntegrationContext ctx, int tenantId, Guid id, string title) =>
+    public static readonly Func<AiIntegrationContext, int, Guid, int, DateTime, Guid, int, IAsyncEnumerable<DbThread>> GetThreadsByEntryFromCursorAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, int entryId, DateTime lastEditDate, Guid id, int count) =>
+                ctx.Threads
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId
+                                && (x.LastEditDate < lastEditDate
+                                    || (x.LastEditDate == lastEditDate && x.Id.CompareTo(id) < 0)))
+                    .OrderByDescending(x => x.LastEditDate)
+                    .ThenByDescending(x => x.Id)
+                    .Take(count));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, string, DateTime, Task<int>> UpdateThreadTitleAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid id, string title, DateTime lastEditDate) =>
             ctx.Threads
                 .Where(x => x.TenantId == tenantId && x.Id == id)
-                .ExecuteUpdateAsync(x => x.SetProperty(y => y.Title, title));
+                .ExecuteUpdateAsync(x => x
+                    .SetProperty(y => y.Title, title)
+                    .SetProperty(y => y.LastEditDate, lastEditDate));
 
     public static readonly Func<AiIntegrationContext, int, Guid, DateTime, Task<int>> TouchThreadAsync =
         (AiIntegrationContext ctx, int tenantId, Guid id, DateTime lastEditDate) =>

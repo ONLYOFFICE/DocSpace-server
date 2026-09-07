@@ -48,9 +48,9 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <remarks>List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.</remarks>
     /// <path>api/2.0/thirdparty/{provider}</path>
     [Tags("ThirdParty")]
-    [SwaggerResponse(200, "Code request", typeof(object))]
+    [SwaggerResponse(200, "Code request", typeof(string))]
     [HttpGet("{provider}")]
-    public object GetThirdPartyCode(ConfirmationCodeUrlRequestDto inDto)
+    public string GetThirdPartyCode(ConfirmationCodeUrlRequestDto inDto)
     {
         var desktop = HttpContext.Request.Query["desktop"] == "true";
         var additionals = new Dictionary<string, string>();

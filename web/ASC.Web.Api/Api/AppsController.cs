@@ -93,7 +93,7 @@ public class AppsController(
     /// </remarks>
     /// <path>api/2.0/apps/{id}/settings</path>
     [Tags("Apps")]
-    [SwaggerResponse(200, "Application settings JSON", typeof(JsonElement))]
+    [SwaggerResponse(200, "Application settings JSON", typeof(JsonElement?))]
     [SwaggerResponse(404, "Application not found")]
     [HttpGet("{id}/settings")]
     public async Task<JsonElement?> GetSettingsAsync(GetAppRequestDto inDto)

@@ -35,6 +35,20 @@ namespace Textile.Blocks;
 
 public static class NoTextileEncoder
 {
+    /// <summary>
+    /// The ampersand is escaped before the table below and unescaped after it, which is what makes the
+    /// pair of methods here exact inverses of each other.
+    ///
+    /// Without it the round trip cannot tell the two kinds of <c>&amp;lt;</c> apart: the one this encoder
+    /// produced from a real <c>&lt;</c>, and the one that was already in the value because the sending
+    /// code called <c>HtmlEncode()</c> on user input. Decoding turned both back into <c>&lt;</c>, so the
+    /// escaping every action applies was undone at the very last step (bug 82910). Escaping the ampersand
+    /// first turns the second kind into <c>&amp;amp;lt;</c>, which the table no longer matches, and the
+    /// final step restores it as <c>&amp;lt;</c> — still escaped.
+    /// </summary>
+    private const string Ampersand = "&";
+    private const string EncodedAmpersand = "&amp;";
+
     private static readonly string[,] _textileModifiers = {
                             { "\"", "&#34;" },
                             { "%", "&#37;" },
@@ -68,6 +82,11 @@ public static class NoTextileEncoder
             {
                 return string.Empty;
             }
+
+            // First, so that an entity already present in the value survives the round trip as an
+            // entity. Never subject to the exceptions: the two methods have to stay symmetrical.
+            toEncode = toEncode.Replace(Ampersand, EncodedAmpersand);
+
             for (var i = 0; i < _textileModifiers.GetLength(0); ++i)
             {
                 if (exceptions == null || Array.IndexOf(exceptions, _textileModifiers[i, 0]) < 0)
@@ -93,6 +112,11 @@ public static class NoTextileEncoder
                     toEncode = toEncode.Replace(_textileModifiers[i, 1], _textileModifiers[i, 0]);
                 }
             }
+
+            // Last, mirroring the encoder: only what is left after the table has run is an ampersand
+            // the value itself carried.
+            toEncode = toEncode.Replace(EncodedAmpersand, Ampersand);
+
             return toEncode;
         }
         tmp = Regex.Replace(tmp, "(" + patternPrefix + "(?<notex>.+?)" + patternSuffix + ")*", evaluator);

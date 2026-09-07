@@ -42,7 +42,7 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 ///   "subjects": []
 /// }
 /// </example>
-public class WebItemSecurityRequestsDto
+public class WebItemSecurityRequestsDto : IValidatableObject
 {
     /// <summary>
     /// The module ID.
@@ -61,16 +61,26 @@ public class WebItemSecurityRequestsDto
     /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public IEnumerable<Guid> Subjects { get; set; }
+
+    public IEnumerable<DataAnnotationsValidationResult> Validate(ValidationContext validationContext)
+    {
+        return WebItemIdValidator.Validate([Id], nameof(Id));
+    }
 }
 
 /// <summary>
 /// The request parameters for configuring security settings across multiple web modules.
 /// </summary>
-public class WebItemsSecurityRequestsDto
+public class WebItemsSecurityRequestsDto : IValidatableObject
 {
     /// <summary>
     /// The list of module security configurations.
     /// </summary>
-    /// <example>["item1", "item2"]</example>
+    /// <example>[{"key":"00000000-0000-0000-0000-000000000000","value":true}]</example>
     public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
+
+    public IEnumerable<DataAnnotationsValidationResult> Validate(ValidationContext validationContext)
+    {
+        return WebItemIdValidator.Validate(Items?.Select(i => i.Key), nameof(Items));
+    }
 }

@@ -244,7 +244,7 @@ public class WhitelabelController(
             {
                 Type = logoType,
                 Name = logoType.ToStringFast(),
-                Size = TenantWhiteLabelSettings.GetSize(logoType)
+                Size = WhiteLabelItemSizeDto.FromGeometry(TenantWhiteLabelSettings.GetSize(logoType))
             };
 
             if (inQueryDto is { IsDark: not null })
@@ -304,6 +304,7 @@ public class WhitelabelController(
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Request properties of white label logos", typeof(IAsyncEnumerable<IsDefaultWhiteLabelLogosDto>))]
+    [AllowNotPayment]
     [HttpGet("whitelabel/logos/isdefault")]
     public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {

@@ -39,11 +39,16 @@ import {
   shouldForwardHeadersToProvider,
 } from "../requestContext.js";
 import type { ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
+import {
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
-function withOnlyofficeProviderOverrides(
+export function withOnlyofficeProviderOverrides(
   profile: Profile | undefined,
 ): Profile | undefined {
   if (!profile || profile.providerType !== "onlyoffice") {
@@ -59,7 +64,7 @@ function withOnlyofficeProviderOverrides(
   return resolved;
 }
 
-function dtoToProfile(raw: unknown): Profile | undefined {
+export function dtoToProfile(raw: unknown): Profile | undefined {
   if (!isObject(raw)) {
     return undefined;
   }
@@ -134,9 +139,35 @@ function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Recor
   };
 }
 
+// The provider a round (or the image tool) is about to call, AFTER the
+// onlyoffice override — so `baseUrl` is the portal's own gateway path for
+// paid profiles and the raw provider URL otherwise. The override rewrites
+// `baseUrl` to the INTERNAL gateway address and merges the caller's
+// forwarded auth headers — exactly what in-process provider calls (chat
+// engine, openai passthrough) need, and exactly what must never leave the
+// process; HTTP responses use `readByIdRaw` instead (Bug 82821). `key` is
+// only reported as present/absent; never logged. `source` is the raw DTO
+// (HTTP path) or the literal "chat-context" (served from the round snapshot).
+function logResolvedProfile(id: string, profile: Profile | undefined, source: unknown): void {
+  const via = source === "chat-context" ? " via chat-context" : "";
+  logger.info(
+    profile
+      ? `HttpProfilesStorage.readById(${id})${via} -> providerType=${profile.providerType} ` +
+          `model=${profile.modelId} baseUrl=${profile.baseUrl} hasKey=${profile.key !== undefined} ` +
+          `capabilities=${profile.capabilities ?? "-"} canUseTool=${profile.canUseTool ?? "-"} ` +
+          `useProxy=${profile.useProxy ?? "-"} isCloud=${profile.isCloudProvider ?? "-"} ` +
+          `headers=[${Object.keys(profile.headers ?? {}).sort().join(",")}]`
+      : source === "chat-context"
+        ? `HttpProfilesStorage.readById(${id}) via chat-context -> NOT FOUND`
+        : `HttpProfilesStorage.readById(${id}) -> UNUSABLE payload (a required field is missing): ` +
+            `${JSON.stringify(source).slice(0, 500)}`,
+  );
+}
+
 export class HttpProfilesStorage implements ProfilesStorage {
   async create(profile: Omit<Profile, "id" | "createdAt">): Promise<Profile> {
     const raw = await aiService.post(PATH, toCreateBody(profile));
+    invalidateChatContext("profiles");
     const result = dtoToProfile(raw);
     if (!result) {
       throw new Error("ai service returned invalid profile");
@@ -148,6 +179,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
     const raw = await aiService.post(`${PATH}/batch`, {
       profiles: profiles.map(toCreateBody),
     });
+    invalidateChatContext("profiles");
     if (!Array.isArray(raw)) {
       return [];
     }
@@ -162,28 +194,21 @@ export class HttpProfilesStorage implements ProfilesStorage {
   }
 
   async readById(id: string): Promise<Profile | undefined> {
+    // A primed round holds the portal's full profile list — the id either
+    // resolves there or does not exist for this user.
+    const snapshot = readChatContext("profiles");
+    if (snapshot) {
+      const profile = withOnlyofficeProviderOverrides(
+        snapshot.profiles.find((p) => p.id === id),
+      );
+      logResolvedProfile(id, profile, "chat-context");
+      return profile;
+    }
+    reportChatContextMiss(`profiles.readById(${id})`);
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       const profile = withOnlyofficeProviderOverrides(dtoToProfile(raw));
-      // The provider override above rewrites `baseUrl` to the INTERNAL
-      // gateway address and merges the caller's forwarded auth headers —
-      // exactly what in-process provider calls (chat engine, openai
-      // passthrough) need, and exactly what must never leave the process.
-      // HTTP responses use `readByIdRaw` below instead (Bug 82821).
-      // The provider a round (or the image tool) is about to call, AFTER the
-      // onlyoffice override — so `baseUrl` is the portal's own gateway path
-      // for paid profiles and the raw provider URL otherwise. `key` is only
-      // reported as present/absent; never logged.
-      logger.info(
-        profile
-          ? `HttpProfilesStorage.readById(${id}) -> providerType=${profile.providerType} ` +
-              `model=${profile.modelId} baseUrl=${profile.baseUrl} hasKey=${profile.key !== undefined} ` +
-              `capabilities=${profile.capabilities ?? "-"} canUseTool=${profile.canUseTool ?? "-"} ` +
-              `useProxy=${profile.useProxy ?? "-"} isCloud=${profile.isCloudProvider ?? "-"} ` +
-              `headers=[${Object.keys(profile.headers ?? {}).sort().join(",")}]`
-          : `HttpProfilesStorage.readById(${id}) -> UNUSABLE payload (a required field is missing): ` +
-              `${JSON.stringify(raw).slice(0, 500)}`,
-      );
+      logResolvedProfile(id, profile, raw);
       return profile;
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
@@ -200,6 +225,10 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // an HTTP response may echo: the override's internal service address and
   // forwarded auth headers must never reach a client (Bug 82821).
   async readByIdRaw(id: string): Promise<Profile | undefined> {
+    const snapshot = readChatContext("profiles");
+    if (snapshot) {
+      return snapshot.profiles.find((p) => p.id === id);
+    }
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       return dtoToProfile(raw);
@@ -213,6 +242,11 @@ export class HttpProfilesStorage implements ProfilesStorage {
   }
 
   async readAll(): Promise<Profile[]> {
+    const snapshot = readChatContext("profiles");
+    if (snapshot) {
+      return snapshot.profiles;
+    }
+    reportChatContextMiss("profiles.readAll");
     const raw = await aiService.get(PATH);
     if (!Array.isArray(raw)) {
       return [];
@@ -229,9 +263,11 @@ export class HttpProfilesStorage implements ProfilesStorage {
 
   async update(profile: Profile): Promise<void> {
     await aiService.put(`${PATH}/${encodeURIComponent(profile.id)}`, toCreateBody(profile));
+    invalidateChatContext("profiles");
   }
 
   async delete(id: string): Promise<void> {
+    invalidateChatContext("profiles");
     try {
       await aiService.delete(`${PATH}/${encodeURIComponent(id)}`);
     } catch (err) {

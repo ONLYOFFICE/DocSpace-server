@@ -132,6 +132,37 @@ public class RoomTagDetachValidationTests(
         exception.ErrorCode.Should().Be(404);
     }
 
+    [Fact]
+    public async Task DeleteRoomTags_NegativeRoomId_NotFound()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.DeleteRoomTagsAsync(-1, new BatchTagsRequestDto(["X"]), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    // A non-integer (1.5) or empty room id segment cannot be produced through the typed int
+    // route parameter, so these go through raw HTTP.
+    [Theory]
+    [InlineData("1.5")]
+    [InlineData("")]
+    public async Task DeleteRoomTags_InvalidRoomIdShape_NotFound(string roomIdSegment)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        using var response = await SendRawRoomTagsDelete(roomIdSegment, """{"names":["X"]}""");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
     // Note: a missing room id is enforced by the SDK's route — the endpoint cannot be invoked
     // without an id, so there is no separate test for it.
 

@@ -177,6 +177,7 @@ public class DocsCloudController(
     /// </remarks>
     /// <summary>Get the DocsCloud tenant</summary>
     /// <path>api/2.0/settings/docscloud/tenant</path>
+    /// <param name="refresh">Specifies whether to bypass the cache and request the tenant from DocsCloud again.</param>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant", typeof(DocsCloudTenant))]
     [HttpGet("tenant")]
@@ -192,6 +193,7 @@ public class DocsCloudController(
     /// </remarks>
     /// <summary>Get the DocsCloud tenant information</summary>
     /// <path>api/2.0/settings/docscloud/tenant/info</path>
+    /// <param name="refresh">Specifies whether to bypass the cache and request the tenant information from DocsCloud again.</param>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant information", typeof(DocsCloudTenantInfo))]
     [SwaggerResponse(400, "The DocsCloud tenant is not activated")]
@@ -227,6 +229,7 @@ public class DocsCloudController(
     /// </remarks>
     /// <summary>Get the DocsCloud tenant configuration</summary>
     /// <path>api/2.0/settings/docscloud/tenant/config</path>
+    /// <param name="refresh">Specifies whether to bypass the cache and request the tenant configuration from DocsCloud again.</param>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant configuration", typeof(DocsCloudConfig))]
     [SwaggerResponse(400, "The DocsCloud tenant is not activated")]
@@ -259,6 +262,7 @@ public class DocsCloudController(
     /// </remarks>
     /// <summary>Get the DocsCloud tenant quota</summary>
     /// <path>api/2.0/settings/docscloud/tenant/quota</path>
+    /// <param name="refresh">Specifies whether to bypass the cache and request the user quota from DocsCloud again.</param>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud user quota", typeof(DocsCloudQuota))]
     [SwaggerResponse(400, "The DocsCloud tenant is not activated")]
@@ -356,6 +360,7 @@ public class DocsCloudController(
     /// </remarks>
     /// <summary>Get the DocsCloud tenant usage</summary>
     /// <path>api/2.0/settings/docscloud/tenant/usage</path>
+    /// <param name="refresh">Specifies whether to bypass the cache and request the usage statistics from DocsCloud again.</param>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "DocsCloud tenant usage statistics", typeof(DocsCloudUsage))]
     [SwaggerResponse(400, "The DocsCloud tenant is not activated")]

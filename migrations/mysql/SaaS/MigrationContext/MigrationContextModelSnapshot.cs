@@ -343,8 +343,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("TenantId", "ThreadId", "Timestamp")
-                        .HasDatabaseName("IX_tenant_id_thread_id_timestamp");
+                    b.HasIndex("TenantId", "ThreadId", "Timestamp", "Id")
+                        .HasDatabaseName("IX_tenant_id_thread_id_timestamp_id");
 
                     b.ToTable("ai_integration_messages", (string)null);
 
@@ -627,14 +627,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("TenantId", "CreatedBy")
-                        .HasDatabaseName("IX_tenant_id_created_by");
-
                     b.HasIndex("TenantId", "LastEditDate")
                         .HasDatabaseName("IX_tenant_id_last_edit_date");
 
                     b.HasIndex("TenantId", "ProfileId")
                         .HasDatabaseName("IX_tenant_id_profile_id");
+
+                    b.HasIndex("TenantId", "CreatedBy", "EntryId", "LastEditDate", "Id")
+                        .HasDatabaseName("IX_tenant_id_created_by_entry_id_last_edit_date_id");
 
                     b.ToTable("ai_integration_threads", (string)null);
 

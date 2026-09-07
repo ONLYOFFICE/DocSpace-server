@@ -33,7 +33,7 @@
 
 namespace ASC.Security.Cryptography;
 
-/// <ssummary>
+/// <summary>
 /// The password hash parameters.
 /// </summary>
 [Singleton]

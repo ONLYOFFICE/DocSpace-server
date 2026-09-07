@@ -119,6 +119,7 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 
         letter.ShouldHaveTopImage(tags);
         letter.ShouldHaveSignature(tags);
+        letter.ShouldRenderMarkupTags(tags);
 
         AssertContent(letter, scope);
 

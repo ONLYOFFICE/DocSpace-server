@@ -155,13 +155,15 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "File changes", typeof(KeyValuePair<bool, string>))]
+    [SwaggerResponse(200, "File changes", typeof(ItemKeyValuePair<bool, string>))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
-    public async Task<KeyValuePair<bool, string>> TrackEditFile(TrackEditFileRequestDto<T> inDto)
+    public async Task<ItemKeyValuePair<bool, string>> TrackEditFile(TrackEditFileRequestDto<T> inDto)
     {
-        return await fileStorageService.TrackEditFileAsync(inDto.FileId, inDto.TabId, inDto.DocKeyForTrack, inDto.IsFinish);
+        var result = await fileStorageService.TrackEditFileAsync(inDto.FileId, inDto.TabId, inDto.DocKeyForTrack, inDto.IsFinish);
+
+        return new ItemKeyValuePair<bool, string> { Key = result.Key, Value = result.Value };
     }
 
     /// <remarks>

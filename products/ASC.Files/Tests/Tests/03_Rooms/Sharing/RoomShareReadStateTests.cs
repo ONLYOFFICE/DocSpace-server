@@ -207,6 +207,68 @@ public class RoomShareReadStateTests(
         exception.ErrorCode.Should().Be(404);
     }
 
+    /// <summary>
+    /// The typed SDK's <c>id</c> parameter is an <c>int</c>, so a non-numeric route segment cannot
+    /// be produced through it; this goes over raw HTTP instead.
+    /// </summary>
+    private async Task<HttpResponseMessage> GetRoomSecurityInfoRaw(string id)
+    {
+        return await _filesClient.GetAsync($"api/2.0/files/rooms/{id}/share", TestContext.Current.CancellationToken);
+    }
+
+    /// <remarks>
+    /// BUG 81790 confirmed by design: a room id is not always numeric — a thirdparty-storage room
+    /// can have a string id — so the API accepts any string shape as a potential id and resolves it
+    /// as "not found" -&gt; 404, not a 400 validation error. Same reasoning as bug 81703 on
+    /// <c>DELETE /files/rooms/:id/tags</c> (<see cref="Tags.RoomTagDetachValidationTests.DeleteRoomTags_InvalidStringRoomId_NotFound"/>).
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "81790")]
+    public async Task GetRoomSecurityInfo_StringRoomId_Returns404()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        using var response = await GetRoomSecurityInfoRaw("abc");
+
+        // Assert
+        ((int)response.StatusCode).Should().Be(404);
+    }
+
+    /// <summary>
+    /// Other invalid id shapes not covered by the thirdparty-string reasoning above (a non-integer
+    /// number, a special-character string) still resolve as "not found" -&gt; 404, same contract as
+    /// the string case.
+    /// </summary>
+    [Theory]
+    [InlineData("1.5")]
+    [InlineData("!@#$%")]
+    public async Task GetRoomSecurityInfo_OtherInvalidIdShape_Returns404(string badId)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        using var response = await GetRoomSecurityInfoRaw(badId);
+
+        // Assert
+        ((int)response.StatusCode).Should().Be(404);
+    }
+
+    [Fact]
+    public async Task GetRoomSecurityInfo_EmptyStringRoomId_Returns404()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        using var response = await GetRoomSecurityInfoRaw(string.Empty);
+
+        // Assert
+        ((int)response.StatusCode).Should().Be(404);
+    }
+
     [Fact]
     public async Task GetRoomSecurityInfo_RepeatedGet_ReturnsTheSameSecurityList()
     {

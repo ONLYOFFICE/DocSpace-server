@@ -56,9 +56,9 @@ import {
 export { DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE };
 
 const APPROVAL_TOOL_NAMES = new Set<string>([
-    "docspace_generate_docx",
-    "docspace_generate_presentation",
-    "docspace_generate_form",
+    "onlyoffice_generate_docx",
+    "onlyoffice_generate_presentation",
+    "onlyoffice_generate_form",
 ]);
 
 type ToolsList = {

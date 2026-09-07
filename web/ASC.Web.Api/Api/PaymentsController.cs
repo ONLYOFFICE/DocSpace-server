@@ -616,6 +616,9 @@ public class PaymentController(
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaPaymentInformation(PaymentInformationRequestDto inDto)
     {
+        // Every non-guest member reads this at start-up: the client's AuthStore.getPaymentInfo needs
+        // the plan's feature limits (rooms, storage, AI agents) to render at all, and rethrows on
+        // failure. Narrowing this to administrators leaves a RoomAdmin or a User with a blank page.
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
@@ -1285,6 +1288,26 @@ public class PaymentController(
     }
 
     /// <summary>
+    /// Get the service prices from the accounting service
+    /// </summary>
+    /// <remarks>
+    /// Returns the list of prices of the specified service from the accounting service.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/accounting/prices/{serviceName}</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The list of the service prices", typeof(List<ServicePriceInfo>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("accounting/prices/{serviceName}")]
+    public async Task<List<ServicePriceInfo>> GetAccountingServicePrices(ServicePricesRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        return await tariffService.GetAccountingServicePricesAsync(inDto.ServiceName, inDto.Active);
+    }
+
+    /// <summary>
     /// Gets the tenant wallet auto top up settings
     /// </summary>
     /// <remarks>
@@ -1411,7 +1434,7 @@ public class PaymentController(
     /// </remarks>
     /// <path>api/2.0/portal/payment/ai-prices</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
+    [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()

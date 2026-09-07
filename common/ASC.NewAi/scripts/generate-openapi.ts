@@ -50,7 +50,7 @@ import { mkdirSync, writeFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { buildOpenApiDocument } from "../app/openapi.js";
-import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS } from "../app/apiCatalog.js";
+import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS, CUSTOM_TAG_DOCS } from "../app/apiCatalog.js";
 import { generateOpenApiSchemas } from "./lib/generate-schemas.js";
 import { extractDotnetProxySchemas } from "./lib/dotnet-schemas.js";
 
@@ -122,6 +122,7 @@ const document = buildOpenApiDocument({
   apiPrefix: API_PREFIX,
   engines: ENGINE_DOCS,
   customRoutes: CUSTOM_ROUTE_DOCS,
+  customTagDescriptions: CUSTOM_TAG_DOCS,
   schemas,
 });
 

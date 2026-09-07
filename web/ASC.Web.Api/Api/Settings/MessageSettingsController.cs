@@ -193,6 +193,7 @@ public class MessageSettingsController(
     [SwaggerResponse(200, "Message about sending a link to confirm joining the DocSpace", typeof(string))]
     [SwaggerResponse(400, "Incorrect email or email already exists")]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(405, "Joining the portal is not available")]
     [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
@@ -202,12 +203,17 @@ public class MessageSettingsController(
         {
             var tenant = tenantManager.GetCurrentTenant();
             var email = inDto.Email;
+
+            // Joining is what this endpoint serves - the "Register" link the login page shows an
+            // anonymous visitor - so it exists only while the portal publishes a trusted-domain
+            // policy, the same condition SettingsDto.EnabledJoin reports to that page. Saying so with
+            // 405 rather than letting an unmapped MethodAccessException surface as 500.
             if (!(
                 (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
                 tenant.TrustedDomains.Count > 0) ||
                 tenant.TrustedDomainsType == TenantTrustedDomainsType.All))
             {
-                throw new MethodAccessException("Method not available");
+                throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, "Method not available");
             }
 
             if (!email.TestEmailRegex() || email.TestEmailPunyCode())

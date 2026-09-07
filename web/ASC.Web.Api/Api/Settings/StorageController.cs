@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -528,11 +528,20 @@ public class StorageController(
     /// </remarks>
     /// <summary>Get Amazon regions</summary>
     /// <path>api/2.0/settings/storage/s3/regions</path>
+    /// <collection>list</collection>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "List of the Amazon regions", typeof(object))]
+    [SwaggerResponse(200, "List of the Amazon regions", typeof(IEnumerable<AmazonS3RegionDto>))]
     [HttpGet("storage/s3/regions")]
-    public object GetAmazonS3Regions()
+    public IEnumerable<AmazonS3RegionDto> GetAmazonS3Regions()
     {
-        return RegionEndpoint.EnumerableAllRegions;
+        return RegionEndpoint.EnumerableAllRegions.Select(r => new AmazonS3RegionDto
+        {
+            SystemName = r.SystemName,
+            DisplayName = r.DisplayName,
+            PartitionName = r.PartitionName,
+            PartitionDnsSuffix = r.PartitionDnsSuffix,
+            PartitionRegionRegex = r.PartitionRegionRegex,
+            HostnameTemplate = r.HostnameTemplate
+        });
     }
 }

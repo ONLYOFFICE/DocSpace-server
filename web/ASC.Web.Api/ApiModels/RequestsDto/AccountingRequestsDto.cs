@@ -107,13 +107,13 @@ public class CustomerOperationsReportRequestDto
     /// <summary>
     /// The operation type to filter by.
     /// </summary>
-    /// <example>Any</example>
+    /// <example>ServicePayment</example>
     public ASC.Core.Billing.OperationType? Type { get; init; }
 
     /// <summary>
     /// The operation status to filter by.
     /// </summary>
-    /// <example>Any</example>
+    /// <example>Completed</example>
     public OperationStatus? Status { get; init; }
 
     /// <summary>
@@ -170,7 +170,7 @@ public class CustomerServiceUsageReportRequestDto
     /// <summary>
     /// The operation status to filter by.
     /// </summary>
-    /// <example>Any</example>
+    /// <example>Completed</example>
     public OperationStatus? Status { get; init; }
 
     /// <summary>
@@ -317,6 +317,27 @@ public class CustomerServiceUsageRequestDto
     /// </summary>
     /// <example>Descending</example>
     public OperationOrderType? OrderType { get; init; }
+}
+
+/// <summary>
+/// The request parameters for receiving the prices of the service.
+/// </summary>
+public class ServicePricesRequestDto
+{
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    /// <example>ai-tools</example>
+    [StringLength(255)]
+    [FromRoute(Name = "serviceName")]
+    public string ServiceName { get; init; }
+
+    /// <summary>
+    /// Specifies whether to return only the active prices. The default value is false.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "active")]
+    public bool Active { get; init; }
 }
 
 
