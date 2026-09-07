@@ -50,7 +50,9 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
                 var responses = operation.Value.Responses;
                 foreach (var response in responses)
                 {
-                    if (response.Key == "200" && response.Value.Content != null)
+                    // The runtime CustomResponseFilterAttribute wraps every ObjectResult regardless of its
+                    // status code, so every documented success response with a body must be wrapped too.
+                    if (response.Key.StartsWith('2') && response.Value.Content != null)
                     {
                         foreach (var content in response.Value.Content)
                         {

@@ -60,7 +60,7 @@ public class RoomTemplatesWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _templateQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _templateQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.UserId == userId);
 
             if (item is { IsCompleted: true })
             {
@@ -113,7 +113,7 @@ public class RoomTemplatesWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _roomQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _roomQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.UserId == userId);
 
             if (item is { IsCompleted: true })
             {
@@ -145,13 +145,22 @@ public class RoomTemplatesWorker(
         }
     }
 
-    public async Task<CreateRoomTemplateOperation> GetStatusTemplateCreatingAsync(int tenantId)
+    /// <summary>
+    /// The template creation started by <paramref name="userId"/>, if one is running. Scoped to the
+    /// caller: an operation started by another user of the same portal is none of their business, and
+    /// reporting it leaked that user's template id.
+    /// </summary>
+    public async Task<CreateRoomTemplateOperation> GetStatusTemplateCreatingAsync(int tenantId, Guid userId)
     {
-        return (await _templateQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
+        return (await _templateQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.UserId == userId);
     }
 
-    public async Task<CreateRoomFromTemplateOperation> GetStatusRoomCreatingAsync(int tenantId)
+    /// <summary>
+    /// The room-from-template creation started by <paramref name="userId"/>, if one is running.
+    /// Scoped to the caller for the same reason as <see cref="GetStatusTemplateCreatingAsync"/>.
+    /// </summary>
+    public async Task<CreateRoomFromTemplateOperation> GetStatusRoomCreatingAsync(int tenantId, Guid userId)
     {
-        return (await _roomQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
+        return (await _roomQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.UserId == userId);
     }
 }

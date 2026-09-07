@@ -52,6 +52,21 @@ logger.info("Storage initialized");
 
 const app = express();
 
+// Server-Timing header so DevTools can tell server time from network time;
+// set at header flush, so for streamed replies it is time-to-first-byte.
+app.use((_req, res, next) => {
+  const startedAt = process.hrtime.bigint();
+  const writeHead = res.writeHead.bind(res);
+  res.writeHead = ((...args: Parameters<typeof writeHead>) => {
+    if (!res.headersSent) {
+      const elapsedMs = (process.hrtime.bigint() - startedAt) / 1_000_000n;
+      res.setHeader("Server-Timing", `express-request-time;dur=${elapsedMs}ms`);
+    }
+    return writeHead(...args);
+  }) as typeof res.writeHead;
+  next();
+});
+
 // CORS is off by default: the chat UI reaches this service same-origin via
 // the DocSpace nginx (`/api/2.0/new-ai`), so no cross-origin request is
 // expected. A blanket `cors()` would emit `Access-Control-Allow-Origin: *`
@@ -75,12 +90,25 @@ const jsonParser = bodyParser.json({ strict: false });
 // (base64 data URLs) easily exceed the parser's 100kb default limit.
 const OPENAI_PASSTHROUGH_PREFIX = `${API_PREFIX}/openai/`;
 
+// The docx export carries a whole thread transcript in one request, so a
+// long thread blows past the parser's 100kb default and 413s before the
+// handler runs (Bug 83096). User messages are capped by the default parser
+// on their own routes, so only assistant replies grow a transcript — 15mb
+// covers even extreme threads. The downstream .NET hop accepts ~28mb
+// (Kestrel default); a front proxy's own body cap still applies before us.
+const TEXT_TO_DOCX_PATH = `${API_PREFIX}/text-to-docx`;
+const docxJsonParser = bodyParser.json({ strict: false, limit: "15mb" });
+
 app
   .use(morgan("combined", { stream: logStream }))
   .use(cookieParser())
   .use((req, res, next) => {
     if (req.path.startsWith(OPENAI_PASSTHROUGH_PREFIX)) {
       next();
+      return;
+    }
+    if (req.path === TEXT_TO_DOCX_PATH) {
+      docxJsonParser(req, res, next);
       return;
     }
     jsonParser(req, res, next);

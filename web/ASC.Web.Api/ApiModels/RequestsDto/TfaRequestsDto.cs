@@ -40,7 +40,7 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// {
 ///   "type": "EnumValue",
 ///   "id": {},
-///   "trustedIps": ["item1", "item2"],
+///   "trustedIps": ["192.0.2.1", "203.0.113.0/24"],
 ///   "mandatoryUsers": [],
 ///   "mandatoryGroups": []
 /// }
@@ -61,9 +61,11 @@ public class TfaRequestsDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The list of IP addresses that bypass TFA verification.
+    /// The list of IP addresses that bypass TFA verification. Each entry is a single address, an inclusive
+    /// "from-to" range or a CIDR block.
     /// </summary>
-    /// <example>["item1", "item2"]</example>
+    /// <example>["192.0.2.1", "198.51.100.1-198.51.100.20", "203.0.113.0/24"]</example>
+    [IpAddressOrRange]
     public List<string> TrustedIps { get; set; }
 
     /// <summary>

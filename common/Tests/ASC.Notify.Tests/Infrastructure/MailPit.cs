@@ -34,190 +34,83 @@
 namespace ASC.Notify.Tests.Infrastructure;
 
 /// <summary>
-/// The MailPit instance that the Aspire AppHost starts for local development
-/// (<c>ConnectionStringManager.AddMailPit</c>, present in the <c>development</c>, <c>test</c> and
-/// <c>frontend-dev</c> launch profiles). Aspire publishes the container's SMTP (1025) and web (8025)
-/// ports on random host ports, so they are discovered at run time instead of being hard-coded.
-/// </summary>
-internal sealed record MailPitEndpoint(string SmtpHost, int SmtpPort, Uri WebUi)
-{
-    /// <summary>Environment overrides for CI or a non-Aspire MailPit: <c>host:port</c> and a base URL.</summary>
-    private const string SmtpEnvVariable = "MAILPIT_SMTP";
-    private const string WebUiEnvVariable = "MAILPIT_HTTP";
-
-    private const int ContainerSmtpPort = 1025;
-    private const int ContainerWebPort = 8025;
-
-    /// <summary>
-    /// Returns the first candidate whose web API answers, or <c>null</c> when MailPit is not running.
-    /// Candidates, in order: the environment overrides, the published ports of the running MailPit
-    /// container (via <c>docker ps</c>), and finally MailPit's own defaults on localhost.
-    /// </summary>
-    public static async Task<MailPitEndpoint?> ResolveAsync(CancellationToken cancellationToken)
-    {
-        foreach (var candidate in GetCandidates())
-        {
-            if (await candidate.IsAliveAsync(cancellationToken))
-            {
-                return candidate;
-            }
-        }
-
-        return null;
-    }
-
-    private static IEnumerable<MailPitEndpoint> GetCandidates()
-    {
-        var fromEnvironment = FromEnvironment();
-        if (fromEnvironment != null)
-        {
-            yield return fromEnvironment;
-        }
-
-        var fromDocker = FromDocker();
-        if (fromDocker != null)
-        {
-            yield return fromDocker;
-        }
-
-        yield return new MailPitEndpoint("localhost", ContainerSmtpPort, new Uri($"http://localhost:{ContainerWebPort}"));
-    }
-
-    private static MailPitEndpoint? FromEnvironment()
-    {
-        var smtp = Environment.GetEnvironmentVariable(SmtpEnvVariable);
-        var webUi = Environment.GetEnvironmentVariable(WebUiEnvVariable);
-
-        if (string.IsNullOrEmpty(smtp) || string.IsNullOrEmpty(webUi))
-        {
-            return null;
-        }
-
-        var parts = smtp.Split(':');
-
-        if (parts.Length != 2 || !int.TryParse(parts[1], out var port) || !Uri.TryCreate(webUi, UriKind.Absolute, out var webUiUri))
-        {
-            return null;
-        }
-
-        return new MailPitEndpoint(parts[0], port, webUiUri);
-    }
-
-    /// <summary>
-    /// Reads the host ports Aspire published for the MailPit container. Any failure (no docker on
-    /// PATH, docker not running, container gone) simply drops this candidate.
-    /// </summary>
-    private static MailPitEndpoint? FromDocker()
-    {
-        string output;
-
-        try
-        {
-            var startInfo = new ProcessStartInfo("docker")
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            startInfo.ArgumentList.Add("ps");
-            startInfo.ArgumentList.Add("--filter");
-            startInfo.ArgumentList.Add("name=mailpit");
-            startInfo.ArgumentList.Add("--format");
-            startInfo.ArgumentList.Add("{{.Ports}}");
-
-            using var process = Process.Start(startInfo);
-
-            if (process == null)
-            {
-                return null;
-            }
-
-            output = process.StandardOutput.ReadToEnd();
-
-            if (!process.WaitForExit(TimeSpan.FromSeconds(10)) || process.ExitCode != 0)
-            {
-                return null;
-            }
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-
-        var smtpPort = MatchPublishedPort(output, ContainerSmtpPort);
-        var webPort = MatchPublishedPort(output, ContainerWebPort);
-
-        if (smtpPort == null || webPort == null)
-        {
-            return null;
-        }
-
-        return new MailPitEndpoint("localhost", smtpPort.Value, new Uri($"http://localhost:{webPort}"));
-    }
-
-    /// <summary>Picks the host port out of a <c>docker ps</c> mapping such as <c>0.0.0.0:56162-&gt;8025/tcp</c>.</summary>
-    private static int? MatchPublishedPort(string dockerPorts, int containerPort)
-    {
-        var match = Regex.Match(dockerPorts, $@":(?<port>\d+)->{containerPort}/tcp", RegexOptions.None, TimeSpan.FromSeconds(1));
-
-        return match.Success && int.TryParse(match.Groups["port"].Value, out var port) ? port : null;
-    }
-
-    private async Task<bool> IsAliveAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            using var client = new HttpClient { BaseAddress = WebUi, Timeout = TimeSpan.FromSeconds(3) };
-            using var response = await client.GetAsync("api/v1/info", cancellationToken);
-
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
-}
-
-/// <summary>
 /// Delivers a rendered letter to MailPit over SMTP and reads it back through MailPit's web API, so a
-/// test can both drop a letter into the inbox for a human to look at and assert that it arrived.
+/// test can drop a letter into the inbox for a human to look at, assert that it arrived, and ask
+/// MailPit how well real mail clients would cope with its markup.
+///
+/// Both endpoints come from <see cref="LetterStackFixture"/>, i.e. from the Aspire host the test run
+/// started — nothing here discovers or guesses where MailPit is.
 /// </summary>
-internal sealed class MailPitInbox(MailPitEndpoint endpoint)
+/// <param name="smtpHost">Host of the container's SMTP endpoint.</param>
+/// <param name="smtpPort">Port of the container's SMTP endpoint.</param>
+/// <param name="api">Client bound to the web API, shared by every test — <see cref="HttpClient"/> is
+/// thread-safe, and test classes run in parallel.</param>
+internal sealed class MailPitInbox(string smtpHost, int smtpPort, HttpClient api) : IDisposable
 {
     private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public async Task SendAsync(string toAddress, string subject, string htmlBody, CancellationToken cancellationToken)
+    /// <summary>
+    /// HTML checks run one at a time, and this is not a tuning choice. MailPit loads its caniemail
+    /// support matrix lazily on the first check, guarded by nothing but a "have I loaded it yet"
+    /// field (<c>internal/htmlcheck/caniemail.go</c>). Two checks arriving together both start
+    /// filling the same map and the Go runtime kills the process outright — the container dies with
+    /// <c>fatal error: concurrent map writes</c> and every later test fails against a corpse.
+    /// </summary>
+    private readonly SemaphoreSlim _htmlCheck = new(1, 1);
+
+    /// <param name="embedded">
+    /// What the letter references by content id — the tenant letter logo, for every letter that carries
+    /// no top image of its own. Delivering the body without them would leave the reader, and MailPit's
+    /// markup check, looking at a broken image that production never sends.
+    /// </param>
+    public async Task SendAsync(
+        string toAddress,
+        string subject,
+        string htmlBody,
+        IReadOnlyCollection<NotifyMessageAttachment> embedded,
+        CancellationToken cancellationToken)
     {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("ONLYOFFICE letter preview", "noreply@onlyoffice.com"));
         message.To.Add(MailboxAddress.Parse(toAddress));
         message.Subject = subject;
-        message.Body = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
 
+        var body = new BodyBuilder { HtmlBody = htmlBody };
+
+        foreach (var attachment in embedded)
+        {
+            var resource = body.LinkedResources.Add(attachment.FileName, attachment.Content);
+
+            // The cid the body was rendered against, not a fresh one MimeKit would invent.
+            resource.ContentId = attachment.ContentId;
+        }
+
+        message.Body = body.ToMessageBody();
+
+        // A client per letter: MailKit's SmtpClient is not thread-safe and the tests are parallel.
+        // MailPit itself takes the whole assembly delivering at once without complaint, so deliveries
+        // are deliberately not throttled — only the HTML check below has to be.
         using var client = new SmtpClient();
 
-        await client.ConnectAsync(endpoint.SmtpHost, endpoint.SmtpPort, SecureSocketOptions.None, cancellationToken);
+        await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.None, cancellationToken);
         await client.SendAsync(message, cancellationToken);
         await client.DisconnectAsync(true, cancellationToken);
     }
 
-    /// <summary>Polls the inbox until a message addressed to <paramref name="toAddress"/> shows up.</summary>
+    /// <summary>
+    /// Polls until the message addressed to <paramref name="toAddress"/> shows up. The lookup goes
+    /// through the search API rather than a page of the inbox: a full sweep delivers a couple of
+    /// thousand letters from parallel test classes, so by the time this runs the letter it is waiting
+    /// for is nowhere near the newest page.
+    /// </summary>
     public async Task<MailPitMessage?> WaitForMessageAsync(string toAddress, TimeSpan timeout, CancellationToken cancellationToken)
     {
-        using var client = new HttpClient { BaseAddress = endpoint.WebUi, Timeout = TimeSpan.FromSeconds(10) };
-
+        var query = Uri.EscapeDataString($"to:{toAddress}");
         var deadline = DateTime.UtcNow + timeout;
 
         do
         {
-            var body = await client.GetStringAsync("api/v1/messages?limit=100", cancellationToken);
-            var messages = JsonSerializer.Deserialize<MailPitMessages>(body, _jsonOptions)?.Messages ?? [];
-
-            var found = messages.FirstOrDefault(m => m.To != null
-                && m.To.Any(t => string.Equals(t.Address, toAddress, StringComparison.OrdinalIgnoreCase)));
+            var found = await TryFindAsync(query, cancellationToken);
 
             if (found != null)
             {
@@ -231,9 +124,56 @@ internal sealed class MailPitInbox(MailPitEndpoint endpoint)
         return null;
     }
 
+    /// <summary>
+    /// MailPit's HTML check: it walks the letter's markup and scores every construct against the
+    /// caniemail support matrix, returning the share of mail clients that would render it
+    /// (<see cref="HtmlCheckTotal.Supported"/>), render it partially, or not render it at all.
+    /// </summary>
+    public async Task<HtmlCheck> CheckHtmlAsync(string messageId, CancellationToken cancellationToken)
+    {
+        await _htmlCheck.WaitAsync(cancellationToken);
+
+        try
+        {
+            var body = await api.GetStringAsync($"api/v1/message/{messageId}/html-check", cancellationToken);
+
+            return JsonSerializer.Deserialize<HtmlCheck>(body, _jsonOptions)
+                ?? throw new InvalidOperationException($"MailPit returned no HTML check for message '{messageId}'.");
+        }
+        finally
+        {
+            _htmlCheck.Release();
+        }
+    }
+
     public Uri GetMessageUrl(MailPitMessage message)
     {
-        return new Uri(endpoint.WebUi, $"view/{message.Id}");
+        return new Uri(api.BaseAddress!, $"view/{message.Id}");
+    }
+
+    /// <summary>Releases the gate. The client belongs to the fixture, which disposes it itself.</summary>
+    public void Dispose()
+    {
+        _htmlCheck.Dispose();
+    }
+
+    /// <summary>
+    /// One search attempt. A request that fails outright counts as "not delivered yet": under a
+    /// parallel sweep the busy container occasionally cuts one short, and it is the caller's deadline
+    /// that decides the verdict, not a single unlucky response.
+    /// </summary>
+    private async Task<MailPitMessage?> TryFindAsync(string query, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var body = await api.GetStringAsync($"api/v1/search?query={query}&limit=1", cancellationToken);
+
+            return JsonSerializer.Deserialize<MailPitMessages>(body, _jsonOptions)?.Messages?.FirstOrDefault();
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
     }
 }
 
@@ -245,3 +185,36 @@ internal sealed record MailPitMessage(
     [property: JsonPropertyName("To")] List<MailPitAddress>? To);
 
 internal sealed record MailPitAddress([property: JsonPropertyName("Address")] string Address);
+
+/// <summary>The <c>html-check</c> response.</summary>
+internal sealed record HtmlCheck(
+    [property: JsonPropertyName("Total")] HtmlCheckTotal Total,
+    [property: JsonPropertyName("Warnings")] List<HtmlCheckWarning>? Warnings);
+
+/// <summary>
+/// The verdict on the letter as a whole. The three shares are percentages and add up to 100:
+/// <see cref="Supported"/> is what MailPit reports as the letter's compatibility.
+/// </summary>
+internal sealed record HtmlCheckTotal(
+    [property: JsonPropertyName("Tests")] int Tests,
+    [property: JsonPropertyName("Nodes")] int Nodes,
+    [property: JsonPropertyName("Supported")] double Supported,
+    [property: JsonPropertyName("Partial")] double Partial,
+    [property: JsonPropertyName("Unsupported")] double Unsupported);
+
+/// <summary>One construct the letter uses that some mail clients do not handle.</summary>
+internal sealed record HtmlCheckWarning(
+    [property: JsonPropertyName("Slug")] string Slug,
+    [property: JsonPropertyName("Title")] string Title,
+    [property: JsonPropertyName("Category")] string Category,
+    [property: JsonPropertyName("Score")] HtmlCheckScore Score);
+
+/// <summary>
+/// How that construct fares: the same three percentages, plus <see cref="Found"/> — how many nodes of
+/// the letter use it, which is what decides how much the construct drags the total down.
+/// </summary>
+internal sealed record HtmlCheckScore(
+    [property: JsonPropertyName("Found")] int Found,
+    [property: JsonPropertyName("Supported")] double Supported,
+    [property: JsonPropertyName("Partial")] double Partial,
+    [property: JsonPropertyName("Unsupported")] double Unsupported);

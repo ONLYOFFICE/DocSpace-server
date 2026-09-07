@@ -108,6 +108,22 @@ export function allowPrivateBaseUrl(): boolean {
 // management surfaces accordingly.
 export const PORTAL_MCP_SERVER_NAME = "docspace";
 
+// Group keys of the DocSpace integration tools (`httpToolsAdapter`). Defined
+// here — not in the adapter — so the storage layer can alias the two groups
+// in tool prefs without importing the adapter (which imports storage back).
+// The engine gates approval per serverType, so approval-required tools are
+// emitted under the dedicated `-approval` group; both groups are one logical
+// source, and tool prefs treat them as one namespace (Bug 83013).
+export const DOCSPACE_INTEGRATION_SERVER_TYPE = "docspace-integration";
+export const DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE =
+  "docspace-integration-approval";
+
+// Group keys of the library's built-in tool sources (mirrors of the
+// non-exported WEB_SEARCH_TYPE / IMAGE_GENERATION_TYPE constants in
+// @onlyoffice/ai-chat core). Used to validate tool-pref serverTypes.
+export const WEB_SEARCH_TYPE = "web-search";
+export const IMAGE_GENERATION_TYPE = "image-generation";
+
 // Host-preconfigured MCP servers from the shared `appsettings.json`
 // (`ai.mcp`), with the Aspire endpoint override applied per entry.
 // Malformed entries (missing id / name / endpoint) are dropped so a bad

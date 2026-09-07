@@ -440,7 +440,14 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
             `backend entryIds=${JSON.stringify([...byEntryId.keys()])} ` +
             `raw=${JSON.stringify(raw)}`,
         );
-        throw new Error(`ai service did not return attachment for entryId=${entryId}`);
+        // The C# side silently drops entry ids it cannot resolve (an id that
+        // does not exist, or one the caller cannot read), so a missing match
+        // is a client error, not a service fault — answer 404 instead of
+        // collapsing to a generic 500 (Bug 82893).
+        throw Object.assign(
+          new Error(`attachment entry not found or inaccessible: ${entryId}`),
+          { status: 404, expose: true },
+        );
       }
       // The caller's own `type` wins over the title-derived one from
       // `dtoToAttachment`: it comes from the same `c_oAscFileType` table but

@@ -186,11 +186,14 @@ public class RoomGroupCreateTests(
         created.Name.Should().Be(name);
     }
 
+    /// <summary>
+    /// Every character here is inside the Basic Multilingual Plane, which is what the name column
+    /// can hold — see <see cref="Create_NameOutsideBmp_Rejected"/> for the rest.
+    /// </summary>
     public static TheoryData<string, string> UnicodeNames => new()
     {
         { "cyrillic", "Мои любимые комнаты" },
         { "hieroglyphs", "我的房间列表" },
-        { "emoji", "Rooms 😀🚀🌟" },
         { "combining", "Café Ñoño déjà" },
         { "internal-spaces", "My favorite rooms" }
     };
@@ -207,6 +210,33 @@ public class RoomGroupCreateTests(
 
         // Assert
         created.Name.Should().Be(name);
+    }
+
+    /// <summary>
+    /// A name carrying a character outside the Basic Multilingual Plane — an emoji — is refused.
+    /// <c>files_group.name</c> is declared <c>utf8</c> / <c>utf8_general_ci</c>
+    /// (<c>products/ASC.Files/Core/Core/EF/DbFilesGroup.cs</c>), and MySQL's <c>utf8</c> holds at most
+    /// three bytes per character, so a four-byte one cannot be stored. That is the accepted behaviour
+    /// for room groups, not a defect, which is why this asserts the refusal rather than a round-trip.
+    /// The rejection surfaces from the database write, so the status is 500 rather than a validated
+    /// 400 — this test pins the refusal, and will start failing if the column ever moves to
+    /// <c>utf8mb4</c> or the name is validated up front, both of which are worth noticing.
+    /// </summary>
+    [Fact]
+    public async Task Create_NameOutsideBmp_Rejected()
+    {
+        // Arrange
+        var roomId = await CreateGroupRoomId("Uni emoji");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateRoomGroup("Rooms 😀🚀🌟", [roomId]));
+
+        // Assert
+        exception.ErrorCode.Should().Be(500);
+
+        var groups = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        groups.Should().NotContain(g => g.Name.Contains("😀"), "the refused name must not be stored");
     }
 
     //

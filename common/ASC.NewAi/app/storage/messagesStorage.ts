@@ -106,6 +106,22 @@ export class HttpMessagesStorage implements MessagesStorage {
     }
   }
 
+  // The thread a message belongs to, or null when the message does not
+  // exist. `ThreadMessageLike` has no thread field, so `readById` drops the
+  // C# DTO's `threadId`; attachments/link-to-message needs it to verify the
+  // caller-supplied pair (Bug 82771 reopen).
+  async readThreadId(messageId: string): Promise<string | null> {
+    try {
+      const raw = await aiService.get(`${MESSAGES_PATH}/${encodeURIComponent(messageId)}`);
+      return (isObject(raw) ? getString(raw, "threadId") : undefined) ?? null;
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  }
+
   // The C# messages endpoint paginates by offset (`limit`/`startIndex`)
   // and cannot express the library's keyset cursor (`createdAt` + `id`),
   // so pagination parameters are ignored and the full thread is returned

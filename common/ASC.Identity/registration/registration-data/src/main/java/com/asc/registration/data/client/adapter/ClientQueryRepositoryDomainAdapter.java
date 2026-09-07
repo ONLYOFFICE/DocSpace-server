@@ -38,6 +38,8 @@ import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.entity.Client;
+import com.asc.registration.data.client.entity.ClientCursor;
+import com.asc.registration.data.client.entity.ClientEntity;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
 import com.asc.registration.data.client.repository.JpaClientRepository;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
@@ -45,6 +47,7 @@ import com.asc.registration.service.transfer.response.PageableResponse;
 import java.time.ZonedDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +68,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository {
   private final JpaClientRepository jpaClientRepository;
   private final ClientDataAccessMapper clientDataAccessMapper;
+
+  private PageableResponse<Client> toPageable(
+      List<ClientCursor> rows, List<ClientEntity> loaded, int limit) {
+    var last = rows.size() > limit ? rows.get(limit - 1) : null;
+    var byId =
+        loaded.stream().collect(Collectors.toMap(ClientEntity::getClientId, c -> c, (a, b) -> a));
+
+    return PageableResponse.<Client>builder()
+        .lastClientId(last == null ? null : last.getClientId())
+        .lastCreatedOn(last == null ? null : last.getCreatedOn())
+        .limit(limit)
+        .data(
+            rows.stream()
+                .limit(limit)
+                .map(ClientCursor::getClientId)
+                .map(byId::get)
+                .filter(Objects::nonNull)
+                .map(clientDataAccessMapper::toDomain)
+                .collect(Collectors.toCollection(LinkedHashSet::new)))
+        .build();
+  }
 
   /**
    * Finds a client by its ID and visibility.
@@ -114,26 +138,13 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
       int limit,
       String lastClientId,
       ZonedDateTime lastCreatedOn) {
-    var clients =
+    var rows =
         jpaClientRepository.findAllByTenantIdAndCreatedByWithCursor(
             tenantId.getValue(), creatorId.getValue(), lastCreatedOn, limit + 1);
-    var lastClient = clients.size() > limit ? clients.get(limit - 1) : null;
-
-    var data =
-        clients.stream()
-            .limit(limit)
-            .filter(c -> !c.isInvalidated())
-            .map(clientDataAccessMapper::toDomain)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-
-    var builder =
-        PageableResponse.<Client>builder()
-            .lastClientId(lastClient == null ? null : lastClient.getClientId())
-            .lastCreatedOn(lastClient == null ? null : lastClient.getCreatedOn())
-            .limit(limit)
-            .data(data);
-
-    return builder.build();
+    var ids = rows.stream().limit(limit).map(ClientCursor::getClientId).toList();
+    var loaded =
+        ids.isEmpty() ? List.<ClientEntity>of() : jpaClientRepository.findAllByClientIds(ids);
+    return toPageable(rows, loaded, limit);
   }
 
   /**
@@ -150,26 +161,13 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
   public PageableResponse<Client> findAllByTenantId(
       TenantId tenantId, int limit, String lastClientId, ZonedDateTime lastCreatedOn) {
     log.debug("Querying clients by tenant id with pagination");
-    var clients =
+    var rows =
         jpaClientRepository.findAllByTenantIdWithCursor(
             tenantId.getValue(), lastCreatedOn, limit + 1);
-    var lastClient = clients.size() > limit ? clients.get(limit - 1) : null;
-
-    var data =
-        clients.stream()
-            .limit(limit)
-            .filter(c -> !c.isInvalidated())
-            .map(clientDataAccessMapper::toDomain)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-
-    var builder =
-        PageableResponse.<Client>builder()
-            .lastClientId(lastClient == null ? null : lastClient.getClientId())
-            .lastCreatedOn(lastClient == null ? null : lastClient.getCreatedOn())
-            .limit(limit)
-            .data(data);
-
-    return builder.build();
+    var ids = rows.stream().limit(limit).map(ClientCursor::getClientId).toList();
+    var loaded =
+        ids.isEmpty() ? List.<ClientEntity>of() : jpaClientRepository.findAllByClientIds(ids);
+    return toPageable(rows, loaded, limit);
   }
 
   /**
@@ -214,10 +212,9 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
   @Transactional(timeout = 2, readOnly = true)
   public List<Client> findAllByClientIds(List<ClientId> clientIds) {
     log.debug("Querying all clients by client ids");
-    return jpaClientRepository
-        .findAllByClientIds(clientIds.stream().map(i -> i.getValue().toString()).toList())
-        .stream()
-        .map(clientDataAccessMapper::toDomain)
-        .toList();
+    var clients =
+        jpaClientRepository.findAllByClientIds(
+            clientIds.stream().map(i -> i.getValue().toString()).toList());
+    return clients.stream().map(clientDataAccessMapper::toDomain).toList();
   }
 }

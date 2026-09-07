@@ -150,12 +150,6 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> TagIdAsync(Guid owner, string name, TagType type, int tenantId)
-    {
-        return TagQueries.TagIdAsync(this, owner, name, type, tenantId);
-    }
-
-    [PreCompileQuery]
     public Task<int> UpdateTagLinkAsync(int tenantId, int tagId, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn, int count)
     {
         return TagQueries.UpdateTagLinkAsync(this, tenantId, tagId, tagEntryType, mappedId, createdBy, createOn, count);
@@ -493,16 +487,6 @@ static file class TagQueries
                  where ftl == null
                  select ft).ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, Guid, string, TagType, int, Task<int>> TagIdAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, Guid owner, string name, TagType type, int tenantId) =>
-                ctx.Tag
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Owner == owner)
-                    .Where(r => r.Name == name)
-                    .Where(r => r.Type == type)
-                    .Select(r => r.Id)
-                    .FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, string, Guid, DateTime, int, Task<int>> UpdateTagLinkAsync =
         (FilesDbContext ctx, int tenantId, int tagId, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn, int count) =>

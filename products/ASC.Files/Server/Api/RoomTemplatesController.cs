@@ -74,7 +74,7 @@ public class RoomTemplatesController(IEventBus eventBus,
         // The template is built by a background operation, so the access to the source room has to
         // be verified here — otherwise the caller is told the request succeeded and only finds out
         // later, from the operation status, that it could not.
-        await fileStorageService.CheckCanCreateRoomTemplateAsync(dto.RoomId);
+        await fileStorageService.CheckCanCreateRoomTemplateAsync(dto.RoomId, dto.Quota);
 
         var taskId = await roomTemplatesWorker.StartCreateTemplateAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
             dto.RoomId,
@@ -118,7 +118,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     {
         try
         {
-            var status = await roomTemplatesWorker.GetStatusTemplateCreatingAsync(tenantManager.GetCurrentTenantId());
+            var status = await roomTemplatesWorker.GetStatusTemplateCreatingAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID);
             if (status != null)
             {
                 var result = new RoomTemplateStatusDto
@@ -149,6 +149,8 @@ public class RoomTemplatesController(IEventBus eventBus,
     [HttpGet("{id}/public")]
     public async Task<bool> GetPublicSettings(PublicDto inDto)
     {
+        await fileStorageService.CheckIsRoomTemplateAsync(inDto.Id);
+
         return await fileStorageService.IsPublicAsync(inDto.Id);
     }
 
@@ -163,6 +165,8 @@ public class RoomTemplatesController(IEventBus eventBus,
     [HttpPut("public")]
     public async Task SetPublicSettings(SetPublicDto inDto)
     {
+        await fileStorageService.CheckIsRoomTemplateAsync(inDto.Id);
+
         var shared = fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
 
         var wrappers = new List<AceWrapper> { new() { Id = Constants.GroupEveryone.ID, Access = inDto.Public ? FileShare.Read : FileShare.None, SubjectType = SubjectType.Group } };

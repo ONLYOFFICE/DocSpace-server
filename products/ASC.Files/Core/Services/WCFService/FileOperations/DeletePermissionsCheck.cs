@@ -142,6 +142,42 @@ public class DeletePermissionsCheck<T>(
         return errors;
     }
 
+    /// <summary>
+    /// A folder delete is all-or-nothing from the caller's point of view: a single file that is
+    /// open for editing must block the whole subtree instead of leaving it half-deleted. This is
+    /// check-then-delete, not a transaction — a file opened after the check still wins the race.
+    /// </summary>
+    public async Task<string> CheckSubtreeFilesPermissionsAsync(Folder<T> folder, bool checkPermissions)
+    {
+        const int pageSize = 500;
+        var offset = 0;
+
+        while (true)
+        {
+            var page = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false,
+                    withSubfolders: true, offset: offset, count: pageSize)
+                .ToListAsync();
+
+            if (page.Count == 0)
+            {
+                return null;
+            }
+
+            var errors = await CheckFilesPermissionsAsync(page, checkPermissions);
+            if (errors.Count > 0)
+            {
+                return errors.Values.First();
+            }
+
+            if (page.Count < pageSize)
+            {
+                return null;
+            }
+
+            offset += page.Count;
+        }
+    }
+
     public async Task<string> CheckFilePermissionsAsync(IEnumerable<File<T>> files, bool folder, bool checkPermissions, bool throwException = false)
     {
         foreach (var file in files)

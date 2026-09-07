@@ -74,7 +74,6 @@ import type {
   PromptBundle,
   ImportResult,
   ImportMode,
-  OpenOrCreateInput,
   OpenOrCreateResult,
   AssignmentMutationResult,
   BulkAssignmentResult,
@@ -313,7 +312,9 @@ export type Req_aiProfilesListProviderModels = {
 export type Res_aiProfilesListProviderModels = Model[];
 export type Req_aiProfilesTestConnection = string;
 export type Res_aiProfilesTestConnection = true | { message?: string };
-export type Res_aiProfilesGetById = Profile;
+// `key` and `headers` are stripped from the HTTP response (Bug 82821) —
+// see profilesController.getById.
+export type Res_aiProfilesGetById = Omit<Profile, "key" | "headers">;
 export type Res_aiProfilesList = Profile[];
 
 /* ------------------------------- Prompts ------------------------------- */
@@ -373,7 +374,25 @@ export type Req_aiThreadsCreate = {
   entityId?: string;
 };
 export type Res_aiThreadsCreate = Thread;
-export type Req_aiThreadsOpenOrCreate = OpenOrCreateInput;
+// Mirrored by hand instead of aliasing the lib's OpenOrCreateInput: its
+// `entityMeta` is Pick<ActionArgs, ...>, and resolving ActionArgs drags the
+// DOM-typed ProviderFetch function type into the schema graph, which
+// ts-json-schema-generator cannot parse. Field set must track the lib type.
+export type Req_aiThreadsOpenOrCreate = {
+  threadId?: string;
+  /** Profile the title generation runs on. */
+  profile: Profile;
+  profileId: string;
+  /** First user message a fresh thread derives its title from. */
+  firstMessage: ThreadMessageLike;
+  /** Opaque scope token persisted on a freshly created thread. */
+  entityId?: string;
+  /**
+   * Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is
+   * re-resolved server-side before reaching the provider as metadata.
+   */
+  entityMeta?: { entityId?: string; entityTitle?: string };
+};
 export type Res_aiThreadsOpenOrCreate = OpenOrCreateResult;
 export type Req_aiThreadsAppendUserMessage = {
   threadId: string;
@@ -397,6 +416,11 @@ export type Req_aiThreadsRegenerateTitle = {
   threadId: string;
   /** Profile used to regenerate the title. */
   profile: Profile;
+  /**
+   * Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is
+   * re-resolved server-side before reaching the provider as metadata.
+   */
+  entityMeta?: { entityId?: string; entityTitle?: string };
 };
 export type Res_aiThreadsRegenerateTitle = string;
 export type Res_aiThreadsList = Thread[];

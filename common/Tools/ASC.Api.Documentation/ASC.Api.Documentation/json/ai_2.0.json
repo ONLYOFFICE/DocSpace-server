@@ -4113,8 +4113,11 @@
             "examples": [
               true
             ],
-            "type": "boolean",
-            "description": "Indicates whether the recommended model banner is visible in the AI chat."
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "Indicates whether the recommended model banner is visible in the AI chat. If not specified, the current value is preserved."
           }
         },
         "additionalProperties": false,
@@ -4249,15 +4252,14 @@
           },
           "color": {
             "examples": [
-              "#FF5733"
+              "FF5733"
             ],
-            "maxLength": 6,
-            "minLength": 0,
+            "pattern": "^[0-9a-fA-F]{6}$",
             "type": [
               "null",
               "string"
             ],
-            "description": "The room color."
+            "description": "The room color, as a six-digit hexadecimal value without a leading '#'."
           },
           "cover": {
             "examples": [

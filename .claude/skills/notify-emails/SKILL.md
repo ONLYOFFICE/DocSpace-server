@@ -14,6 +14,7 @@ is enough for DI.
 | What | Where |
 | --- | --- |
 | Actions | `web/ASC.Web.Core/Notify/Actions.cs` |
+| Letter tests + their harness | `common/Tests/ASC.Notify.Tests`, shared parts in `Infrastructure/` (§9) |
 | Texts (default culture) | `web/ASC.Web.Core/PublicResources/WebstudioNotifyPatternResource.resx` + hand-written `.Designer.cs` |
 | Common tags for every letter | `web/ASC.Web.Core/Notify/NotifyConfiguration.cs` (`NotifyTransferRequest.BeforeTransferRequestAsync`) |
 | Tag helpers (button, signature, image) | `web/ASC.Web.Core/Notify/TagValues.cs` |
@@ -60,14 +61,48 @@ for its `_tg` sibling and carry the same edit across — including into the loca
 one case where hand-editing a translation is right, because the wording is already there in the
 sibling key of that same culture.
 
-For periodic letters inherit `BasePeriodicNotifyAction` instead and declare **only** `ID` +
-`Patterns`: the tags come from the shared `Init` overloads that `StudioPeriodicNotify` calls
-(`$UserName`, `$OrangeButton`…`$OrangeButton5`, `$IMG1`…`$IMG7`, `$URL1`…`$URL14`, `$TopGif`,
-`$TrulyYours`, `$Footer`, price/quota tags).
+For periodic letters inherit `BasePeriodicNotifyAction` (`Actions.cs`, bottom half) and answer the
+three questions a scheduled letter has to answer about itself:
 
-That full list is the **SaaS** overload. `SendEnterpriseLettersAsync` calls a shorter one — one button,
-`$IMG1`…`$IMG5`, `$URL1`…`$URL6`. An enterprise letter that reaches for `$URL9` gets no value and
-prints the raw tag.
+```csharp
+[Scope]
+public sealed class MyPeriodicLetterNotifyAction(
+    UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility, PeriodicNotifyAction periodicNotifyAction, TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "my_periodic_letter";
+    public override List<Pattern> Patterns { get => [ /* EmailPattern */ ]; }
+
+    protected override bool ToAdmins => true;                 // + ToOwner / ToUsers / ToGuests / ToPayer
+    protected override bool RequiresSubscription => true;      // must be set: the base defaults to false
+    protected override bool TrulyYoursAsTableRow => true;      // true for the HTML letters
+
+    /// <summary>Is today this letter's day for this portal?</summary>
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+        => Task.FromResult(context.CreatedDate.AddDays(4) == context.NowDate);
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonGetStarted", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+
+        return Task.CompletedTask;
+    }
+}
+```
+
+Then add the type to `_saasLetters` or `_enterpriseLetters` in `StudioPeriodicNotify` — that list *is*
+the registration; nothing else schedules it.
+
+Only the tags the letter's own pattern references. The base adds `$Culture`, `$UserName`, `$TrulyYours`
+and `$Footer` for every periodic letter (`BuildCommonTagsAsync`), and `$Footer` is chosen from the
+recipient — `common` for a DocSpace admin, `social` for anybody else — so it is not yours to set. An
+unused tag is dead weight; a missing one leaves a raw `$URL1` in front of the reader.
+
+**There are no shared `Init` overloads any more.** Each letter used to be a branch in one `else if`
+chain per edition that filled forty shared locals and poured them into a thirty-eight parameter `Init`,
+so every letter carried the union of every tag any letter might want. If you find a description of
+`$URL1`…`$URL14` as "what a periodic letter gets for free", it predates that.
 
 ## 2. Resource keys
 
@@ -163,9 +198,10 @@ letter tests (§9):
   it on the **final message body** after tag substitution — that is why `ButtonGoToDocSpace` can be
   `Go to your ${LetterLogoText}` and `TrulyYoursText` can be `Truly Yours, ${LetterLogoText} Team`.
 - External links come from `externalresources.json` (`ExternalResourceSettingsHelper`, resolved for the
-  recipient's culture) and portal links from `CommonLinkUtility` — passed in as `$URL1`…`$URL14` /
-  `${__VirtualRootPath}` / `${__SupportLink}`. A hard-coded `https://…` in a pattern breaks regional
-  domains and white-labelling.
+  recipient's culture) and portal links from `CommonLinkUtility` — passed in as `$URL1`, `$URL2`, … or
+  read off the common set (`${__VirtualRootPath}`, `${__SupportLink}`). A hard-coded `https://…` in a
+  pattern breaks regional domains and white-labelling. There is no fixed pool of `$URLn` slots: a letter
+  numbers only the links it has, and today nothing goes past `$URL2`.
 
 **`${LetterLogoText} Docs` is a product name, not a phrase.** The editors carry that name in every
 culture, so `Docs` stays untranslated — including where the reference writes it bare, as in "Embed
@@ -218,35 +254,24 @@ disabled entirely by `core:notify:tariff=false`:
   per installation, `tenantExtraConfig.Enterprise` first, then `.Saas`; there is no opensource sender
   (the old `SendOpensourceLettersAsync` went away with its last letter).
 
-Each method loops tenants, picks **one** `action` per tenant per run, then sends it to the computed
-recipient list. Add a block with the date condition and the flags:
+Each method gathers a `PeriodicLetterContext` per tenant — tariff, quota, dates, last activity — and
+then asks **every** letter in its list whether today is its day (`SendLettersAsync` →
+`ShouldSendAsync` → `SendAsync`). So adding a letter is two edits and neither is in this file's control
+flow: implement it as in §1, and add its type to `_saasLetters` / `_enterpriseLetters`.
 
-```csharp
-if (createdDate.AddDays(2) == nowDate)
-{
-    action = serviceProvider.GetService<MyLetterNotifyAction>();
-    paymentMessage = false;      // false = respects unsubscribe (PeriodicNotifyAction subscription)
-    toowner = true;
-    toadmins = true;
+**Letters now judge themselves independently, and that changes what a predicate has to say.** There is
+no enclosing `if` to inherit a condition from any more, so a predicate must carry every condition its
+old branch got for free from the chain it was nested in — the tariff state, the free quota, the trial.
+A predicate that only checks the date will fire on portals the letter was never meant for.
 
-    orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToDocSpace", c);
-    orangeButtonUrl = _ => commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+The flip side is that the mutual exclusion the chain gave away is gone too: two letters can now claim
+the same portal on the same day. `PeriodicLetterScheduleTests.OnlyOneEnterpriseLetterClaimsAPortal` is
+where that is checked, and a new letter belongs in it.
 
-    trulyYoursAsTebleRow = true; // true when $TrulyYours is a top-level table row (HTML letters)
-}
-```
-
-Placement inside the method decides the tariff scope, because the branches are one `if/else if`
-chain over `quota.Free` / `tariff.State`:
-
-- **tariff-independent** (must reach startup *and* paid portals) → put the block **first**, before
-  `else if (quota.Free)`. Verify the date cannot collide with a branch further down the chain,
-  otherwise one of the two letters is silently lost.
-- **free/startup only** → inside the `quota.Free` region.
-- **paid only** → inside the `tariff.State >= TariffState.Paid` region.
-
-`paymentMessage = true` bypasses the subscription check — only for billing/legal letters. Marketing
-letters set it to `false`.
+**The base default is `RequiresSubscription => false`**, i.e. the letter goes out whatever the recipient
+has switched off — right for billing and legal notices, wrong for everything else. A marketing letter
+has to override it to `true`, and forgetting to is not a compile error: the letter simply ignores an
+unsubscribe.
 
 ## 7. Recipients (`StudioNotifyHelper.GetRecipientsAsync(toadmins, tousers, toguests)`)
 
@@ -258,9 +283,10 @@ letters set it to `false`.
 | `(false, true, false)` | room admins minus `GroupAdmin` |
 | `(true, true, true)` | everybody |
 
-The owner is put into `GroupAdmin` at tenant creation (`DbTenantService`), so `toadmins` normally
-covers it; `toowner` unions the owner in explicitly (`users.Append(owner).DistinctBy(u => u.Id)`) and
-`topayer` adds the Stripe customer.
+The owner is put into `GroupAdmin` at tenant creation (`DbTenantService`), so `ToAdmins` normally
+covers it; `ToOwner` unions the owner in explicitly (`users.Append(owner).DistinctBy(u => u.Id)`) and
+`ToPayer` adds the Stripe customer. For a periodic letter these are the properties from §1 —
+`BasePeriodicNotifyAction.GetRecipientsAsync` reads them and calls the helper above.
 
 ## 8. Verify
 
@@ -287,19 +313,34 @@ the diff then covers the whole file and buries the one line that actually change
 artifact); confirm real trailing whitespace with a grep before chasing it.
 
 Runtime check: MailPit catches outgoing mail in local dev (the Aspire dashboard shows the port it
-was published on); `../Logs/notify.log` shows what the notify service did.
+was published on); `../Logs/notify.log` shows what the notify service did. The letter tests (§9) do not
+piggyback on that stack — they start one of their own.
 
 ## 9. Look at the letter (preview test)
 
-**Every new letter gets a test in `common/Tests/ASC.Notify.Tests`.** The harness renders it through the
-real pipeline (resources → `NVelocityPatternFormatter` → `TextileStyler` → `HtmlMaster`), saves the HTML
-and — when MailPit is running — delivers it to the inbox. It is a rule for new letters, not a statement
-about the old ones: some sixty letters have a test against a hundred-odd `pattern_*` keys, so a green
-run means the covered letters are fine, not all of them.
+**Every new letter gets a test in `common/Tests/ASC.Notify.Tests`.** The harness resolves the real
+action, calls its own `Init`, renders the letter through the real pipeline (resources →
+`NVelocityPatternFormatter` → `TextileStyler` → `HtmlMaster`), saves the HTML, delivers it to MailPit and
+asks MailPit how many mail clients can render it. It is a rule for new letters, not a statement about the
+old ones: **51 of the 122 actions that carry an email pattern have a test**, so a green run means the
+covered letters are fine, not all of them.
 
 ```bash
 dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
 ```
+
+**Docker has to be running.** The suite boots the Aspire AppHost itself on the `integration-test` launch
+profile, like the Files/People/AI suites, and trims the graph to what a letter needs: MySQL, the
+migration runner, ApiSystem, MailPit — plus RabbitMQ, Redis and OpenSearch, which stay only because
+every project in the graph waits for them. Then it registers a portal through `portal/register` and
+builds the DocSpace service graph **inside the test process** (`Infrastructure/LetterHost.cs`).
+
+That is not gold-plating: a notify action is a `[Scope]` service whose `Init` resolves links against the
+current tenant and shortens them through the database, so there is no calling it without a portal. Start
+to first test is about 50 s; the full sweep of ~3400 cases takes some two and a half minutes.
+
+When the whole suite goes red, `LetterStackSmokeTests` is the test that says whether the stack broke or
+the letters did — it registers a portal, resolves one action and calls `Init`, and nothing else.
 
 **That run covers every culture the portal offers** — `LetterCultures.Names` reads `web:cultures` from
 `appsettings.json` (falling back to the cultures whose `ASC.Web.Core.resources.dll` satellite sits next
@@ -308,8 +349,7 @@ switched on. Checking English alone would be close to useless: the defects these
 a translated tag name, a lost `$`, a textile link glued to the next character — cannot occur in the
 default culture at all.
 
-Every culture multiplies the case count, so the default sweep takes a few minutes. `LETTER_CULTURES`
-**narrows** it for one run while you iterate:
+`LETTER_CULTURES` **narrows** the sweep for one run while you iterate:
 
 ```bash
 LETTER_CULTURES=en-US,de,ru,zh-CN dotnet test common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj
@@ -319,36 +359,70 @@ Only `AssertContent` (tags resolved, links and buttons present) runs per culture
 `AssertDefaultCultureText` checks wording and stays on `en-US`, since any other culture may legitimately
 translate it. A culture with no resx of its own falls back to the default one, exactly as production does.
 
-A letter test derives from `LetterTestBase` and describes only its own letter; everything shared lives in
-`Infrastructure/`:
+**A letter test says how `Init` is called and what the text must contain — never what the tags are.**
+That is the whole shape of it; everything shared lives in `Infrastructure/`:
 
 ```csharp
-public class SaasAdminConfigureLetterTests : LetterTestBase
+public class SaasUserWelcomeLetterTests : LetterTestBase<SaasUserWelcomeV1NotifyAction>
 {
-    protected override string LetterId => "saas_admin_configure_v1";
+    protected override Task InitAsync(SaasUserWelcomeV1NotifyAction action, LetterScope scope)
+    {
+        action.Init(scope.Recipient);          // the production call, with the production arguments
 
-    protected override IPattern Pattern => new EmailPattern(
-        () => WebstudioNotifyPatternResource.subject_saas_admin_configure_v1,
-        () => WebstudioNotifyPatternResource.pattern_saas_admin_configure_v1);
+        return Task.CompletedTask;             // async Init: return action.Init(...) instead
+    }
 
-    protected override string? TopGif => LetterEnvironment.NotificationImageUrl("configure_docspace.gif");
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope) { /* links, any culture */ }
 
-    protected override IEnumerable<ITagValue> BuildLetterTags(CultureInfo culture) =>
-    [
-        OrangeButton("ButtonConfigureRightNow", culture, LetterEnvironment.PortalLink("portal-settings")),
-        new TagValue("URL1", LetterEnvironment.ExternalDomain(LetterEnvironment.ExternalResources.Helpcenter, culture, "https://helpcenter.onlyoffice.com")),
-        new TagValue("URL2", LetterEnvironment.PortalLink("billing/tariff-plan"))
-    ];
-
-    protected override void AssertContent(RenderedLetter letter, CultureInfo culture) { /* links, in any culture */ }
-
-    protected override void AssertDefaultCultureText(RenderedLetter letter) { /* English wording */ }
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope) { /* English wording */ }
 }
 ```
 
-`BuildLetterTags` and `TopGif` must mirror that letter's block in `StudioPeriodicNotify` one-to-one —
-same resource keys, same links, and the top image included whenever the sending code sets `topGif`
-(the harness asserts it reached the letter).
+There is no `Init` on `INotifyAction` — every action declares its own signature — so that one call is the
+only thing a test cannot inherit. Everything the letter says follows from it: the button, the footer
+flavour, the top image, whether the signature is a table row.
+
+A periodic letter has no `Init`; derive from `PeriodicLetterTestBase<TAction>` and it calls
+`BuildTagsAsync` for you. Override `BuildContext` only when the letter quotes a date — the portal state
+is assembled in memory by `PeriodicLetterContexts`, shared with the schedule tests, so a letter about an
+expiring tariff needs no portal whose tariff actually expires.
+
+`LetterScope` is that test's view of the portal: `Recipient` (the owner, carrying the culture under
+test), `DisplayName`, `PortalUrl`, `Culture`, `Services`. Letters disagree about which name they greet
+with — the welcome ones use `Recipient.FirstName`, the backup ones `DisplayName` — and that difference is
+only visible because the harness no longer fills `$UserName` itself.
+
+**Do not restate a tag value in an assertion when you can assert the effect.** `AssertContent` is
+optional, and for the six letters whose `Init` shortens its link there is nothing stable to assert: the
+short key is minted by the database on every call. Assert the button caption and the portal address
+instead.
+
+Shaping the input is fair game, and sometimes necessary: `SaasAdminActivationV1NotifyAction.Init` offers
+the password change only to an activated owner with an audit date and otherwise asks for email
+confirmation, so its test clones the recipient and sets `ActivationStatus` to pick the variant it means
+to render.
+
+**The template is never named in the test.** `LetterTestBase<TAction>` reads it off the action itself —
+`Patterns.Find(SenderName == "email.sender")`, the same lookup `NotifyEngine` does — and takes the
+preview name from `TAction.ID`. Since the pattern XML was removed the action is the only place a
+letter's `subject_`/`pattern_` keys are written down, so repeating them in the test would let it keep
+rendering an old template after the action moved to a new one, and stay green.
+
+A letter with no `EmailPattern` therefore cannot be rendered by this harness at all — `Pattern` throws.
+That is most of the Files module (§10), which is push-first.
+
+Where one template serves several actions — the activation and welcome letters, one per edition — the
+test names the edition it renders, and its `<summary>` says which others share the template.
+
+The **common** tags are not restated either: the harness builds a real `NotifyRequest` and runs
+`NotifyTransferRequest.BeforeTransferRequestAsync` over it, the same step the engine runs on the way out.
+So the portal paths, the author, the external links, the branding and the letter logo are the production
+values, and `Init`'s tags go in first — which is what lets the transfer step see a letter's `$TopGif` and
+leave its logo alone.
+
+That step is also why a letter **without** a top image shows `cid:…` rather than a file under the image
+folder: `AddLetterLogoAsync` attaches the tenant logo and references it by content id. The MailPit
+delivery carries that attachment, so the message under test is the one a reader would receive.
 
 Two tests are generated per culture:
 
@@ -359,18 +433,28 @@ Two tests are generated per culture:
   image / letter logo, the signature. Then your `AssertContent`, and
   `AssertDefaultCultureText` for `en-US` only (another culture may carry a translation). Saves
   `bin/Debug/net10.0/letter-preview/<letter-id>.<culture>.html`.
-- **`Letter_IsDeliveredToMailPit`** — sends over SMTP, asserts arrival, prints the message URL. **Skips**
-  when MailPit is unreachable, so it is harmless in `dotnet test ASC.Tests.slnx`. Start the stack with
-  `dotnet run --project common/ASC.AppHost --launch-profile development`; the SMTP/web ports are read
-  from the running `mailpit` container (Aspire publishes them on random host ports), or set
-  `MAILPIT_SMTP=host:port` / `MAILPIT_HTTP=http://host:port`.
+- **`Letter_IsDeliveredToMailPit`** — sends the letter over SMTP, asserts it arrived, prints the message
+  URL, then calls MailPit's `html-check` and asserts the share of mail clients that render the markup
+  (`MinimumHtmlSupport`, 75% by default). The letters measure 78.5–91.5%; nearly all of the remainder is
+  *partial* support, the CSS every table-based email leans on, and under 3% is unsupported outright. The
+  floor sits just below the lowest letter — low enough that a caniemail data update alone cannot turn the
+  suite red, high enough that markup costing a letter more than a few points has to be justified. A
+  letter may raise or lower it with `protected override double MinimumHtmlSupport`, and the override says
+  why. When it fails, the message names the offending constructs (`css-margin`, `css-display`, …), so
+  read those before touching the threshold.
 
-`Infrastructure/LetterEnvironment.cs` is the only place that knows the surroundings, and they match the
-local Aspire stack: portal at `http://localhost:8092` (`PORTAL_URL` overrides), notification images at
-`{portal}/static/images/notifications`, branding from `BaseWhiteLabelSettings.DefaultLogoText`, external
-links from `buildtools/config/externalresources.json` when it is there (with fallbacks when it is not).
-**A letter test must not hard-code a URL** — use `PortalLink`, `NotificationImageUrl`, `ExternalDomain`,
-`ExternalEntry`.
+`Infrastructure/LetterEnvironment.cs` holds the **expected** side of the assertions, read from the config
+the local stack runs on: branding from `BaseWhiteLabelSettings.DefaultLogoText`, external links from
+`buildtools/config/externalresources.json` (with fallbacks when it is absent). It is deliberately *not*
+the source the letters are rendered from any more — that is the portal — so a help-center link the two
+disagree about is a finding, not a duplication.
+
+**A letter test must not hard-code a URL.** Portal addresses come from `scope.PortalUrl`; external ones
+from `NotificationImageUrl`, `ExternalDomain`, `ExternalEntry`. (`PortalLink` is gone — it was a second
+implementation of `CommonLinkUtility.GetFullAbsolutePath`.) `PortalUrl` survives as an input, the address
+that seeds the request the sending code would have had; a registered portal still answers there because
+`core:base-domain` is `localhost`, which `Tenant.GetTenantDomain` short-circuits on whatever the alias is.
+`LetterScope` asserts that on every scope it opens, so if that ever stops being true the failure names it.
 
 `AssertDefaultCultureText` compares against the **rendered** body, not the resx source: `TextileStyler`
 applies typographic replacements, so a straight `'` in the pattern arrives as `&#8217;` and an assertion
@@ -379,8 +463,12 @@ on `haven't` fails. Pick expected substrings without apostrophes or quotes.
 `Infrastructure/LetterCultures.cs` derives the culture list from `web:cultures`, so a new language needs
 no edit there — only `LETTER_CULTURES` narrows a single run.
 
-The preview supplies the tag *values* itself, so it verifies the template, the markup and the
-substitutions — not the recipient selection or the schedule condition.
+**What the preview does not cover.** The recipient is always the portal owner, who is a DocSpace admin,
+so the `social` branch of a periodic letter's footer is never taken — it matters to
+`saas_admin_user_apps_tips_v1` and its Enterprise twin, which also go to plain users. The portal is never
+white-labelled, so `AddLetterLogoAsync`'s other branch (custom logo, `$TopGif` dropped) never runs. Only
+the `EmailPattern` is rendered — telegram and push bodies are not. And the schedule is a separate suite:
+`PeriodicLetterScheduleTests` answers *when* a letter goes out, this one *what it says*.
 
 ## 10. The Files module's own letters
 
@@ -447,11 +535,26 @@ reaches people who muted the room:
   being sent;
 - `roomsNotificationSettingsHelper.CheckMuteForRoomAsync(roomId, recipientId)` for `VirtualRooms`.
 
-**None of these letters has a test.** `ASC.Notify.Tests` does not reference `FilesPatternResource` at all,
-so the §9 harness — unresolved tags, hard-coded URLs, unrendered textile links, every culture — covers the
-studio letters only. Editing one of these means previewing it by hand through MailPit (§8). Pointing
-`LetterTestBase` at a `FilesPatternResource` key is the obvious way to close that, and nothing in the
-harness is studio-specific except the resource class it reads.
+**None of these letters has a test**, so the §9 checks — unresolved tags, hard-coded URLs, unrendered
+textile links, every culture — cover the studio letters only. Editing one means previewing it by hand
+through MailPit (§8).
+
+Closing that is more than pointing the harness at another resource class, and it is worth knowing why
+before you try:
+
+- the actions **do** resolve in the §9 host — `ASC.Studio.Notify` references `ASC.Files.Core`, so
+  `DIHelper.Scan` registers them, `FilesLinkUtility` and `FileUtility` included;
+- but **16 of the 24 have no `EmailPattern`** (push only, and `ShareEncryptedDocument` has an empty
+  `Patterns`), and `LetterTestBase` throws on those. Covering them needs a push-rendering harness, not
+  this one;
+- and the eight that do have a mail body take `FileEntry<T>` / `Folder<T>` / `File<T>` as `Init`
+  arguments. Those `Init` bodies only read `Title`, `Id`, `ParentId`, `RootFolderType`, so hand-built
+  entries may well be enough — but `DocuSignComplete` and the form-filling family route through
+  `FilesLinkUtility.GetFileWebPreviewUrl` and `FileUtility`, which holds a `DaoFactory`, and whether that
+  path touches the database is unverified.
+
+`Resource` on the base reads `WebstudioNotifyPatternResource`, so a Files test would need its own
+accessor for `FilesPatternResource` — that part really is a one-liner.
 
 ## Reference letters to copy from
 

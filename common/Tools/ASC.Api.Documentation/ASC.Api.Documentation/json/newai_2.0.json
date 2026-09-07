@@ -1032,158 +1032,6 @@
         }
       }
     },
-    "/api/2.0/ai/attachments/save-image": {
-      "post": {
-        "tags": [
-          "AI / Attachments"
-        ],
-        "operationId": "aiAttachmentsSaveImage",
-        "summary": "Save image",
-        "responses": {
-          "200": {
-            "description": "Success.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiAttachment"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "input": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string",
-                        "description": "Image name."
-                      },
-                      "base64": {
-                        "type": "string",
-                        "description": "Full `data:image/...;base64,…` data URL."
-                      },
-                      "title": {
-                        "type": "string",
-                        "description": "Optional display title."
-                      }
-                    },
-                    "required": [
-                      "name",
-                      "base64"
-                    ],
-                    "additionalProperties": false,
-                    "description": "An image attachment draft to persist."
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "input"
-                ],
-                "additionalProperties": false
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/2.0/ai/attachments/save-images-many": {
-      "post": {
-        "tags": [
-          "AI / Attachments"
-        ],
-        "operationId": "aiAttachmentsSaveImagesMany",
-        "summary": "Save images many",
-        "responses": {
-          "200": {
-            "description": "Success.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AiAttachment"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "inputs": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "description": "Image name."
-                        },
-                        "base64": {
-                          "type": "string",
-                          "description": "Full `data:image/...;base64,…` data URL."
-                        },
-                        "title": {
-                          "type": "string",
-                          "description": "Optional display title."
-                        }
-                      },
-                      "required": [
-                        "name",
-                        "base64"
-                      ],
-                      "additionalProperties": false,
-                      "description": "An image attachment draft to persist."
-                    }
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "inputs"
-                ],
-                "additionalProperties": false
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/2.0/ai/attachments/get": {
       "post": {
         "tags": [
@@ -1911,7 +1759,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiProfile"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique profile identifier (UUID)."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "User-defined profile display name."
+                    },
+                    "providerType": {
+                      "$ref": "#/components/schemas/AiProviderType",
+                      "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to  {@link  PlatformAdapter.externalFetch  }  while reusing an existing provider's response parser — see  {@link  Profile.basedOn }  for the format selector."
+                    },
+                    "basedOn": {
+                      "$ref": "#/components/schemas/AiBuiltinProviderType",
+                      "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
+                    },
+                    "baseUrl": {
+                      "type": "string",
+                      "description": "Base URL of the provider API."
+                    },
+                    "modelId": {
+                      "type": "string",
+                      "description": "Selected model ID within this provider."
+                    },
+                    "reasoning": {
+                      "type": "boolean",
+                      "description": "Whether extended thinking is enabled for this profile's model."
+                    },
+                    "capabilities": {
+                      "type": "number",
+                      "description": "Bitmask of capabilities supported by the selected model."
+                    },
+                    "canUseTool": {
+                      "type": "boolean",
+                      "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record)."
+                    },
+                    "useResponsesApi": {
+                      "type": "boolean",
+                      "description": "Result of the live Responses-API probe (parallel to  {@link  canUseTool  } ). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+                    },
+                    "isCloudProvider": {
+                      "type": "boolean",
+                      "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace)."
+                    },
+                    "useProxy": {
+                      "type": "boolean",
+                      "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the  {@link  PlatformAdapter.fetchProxy  }  is not configured."
+                    },
+                    "createdAt": {
+                      "type": "number",
+                      "description": "Creation timestamp (ms since epoch). Used to sort the AI models list newest-first."
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "providerType",
+                    "baseUrl",
+                    "modelId"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -2682,7 +2592,46 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AiOpenOrCreateInput"
+                "type": "object",
+                "properties": {
+                  "threadId": {
+                    "type": "string"
+                  },
+                  "profile": {
+                    "$ref": "#/components/schemas/AiProfile",
+                    "description": "Profile the title generation runs on."
+                  },
+                  "profileId": {
+                    "type": "string"
+                  },
+                  "firstMessage": {
+                    "$ref": "#/components/schemas/AiThreadMessageLike",
+                    "description": "First user message a fresh thread derives its title from."
+                  },
+                  "entityId": {
+                    "type": "string",
+                    "description": "Opaque scope token persisted on a freshly created thread."
+                  },
+                  "entityMeta": {
+                    "type": "object",
+                    "properties": {
+                      "entityId": {
+                        "type": "string"
+                      },
+                      "entityTitle": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is re-resolved server-side before reaching the provider as metadata."
+                  }
+                },
+                "required": [
+                  "profile",
+                  "profileId",
+                  "firstMessage"
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -2979,6 +2928,19 @@
                   "profile": {
                     "$ref": "#/components/schemas/AiProfile",
                     "description": "Profile used to regenerate the title."
+                  },
+                  "entityMeta": {
+                    "type": "object",
+                    "properties": {
+                      "entityId": {
+                        "type": "string"
+                      },
+                      "entityTitle": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is re-resolved server-side before reaching the provider as metadata."
                   }
                 },
                 "required": [
@@ -5456,6 +5418,10 @@
             "type": "boolean",
             "description": "Whether this tool is currently enabled. Disabled tools are hidden from the AI model."
           },
+          "serverType": {
+            "type": "string",
+            "description": "Server type (MCP server name / host tool group id) this tool belongs to — the key the persisted disabled map is stored under. Set by the source that enumerated the tool, so a caller-supplied tool can still be attributed to its group after being flattened into a single list: that is what lets the engine apply the disabled map to `actionArgs.tools` instead of trusting the caller to pre-filter. Wire-serializable, so it survives a remote (server-side) engine."
+          },
           "requireApproval": {
             "type": "boolean",
             "description": "Whether the consumer must show an approval dialog before this tool runs. The engine reads it when deciding the `autoAllow` flag on a `tool-call-pending` event: `requireApproval === false` auto-allows the call (no dialog), `true` always prompts. `undefined` leaves the decision to the persisted \"always-allow\" list alone — so MCP / custom-server tools (which never set it) keep prompting as before, while host tools opt into auto-allow by default. Wire-serializable, so it survives a remote (server-side) engine."
@@ -6530,34 +6496,6 @@
         ],
         "additionalProperties": false,
         "description": "Minimal provider connection configuration. Used to connect to a provider API."
-      },
-      "AiOpenOrCreateInput": {
-        "type": "object",
-        "properties": {
-          "threadId": {
-            "type": "string"
-          },
-          "profile": {
-            "$ref": "#/components/schemas/AiProfile"
-          },
-          "profileId": {
-            "type": "string"
-          },
-          "firstMessage": {
-            "$ref": "#/components/schemas/AiThreadMessageLike"
-          },
-          "entityId": {
-            "type": "string",
-            "description": "Opaque scope token persisted on a freshly created thread. Ignored when `threadId` is provided (the existing thread keeps its scope)."
-          }
-        },
-        "required": [
-          "profile",
-          "profileId",
-          "firstMessage"
-        ],
-        "additionalProperties": false,
-        "description": "Input for  {@link  ThreadsEngine.openOrCreate } : open an existing thread if `threadId` is given, otherwise create a new one with an auto-generated title derived from `firstMessage`."
       },
       "AiOpenOrCreateResult": {
         "type": "object",

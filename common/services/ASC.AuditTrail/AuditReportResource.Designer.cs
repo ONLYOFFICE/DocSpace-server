@@ -2131,6 +2131,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Private room encryption key {0} created.
+        /// </summary>
+        public static string PrivacyRoomKeyCreated {
+            get {
+                return ResourceManager.GetString("PrivacyRoomKeyCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Private room encryption key {0} deleted.
+        /// </summary>
+        public static string PrivacyRoomKeyDeleted {
+            get {
+                return ResourceManager.GetString("PrivacyRoomKeyDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Private room encryption key {0} updated.
+        /// </summary>
+        public static string PrivacyRoomKeyUpdated {
+            get {
+                return ResourceManager.GetString("PrivacyRoomKeyUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Products [{0}]. Access Opened.
         /// </summary>
         public static string ProductAccessOpened {

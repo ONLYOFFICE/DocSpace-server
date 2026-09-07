@@ -48,6 +48,7 @@ public class RoomLinkRequest
     /// The link sharing rights.
     /// </summary>
     /// <example>1</example>
+    [EnumDataType(typeof(FileShare))]
     public FileShare Access { get; set; }
 
     /// <summary>
@@ -73,6 +74,7 @@ public class RoomLinkRequest
     /// The link type.
     /// </summary>
     /// <example>1</example>
+    [EnumDataType(typeof(LinkType))]
     public LinkType LinkType { get; set; }
 
     /// <summary>

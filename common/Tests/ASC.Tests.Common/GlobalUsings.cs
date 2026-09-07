@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using System.Diagnostics;
+global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
 global using System.Runtime.CompilerServices;
@@ -43,10 +44,14 @@ global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
 
 global using Aspire.Hosting;
+global using Aspire.Hosting.ApplicationModel;
 global using Aspire.Hosting.Testing;
 
 global using Bogus;
 global using Bogus.DataSets;
+
+global using DocSpace.API.SDK.Api.People;
+global using DocSpace.API.SDK.Model;
 
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 

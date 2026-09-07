@@ -41,7 +41,8 @@ namespace ASC.Api.Documents;
 public class PrivacyRoomControllerCommon(
     AuthContext authContext,
     PermissionContext permissionContext,
-    EncryptionKeyPairDtoHelper encryptionKeyPairHelper)
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
+    MessageService messageService)
     : ControllerBase
 {
     /// <summary>
@@ -61,7 +62,11 @@ public class PrivacyRoomControllerCommon(
     {
         await Demand();
 
-        var keys = await encryptionKeyPairHelper.CreateKeyPairAsync(inDto?.Map());
+        var keyPair = inDto?.Map();
+
+        var keys = await encryptionKeyPairHelper.CreateKeyPairAsync(keyPair);
+
+        messageService.Send(MessageAction.PrivacyRoomKeyCreated, MessageTarget.Create(keyPair!.Id), keyPair.Id.ToString());
 
         return Created(Request.Path.Value, keys);
     }
@@ -83,7 +88,13 @@ public class PrivacyRoomControllerCommon(
     {
         await Demand();
 
-        return await encryptionKeyPairHelper.ReplaceKeyPairAsync(inDto?.Map());
+        var keyPair = inDto?.Map();
+
+        var keys = await encryptionKeyPairHelper.ReplaceKeyPairAsync(keyPair);
+
+        messageService.Send(MessageAction.PrivacyRoomKeyUpdated, MessageTarget.Create(keyPair!.Id), keyPair.Id.ToString());
+
+        return keys;
     }
 
     /// <summary>
@@ -141,6 +152,8 @@ public class PrivacyRoomControllerCommon(
         await Demand();
 
         await encryptionKeyPairHelper.DeleteAsync(inDto.Id);
+
+        messageService.Send(MessageAction.PrivacyRoomKeyDeleted, MessageTarget.Create(inDto.Id), inDto.Id.ToString());
 
         return NoContent();
     }

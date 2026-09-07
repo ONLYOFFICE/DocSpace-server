@@ -305,7 +305,7 @@ public class AuthenticationController(
                     break;
             }
 
-            var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session, initiator, description);
+            var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session, initiator, true, description);
 
             if (!string.IsNullOrEmpty(inDto.Culture) && user.CultureName != inDto.Culture)
             {

@@ -242,4 +242,159 @@ public class FoldersMoveTests(
         newFolder.Should().NotBeNull();
         newFolder.Folders.Should().Contain(r=> Path.GetFileNameWithoutExtension(r.Title) == Path.GetFileNameWithoutExtension(sourceFolder.Title) + " (1)");
     }
+
+    [Fact]
+    public async Task MoveFolder_WithInnerFile_ToCustomRoom_ReturnsSuccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var folderTitle = "Autotest MoveBatch Source Folder";
+        var myDocsFolderId = await GetUserFolderIdAsync(Owner);
+        var sourceFolder = await CreateFolder(folderTitle, myDocsFolderId);
+
+        var innerFileTitle = "Autotest MoveBatch Inner File.docx";
+        await CreateFile(innerFileTitle, sourceFolder.Id);
+
+        var destRoom = await CreateCustomRoom("Autotest MoveBatch Folder Dest Room");
+
+        // Act
+        var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
+        {
+            DestFolderId = new(destRoom.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [],
+            FolderIds = [new(sourceFolder.Id)],
+            ReturnSingleOperation = true
+        }, TestContext.Current.CancellationToken)).Response;
+
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+        }
+
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+
+        var movedFolder = (await _foldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
+        movedFolder.ParentId.Should().Be(destRoom.Id);
+
+        var movedContent = (await _foldersApi.GetFolderByFolderIdAsync(sourceFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        movedContent.Files.Should().Contain(f => f.Title == innerFileTitle);
+
+        var srcContent = (await _foldersApi.GetFolderByFolderIdAsync(myDocsFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        srcContent.Folders.Should().NotContain(f => f.Title == folderTitle);
+    }
+
+    [Fact]
+    public async Task MoveBatch_MixedFilesAndFolders_ToCustomRoom_ReturnsSuccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var myDocsFolderId = await GetUserFolderIdAsync(Owner);
+
+        var fileTitle = "Autotest MoveBatch Mix File.docx";
+        var file = await CreateFile(fileTitle, myDocsFolderId);
+
+        var folderTitle = "Autotest MoveBatch Mix Folder";
+        var folder = await CreateFolder(folderTitle, myDocsFolderId);
+
+        var destRoom = await CreateCustomRoom("Autotest MoveBatch Mix Dest Room");
+
+        // Act
+        var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
+        {
+            DestFolderId = new(destRoom.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(file.Id)],
+            FolderIds = [new(folder.Id)],
+            ReturnSingleOperation = true
+        }, TestContext.Current.CancellationToken)).Response;
+
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+        }
+
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+
+        var destContent = (await _foldersApi.GetFolderByFolderIdAsync(destRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        destContent.Files.Should().Contain(f => f.Title == fileTitle);
+        destContent.Folders.Should().Contain(f => f.Title == folderTitle);
+    }
+
+    [Fact]
+    public async Task MoveFolder_SubfolderWithinRoom_ToAnotherSubfolder_ReturnsSuccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var room = await CreateCustomRoom("Autotest MoveBatch SubMove Room");
+
+        var srcTitle = "Autotest MoveBatch Src Subfolder";
+        var srcFolder = await CreateFolder(srcTitle, room.Id);
+        var destFolder = await CreateFolder("Autotest MoveBatch Dest Parent", room.Id);
+
+        // Act
+        var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
+        {
+            DestFolderId = new(destFolder.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [],
+            FolderIds = [new(srcFolder.Id)],
+            ReturnSingleOperation = true
+        }, TestContext.Current.CancellationToken)).Response;
+
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+        }
+
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+
+        var destContent = (await _foldersApi.GetFolderByFolderIdAsync(destFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        destContent.Folders.Should().Contain(f => f.Title == srcTitle);
+    }
+
+    [Fact]
+    public async Task MoveFolder_ContentTrue_MovesContentsOnlyNotFolderItself()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var myDocsFolderId = await GetUserFolderIdAsync(Owner);
+        var folderTitle = "Autotest MoveBatch Content Folder";
+        var sourceFolder = await CreateFolder(folderTitle, myDocsFolderId);
+
+        var innerFileTitle = "Autotest MoveBatch Content Inner File.docx";
+        await CreateFile(innerFileTitle, sourceFolder.Id);
+
+        var destRoom = await CreateCustomRoom("Autotest MoveBatch Content Dest Room");
+
+        // Act
+        var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
+        {
+            DestFolderId = new(destRoom.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [],
+            FolderIds = [new(sourceFolder.Id)],
+            Content = true,
+            ReturnSingleOperation = true
+        }, TestContext.Current.CancellationToken)).Response;
+
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+        }
+
+        // Assert - only the inner file lands in the destination, the folder itself is not created there
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+
+        var destContent = (await _foldersApi.GetFolderByFolderIdAsync(destRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        destContent.Files.Should().Contain(f => f.Title == innerFileTitle);
+        destContent.Folders.Should().NotContain(f => f.Title == folderTitle);
+    }
 }

@@ -33,8 +33,31 @@
 
 namespace ASC.Notify.Tests.Infrastructure;
 
-/// <summary>The rendered letter, exactly as the SMTP sender would hand it to MailKit.</summary>
-public sealed record RenderedLetter(string Subject, string Body);
+/// <summary>
+/// The rendered letter, exactly as the SMTP sender would hand it to MailKit, together with the pattern
+/// it was rendered from.
+/// </summary>
+/// <param name="Subject">The finished subject line.</param>
+/// <param name="Body">The finished HTML body.</param>
+/// <param name="SubjectPattern">The subject resource before substitution, in this letter's culture.</param>
+/// <param name="BodyPattern">The body resource before substitution, in this letter's culture.</param>
+/// <param name="ReferencedTags">
+/// The tag names the pattern references, read from that same culture's text.
+/// </param>
+/// <remarks>
+/// The last three are carried here rather than re-read from the <see cref="IPattern"/> because a
+/// pattern resolves against the <em>ambient</em> UI culture: the generated resource properties call
+/// <c>ResourceManager.GetString(key, null)</c>, and nothing ever assigns
+/// <c>WebstudioNotifyPatternResource.Culture</c>. Asking a pattern for its text outside
+/// <see cref="LetterPreview.RenderAsync"/> answers in whatever culture the machine happens to run in —
+/// which is how a check meant to run in thirty cultures silently runs thirty times in one.
+/// </remarks>
+public sealed record RenderedLetter(
+    string Subject,
+    string Body,
+    string SubjectPattern,
+    string BodyPattern,
+    IReadOnlyCollection<string> ReferencedTags);
 
 /// <summary>
 /// Renders a letter the way the notify engine does, but without a portal: pattern text from the
@@ -66,13 +89,26 @@ internal static class LetterPreview
 
             message.AddArgument([.. tags]);
 
-            new NVelocityPatternFormatter().FormatMessage(message, message.Arguments);
+            var formatter = new NVelocityPatternFormatter();
+
+            // Read while the culture is set, and handed to the caller on the result: everything the
+            // checks want to say about the pattern is about *this* culture's text.
+            var subjectPattern = pattern.Subject();
+            var bodyPattern = pattern.Body();
+            var referencedTags = formatter.GetTags(pattern);
+
+            formatter.FormatMessage(message, message.Arguments);
 
             await CreateStyler().ApplyFormatingAsync(message);
 
             var logoText = tags.FirstOrDefault(t => t.Tag == CommonTags.LetterLogoText)?.Value as string ?? string.Empty;
 
-            return new RenderedLetter(ReplaceLogoText(message.Subject, logoText), ReplaceLogoText(message.Body, logoText));
+            return new RenderedLetter(
+                ReplaceLogoText(message.Subject, logoText),
+                ReplaceLogoText(message.Body, logoText),
+                subjectPattern,
+                bodyPattern,
+                referencedTags);
         }
         finally
         {

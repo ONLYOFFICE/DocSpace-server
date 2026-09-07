@@ -39,18 +39,32 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
     private readonly byte[] _lowerBytes = lower.GetAddressBytes();
     private readonly byte[] _upperBytes = upper.GetAddressBytes();
 
+    /// <summary>
+    /// Tells whether a request address falls under a restriction entry: a plain address, an inclusive
+    /// <c>from-to</c> range or a CIDR block. Anything that cannot be parsed is not a match — this runs on the
+    /// login path, where an exception would lock every user out of the portal.
+    /// </summary>
     public static bool MatchIPs(string requestIp, string restrictionIp)
     {
+        if (string.IsNullOrWhiteSpace(restrictionIp))
+        {
+            return false;
+        }
+
         var ipWithoutPort = GetIpWithoutPort(requestIp);
         var dividerIdx = restrictionIp.IndexOf('-');
         if (dividerIdx > 0)
         {
-            var lower = IPAddress.Parse(restrictionIp.Substring(0, dividerIdx).Trim());
-            var upper = IPAddress.Parse(restrictionIp.Substring(dividerIdx + 1).Trim());
+            if (!IPAddress.TryParse(restrictionIp[..dividerIdx].Trim(), out var lower) ||
+                !IPAddress.TryParse(restrictionIp[(dividerIdx + 1)..].Trim(), out var upper) ||
+                !IPAddress.TryParse(ipWithoutPort, out var address))
+            {
+                return false;
+            }
 
             var range = new IPAddressRange(lower, upper);
 
-            return range.IsInRange(IPAddress.Parse(ipWithoutPort));
+            return range.IsInRange(address);
         }
 
         if (restrictionIp.IndexOf('/') > 0)
@@ -59,6 +73,32 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
         }
 
         return ipWithoutPort == restrictionIp;
+    }
+
+    /// <summary>
+    /// Tells whether a restriction entry is one <see cref="MatchIPs"/> can ever match a request against, so a
+    /// value that would silently never apply can be rejected where it is written instead of stored.
+    /// </summary>
+    public static bool IsValidRestriction(string restrictionIp)
+    {
+        if (string.IsNullOrWhiteSpace(restrictionIp))
+        {
+            return false;
+        }
+
+        var dividerIdx = restrictionIp.IndexOf('-');
+        if (dividerIdx > 0)
+        {
+            return IPAddress.TryParse(restrictionIp[..dividerIdx].Trim(), out _) &&
+                   IPAddress.TryParse(restrictionIp[(dividerIdx + 1)..].Trim(), out _);
+        }
+
+        if (restrictionIp.IndexOf('/') > 0)
+        {
+            return IPNetwork.TryParse(restrictionIp, out _);
+        }
+
+        return IPAddress.TryParse(restrictionIp, out _);
     }
 
     private bool IsInRange(IPAddress address)
@@ -90,11 +130,13 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
         return true;
     }
 
-    private static bool IsInRange(string ipAddress, string CIDRmask)
+    private static bool IsInRange(string ipAddress, string cidrMask)
     {
-        var network = IPNetwork.Parse(CIDRmask);
+        if (!IPNetwork.TryParse(cidrMask, out var network) || !IPAddress.TryParse(ipAddress, out var requestIP))
+        {
+            return false;
+        }
 
-        var requestIP = IPAddress.Parse(ipAddress);
         var restrictionIP = network.BaseAddress;
 
         if (requestIP.AddressFamily != restrictionIP.AddressFamily)
@@ -102,11 +144,11 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
             return false;
         }
 
-        var IP_addr = BitConverter.ToInt32(requestIP.GetAddressBytes(), 0);
-        var CIDR_addr = BitConverter.ToInt32(restrictionIP.GetAddressBytes(), 0);
-        var CIDR_mask = IPAddress.HostToNetworkOrder(-1 << (32 - network.PrefixLength));
+        var requestAddr = BitConverter.ToInt32(requestIP.GetAddressBytes(), 0);
+        var cidrAddr = BitConverter.ToInt32(restrictionIP.GetAddressBytes(), 0);
+        var cidrMaskBits = IPAddress.HostToNetworkOrder(-1 << (32 - network.PrefixLength));
 
-        return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask);
+        return (requestAddr & cidrMaskBits) == (cidrAddr & cidrMaskBits);
     }
 
     private static string GetIpWithoutPort(string ip)
@@ -127,5 +169,29 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
         }
 
         return ip;
+    }
+}
+
+/// <summary>
+/// Requires every entry of the annotated value — a single string or a collection of them — to be a restriction
+/// <see cref="IPAddressRange.MatchIPs"/> can match a request against: a plain IP address, an inclusive
+/// <c>from-to</c> range or a CIDR block.
+/// </summary>
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
+public class IpAddressOrRangeAttribute() : ValidationAttribute("The {0} field must contain a valid IP address, IP range or CIDR block.")
+{
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    {
+        var valid = value switch
+        {
+            null => true,
+            string single => IPAddressRange.IsValidRestriction(single),
+            IEnumerable<string> many => many.All(IPAddressRange.IsValidRestriction),
+            _ => IPAddressRange.IsValidRestriction(value.ToString())
+        };
+
+        return valid
+            ? ValidationResult.Success
+            : new ValidationResult(FormatErrorMessage(validationContext.DisplayName), [validationContext.MemberName]);
     }
 }

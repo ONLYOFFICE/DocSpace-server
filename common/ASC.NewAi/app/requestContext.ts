@@ -132,6 +132,23 @@ export function getResolvedFormId(): number | undefined {
   return als.getStore()?.resolvedFormId;
 }
 
+// Names of the custom MCP servers resolved for the current round's scope.
+// Set by the custom-tools resolver (app/tools/customTools.ts) whenever it
+// runs; read by the engine's `systemServerTypes` callback, which is
+// synchronous and therefore cannot resolve the registry itself. The send
+// handlers prime the resolver before calling the engine so the value is
+// present when the callback fires. Request-scoped: dies with the request.
+export function setCustomServerNames(names: string[]): void {
+  const store = als.getStore();
+  if (store) {
+    store.customServerNames = names;
+  }
+}
+
+export function getCustomServerNames(): string[] {
+  return als.getStore()?.customServerNames ?? [];
+}
+
 // Per-request folder-info memoization store (see RequestContext). Undefined
 // outside a request context, where callers fall back to a direct fetch.
 export function getFolderInfoCache():

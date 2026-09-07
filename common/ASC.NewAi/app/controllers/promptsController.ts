@@ -127,6 +127,15 @@ export const promptsController = {
       res.status(400).json({ error: "id required" });
       return;
     }
+    // The storage delete swallows the C# 404, so deleting another user's
+    // folder (scoped away by C#) or a nonexistent one reported success while
+    // rename-folder on the same id answers "Folder not found" (Bug 83138).
+    // Verify visibility at the HTTP boundary; both cases stay a uniform 404
+    // so a foreign folder is indistinguishable from a missing one.
+    if ((await storage.promptFolders.readById(idStr)) === null) {
+      res.status(404).json({ error: `Folder not found: ${idStr}` });
+      return;
+    }
     await engine.deleteFolder(idStr);
     res.json({ success: true });
   }),

@@ -47,9 +47,14 @@ public class DownloadPermissionsCheck<T>(FileSecurity security, IFileDao<T> file
             return;
         }
 
+        var requestedCount = 0;
+
         if (data.Files.Any())
         {
-            var filesForSend = await security.FilterDownloadAsync(fileDao.GetFilesAsync(data.Files)).ToListAsync();
+            var requestedFiles = await fileDao.GetFilesAsync(data.Files).ToListAsync();
+            requestedCount += requestedFiles.Count;
+
+            var filesForSend = await security.FilterDownloadAsync(requestedFiles.ToAsyncEnumerable()).ToListAsync();
             foreach (var file in filesForSend)
             {
                 entriesPathId.Add("", file.Id);
@@ -58,10 +63,20 @@ public class DownloadPermissionsCheck<T>(FileSecurity security, IFileDao<T> file
 
         if (data.Folders.Any())
         {
-            var folderForSend = await security.FilterDownloadAsync(folderDao.GetFoldersAsync(data.Folders)).ToListAsync();
+            var requestedFolders = await folderDao.GetFoldersAsync(data.Folders).ToListAsync();
+            requestedCount += requestedFolders.Count;
+
+            var folderForSend = await security.FilterDownloadAsync(requestedFolders.ToAsyncEnumerable()).ToListAsync();
 
             var filesInFolder = await GetFilesInFoldersAsync(folderForSend.Select(x => x.Id), string.Empty);
             entriesPathId.Add(filesInFolder);
+        }
+
+        // Entries that exist but were dropped by the download filter are a permission problem,
+        // not a missing-item one - without this, denied and missing are both reported as 404.
+        if (entriesPathId.Count == 0 && requestedCount != 0)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         await CheckPermissionsAsync(entriesPathId, data.Files);

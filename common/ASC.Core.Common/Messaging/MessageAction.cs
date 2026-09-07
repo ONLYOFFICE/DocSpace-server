@@ -636,6 +636,15 @@ public enum MessageAction
     [Description("Documents default templates settings updated")]
     DocumentsDefaultTemplatesSettingsUpdated = 5160,
 
+    [Description("Private room encryption key created")]
+    PrivacyRoomKeyCreated = 5161,
+
+    [Description("Private room encryption key updated")]
+    PrivacyRoomKeyUpdated = 5162,
+
+    [Description("Private room encryption key deleted")]
+    PrivacyRoomKeyDeleted = 5163,
+
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 

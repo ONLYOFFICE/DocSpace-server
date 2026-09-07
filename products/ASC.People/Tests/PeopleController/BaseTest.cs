@@ -91,32 +91,9 @@ public class BaseTest(
     /// <summary>
     /// Invites and registers a new member of the given type into the current test's portal.
     /// </summary>
-    protected async Task<User> InviteContact(EmployeeType employeeType, User? user = null)
+    protected Task<User> InviteContact(EmployeeType employeeType, User? user = null)
     {
-        user ??= Owner;
-        await _peopleClient.Authenticate(user);
-
-        var fakeMember = Initializer.FakerMember.Generate();
-
-        var memberSw = Stopwatch.StartNew();
-        var createMemberResponse = await _profilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
-        {
-            CultureName = "en-US",
-            Spam = false,
-            Email = fakeMember.Email,
-            Password = fakeMember.Password,
-            FirstName = fakeMember.FirstName,
-            LastName = fakeMember.LastName,
-            Type = employeeType,
-        }, TestContext.Current.CancellationToken);
-        Timing.Write($"invite.addMember({employeeType})", memberSw.ElapsedMilliseconds);
-
-        if (createMemberResponse.StatusCode != HttpStatusCode.OK)
-        {
-            throw new HttpRequestException($"Unable to invite user {employeeType}");
-        }
-
-        return new User(fakeMember.Email, fakeMember.Password) { Id = createMemberResponse.Data.Response.Id };
+        return Invitations.InviteContactAsync(_profilesApi, _peopleClient, employeeType, user ?? Owner, TestContext.Current.CancellationToken);
     }
 
     protected async Task<User> InviteGuest(User? user = null)

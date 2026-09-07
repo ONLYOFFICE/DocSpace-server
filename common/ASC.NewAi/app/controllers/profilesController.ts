@@ -34,12 +34,50 @@
 import { ProfilesEngine } from "@onlyoffice/ai-chat/core";
 import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
+import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { asString, isObject } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import logger from "../log.js";
 
 const engine = new ProfilesEngine({ storage });
+
+// Profiles are read-only when the portal AI gateway is configured (SaaS):
+// the C# storage rejects every write with 403 — but only after
+// `engine.create`/`update` has already dialed the caller-supplied baseUrl
+// to live-validate the key. Check the flag first so no outbound request is
+// made for an operation that cannot succeed anyway (Bug 83112).
+// `systemAiEnabled` mirrors `AiStatus.GatewayEnabled`
+// (AiSettingsService.GetAiSettingsAsync), the same state
+// AssertGatewayNotConfigured trips on.
+async function assertProfilesWritable(): Promise<void> {
+  const config = await aiService.get("/config");
+  if (isObject(config) && config["systemAiEnabled"] === true) {
+    throw Object.assign(
+      new Error("AI profiles are read-only on this portal (managed by the AI gateway)"),
+      { status: 403, expose: true },
+    );
+  }
+}
+
+// `providerType: "external"` delegates all HTTP transport to the host
+// application's `externalFetch` (a browser-side hook) — a server-created
+// profile has no such transport, so `engine.create` blows up inside the
+// live credentials probe with an unhandled error (Bug 83114, agreed to be
+// a 400). Reject it up front with an actionable message.
+function rejectExternalProviderType(
+  providerType: unknown,
+  res: { status: (code: number) => { json: (body: unknown) => void } },
+): boolean {
+  if (providerType !== "external") {
+    return false;
+  }
+  res.status(400).json({
+    error:
+      'providerType "external" cannot be used for server-managed profiles: it delegates transport to the host application',
+  });
+  return true;
+}
 
 // Translate a provider-side failure (raised by the OpenAI-compatible SDK
 // while listing models) into a meaningful HTTP status + message instead of
@@ -47,6 +85,13 @@ const engine = new ProfilesEngine({ storage });
 // and key come from the user's profile form, so most failures are config
 // errors that should read as such in the UI.
 function describeProviderError(err: unknown): { status: number; message: string } {
+  // An unknown providerType never reaches the network — the provider
+  // registry lookup throws before any request is made. Surface it as the
+  // input error it is instead of collapsing into a 502 "Failed to list
+  // provider models" (Bug 83117).
+  if (err instanceof Error && err.message.startsWith("Unknown provider type")) {
+    return { status: 400, message: err.message };
+  }
   // OpenAI-SDK HTTP errors expose a numeric `status`.
   const httpStatus =
     typeof (err as { status?: unknown })?.status === "number"
@@ -111,12 +156,20 @@ interface ListProviderModelsBody {
 
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
+    await assertProfilesWritable();
+    if (rejectExternalProviderType(req.body?.providerType, res)) {
+      return;
+    }
     await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.create(req.body);
     res.json(result);
   }),
 
   update: asyncHandler<Profile>(async (req, res) => {
+    await assertProfilesWritable();
+    if (rejectExternalProviderType(req.body?.providerType, res)) {
+      return;
+    }
     await assertSafeBaseUrl(req.body?.baseUrl);
     const result = await engine.update(req.body);
     res.json(result);
@@ -135,8 +188,16 @@ export const profilesController = {
 
   listProviderModels: asyncHandler<ListProviderModelsBody>(async (req, res) => {
     const { providerType, baseUrl, apiKey } = req.body ?? {};
-    if (!providerType || !baseUrl) {
-      res.status(400).json({ error: "providerType and baseUrl required" });
+    // One error per actually-missing field, so the client knows which
+    // input to highlight (Bug 83116).
+    if (!providerType) {
+      res
+        .status(400)
+        .json({ error: "providerType required", field: "providerType" });
+      return;
+    }
+    if (!baseUrl) {
+      res.status(400).json({ error: "baseUrl required", field: "baseUrl" });
       return;
     }
     await assertSafeBaseUrl(baseUrl);
@@ -168,6 +229,15 @@ export const profilesController = {
       const models = await engine.listModels(profileId);
       res.json(models);
     } catch (err) {
+      // A failure from the C# storage hop (the profile read inside
+      // `engine.listModels`) carries the real verdict — 403 for guests or
+      // disabled AI, 404 for a missing profile. `describeProviderError`
+      // would misread its 401/403 as a provider auth failure and answer
+      // 400 "Invalid API key" (Bug 82971) — rethrow so asyncHandler
+      // forwards the upstream status instead.
+      if (err instanceof AiServiceHttpError) {
+        throw err;
+      }
       const { status, message } = describeProviderError(err);
       logger.warn(
         `listModels failed (profileId=${profileId}) -> ${status}: ${
@@ -195,18 +265,22 @@ export const profilesController = {
       res.status(400).json({ error: "id required" });
       return;
     }
-    const profile = await engine.getById(id);
+    // Read WITHOUT the onlyoffice provider override: the override rewrites
+    // `baseUrl` to the internal service address and merges the caller's
+    // forwarded auth headers — meant for in-process provider calls, never
+    // for an HTTP response (Bug 82821). The former justification for the
+    // full profile — the doceditor Next passthrough — was removed; the
+    // editor now goes through /openai/{profileId}/v1, which resolves the
+    // profile server-side. `key` and `headers` are dropped on top: no
+    // consumer reads them (on SaaS `key` is the "onlyoffice" placeholder;
+    // on self-hosted it is the tenant's real provider secret).
+    const profile = await storage.profiles.readByIdRaw(id);
     if (!profile) {
       res.status(404).json({ error: "Profile not found" });
       return;
     }
-    // Return the full profile (same shape as `list`): the doceditor AI
-    // passthrough (packages/doceditor .../ai/passthrough) resolves the
-    // profile through this endpoint and needs baseUrl/key/headers to reach
-    // the provider. get-by-id is caller-scoped (a user reads their own
-    // profile), so this is not a cross-user leak — the earlier redaction
-    // (Bug 82821) broke the passthrough and is reverted.
-    res.json(profile);
+    const { key: _key, headers: _headers, ...publicProfile } = profile;
+    res.json(publicProfile);
   }),
 
   list: asyncHandler(async (_req, res) => {
