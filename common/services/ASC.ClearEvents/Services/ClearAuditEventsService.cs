@@ -156,6 +156,11 @@ public sealed class ClearAuditEventsService : ActivePassiveBackgroundService<Cle
                 continue;
             }
 
+            if (ids.Count == _retention.BatchSize)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(200), stoppingToken);
+            }
+
             removed += deleted;
         }
 
