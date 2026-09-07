@@ -403,6 +403,78 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Source ID.
+        /// </summary>
+        public static string AccountingCustomerOperationSourceId {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationSourceId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source name.
+        /// </summary>
+        public static string AccountingCustomerOperationSourceTitle {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationSourceTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source type.
+        /// </summary>
+        public static string AccountingCustomerOperationSourceType {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationSourceType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Agent.
+        /// </summary>
+        public static string AccountingCustomerOperationSourceType_Agent {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationSourceType_Agent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File.
+        /// </summary>
+        public static string AccountingCustomerOperationSourceType_File {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationSourceType_File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folder.
+        /// </summary>
+        public static string AccountingCustomerOperationSourceType_Folder {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationSourceType_Folder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Form.
+        /// </summary>
+        public static string AccountingCustomerOperationSourceType_Form {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationSourceType_Form", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room.
+        /// </summary>
+        public static string AccountingCustomerOperationSourceType_Room {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationSourceType_Room", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customer operations report ({0}-{1}).
         /// </summary>
         public static string AccountingCustomerOperationsReportName {
