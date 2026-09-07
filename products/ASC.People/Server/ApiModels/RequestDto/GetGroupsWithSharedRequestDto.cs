@@ -40,21 +40,25 @@ namespace ASC.People.ApiModels.RequestDto;
 public class GetGroupsWithSharedRequestDto<T>
 {
     /// <summary>
-    /// The group ID.
+    /// The ID of the room, folder or file whose access the search is run against, taken from the route. It is an
+    /// integer for an entry stored in DocSpace and a provider-specific string for an entry in a connected
+    /// third-party storage.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>1234</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// Specifies whether to exclude the group sharing settings from the response.
+    /// Keeps only the groups that do not have access to the entry yet, which is the set to offer when granting
+    /// access. Every returned entry then has `shared` set to false; without the flag every matching group comes back
+    /// and `shared` tells them apart.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
 
     /// <summary>
-    /// The number of groups to retrieve in the request.
+    /// The size of the page. It defaults to 100, which is also the largest value the operation accepts.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -62,16 +66,17 @@ public class GetGroupsWithSharedRequestDto<T>
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index from which to begin retrieving groups with their sharing settings.
+    /// The number of matching groups to skip before the page starts. It defaults to 0, and the total number of
+    /// matches is reported in the total count of the response.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// The text used as a filter for retrieving groups with their sharing settings.
+    /// The text to match against the group name. Omit it to get every group the caller may grant access to.
     /// </summary>
-    /// <example>John</example>
+    /// <example>Marketing</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }
