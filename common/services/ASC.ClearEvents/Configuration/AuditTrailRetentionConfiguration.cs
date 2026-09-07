@@ -37,7 +37,7 @@ public class AuditTrailRetentionConfiguration
 {
     public const string SectionName = "clearEvents:auditTrail";
 
-    public bool Enabled { get; init; } = true;
+    public bool Enabled { get; init; }
 
     public int PaidLifeTimeDays { get; init; } = 3 * 365;
 
