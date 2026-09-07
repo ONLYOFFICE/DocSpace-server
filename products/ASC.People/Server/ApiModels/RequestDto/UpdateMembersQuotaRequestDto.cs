@@ -39,14 +39,16 @@ namespace ASC.People.ApiModels.RequestDto;
 public class UpdateMembersQuotaRequestDto
 {
     /// <summary>
-    /// The list of user IDs.
+    /// The accounts the operation applies to. System accounts are dropped from the list without an error.
     /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000", "11111111-1111-1111-1111-111111111111"]</example>
     public IEnumerable<Guid> UserIds { get; set; }
 
     /// <summary>
-    /// The quota in JSON format.
+    /// The personal storage limit in bytes, as a whole number. A value of 0 or more becomes the limit, and any
+    /// negative value switches the personal limit off so that the portal default applies again. It is read only by
+    /// `PUT api/2.0/people/userquota`.
     /// </summary>
-    /// <example>{"maxSize": 1073741824}</example>
+    /// <example>1073741824</example>
     public JsonElement Quota { get; set; }
 }

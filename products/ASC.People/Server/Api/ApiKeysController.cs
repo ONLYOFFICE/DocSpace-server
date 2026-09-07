@@ -33,6 +33,9 @@
 
 namespace ASC.People.Api;
 
+/// <remarks>
+/// API keys API.
+/// </remarks>
 [Scope]
 [ApiEndpoint("keys")]
 public class ApiKeysController(
@@ -45,14 +48,28 @@ public class ApiKeysController(
     IHttpContextAccessor httpContextAccessor) : ControllerBase
 {
     /// <remarks>
-    ///  Creates a user API key with the parameters specified in the request.
-    /// </remarks>  
+    /// Creates an API key that authenticates requests as the calling account, and is the only operation that ever
+    /// returns the secret.
+    /// Any portal member except a guest may create one; when the portal limits developer tools to administrators,
+    /// only a DocSpace administrator may call it.
+    /// The call is not idempotent - every call issues a new key - and it is throttled, so a client that retries on a
+    /// timeout can end up with several keys.
+    /// The answer carries the full secret in `key`: it is shown here and never again, later reads expose only the
+    /// last four characters in `keyPostfix`, so store it now.
+    /// Pass the scopes the key may use in `permissions`, taking the values from
+    /// `GET api/2.0/keys/permissions`; pass `*` or omit the field to record a key without scope restrictions, and set
+    /// `expiresInDays` to make it expire, otherwise it stays valid until it is deleted.
+    /// An empty `permissions` array and an unknown scope are both rejected with 400.
+    /// Send the key in the `Authorization` header as `Bearer sk-...` to use it.
+    /// </remarks>
     /// <summary>
-    ///  Create a user API key
+    /// Create a user API key
     /// </summary>
     /// <path>api/2.0/keys</path>
     [Tags("Api keys")]
-    [SwaggerResponse(200, "Create a user api key", typeof(ApiKeyResponseDto))]
+    [SwaggerResponse(200, "The new API key, with the full secret in the key field", typeof(ApiKeyResponseDto))]
+    [SwaggerResponse(400, "The permissions array is empty or contains a scope the portal does not know")]
+    [SwaggerResponse(403, "The caller is a guest, or the portal limits developer tools to administrators")]
     [HttpPost]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<ApiKeyResponseDto> CreateApiKey(CreateApiKeyRequestDto apiKey)
@@ -93,15 +110,23 @@ public class ApiKeysController(
     }
 
     /// <remarks>
-    ///  Returns a list of all available permissions for the API key.
-    /// </remarks>  
+    /// Returns every scope value the portal accepts in the `permissions` array of an API key.
+    /// Read it before `POST api/2.0/keys` or `PUT api/2.0/keys/{keyId}`, because any other value is rejected with
+    /// 400.
+    /// Any portal member except a guest may call it, and the call is read-only.
+    /// The answer is a flat list sorted alphabetically, holding the per-area scopes such as `accounts:read`,
+    /// `files:write` and `rooms:write`, the portal-wide `*:read` and `*:write`, and `*` which stands for a key
+    /// without scope restrictions.
+    /// The list is fixed for the portal and identical for every caller, so it can be cached by the client.
+    /// </remarks>
     /// <summary>
     /// Get API key permissions
     /// </summary>
     /// <path>api/2.0/keys/permissions</path>
     /// <collection>list</collection>
     [Tags("Api keys")]
-    [SwaggerResponse(200, "List of all available permissions for key", typeof(IEnumerable<string>))]
+    [SwaggerResponse(200, "The scope values accepted in the permissions array of an API key", typeof(IEnumerable<string>))]
+    [SwaggerResponse(403, "The caller is a guest")]
     [HttpGet("permissions")]
     public async Task<IEnumerable<string>> GetAllPermissions()
     {
@@ -125,15 +150,24 @@ public class ApiKeysController(
 
 
     /// <remarks>
-    ///  Returns a list of all API keys for the current user.
-    /// </remarks>  
+    /// Returns the API keys the caller is allowed to see, which is not the same set for everybody: a DocSpace
+    /// administrator gets every key of the portal, while any other member gets only the keys they created
+    /// themselves.
+    /// Any portal member except a guest may call it, and the call is read-only.
+    /// The secrets are not returned - each entry identifies its key by `id` and by the last four characters in
+    /// `keyPostfix`, and a secret can only be read once, at the moment `POST api/2.0/keys` creates it.
+    /// Expired and deactivated keys stay in the list, so check `expiresAt` against the current time and read
+    /// `isActive` before treating an entry as usable.
+    /// An empty list means the caller has created no keys, not that the portal has none.
+    /// </remarks>
     /// <summary>
-    ///  Get current user's API keys
+    /// Get the API keys
     /// </summary>
     /// <path>api/2.0/keys</path>
     /// <collection>list</collection>
     [Tags("Api keys")]
-    [SwaggerResponse(200, "List of api keys for user", typeof(IAsyncEnumerable<ApiKeyResponseDto>))]
+    [SwaggerResponse(200, "Every key of the portal for a DocSpace admin, or the keys created by the caller for anybody else", typeof(IAsyncEnumerable<ApiKeyResponseDto>))]
+    [SwaggerResponse(403, "The caller is a guest")]
     [HttpGet]
     public async IAsyncEnumerable<ApiKeyResponseDto> GetApiKeys()
     {
@@ -166,14 +200,21 @@ public class ApiKeysController(
 
 
     /// <remarks>
-    /// Returns information about the current user's API key.
-    /// </remarks>  
+    /// Returns the API key that authenticated this very request, letting the holder of a key find out what it is
+    /// allowed to do without knowing its ID.
+    /// The key is identified by the `Authorization` header of the call itself, so the request has to be sent as
+    /// `Bearer sk-...`; a session authenticated in any other way has no key to report and this operation is not
+    /// usable for it.
+    /// The call is read-only and returns one entry, with the same fields as `GET api/2.0/keys` and without the
+    /// secret - read `permissions` for the granted scopes, `expiresAt` for the expiry and `isActive` for the state.
+    /// To look at a key other than the one in use, call `GET api/2.0/keys` instead.
+    /// </remarks>
     /// <summary>
-    ///  Get current user's API key
+    /// Get the current API key
     /// </summary>
     /// <path>api/2.0/keys/@self</path>
     [Tags("Api keys")]
-    [SwaggerResponse(200, "List of api keys for user", typeof(ApiKeyResponseDto))]
+    [SwaggerResponse(200, "The API key that authenticated this request", typeof(ApiKeyResponseDto))]
     [HttpGet("@self")]
     public async Task<ApiKeyResponseDto> GetApiKey()
     {
@@ -185,14 +226,25 @@ public class ApiKeysController(
 
 
     /// <remarks>
-    ///  Updates an existing API key changing its name, permissions, and status.
-    /// </remarks>  
+    /// Renames an API key, replaces the scopes it may use, or activates and deactivates it, without changing the
+    /// secret.
+    /// The caller may update a key they created themselves, and a DocSpace administrator may update any key of the
+    /// portal.
+    /// Take the values for `permissions` from `GET api/2.0/keys/permissions`; an unknown scope or an empty array is
+    /// rejected with 400, and the fields that are left out keep their current values.
+    /// The answer is a plain boolean: true when the key was changed, and false when it was not - which is also what
+    /// an already expired key returns, because such a key is left untouched instead of being reported as an error.
+    /// Deactivating a key through `isActive` stops it from authenticating while keeping it in the list, so use it
+    /// when the key may be needed again and `DELETE api/2.0/keys/{keyId}` when it may not.
+    /// </remarks>
     /// <summary>
-    ///  Update an API key
+    /// Update an API key
     /// </summary>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
-    [SwaggerResponse(200, "Update optional params for user api keys", typeof(bool))]
+    [SwaggerResponse(200, "True if the key was changed, false if it was left untouched because it has already expired", typeof(bool))]
+    [SwaggerResponse(400, "The permissions array is empty or contains a scope the portal does not know")]
+    [SwaggerResponse(403, "The key belongs to another member and the caller is not a DocSpace admin")]
     [HttpPut("{keyId:guid}")]
     public async Task<bool> UpdateApiKey(UpdateApiKeyRequestDto requestDto)
     {
@@ -230,14 +282,21 @@ public class ApiKeysController(
     }
 
     /// <remarks>
-    ///  Deletes a user API key by its ID.
-    /// </remarks>  
+    /// Deletes the API key with the ID given in the route, so that it stops authenticating requests immediately.
+    /// The caller may delete a key they created themselves, and a DocSpace administrator may delete any key of the
+    /// portal.
+    /// The removal is permanent and cannot be undone: the secret was only ever readable at creation time, so a
+    /// deleted key cannot be restored and a new one has to be issued through `POST api/2.0/keys`.
+    /// To stop a key temporarily instead, set `isActive` to false through `PUT api/2.0/keys/{keyId}`.
+    /// The answer is a plain boolean reporting whether the key was removed.
+    /// </remarks>
     /// <summary>
-    ///  Delete a user API key
+    /// Delete an API key
     /// </summary>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
-    [SwaggerResponse(200, "Delete a user api key", typeof(bool))]
+    [SwaggerResponse(200, "True if the key was removed", typeof(bool))]
+    [SwaggerResponse(403, "The key belongs to another member and the caller is not a DocSpace admin")]
     [HttpDelete("{keyId:guid}")]
     public async Task<bool> DeleteApiKey(DeleteApiKeyRequestDto requestDto)
     {

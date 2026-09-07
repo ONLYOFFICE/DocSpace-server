@@ -39,19 +39,22 @@ namespace ASC.People.ApiModels.RequestDto;
 public class StartReassignRequestDto
 {
     /// <summary>
-    /// The user ID whose data will be reassigned to another user.
+    /// The ID of the user whose rooms and shared files are transferred away. The account has to have the `Terminated`
+    /// status already, and it cannot be a system account, the portal owner or the caller.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid FromUserId { get; set; }
 
     /// <summary>
-    /// The user ID to whom all the data will be reassigned.
+    /// The ID of the user who receives the data. The account has to be an active room admin or DocSpace admin, so a
+    /// guest, a system account or a disabled account is rejected.
     /// </summary>
     /// <example>11111111-1111-1111-1111-111111111111</example>
     public required Guid ToUserId { get; set; }
 
     /// <summary>
-    /// Specifies whether to delete a profile when the data reassignment will be finished or not.
+    /// Specifies whether to delete the source profile once the transfer succeeds. When false, which is the default,
+    /// the emptied profile is kept and can be deleted later through `DELETE api/2.0/people/{userid}`.
     /// </summary>
     /// <example>false</example>
     public bool DeleteProfile { get; set; }
