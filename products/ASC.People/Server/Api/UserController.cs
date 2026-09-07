@@ -1423,7 +1423,7 @@ public class UserController(
     [SwaggerResponse(200, "The full profiles of the matching active accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("search")]
-    public IAsyncEnumerable<EmployeeDto> SearchUsersByQuery(GetPeopleByQueryRequestDto inDto)
+    public IAsyncEnumerable<EmployeeFullDto> SearchUsersByQuery(GetPeopleByQueryRequestDto inDto)
     {
         var query = new GetMemberByQueryRequestDto { Query = inDto.Query };
         return GetSearch(query);
