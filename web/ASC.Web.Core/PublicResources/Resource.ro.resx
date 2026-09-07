@@ -1452,4 +1452,28 @@
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Încorporați editorii ONLYOFFICE Docs în aplicația dvs. cu chiriași găzduiți în cloud și propriile chei API.</value>
   </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Tip sursă</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Numele sursei</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID sursă</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>Agent de IA</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Fișier</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Sală</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formular</value>
+  </data>
 </root>

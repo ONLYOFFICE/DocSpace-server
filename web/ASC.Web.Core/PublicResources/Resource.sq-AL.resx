@@ -1452,4 +1452,28 @@
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
     <value>Raporti i kuotës DocsCloud ({0})</value>
   </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Lloji i burimit</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Emri i burimit</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID e burimit</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>Agjent AI</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Skedari</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Dosja</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Dhoma</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formulari</value>
+  </data>
 </root>

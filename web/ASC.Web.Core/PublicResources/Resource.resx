@@ -1516,7 +1516,7 @@
     <value>Source ID</value>
   </data>
   <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
-    <value>Agent</value>
+    <value>AI Agent</value>
   </data>
   <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
     <value>File</value>

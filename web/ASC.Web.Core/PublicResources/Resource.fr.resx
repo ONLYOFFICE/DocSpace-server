@@ -1497,4 +1497,28 @@
   <data name="AccountingReportTotal" xml:space="preserve">
     <value>Total</value>
   </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Type de source</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Nom de la source</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>Identifiant de la source</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>Agent IA</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Fichier</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Dossier</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Salle</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formulaire</value>
+  </data>
 </root>

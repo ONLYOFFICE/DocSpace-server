@@ -1452,4 +1452,28 @@
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Nhúng các trình soạn thảo ONLYOFFICE Docs vào ứng dụng của bạn với các tenant được lưu trữ trên đám mây và khóa API riêng của bạn.</value>
   </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Loại nguồn</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Tên nguồn</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID nguồn</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI agent</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Tập tin</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Thư mục</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Phòng</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Biểu mẫu</value>
+  </data>
 </root>

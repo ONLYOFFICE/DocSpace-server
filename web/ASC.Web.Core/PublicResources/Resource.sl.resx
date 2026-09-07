@@ -1452,4 +1452,28 @@
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Vgradite urejevalnike ONLYOFFICE Docs v svojo aplikacijo z v oblaku gostovanimi najemniki in lastnimi ključi API.</value>
   </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Tip vira</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Ime vira</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID vira</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI agent</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Datoteka</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Mapa</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Soba</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Obrazec</value>
+  </data>
 </root>

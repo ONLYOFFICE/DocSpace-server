@@ -1452,4 +1452,28 @@
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Upota ONLYOFFICE Docs -editorit sovellukseesi pilvessä isännöidyillä vuokralaisilla ja omilla API-avaimillasi.</value>
   </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Lähteen tyyppi</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Lähteen nimi</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>Lähteen ID</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>Tekoälyagentti</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Tiedosto</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Kansio</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Huone</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Lomake</value>
+  </data>
 </root>

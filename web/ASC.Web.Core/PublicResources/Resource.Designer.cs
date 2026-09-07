@@ -421,7 +421,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agent.
+        ///   Looks up a localized string similar to AI Agent.
         /// </summary>
         public static string AccountingCustomerOperationSourceType_Agent {
             get {
