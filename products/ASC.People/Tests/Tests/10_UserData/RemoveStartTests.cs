@@ -35,7 +35,9 @@ namespace ASC.People.Tests.Tests._10_UserData;
 
 /// <summary>
 /// <c>POST /people/remove/start</c> - only the Owner and a DocSpaceAdmin may start removing a
-/// deactivated member's data, and doing so should hand any room the member owned over to the Owner.
+/// deactivated member's data, and doing so hands any room the member owned over to the Owner.
+/// The hand-over used to be invisible: the room's own <c>CreateBy</c> was reassigned, but the API
+/// reported <c>OwnedBy</c> from the creator's virtualrooms root, which reassignment never touches.
 /// </summary>
 public class RemoveStartTests(AspireAppFixture fixture) : UserDataTestBase(fixture)
 {
