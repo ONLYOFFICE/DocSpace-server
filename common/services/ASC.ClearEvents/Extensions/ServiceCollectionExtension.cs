@@ -34,10 +34,10 @@
 namespace ASC.ClearEvents.Extensions;
 public static class ServiceCollectionExtension
 {
-    public static IServiceCollection AddClearEventsServices(this IServiceCollection services)
+    public static IServiceCollection AddClearEventsServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHostedService<ClearEventsService>();
-        services.AddHostedService<ClearAuditEventsService>();
+        services.AddActivePassiveHostedService<ClearAuditEventsService>(configuration);
 
         return services;
     }

@@ -34,15 +34,6 @@
 namespace ASC.ClearEvents.Log;
 internal static partial class ClearAuditEventsServiceLogger
 {
-    [LoggerMessage(LogLevel.Information, "Clear Audit Events Service running. Life time: {paidLifeTimeDays} day(s) for a paid tariff, {freeLifeTimeDays} day(s) otherwise.")]
-    public static partial void InformationTimerRunning(this ILogger<ClearAuditEventsService> logger, int paidLifeTimeDays, int freeLifeTimeDays);
-
-    [LoggerMessage(LogLevel.Information, "Clear Audit Events Service is disabled.")]
-    public static partial void InformationDisabled(this ILogger<ClearAuditEventsService> logger);
-
-    [LoggerMessage(LogLevel.Information, "Clear Audit Events Service is stopping.")]
-    public static partial void InformationTimerStopping(this ILogger<ClearAuditEventsService> logger);
-
     [LoggerMessage(LogLevel.Warning, "Clear Audit Events Service will not run: life time {paidLifeTimeDays}/{freeLifeTimeDays} day(s), batch size {batchSize} and period {period} are not a usable configuration.")]
     public static partial void WarningInvalidConfiguration(this ILogger<ClearAuditEventsService> logger, int paidLifeTimeDays, int freeLifeTimeDays, int batchSize, TimeSpan period);
 
