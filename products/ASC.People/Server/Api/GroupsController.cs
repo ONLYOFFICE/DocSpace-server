@@ -387,6 +387,12 @@ public class GroupController(
     [HttpPost("{id:guid}/members")]
     public async Task<GroupDto> SetMembersTo(MembersRequestDto inDto)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+
+        // Resolve the group before the payload is validated, so that an unknown ID answers 404 instead of the 400 of
+        // the member check below. Both checks otherwise happen inside RemoveMembersFrom, after that 400.
+        await GetGroupInfoAsync(inDto.Id);
+
         var anyValidMembers = await inDto.Members.Members
             .ToAsyncEnumerable()
             .AnyAsync(async (userId, _) => await ValidateUserAsync(userId));
