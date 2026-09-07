@@ -43,9 +43,10 @@ public class GroupPermissionMoveMembersTests(
     #region Validation and edge cases
 
     /// <summary>
-    /// Was a Playwright <c>test.fail</c>: moving a group's members onto itself used to corrupt the
-    /// group. The correct behaviour is that the call either succeeds or fails cleanly (never a 5xx)
-    /// and the member is still there afterwards.
+    /// Moving a group's members onto itself used to empty the group: the loop in
+    /// <c>GroupsController.MoveMembersTo</c> added each member back into the same group and then
+    /// removed them from it. The endpoint now returns the group unchanged when
+    /// <c>fromId == toId</c>, so the call succeeds and the member is still there afterwards.
     /// </summary>
     [Fact]
     [Trait("Category", "Bug")]
