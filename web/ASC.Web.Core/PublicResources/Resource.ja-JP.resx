@@ -1308,9 +1308,6 @@
   <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
     <value>クライアントのシークレット</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>エージェント</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>チャット</value>
   </data>

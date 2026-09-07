@@ -1308,9 +1308,6 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Kas Jauns</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Aģents</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Tērzēšana</value>
   </data>

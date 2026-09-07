@@ -1308,9 +1308,6 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Čo je nové</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Agent</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Chat</value>
   </data>

@@ -1377,9 +1377,6 @@
   <data name="ConsumersNextcloud" xml:space="preserve">
     <value>Nextcloud</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Агент</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Чат</value>
   </data>

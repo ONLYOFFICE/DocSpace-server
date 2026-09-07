@@ -1302,9 +1302,6 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>新鲜事</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>代理</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>聊天</value>
   </data>

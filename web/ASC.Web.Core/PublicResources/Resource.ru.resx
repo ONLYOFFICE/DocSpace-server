@@ -1368,9 +1368,6 @@
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Подключите внешнюю базу данных для хранения результатов заполнения форм.</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Агент</value>
-  </data>
   <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
     <value>SQLite доступен только в изолированных установках системы.</value>
   </data>
