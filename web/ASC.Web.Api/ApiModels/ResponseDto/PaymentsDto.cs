@@ -162,15 +162,20 @@ public class OperationDto
     /// <example>Example Name</example>
     public string ParticipantDisplayName { get; set; }
     /// <summary>
-    /// AI Agent id.
+    /// The type of the entity the AI operation was performed on: Agent, File, Folder, Room or Form.
     /// </summary>
-    /// <example>123</example>
-    public string AgentId { get; set; }
+    /// <example>Agent</example>
+    public string SourceType { get; set; }
     /// <summary>
-    /// AI Agent name.
+    /// The name of the entity the AI operation was performed on.
     /// </summary>
     /// <example>My AI Agent</example>
-    public string AgentTitle { get; set; }
+    public string SourceTitle { get; set; }
+    /// <summary>
+    /// The id of the entity the AI operation was performed on.
+    /// </summary>
+    /// <example>123</example>
+    public string SourceId { get; set; }
     /// <summary>
     /// Type of the operation
     /// </summary>
@@ -180,7 +185,7 @@ public class OperationDto
     public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
         var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, operation.Metadata);
-        var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
+        var (sourceId, sourceType, sourceTitle) = WalletServiceDescriptionManager.GetSourceInfo(operation.Metadata);
 
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
@@ -195,8 +200,9 @@ public class OperationDto
         ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
             ? value
             : operation.ParticipantName;
-        AgentId = agentId;
-        AgentTitle = agentTitle;
+        SourceType = sourceType;
+        SourceTitle = sourceTitle;
+        SourceId = sourceId;
         Type = operation.Type;
     }
 }
