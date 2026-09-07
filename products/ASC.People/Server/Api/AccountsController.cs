@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -77,10 +77,10 @@ public class AccountsController<T>(
     /// <path>api/2.0/accounts/room/{id}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<IAccountEntryDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}/search")]
-    public async IAsyncEnumerable<object> GetAccountsEntriesWithRoomsShared(AccountsEntriesRequestDto<T> inDto)
+    public async IAsyncEnumerable<IAccountEntryDto> GetAccountsEntriesWithRoomsShared(AccountsEntriesRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
@@ -96,10 +96,10 @@ public class AccountsController<T>(
     /// <path>api/2.0/accounts/folder/{id}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<IAccountEntryDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("folder/{id}/search")]
-    public async IAsyncEnumerable<object> GetAccountsEntriesWithFoldersShared(AccountsEntriesRequestDto<T> inDto)
+    public async IAsyncEnumerable<IAccountEntryDto> GetAccountsEntriesWithFoldersShared(AccountsEntriesRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
@@ -115,10 +115,10 @@ public class AccountsController<T>(
     /// <path>api/2.0/accounts/file/{id}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<IAccountEntryDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("file/{id}/search")]
-    public async IAsyncEnumerable<object> GetAccountsEntriesWithFilesShared(AccountsEntriesRequestDto<T> inDto)
+    public async IAsyncEnumerable<IAccountEntryDto> GetAccountsEntriesWithFilesShared(AccountsEntriesRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFileDao<T>().GetFileAsync(inDto.Id)).NotFoundIfNull();
 
@@ -128,7 +128,7 @@ public class AccountsController<T>(
         }
     }
 
-    private async IAsyncEnumerable<object> GetAccounts(AccountsEntriesRequestDto<T> inDto, FileEntry<T> fileEntry)
+    private async IAsyncEnumerable<IAccountEntryDto> GetAccounts(AccountsEntriesRequestDto<T> inDto, FileEntry<T> fileEntry)
     {
         if (!await fileSecurity.CanEditAccessAsync(fileEntry))
         {

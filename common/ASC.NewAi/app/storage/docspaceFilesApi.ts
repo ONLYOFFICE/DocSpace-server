@@ -32,10 +32,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { proxyBaseUrl, withTimeout } from "./httpClient.js";
-import { getForwardedHeaders, getFolderInfoCache } from "../requestContext.js";
+import { countFilesApiRead, getForwardedHeaders, getFolderInfoCache } from "../requestContext.js";
 import { isObject, getNumber, getObject, getString, getEntityId } from "../narrow.js";
 import logger from "../log.js";
 import { sanitizeInstruction } from "../sanitizeInstruction.js";
+import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
@@ -154,6 +155,7 @@ export async function getFolderInfo(
 ): Promise<DocspaceFolderInfo | undefined> {
   const url = `${proxyBaseUrl}/api/2.0/files/folder/${encodeURIComponent(folderId)}`;
   const { signal, cancel } = withTimeout(undefined);
+  countFilesApiRead();
   try {
     const res = await fetch(url, { headers: getForwardedHeaders(), signal });
     if (res.status === 404) {
@@ -181,6 +183,12 @@ export async function getFolderInfo(
  * dropped so a later reader can retry.
  */
 function getFolderInfoOnce(folderId: string): Promise<DocspaceFolderInfo | undefined> {
+  // A primed chat round already carries the folders it is scoped to (from
+  // `GET internal/ai/chat-context`) — no Files API round-trip for those.
+  const fromSnapshot = lookupChatContextFolder(folderId);
+  if (fromSnapshot.hit) {
+    return Promise.resolve(fromSnapshot.info);
+  }
   const cache = getFolderInfoCache();
   if (!cache) {
     return getFolderInfo(folderId);
@@ -348,7 +356,7 @@ export async function resolveAgentEntityId(
   if (!entityId) {
     return undefined;
   }
-  const folderInfo = await getFolderInfo(entityId);
+  const folderInfo = await getFolderInfoOnce(entityId);
   return folderInfo?.isAgent ? entityId : undefined;
 }
 
@@ -370,7 +378,7 @@ export async function assertEntityAccessible(
   }
   let accessible: boolean;
   try {
-    accessible = (await getFolderInfo(entityId)) !== undefined;
+    accessible = (await getFolderInfoOnce(entityId)) !== undefined;
   } catch (err) {
     if (err instanceof DocspaceApiHttpError && err.status === 403) {
       accessible = false; // no access → treat as not found (don't reveal it)

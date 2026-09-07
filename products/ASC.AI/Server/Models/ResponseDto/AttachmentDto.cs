@@ -45,6 +45,7 @@ public class AttachmentDto
     public string? DataUrl { get; init; }
     public string? EntryId { get; init; }
     public long CreatedAt { get; init; }
+    public bool CanAnalyze { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

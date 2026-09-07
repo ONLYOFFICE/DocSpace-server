@@ -6943,7 +6943,6 @@
             "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user."
           }
         },
-        "additionalProperties": false,
         "description": "The per-user AI settings."
       },
       "AiVectorizationSettingsWrapper": {
@@ -7003,7 +7002,6 @@
             "description": "Indicates whether the embedding provider API key needs to be reconfigured."
           }
         },
-        "additionalProperties": false,
         "description": "The vectorization settings."
       },
       "AiEmbeddingProviderType": {
@@ -7141,7 +7139,6 @@
             "description": "The identifier of the model recommended for form generation."
           }
         },
-        "additionalProperties": false,
         "description": "The AI module settings."
       },
       "AiFolderIntegerArrayWrapper": {
@@ -7415,7 +7412,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The folder parameters."
       },
       "AiChatSettingsDto": {
@@ -7432,7 +7428,6 @@
             "description": "The system prompt for the chat."
           }
         },
-        "additionalProperties": false,
         "description": "The chat settings parameters."
       },
       "AiFolderType": {
@@ -7618,7 +7613,6 @@
             "format": "double"
           }
         },
-        "additionalProperties": false,
         "description": "The watermark settings."
       },
       "AiWatermarkAdditions": {
@@ -7700,7 +7694,6 @@
             "description": "Specifies whether the room data lifetime setting is enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The room data lifetime information."
       },
       "AiRoomDataLifetimePeriod": {
@@ -7846,7 +7839,6 @@
             "$ref": "#/components/schemas/AiLogoCover"
           }
         },
-        "additionalProperties": false,
         "description": "The room logo information."
       },
       "AiLogoCover": {
@@ -7877,7 +7869,6 @@
             "description": "The logo cover data."
           }
         },
-        "additionalProperties": false,
         "description": "The logo cover information."
       },
       "AiFileEntryDtoInteger": {
@@ -7980,7 +7971,6 @@
                     "format": "int32"
                   }
                 },
-                "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry."
               },
               "security": {
@@ -8138,7 +8128,6 @@
                     "type": "boolean"
                   }
                 },
-                "additionalProperties": false,
                 "description": "The actions that can be performed with the file entry."
               },
               "availableShareRights": {
@@ -8186,7 +8175,6 @@
                     }
                   }
                 },
-                "additionalProperties": false,
                 "description": "The available external rights of the file entry."
               },
               "requestToken": {
@@ -8226,7 +8214,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The generic file entry information."
       },
       "AiApiDateTime": {
@@ -8251,7 +8238,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The API date and time parameters."
       },
       "AiFileEntryBaseDto": {
@@ -8402,7 +8388,6 @@
             "$ref": "#/components/schemas/AiFileEntryType"
           }
         },
-        "additionalProperties": false,
         "description": "The file entry information.",
         "x-derived": true,
         "x-derived-types": [
@@ -8540,7 +8525,6 @@
             "description": "Specifies if the user is anonymous or not."
           }
         },
-        "additionalProperties": false,
         "description": "The user parameters."
       },
       "AiFileShare": {
@@ -8761,7 +8745,6 @@
             "$ref": "#/components/schemas/AiDistributedTaskStatus"
           }
         },
-        "additionalProperties": false,
         "description": "The file operation information."
       },
       "AiDistributedTaskStatus": {
@@ -8923,7 +8906,6 @@
             "description": "The list of items."
           }
         },
-        "additionalProperties": false,
         "description": "The new item parameters."
       },
       "AiAgentNewItemsDto": {
@@ -8949,7 +8931,6 @@
             "description": "The list of file entry items."
           }
         },
-        "additionalProperties": false,
         "description": "The agent new item's information."
       },
       "AiFolderIntegerWrapper": {
@@ -9125,7 +9106,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The folder content information."
       }
     }

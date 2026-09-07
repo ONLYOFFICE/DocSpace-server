@@ -41,12 +41,17 @@ global using System.Xml.Linq;
 
 global using ASC.Api.Core.Middleware;
 global using ASC.Common.Caching;
+global using ASC.Common.Notify.Patterns;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Data;
 global using ASC.Core.Tenants;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.Notify.Cron;
+global using ASC.Notify.Messages;
+global using ASC.Notify.Patterns;
+global using ASC.Notify.Recipients;
+global using ASC.Notify.Textile;
 
 global using FluentAssertions;
 

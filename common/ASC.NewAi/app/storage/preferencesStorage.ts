@@ -35,6 +35,12 @@ import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js"
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getBoolean } from "../narrow.js";
 import type { PreferencesStorage } from "@onlyoffice/ai-chat/core";
+import {
+  chatContextScope,
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const PATH = "/preferences";
 
@@ -61,9 +67,16 @@ export class HttpPreferencesStorage implements PreferencesStorage {
       deepMode: value,
       entityId: await scopedEntityId(entityId),
     });
+    invalidateChatContext("preferences");
   }
 
   async readDeepMode(entityId?: string): Promise<boolean | null> {
+    const snapshot = readChatContext("preferences");
+    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
+    if (scope) {
+      return scope.deepMode;
+    }
+    reportChatContextMiss(`preferences.readDeepMode(${entityId ?? "-"})`);
     try {
       const query = entityIdQuery(await resolveAgentEntityId(entityId));
       const raw = await aiService.get(PATH, query ? { query } : undefined);
@@ -84,6 +97,7 @@ export class HttpPreferencesStorage implements PreferencesStorage {
       deepMode: value,
       entityId: await scopedEntityId(entityId),
     });
+    invalidateChatContext("preferences");
   }
 
   async upsertDeepMode(value: boolean, entityId?: string): Promise<void> {
@@ -91,9 +105,11 @@ export class HttpPreferencesStorage implements PreferencesStorage {
       deepMode: value,
       entityId: await scopedEntityId(entityId),
     });
+    invalidateChatContext("preferences");
   }
 
   async deleteDeepMode(entityId?: string): Promise<void> {
+    invalidateChatContext("preferences");
     try {
       const query = entityIdQuery(await resolveAgentEntityId(entityId));
       await aiService.delete(PATH, query ? { query } : undefined);

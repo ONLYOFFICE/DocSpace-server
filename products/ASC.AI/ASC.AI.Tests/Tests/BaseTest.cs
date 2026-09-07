@@ -45,6 +45,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string PromptFoldersPath = "/internal/ai/prompt-folders";
     protected const string PreferencesPath = "/internal/ai/preferences";
     protected const string ToolPrefsPath = "/internal/ai/tool-prefs";
+    protected const string ChatContextPath = "/internal/ai/chat-context";
 
     protected const string SystemToolsServerType = "00000000-0000-0000-0000-000000000001";
 
@@ -349,6 +350,44 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             new { allowAlways, entityId },
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
+    }
+
+    protected static string BuildChatContextPath(
+        Guid? threadId = null,
+        string? entityId = null,
+        string? contextEntityId = null,
+        bool? includeMessages = null)
+    {
+        var query = new List<string>();
+        if (threadId is not null)
+        {
+            query.Add($"threadId={threadId}");
+        }
+        if (entityId is not null)
+        {
+            query.Add($"entityId={entityId}");
+        }
+        if (contextEntityId is not null)
+        {
+            query.Add($"contextEntityId={contextEntityId}");
+        }
+        if (includeMessages is not null)
+        {
+            query.Add($"includeMessages={includeMessages.Value.ToString().ToLowerInvariant()}");
+        }
+
+        return query.Count > 0 ? $"{ChatContextPath}?{string.Join("&", query)}" : ChatContextPath;
+    }
+
+    protected async Task<ChatContextDto> ReadChatContextAsync(
+        Guid? threadId = null,
+        string? entityId = null,
+        string? contextEntityId = null,
+        bool? includeMessages = null)
+    {
+        var path = BuildChatContextPath(threadId, entityId, contextEntityId, includeMessages);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<ChatContextDto>(response, TestContext.Current.CancellationToken);
     }
 
     private static string BuildScopedAssignmentPath(string actionType, string? entityId) =>

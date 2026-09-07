@@ -54,8 +54,7 @@ public class AuditTrailMappersTests(
         var mappers = await _auditTrailDataApi.GetAuditTrailMappersAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        mappers.Response.Should().NotBeNull();
-        mappers.Response.Should().BeAssignableTo<Newtonsoft.Json.Linq.JToken>();
+        mappers.Response.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -70,6 +69,6 @@ public class AuditTrailMappersTests(
 
         // Assert
         mappers.Response.Should().NotBeNull();
-        mappers.Response.Should().BeAssignableTo<Newtonsoft.Json.Linq.JToken>();
+        mappers.Response.Should().NotBeNullOrEmpty();
     }
 }

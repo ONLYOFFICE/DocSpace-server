@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -34,8 +34,10 @@
 namespace ASC.Core.Billing;
 
 [Scope]
-public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IAccountingApi accountingApi)
+public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IFusionCache hybridCache, IAccountingApi accountingApi)
 {
+    private static readonly TimeSpan _servicePricesCacheDuration = TimeSpan.FromDays(1);
+
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
     public async Task<Balance> GetCustomerBalanceAsync(string portalId)
@@ -121,6 +123,31 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         EnsureConfigured();
 
         return await accountingApi.GetServiceInfoAsync(serviceName);
+    }
+
+    /// <summary>
+    /// Returns the prices of the service. The accounting service addresses prices by service ID, so the name is
+    /// resolved first; the result is not tenant-specific and is cached for all portals.
+    /// </summary>
+    public async Task<List<ServicePriceInfo>> GetServicePricesAsync(string serviceName, bool active = false)
+    {
+        EnsureConfigured();
+
+        return await hybridCache.GetOrSetAsync<List<ServicePriceInfo>>(GetServicePricesCacheKey(serviceName, active), async (_, _) =>
+        {
+            var serviceInfo = await accountingApi.GetServiceInfoAsync(serviceName);
+            if (serviceInfo == null)
+            {
+                return [];
+            }
+
+            return await accountingApi.GetServicePricesAsync(serviceInfo.Id, active);
+        }, opt => opt.SetDuration(_servicePricesCacheDuration));
+    }
+
+    private static string GetServicePricesCacheKey(string serviceName, bool active)
+    {
+        return $"accounting-service-prices-{serviceName}-{active}";
     }
 
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
@@ -565,6 +592,172 @@ public class ServiceInfo
     /// The account number.
     /// </summary>
     public int AccountNumber { get; init; }
+}
+
+/// <summary>
+/// The time unit the price is bound to.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PriceTimeUnit
+{
+    [Description("None")]
+    None,
+    [Description("Hour")]
+    Hour,
+    [Description("Day")]
+    Day,
+    [Description("Week")]
+    Week,
+    [Description("Month")]
+    Month,
+    [Description("Year")]
+    Year,
+    [Description("ThreeYears")]
+    ThreeYears
+}
+
+/// <summary>
+/// The price status.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PriceStatus
+{
+    [Description("Draft")]
+    Draft,
+    [Description("Approved")]
+    Approved,
+    [Description("Rejected")]
+    Rejected
+}
+
+/// <summary>
+/// Represents a price of the service.
+/// </summary>
+public class ServicePriceInfo
+{
+    /// <summary>
+    /// The price unique identifier.
+    /// </summary>
+    /// <example>12345</example>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The account number.
+    /// </summary>
+    /// <example>1010</example>
+    public int AccountNumber { get; init; }
+
+    /// <summary>
+    /// The service ID.
+    /// </summary>
+    /// <example>12345</example>
+    public int ServiceId { get; init; }
+
+    /// <summary>
+    /// The time unit the price is bound to.
+    /// </summary>
+    /// <example>None</example>
+    public PriceTimeUnit TimeUnit { get; init; }
+
+    /// <summary>
+    /// The cost price.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal CostPrice { get; init; }
+
+    /// <summary>
+    /// The extra charge added to the cost price.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal ExtraCharge { get; init; }
+
+    /// <summary>
+    /// The resulting service price.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal ServicePrice { get; init; }
+
+    /// <summary>
+    /// The quota the price is set for.
+    /// </summary>
+    /// <example>100</example>
+    public double? Quota { get; init; }
+
+    /// <summary>
+    /// The period the price is effective in.
+    /// </summary>
+    public TimeBound TimeBound { get; init; }
+
+    /// <summary>
+    /// The price status.
+    /// </summary>
+    /// <example>Draft</example>
+    public PriceStatus Status { get; init; }
+
+    /// <summary>
+    /// The date and time when the price was created.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime Created { get; init; }
+
+    /// <summary>
+    /// The discount category ID.
+    /// </summary>
+    /// <example>12345</example>
+    public int? DiscountCategoryId { get; init; }
+
+    /// <summary>
+    /// The discount category.
+    /// </summary>
+    public DiscountCategory DiscountCategory { get; init; }
+}
+
+/// <summary>
+/// Represents the period the price is effective in.
+/// </summary>
+public class TimeBound
+{
+    /// <summary>
+    /// The date and time when the period starts.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime StartDate { get; init; }
+
+    /// <summary>
+    /// The date and time when the period ends.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime? EndDate { get; init; }
+}
+
+/// <summary>
+/// Represents a discount category applied to the price.
+/// </summary>
+public class DiscountCategory
+{
+    /// <summary>
+    /// The discount category unique identifier.
+    /// </summary>
+    /// <example>12345</example>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The discount value.
+    /// </summary>
+    /// <example>10.5</example>
+    public decimal ValueDiscount { get; init; }
+
+    /// <summary>
+    /// The discount category description.
+    /// </summary>
+    /// <example>Annual subscription discount</example>
+    public string Description { get; init; }
+
+    /// <summary>
+    /// The date and time when the discount category was created.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime Created { get; init; }
 }
 
 public class BaseReport<T>

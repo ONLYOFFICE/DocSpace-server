@@ -53,6 +53,7 @@ public class PrivacyRoomControllerCommon(
     /// Creates and sets encryption keys for the user.
     /// </remarks>
     /// <path>api/2.0/privacyroom/keys</path>
+    /// <collection>list</collection>
     /// <param name="inDto">The request object containing public and private key information.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [SwaggerResponse(201, "The encryption key is created. Answered 200 before DocSpace 4.0; the response body is unchanged", typeof(IEnumerable<EncryptionKeyDto>))]
@@ -79,6 +80,7 @@ public class PrivacyRoomControllerCommon(
     /// Replaces an existing encryption key with a new one for the user.
     /// </remarks>
     /// <path>api/2.0/privacyroom/keys</path>
+    /// <collection>list</collection>
     /// <param name="inDto">The request object containing the public and private key information to replace the existing key.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [SwaggerResponse(200, "The encryption key is replaced", typeof(IEnumerable<EncryptionKeyDto>))]
@@ -105,7 +107,9 @@ public class PrivacyRoomControllerCommon(
     /// Retrieves encryption keys associated with the current user.
     /// </remarks>
     /// <path>api/2.0/privacyroom/keys</path>
+    /// <collection>list</collection>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
+    [SwaggerResponse(200, "The encryption keys of the current user", typeof(IEnumerable<EncryptionKeyDto>))]
     [HttpGet("keys")]
     public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeys()
     {
@@ -121,8 +125,10 @@ public class PrivacyRoomControllerCommon(
     /// Retrieves the encryption keys associated with a specific privacy room.
     /// </remarks>
     /// <path>api/2.0/privacyroom/{roomId}/access</path>
+    /// <collection>list</collection>
     /// <param name="roomId">The identifier of the privacy room.</param>
     /// <returns>A task containing a collection of encryption key data transfer objects for the specified room.</returns>
+    [SwaggerResponse(200, "The encryption keys associated with the privacy room", typeof(IEnumerable<EncryptionKeyDto>))]
     [HttpGet("{roomId:int}/access")]
     public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeysForRoom(int roomId)
     {

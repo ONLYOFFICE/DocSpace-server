@@ -13835,7 +13835,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Information about created session",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -14117,7 +14117,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Current state of the upload session and, once the upload is complete, the uploaded file",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -14286,7 +14286,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated information about the upload session, including the current progress",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -14420,7 +14420,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Details about the completed upload session, including the file metadata",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -25346,7 +25346,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/STRINGArrayWrapper"
                 }
               }
             }
@@ -26228,7 +26228,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The newly created room group",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -26346,7 +26346,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of room groups",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -26479,7 +26479,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The room group with the detailed information",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -26611,7 +26611,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The updated room group",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -26868,7 +26868,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The room group with the updated icon",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -27188,7 +27188,7 @@
         "operationId": "getUserKeys",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The encryption keys of the current user",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -27297,7 +27297,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The encryption keys associated with the privacy room",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -27527,7 +27527,6 @@
             "description": "Encrypted private key"
           }
         },
-        "additionalProperties": false,
         "description": "The encryption key granting one user access to a file."
       },
       "AceShortWrapper": {
@@ -27561,7 +27560,6 @@
             "description": "Specifies whether to change the user icon to the link icon."
           }
         },
-        "additionalProperties": false,
         "description": "The information about the settings which allow to share the document with other users."
       },
       "AceShortWrapperArrayWrapper": {
@@ -27637,7 +27635,6 @@
             "description": "The action type."
           }
         },
-        "additionalProperties": false,
         "description": "The information about the action in the document that will be scrolled to."
       },
       "ActionLinkConfig": {
@@ -27648,7 +27645,6 @@
             "$ref": "#/components/schemas/ActionConfig"
           }
         },
-        "additionalProperties": false,
         "description": "The config parameter which contains the information about the action in the document that will be scrolled to."
       },
       "AnonymousConfigDto": {
@@ -27665,7 +27661,6 @@
             "description": "Specifies if the anonymous is a request."
           }
         },
-        "additionalProperties": false,
         "description": "The anonymous config parameters."
       },
       "ApiDateTime": {
@@ -27690,7 +27685,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The API date and time parameters."
       },
       "ApplyFilterOption": {
@@ -27739,7 +27733,6 @@
             "description": "Specifies whether to archive a room after the editing session is finished or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for archiving a room."
       },
       "ArrayArrayWrapper": {
@@ -27881,7 +27874,6 @@
             "$ref": "#/components/schemas/OAuth20Token"
           }
         },
-        "additionalProperties": false,
         "description": "The authentication data."
       },
       "AutoCleanUpData": {
@@ -27899,7 +27891,6 @@
             "$ref": "#/components/schemas/DateToAutoCleanUp"
           }
         },
-        "additionalProperties": false,
         "description": "The auto-clearing setting parameters."
       },
       "AutoCleanUpDataWrapper": {
@@ -27959,7 +27950,6 @@
             "$ref": "#/components/schemas/DateToAutoCleanUp"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating the trash bin auto-clearing setting."
       },
       "BaseBatchRequestDto": {
@@ -28033,7 +28023,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The base batch request parameters."
       },
       "BatchRequestDto": {
@@ -28152,7 +28141,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The request parameters for copying/moving files."
       },
       "BatchTagsRequestDto": {
@@ -28176,7 +28164,6 @@
             "description": "The list of tag names."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for managing room tags."
       },
       "BooleanWrapper": {
@@ -28243,7 +28230,6 @@
             "description": "Specifies whether to start a new version or continue revision of the change history."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for changing version history."
       },
       "ChangeOwnerRequestDto": {
@@ -28321,7 +28307,6 @@
             "format": "uuid"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for changing the file owner."
       },
       "ChatSettings": {
@@ -28364,7 +28349,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The chat settings."
       },
       "ChatSettingsDto": {
@@ -28381,7 +28365,6 @@
             "description": "The system prompt for the chat."
           }
         },
-        "additionalProperties": false,
         "description": "The chat settings parameters."
       },
       "CheckConversionRequestDtoInteger": {
@@ -28445,7 +28428,6 @@
             "description": "Specifies whether to create a new file if it exists or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for checking file conversion."
       },
       "CheckDestFolderDto": {
@@ -28475,7 +28457,6 @@
             "description": "The list of files in the destination folder."
           }
         },
-        "additionalProperties": false,
         "description": "The result of checking whether files can be moved or copied to the specified folder."
       },
       "CheckDestFolderResult": {
@@ -28622,7 +28603,6 @@
             "description": "Specifies if the SSL verification of the ONLYOFFICE Docs is enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for checking the document service location."
       },
       "CheckFillFormDraft": {
@@ -28666,7 +28646,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for checking the form draft filling."
       },
       "CheckUploadRequest": {
@@ -28690,7 +28669,6 @@
             "description": "The list of file titles."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for checking file uploads."
       },
       "ChunkedUploadSessionResponseInteger": {
@@ -28759,7 +28737,6 @@
             "format": "int64"
           }
         },
-        "additionalProperties": false,
         "description": "Represents the response returned from a chunked upload session."
       },
       "ChunkedUploadSessionResponseIntegerWrapper": {
@@ -28819,7 +28796,6 @@
             "$ref": "#/components/schemas/ChunkedUploadSessionResponseInteger"
           }
         },
-        "additionalProperties": false,
         "description": "Represents a wrapper for the response of a chunked upload session operation."
       },
       "ChunkedUploadSessionResponseWrapperIntegerWrapper": {
@@ -28886,7 +28862,6 @@
             "$ref": "#/components/schemas/CoEditingConfigMode"
           }
         },
-        "additionalProperties": false,
         "description": "The co-editing configuration parameters."
       },
       "CoEditingConfigMode": {
@@ -29042,7 +29017,6 @@
             "$ref": "#/components/schemas/EditorToolCallStateDto"
           }
         },
-        "additionalProperties": false,
         "description": "The configuration parameters."
       },
       "ConfigurationIntegerWrapper": {
@@ -29111,7 +29085,6 @@
             "description": "The contact value."
           }
         },
-        "additionalProperties": false,
         "description": "The contact information."
       },
       "ConversationResultArrayWrapper": {
@@ -29230,7 +29203,6 @@
             "description": "Specifies if the conversion operation is processed or not."
           }
         },
-        "additionalProperties": false,
         "description": "The result of file convertion operation."
       },
       "CopyAsJsonElement": {
@@ -29295,7 +29267,6 @@
             "description": "Specifies whether to convert the file to form or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for copying a file."
       },
       "CoverRequestDto": {
@@ -29323,7 +29294,6 @@
             "description": "The cover name."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters to change the room cover."
       },
       "CoversResultArrayWrapper": {
@@ -29399,7 +29369,6 @@
             "description": "The cover image data."
           }
         },
-        "additionalProperties": false,
         "description": "The result of the cover request containing the cover image data."
       },
       "CreateFileJsonElement": {
@@ -29456,7 +29425,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for creating a file."
       },
       "CreateFolder": {
@@ -29478,7 +29446,6 @@
             "description": "The folder title to create."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for creating a folder."
       },
       "CreateRoomFromTemplateDto": {
@@ -29610,7 +29577,6 @@
             "description": "Specifies whether the room to be created is private or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for creating a room from a template."
       },
       "CreateRoomRequestDto": {
@@ -29770,7 +29736,6 @@
             "description": "Specifies whether to save form data as XLSX file."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for creating a room."
       },
       "CreateTagRequestDto": {
@@ -29792,7 +29757,6 @@
             "description": "The tag name."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for creating a tag."
       },
       "CreateTextOrHtmlFile": {
@@ -29831,7 +29795,6 @@
             "description": "Specifies whether to create a new text or HTML file if it exists or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for creating an HTML or text file."
       },
       "CreateThirdPartyRoom": {
@@ -29925,7 +29888,6 @@
             "$ref": "#/components/schemas/LogoRequest"
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for creating a third-party room."
       },
       "CustomFilterParameters": {
@@ -29939,7 +29901,6 @@
             "description": "Specifies whether the Custom Filter editing mode is enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for setting the Custom Filter editing mode."
       },
       "CustomerConfigDto": {
@@ -30006,7 +29967,6 @@
             "description": "The site web address of the customer configuration."
           }
         },
-        "additionalProperties": false,
         "description": "The customer config parameters."
       },
       "CustomizationConfigDto": {
@@ -30069,7 +30029,6 @@
             "$ref": "#/components/schemas/StartFillingForm"
           }
         },
-        "additionalProperties": false,
         "description": "The customization config parameters."
       },
       "DarkThemeSettingsType": {
@@ -30221,7 +30180,6 @@
             "description": "View url of a default template"
           }
         },
-        "additionalProperties": false,
         "description": "Default template setting"
       },
       "DefaultTemplateSettingsDto": {
@@ -30250,7 +30208,6 @@
             "description": "Default templates list."
           }
         },
-        "additionalProperties": false,
         "description": "Default templates settings parameters."
       },
       "DefaultTemplateSettingsRequestDto": {
@@ -30291,7 +30248,6 @@
             "description": "File extension of a template to replace"
           }
         },
-        "additionalProperties": false,
         "description": "Default templates settings request parameters."
       },
       "DefaultTemplateSettingsResetRequestDto": {
@@ -30311,7 +30267,6 @@
             "description": "File extension of a template to reset"
           }
         },
-        "additionalProperties": false,
         "description": "Default templates settings reset request parameters."
       },
       "DefaultTemplateSettingsWrapper": {
@@ -30374,7 +30329,6 @@
             "description": "Specifies whether to move a file to the \\\"Trash\\\" folder or delete it immediately."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for deleting a file."
       },
       "DeleteBatchRequestDto": {
@@ -30462,7 +30416,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The request parameters for deleting files."
       },
       "DeleteFolder": {
@@ -30483,7 +30436,6 @@
             "description": "Specifies whether to move a folder to the \\\"Trash\\\" folder or delete it immediately."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for deleting a folder."
       },
       "DeleteRoomRequest": {
@@ -30497,7 +30449,6 @@
             "description": "Specifies whether to delete a room after the editing session is finished or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for deleting a room."
       },
       "DeleteVersionBatchRequestDto": {
@@ -30548,7 +30499,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The request parameters for deleting file versions."
       },
       "DisplayRequestDto": {
@@ -30562,7 +30512,6 @@
             "description": "Specifies whether to set the specified settings or not."
           }
         },
-        "additionalProperties": false,
         "description": "The settings request parameters."
       },
       "DistributedTaskStatus": {
@@ -30705,7 +30654,6 @@
             "description": "Specifies if the document service is default."
           }
         },
-        "additionalProperties": false,
         "description": "The document service URL parameters."
       },
       "DocServiceUrlWrapper": {
@@ -30830,7 +30778,6 @@
             "description": "The result file URL."
           }
         },
-        "additionalProperties": false,
         "description": "The Document Builder task parameters."
       },
       "DocumentBuilderTaskWrapper": {
@@ -30970,7 +30917,6 @@
             "$ref": "#/components/schemas/Options"
           }
         },
-        "additionalProperties": false,
         "description": "The document config parameters."
       },
       "DownloadRequestDto": {
@@ -31064,7 +31010,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The request parameters for downloading files."
       },
       "DownloadRequestItemDto": {
@@ -31115,7 +31060,6 @@
             "description": "The optional password for accessing protected files."
           }
         },
-        "additionalProperties": false,
         "description": "The download request item with conversion parameters and security settings."
       },
       "DraftLocationInteger": {
@@ -31158,7 +31102,6 @@
             "description": "The draft title."
           }
         },
-        "additionalProperties": false,
         "description": "The file draft parameters."
       },
       "DuplicateRequestDto": {
@@ -31232,7 +31175,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The request parameters for duplicating files and fodlers."
       },
       "EditHistoryArrayWrapper": {
@@ -31307,7 +31249,6 @@
             "description": "The author name."
           }
         },
-        "additionalProperties": false,
         "description": "The information about the file editing history author."
       },
       "EditHistoryChangesWrapper": {
@@ -31332,7 +31273,6 @@
             "description": "The document hash generated by the SHA-256 algorithm."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters of the file editing history."
       },
       "EditHistoryDataDto": {
@@ -31409,7 +31349,6 @@
             "description": "The document extension."
           }
         },
-        "additionalProperties": false,
         "description": "The file editing history data."
       },
       "EditHistoryDataWrapper": {
@@ -31542,7 +31481,6 @@
             "description": "The current server version number."
           }
         },
-        "additionalProperties": false,
         "description": "The file editing history parameters."
       },
       "EditHistoryUrl": {
@@ -31580,7 +31518,6 @@
             "description": "The document extension."
           }
         },
-        "additionalProperties": false,
         "description": "The file editing history URL parameters."
       },
       "EditorConfigurationDto": {
@@ -31698,12 +31635,23 @@
             "$ref": "#/components/schemas/UserConfig"
           }
         },
-        "additionalProperties": false,
         "description": "The editor configuration parameters."
       },
       "EditorToolCallParametersDto": {
-        "type": "object",
-        "additionalProperties": false,
+        "oneOf": [
+          {
+            "description": "The generate docx tool call parameters.",
+            "$ref": "#/components/schemas/GenerateDocxToolCallParametersDto"
+          },
+          {
+            "description": "The generate form tool call parameters.",
+            "$ref": "#/components/schemas/GenerateFormToolCallParametersDto"
+          },
+          {
+            "description": "The generate presentation tool call parameters.",
+            "$ref": "#/components/schemas/GeneratePresentationToolCallParametersDto"
+          }
+        ],
         "description": "The editor tool call parameters.",
         "x-derived": true,
         "x-derived-types": [
@@ -31734,7 +31682,6 @@
             "$ref": "#/components/schemas/EditorToolCallParametersDto"
           }
         },
-        "additionalProperties": false,
         "description": "The editor tool call state. Used to run the agent flow in the editor."
       },
       "EditorType": {
@@ -31788,7 +31735,6 @@
             "format": "email"
           }
         },
-        "additionalProperties": false,
         "description": "The email invitation parameters."
       },
       "EmbeddedConfig": {
@@ -31847,7 +31793,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The configuration parameters for the embedded document type."
       },
       "EmployeeActivationStatus": {
@@ -31984,7 +31929,6 @@
             "description": "Specifies if the user is anonymous or not."
           }
         },
-        "additionalProperties": false,
         "description": "The user parameters."
       },
       "EmployeeFullDto": {
@@ -32304,7 +32248,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The full list of user parameters."
       },
       "EmployeeStatus": {
@@ -32451,7 +32394,6 @@
             "description": "The identifier of the crypto engine the key pair was issued for."
           }
         },
-        "additionalProperties": false,
         "description": "The encryption key pair of a user."
       },
       "EncryptionKeyRequestDto": {
@@ -32486,7 +32428,6 @@
             "description": "The private key of the pair, encrypted with the user password."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for storing the encryption key pair of a user."
       },
       "ErrorApiResponse": {
@@ -32567,7 +32508,6 @@
             "description": "The error message if the synchronization failed for this form."
           }
         },
-        "additionalProperties": false,
         "description": "The result of an external DB synchronization for a single form."
       },
       "ExternalDbSyncTaskDto": {
@@ -32641,7 +32581,6 @@
             "description": "The synchronization results for all original forms in the room."
           }
         },
-        "additionalProperties": false,
         "description": "The external DB synchronization task parameters."
       },
       "ExternalDbSyncTaskWrapper": {
@@ -32796,7 +32735,6 @@
             "description": "The room ID of the external data."
           }
         },
-        "additionalProperties": false,
         "description": "The external sharing information and validation data."
       },
       "ExternalShareRequestParam": {
@@ -32813,7 +32751,6 @@
             "description": "The password to share external data."
           }
         },
-        "additionalProperties": false,
         "description": "The external data parameters."
       },
       "ExternalShareWrapper": {
@@ -32897,7 +32834,6 @@
             "description": "When external sharing is restricted, specifies whether existing public links are blocked immediately."
           }
         },
-        "additionalProperties": false,
         "description": "The Access Control external sharing settings."
       },
       "ExternalSharingSettingsRequestDto": {
@@ -32939,7 +32875,6 @@
             "description": "When external sharing is restricted, specifies whether to block existing public links immediately.\r\nRelevant only when ExternalShare is false."
           }
         },
-        "additionalProperties": false,
         "description": "The Access Control external sharing settings request parameters."
       },
       "ExternalSharingSettingsWrapper": {
@@ -33006,7 +32941,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The settings for the \"Feedback & Support\" menu button."
       },
       "FileConflictResolveType": {
@@ -33361,7 +33295,6 @@
                     "type": "boolean"
                   }
                 },
-                "additionalProperties": false,
                 "description": "The file accessibility."
               },
               "lastOpened": {
@@ -33393,7 +33326,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The file parameters."
       },
       "FileEncryptionInfoDto": {
@@ -33446,7 +33378,6 @@
             "description": "The file keys issued to those users."
           }
         },
-        "additionalProperties": false,
         "description": "The encryption information of a file: the user key pairs and the per-user file keys."
       },
       "FileEncryptionInfoWrapper": {
@@ -33684,7 +33615,6 @@
             "$ref": "#/components/schemas/FileEntryType"
           }
         },
-        "additionalProperties": false,
         "description": "The file entry information.",
         "x-derived": true,
         "x-derived-types": [
@@ -33836,7 +33766,6 @@
                     "format": "int32"
                   }
                 },
-                "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry."
               },
               "security": {
@@ -33994,7 +33923,6 @@
                     "type": "boolean"
                   }
                 },
-                "additionalProperties": false,
                 "description": "The actions that can be performed with the file entry."
               },
               "availableShareRights": {
@@ -34042,7 +33970,6 @@
                     }
                   }
                 },
-                "additionalProperties": false,
                 "description": "The available external rights of the file entry."
               },
               "requestToken": {
@@ -34082,7 +34009,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The generic file entry information."
       },
       "FileEntryDtoString": {
@@ -34193,7 +34119,6 @@
                     "format": "int32"
                   }
                 },
-                "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry."
               },
               "security": {
@@ -34351,7 +34276,6 @@
                     "type": "boolean"
                   }
                 },
-                "additionalProperties": false,
                 "description": "The actions that can be performed with the file entry."
               },
               "availableShareRights": {
@@ -34399,7 +34323,6 @@
                     }
                   }
                 },
-                "additionalProperties": false,
                 "description": "The available external rights of the file entry."
               },
               "requestToken": {
@@ -34439,7 +34362,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The generic file entry information."
       },
       "FileEntryIntegerArrayWrapper": {
@@ -34660,7 +34582,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The encrypted file key issued to one user."
       },
       "FileLink": {
@@ -34702,7 +34623,6 @@
             "format": "uri"
           }
         },
-        "additionalProperties": false,
         "description": "The file link properties."
       },
       "FileLinkRequest": {
@@ -34770,7 +34690,6 @@
             "description": "Password for access via link."
           }
         },
-        "additionalProperties": false,
         "description": "The external link request parameters."
       },
       "FileLinkWrapper": {
@@ -34974,7 +34893,6 @@
             "$ref": "#/components/schemas/DistributedTaskStatus"
           }
         },
-        "additionalProperties": false,
         "description": "The file operation information."
       },
       "FileOperationRequestBaseDto": {
@@ -34988,7 +34906,6 @@
             "description": "Specifies whether to return only the current operation"
           }
         },
-        "additionalProperties": false,
         "description": "The base operation request parameters."
       },
       "FileOperationType": {
@@ -35162,7 +35079,6 @@
             "description": "The encrypted signature added to the parameter in the form of a token."
           }
         },
-        "additionalProperties": false,
         "description": "The file reference parameters."
       },
       "FileReferenceData": {
@@ -35206,7 +35122,6 @@
             "description": "Specifies if the room can be edited out or not."
           }
         },
-        "additionalProperties": false,
         "description": "An object that is generated by the integrator to uniquely identify a file in its system."
       },
       "FileReferenceWrapper": {
@@ -35451,7 +35366,6 @@
             "$ref": "#/components/schemas/SubjectType"
           }
         },
-        "additionalProperties": false,
         "description": "The file sharing information and access rights."
       },
       "FileShareLink": {
@@ -35573,7 +35487,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "A shareable link for a file with its configuration and status."
       },
       "FileShareParams": {
@@ -35599,7 +35512,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The collection of file sharing parameters."
       },
       "FileShareResponseArrayWrapper": {
@@ -36211,7 +36123,6 @@
                 "type": "string"
               }
             },
-            "additionalProperties": false,
             "description": "The internal file formats."
           },
           "masterFormExtension": {
@@ -36617,7 +36528,6 @@
             "format": "int64"
           }
         },
-        "additionalProperties": false,
         "description": "The file settings parameters."
       },
       "FilesSettingsWrapper": {
@@ -36684,7 +36594,6 @@
             "format": "int64"
           }
         },
-        "additionalProperties": false,
         "description": "The file statictics folder parameters."
       },
       "FilesStatisticsResultDto": {
@@ -36715,7 +36624,6 @@
             "$ref": "#/components/schemas/FilesStatisticsFolder"
           }
         },
-        "additionalProperties": false,
         "description": "The file statistics result parameters."
       },
       "FilesStatisticsResultWrapper": {
@@ -36803,7 +36711,6 @@
             "description": "Specifies if the manager who fills the form is a room member or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters of the form filling result."
       },
       "FillingFormResultIntegerWrapper": {
@@ -37026,7 +36933,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The folder content information."
       },
       "FolderContentIntegerArrayWrapper": {
@@ -37342,7 +37248,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The folder parameters."
       },
       "FolderDtoString": {
@@ -37573,7 +37478,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The folder parameters."
       },
       "FolderIntegerArrayWrapper": {
@@ -37728,7 +37632,6 @@
             "description": "Specifies whether the folder link is primary or not."
           }
         },
-        "additionalProperties": false,
         "description": "The folder link parameters."
       },
       "FolderStringArrayWrapper": {
@@ -38063,7 +37966,6 @@
             "description": "The list of possible values for the form field."
           }
         },
-        "additionalProperties": false,
         "description": "The metadata of a single form field."
       },
       "FormResultsDto": {
@@ -38097,7 +37999,6 @@
             "description": "The list of forms data."
           }
         },
-        "additionalProperties": false,
         "description": "A single filled-in form submission."
       },
       "FormRole": {
@@ -38171,7 +38072,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The form role."
       },
       "FormRoleArrayWrapper": {
@@ -38291,7 +38191,6 @@
             "$ref": "#/components/schemas/FormFillingStatus"
           }
         },
-        "additionalProperties": false,
         "description": "The form role parameters."
       },
       "FormSubmissionsDto": {
@@ -38326,7 +38225,6 @@
             "description": "All submissions."
           }
         },
-        "additionalProperties": false,
         "description": "All submissions of a form, together with the metadata of its fields."
       },
       "FormSubmissionsWrapper": {
@@ -38460,7 +38358,6 @@
             "description": "The form data type."
           }
         },
-        "additionalProperties": false,
         "description": "The data of the separate form item."
       },
       "FormsItemDto": {
@@ -38481,8 +38378,66 @@
             "description": "The form item type.\r\n            <example>text</example>"
           }
         },
-        "additionalProperties": false,
         "description": "The forms item information."
+      },
+      "GenerateDocxToolCallParametersDto": {
+        "required": [
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The description of the document to generate."
+          }
+        },
+        "description": "The generate docx tool call parameters."
+      },
+      "GenerateFormToolCallParametersDto": {
+        "required": [
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The description of the form to generate."
+          }
+        },
+        "description": "The generate form tool call parameters."
+      },
+      "GeneratePresentationToolCallParametersDto": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The presentation topic."
+          },
+          "slideCount": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The number of slides."
+          },
+          "style": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The visual style."
+          }
+        },
+        "description": "The generate presentation tool call parameters."
       },
       "GetReferenceDataDtoInteger": {
         "required": [
@@ -38540,7 +38495,6 @@
             "description": "The file link."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for getting reference data."
       },
       "GobackConfig": {
@@ -38557,7 +38511,6 @@
             "description": "The absolute URL to the website address which will be opened when clicking the \"Open file location\" menu button."
           }
         },
-        "additionalProperties": false,
         "description": "The settings for the \"Open file location\" menu button and upper right corner button."
       },
       "GroupMemberSecurityRequestArrayWrapper": {
@@ -38649,7 +38602,6 @@
             "description": "Specifies if the group member is a group owner or not."
           }
         },
-        "additionalProperties": false,
         "description": "The group member security information."
       },
       "GroupSummaryDto": {
@@ -38698,7 +38650,6 @@
             "description": "Indicates whether the group is a system group."
           }
         },
-        "additionalProperties": false,
         "description": "The group summary parameters."
       },
       "HideConfirmConvertRequestDto": {
@@ -38712,7 +38663,6 @@
             "description": "Specifies whether to set the specified settings or not."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for hiding the confirmation dialog when converting."
       },
       "HistoryAction": {
@@ -38733,7 +38683,6 @@
             "description": "The action performed on the file."
           }
         },
-        "additionalProperties": false,
         "description": "The action performed on the file."
       },
       "HistoryArrayWrapper": {
@@ -38796,7 +38745,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The history data.",
         "x-derived": true,
         "x-derived-types": [
@@ -38872,12 +38820,10 @@
             "description": "The list of related history."
           }
         },
-        "additionalProperties": false,
         "description": "The file history information."
       },
       "ICompress": {
         "type": "object",
-        "additionalProperties": false,
         "description": "The archiving class unification interface."
       },
       "ICompressWrapper": {
@@ -38936,7 +38882,6 @@
             "description": "Group icon"
           }
         },
-        "additionalProperties": false,
         "description": "The icon to set on a room group."
       },
       "InfoConfigDto": {
@@ -39001,7 +38946,6 @@
             "description": "The uploaded file."
           }
         },
-        "additionalProperties": false,
         "description": "The information config parameters."
       },
       "ItemKeyValuePairBooleanString": {
@@ -39019,7 +38963,6 @@
             "description": "The value associated with the key."
           }
         },
-        "additionalProperties": false,
         "description": "A key-value pair of a list item."
       },
       "ItemKeyValuePairBooleanStringWrapper": {
@@ -39142,7 +39085,6 @@
             "description": "Specifies whether to lock a file or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for locking a file."
       },
       "Logo": {
@@ -39209,7 +39151,6 @@
             "$ref": "#/components/schemas/LogoCover"
           }
         },
-        "additionalProperties": false,
         "description": "The room logo information."
       },
       "LogoConfigDto": {
@@ -39273,7 +39214,6 @@
             "description": "Specifies if the logo is visible."
           }
         },
-        "additionalProperties": false,
         "description": "The logo config parameters."
       },
       "LogoCover": {
@@ -39304,7 +39244,6 @@
             "description": "The logo cover data."
           }
         },
-        "additionalProperties": false,
         "description": "The logo cover information."
       },
       "LogoRequest": {
@@ -39362,7 +39301,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The logo request parameters."
       },
       "ManageFormFillingDtoInteger": {
@@ -39384,7 +39322,6 @@
             "$ref": "#/components/schemas/FormFillingManageAction"
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for managing form filling."
       },
       "MentionMessageWrapper": {
@@ -39423,7 +39360,6 @@
             "description": "The mention message."
           }
         },
-        "additionalProperties": false,
         "description": "The mention message parameters."
       },
       "MentionWrapper": {
@@ -39487,7 +39423,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The parameters of a user mentioned in a message."
       },
       "MentionWrapperArrayWrapper": {
@@ -40723,7 +40658,6 @@
             "description": "Specifies if the module is primary or not."
           }
         },
-        "additionalProperties": false,
         "description": "The module information."
       },
       "ModuleWrapper": {
@@ -40806,7 +40740,6 @@
             "description": "The logo cover data."
           }
         },
-        "additionalProperties": false,
         "description": "The logo cover information, with the cover data in every available size."
       },
       "NewItemsDtoFileEntryBaseDto": {
@@ -40832,7 +40765,6 @@
             "description": "The list of items."
           }
         },
-        "additionalProperties": false,
         "description": "The new item parameters."
       },
       "NewItemsDtoRoomNewItemsDto": {
@@ -40858,7 +40790,6 @@
             "description": "The list of items."
           }
         },
-        "additionalProperties": false,
         "description": "The new item parameters."
       },
       "NewItemsFileEntryBaseArrayWrapper": {
@@ -41030,7 +40961,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The OAuth 2.0 token issued by a third-party provider."
       },
       "ObjectArrayWrapper": {
@@ -41086,7 +41016,6 @@
             "$ref": "#/components/schemas/WatermarkOnDraw"
           }
         },
-        "additionalProperties": false,
         "description": "The document options."
       },
       "OrderBy": {
@@ -41104,7 +41033,6 @@
             "$ref": "#/components/schemas/SortedByType"
           }
         },
-        "additionalProperties": false,
         "description": "The sorting parameters."
       },
       "OrderRequestDto": {
@@ -41121,7 +41049,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for ordering requests."
       },
       "OrdersItemRequestDtoInteger": {
@@ -41155,7 +41082,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "An item in the ordering request with its entry type and ID."
       },
       "OrdersRequestDtoInteger": {
@@ -41184,7 +41110,6 @@
             "description": "The list of items with their ordering information."
           }
         },
-        "additionalProperties": false,
         "description": "The collection of items to be ordered."
       },
       "Paragraph": {
@@ -41223,7 +41148,6 @@
             "description": "The list of text runs from the paragraph."
           }
         },
-        "additionalProperties": false,
         "description": "The paragraph parameters."
       },
       "PermissionsConfig": {
@@ -41300,7 +41224,6 @@
             "description": "Defines if the content can be copied to the clipboard or not."
           }
         },
-        "additionalProperties": false,
         "description": "The permissions configuration parameters."
       },
       "PluginsConfig": {
@@ -41324,7 +41247,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The configuration settings to connect the special add-ons."
       },
       "ProviderArrayWrapper": {
@@ -41437,7 +41359,6 @@
             "description": "The provider OAuth client ID."
           }
         },
-        "additionalProperties": false,
         "description": "The provider information."
       },
       "ProviderFilter": {
@@ -41601,7 +41522,6 @@
             "format": "uri"
           }
         },
-        "additionalProperties": false,
         "description": "The presence or absence of the documents in the \"Open Recent...\" menu option."
       },
       "ReviewConfig": {
@@ -41619,7 +41539,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "Configuration for review display settings."
       },
       "RoomDataLifetimeDto": {
@@ -41660,7 +41579,6 @@
             "description": "Specifies whether the room data lifetime setting is enabled or not."
           }
         },
-        "additionalProperties": false,
         "description": "The room data lifetime information."
       },
       "RoomDataLifetimePeriod": {
@@ -41741,7 +41659,6 @@
             "description": "Specifies whether the process of creating a room from the template is completed."
           }
         },
-        "additionalProperties": false,
         "description": "The progress parameters of creating a room from the template."
       },
       "RoomFromTemplateStatusWrapper": {
@@ -41896,7 +41813,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The room security parameters."
       },
       "RoomGroupRequestDto": {
@@ -41953,7 +41869,6 @@
             "description": "The list of room IDs."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for creating a room group"
       },
       "RoomGroupWrapper": {
@@ -42021,7 +41936,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The room invitation parameters."
       },
       "RoomInvitationRequest": {
@@ -42081,7 +41995,6 @@
             "description": "Specifies whether to forcibly delete a user with form roles from the room."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for inviting users to the room."
       },
       "RoomLinkRequest": {
@@ -42167,7 +42080,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The room link parameters."
       },
       "RoomNewItemsDto": {
@@ -42189,7 +42101,6 @@
             "description": "The list of file entry items."
           }
         },
-        "additionalProperties": false,
         "description": "The room new items information."
       },
       "RoomPrivacyFilter": {
@@ -42264,7 +42175,6 @@
             "$ref": "#/components/schemas/RoomSecurityError"
           }
         },
-        "additionalProperties": false,
         "description": "The room security parameters."
       },
       "RoomSecurityError": {
@@ -42467,7 +42377,6 @@
             "format": "int64"
           }
         },
-        "additionalProperties": false,
         "description": "The room template parameters."
       },
       "RoomTemplateStatusDto": {
@@ -42512,7 +42421,6 @@
             "description": "Specifies whether the process of creating the room template is completed."
           }
         },
-        "additionalProperties": false,
         "description": "The room template status."
       },
       "RoomTemplateStatusWrapper": {
@@ -42643,7 +42551,6 @@
             "description": "The font size of the text run in points."
           }
         },
-        "additionalProperties": false,
         "description": "The text run parameters."
       },
       "STRINGArrayWrapper": {
@@ -42717,7 +42624,6 @@
             "description": "The file title to save as PDF."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for saving a file as PDF."
       },
       "SaveFormRoleMappingDtoInteger": {
@@ -42755,7 +42661,6 @@
             "description": "The collection of roles."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for saving form role mapping."
       },
       "SearchArea": {
@@ -42916,7 +42821,6 @@
             "description": "The message to send when notifying about the shared file."
           }
         },
-        "additionalProperties": false,
         "description": "The security information request parameters."
       },
       "SecurityInfoSimpleRequestDto": {
@@ -42961,7 +42865,6 @@
             "description": "The message to send when notifying about the shared file."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters of the security information request."
       },
       "SessionRequest": {
@@ -43017,7 +42920,6 @@
             "description": "Specifies whether to create a new file if it already exists."
           }
         },
-        "additionalProperties": false,
         "description": "The session request parameters."
       },
       "SetPublicDto": {
@@ -43044,7 +42946,6 @@
             "description": "Specifies whether the room template is public or not."
           }
         },
-        "additionalProperties": false,
         "description": "The public settings of the room template to set."
       },
       "SettingsRequestDto": {
@@ -43058,7 +42959,6 @@
             "description": "Specifies whether to set the specified settings or not."
           }
         },
-        "additionalProperties": false,
         "description": "The settings request parameters."
       },
       "ShareFilterType": {
@@ -43131,7 +43031,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "Represents dimensions with width and height values."
       },
       "SortOrder": {
@@ -43242,7 +43141,6 @@
             "description": "Specifies whether to share the file with other users for editing or not."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for starting file editing."
       },
       "StartFillingForm": {
@@ -43259,7 +43157,6 @@
             "description": "The caption of the button that starts filling out the form."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters of the button that starts filling out the form."
       },
       "StartFillingMode": {
@@ -43483,7 +43380,6 @@
             "description": "A message displayed after forms are submitted."
           }
         },
-        "additionalProperties": false,
         "description": "The \"Complete & Submit\" button settings."
       },
       "TemplatesConfig": {
@@ -43521,7 +43417,6 @@
             "format": "uri"
           }
         },
-        "additionalProperties": false,
         "description": "The presence or absence of the templates in the \"Create New...\" menu option."
       },
       "TemplatesRequestDto": {
@@ -43546,7 +43441,6 @@
             "description": "The list of file IDs."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for adding files to the template list."
       },
       "ThirdPartyBackupRequestDto": {
@@ -43613,7 +43507,6 @@
             "description": "The provider key."
           }
         },
-        "additionalProperties": false,
         "description": "The third-party backup request parameters."
       },
       "ThirdPartyParams": {
@@ -43669,7 +43562,6 @@
             "description": "The provider key."
           }
         },
-        "additionalProperties": false,
         "description": "The third-party account parameters."
       },
       "ThirdPartyParamsArrayWrapper": {
@@ -43796,7 +43688,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The third-party request parameters."
       },
       "Thumbnail": {
@@ -43869,7 +43760,6 @@
             "description": "The comment text."
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for updating a comment."
       },
       "UpdateFile": {
@@ -43896,7 +43786,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for updating a file."
       },
       "UpdateRoomGroupRequest": {
@@ -43975,7 +43864,6 @@
             "description": "The group name."
           }
         },
-        "additionalProperties": false,
         "description": "The changes to apply to a room group: its name and the rooms to add or remove."
       },
       "UpdateRoomRequest": {
@@ -44145,7 +44033,6 @@
             "format": "int64"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating the room quota."
       },
       "UpdateRoomsRoomIdsRequestDtoInteger": {
@@ -44182,7 +44069,6 @@
             "description": "The list of room IDs."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating the rooms."
       },
       "UpdateTagRequestDto": {
@@ -44217,7 +44103,6 @@
             "description": "The new tag name."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for creating a tag."
       },
       "UploadResultDto": {
@@ -44251,7 +44136,6 @@
             "description": "The message sent after the successful upload operation."
           }
         },
-        "additionalProperties": false,
         "description": "The upload result parameters."
       },
       "UploadResultWrapper": {
@@ -44355,7 +44239,6 @@
             "$ref": "#/components/schemas/FileDtoInteger"
           }
         },
-        "additionalProperties": false,
         "description": "The upload session response parameters."
       },
       "UploadSessionResponseIntegerWrapper": {
@@ -44460,7 +44343,6 @@
             "description": "Customer identifier associated with the user."
           }
         },
-        "additionalProperties": false,
         "description": "The configuration parameters of the user currently viewing or editing the document."
       },
       "UserInfo": {
@@ -44753,7 +44635,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The user information."
       },
       "UserInvitation": {
@@ -44783,7 +44664,6 @@
             "description": "Specifies whether to resend all user invitations or not."
           }
         },
-        "additionalProperties": false,
         "description": "The user invitation parameters."
       },
       "VectorizationStatus": {
@@ -44929,7 +44809,6 @@
             "format": "double"
           }
         },
-        "additionalProperties": false,
         "description": "The watermark settings."
       },
       "WatermarkOnDraw": {
@@ -45026,7 +44905,6 @@
             "description": "The list of paragraphs of the watermark."
           }
         },
-        "additionalProperties": false,
         "description": "The document watermark parameters."
       },
       "WatermarkRequestDto": {
@@ -45101,7 +44979,6 @@
             "format": "double"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for adding watermarks."
       },
       "XlsxReportResponseDto": {
@@ -45123,7 +45000,6 @@
             "description": "Specifies whether the XLSX report file is newly created or an existing file will be updated."
           }
         },
-        "additionalProperties": false,
         "description": "The XLSX report task response parameters."
       },
       "XlsxReportResponseWrapper": {

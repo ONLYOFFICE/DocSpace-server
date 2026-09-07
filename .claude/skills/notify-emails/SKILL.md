@@ -194,9 +194,13 @@ and is filled for every letter, not only those.
 letter tests (§9):
 
 - The word `ONLYOFFICE` must always be `${LetterLogoText}`, so a white-labelled portal sends its own
-  branding. It works everywhere, including inside tag values, because `WhiteLabelInterceptor` replaces
-  it on the **final message body** after tag substitution — that is why `ButtonGoToDocSpace` can be
-  `Go to your ${LetterLogoText}` and `TrulyYoursText` can be `Truly Yours, ${LetterLogoText} Team`.
+  branding. It works everywhere, including inside tag values, because
+  `NotifyTransferRequest.BeforeTransferRequestAsync` resolves it in the tag values **before** the
+  pattern is rendered — that is why `ButtonGoToDocSpace` can be `Go to your ${LetterLogoText}` and
+  `TrulyYoursText` can be `Truly Yours, ${LetterLogoText} Team`. It has to happen there rather than on
+  the finished body: `MarkDownStyler` escapes the braces for Telegram's markdown, so after styling
+  nothing can recognise the reference any more — which is how the wallet letter came to be signed
+  "Truly Yours, ${LetterLogoText} Team" on Telegram while the mail was correct.
 - External links come from `externalresources.json` (`ExternalResourceSettingsHelper`, resolved for the
   recipient's culture) and portal links from `CommonLinkUtility` — passed in as `$URL1`, `$URL2`, … or
   read off the common set (`${__VirtualRootPath}`, `${__SupportLink}`). A hard-coded `https://…` in a
@@ -467,8 +471,11 @@ no edit there — only `LETTER_CULTURES` narrows a single run.
 so the `social` branch of a periodic letter's footer is never taken — it matters to
 `saas_admin_user_apps_tips_v1` and its Enterprise twin, which also go to plain users. The portal is never
 white-labelled, so `AddLetterLogoAsync`'s other branch (custom logo, `$TopGif` dropped) never runs. Only
-the `EmailPattern` is rendered — telegram and push bodies are not. And the schedule is a separate suite:
-`PeriodicLetterScheduleTests` answers *when* a letter goes out, this one *what it says*.
+the `EmailPattern` is rendered — telegram and push bodies are not, and what little covers them is
+`NotifyStylerTests` in `common/Tests/ASC.Core.Common.Tests`: a pattern through the formatter and
+`MarkDownStyler`/`JabberStyler`, no portal, asserting what the email tag values turn into. And the
+schedule is a separate suite: `PeriodicLetterScheduleTests` answers *when* a letter goes out, this
+one *what it says*.
 
 ## 10. The Files module's own letters
 
@@ -503,8 +510,9 @@ rule. What you have to do differently:
 - **Take tag names from `NotifyConstants`, never spell them yourself.** The casing is not guessable —
   `$DocumentURL` and `$RoomURL` shout the URL, `$FolderID` and `$FolderParentId` disagree with each other.
 - **Don't re-register anything for common tags.** `NotifyConfiguration` hooks
-  `WorkContext.NotifyClientRegistration` globally, so `${__VirtualRootPath}`, `${__AuthorName}`, the URL
-  absolutizer and `WhiteLabelInterceptor` reach this source too.
+  `WorkContext.NotifyClientRegistration` globally and registers `NotifyTransferRequest` on the engine, so
+  `${__VirtualRootPath}`, `${__AuthorName}`, the URL absolutizer and the `${LetterLogoText}` resolution
+  reach this source too.
 - **Read the pattern before assuming which tag names a person.** An action can hand the same human to its
   mail body and its push body under different tags — one from the global set, one set by `Init`.
 

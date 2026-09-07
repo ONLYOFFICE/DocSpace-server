@@ -4449,7 +4449,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/TokenDiagnosticsWrapper"
                 }
               }
             }
@@ -6442,7 +6442,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/IAccountEntryArrayWrapper"
                 }
               }
             }
@@ -6705,7 +6705,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/IAccountEntryArrayWrapper"
                 }
               }
             }
@@ -6968,7 +6968,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectArrayWrapper"
+                  "$ref": "#/components/schemas/IAccountEntryArrayWrapper"
                 }
               }
             }
@@ -9456,7 +9456,7 @@
         },
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "The newly created user linked to the third-party account",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -11941,7 +11941,6 @@
             "description": "Specifies if an account is linked with other profiles or not."
           }
         },
-        "additionalProperties": false,
         "description": "The account information parameters."
       },
       "AccountLoginType": {
@@ -12001,7 +12000,6 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
         "description": "The API date and time parameters."
       },
       "ApiKeyResponseArrayWrapper": {
@@ -12138,7 +12136,6 @@
             "description": "Indicates whether the API key is active or not."
           }
         },
-        "additionalProperties": false,
         "description": "The response data for the API key operations."
       },
       "ApiKeyResponseWrapper": {
@@ -12287,7 +12284,6 @@
             "description": "The user encrypted email address."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating a user email."
       },
       "ChangePasswordRequest": {
@@ -12314,7 +12310,6 @@
             "description": "The user password hash."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating a user password."
       },
       "Contact": {
@@ -12341,7 +12336,6 @@
             "description": "The contact value."
           }
         },
-        "additionalProperties": false,
         "description": "The contact information."
       },
       "CreateApiKeyRequestDto": {
@@ -12389,7 +12383,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for creating a new API key."
       },
       "Culture": {
@@ -12408,7 +12401,6 @@
             "description": "The user culture name (en-US, de, fr, es, ...)."
           }
         },
-        "additionalProperties": false,
         "description": "The culture name parameters."
       },
       "DarkThemeSettings": {
@@ -12427,7 +12419,6 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
         "description": "The theme parameters."
       },
       "DarkThemeSettingsRequestDto": {
@@ -12441,7 +12432,6 @@
             "$ref": "#/components/schemas/DarkThemeSettingsType"
           }
         },
-        "additionalProperties": false,
         "description": "The theme settings request parameters."
       },
       "DarkThemeSettingsType": {
@@ -12578,7 +12568,6 @@
             "format": "email"
           }
         },
-        "additionalProperties": false,
         "description": "The email invitation parameters."
       },
       "EmailMemberRequestDto": {
@@ -12612,7 +12601,6 @@
             "description": "The user's response to the CAPTCHA challenge."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for the user email."
       },
       "EmployeeActivationStatus": {
@@ -12794,7 +12782,6 @@
             "description": "Specifies if the user is anonymous or not."
           }
         },
-        "additionalProperties": false,
         "description": "The user parameters."
       },
       "EmployeeFullArrayWrapper": {
@@ -13159,7 +13146,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The full list of user parameters."
       },
       "EmployeeFullWrapper": {
@@ -13398,7 +13384,6 @@
             "description": "The file upload result message."
           }
         },
-        "additionalProperties": false,
         "description": "The file upload result."
       },
       "FileUploadResultWrapper": {
@@ -13592,7 +13577,6 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The group parameters."
       },
       "GroupRequestDto": {
@@ -13639,7 +13623,6 @@
             "description": "The group name."
           }
         },
-        "additionalProperties": false,
         "description": "The group request parameters."
       },
       "GroupSummaryArrayWrapper": {
@@ -13733,7 +13716,6 @@
             "description": "Indicates whether the group is a system group."
           }
         },
-        "additionalProperties": false,
         "description": "The group summary parameters."
       },
       "GroupWrapper": {
@@ -13778,6 +13760,69 @@
         },
         "description": "The successful API response containing the GroupDto object."
       },
+      "IAccountEntryArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IAccountEntryDto"
+            },
+            "description": "The list of IAccountEntryDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of IAccountEntryDto objects."
+      },
+      "IAccountEntryDto": {
+        "oneOf": [
+          {
+            "description": "The full list of user parameters.",
+            "$ref": "#/components/schemas/EmployeeFullDto"
+          },
+          {
+            "description": "The group parameters.",
+            "$ref": "#/components/schemas/GroupDto"
+          }
+        ],
+        "description": "One entry of an account search: either a user or a group.",
+        "x-derived": true,
+        "x-derived-types": [
+          "EmployeeFullDto",
+          "GroupDto"
+        ]
+      },
       "InviteUsersRequestDto": {
         "required": [
           "invitations"
@@ -13811,7 +13856,6 @@
             "description": "The culture code of invitations."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for inviting users."
       },
       "LinkAccountRequestDto": {
@@ -13828,7 +13872,6 @@
             "description": "The third-party profile in the serialized format."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for linking accounts."
       },
       "MemberRequestDto": {
@@ -14016,7 +14059,6 @@
             "description": "Specifies if tips, updates and offers are allowed to be sent to the user or not."
           }
         },
-        "additionalProperties": false,
         "description": "The user request parameters."
       },
       "MembersRequest": {
@@ -14040,7 +14082,6 @@
             "description": "The list of group member IDs."
           }
         },
-        "additionalProperties": false,
         "description": "The member request."
       },
       "MobilePhoneActivationStatus": {
@@ -14074,93 +14115,6 @@
         ],
         "description": "The user mobile phone activation status.",
         "x-enum-type": "integer"
-      },
-      "ObjectArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            },
-            "description": "The response payload."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response."
-      },
-      "ObjectWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "object",
-            "description": "The response payload."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response."
       },
       "Payments": {
         "oneOf": [
@@ -14327,7 +14281,6 @@
             "format": "uuid"
           }
         },
-        "additionalProperties": false,
         "description": "The request for setting a group manager."
       },
       "SignupAccountRequestDto": {
@@ -14372,7 +14325,6 @@
             "description": "The third-party profile in the serialized format"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for creating a third-party account."
       },
       "SortOrder": {
@@ -14438,7 +14390,6 @@
             "description": "Specifies whether to delete a profile when the data reassignment will be finished or not."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for starting the reassignment process."
       },
       "StartUpdateUserTypeDto": {
@@ -14468,7 +14419,6 @@
             "format": "uuid"
           }
         },
-        "additionalProperties": false,
         "description": "The parameters for updating the type of the user or guest when reassigning rooms and shared files."
       },
       "StringWrapper": {
@@ -14562,7 +14512,6 @@
             "$ref": "#/components/schemas/DistributedTaskStatus"
           }
         },
-        "additionalProperties": false,
         "description": "The task progress response parameters."
       },
       "TaskProgressResponseWrapper": {
@@ -14622,7 +14571,6 @@
             "format": "uuid"
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for terminating the reassignment/deletion process."
       },
       "ThumbnailsDataDto": {
@@ -14689,7 +14637,6 @@
             "description": "The thumbnail small size photo."
           }
         },
-        "additionalProperties": false,
         "description": "The thumbnails data parameters."
       },
       "ThumbnailsDataWrapper": {
@@ -14780,8 +14727,80 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
         "description": "The thumbnail request."
+      },
+      "TokenDiagnosticsDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "examples": [
+              "user@example.com"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The name of the authenticated identity."
+          },
+          "claims": {
+            "examples": [
+              [
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name:user@example.com"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The claims of the identity, each formatted as \"type:value\"."
+          }
+        },
+        "description": "What the current token carries, for diagnostics."
+      },
+      "TokenDiagnosticsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The TokenDiagnosticsDto object returned by the operation.",
+            "$ref": "#/components/schemas/TokenDiagnosticsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the TokenDiagnosticsDto object."
       },
       "UpdateApiKeyRequest": {
         "type": "object",
@@ -14826,7 +14845,6 @@
             "description": "Indicates whether the API key should be active or not."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating an existing API key."
       },
       "UpdateGroupRequest": {
@@ -14885,7 +14903,6 @@
             "description": "The group name."
           }
         },
-        "additionalProperties": false,
         "description": "The request for updating a group."
       },
       "UpdateMemberRequestDto": {
@@ -15034,7 +15051,6 @@
             "description": "Specifies if tips, updates and offers are allowed to be sent to the user or not."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating the user information."
       },
       "UpdateMembersQuotaRequestDto": {
@@ -15080,7 +15096,6 @@
             "description": "The quota in JSON format."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating a user quota."
       },
       "UpdateMembersRequestDto": {
@@ -15111,7 +15126,6 @@
             "description": "Specifies whether to resend invitation letters to all the users or not."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating the user information."
       },
       "UpdatePhotoMemberRequest": {
@@ -15128,7 +15142,6 @@
             "description": "The avatar photo URL."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for updating a photo."
       },
       "UserExistsResponseDto": {
@@ -15149,7 +15162,6 @@
             "$ref": "#/components/schemas/EmployeeStatus"
           }
         },
-        "additionalProperties": false,
         "description": "The user existence check response parameters."
       },
       "UserExistsResponseWrapper": {
@@ -15209,7 +15221,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The user invitation parameters."
       }
     },

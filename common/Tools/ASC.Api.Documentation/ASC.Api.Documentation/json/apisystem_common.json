@@ -2146,7 +2146,6 @@
             "description": "The host name."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for checking domain names."
       },
       "ErrorApiResponse": {
@@ -2189,8 +2188,7 @@
         "description": "The error body returned with every failed request."
       },
       "IActionResult": {
-        "type": "object",
-        "additionalProperties": false
+        "type": "object"
       },
       "IActionResultWrapper": {
         "type": "object",
@@ -2252,7 +2250,6 @@
             }
           }
         ],
-        "additionalProperties": false,
         "description": "The request parameters for provisioning a portal with an OAuth provider."
       },
       "ProvisionProviderDto": {
@@ -2319,7 +2316,6 @@
             "description": "The domain to add to the portal's Content Security Policy whitelist."
           }
         },
-        "additionalProperties": false,
         "description": "The OAuth provider configuration for portal provisioning."
       },
       "RecaptchaType": {
@@ -2409,7 +2405,6 @@
             "description": "The settings parameter value."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing portal settings."
       },
       "TenantModel": {
@@ -2704,7 +2699,6 @@
             "description": "The authorization code used for obtaining OAuth tokens."
           }
         },
-        "additionalProperties": false,
         "description": "The request parameters for managing a portal."
       },
       "TenantStatus": {

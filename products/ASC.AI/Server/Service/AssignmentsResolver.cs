@@ -100,6 +100,13 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
 
     public async Task<Dictionary<ActionType, Guid>> ResolveAsync(Dictionary<ActionType, Guid> stored, bool applyDefaults)
     {
+        var models = gateway.Configured ? await GetModelsAsync() : null;
+
+        return Resolve(stored, applyDefaults, models);
+    }
+
+    internal static Dictionary<ActionType, Guid> Resolve(Dictionary<ActionType, Guid> stored, bool applyDefaults, List<Model>? models)
+    {
         var unassigned = stored
             .Where(a => a.Value == AssignmentsStorage.UnassignedProfileId)
             .Select(a => a.Key)
@@ -109,12 +116,6 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
             ? stored
             : stored.Where(a => !unassigned.Contains(a.Key)).ToDictionary(a => a.Key, a => a.Value);
 
-        if (!gateway.Configured)
-        {
-            return assigned;
-        }
-
-        var models = await GetModelsAsync();
         if (models == null)
         {
             return assigned;

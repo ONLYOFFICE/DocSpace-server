@@ -155,7 +155,36 @@ public class DerivedSchemaFilter : ISchemaFilter
             {
                 openApiSchema.Extensions["x-derived-types"] = new JsonNodeExtension(derivedArray);
             }
+
+            DescribeUnion(openApiSchema, derivedTypes, context);
         }
+    }
+
+    /// <summary>
+    /// Turns a base that declares nothing of its own into the union it actually is.
+    /// </summary>
+    /// <remarks>
+    /// Such a base - a marker interface, or an abstract class holding only the <c>[JsonDerivedType]</c>
+    /// list - reflects to an empty object, so the response reads as "some object with no fields" and the
+    /// only hint of what can arrive is the extension above, which no generator reads. <c>oneOf</c> states
+    /// it in a keyword every consumer understands, and generating each derived schema is also what puts
+    /// it in the document: referencing one by name alone leaves the reference dangling. A base that does
+    /// carry properties is already described by them, and its derived types point back at it through
+    /// <c>allOf</c>, so it is left alone rather than described twice.
+    /// </remarks>
+    private static void DescribeUnion(OpenApiSchema schema, List<Type> derivedTypes, SchemaFilterContext context)
+    {
+        if (schema.Properties is { Count: > 0 } || schema.OneOf is { Count: > 0 } || schema.AllOf is { Count: > 0 })
+        {
+            return;
+        }
+
+        schema.OneOf = derivedTypes
+            .Select(type => context.SchemaGenerator.GenerateSchema(type, context.SchemaRepository))
+            .ToList();
+
+        // A union is not an object in its own right, and claiming both would contradict the branches.
+        schema.Type = null;
     }
 
     private static string CustomSchemaId(Type type)

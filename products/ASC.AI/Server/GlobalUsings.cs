@@ -37,6 +37,7 @@ global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Middleware;
 global using ASC.Api.Utils;
 
+global using ASC.AI.Integration;
 global using ASC.AI.Integration.Assignments;
 global using ASC.AI.Integration.Attachments;
 global using ASC.AI.Integration.Preferences;
@@ -49,6 +50,7 @@ global using ASC.AI.Models.RequestDto;
 global using ASC.AI.Models.RequestDto.Agents;
 global using ASC.AI.Models.RequestDto.Assignments;
 global using ASC.AI.Models.RequestDto.Attachments;
+global using ASC.AI.Models.RequestDto.ChatContext;
 global using ASC.AI.Models.RequestDto.McpServers;
 global using ASC.AI.Models.RequestDto.Messages;
 global using ASC.AI.Models.RequestDto.Preferences;

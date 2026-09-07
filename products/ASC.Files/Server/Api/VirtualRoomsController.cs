@@ -1019,9 +1019,9 @@ public class VirtualRoomsCommonController(
     /// <path>api/2.0/files/tags</path>
     /// <collection>list</collection>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "List of tag names", typeof(IAsyncEnumerable<object>))]
+    [SwaggerResponse(200, "List of tag names", typeof(IAsyncEnumerable<string>))]
     [HttpGet("tags")]
-    public IAsyncEnumerable<object> GetRoomTagsInfo(GetTagsInfoRequestDto inDto)
+    public IAsyncEnumerable<string> GetRoomTagsInfo(GetTagsInfoRequestDto inDto)
     {
         return customTagsService.GetTagsInfoAsync<int>(inDto.Text, TagType.Custom, inDto.StartIndex, inDto.Count);
     }
