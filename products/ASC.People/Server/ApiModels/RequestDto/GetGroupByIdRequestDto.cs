@@ -40,7 +40,8 @@ namespace ASC.People.ApiModels.RequestDto;
 public class GetGroupByUserIdRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The ID of the account whose groups are listed, taken from the route. An ID that matches no account yields an
+    /// empty list rather than 404.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]
@@ -53,7 +54,8 @@ public class GetGroupByUserIdRequestDto
 public class GetGroupByIdRequestDto
 {
     /// <summary>
-    /// The group ID.
+    /// The ID of the group to delete, taken from the route. It has to be a group that has not been deleted already,
+    /// otherwise the operation answers 404.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
