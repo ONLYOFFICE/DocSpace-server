@@ -149,7 +149,7 @@ public class HistoryService(
         DateTime? fromDate,
         DateTime? toDate)
     {
-        var messageDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var events = needFiltering
@@ -171,7 +171,7 @@ public class HistoryService(
         DateTime? fromDate,
         DateTime? toDate)
     {
-        var messageDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = tenantManager.GetCurrentTenantId();
 
         if (needFiltering)

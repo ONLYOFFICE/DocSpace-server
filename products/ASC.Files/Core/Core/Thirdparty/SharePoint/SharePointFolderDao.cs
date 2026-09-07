@@ -106,7 +106,7 @@ internal class SharePointFolderDao(
             rooms = rooms.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
 
         await foreach (var room in rooms)

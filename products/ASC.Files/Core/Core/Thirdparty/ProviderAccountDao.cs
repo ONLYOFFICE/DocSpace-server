@@ -95,7 +95,7 @@ internal class ProviderAccountDao(
     public virtual async IAsyncEnumerable<IProviderInfo> GetProvidersInfoAsync(Guid userId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var thirdPartyAccounts = filesDbContext.ThirdPartyAccountsAsync(tenantId, userId);
 
         await foreach (var t in thirdPartyAccounts)
@@ -107,7 +107,7 @@ internal class ProviderAccountDao(
     private async IAsyncEnumerable<IProviderInfo> GetProvidersInfoInternalAsync(int linkId = -1, FolderType folderType = FolderType.DEFAULT, string searchText = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var thirdPartyAccounts = filesDbContext.ThirdPartyAccountsByFilterAsync(tenantId, linkId, folderType, authContext.CurrentAccount.ID, GetSearchText(searchText));
         await foreach (var t in thirdPartyAccounts)
         {
