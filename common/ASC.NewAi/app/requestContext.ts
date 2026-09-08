@@ -35,7 +35,7 @@ import { AsyncLocalStorage } from "async_hooks";
 import type { IncomingHttpHeaders } from "http";
 import type { Request, Response, NextFunction } from "express";
 import type { ForwardedHeaders, RequestContext } from "./types.js";
-import type { DocspaceFolderInfo } from "./storage/docspaceFilesApi.js";
+import type { DocspaceFolderInfo, DocspaceFileInfo, SourceMeta } from "./storage/docspaceFilesApi.js";
 import type { ChatContextSnapshot } from "./storage/chatContextSnapshot.js";
 
 const HOP_BY_HOP = new Set<string>([
@@ -96,6 +96,7 @@ export function requestContextMiddleware(req: Request, _res: Response, next: Nex
   const ctx: RequestContext = {
     headers: pickForwardableHeaders(req.headers),
     folderInfoCache: new Map(),
+    fileInfoCache: new Map(),
   };
   als.run(ctx, () => next());
 }
@@ -156,6 +157,28 @@ export function getFolderInfoCache():
   | Map<string, Promise<DocspaceFolderInfo | undefined>>
   | undefined {
   return als.getStore()?.folderInfoCache;
+}
+
+export function getFileInfoCache():
+  | Map<string, Promise<DocspaceFileInfo | undefined>>
+  | undefined {
+  return als.getStore()?.fileInfoCache;
+}
+
+// The entry the current round is attributed to (see RequestContext.sourceMeta).
+// Set by `primeSourceMeta` before the engine runs; read by the ONLYOFFICE
+// provider override on every request it builds within the round — streaming
+// chat, tool-call resume rounds, one-shot actions, title generation. Passing
+// `undefined` clears a value left by an earlier resolution in the same request.
+export function setSourceMeta(source: SourceMeta | undefined): void {
+  const store = als.getStore();
+  if (store) {
+    store.sourceMeta = source;
+  }
+}
+
+export function getSourceMeta(): SourceMeta | undefined {
+  return als.getStore()?.sourceMeta;
 }
 
 // The round's aggregate read (see RequestContext.chatContext). Set once by the

@@ -1983,7 +1983,6 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sends a password recovery email to the specified user address.
     /// Emails a password recovery link to an address, and is the entry point of the recovery flow rather than the
     /// operation that changes anything.
     /// It needs no authentication, which is how a person who cannot sign in uses it; when the portal has a CAPTCHA
