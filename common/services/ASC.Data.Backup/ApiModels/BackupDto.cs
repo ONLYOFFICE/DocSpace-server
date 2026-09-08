@@ -60,26 +60,30 @@ public class BackupDto
 
 
 /// <summary>
-/// Parameters for calculating the number of backups.
+/// The request parameters for counting the backups of a portal.
 /// </summary>
 public class BackupsCountDto
 {
     /// <summary>
-    /// The from date.
+    /// The start of the period, in UTC and inclusive. It defaults to the first day of the current calendar
+    /// month at 00:00 UTC, and it has to be no later than `to`.
     /// </summary>
-    /// <example>2025-01-01T00:00:00Z</example>
+    /// <example>2026-03-01T00:00:00Z</example>
     [FromQuery(Name = "from")]
     public DateTime? From { get; set; }
 
     /// <summary>
-    /// The to date.
+    /// The end of the period, in UTC and inclusive. It defaults to the moment of the call.
     /// </summary>
-    /// <example>2025-12-31T23:59:59Z</example>
+    /// <example>2026-03-31T23:59:59Z</example>
     [FromQuery(Name = "to")]
     public DateTime? To { get; set; }
 
     /// <summary>
-    /// Specifies if the backups are paid or not.
+    /// Counts the backups charged to the portal wallet when true, and the ones covered by the free monthly
+    /// allowance when false, which is the default. It is read only by
+    /// `GET api/2.0/backup/getbackupscount` and is ignored by
+    /// `GET api/2.0/backup/getbackupscountbypaid`, which always reports both.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "paid")]
@@ -87,30 +91,32 @@ public class BackupsCountDto
 }
 
 /// <summary>
-/// The number of backups.
+/// The backups of a portal, split by who paid for them.
 /// </summary>
 public class BackupsCountResultDto
 {
     /// <summary>
-    /// The number of free backups.
+    /// The number of backups covered by the free monthly allowance.
     /// </summary>
     /// <example>3</example>
     public int Free { get; set; }
 
     /// <summary>
-    /// The number of paid backups.
+    /// The number of backups charged to the portal wallet.
     /// </summary>
     /// <example>5</example>
     public int Paid { get; set; }
 }
 
 /// <summary>
-/// Backup service state.
+/// Whether the paid backup service is switched on for a portal.
 /// </summary>
 public class BackupServiceStateDto
 {
     /// <summary>
-    /// Specifies if the backup service is enabled or not.
+    /// Specifies whether the paid backup service is switched on for this portal, which is a setting of its
+    /// wallet rather than the health of the backup service. While it is true, backups beyond the free
+    /// monthly allowance are charged to the wallet.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }

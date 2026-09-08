@@ -623,14 +623,22 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Returns the number of backups for a period of time. The default is the current calendar month.
+    /// Counts the backups of the current portal that were created within a period, and `paid` chooses which
+    /// kind is counted: false, the default, counts the ones covered by the free monthly allowance, and true
+    /// counts the ones charged to the portal wallet.
+    /// The period defaults to the current calendar month - `from` becomes the first day of the month at
+    /// 00:00 UTC and `to` becomes the moment of the call. Both bounds are UTC and inclusive, and a `from`
+    /// later than `to` is rejected. Called with no parameters at all, this returns exactly the figure the
+    /// free monthly allowance is measured against.
+    /// The count is over history records rather than over stored archives, so it includes backups that have
+    /// already been deleted; use `GET api/2.0/backup/getbackuphistory` to see what can still be restored.
     /// </remarks>
     /// <summary>Get the number of backups</summary>
     /// <path>api/2.0/backup/getbackupscount</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Number of backups", typeof(int))]
-    [SwaggerResponse(400, "From date must be less than to date")]
-    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(200, "The number of backups created within the period", typeof(int))]
+    [SwaggerResponse(400, "The start of the period is later than its end")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("getbackupscount")]
     public async Task<int> GetBackupsCountAsync(BackupsCountDto dto)
@@ -651,14 +659,21 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Returns the number of free and paid backups for a period of time. The default is the current calendar month.
+    /// Counts the backups of the current portal created within a period and splits the result into the ones
+    /// covered by the free monthly allowance and the ones charged to the portal wallet, which saves calling
+    /// `GET api/2.0/backup/getbackupscount` twice.
+    /// The `paid` query parameter is accepted but not read here: the answer always carries both figures. The
+    /// period behaves as it does for `GET api/2.0/backup/getbackupscount` - it defaults to the current
+    /// calendar month, both bounds are UTC and inclusive, and a `from` later than `to` is rejected.
+    /// The counts are over history records rather than over stored archives, so they include backups that
+    /// have already been deleted.
     /// </remarks>
-    /// <summary>Get the number of free and paid backups</summary>
+    /// <summary>Get free and paid backup counts</summary>
     /// <path>api/2.0/backup/getbackupscountbypaid</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Number of free and paid backups", typeof(BackupsCountResultDto))]
-    [SwaggerResponse(400, "From date must be less than to date")]
-    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(200, "The number of free and of paid backups created within the period", typeof(BackupsCountResultDto))]
+    [SwaggerResponse(400, "The start of the period is later than its end")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("getbackupscountbypaid")]
     public async Task<BackupsCountResultDto> GetBackupsCountsAsync(BackupsCountDto dto)
@@ -680,13 +695,21 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Returns the backup service state.
+    /// Reports whether the paid backup service is switched on for the current portal. This is a wallet
+    /// setting of the portal, not the health of the backup service or of the worker that runs the jobs, so a
+    /// false answer does not mean backups are unavailable and a true one does not mean they are working.
+    /// While it is on, backups beyond the free monthly allowance are charged to the portal wallet. While it
+    /// is off and that allowance is used up, `POST api/2.0/backup/startbackup` and
+    /// `POST api/2.0/backup/createbackupschedule` answer 402.
+    /// Starting a backup once the allowance is used up switches the service on by itself, as soon as a
+    /// billing session opens for the portal, so this flag can change without anybody editing the portal
+    /// settings.
     /// </remarks>
-    /// <summary>Get the backup service state</summary>
+    /// <summary>Check whether backups are enabled</summary>
     /// <path>api/2.0/backup/getservicestate</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup service state", typeof(BackupServiceStateDto))]
-    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(200, "Whether the paid backup service is switched on for this portal", typeof(BackupServiceStateDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("getservicestate")]
     public async Task<BackupServiceStateDto> GetBackupsServiceStateAsync()
