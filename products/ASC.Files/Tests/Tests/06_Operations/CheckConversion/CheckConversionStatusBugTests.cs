@@ -31,28 +31,42 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Tests.ApiFactories;
+namespace ASC.Files.Tests.Tests._06_Operations.CheckConversion;
 
 /// <summary>
-/// The Files suite's Aspire host: Files itself, plus People for the members a test invites.
+/// <c>GET /api/2.0/files/file/{fileId}/checkconversion</c> - the access-check bug open against
+/// this endpoint. Functional coverage for this endpoint does not exist yet beyond this bug.
 /// </summary>
-public class AspireAppFixture : AspireHostFixture<PortalClients>
+[Trait("Category", "Bug")]
+[Trait("Feature", "Files")]
+public class CheckConversionStatusBugTests(
+    AspireAppFixture fixture)
+    : BaseTest(fixture)
 {
-    // Web.Studio is not called by any test here - it is started because it hosts the only subscriber
-    // that persists audit events, which the file and folder history suites read back.
-    protected override IEnumerable<string> Resources => [ResourceNames.Files, ResourceNames.People, ResourceNames.WebStudio];
-
-    protected override PortalClients CreateClients(PortalContext context)
+    /// <remarks>
+    /// BUG 81825: a room member invited with Editing access gets 403 from checkconversion, even
+    /// though Editing lets them open and edit the file - the endpoint's access check requires more
+    /// than editing rights.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "81825")]
+    public async Task CheckConversionStatus_MemberWithEditingAccess_Succeeds()
     {
-        return new PortalClients(context);
-    }
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest CheckConversion Editor Room");
+        var file = await CreateFile("Autotest CheckConversion Editor File.docx", room.Id);
 
-    protected override async ValueTask WarmUpAsync(PortalClients clients)
-    {
-        await clients.FilesHttpClient.Authenticate(clients.Owner);
+        var member = await InviteMember(EmployeeType.User);
+        await InviteToRoom(room.Id, member, FileShare.Editing);
 
-        // Touch the owner's root folder tree — it is provisioned lazily on first access, so this
-        // warms that path too (the one every test hits right after registration).
-        await clients.FoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await _filesClient.Authenticate(member);
+
+        // Act
+        var status = await _filesOperationsApi.CheckConversionStatusAsync(
+            file.Id, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        status.Should().NotBeNull("Editing access is enough to read the conversion status of a file");
     }
 }

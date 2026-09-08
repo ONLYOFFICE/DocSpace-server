@@ -160,4 +160,89 @@ public class SendEditorNotifyTests(
 
         exception.ErrorCode.Should().Be(404);
     }
+
+    /// <summary>
+    /// BUG 83430: <c>FileStorageService.SendEditorNotifyAsync</c> only returns
+    /// <c>fileSharing.GetSharedInfoShortFileAsync</c> when a mentioned e-mail does not resolve to a
+    /// registered user (or the file is encrypted); for an ordinary mentioned member it returns
+    /// <c>null</c>, so the response is 200 with an empty body instead of carrying the mentioned
+    /// user's name and permissions.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "83430")]
+    public async Task SendEditorNotify_MentionedUserWithRoomAccess_ResponseContainsUserAndPermissions()
+    {
+        var room = await CreateCollaborationRoom("Autotest Notify Room Response Fields");
+        var file = await CreateFile("Autotest Notify File.docx", room.Id);
+        var user = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, user, FileShare.Editing);
+
+        var result = (await _sharingApi.SendEditorNotifyAsync(
+            file.Id, BuildRequest([user.Email], "test"), TestContext.Current.CancellationToken));
+
+        result.Response.Should().ContainSingle();
+        var entry = result.Response[0];
+        entry.User.Should().NotBeNullOrEmpty();
+        entry.Permissions.Should().NotBeNullOrEmpty();
+        entry.IsLink.Should().BeFalse();
+    }
+
+    /// <summary>
+    /// BUG 83430: same missing-response defect - a user invited with <c>Editing</c> access should be
+    /// reported as "Full Access" in the mention response, but the response is empty.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "83430")]
+    public async Task SendEditorNotify_UserWithEditingAccess_ResponseShowsFullAccess()
+    {
+        var room = await CreateCollaborationRoom("Autotest Notify Room Editing");
+        var file = await CreateFile("Autotest Notify File.docx", room.Id);
+        var user = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, user, FileShare.Editing);
+
+        var result = await _sharingApi.SendEditorNotifyAsync(
+            file.Id, BuildRequest([user.Email], "test"), TestContext.Current.CancellationToken);
+
+        result.Response.Should().ContainSingle();
+        result.Response[0].Permissions.Should().Be("Full Access");
+    }
+
+    /// <summary>
+    /// BUG 83430: same missing-response defect - a mentioned user with no access to the room should be
+    /// reported as "Deny Access", but the response is empty.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "83430")]
+    public async Task SendEditorNotify_UserWithoutRoomAccess_ResponseShowsDenyAccess()
+    {
+        var room = await CreateCollaborationRoom("Autotest Notify Room Deny");
+        var file = await CreateFile("Autotest Notify File.docx", room.Id);
+        var outsider = await InviteContact(EmployeeType.User);
+
+        var result = await _sharingApi.SendEditorNotifyAsync(
+            file.Id, BuildRequest([outsider.Email], "test"), TestContext.Current.CancellationToken);
+
+        result.Response.Should().ContainSingle();
+        result.Response[0].Permissions.Should().Be("Deny Access");
+    }
+
+    /// <summary>
+    /// BUG 83430: same missing-response defect - mentioning several e-mails should yield one response
+    /// entry per mentioned user, but the response is empty.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "83430")]
+    public async Task SendEditorNotify_MultipleEmails_ReturnsEntryPerMentionedUser()
+    {
+        var room = await CreateCollaborationRoom("Autotest Notify Room Multi");
+        var file = await CreateFile("Autotest Notify File.docx", room.Id);
+        var user = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, user, FileShare.Editing);
+
+        var result = await _sharingApi.SendEditorNotifyAsync(
+            file.Id, BuildRequest([Owner.Email, user.Email], "test"), TestContext.Current.CancellationToken);
+
+        result.Response.Should().HaveCount(2);
+        result.Count.Should().Be(2);
+    }
 }
