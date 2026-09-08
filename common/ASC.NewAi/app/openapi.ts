@@ -470,6 +470,253 @@ const UNAUTHORIZED_RESPONSE: Json = jsonResponse(
   ERROR_RESPONSE_REF,
 );
 
+// Error statuses this service can actually answer with, and what each one
+// means across the API. `OPERATION_ERRORS` picks the codes per operation and
+// may replace the text where an operation rejects something specific.
+//
+// Every code below was traced to the code that produces it. The single error
+// boundary is `clientError` in `controllers/_helpers.ts`, which forwards the
+// status of a relayed `AiServiceHttpError` / `DocspaceApiHttpError`, lets a
+// 4xx with `expose: true` through, and collapses everything else to 500.
+//
+// Two traps, both of which would make the document untrue in the other
+// direction, so do not "fill them in for symmetry":
+//   - 429 is never produced here. The service has no rate limiter; the status
+//     only appears when a passthrough operation relays a provider's answer.
+//   - 403 is almost never raised locally. For anything resolving an agent
+//     entity, a 403 from the Files API is deliberately turned into a 404
+//     (`storage/docspaceFilesApi.ts`, "don't reveal it"), so those operations
+//     declare 404 and say that it covers both cases.
+const ERROR_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  "400": "The request body or query is malformed, or a required value is missing.",
+  "402":
+    "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched.",
+  "403":
+    "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+  "404":
+    "The referenced object does not exist, or the caller cannot access it - the two are " +
+    "deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+  "413": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+  "429": "Relayed verbatim from the AI provider, which is rate-limiting this portal's key.",
+  "500": "Unhandled failure. The reason is logged server-side and never echoed back.",
+  "502": "The AI provider could not be reached, or answered with a failure of its own.",
+};
+
+// `true` uses the shared text above; a string replaces it for this operation.
+type ErrorSpec = Readonly<Record<string, string | true>>;
+
+// Codes every operation declares:
+//   401 - the global auth gate (`routes.ts`), already emitted separately;
+//   500 - the `clientError` catch-all, reachable on every route;
+//   403 - the AI-feature and guest gates of the .NET service, relayed by any
+//         handler that touches its storage;
+//   413 - the body parser, on every operation that carries a request body.
+const ALWAYS_ERRORS: readonly string[] = ["403", "500"];
+
+// Per-operation codes beyond the four above, keyed by `operationId`. There is
+// deliberately no fallback: an operation missing from this table declares only
+// the always-on set, and the gap stays visible instead of being papered over
+// with a guess (the same principle as `OPERATION_DOCS` and `PARAM_DOCS`).
+const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
+  // AI - chat rounds. Only the two streaming entry points validate and bill
+  // before the stream opens; `send`/`sendCustom` dispatch straight away.
+  aiAiSendWithStream: {
+    "400":
+      "The prompt is empty, more attachments were sent than the limit allows, or no AI " +
+      "profile could be resolved for the requested action.",
+    "402": true,
+    "404": "The `entityId` names a room the caller cannot open, or no live profile is bound to it.",
+  },
+  aiAiSendWithStreamOpenAI: {
+    "400": "The prompt is empty, or no AI profile could be resolved for the requested action.",
+    "402": true,
+  },
+
+  // Assignments - every write validates its action type first; reading all
+  // assignments of a room resolves the room.
+  aiAssignmentsResolveForAction: { "400": "`actionType` is missing." },
+  aiAssignmentsTryResolveForAction: { "400": "`actionType` is missing." },
+  aiAssignmentsAssign: { "400": "`actionType` or `profileId` is missing." },
+  aiAssignmentsUnassign: { "400": "`actionType` is missing." },
+  aiAssignmentsBulkAssign: {
+    "400":
+      "The body is not a map of action type to profile ID, or one of its keys is not a " +
+      "known action type.",
+  },
+  aiAssignmentsGetAssignment: { "400": "`actionType` is missing." },
+  aiAssignmentsGetAllAssignments: { "404": true },
+  aiAssignmentsCascadeProfileDelete: { "400": "`profileId` is missing." },
+
+  // Attachments - `linkToMessage` is the only one that resolves a message.
+  aiAttachmentsSaveFile: { "400": "The attachment payload is malformed." },
+  aiAttachmentsSaveFilesMany: {
+    "400": "`inputs` is not an array, or one of its entries is malformed.",
+  },
+  aiAttachmentsGet: { "400": "The attachment ID is missing." },
+  aiAttachmentsGetMany: { "400": "The list of attachment IDs is malformed." },
+  aiAttachmentsLinkToMessage: {
+    "400": "The attachment or message reference is malformed.",
+    "404": "The message or the attachment does not exist.",
+  },
+
+  // Editor tools.
+  aiEditorToolsCall: { "400": "The tool name is not one this portal exposes." },
+
+  // Export - asynchronous, so the success code is 202 rather than 200.
+  aiExportTextToDocx: {
+    "400": "`title`, `content` or `folderId` is missing.",
+    "413": "The transcript is larger than 15 MB, this route's own parser limit.",
+  },
+
+  // OpenAI passthrough - the provider's answer is relayed as it stands, so any
+  // status it returns can reach the caller, 429 included.
+  aiOpenaiChatCompletions: {
+    "413": "The request body is larger than this route accepts.",
+    "429": true,
+    "502": true,
+  },
+  aiOpenaiImagesGenerations: {
+    "413": "The request body is larger than this route accepts.",
+    "429": true,
+    "502": true,
+  },
+
+  // Preferences.
+  aiPreferencesSetDeepMode: { "400": "`value` is missing or is not a boolean." },
+
+  // Profiles - creating and updating are refused outright while the portal
+  // runs on the AI gateway, and both validate the provider URL.
+  aiProfilesCreate: {
+    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "403": "AI profiles are read-only on this portal because they are managed by the AI gateway.",
+  },
+  aiProfilesUpdate: {
+    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "403": "AI profiles are read-only on this portal because they are managed by the AI gateway.",
+  },
+  aiProfilesDelete: { "400": "The profile ID is missing." },
+  aiProfilesListProviderModels: {
+    "400":
+      "`baseUrl` is missing, points at a private network address, or the provider rejected " +
+      "the supplied API key.",
+    "502": true,
+  },
+  aiProfilesListModels: {
+    "400": "`profileId` is missing, or the provider rejected the profile's API key.",
+    "502": true,
+  },
+  aiProfilesTestConnection: { "400": "`profileId` is missing." },
+  aiProfilesGetById: {
+    "400": "The profile ID is missing.",
+    "404": "No profile has this ID.",
+  },
+
+  // Prompts.
+  aiPromptsDelete: { "400": "The prompt ID is missing." },
+  aiPromptsDeleteFolder: {
+    "400": "The folder ID is missing.",
+    "404": "No prompt folder has this ID.",
+  },
+  aiPromptsGetById: { "400": "The prompt ID is missing." },
+  aiPromptsGetFolderById: { "400": "The folder ID is missing." },
+
+  // Threads - the create pair resolves both the room and a live profile.
+  aiThreadsCreate: {
+    "404":
+      "The `entityId` names a room the caller cannot open, or no live AI profile is bound " +
+      "to it, so there is no model to run the thread against.",
+  },
+  aiThreadsOpenOrCreate: {
+    "404":
+      "The `entityId` names a room the caller cannot open, or no live AI profile is bound to it.",
+  },
+  aiThreadsAppendUserMessage: { "400": "The message is longer than the limit allows." },
+  aiThreadsRename: { "400": "`threadId` or the new title is missing." },
+  aiThreadsDelete: {
+    "400": "`threadId` is missing.",
+    "404": "No thread has this ID.",
+  },
+  aiThreadsClearMessages: { "400": "`threadId` is missing." },
+  aiThreadsRegenerateTitle: { "400": "`threadId` is missing." },
+  aiThreadsGetById: {
+    "400": "`threadId` is missing.",
+    "404": "No thread has this ID.",
+  },
+  aiThreadsGetMessageById: { "400": "`messageId` is missing." },
+  aiThreadsDeleteMessage: { "400": "`messageId` is missing." },
+
+  // Tools - every operation that names a custom server validates the name,
+  // and every one that is room-scoped resolves the room.
+  aiToolsAddCustomServer: {
+    "400": "The server name is missing or is not routable.",
+    "404": true,
+  },
+  aiToolsUpdateCustomServer: {
+    "400": "The server name is missing or is not routable.",
+    "404": true,
+  },
+  aiToolsRemoveCustomServer: { "400": "The server name is missing.", "404": true },
+  aiToolsGetCustomServer: { "400": "The server name is missing." },
+  aiToolsReplaceAllCustomServers: {
+    "400": "The body is not a map of server name to configuration, or a name is not routable.",
+    "404": true,
+  },
+  aiToolsSetDisabled: { "400": "The list of tools to disable is malformed.", "404": true },
+  aiToolsIsToolDisabled: { "400": "`serverType` or `toolName` is missing." },
+  aiToolsSetAllowAlways: { "404": true },
+  aiToolsIsAllowAlways: { "400": "`serverType` or `toolName` is missing." },
+
+  // Web search - the four room-scoped operations resolve the room; the two
+  // that accept a configuration validate its URL; the passthrough pair relays
+  // the provider's answer.
+  aiWebSearchGetActiveConfig: { "404": true },
+  aiWebSearchIsConfigured: { "404": true },
+  aiWebSearchTestConnection: {
+    "400": "The provider URL is missing, malformed, or points at a private network address.",
+  },
+  aiWebSearchConfigure: {
+    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "404": true,
+  },
+  aiWebSearchSetActiveConfig: {
+    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "404": true,
+  },
+  aiWebSearchPassthroughSearch: {
+    "404": "Web search is not configured for this portal.",
+    "429": true,
+    "502": true,
+  },
+  aiWebSearchPassthroughContents: {
+    "404": "Web search is not configured for this portal.",
+    "429": true,
+    "502": true,
+  },
+};
+
+// Success codes that are not 200. `text-to-docx` hands the conversion to the
+// .NET side and answers before it finishes.
+const OPERATION_SUCCESS_CODES: Readonly<Record<string, string>> = {
+  aiExportTextToDocx: "202",
+};
+
+// Assemble the error half of an operation's `responses`. `hasBody` adds the
+// body-parser's 413, which cannot occur on a route that takes no body.
+function errorResponses(operationId: string, hasBody: boolean): Record<string, Json> {
+  const spec = OPERATION_ERRORS[operationId] ?? {};
+  const codes = new Set<string>([...ALWAYS_ERRORS, ...Object.keys(spec)]);
+  if (hasBody) {
+    codes.add("413");
+  }
+  const responses: Record<string, Json> = {};
+  for (const code of [...codes].sort()) {
+    const override = spec[code];
+    const description = typeof override === "string" ? override : ERROR_DESCRIPTIONS[code];
+    responses[code] = jsonResponse(description as string, ERROR_RESPONSE_REF);
+  }
+  return responses;
+}
+
 function capitalize(name: string): string {
   return name.length > 0 ? name.charAt(0).toUpperCase() + name.slice(1) : name;
 }
@@ -589,8 +836,9 @@ function engineOperation(
     summary: humanize(methodName),
     ...(operationDescription(operationId) as object),
     responses: {
-      "200": responseFor(operations, operationId),
+      [OPERATION_SUCCESS_CODES[operationId] ?? "200"]: responseFor(operations, operationId),
       "401": UNAUTHORIZED_RESPONSE,
+      ...errorResponses(operationId, !isGet),
     },
   };
   if (isGet && spec.params && spec.params.length > 0) {
@@ -609,8 +857,12 @@ function customOperation(route: CustomRouteDoc, operations: OperationSchemaLooku
     summary: route.summary,
     ...(operationDescription(route.operationId) as object),
     responses: {
-      "200": responseFor(operations, route.operationId),
+      [OPERATION_SUCCESS_CODES[route.operationId] ?? "200"]: responseFor(
+        operations,
+        route.operationId,
+      ),
       "401": UNAUTHORIZED_RESPONSE,
+      ...errorResponses(route.operationId, route.hasBody === true),
     },
   };
   const params: Json[] = [];
