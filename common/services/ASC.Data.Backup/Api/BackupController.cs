@@ -426,14 +426,27 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Returns the history of the started backup.
+    /// Lists the backups of the current portal whose archive is still present in the storage it was written
+    /// to. The records come back in no particular order, so sort them by `createdOn` if the newest one is
+    /// wanted. `dump` lists the backups of the whole server instead and requires the space access
+    /// permission.
+    /// Despite being a read operation, this prunes the history as it goes: a record whose archive is no
+    /// longer in its storage is deleted outright, so the list can shrink between two calls without anybody
+    /// deleting anything. A record whose storage can no longer be reached at all - a disconnected
+    /// third-party account, for instance - is neither returned nor deleted, so it stays invisible while
+    /// still occupying the history.
+    /// The `id` of a record is the same value as the `taskId` that
+    /// `POST api/2.0/backup/startbackup` returned for it, and it is what
+    /// `DELETE api/2.0/backup/deletebackup/{id}` and the `backupId` of
+    /// `POST api/2.0/backup/startrestore` expect.
     /// </remarks>
     /// <summary>Get the backup history</summary>
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
     [Tags("Backup")]
-    [SwaggerResponse(200, "List of backup history records", typeof(List<BackupHistoryRecord>))]
-    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(200, "The backups whose archive is still stored", typeof(List<BackupHistoryRecord>))]
+    [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory(DumpDto dto)
     {
@@ -445,13 +458,22 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Deletes the backup with the ID specified in the request.
+    /// Deletes one backup: first its history record, then the archive in the storage the record points at.
+    /// The ID is the one listed by `GET api/2.0/backup/getbackuphistory`, which is also the `taskId` the
+    /// backup was started with.
+    /// Deleting a backup of the whole server rather than of one portal additionally requires the space
+    /// access permission. A record that belongs to another portal is left untouched and the call still
+    /// answers true, so the result confirms that the request was accepted rather than that anything was
+    /// deleted - check with `GET api/2.0/backup/getbackuphistory` if it matters.
+    /// The record is removed before the archive, so when the storage can no longer be reached the archive
+    /// stays behind with nothing pointing at it.
     /// </remarks>
     /// <summary>Delete the backup</summary>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(200, "True once the request has been accepted, whether or not a backup was deleted", typeof(bool))]
+    [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
     {
@@ -460,13 +482,21 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Deletes the backup history from the current portal.
+    /// Deletes every backup of the current portal, both the history records and the archives themselves, and
+    /// leaves the backup schedule alone. `dump` clears the backups of the whole server instead and requires
+    /// the space access permission.
+    /// The records are walked one by one and a failure on any of them is swallowed, so the result is always
+    /// true even when some archives could not be deleted: it does not mean the history is now empty. Call
+    /// `GET api/2.0/backup/getbackuphistory` afterwards to see what is left.
+    /// Each record is removed before its archive, so an archive whose deletion fails stays in the storage
+    /// with nothing pointing at it.
     /// </remarks>
     /// <summary>Delete the backup history</summary>
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(200, "True once every record has been walked, whether or not all of them were deleted", typeof(bool))]
+    [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory(DumpDto dto)
     {
