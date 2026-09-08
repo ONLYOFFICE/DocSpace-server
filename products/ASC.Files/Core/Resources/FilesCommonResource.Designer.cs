@@ -590,7 +590,7 @@ namespace ASC.Files.Core.Resources {
                 return ResourceManager.GetString("ErrorMessage_InvalidFolderId", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Invalid provider.
         /// </summary>

@@ -160,7 +160,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Web search.
+        ///   Looks up a localized string similar to AI search.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_search {
             get {

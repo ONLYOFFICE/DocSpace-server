@@ -1476,4 +1476,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>نموذج</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>الشركة</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>تاريخ الإنشاء</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>الفترة</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>المتبقي</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>الإجمالي</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>نشط</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>تنتهي صلاحية الوصول</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>نوع المستخدم</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>معرّف المستخدم</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>المحررون</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>محررو المستندات بصلاحيات كاملة</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>حصة المستخدم</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>مشاهد مباشر</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>مشاهدو المستندات للقراءة فقط</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>خارجي</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>داخلي</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>المتبقي</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>حد الاشتراك</value>
+  </data>
 </root>

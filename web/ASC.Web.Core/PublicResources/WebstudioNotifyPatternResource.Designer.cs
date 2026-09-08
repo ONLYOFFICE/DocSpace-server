@@ -19,7 +19,7 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class WebstudioNotifyPatternResource {
@@ -338,7 +338,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ButtonActivateAiFeatures", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Click here to activate your email address.
         /// </summary>
@@ -465,7 +465,6 @@ namespace ASC.Web.Core.PublicResources {
             }
         }
         
-        
         /// <summary>
         ///   Looks up a localized string similar to Get started.
         /// </summary>
@@ -546,7 +545,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ButtonLogIn", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Open ${LetterLogoText}.
         /// </summary>
@@ -656,17 +655,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_admin_activation_v1 {
-            get {
-                return ResourceManager.GetString("pattern_admin_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to h1.Activate your email for &quot;${__VirtualRootPath}&quot;:&quot;$InviteLink&quot; portal.
         ///
         ///Hello!
@@ -680,6 +668,17 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_activate_email {
             get {
                 return ResourceManager.GetString("pattern_activate_email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+        ///
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-heig [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_admin_activation_v1 {
+            get {
+                return ResourceManager.GetString("pattern_admin_activation_v1", resourceCulture);
             }
         }
         
@@ -867,7 +866,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
-        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesE [rest of string was truncated]&quot;;.
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. F [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_developer_admin_payment_warning_grace_period_activation {
             get {
@@ -933,7 +932,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///We have activated *a grace period of $PaymentDelay‎ days* for you. During this time, access to ${LetterLogoText} is provided for 3 named users* (support and updates are no longer provided).
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates  [rest of string was truncated]&quot;;.
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates included) [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_activation {
             get {
@@ -952,7 +951,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///You are also welcome to contact your dedicated sales manager directly for the license update.
         ///
-        ///For payment questions, contact us at &quot;${__SalesE [rest of string was truncated]&quot;;.
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${_ [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_before_activation {
             get {
@@ -969,7 +968,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$OrangeButton
         ///
-        ///You are also welcome to contact your dedicated sales manager directly for the license [rest of string was truncated]&quot;;.
+        ///You are also welcome to contact your dedicated sales manager directly for the license update.        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -986,7 +985,9 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$OrangeButton
         ///
-        ///You are also welcome to contact your dedicated sales manager directly for the license upd [rest of string was truncated]&quot;;.
+        ///You are also welcome to contact your dedicated sales manager directly for the license update. 
+        ///
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_expiration {
             get {
@@ -1003,7 +1004,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at the mome [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_before_expiration {
             get {
@@ -1020,7 +1021,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at the moment  [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at the moment of the li [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_expiration {
             get {
@@ -1251,9 +1252,7 @@ namespace ASC.Web.Core.PublicResources {
         ///#end
         ///Browser: *$Browser*
         ///
-        ///If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to ${LetterLogoText} for this device.
-        ///
-        ///$ [rest of string was truncated]&quot;;.
+        ///If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to ${LetterLogoText} for [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_password_changed {
             get {
@@ -1325,7 +1324,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;${LetterLogoText} has been &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 1 [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_delete_success_v1 {
             get {
@@ -1640,7 +1639,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-heig [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_activation_v1 {
             get {
@@ -1651,7 +1650,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Get more from ${LetterLogoText} with &lt;span style=&quot;color: #FF6F3D; white-space: nowrap;&quot;&gt;useful add&amp;#8209;ons&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Aria [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_addons_v1 {
             get {
@@ -1662,7 +1661,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Work faster in ${LetterLogoText} with &lt;span style=&quot;color: #FF6F3D; white-space: nowrap;&quot;&gt;AI agents&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_ai_agents_v1 {
             get {
@@ -1673,7 +1672,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Configure your &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-si [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_configure_v1 {
             get {
@@ -1684,7 +1683,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Connect, integrate, and build with &lt;span style=&quot;color: #FF6F3D; white-space: nowrap;&quot;&gt;${LetterLogoText} Docs&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Aria [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_developer_tools_v1 {
             get {
@@ -1695,7 +1694,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover &lt;span style=&quot;color: #FF6F3D;&quot;&gt;4 handy apps&lt;/span&gt; inside your ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_handy_apps_v1 {
             get {
@@ -1706,7 +1705,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_startup_warning_after_half_year_v1 {
             get {
@@ -1739,7 +1738,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_warning_after_half_year_v1 {
             get {
@@ -1804,7 +1803,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21p [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_docspace_invite {
             get {
@@ -1833,9 +1832,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that the grace period of $PaymentDelay‎ days for your ${LetterLogoText} DocSpace is activated.
+        ///Please take into consideration that the grace period of $PaymentDelay‎ days for your ${LetterLogoText} is activated.
         ///
-        ///Make sure to pay your Business subscription before the grace period is due. Thus, you will be able to further use all the benefits of your ${LetterLogoText} DocSpace.
+        ///Make sure to pay your Business subscription before the grace period is due. Thus, you will be able to further use all the benefits of your ${LetterLogoText}.
         ///
         ///$OrangeButton
         ///
@@ -1850,9 +1849,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///We’re reaching out to inform you that your subscription payment will be automatically debited from your account in 3 days.
+        ///We’re reaching out to inform you that your Business subscription payment for the chosen number of admins will be automatically debited in 3 days.
         ///
-        ///To ensure a smooth transaction, please confirm that sufficient funds are available in your payment method.
+        ///To ensure a smooth transaction, please confirm that sufficient funds are available in your &quot;payment method&quot;:&quot;$URL1&quot;.
         ///
         ///If you have any questions or need assistance, feel free to reach out to our &quot;support team&quot;:&quot;${__SupportLink}&quot;.
         ///
@@ -1867,9 +1866,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} DocSpace is over.
+        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} is over.
         ///
-        ///Make sure to pay your Business subscription as soon as possible. Thus, you will be able to use all the benefits of your ${LetterLogoText} DocSpace as before.
+        ///Make sure to pay your Business subscription as soon as possible. Thus, you will be able to use all the benefits of your ${LetterLogoText} as before.
         ///
         ///$OrangeButton
         ///
@@ -1884,9 +1883,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} DocSpace will expire tomorrow.
+        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} will expire tomorrow.
         ///
-        ///Make sure to pay your Business subscription today. Thus, you will be able to further use all the benefits of your ${LetterLogoText} DocSpace.
+        ///Make sure to pay your Business subscription today. Thus, you will be able to further use all the benefits of your ${LetterLogoText}.
         ///
         ///$OrangeButton
         ///
@@ -2113,7 +2112,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to h1.Suspicious login detected
         ///
-        ///We noticed a login to your account *$UserName*, *$UserEmail* on *$Date* in DocSpace: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; that looks different from your usual activity.
+        ///We noticed a login to your account *$UserName*, *$UserEmail* on *$Date* in ${LetterLogoText}: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; that looks different from your usual activity.
         ///
         ///IP: *$IP*
         ///Device: *$Device*
@@ -2154,7 +2153,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///We’re reaching out to inform you that the subscription payment for “$SubscriptionName” will be automatically debited from your &quot;${LetterLogoText} Wallet&quot;:&quot;${__VirtualRootPath}/billing/w [rest of string was truncated]&quot;;.
+        ///We’re reaching out to inform you that the subscription payment for “$SubscriptionName” will be automatically debited from your &quot;${LetterLogoText} Wallet&quot;:&quot;${__VirtualRootPath}/billing/wallet&quot; in 3 days.
+        ///
+        ///To ensure a smooth transaction, please confirm that sufficient funds are available in your &quot;${LetterLogoText} Wallet&quot;:&quot;${__VirtualRootPath}/billing/wallet&quot;.
+        ///
+        ///If you have any questions or need assistance, feel free to reach out to our &quot;support team&quot;:&quot;${__SupportLink}&quot;.
+        ///
+        ///$TrulyYours.
         /// </summary>
         public static string pattern_upcoming_subscription_payment {
             get {
@@ -2296,20 +2301,11 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Your current tariff plan is STARTUP. It is absolutely free and includes:
         ///
-        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-col [rest of string was truncated]&quot;;.
+        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-collapse: collapse; b [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_zoom_welcome {
             get {
                 return ResourceManager.GetString("pattern_zoom_welcome", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
-        /// </summary>
-        public static string subject_admin_activation_v1 {
-            get {
-                return ResourceManager.GetString("subject_admin_activation_v1", resourceCulture);
             }
         }
         
@@ -2319,6 +2315,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_activate_email {
             get {
                 return ResourceManager.GetString("subject_activate_email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
+        /// </summary>
+        public static string subject_admin_activation_v1 {
+            get {
+                return ResourceManager.GetString("subject_admin_activation_v1", resourceCulture);
             }
         }
         
@@ -2755,7 +2760,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
         /// </summary>
         public static string subject_saas_admin_activation_v1 {
             get {
@@ -2899,7 +2904,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace activated.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} activated.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_activation {
             get {
@@ -2908,7 +2913,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upcoming subscription payment for your ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Upcoming subscription payment for your ${LetterLogoText} tariff plan.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_before_activation {
             get {
@@ -2917,7 +2922,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace expired.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} expired.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_expired {
             get {
@@ -2926,7 +2931,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace expires tomorrow.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} expires tomorrow.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_last_day {
             get {
@@ -3052,14 +3057,14 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Suspicious login to your account.
+        ///   Looks up a localized string similar to Suspicious login to your ${LetterLogoText} account.
         /// </summary>
         public static string subject_suspicious_login {
             get {
                 return ResourceManager.GetString("subject_suspicious_login", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText}.
         /// </summary>
