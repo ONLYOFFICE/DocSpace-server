@@ -69,7 +69,10 @@ public class FolderHistoryTests(
         entry!.Initiator.DisplayName.Should().Be(ownerDisplayName);
     }
 
-    [Fact]
+    [Fact(Skip = "Depends on a room index export completing, which the integration-test profile " +
+                 "cannot do - see the same skip on " +
+                 "RoomIndexExportTests.StartRoomIndexExport_IndexingEnabledAfterCreation_CompletesWithoutError. " +
+                 "Skipped for the environment, not for the bug: 81640 itself is untested here.")]
     [Trait("Bug", "81640")]
     public async Task GetFolderHistory_ContainsRoomIndexExportSaved_AfterIndexExportCompletes()
     {
