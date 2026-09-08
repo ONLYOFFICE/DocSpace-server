@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing additional tenant information in a portal.
+/// Whether the tariff behind the extra tenant information is taken from the cache or the billing system.
 /// </summary>
 /// <example>
 /// {
@@ -44,7 +44,8 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class PortalExtraTenantRequestDto
 {
     /// <summary>
-    /// Specifies whether to fetch fresh tariff information.
+    /// Whether the tariff is re-read from the billing system instead of the portal cache. The remote read is slower,
+    /// so ask for it after a payment rather than on every page.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "refresh")]
@@ -52,12 +53,15 @@ public class PortalExtraTenantRequestDto
 }
 
 /// <summary>
-/// The request parameters for the portal path configuration.
+/// The portal-relative path that is turned into an absolute URL.
 /// </summary>
 public class PortalPathRequestDto
 {
     /// <summary>
-    /// The virtual path for the portal resource access.
+    /// The path to resolve. It is taken as it is: an omitted or empty value yields the portal root, a value starting
+    /// with `/` is appended to that root, a value starting with `~/` is resolved against the virtual root, and one
+    /// that already begins with `http://`, `https://` or `mailto:` is handed back unchanged. Nothing checks that the
+    /// path exists or that the caller may open it.
     /// </summary>
     /// <example>/portal/documents</example>
     [FromQuery(Name = "virtualPath")]
@@ -65,12 +69,14 @@ public class PortalPathRequestDto
 }
 
 /// <summary>
-/// The request parameters for managing the portal thumbnail generation.
+/// The page a preview image is requested for.
 /// </summary>
 public class PortalThumbnailRequestDto
 {
     /// <summary>
-    /// The URL of the content to generate a thumbnail from.
+    /// The absolute address of the page to picture. It is passed on to the thumbnail service the installation is
+    /// configured with, so a page that service cannot reach yields no image; HTML-escaped ampersands are restored
+    /// before the address is used.
     /// </summary>
     /// <example>https://example.com/image.png</example>
     [FromQuery(Name = "url")]
@@ -78,12 +84,13 @@ public class PortalThumbnailRequestDto
 }
 
 /// <summary>
-/// The request parameters for the mobile application configuration of the portal.
+/// Which mobile application the calling user has installed.
 /// </summary>
 public class PortalMobileAppRequestDto
 {
     /// <summary>
-    /// The target mobile platform or application type.
+    /// The application that was installed. The installation is recorded against the calling user address, so it
+    /// tells the portal which app that person uses rather than counting devices.
     /// </summary>
     /// <example>IosProjects</example>
     [FromQuery(Name = "type")]
@@ -91,12 +98,14 @@ public class PortalMobileAppRequestDto
 }
 
 /// <summary>
-/// The request parameters for the portal security and configuration settings.
+/// Whether the portal settings answer carries the client-side password hashing parameters.
 /// </summary>
 public class PortalSettingsRequestDto
 {
     /// <summary>
-    /// Specifies whether to include the password hashing configuration in the response.
+    /// Whether the answer also carries the salt, iteration count and hash size a client needs to hash a password
+    /// before sending it to the authentication operations. They are included for an anonymous caller anyway; for a
+    /// signed-in one they are left out unless this is set.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "withpassword")]

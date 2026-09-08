@@ -44,37 +44,42 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class AmazonS3RegionDto
 {
     /// <summary>
-    /// The region system name.
+    /// The region code to send as the region value when configuring an Amazon S3 storage or backup target. It is
+    /// the one field of this object that is an argument elsewhere; a code the server does not list here cannot be
+    /// reached, so pick one from this list rather than typing it.
     /// </summary>
     /// <example>eu-west-1</example>
     public string SystemName { get; set; }
 
     /// <summary>
-    /// The human-readable region name.
+    /// The region name as Amazon writes it, in English regardless of the portal language, for showing in a
+    /// picker next to `systemName`.
     /// </summary>
     /// <example>Europe (Ireland)</example>
     public string DisplayName { get; set; }
 
     /// <summary>
-    /// The name of the AWS partition the region belongs to.
+    /// The Amazon partition the region sits in - the ordinary commercial cloud, the Chinese one, or a government
+    /// one. Regions of different partitions are not reachable with the same credentials.
     /// </summary>
     /// <example>aws</example>
     public string PartitionName { get; set; }
 
     /// <summary>
-    /// The DNS suffix of the partition.
+    /// The domain the partition's service host names end in, which differs from partition to partition.
     /// </summary>
     /// <example>amazonaws.com</example>
     public string PartitionDnsSuffix { get; set; }
 
     /// <summary>
-    /// The pattern the region names of the partition match.
+    /// The pattern every region code of this partition matches, for validating a code before sending it.
     /// </summary>
     /// <example>^(us|eu|ap|sa|ca|me|af|il|mx)\-\w+\-\d+$</example>
     public string PartitionRegionRegex { get; set; }
 
     /// <summary>
-    /// The template the partition builds service endpoint hostnames from.
+    /// How a service host name of the partition is assembled, with `{service}`, `{region}` and `{dnsSuffix}` to
+    /// be filled in. It is reference material - the portal builds its own endpoints from `systemName`.
     /// </summary>
     /// <example>{service}.{region}.{dnsSuffix}</example>
     public string HostnameTemplate { get; set; }

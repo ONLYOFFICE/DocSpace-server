@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing the tenant storage quota settings in a multi-tenant system.
+/// The storage limit set on one tenant of a self-hosted installation.
 /// </summary>
 /// <example>
 /// {
@@ -44,13 +44,15 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class TenantQuotaSettingsRequestsDto
 {
     /// <summary>
-    /// The ID of the tenant whose quota is being configured.
+    /// The tenant the limit applies to, by tenant ID. Only a self-hosted installation has more than one, which is
+    /// why the operation is refused on SaaS.
     /// </summary>
     /// <example>1</example>
     public required int TenantId { get; set; }
 
     /// <summary>
-    /// The storage quota limit in bytes allocated to the tenant.
+    /// The limit in bytes. A negative value is not a smaller limit but the absence of one: it removes whatever limit
+    /// the tenant had. The value is a ceiling on stored data and says nothing about how much of it is already used.
     /// </summary>
     /// <example>1048576</example>
     public long Quota { get; set; }

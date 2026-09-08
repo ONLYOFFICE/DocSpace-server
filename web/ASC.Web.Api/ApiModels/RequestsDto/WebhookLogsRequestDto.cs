@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for querying the webhook delivery logs with various filter criteria.
+/// The filters that narrow the webhook delivery log, and the window of the page returned from it.
 /// </summary>
 /// <example>
 /// {
@@ -53,63 +53,71 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class WebhookLogsRequestDto
 {
     /// <summary>
-    /// The delivery start time for filtering webhook logs.
+    /// The earliest delivery moment a record may carry. Records of attempts still on their way have no delivery
+    /// moment yet and fall outside any bound set here.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "deliveryFrom")]
     public DateTime? DeliveryFrom { get; set; }
 
     /// <summary>
-    /// The delivery end time for filtering webhook logs.
+    /// The latest delivery moment a record may carry. All the filters combine with AND, so it narrows whatever the
+    /// other ones already kept.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "deliveryTo")]
     public DateTime? DeliveryTo { get; set; }
 
     /// <summary>
-    /// The destination URL where webhooks are delivered.
+    /// The subscription target address, matched in full rather than as a prefix. Filtering by `configId` is the
+    /// reliable way to pick one subscription, since several may share an address.
     /// </summary>
     /// <example>https://example.com/webhook</example>
     [FromQuery(Name = "hookUri")]
     public string HookUri { get; set; }
 
     /// <summary>
-    /// The webhook configuration identifier.
+    /// The subscription whose deliveries are kept, by the `id` that `GET api/2.0/settings/webhook` reports.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "configId")]
     public int? ConfigId { get; set; }
 
     /// <summary>
-    /// The unique identifier of the event that triggered the webhook.
+    /// A single delivery record, by its own identifier. It narrows the answer to that one record, which is how a
+    /// client follows up a retry it queued earlier.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "eventId")]
     public int? EventId { get; set; }
 
     /// <summary>
-    /// The status of the webhook delivery group.
+    /// The classes of answered status to keep, as a bitmask; 0 keeps every record whatever the target answered.
     /// </summary>
     /// <example>NotSent</example>
     [FromQuery(Name = "groupStatus")]
     public WebhookGroupStatus? GroupStatus { get; set; }
 
     /// <summary>
-    /// The identifier of the user associated with the webhook event.
+    /// The member whose subscriptions the records belong to, by portal user ID - who created the subscription, not
+    /// who caused the event. For a caller who is not a DocSpace administrator it is overwritten with the caller own
+    /// ID, so such a caller never sees another member deliveries whatever is sent here.
     /// </summary>
     /// <example>{}</example>
     [FromQuery(Name = "userId")]
     public Guid? UserId { get; set; }
 
     /// <summary>
-    /// The type of event that triggered the webhook.
+    /// The single event kind to keep; 0 keeps every kind. It names one trigger rather than a mask of several, unlike
+    /// the `triggers` a subscription is created with.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "trigger")]
     public WebhookTrigger? Trigger { get; set; }
 
     /// <summary>
-    /// The maximum number of webhook log records to return in the query response.
+    /// How many records one page may hold. The maximum is also the default, so a client that wants shorter pages has
+    /// to ask for them; the number of records matching the filter comes back as `total` beside the page.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "count")]
@@ -117,8 +125,8 @@ public class WebhookLogsRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// Specifies the starting index for retrieving webhook logs.
-    /// Used for pagination in the webhook delivery log queries.
+    /// How many matching records to skip before the page begins, counting from the newest. Advance it by `count` to
+    /// walk back through the log.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "startIndex")]
