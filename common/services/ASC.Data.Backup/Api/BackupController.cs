@@ -71,13 +71,22 @@ public class BackupController(
     private Guid CurrentUserId => authContext.CurrentAccount.ID;
 
     /// <remarks>
-    /// Returns the backup schedule of the current portal.
+    /// Returns the backup schedule of the current portal. A portal keeps at most one schedule, so no ID is
+    /// passed in, and when none is set the call still answers 200 with a body that carries no `response`
+    /// member at all. `dump` asks for the schedule of the whole server instead of the one of this portal and
+    /// requires the space access permission.
+    /// The answer cannot be sent back unchanged: `storageParams` is returned as an object keyed by parameter
+    /// name, while `POST api/2.0/backup/createbackupschedule` expects an array of key and value pairs. For
+    /// every storage type except `ThirdPartyConsumer` the `folderId` key of the answer is built from the
+    /// stored base path rather than read back from the saved parameters, and a schedule that keeps an
+    /// unlimited number of copies reports `backupsStored` as null instead of 0.
     /// </remarks>
     /// <summary>Get the backup schedule</summary>
     /// <path>api/2.0/backup/getbackupschedule</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup schedule", typeof(ScheduleDto))]
-    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(200, "The backup schedule, or an empty payload when none is set", typeof(ScheduleDto))]
+    [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("getbackupschedule")]
     public async Task<ScheduleDto> GetBackupSchedule(DumpDto dto)
     {
@@ -89,16 +98,33 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Creates the backup schedule of the current portal with the parameters specified in the request.
+    /// Sets the backup schedule of the current portal. A portal keeps at most one schedule, so this replaces
+    /// the existing one rather than adding a second, and `dump` writes the schedule of the whole server
+    /// instead, which requires the space access permission and works on a standalone installation only.
+    /// Scheduled backups have to be allowed by the pricing plan of a portal that is not a standalone
+    /// installation.
+    /// `cronParams` is a period plus a time rather than a cron string: `hour` is the hour of the day from 0
+    /// to 23, and `day` has to be given for `EveryWeek`, where it is the day of the week from 1 to 7 with
+    /// Sunday as 1, and for `EveryMonth`, where it is the day of the month from 1 to 31. It is left out for
+    /// `EveryDay`, and because an omitted `day` is stored as 0, which neither period accepts, a weekly or
+    /// monthly schedule sent without it fails instead of falling back to a default.
+    /// `backupsStored` is the number of scheduled copies to keep, from 1 to 30, and it defaults to 1. Older
+    /// copies are removed by a background cleaner, and only the ones this schedule created: archives made by
+    /// `POST api/2.0/backup/startbackup` are not counted and not removed. A portal whose subscription stops
+    /// covering backups has its schedule deleted by the scheduler, not suspended, and its administrators are
+    /// notified that the scheduled backup failed.
+    /// The keys expected in `storageParams` are the same as for `POST api/2.0/backup/startbackup`, except
+    /// that they are sent as an array of key and value pairs here and returned as an object by
+    /// `GET api/2.0/backup/getbackupschedule`.
     /// </remarks>
     /// <summary>Create the backup schedule</summary>
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(400, "BackupStored must be 1 - 30 or backup can not start as dump")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "Access denied")]
-    [SwaggerResponse(404, "The required folder was not found")]
+    [SwaggerResponse(200, "True if the schedule was saved", typeof(bool))]
+    [SwaggerResponse(400, "The number of the stored copies is outside 1 - 30, or a dump was requested on a portal that is not a standalone installation")]
+    [SwaggerResponse(402, "The portal subscription does not cover scheduled backups, has expired or has not been paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "The target folder was not found")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupSchedule(BackupScheduleDto inDto)
     {
@@ -138,13 +164,21 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Deletes the backup schedule of the current portal.
+    /// Deletes the backup schedule of the current portal, which stops the scheduled backups; `dump` deletes
+    /// the schedule of the whole server instead and requires the space access permission. The archives the
+    /// schedule has already produced are kept and stay listed by
+    /// `GET api/2.0/backup/getbackuphistory` - delete them through
+    /// `DELETE api/2.0/backup/deletebackup/{id}` if they are no longer wanted.
+    /// The result is always true, including when there was no schedule to delete, so it confirms that the
+    /// portal now has none rather than that anything was removed. The deletion is written to the audit trail
+    /// either way.
     /// </remarks>
     /// <summary>Delete the backup schedule</summary>
     /// <path>api/2.0/backup/deletebackupschedule</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(200, "True once the portal has no backup schedule, whether or not one had to be deleted", typeof(bool))]
+    [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule(DumpDto dto)
     {
