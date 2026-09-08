@@ -34,37 +34,45 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// The backup restoring parameters.
+/// The request parameters for restoring a portal from a backup.
 /// </summary>
 public class BackupRestoreDto
 {
     /// <summary>
-    /// The backup ID.
+    /// The ID of the backup to restore from, as listed by `GET api/2.0/backup/getbackuphistory`. Send
+    /// anything that is not a GUID to restore from a file given by `storageParams` instead; an all-zero GUID
+    /// selects neither, because it parses as a GUID and then matches no record.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>5f4b2c1a-9d3e-4f8a-b7c6-1e2d3f4a5b6c</example>
     public required string BackupId { get; set; }
 
     /// <summary>
-    /// The backup storage type.
+    /// The storage the archive is read from. It defaults to `Documents` and is only used when `backupId` is
+    /// not a GUID, because a known backup carries the storage of its own record.
     /// </summary>
     /// <example>Documents</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
-    /// The backup storage parameters.
+    /// The location of the archive, as an array of key and value pairs. The key read here is `filePath` -
+    /// not the `folderId` a backup is started with - and it holds a file ID for `Documents`, a
+    /// provider-specific file ID for `ThridpartyDocuments` and a path on the server for `Local`. It is only
+    /// used when `backupId` is not a GUID.
     /// </summary>
-    /// <example>[{"key": "path", "value": "/backup"}]</example>
+    /// <example>[{"key": "filePath", "value": "1234"}]</example>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
-    /// Notifies users about the portal restoring process or not.
+    /// Chooses who is emailed when the restoring starts and when it finishes: every active user of the
+    /// portal when true, and its owner alone when false. Mail goes only to accounts that have been
+    /// activated, so this decides the audience rather than whether anybody is notified at all.
     /// </summary>
     /// <example>true</example>
     public bool Notify { get; set; }
 
     /// <summary>
-    /// Specifies if a dump will be created or not.
+    /// Restores the whole server rather than this one portal. It requires the space access permission.
     /// </summary>
     /// <example>false</example>
     public bool Dump { get; set; }
