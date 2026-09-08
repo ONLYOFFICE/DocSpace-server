@@ -345,25 +345,34 @@ surgical and knowing it. It also catches the opposite case early: a one-line int
 lines of document is telling you the edit reached further than you thought.
 
 Then re-lint. **The command lives in the header comment of `SDK/.spectral.yaml` — read it and run it
-verbatim** rather than reconstructing it. That header is the single source of truth for the document
-list, the three output formats and the severity flag, and it records why each part is there. Four things
-it says that decide whether a run is usable at all:
+verbatim** rather than reconstructing it. It is one line, and it is two programs: spectral writes
+`report.md` and `report.json`, then `spectral-reporter` renders `report.html` from the json. The header
+is the single source of truth for the document list, the output formats and the severity flag, and it
+records why each part is there. Five things it says that decide whether a run is usable at all:
 
-- Call `spectral.cmd`, not `spectral`. On Windows the bare name resolves to npm's unsigned
-  `spectral.ps1` shim, which a restrictive PowerShell execution policy refuses to run; the header
-  records the reasoning.
+- Call `spectral.cmd` and `spectral-reporter.cmd`, not the bare names. On Windows those resolve to
+  npm's unsigned `.ps1` shims, which a restrictive PowerShell execution policy refuses to run; the
+  header records the reasoning.
 - `lint/` must already exist. `--output` does not create directories.
 - The documents are listed **explicitly**, never as a glob — a `json/*_2.0.json` glob picks up files
   that nothing references.
-- `--fail-severity hint` is not optional. The markdown formatter prints only findings at or below
-  failSeverity and the CLI default is `error`, so without the flag `report.md` collapses to a handful
-  of errors while `report.html` stays complete — a difference easy to misread as progress.
+- Both programs must be installed globally: `npm i -g @stoplight/spectral-cli @api-common/spectral-reporter`.
+  Without the second one the line half-runs — the two spectral reports appear and the render fails with
+  "'spectral-reporter' is not recognized". Do not reach for `npx` instead; it stops to ask permission
+  to download the package.
+- `--fail-severity hint` is not optional, and it governs all three artefacts. The markdown formatter
+  prints only findings at or below failSeverity and the CLI default is `error`; the json obeys the same
+  flag, and the html can only show what the json carries. Without it every artefact collapses to a
+  handful of errors — which reads exactly like progress and is not.
 
 Exit code 1 is the normal outcome, since `--fail-severity hint` makes any finding at all produce it.
-Read it as "there are findings", never as "the run failed". With both `--output.*` flags set the run
-prints nothing at all on success — silence is expected, not a sign it did not run, and the reports'
-timestamps are what tell you it did. Do not read the exit code through a pipe either: `| tail` hands
-you tail's status, not spectral's.
+Read it as "there are findings", never as "the run failed". With both `--output.*` flags set spectral
+prints nothing at all on success — its silence is expected, not a sign it did not run. The only line the
+command does print is the reporter's `✓ Wrote <path> (N findings)`, and that N is a free cross-check on
+`count.py`'s TOTAL; beyond it, the reports' timestamps are what tell you the run happened. Do not read the exit code through a pipe either: `| tail` hands
+you tail's status, not spectral's — and because the header joins the two programs with `;`, the code
+left behind at the end of the line is the reporter's. Neither number tells you anything about the
+findings; the reports do.
 
 Finally, confirm the reports are newer than every input document before drawing any conclusion from
 them. There is precedent for a report describing a tree state that no longer existed:
@@ -373,11 +382,10 @@ ls -la --time-style=+%Y-%m-%d_%H:%M json/*_2.0.json lint/report.md
 ```
 
 The header command writes three files and each has one job: `report.md` is what step 8 greps and
-diffs, `report.html` is its complete twin, and `report.json` is what `count.py` aggregates. None of
-them is meant for showing to anyone. When the ask is to *look at* the findings rather than to close
-one, render a fourth artefact from the json with `@api-common/spectral-reporter`, written out under
-**Tool traps** in `references/project-facts.md`. That is an addition, never a replacement: step 8's
-checks are written against the three above, so produce those as usual.
+diffs, `report.json` is what `count.py` aggregates — it carries the rule code, path and severity as
+data instead of as rendered table cells — and `report.html` is the one to show to a person, which is
+what to point at when the ask is to *look at* the findings rather than to close one. Step 8's checks
+are written against the first two, because those are the two that carry rule names.
 
 ## 8. Prove the target finding is gone
 
@@ -400,28 +408,30 @@ committed content and `git diff` shows nothing. That is not a sign you changed n
 a reason to undo a correct fix. The report and the regenerated document are the evidence, and neither
 cares what happens to be committed.
 
-1. **The indicator — the rule is absent from the report, by name in markdown and by message text in
-   html.**
+1. **The indicator — the rule is absent from both machine-readable reports, by name.**
 
    ```bash
    grep -c "<rule-name>" lint/report.md
-   grep -c "<the rule's message text>" lint/report.html
+   grep -c '"code": *"<rule-name>"' lint/report.json
    ```
 
-   Both must be 0, and it has to be two different greps because the two formatters emit different
-   things. The html formatter writes only position, severity and message — **no rule names at all** —
-   so grepping html by rule name returns 0 for every rule, fixed or live. It can never fail, and
-   passing it proves nothing.
+   Both must be 0, and it has to be two greps because the json is the one written against data rather
+   than against a rendering: it carries the rule code on every finding, so a name that survives there
+   survives whatever the markdown table happened to do with it. Do not grep `report.html` for either —
+   it is the reporter's own markup, aggregated by rule and file, and it is derived from the same json,
+   so it can neither confirm nor contradict what the json already said.
 
-   Checking html at all still matters: the markdown formatter obeys `--fail-severity` and the html one
-   ignores it, so a finding present in html and absent from markdown means the markdown was filtered,
-   not that the finding was fixed. Cross-check the html tally, which is exactly one match per finding:
+   That leaves one failure mode the rule-level greps cannot see. Both formats obey `--fail-severity`,
+   so a run that lost the flag filters both at once and leaves two agreeing, equally wrong reports.
+   The cross-check for that is the severity split:
 
    ```bash
-   grep -o 'class="severity' lint/report.html | wc -l
+   python ../../../../.claude/skills/openapi-lint-fix/count.py lint/report.json
    ```
 
-   (No closing quote in the pattern — the class is `severity clr-warning` / `severity clr-error`.)
+   Its split must still show findings below `error`. A report that is all errors is the signature of a
+   run without `--fail-severity hint`, not of a clean tree — re-lint with the header command verbatim
+   before reading anything into it.
 
 2. **Guard — the documents themselves carry the fixed construct.** This is the check that separates "fixed"
    from "no longer evaluated", and the only one written against reality rather than against the
@@ -464,8 +474,8 @@ cares what happens to be committed.
 
 **If the target finding is still in the fresh report, the pass ends here.** So it does when a guard
 shows that the absence was not a fix: the document does not carry the fixed construct (guard 2), the
-arithmetic does not add up (guard 3), or the html still lists a finding the markdown dropped (guard
-1's cross-check). Say which check failed and what it showed, record the pass as step 9 describes, and
+arithmetic does not add up (guard 3), or the severity split shows the run was filtered rather than
+clean (guard 1's cross-check). Say which check failed and what it showed, record the pass as step 9 describes, and
 hand it to the user. Do not adjust the edit and regenerate again in the same session.
 
 Guard 4 is the exception, and the distinction is worth being precise about. A *new* rule appearing in
