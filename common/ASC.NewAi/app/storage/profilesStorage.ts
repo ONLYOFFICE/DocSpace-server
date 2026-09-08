@@ -31,14 +31,17 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { aiService, AiServiceHttpError, aiServiceBaseUrl } from "./httpClient.js";
-import { isObject, getString, getNumber, getBoolean } from "../narrow.js";
+import { aiService, AiServiceHttpError, aiServiceBaseUrl, withTimeout } from "./httpClient.js";
+import { isObject, getString, getNumber, getBoolean, getArray } from "../narrow.js";
 import logger from "../log.js";
 import {
+  countUpstreamCall,
+  countUpstreamRead,
   getForwardedHeaders,
   shouldForwardHeadersToProvider,
 } from "../requestContext.js";
-import type { ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
+import { CapabilitiesUI } from "@onlyoffice/ai-chat/core";
+import type { Model, ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
 import {
   invalidateChatContext,
   readChatContext,
@@ -276,5 +279,91 @@ export class HttpProfilesStorage implements ProfilesStorage {
       }
       throw err;
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// ONLYOFFICE gateway model catalog
+
+const lowered = (values: unknown[] | undefined): string[] =>
+  (values ?? []).filter((v): v is string => typeof v === "string").map((v) => v.toLowerCase());
+
+// Mirror of the C# ProfileStorageService.MapCapabilities/HasCapability
+// mapping (products/ASC.AI), which builds GET /ai/profiles/list from this
+// same catalog: type chat/image -> Chat/Image, an "image" input modality ->
+// Vision, an "image" output modality -> Image, "tools" -> Tools, "reasoning"
+// -> the reasoning flag. Embedding models are skipped there too.
+function mapGatewayModel(raw: unknown): Model | undefined {
+  if (!isObject(raw)) {
+    return undefined;
+  }
+  const id = getString(raw, "id");
+  if (id === undefined) {
+    return undefined;
+  }
+  const type = getString(raw, "type")?.toLowerCase();
+  if (type === "embedding") {
+    return undefined;
+  }
+  const capabilityNames = lowered(getArray(raw, "capabilities"));
+  let capabilities: number = CapabilitiesUI.None;
+  if (type === "chat") {
+    capabilities |= CapabilitiesUI.Chat;
+  } else if (type === "image") {
+    capabilities |= CapabilitiesUI.Image;
+  }
+  if (lowered(getArray(raw, "input_modalities")).includes("image")) {
+    capabilities |= CapabilitiesUI.Vision;
+  }
+  if (lowered(getArray(raw, "output_modalities")).includes("image")) {
+    capabilities |= CapabilitiesUI.Image;
+  }
+  if (capabilityNames.includes("tools")) {
+    capabilities |= CapabilitiesUI.Tools;
+  }
+  return {
+    id,
+    name: getString(raw, "alias") ?? id,
+    provider: "onlyoffice",
+    reasoning: capabilityNames.includes("reasoning"),
+    capabilities,
+  };
+}
+
+/**
+ * List the ONLYOFFICE gateway model catalog through the portal's gateway
+ * proxy (`/api/2.0/ai/gateway/models` — the C# side signs the gateway key
+ * and swaps in `customer/models` for paid portals).
+ *
+ * The onlyoffice provider's own OpenAI-compatible `/models` listing carries
+ * bare ids only, so the engine stamps every model with the broad default
+ * capability mask — while `GET /ai/profiles/list` synthesizes its answer
+ * from this rich catalog. Serving `list-provider-models` from the same
+ * catalog keeps the two methods consistent (Bug 83113).
+ */
+export async function listOnlyofficeGatewayModels(signal?: AbortSignal): Promise<Model[]> {
+  const url = `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}/models`;
+  countUpstreamRead();
+  countUpstreamCall("GET");
+  const { signal: reqSignal, cancel } = withTimeout(signal);
+  try {
+    const res = await fetch(url, {
+      headers: { ...getForwardedHeaders() },
+      signal: reqSignal,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new AiServiceHttpError(res.status, res.statusText, text, url);
+    }
+    const json: unknown = await res.json();
+    const data = isObject(json) ? getArray(json, "data") : undefined;
+    if (!data) {
+      throw new Error(`gateway models listing returned no data array (${url})`);
+    }
+    return data
+      .map(mapGatewayModel)
+      .filter((m): m is Model => m !== undefined);
+  } finally {
+    cancel();
   }
 }
