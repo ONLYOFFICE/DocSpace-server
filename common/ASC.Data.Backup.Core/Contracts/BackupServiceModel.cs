@@ -34,7 +34,11 @@
 namespace ASC.Data.Backup.Contracts;
 
 /// <summary>
-/// The backup storage type.
+/// Where a backup archive is stored. The value decides which keys the storage parameters of an operation
+/// have to carry: `Documents` and `ThridpartyDocuments` need a folder ID, `Local` needs a file path and
+/// works on a standalone installation only, `ThirdPartyConsumer` needs the module of the consumer plus its
+/// settings, and `DataStore` needs none. `CustomCloud` is not implemented and no storage can be built for
+/// it.
 /// </summary>
 public enum BackupStorageType
 {

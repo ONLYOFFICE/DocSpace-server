@@ -48,7 +48,15 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace ASC.Data.Backup.Controllers;
 
 /// <remarks>
-/// Backup API.
+/// Backs a portal up and restores it: backups can be started by hand or put on a schedule, they are listed
+/// and deleted through a history, and the counters report how many of them the free monthly allowance has
+/// covered. Every operation here needs the portal settings permission, and each one that accepts a `dump`
+/// parameter switches from the current portal to the whole server, which additionally needs the space access
+/// permission and works on a standalone installation only.
+/// Backing up and restoring are asynchronous: the operation that starts one queues a job and returns a task
+/// ID, and a separate worker service does the work, so the result has to be polled. While a portal is being
+/// restored every operation of this API answers 403 except
+/// `GET api/2.0/backup/getrestoreprogress`, which is also the only one that needs no authorization.
 /// </remarks>
 /// <name>backup</name>
 [Scope]

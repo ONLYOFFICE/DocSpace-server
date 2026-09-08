@@ -34,25 +34,30 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// The backup parameters.
+/// The request parameters for starting a backup.
 /// </summary>
 public class BackupDto
 {
     /// <summary>
-    /// The backup storage type.
+    /// The storage the archive is written to. It defaults to `Documents`, and it decides which keys
+    /// `storageParams` has to carry.
     /// </summary>
     /// <example>Documents</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
-    /// The backup storage parameters.
+    /// The settings of the chosen storage, as an array of key and value pairs. `Documents` needs an integer
+    /// `folderId`, `ThridpartyDocuments` a provider-specific non-integer `folderId`, `Local` a `filePath`,
+    /// `ThirdPartyConsumer` a `module` plus the settings of that consumer, and `DataStore` none. The
+    /// `subdir` key is added by the operation itself and must not be sent.
     /// </summary>
-    /// <example>[{"key": "path", "value": "/backup"}]</example>
+    /// <example>[{"key": "folderId", "value": "1234"}]</example>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
-    /// Specifies if a dump will be created or not.
+    /// Backs up the whole server rather than this one portal. It requires the space access permission and
+    /// works on a standalone installation only.
     /// </summary>
     /// <example>false</example>
     public bool Dump { get; set; }
