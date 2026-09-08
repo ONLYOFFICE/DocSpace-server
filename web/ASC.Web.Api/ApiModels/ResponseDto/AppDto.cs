@@ -34,24 +34,29 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The portal application information.
+/// One feature module of the portal: whether it is switched on here, and the settings stored for it.
 /// </summary>
 public class AppDto
 {
     /// <summary>
-    /// The application identifier (stable slug). The client maps this to its title, description and icon.
+    /// The application's stable key, declared in the installation configuration - `ai-rooms`, `docs-cloud` and
+    /// the like. It is what every other operation of this group addresses an application by, and a client maps it
+    /// to a title and an icon of its own; the portal ships no display name for it.
     /// </summary>
     /// <example>ai-rooms</example>
     public string Id { get; set; }
 
     /// <summary>
-    /// Whether the application is enabled for the current tenant.
+    /// Whether the application is switched on for this portal. It is the portal's own flag where one has been
+    /// saved, and the default the installation configuration gives the application otherwise.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Application-specific settings as a JSON document, or null if no overrides exist.
+    /// The settings document saved for this portal, stored and returned verbatim - the portal never looks inside
+    /// it, and only the application knows its shape. It is empty while the portal has saved none, which means the
+    /// application falls back to its own defaults, and it also survives the application being switched off.
     /// </summary>
     /// <example>{"theme":"dark","language":"en"}</example>
     public JsonElement? Settings { get; set; }
