@@ -37,8 +37,9 @@ import type { Response } from "express";
 import logger from "../log.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
-import { safeGetAgentEntity } from "../storage/docspaceFilesApi.js";
-import type { AgentEntityMeta } from "../storage/docspaceFilesApi.js";
+import { safeResolveSource } from "../storage/docspaceFilesApi.js";
+import type { SourceKind, SourceMeta } from "../storage/docspaceFilesApi.js";
+import { sourceMetadata } from "../providers/onlyofficeSourceProvider.js";
 import { asyncHandler, startStreamHeartbeat } from "./_helpers.js";
 import { isObject } from "../narrow.js";
 
@@ -61,13 +62,20 @@ import { isObject } from "../narrow.js";
 // `models` / `embeddings` / `responses` never travel this way: model
 // listing bypasses `externalFetch` in the plugin, `useResponsesApi` is
 // dropped for external profiles, and embeddings have no call site.
-// Query parameters the plugin uses to describe the round: the host entity
-// (agent room) it is chatting with, and the conversation the round belongs to.
-// Both are consumed here and never forwarded — the rest of the query string is
+// Query parameters the plugin uses to describe the round: the DocSpace entry
+// it runs for (`entityId`, plus `entityKind` = `folder` | `file` saying which
+// table the id lives in — file and folder ids are independent and may
+// collide; `folder` when absent), and the conversation the round belongs to.
+// All are consumed here and never forwarded — the rest of the query string is
 // relayed to the provider verbatim, and an unknown parameter is at best
 // ignored and at worst a 400.
 const ENTITY_ID_PARAM = "entityId";
+const ENTITY_KIND_PARAM = "entityKind";
 const SESSION_ID_PARAM = "sessionId";
+
+function sourceKindOf(value: string | null): SourceKind {
+  return value === "file" ? "file" : "folder";
+}
 
 // The conversation-correlation header the ONLYOFFICE route reads, and the
 // Anthropic-style cache breakpoint the Claude backend behind it looks for.
@@ -162,10 +170,10 @@ function markCacheBreakpoints(messages: unknown[]): unknown[] {
 //
 // The body is deliberately never deserialized on this path (vision/OCR data
 // URLs reach megabytes, and the wire format is owned by the plugin's SDK on
-// one end and the provider on the other), so the pair is inserted right after
-// the opening brace and every other byte survives untouched. Inserting first
-// also means a `metadata` the plugin sent itself parses last and wins, on
-// every JSON parser that takes the last duplicate key (Node, System.Text.Json).
+// one end and the provider on the other), so the object is inserted right
+// after the opening brace and every other byte survives untouched. Inserting
+// first also means a `metadata` the plugin sent itself parses last and wins,
+// on every JSON parser that takes the last duplicate key (Node, System.Text.Json).
 //
 // Returns the body unchanged when it is not a JSON object — an empty body, a
 // top-level array, anything non-JSON — so a malformed request still reaches
@@ -173,19 +181,13 @@ function markCacheBreakpoints(messages: unknown[]): unknown[] {
 function spliceMetadata(
   body: Buffer,
   contentType: string | undefined,
-  entity: AgentEntityMeta,
+  source: SourceMeta | undefined,
 ): Buffer {
   if (!contentType || !contentType.toLowerCase().includes("json")) {
     return body;
   }
-  const metadata: Record<string, string> = {};
-  if (entity.entityId) {
-    metadata["agent_id"] = entity.entityId;
-  }
-  if (entity.entityTitle) {
-    metadata["agent_title"] = entity.entityTitle;
-  }
-  if (Object.keys(metadata).length === 0) {
+  const metadata = sourceMetadata(source);
+  if (!metadata) {
     return body;
   }
   const text = body.toString("utf8");
@@ -203,7 +205,7 @@ function spliceMetadata(
 }
 
 // Add everything the ONLYOFFICE route expects on top of the plugin's own
-// request: the `metadata` object describing the agent, and (streaming chat
+// request: the `metadata` object describing the source, and (streaming chat
 // only) the prompt-caching breakpoints. Parsing is the accurate path — it can
 // place breakpoints inside the message list — but the body on this route is
 // occasionally megabytes of vision data, so above `MAX_PARSE_BYTES` we fall
@@ -216,7 +218,7 @@ function spliceMetadata(
 function withOnlyofficeExtras(
   body: Buffer,
   contentType: string | undefined,
-  entity: AgentEntityMeta,
+  source: SourceMeta | undefined,
   cacheBreakpoints: boolean,
   route: string,
 ): Buffer {
@@ -224,13 +226,13 @@ function withOnlyofficeExtras(
     return body;
   }
   if (!cacheBreakpoints) {
-    return spliceMetadata(body, contentType, entity);
+    return spliceMetadata(body, contentType, source);
   }
   if (body.length > MAX_PARSE_BYTES) {
     logger.info(
       `${route}: body ${body.length}B over ${MAX_PARSE_BYTES}B — prompt-cache breakpoints skipped, metadata still sent`,
     );
-    return spliceMetadata(body, contentType, entity);
+    return spliceMetadata(body, contentType, source);
   }
   let parsed: unknown;
   try {
@@ -245,7 +247,7 @@ function withOnlyofficeExtras(
   if (parsed["stream"] === true && Array.isArray(parsed["messages"])) {
     next["messages"] = markCacheBreakpoints(parsed["messages"]);
   }
-  return spliceMetadata(Buffer.from(JSON.stringify(next), "utf8"), contentType, entity);
+  return spliceMetadata(Buffer.from(JSON.stringify(next), "utf8"), contentType, source);
 }
 
 // The plugin's round-trip runs browser → CDN/reverse proxy → nginx → here, and
@@ -443,8 +445,10 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
       queryIndex >= 0 ? req.originalUrl.slice(queryIndex + 1) : "",
     );
     const entityIdParam = params.get(ENTITY_ID_PARAM) ?? undefined;
+    const entityKind = sourceKindOf(params.get(ENTITY_KIND_PARAM));
     const sessionIdParam = params.get(SESSION_ID_PARAM) ?? undefined;
     params.delete(ENTITY_ID_PARAM);
+    params.delete(ENTITY_KIND_PARAM);
     params.delete(SESSION_ID_PARAM);
     const remaining = params.toString();
     const search = remaining.length > 0 ? `?${remaining}` : "";
@@ -477,19 +481,19 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
       return;
     }
 
-    // Everything `OnlyOfficeProvider` adds on the engine paths, added here by
-    // the host instead — the engine is not involved on this route. Only for the
-    // ONLYOFFICE provider: a third-party OpenAI-compatible backend has no use
-    // for these fields and may reject an unknown one. The agent title is
-    // resolved server-side from the Files API under the caller's credentials,
-    // so the plugin can only name an entity, never describe one it does not
-    // own; a non-agent scope yields no metadata.
+    // Everything the ONLYOFFICE provider adds on the engine paths, added here
+    // by the host instead — the engine is not involved on this route. Only for
+    // the ONLYOFFICE provider: a third-party OpenAI-compatible backend has no
+    // use for these fields and may reject an unknown one. The source type and
+    // title are resolved server-side from the Files API under the caller's
+    // credentials, so the plugin can only name an entry, never describe one it
+    // cannot see; an unresolvable entry yields no metadata.
     if (profile.providerType === "onlyoffice") {
-      const entity = entityIdParam ? await safeGetAgentEntity(entityIdParam) : {};
+      const source = await safeResolveSource(entityIdParam, entityKind);
       body = withOnlyofficeExtras(
         body,
         req.headers["content-type"],
-        entity,
+        source,
         cacheBreakpoints,
         `openai passthrough ${subPath}`,
       );

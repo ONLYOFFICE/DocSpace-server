@@ -64,7 +64,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
-import { safeGetAgentEntity, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
+import { primeSourceMeta, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -260,39 +260,32 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
   return instruction ? appendActionPrompt(body, instruction) : body;
 }
 
-// Describe the host entity the round runs for — the agent whose chat this
-// is — in `actionArgs`. `@onlyoffice/ai-chat` (>= 0.5.50) turns the pair into
-// the ONLYOFFICE request's `metadata` object (`agent_id` / `agent_title`),
-// including on tool-call resume rounds, so the backend can attribute usage to
-// the agent. Server-resolved on purpose: the title comes from the Files API
-// under the caller's credentials, so a client cannot claim someone else's
-// agent. A plain chat (no agent room in scope) contributes nothing and the
-// field stays absent.
+// Attribute the round to the DocSpace entry it runs for — the agent whose
+// chat this is, or else the folder the user is in. The resolved source lands
+// on the request context, and the ONLYOFFICE provider override
+// (`app/providers/onlyofficeSourceProvider.ts`) turns it into the request's
+// `metadata` object (`source_id` / `source_type` / `source_title`) on every
+// request of the round, tool-call resume rounds included, so the backend can
+// attribute usage. Server-resolved on purpose: type and title come from the
+// Files API under the caller's credentials, so a client cannot claim someone
+// else's entry. A round with no resolvable scope leaves the context empty and
+// the field stays absent.
 //
-// `scope` overrides where the agent is read from, for the one input shape that
+// `scope` overrides where the entry is read from, for the one input shape that
 // carries no top-level scope of its own (see {@link customScopeOf}). It is only
-// ever a hint: the pair itself is always re-resolved here.
-async function withEntityMetadata<T>(body: T, scope?: string): Promise<T> {
-  if (!isObject(body)) {
-    return body;
-  }
-  const entity = await safeGetAgentEntity(scope ?? contextScopeOf(body));
-  if (!entity.entityId) {
-    return body;
-  }
-  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
-  return {
-    ...body,
-    actionArgs: { ...actionArgs, ...entity },
-  } as T;
+// ever a hint: the source itself is always re-resolved here.
+async function withSourceMetadata<T>(body: T, scope?: string): Promise<T> {
+  await primeSourceMeta(scope ?? contextScopeOf(body));
+  return body;
 }
 
 // Scope of a `sendCustom` round. `SendCustomInput` is `isStream` /
 // `systemPrompt` / `userMessage` / `actionArgs` / `profileId` — it has no
 // `entityId` of its own, so the only place a caller can name the agent is
-// `actionArgs.entityId`, the same field the metadata pair lives in. Treated as
-// a hint and re-resolved server-side by `withEntityMetadata`, so a client still
-// cannot claim someone else's agent (mirrors threads/regenerate-title).
+// `actionArgs.entityId` (the field the library once carried the metadata pair
+// in). Treated as a hint and re-resolved server-side by `withSourceMetadata`,
+// so a client still cannot claim someone else's entry (mirrors
+// threads/regenerate-title).
 //
 // `contextScopeOf` still wins when present: a host that sends the round with an
 // explicit top-level scope keeps describing it that way.
@@ -629,7 +622,7 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
-    const result = await engine.send(await withEntityMetadata(req.body));
+    const result = await engine.send(await withSourceMetadata(req.body));
     res.json(result);
   }),
 
@@ -642,13 +635,11 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
-    // Attribute the round to the agent for the backend's usage accounting, as
-    // every other model-bound route does. The library carries the pair from
-    // `actionArgs` into the provider credentials on this path too — `sendCustom`
-    // builds its action args with `{...actionArgs}` and the provider factory
-    // reads `entityId`/`entityTitle` from them, for both the streaming
-    // (`sendMessage`) and one-shot (`sendMessageSync`) branches.
-    const body = await withEntityMetadata(
+    // Attribute the round to its source for the backend's usage accounting, as
+    // every other model-bound route does. The provider override reads it from
+    // the request context, so both the streaming (`sendMessage`) and one-shot
+    // (`sendMessageSync`) branches carry it.
+    const body = await withSourceMetadata(
       withRequestSignal(res, req.body),
       customScopeOf(req.body),
     );
@@ -762,7 +753,7 @@ export const aiController = {
     }
     const body = withContextPrompt(
       await withToolsPrompt(
-        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+        await withAgentInstruction(await withSourceMetadata(withRequestSignal(res, req.body))),
       ),
     );
     // The round's scope as the client sent it. `entityId` is what an
@@ -822,7 +813,7 @@ export const aiController = {
     }
     const body = withContextPrompt(
       await withToolsPrompt(
-        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+        await withAgentInstruction(await withSourceMetadata(withRequestSignal(res, req.body))),
       ),
     );
     await streamOpenAiSse(
@@ -846,7 +837,7 @@ export const aiController = {
     // see the identical workspace-context fragment the original reply had.
     const body = withContextPrompt(
       await withToolsPrompt(
-        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+        await withAgentInstruction(await withSourceMetadata(withRequestSignal(res, req.body))),
       ),
     );
     await streamNdjson(
@@ -866,7 +857,7 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
-    const body = await withEntityMetadata(withRequestSignal(res, req.body));
+    const body = await withSourceMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       tapStream("ai/approve-tool-call", engine.approveToolCall(body)),
@@ -884,7 +875,7 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
-    const body = await withEntityMetadata(withRequestSignal(res, req.body));
+    const body = await withSourceMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
       tapStream("ai/deny-tool-call", engine.denyToolCall(body)),
