@@ -73,7 +73,9 @@ public class FolderHistoryTests(
     [Trait("Bug", "81640")]
     public async Task GetFolderHistory_ContainsRoomIndexExportSaved_AfterIndexExportCompletes()
     {
-        // Arrange
+        // Arrange - see RoomIndexExportTests for why My Documents has to be provisioned first.
+        await GetUserFolderIdAsync(Owner);
+
         var ownerDisplayName = await GetDisplayNameAsync();
 
         var room = await CreateVirtualRoom("Autotest Folder History RoomIndexExportSaved");

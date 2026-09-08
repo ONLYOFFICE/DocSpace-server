@@ -209,8 +209,9 @@ public class FormFillingSectionBugTests(
             sortBy: "AZ",
             sortOrder: SortOrder.Ascending,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
-        asc.Folders.Select(f => f.Title).Should().ContainInOrder(aTitle, zTitle,
-            "the premise is that both favorited rooms are present and orderable");
+        // ContainInOrder takes only the expected items - a trailing reason string would be read as
+        // one more item to find.
+        asc.Folders.Select(f => f.Title).Should().ContainInOrder(aTitle, zTitle);
 
         // Act
         var page = (await _foldersApi.GetFavoritesFolderAsync(

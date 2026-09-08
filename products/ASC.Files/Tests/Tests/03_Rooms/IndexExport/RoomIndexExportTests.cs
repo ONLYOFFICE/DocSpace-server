@@ -57,6 +57,13 @@ public class RoomIndexExportTests(
     {
         // Arrange - the room starts without indexing and only gets it turned on afterwards.
         await _filesClient.Authenticate(Owner);
+
+        // Mirrors the `getMyFolder` call the TypeScript original makes before starting the export.
+        // The task saves its result into the initiator's My Documents and looks that folder up with
+        // GetFolderIDUserAsync(createIfNotExists: false) (RoomIndexExportTask.ProcessSourceFileAsync),
+        // while BaseTest.InitializeAsync deliberately leaves the owner's root tree unprovisioned.
+        await GetUserFolderIdAsync(Owner);
+
         var room = await CreateVirtualRoom("Autotest Index Export Enabled After Create", indexing: false);
         await _roomsApi.UpdateRoomAsync(room.Id, new UpdateRoomRequest(indexing: true), TestContext.Current.CancellationToken);
 

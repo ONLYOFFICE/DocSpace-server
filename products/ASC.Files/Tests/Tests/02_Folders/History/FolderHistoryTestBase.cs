@@ -73,6 +73,29 @@ public abstract class FolderHistoryTestBase(
     }
 
     /// <summary>
+    /// Polls a room's history until it holds at least <paramref name="count"/> entries. Paging tests
+    /// need this: audit entries are written asynchronously, so reading two pages while an entry is
+    /// still landing shifts the window between the calls and the second page returns the entry the
+    /// first one just returned - which looks exactly like <c>startIndex</c> being ignored.
+    /// </summary>
+    protected async Task<List<HistoryDto>> PollHistoryCountAsync(int roomId, int count, int timeoutSeconds = 15)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+
+        while (true)
+        {
+            var history = (await _foldersApi.GetFolderHistoryAsync(roomId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+            if (history.Count >= count || DateTime.UtcNow >= deadline)
+            {
+                return history;
+            }
+
+            await Task.Delay(1_000, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
     /// Polls until <paramref name="action"/> appears in <paramref name="roomId"/>'s history and
     /// asserts that it does, optionally also asserting the initiator's display name. This is the
     /// shape of every "history contains X after Y" test in the suite.

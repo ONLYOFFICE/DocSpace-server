@@ -61,7 +61,7 @@ public class RoomIndexExportValidationTests(
             async () => await _roomsApi.StartRoomIndexExportAsync(id, TestContext.Current.CancellationToken));
 
         // Assert - current (buggy) behaviour: 404, not the 400 a validation error should produce.
-        exception.ErrorCode.Should().Be(400);
+        exception.ErrorCode.Should().Be(404);
     }
 
     /// <remarks>

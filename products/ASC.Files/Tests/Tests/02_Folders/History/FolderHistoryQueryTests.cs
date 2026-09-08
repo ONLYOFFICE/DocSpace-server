@@ -117,6 +117,9 @@ public class FolderHistoryQueryTests(
         var room = await CreateCustomRoom("Autotest Folder History StartIndex");
         await _roomsApi.UpdateRoomAsync(room.Id, new UpdateRoomRequest(title: "Autotest Folder History StartIndex Renamed"), TestContext.Current.CancellationToken);
 
+        var settled = await PollHistoryCountAsync(room.Id, 2);
+        settled.Should().HaveCountGreaterThanOrEqualTo(2, "paging needs at least two entries to shift between");
+
         // Act
         var page0 = (await _foldersApi.GetFolderHistoryAsync(room.Id, startIndex: 0, count: 1, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var page1 = (await _foldersApi.GetFolderHistoryAsync(room.Id, startIndex: 1, count: 1, cancellationToken: TestContext.Current.CancellationToken)).Response;

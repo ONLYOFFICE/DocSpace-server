@@ -131,9 +131,12 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
     }
 
     /// <summary>
-    /// BUG 79975: uploading a <c>.pdf</c> file while declaring it as a <c>.docx</c> template is
-    /// accepted instead of rejected - <c>UploadDefaultTemplate</c> does not check the uploaded file's
-    /// actual content against the declared <c>fileExtension</c>.
+    /// BUG 79975: uploading a <c>.pdf</c> file while declaring it as a <c>.docx</c> template used to
+    /// be accepted. It is refused now, so what is left of the bug is the status code: the mismatch
+    /// is reported as 403 with "Sorry, this file format isn't supported", because
+    /// <c>DefaultTemplateSettings.SetTemplateAsync</c> raises an
+    /// <see cref="InvalidOperationException"/> for it and the handler maps that to 403. A rejected
+    /// payload is a bad request, not an access decision, so 400 is what this asserts.
     /// </summary>
     [Fact]
     [Trait("Bug", "79975")]
@@ -151,8 +154,8 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
     }
 
     /// <summary>
-    /// BUG 79975: same content/extension mismatch defect, for a <c>.docx</c> file declared as
-    /// <c>.xlsx</c>.
+    /// BUG 79975: same mismatch, refused with 403 instead of 400, for a <c>.docx</c> file declared
+    /// as <c>.xlsx</c>. See the <c>.pdf</c> case above for the mapping that produces the status.
     /// </summary>
     [Fact]
     [Trait("Bug", "79975")]
@@ -170,8 +173,8 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
     }
 
     /// <summary>
-    /// BUG 79975: same content/extension mismatch defect, for a <c>.xlsx</c> file declared as
-    /// <c>.pptx</c>.
+    /// BUG 79975: same mismatch, refused with 403 instead of 400, for a <c>.xlsx</c> file declared
+    /// as <c>.pptx</c>. See the <c>.pdf</c> case above for the mapping that produces the status.
     /// </summary>
     [Fact]
     [Trait("Bug", "79975")]
