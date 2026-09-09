@@ -45,7 +45,7 @@ public class ChatContextReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var profile = await CreateProfileAsync();
         await CreateAssignmentAsync("Chat", profile.Id);
-        await UpsertPreferencesAsync(true);
+        await UpsertPreferencesAsync(ReasoningDepth.High);
         await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
         {
             [SystemToolsServerType] = ["tool-a"]
@@ -61,7 +61,7 @@ public class ChatContextReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         context.Global.Folder.Should().BeNull();
         context.Global.Assignments.Should().BeEquivalentTo(await ReadAllAssignmentsAsync());
         context.Global.Preferences.Should().NotBeNull();
-        context.Global.Preferences!.DeepMode.Should().BeTrue();
+        context.Global.Preferences!.Depth.Should().Be(ReasoningDepth.High);
         context.Global.ToolPrefs.Should().BeEquivalentTo(await ReadToolPrefsAsync());
         context.Global.McpServers.Should().BeEquivalentTo(await ReadAllMcpServersAsync());
 
