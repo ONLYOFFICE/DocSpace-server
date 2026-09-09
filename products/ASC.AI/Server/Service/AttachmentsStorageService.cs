@@ -218,10 +218,12 @@ public class AttachmentsStorageService(
     }
 
     /// <summary>
-    /// The flag plus whatever questions are already cached, never starting a generation. Batch reads
-    /// skip it: they hydrate whole threads, and a file lookup per attachment would not pay for itself.
+    /// The flag plus the questions, restarting a generation when nothing is cached — so a poll that
+    /// arrives after a failed or not-ready attempt expired picks the work back up instead of reporting
+    /// an empty list forever. Batch reads skip it: they hydrate whole threads, and a file lookup per
+    /// attachment would not pay for itself.
     /// </summary>
-    private async Task<FormAnalysis?> ReadCachedAnalysisAsync(Attachment attachment)
+    private async Task<FormAnalysis?> ReadFormAnalysisAsync(Attachment attachment)
     {
         if (attachment.EntryId is not { } entryId || !externalDatabaseClient.IsEnabled())
         {
@@ -238,13 +240,13 @@ public class AttachmentsStorageService(
 
             // Questions exist only for analysable forms, so having them settles the flag without
             // touching the external database.
-            var cached = await formPreAnalysisService.ReadCachedAsync(file);
-            if (cached.Count > 0)
+            var questions = await formPreAnalysisService.GenerateAsync(file, _preAnalysisStartWait);
+            if (questions.Count > 0)
             {
-                return new FormAnalysis(true, cached);
+                return new FormAnalysis(true, questions);
             }
 
-            return await formSchemaProvider.TryGetTableNameAsync(file) is null ? null : new FormAnalysis(true, cached);
+            return await formSchemaProvider.TryGetTableNameAsync(file) is null ? null : new FormAnalysis(true, questions);
         }
         catch (Exception e)
         {
@@ -349,7 +351,7 @@ public class AttachmentsStorageService(
             ? await GetDataUrlAsync(attachment.EntryId, thirdpartyEntryId)
             : null;
 
-        var analysis = withFormAnalysis ? await ReadCachedAnalysisAsync(attachment) : null;
+        var analysis = withFormAnalysis ? await ReadFormAnalysisAsync(attachment) : null;
 
         return ToResult(attachment, dataUrl, thirdpartyEntryId, analysis);
     }
