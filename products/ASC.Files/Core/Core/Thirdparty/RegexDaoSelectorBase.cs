@@ -171,7 +171,10 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
         var dbDao = daoFactory.ProviderDao;
         try
         {
-            return dbDao.GetProviderInfoAsync(linkId).Result as IProviderInfo<TFile, TFolder, TItem>;
+            // GetAwaiter().GetResult(), not .Result: the latter wraps whatever the task threw in an
+            // AggregateException, so the catch below never matched and the original exception went
+            // out to the caller as a 500.
+            return dbDao.GetProviderInfoAsync(linkId).GetAwaiter().GetResult() as IProviderInfo<TFile, TFolder, TItem>;
         }
         catch (InvalidOperationException)
         {

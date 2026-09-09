@@ -188,12 +188,14 @@ public class SendEditorNotifyTests(
     }
 
     /// <summary>
-    /// BUG 83430: same missing-response defect - a user invited with <c>Editing</c> access should be
-    /// reported as "Full Access" in the mention response, but the response is empty.
+    /// BUG 83430: same missing-response defect, for a user invited with <c>Editing</c> access. The
+    /// TypeScript original expects "Full Access" here, which no share maps to - that name belongs to
+    /// <c>ReadWrite</c> (<c>AceStatusEnum_ReadWrite</c>), while <c>Editing</c> is "Editor" in both the
+    /// plain and the room name sets. Asserted as the product actually names it.
     /// </summary>
     [Fact]
     [Trait("Bug", "83430")]
-    public async Task SendEditorNotify_UserWithEditingAccess_ResponseShowsFullAccess()
+    public async Task SendEditorNotify_UserWithEditingAccess_ResponseShowsEditor()
     {
         var room = await CreateCollaborationRoom("Autotest Notify Room Editing");
         var file = await CreateFile("Autotest Notify File.docx", room.Id);
@@ -204,7 +206,7 @@ public class SendEditorNotifyTests(
             file.Id, BuildRequest([user.Email], "test"), TestContext.Current.CancellationToken);
 
         result.Response.Should().ContainSingle();
-        result.Response[0].Permissions.Should().Be("Full Access");
+        result.Response[0].Permissions.Should().Be("Editor");
     }
 
     /// <summary>

@@ -149,9 +149,19 @@ public class FormFillingSectionBugTests(
     [Trait("Bug", "82874")]
     public async Task GetRecentFolder_PagedRequest_TotalCollapsesToPageSize()
     {
-        // Arrange
+        // Arrange - both files go into Rooms-section rooms on purpose. SeedRecent puts one of its two
+        // files in a form filling room, which the default searchArea=Active correctly leaves out, so it
+        // cannot serve a test about `total`.
         await _filesClient.Authenticate(Owner);
-        await SeedRecent();
+
+        var first = await CreateCustomRoom("Recent Total Room A " + Guid.NewGuid().ToString()[..8]);
+        var second = await CreateCustomRoom("Recent Total Room B " + Guid.NewGuid().ToString()[..8]);
+
+        var firstFile = await CreateFile("Autotest Recent Total A " + Guid.NewGuid().ToString()[..8] + ".docx", first.Id);
+        var secondFile = await CreateFile("Autotest Recent Total B " + Guid.NewGuid().ToString()[..8] + ".docx", second.Id);
+
+        await _filesApi.AddFileToRecentAsync(firstFile.Id, cancellationToken: TestContext.Current.CancellationToken);
+        await _filesApi.AddFileToRecentAsync(secondFile.Id, cancellationToken: TestContext.Current.CancellationToken);
 
         var all = (await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         all.Total.Should().Be(2, "the premise is that both seeded files are present in Recent");

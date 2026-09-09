@@ -410,24 +410,64 @@ public class EntryManager(IDaoFactory daoFactory,
             var userId = authContext.CurrentAccount.ID;
             var recentOrderBy = new OrderBy(SortedByType.LastOpened, false);
 
-            total = 0;
+            // searchArea was accepted here and then ignored, so Recent answered the same list whatever
+            // section was asked for. The DAO filters by "some ancestor has one of these folder types",
+            // so the two sections are expressed as the room types on either side of the Forms split -
+            // and FolderType.USER keeps the caller's own My Documents files in the Rooms-section view,
+            // which is what Recent has always shown. Built from DocSpaceHelper.RoomTypes rather than
+            // spelled out, so a room type added later lands on the right side by itself.
+            List<FolderType> sectionTypes = searchArea switch
+            {
+                SearchArea.Forms => [FolderType.FillingFormsRoom],
+                SearchArea.Active => [.. DocSpaceHelper.RoomTypes.Where(t => t != FolderType.FillingFormsRoom), FolderType.USER],
+                _ => null
+            };
+
+            if (sectionTypes != null)
+            {
+                if (folderType is { Count: > 0 })
+                {
+                    // An explicit folderType narrows the section, it does not replace it. VirtualRooms
+                    // is expanded first: callers use it to mean "any room", but as a section root it is
+                    // also an ancestor of the form rooms, so intersecting with it directly would either
+                    // select nothing or undo the split.
+                    var requested = folderType.Contains(FolderType.VirtualRooms)
+                        ? folderType.Where(t => t != FolderType.VirtualRooms).Concat(DocSpaceHelper.RoomTypes).Distinct().ToList()
+                        : folderType;
+
+                    // Asking for a type the section does not contain is answered with nothing rather
+                    // than with the whole section - an empty list would read as "no filter" further down.
+                    var narrowed = requested.Intersect(sectionTypes).ToList();
+
+                    if (narrowed.Count == 0)
+                    {
+                        return (entries, 0);
+                    }
+
+                    folderType = narrowed;
+                }
+                else
+                {
+                    folderType = sectionTypes;
+                }
+            }
 
             var providerFiles = await GetThirdPartyFilesByTagAsync<T>(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject,
                 location, 0, folderType, recentOrderBy);
 
             if (providerFiles.Count == 0)
             {
-                var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0,  folderType, recentOrderBy, from, count);
+                // The page used to be cut twice: once in SQL by (from, count) and again here by a
+                // counter that doubled as the total. So `total` reported the size of the page rather
+                // than of the selection, and a non-zero `from` produced an empty page, because the
+                // counter restarted at 1 for a result set that had already been offset. Read the
+                // selection and page it in memory, the way the provider branch below already does.
+                var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0,  folderType, recentOrderBy, 0, -1);
 
-                await foreach (var e in fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => t.Item1))
-                {
-                    total++;
+                var readable = await fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
 
-                    if (total > from && total <= from + count)
-                    {
-                        entries.Add(e);
-                    }
-                }
+                total = readable.Count;
+                entries.AddRange(Paginate(readable, from, count));
 
                 await entryStatusManager.SetFileStatusAsync(entries.OfType<File<T>>().ToList());
                 return (entries, total);
@@ -462,38 +502,34 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (providerFolders.Count == 0 && providerFiles.Count == 0)
             {
-                var allFoldersCountTask = 0;
+                // SQL already applies (from, count) to both queries, so everything they return belongs
+                // on the page. The in-memory gate below used to cut it a second time with a counter
+                // that also served as the total, which made `total` report the page size and made a
+                // non-zero `from` come back empty.
                 var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, from, count);
                 List<Folder<T>> folders = [];
 
                 await foreach (var e in fileSecurity.CanReadAsync(foldersFromDb).Where(r => r.Item2).Select(t => t.Item1))
                 {
-                    total++;
-                    allFoldersCountTask++;
-
-                    if (total > from && total <= from + count)
-                    {
-                        folders.Add((Folder<T>)e);
-                        entries.Add(e);
-                    }
+                    folders.Add((Folder<T>)e);
+                    entries.Add(e);
                 }
 
-                var filesCount = count - folders.Count;
-                var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - allFoldersCountTask, 0);
+                var filesCount = count > 0 ? count - folders.Count : count;
+                var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - folders.Count, 0);
 
                 var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, filesOffset, filesCount);
                 List<File<T>> files = [];
 
                 await foreach (var e in fileSecurity.CanReadAsync(filesFromDb).Where(r => r.Item2).Select(t => t.Item1))
                 {
-                    total++;
-
-                    if (total > from && total <= from + count)
-                    {
-                        files.Add((File<T>)e);
-                        entries.Add(e);
-                    }
+                    files.Add((File<T>)e);
+                    entries.Add(e);
                 }
+
+                // The whole selection, not the page: counted without the (from, count) limits.
+                total = await folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, 0, -1).CountAsync()
+                      + await fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, 0, -1).CountAsync();
 
                 var setFilesStatus = entryStatusManager.SetFileStatusAsync(files);
                 var setFavorites = entryStatusManager.SetIsFavoriteFoldersAsync(folders);

@@ -55,7 +55,8 @@ public class VirtualRoomsInternalController(
     IEventBus eventBus,
     RoomTemplatesWorker roomTemplatesWorker,
     UserManager userManager,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -73,7 +74,8 @@ public class VirtualRoomsInternalController(
         apiDateTimeHelper,
         userManager,
         authContext,
-        daoFactory)
+        daoFactory,
+        fileSecurity)
 {
     private readonly AuthContext _authContext = authContext;
 
@@ -260,7 +262,8 @@ public class VirtualRoomsThirdPartyController(
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
     AuthContext authContext,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
     : VirtualRoomsController<string>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -278,7 +281,8 @@ public class VirtualRoomsThirdPartyController(
         apiDateTimeHelper,
         userManager,
         authContext,
-        daoFactory)
+        daoFactory,
+        fileSecurity)
 {
     /// <remarks>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
@@ -315,7 +319,8 @@ public abstract class VirtualRoomsController<T>(
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
     AuthContext authContext,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
@@ -768,9 +773,19 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("covers")]
     public async IAsyncEnumerable<CoversResultDto> GetRoomCovers()
     {
+        // The gallery itself is portal-wide reference data, so there is nothing room-specific to
+        // check. Guests used to be refused outright, which also shut out a guest who had been invited
+        // into a room and needs the gallery for the room-group dialog. A guest who belongs to no room
+        // at all still has no use for it.
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
-            throw new SecurityException(Resource.ErrorAccessDenied);
+            var subjects = await fileSecurity.GetUserSubjectsAsync(authContext.CurrentAccount.ID);
+            var isRoomMember = await daoFactory.GetSecurityDao<int>().GetSharesAsync(subjects).AnyAsync();
+
+            if (!isRoomMember)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
         }
 
         foreach (var c in await RoomLogoManager.GetCoversAsync())
@@ -930,9 +945,23 @@ public class VirtualRoomsCommonController(
 
         var filter = RoomTypeExtensions.MapToFilterType(inDto.Type);
 
-        var tagNames = !string.IsNullOrEmpty(inDto.Tags)
-            ? JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags)
-            : null;
+        IEnumerable<string> tagNames = null;
+
+        if (!string.IsNullOrEmpty(inDto.Tags))
+        {
+            try
+            {
+                tagNames = JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags);
+            }
+            catch (JsonException)
+            {
+                // The parameter carries a JSON array as a string. A caller that sends a bare tag name
+                // - which is what a generated client does when its own signature takes an array and
+                // serialises it as a repeated query parameter - used to reach the serializer and end
+                // the request as 500. A malformed query value is the caller's mistake.
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(inDto.Tags));
+            }
+        }
 
         // An unrecognised sortBy used to be dropped on the floor: the listing came back in the
         // default order and the caller had no way to tell its sort had been ignored. The accepted
@@ -1122,6 +1151,14 @@ public class VirtualRoomsCommonController(
         if (room.RootId == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
             throw new ItemNotFoundException();
+        }
+
+        // An archived room is read-only, and starting a background export against it used to be
+        // accepted with 200 like any other room - the same guard every other write-side room
+        // operation applies (see FileStorageService's ErrorMessage_UpdateArchivedRoom checks).
+        if (room.RootFolderType == FolderType.Archive)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateArchivedRoom);
         }
 
         var fileSecurity = serviceProvider.GetService<FileSecurity>();

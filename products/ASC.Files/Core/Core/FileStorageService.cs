@@ -702,7 +702,20 @@ public class FileStorageService //: IFileStorageService
         var providerDao = daoFactory.ProviderDao;
 
         var parent = await folderDao.GetFolderAsync(parentId);
+
+        // An id that names no third-party folder - a plain internal folder id, or a well-formed but
+        // unknown provider id - used to dereference null here and end the request as 500.
+        if (parent == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
         var providerInfo = await providerDao.GetProviderInfoAsync(parent.ProviderId);
+
+        if (providerInfo == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
 
         if (providerInfo.RootFolderType != FolderType.VirtualRooms)
         {
@@ -970,6 +983,16 @@ public class FileStorageService //: IFileStorageService
         var settingIndex = indexing ?? template.SettingsIndexing;
         var settingDenyDownload = denyDownload ?? template.SettingsDenyDownload;
         var settingPrivate = @private ?? template.SettingsPrivate;
+
+        // Every other setting falls back to the template's own value; the tags did not, so a caller
+        // who named none got a room with an empty tag list instead of the template's tags.
+        if (tags == null || !tags.Any())
+        {
+            tags = await daoFactory.GetTagDao<int>()
+                .GetTagsAsync(template.Id, FileEntryType.Folder, TagType.Custom)
+                .Select(t => t.Name)
+                .ToListAsync();
+        }
 
         return await CreateRoomAsync(async () =>
         {
@@ -3350,7 +3373,14 @@ public class FileStorageService //: IFileStorageService
                 continue;
             }
 
-            if (!await fileSecurity.CanConvertAsync(file))
+            // Starting a conversion produces a new file, so it needs Convert rights (RoomManager or
+            // ContentCreator in a room). Merely asking how a conversion is going does not - it used to
+            // demand the same rights, which refused a member who may open and edit the very file.
+            var allowed = fileInfo.StartConvert
+                ? await fileSecurity.CanConvertAsync(file)
+                : await fileSecurity.CanReadAsync(file);
+
+            if (!allowed)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
@@ -5100,7 +5130,31 @@ public class FileStorageService //: IFileStorageService
             _logger.ErrorWithException(ex);
         }
 
-        return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(file) : null;
+        // The body used to be filled in only when `showSharingSettings` was set, which happens for an
+        // encrypted file or an e-mail that resolves to nobody. Every ordinary mention therefore
+        // answered 200 with nothing in it, so the caller could not tell what access the people it had
+        // just mentioned actually have. Answer with one entry per mentioned recipient - including the
+        // ones who have no access at all, which is exactly what the caller needs to know before it
+        // decides whether to share.
+        var aces = await fileSharing.GetSharedInfoAsync(file);
+        var result = new List<AceShortWrapper>();
+
+        foreach (var recipientId in recipients)
+        {
+            var ace = aces.FirstOrDefault(a => a.Id == recipientId && a.SubjectType == SubjectType.User);
+            var recipient = await userManager.GetUsersAsync(recipientId);
+
+            // Plain access names (AceStatusEnum_*), not room roles (RoleEnum_*): this is the mention
+            // dialog in the editor, and "no access" only has a name in the plain set - RoleEnum_Restrict
+            // does not exist, so the room format would answer null for exactly the case the caller
+            // most needs to see.
+            result.Add(new AceShortWrapper(
+                ace?.SubjectName ?? recipient.DisplayUserName(displayUserSettingsHelper),
+                FileShareExtensions.GetAccessString(ace?.Access ?? FileShare.Restrict, false),
+                false));
+        }
+
+        return result;
     }
 
     public async Task<List<EncryptionKeyDto>> GetEncryptionAccessAsync<T>(T fileId)

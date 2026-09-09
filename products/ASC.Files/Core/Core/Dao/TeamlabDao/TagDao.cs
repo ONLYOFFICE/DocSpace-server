@@ -577,6 +577,54 @@ internal abstract class BaseTagDao<T>(
         }
     }
 
+    public async Task RemoveTagLinksAsync(IEnumerable<Tag> tags)
+    {
+        if (tags == null)
+        {
+            return;
+        }
+
+        var toDetach = tags.Where(t => t.EntryId != null).ToList();
+
+        if (toDetach.Count == 0)
+        {
+            return;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
+        {
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+            // The tag id is often absent: several of these are built in memory (Tag.New(...)) rather
+            // than read back, so resolve it the same way RemoveTagInDbAsync does - by owner, name and
+            // type - and then delete only this entry's link to it.
+            var resolved = new Dictionary<(Guid Owner, string Name, TagType Type), int>();
+
+            foreach (var tag in toDetach)
+            {
+                var key = (tag.Owner, tag.Name, tag.Type);
+
+                if (!resolved.TryGetValue(key, out var tagId))
+                {
+                    tagId = tag.Id != 0
+                        ? tag.Id
+                        : await filesDbContext.FirstTagIdAsync(tenantId, tag.Owner, tag.Name, tag.Type);
+
+                    resolved[key] = tagId;
+                }
+
+                if (tagId == 0)
+                {
+                    continue;
+                }
+
+                await filesDbContext.DeleteTagLinksAsync(tenantId, [tagId], tag.EntryId.ToString(), tag.EntryType);
+            }
+        }
+    }
+
     public async Task<int> RemoveTagLinksAsync(T entryId, FileEntryType entryType, TagType tagType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

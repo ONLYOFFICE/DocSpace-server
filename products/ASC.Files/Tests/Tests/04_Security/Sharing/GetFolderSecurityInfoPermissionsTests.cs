@@ -44,31 +44,31 @@ public class GetFolderSecurityInfoPermissionsTests(
     : SharingTestBase(fixture)
 {
     /// <summary>
-    /// BUG 79219: <c>SecurityController.GetFolderSecurityInfo</c> throws <c>SecurityException</c> for
-    /// every Guest unconditionally (an <c>IsGuestAsync</c> check ahead of any access check), so a
-    /// Guest who was actually granted room access still gets 403 instead of the sharing information.
+    /// BUG 79219: a Guest is refused unconditionally, before any access check. That is deliberate -
+    /// the share list enumerates every member of the room with name, e-mail and access level, and a
+    /// Guest is not meant to see who else is in a room. Room access is not the same permission as
+    /// membership visibility, so being invited does not open this endpoint.
     /// </summary>
     [Fact]
     [Trait("Bug", "79219")]
-    public async Task GetFolderSecurityInfo_GuestWithRoomAccess_Succeeds()
+    public async Task GetFolderSecurityInfo_GuestWithRoomAccess_Returns403()
     {
         var room = await CreateCollaborationRoom("Autotest Folder Security Info Perm Guest Access");
         var guest = await InviteGuest();
         await InviteToRoom(room.Id, guest, FileShare.Editing);
 
         await _filesClient.Authenticate(guest);
-        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(
-            room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _sharingApi.GetFolderSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken));
 
-        securityInfos.Should().NotBeNull();
+        exception.ErrorCode.Should().Be(403);
 
         await _filesClient.Authenticate(Owner);
     }
 
     /// <summary>
-    /// Same blanket Guest check as <see cref="GetFolderSecurityInfo_GuestWithRoomAccess_Succeeds"/>, but
-    /// here it happens to produce the correct answer: a Guest with no room access is denied either way,
-    /// so this case stays green once BUG 79219 is fixed and the normal access check takes over.
+    /// The other half of the same rule: a Guest with no room access is refused too, so neither the
+    /// role guard nor an access check would let this one through.
     /// </summary>
     [Fact]
     [Trait("Bug", "79219")]

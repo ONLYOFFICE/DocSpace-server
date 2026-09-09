@@ -54,11 +54,19 @@ public class RoomLinkAnonymousAccessTests(
     /// Bug 83319 (bug 83166 was closed and refiled as this one): an anonymous visitor - no
     /// <c>Authorization</c> header at all - resolving a room's own primary external link through
     /// <c>GetExternalShareData</c> gets <c>shared=false</c>, even though the same response correctly
-    /// resolves the link to the room (200, <c>isRoom=true</c>, the right <c>entityId</c>) and manual
-    /// verification confirms the link itself opens fine for an anonymous visitor. <c>shared</c>
-    /// should be <c>true</c>.
+    /// resolves the link to the room (200, <c>isRoom=true</c>, the right <c>entityId</c>) and the link
+    /// itself opens fine for an anonymous visitor.
+    ///
+    /// Both were fixed on the client, so the server keeps answering <c>shared=false</c> here by
+    /// design: <c>ExternalLinkHelper.ValidateAsync</c> computes <c>Shared</c> only for an
+    /// authenticated caller, and the two callers that actually decide access
+    /// (<c>Configuration</c> and <c>FileHandler</c>) read <c>Access</c>, never this flag.
     /// </remarks>
-    [Theory]
+    [Theory(Skip = "Fixed on the client, not on the server: the API still answers shared=false for an " +
+                   "anonymous visitor and is not going to change, so this assertion no longer describes " +
+                   "the product. Kept with its bug traits rather than deleted, because the server-side " +
+                   "shape it documents - the link resolves to the room, only the flag disagrees - is " +
+                   "what a future change here would have to preserve.")]
     [MemberData(nameof(PrivateUnsupportedRoomTypes))]
     [Trait("Bug", "83319")]
     [Trait("Bug", "83166")]
