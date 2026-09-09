@@ -1476,4 +1476,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Lomake</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Yritys</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Luontipäivämäärä</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Ajanjakso</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Yhteensä</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Raportti</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktiivinen</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Käyttöoikeus vanhenee</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Käyttäjätyyppi</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>Käyttäjätunnus</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editorit</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Asiakirjaeditorit täysillä käyttöoikeuksilla</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Käyttäjäkiintiö</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Live-katselija</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Asiakirjojen vain luku -katselija</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Ulkoinen</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Sisäinen</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Jäljellä</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Tilausraja</value>
+  </data>
 </root>

@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>İstifadəçi AI parametrləri yeniləndi</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI profili AI agentinə əməliyyat üçün təyin edildi: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI profili əməliyyat üçün təyin edildi: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI model profili yaradıldı: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI model profili silindi: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI profili əməliyyatdan çıxarıldı: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI model profili yeniləndi: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Fayllar [{0}]. Oxunmuş kimi işarələndi</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Fayllar [{0}]. Fayl saxlanılmadı. Portal üçün saxlama kvotası aşıldı.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Fayllar [{0}]. Faylın saxlanması portalın saxlama kvotasını aşır.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Qovluqlar [{0}]. Oxunmuş kimi işarələndi</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Şəxsi otaq şifrələmə açarı {0} yaradıldı</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Şəxsi otaq şifrələmə açarı {0} silindi</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Şəxsi otaq şifrələmə açarı {0} yeniləndi</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Şübhəli giriş aşkarlandı: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>AI agentinin MCP serveri {0} yeniləndi</value>
+  </data>
 </root>

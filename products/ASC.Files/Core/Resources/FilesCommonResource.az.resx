@@ -601,4 +601,10 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Forma dəyişdirildi. Bu qaralama köhnəlmişdir və göndərilə bilməz.</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Qovluq ID-si etibarsızdır</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Bu əməliyyat yalnız şəxsi otaqda mövcuddur</value>
+  </data>
 </root>

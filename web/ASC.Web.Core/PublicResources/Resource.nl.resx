@@ -1476,4 +1476,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Formulier</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Bedrijf</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Datum gegenereerd</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Periode</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Totaal</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Actief</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Toegang verloopt</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Gebruikerstype</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>Gebruikers-ID</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editors</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Documenteditors met volledige rechten</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Gebruikersquotum</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Live-viewer</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Documentviewers met alleen-lezen toegang</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Extern</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Intern</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Resterend</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Abonnementslimiet</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Rapport</value>
+  </data>
 </root>

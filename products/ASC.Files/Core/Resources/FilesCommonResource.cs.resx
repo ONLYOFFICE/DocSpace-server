@@ -601,4 +601,10 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Formulář byl změněn. Tento koncept je zastaralý a nelze jej odeslat.</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Neplatné ID složky</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Tato akce je dostupná pouze v soukromé místnosti</value>
+  </data>
 </root>

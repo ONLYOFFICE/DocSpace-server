@@ -1521,4 +1521,13 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Formulaire</value>
   </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Rapport</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Restant</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Limite d'abonnement</value>
+  </data>
 </root>

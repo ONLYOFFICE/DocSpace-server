@@ -1476,4 +1476,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Modulo</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Azienda</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Data di generazione</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Periodo</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Totale</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Report</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Attivo</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>L'accesso scade</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Tipo di utente</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID utente</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editor</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Editor di documenti con autorizzazioni complete</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Rimanente</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Quota utente</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Visualizzatore dal vivo</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Limite di abbonamento</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Visualizzatori di documenti in sola lettura</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Esterno</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Interno</value>
+  </data>
 </root>

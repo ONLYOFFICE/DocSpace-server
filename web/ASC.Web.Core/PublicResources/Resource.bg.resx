@@ -1476,4 +1476,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Формуляр</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Компания</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Дата на генериране</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Период</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Отчет</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Общо</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Активен</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Достъпът изтича</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Тип потребител</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>Потребителски ID</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Редактори</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Редактори на документи с пълни права</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Оставащо</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Потребителска квота</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Лимит на абонамента</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Лайв преглед</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Преглед на документи само за четене</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Външен</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Вътрешен</value>
+  </data>
 </root>

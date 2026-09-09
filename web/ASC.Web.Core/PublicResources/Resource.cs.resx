@@ -1476,4 +1476,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Formulář</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Společnost</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Datum vygenerování</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Období</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Celkem</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Zpráva</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktivní</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Přístup vyprší</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Typ uživatele</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID uživatele</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editory</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Editory dokumentů s plnými oprávněními</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Zbývající</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Limit předplatného</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Kvóta uživatele</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Živý prohlížeč</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Prohlížeče dokumentů pouze pro čtení</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Externí</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Interní</value>
+  </data>
 </root>

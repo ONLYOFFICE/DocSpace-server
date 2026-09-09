@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Nastavení AI uživatele bylo aktualizováno</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profil AI přiřazen AI agentovi pro akci: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profil AI přiřazen k akci: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profil AI modelu byl vytvořen: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profil AI modelu byl odstraněn: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Přiřazení profilu AI k akci bylo zrušeno: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profil AI modelu byl aktualizován: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Soubory [{0}]. Označeno jako přečtené</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Soubory [{0}]. Soubor nebyl uložen. Kvóta úložiště portálu byla překročena.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Soubory [{0}]. Uložení souboru překračuje kvótu úložiště portálu.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Složky [{0}]. Označeno jako přečtené</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Šifrovací klíč soukromé místnosti {0} byl vytvořen</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Šifrovací klíč soukromé místnosti {0} byl odstraněn</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Šifrovací klíč soukromé místnosti {0} byl aktualizován</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Bylo zjištěno podezřelé přihlášení: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>MCP server {0} AI agenta byl aktualizován</value>
+  </data>
 </root>

@@ -1476,4 +1476,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Ձև</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Ընկերություն</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Ստեղծման ամսաթիվ</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Ժամանակաշրջան</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Ընդամենը</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Հաշվետվություն</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Ակտիվ</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Մուտքն ավարտվում է</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Օգտատիրոջ տեսակ</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>Օգտատիրոջ ID</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Խմբագիրներ</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Փաստաթղթերի խմբագիրներ լիարժեք թույլտվություններով</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Օգտատիրոջ քվոտա</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Կենդանի դիտող</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Փաստաթղթերի դիտողներ՝ միայն կարդալու համար</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Արտաքին</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Ներքին</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Մնացել է</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Բաժանորդագրության սահմանաչափ</value>
+  </data>
 </root>

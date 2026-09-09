@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>用户 AI 设置已更新</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI 配置文件已分配给 AI 代理以执行操作：{0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI 配置文件已分配给操作：{0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI 模型配置文件已创建：{0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI 模型配置文件已删除：{0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI 配置文件已从操作中取消分配：{0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI 模型配置文件已更新：{0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>文件 [{0}]。已标记为已读</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>文件 [{0}]。文件未保存。门户存储配额已超出。</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>文件 [{0}]。保存文件超出门户存储配额。</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>文件夹 [{0}]。已标记为已读</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>私人房间加密密钥 {0} 已创建</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>私人房间加密密钥 {0} 已删除</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>私人房间加密密钥 {0} 已更新</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>检测到可疑登录：{0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>AI 代理的 MCP 服务器 {0} 已更新</value>
+  </data>
 </root>

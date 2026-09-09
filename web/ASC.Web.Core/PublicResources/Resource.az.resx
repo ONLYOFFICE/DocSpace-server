@@ -1476,4 +1476,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Forma</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Şirkət</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Yaradılma tarixi</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Dövr</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Cəmi</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktiv</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Giriş müddəti bitir</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>İstifadəçi növü</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>İstifadəçi ID-si</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Redaktorlar</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Tam icazələrə malik sənəd redaktorları</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>İstifadəçi kvotası</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Canlı izləyici</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Yalnız oxuma üçün sənəd baxıcıları</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Xarici</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Daxili</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Qalan</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Abunəlik limiti</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Hesabat</value>
+  </data>
 </root>

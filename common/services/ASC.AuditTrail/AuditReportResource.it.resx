@@ -157,13 +157,13 @@
     <value>Agenti</value>
   </data>
   <data name="AIProviderCreated" xml:space="preserve">
-    <value>Provider AI creato: {0}</value>
+    <value>Provider IA creato: {0}</value>
   </data>
   <data name="AIProviderDeleted" xml:space="preserve">
-    <value>Provider AI eliminato: {0}</value>
+    <value>Provider IA eliminato: {0}</value>
   </data>
   <data name="AIProviderUpdated" xml:space="preserve">
-    <value>Provider AI aggiornato: {0}</value>
+    <value>Provider IA aggiornato: {0}</value>
   </data>
   <data name="ApiKeyCreated" xml:space="preserve">
     <value>Chiave API utente creata: {0}</value>
@@ -259,13 +259,13 @@
     <value>Impostazioni navigazione personalizzata aggiornate</value>
   </data>
   <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Agenti AI [{0}]. Imposta quota di archiviazione personalizzata per agenti AI: {1}</value>
+    <value>Agenti IA [{0}]. Imposta quota di archiviazione personalizzata per agenti IA: {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>Agenti AI [{0}]. Imposta quota di archiviazione predefinita per agenti AI: {1}</value>
+    <value>Agenti IA [{0}]. Imposta quota di archiviazione predefinita per agenti IA: {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Agenti AI [{0}]. Quota di archiviazione disabilitata</value>
+    <value>Agenti IA [{0}]. Quota di archiviazione disabilitata</value>
   </data>
   <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
     <value>Stanze [{0}]. Imposta una quota di spazio di archiviazione personalizzata per le stanze: {1}</value>
@@ -754,7 +754,7 @@
     <value>Lista prodotti aggiornata</value>
   </data>
   <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Imposta quota di archiviazione predefinita per agenti AI: {0}</value>
+    <value>Imposta quota di archiviazione predefinita per agenti IA: {0}</value>
   </data>
   <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
     <value>Quota di archiviazione predefinita disabilitata</value>
@@ -1211,5 +1211,50 @@
   </data>
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Impostazioni IA dell'utente aggiornate</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profilo IA assegnato all'agente IA per l'azione: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profilo IA assegnato all'azione: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profilo modello IA creato: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profilo modello IA eliminato: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profilo IA rimosso dall'azione: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profilo modello IA aggiornato: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>File [{0}]. Contrassegnati come letti</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>File [{0}]. File non salvato. La quota di archiviazione del portale è stata superata.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>File [{0}]. Il salvataggio del file supera la quota di archiviazione del portale.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Cartelle [{0}]. Contrassegnate come lette</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Chiave di crittografia della stanza privata {0} creata</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Chiave di crittografia della stanza privata {0} eliminata</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Chiave di crittografia della stanza privata {0} aggiornata</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Rilevato accesso sospetto: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Server MCP {0} dell'agente IA aggiornato</value>
   </data>
 </root>

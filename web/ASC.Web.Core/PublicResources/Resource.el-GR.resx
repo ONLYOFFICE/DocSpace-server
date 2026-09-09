@@ -1476,4 +1476,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Φόρμα</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Εταιρεία</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Ημερομηνία δημιουργίας</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Περίοδος</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Σύνολο</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Ενεργός</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Η πρόσβαση λήγει</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Τύπος χρήστη</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID χρήστη</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Επεξεργαστές</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Επεξεργαστές εγγράφων με πλήρη δικαιώματα</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Ποσόστωση χρήστη</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Ζωντανός θεατής</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Θεατές εγγράφων μόνο για ανάγνωση</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Εξωτερικός</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Εσωτερικός</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Αναφορά</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Υπολειπόμενο</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Όριο συνδρομής</value>
+  </data>
 </root>
