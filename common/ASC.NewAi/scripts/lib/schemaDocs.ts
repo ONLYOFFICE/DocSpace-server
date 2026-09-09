@@ -240,8 +240,12 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   // `type` belong to a file, `base64` to an image. Every renderer builds its
   // sample payload by taking one example per property, so giving both halves an
   // example would describe an attachment that cannot exist. This example is a
-  // file, so `base64` deliberately has none - see the note on variant fields in
-  // `ai-api-findings.md`.
+  // file, so `base64` deliberately has none.
+  //
+  // The rule for any type whose fields are mutually exclusive: give an example
+  // only to the fields the illustrated variant actually carries, and leave the
+  // rest without one rather than filling the gap. `AiChatEvent` below is the
+  // other such type here.
   AiAttachment: {
     examples: {
       id: EXAMPLE_IDS.attachment,
