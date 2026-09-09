@@ -34,14 +34,15 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for deleting a user encryption key.
+/// The encryption key pair of the calling user that is to be deleted.
 /// </summary>
 public class DeleteEncryptionKeyRequestDto
 {
     /// <summary>
-    /// The unique identifier of the encryption key to be deleted.
+    /// The pair to delete, taken from the `id` of an entry of `GET api/2.0/privacyroom/keys`. Only the caller's own
+    /// pairs can be named here.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>9924256B-447C-4F19-9dbd-8ad8c39e8ff5</example>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 }

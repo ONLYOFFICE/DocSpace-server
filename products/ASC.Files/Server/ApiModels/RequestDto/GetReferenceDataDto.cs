@@ -34,37 +34,44 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for getting reference data.
+/// The body of a spreadsheet reference request: the source spreadsheet, and the three ways of naming the document it
+/// refers to, which are tried in the order they are described.
 /// </summary>
 public class GetReferenceDataDto<T>
 {
     /// <summary>
-    /// The unique document identifier used by the service to get a link to the file.
+    /// The id of the referenced file as the document service recorded it in the formula. It is tried first, and only
+    /// when `instanceId` names this portal.
     /// </summary>
-    /// <example>doc_key_123</example>
+    /// <example>512</example>
     public required string FileKey { get; set; }
 
     /// <summary>
-    /// The unique system identifier.
+    /// The portal the reference was made on, as the document service recorded it. Only the id of this portal makes
+    /// the file key resolvable; any other value falls through to the path and the link.
     /// </summary>
-    /// <example>doc_key_123</example>
+    /// <example>1</example>
     public required string InstanceId { get; set; }
 
     /// <summary>
-    /// The source file ID.
+    /// The spreadsheet the formula sits in. The path is resolved against it - the referenced file is looked for among
+    /// the files lying next to it - and it is the file whose read access is checked.
     /// </summary>
     /// <example>1</example>
     public T SourceFileId { get; set; }
 
     /// <summary>
-    /// The file name or relative path for the formula editor.
+    /// The title of the referenced file exactly as the formula spells it, matched against the files lying next to the
+    /// source file. It is tried after the file key, and only when no link is given.
     /// </summary>
-    /// <example>My Document</example>
+    /// <example>Budget 2026.xlsx</example>
     public string Path { get; set; }
 
     /// <summary>
-    /// The file link.
+    /// The web address the formula points at, an editor link of this portal or one of its short links. It is tried
+    /// last, and an address belonging to another site is not resolved at all but handed back for the client to follow
+    /// as it is.
     /// </summary>
-    /// <example>https://example.com</example>
+    /// <example>https://portal.example.com/doc/512</example>
     public string Link { get; set; }
 }

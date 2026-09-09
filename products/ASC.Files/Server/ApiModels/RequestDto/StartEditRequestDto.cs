@@ -34,31 +34,34 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for starting file editing.
+/// The body of an editing session request.
 /// </summary>
 public class StartEdit
 {
     /// <summary>
-    /// Specifies whether to share the file with other users for editing or not.
+    /// Claims the file for this caller alone: the session is opened without asking the document service to track
+    /// co-editing, and the call is refused when anybody else already has the file open. Left off, an ordinary
+    /// co-editing session is opened and others may join it.
     /// </summary>
     /// <example>false</example>
     public bool EditingAlone { get; set; }
 }
 
 /// <summary>
-/// The request parameters for starting file editing.
+/// The parameters of an editing session request: the file in the route and the session options in the body.
 /// </summary>
 public class StartEditRequestDto<T>
 {
     /// <summary>
-    /// The file ID to start editing.
+    /// The file to open the editing session on. The caller needs edit access to it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The file parameters to start editing.
+    /// The session options. The body is required even when it only carries the default, so send an empty object to
+    /// open an ordinary co-editing session.
     /// </summary>
     [FromBody]
     public required StartEdit File { get; set; }

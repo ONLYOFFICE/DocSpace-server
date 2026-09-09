@@ -34,468 +34,517 @@
 namespace ASC.Files.ApiModels.ResponseDto;
 
 /// <summary>
-/// The configuration parameters.
+/// Everything an editor client needs in order to open one document: the document itself, the editor setup for this
+/// caller, and the signature that lets the editors trust both.
 /// </summary>
 public class ConfigurationDto<T>
 {
     /// <summary>
-    /// The document configuration.
+    /// The document as the editors address it: its revision key, title, type, download address and the permissions of
+    /// this caller on it.
     /// </summary>
     /// <example>{"fileType": "docx", "key": "doc-key-123", "title": "Document Title"}</example>
     public required DocumentConfigDto Document { get; set; }
 
     /// <summary>
-    /// The document type.
+    /// The editor family the file opens in - `word`, `cell`, `slide`, `pdf` or `diagram`. It comes back empty for a
+    /// format no editor handles.
     /// </summary>
     /// <example>word</example>
     public required string DocumentType { get; set; }
 
     /// <summary>
-    /// The editor configuration.
+    /// How the editor is set up for this opening: the mode, the language, the interface customization, the callback
+    /// the editors save through, and the account they attribute changes to.
     /// </summary>
     /// <example>{"lang": "en-US", "mode": "edit"}</example>
     public required EditorConfigurationDto EditorConfig { get; set; }
 
     /// <summary>
-    /// The editor type.
+    /// The layout the configuration was actually built for. It echoes the requested one except where the room
+    /// overruled it, as the templates folder does by forcing the embedded viewer.
     /// </summary>
     /// <example>0</example>
     public required EditorType EditorType { get; set; }
 
     /// <summary>
-    /// The editor URL.
+    /// The address of the editor api script the client has to load, with the shard key of this document already
+    /// appended. Load it as it is given rather than assembling it by hand.
     /// </summary>
-    /// <example>http://localhost/editor</example>
+    /// <example>https://portal.example.com/web-apps/apps/api/documents/api.js?shardkey=1_512_3</example>
     [Url]
     public required string EditorUrl { get; set; }
 
     /// <summary>
-    /// The token of the file configuration.
+    /// Signs this whole configuration so that the editors can trust it; anything a client changes in the
+    /// configuration invalidates it. It stays empty on a portal that has no signature secret configured for the
+    /// document service.
     /// </summary>
-    /// <example>token-abc-123</example>
+    /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</example>
     public string Token { get; set; }
 
     /// <summary>
-    /// The platform type.
+    /// The layout spelled as a lowercase word - `desktop`, `mobile` or `embedded` - the same value the editor type
+    /// carries as a number.
     /// </summary>
     /// <example>desktop</example>
     public string Type { get; set; }
 
     /// <summary>
-    /// The file parameters.
+    /// The file the configuration was built for, in the same shape the file listings report it.
     /// </summary>
     /// <example>{"id": 10, "title": "document.docx"}</example>
     public required FileDto<T> File { get; set; }
 
     /// <summary>
-    /// The error message.
+    /// Filled in when the document could not be prepared for opening; the rest of the configuration should then not
+    /// be handed to the editors.
     /// </summary>
-    /// <example>Configuration error</example>
+    /// <example>The file is being converted</example>
     public string ErrorMessage { get; set; }
 
     /// <summary>
-    /// Specifies if the file filling has started or not.
+    /// Whether this caller may start a filling session on the form from inside the editor. It stays empty when the
+    /// file is not a form opened where starting is possible at all.
     /// </summary>
     /// <example>false</example>
     public bool? StartFilling { get; set; }
 
     /// <summary>
-    /// The file filling status.
+    /// True once the caller holds a role in the running filling session of this form. It stays empty outside a
+    /// virtual data room, where roles are the only place it is set.
     /// </summary>
     /// <example>false</example>
     public bool? FillingStatus { get; set; }
 
     /// <summary>
-    /// The start filling mode.
+    /// Which filling button the editor offers: none at all, sharing the form out for others to fill, starting a
+    /// filling session, or starting one inside the form-filling room.
     /// </summary>
     /// <example>0</example>
     public StartFillingMode StartFillingMode { get; set; }
 
     /// <summary>
-    /// The file filling session ID.
+    /// Identifies the filling session this opening belongs to, and is empty when the document is not opened as part
+    /// of one. Submissions made in the editor are collected under it.
     /// </summary>
-    /// <example>session-123-456</example>
+    /// <example>a1b2c3d4-0000-0000-0000-000000000000</example>
     public string FillingSessionId { get; set; }
 
     /// <summary>
-    /// Indicates which quota scope has been exceeded.
+    /// Names the quota that ran out - the user, the room or the portal - and is set only when the document had to be
+    /// opened read-only because of it.
     /// </summary>
     /// <example>0</example>
     public QuotaScope? QuotaExceededScope { get; set; }
 
     /// <summary>
-    /// The generation tool call state. Used to run the agent flow in the editor.
+    /// The generation the editor should run as soon as the document opens. It is set only for a document an AI agent
+    /// produced and left waiting for its content, and is empty for every other file.
     /// </summary>
-    /// <example>{"toolName": "generate_docx", "parameters": {"description": "Create a report"}}</example>
+    /// <example>{"toolName": "GenerateDocx", "parameters": {"description": "Create a quarterly report"}}</example>
     public EditorToolCallStateDto GenerationToolCallState { get; set; }
 }
 
 /// <summary>
-/// The editor configuration parameters.
+/// How the editors behave for this opening: the mode, the language, the interface, and who is editing.
 /// </summary>
+
 public class EditorConfigurationDto
 {
     /// <summary>
-    /// The callback URL of the editor.
+    /// Where the editors post the document back to when they save it. A client must not call it itself; it is the
+    /// address the document service uses.
     /// </summary>
-    /// <example>http://localhost/callback</example>
+    /// <example>https://portal.example.com/filehandler.ashx?action=track&amp;fileid=512</example>
     [Url]
     public string CallbackUrl { get; set; }
 
     /// <summary>
-    /// The co-editing configuration parameters.
+    /// How co-editing starts out for this session and whether the user may switch it in the interface.
     /// </summary>
     public CoEditingConfig CoEditing { get; set; }
 
     /// <summary>
-    /// The creation URL of the editor.
+    /// Where the editor sends the user when they ask for a new document of the same type. It is empty when creating
+    /// one is not offered here.
     /// </summary>
-    /// <example>http://localhost/create</example>
+    /// <example>https://portal.example.com/products/files/?action=create&amp;doctype=word</example>
     public string CreateUrl { get; set; }
 
     /// <summary>
-    /// The customization configuration.
+    /// How the editor interface is dressed for this portal, this document and this layout.
     /// </summary>
     public CustomizationConfigDto Customization { get; set; }
 
     /// <summary>
-    /// The embedded configuration parameters for embedded documents.
+    /// The addresses the framed viewer needs. It is filled in only for the embedded layout.
     /// </summary>
     public EmbeddedConfig Embedded { get; set; }
 
     /// <summary>
-    /// The encryption keys of the editor configuration.
+    /// The caller's end-to-end encryption keys, added only when the document lies in a private room, so that the
+    /// editors can decrypt it in the browser. It is empty everywhere else.
     /// </summary>
     public List<EncryptionKeyDto> EncryptionKeys { get; set; }
 
     /// <summary>
-    /// The language of the editor configuration.
+    /// The culture the editor interface is shown in, taken from the profile of the caller.
     /// </summary>
     /// <example>en-US</example>
     public required string Lang { get; set; }
 
     /// <summary>
-    /// The mode of the editor configuration.
+    /// `edit` when this session may write the document, `view` when it may only read it.
     /// </summary>
     /// <example>edit</example>
     public required string Mode { get; set; }
 
     /// <summary>
-    /// Specifies if the mode is write of the editor configuration.
+    /// Whether this session may write; it is what the mode above says in one word.
     /// </summary>
     /// <example>true</example>
     public bool ModeWrite { get; set; }
 
     /// <summary>
-    /// The plugins configuration.
+    /// Which editor plugins are offered. The portal currently offers none, so the list inside comes back empty.
     /// </summary>
     public PluginsConfig Plugins { get; set; }
 
     /// <summary>
-    /// The recent configuration of the editor.
+    /// The documents offered in the editor's recent list. It is left out altogether when there is nothing to offer.
     /// </summary>
     /// <example>[]</example>
     public List<RecentConfig> Recent { get; set; }
 
     /// <summary>
-    /// The templates of the editor configuration.
+    /// Always empty: the portal no longer passes creation templates through the editor configuration.
     /// </summary>
     /// <example>[]</example>
     public List<TemplatesConfig> Templates { get; set; }
 
     /// <summary>
-    /// The user configuration of the editor.
+    /// The account the editors attribute changes to. It is empty for an anonymous session opened through an external
+    /// link, and the editors then ask for a name themselves.
     /// </summary>
     public UserConfig User { get; set; }
 
 }
 
 /// <summary>
-/// The customization config parameters.
+/// How the editor interface is dressed: branding, the buttons that lead back into the portal, and the behaviour of
+/// review, mentions and form submission.
 /// </summary>
+
 public class CustomizationConfigDto
 {
     /// <summary>
-    /// Specifies if the customization is about.
+    /// Whether the About entry of the editor menu is shown.
     /// </summary>
     /// <example>true</example>
     public bool About { get; set; }
 
     /// <summary>
-    /// The customization customer configuration.
+    /// The branding of the organization running the portal. It is filled in on a server installation only and is
+    /// empty in the cloud.
     /// </summary>
     public CustomerConfigDto Customer { get; set; }
 
     /// <summary>
-    /// The anonymous configuration of the customization.
+    /// How an anonymous participant is treated in this session.
     /// </summary>
     public AnonymousConfigDto Anonymous { get; set; }
 
     /// <summary>
-    /// The feedback configuration of the customization.
+    /// The support link the editor offers behind its feedback button.
     /// </summary>
     public FeedbackConfig Feedback { get; set; }
 
     /// <summary>
-    /// Specifies if the customization should be force saved.
+    /// Whether the editors write intermediate revisions while the document stays open. It is empty when the portal
+    /// leaves the decision to the editors themselves.
     /// </summary>
     /// <example>false</example>
     public bool? Forcesave { get; set; }
 
     /// <summary>
-    /// The go back configuration of the customization.
+    /// Where the editor returns the user to when they leave the document. It is empty when there is nowhere to go
+    /// back to, as in an embedded opening.
     /// </summary>
     public GobackConfig Goback { get; set; }
 
     /// <summary>
-    /// The review configuration of the customization.
+    /// How tracked changes are displayed when the document opens; it depends on whether this session may write.
     /// </summary>
     public ReviewConfig Review { get; set; }
 
     /// <summary>
-    /// The logo of the customization.
+    /// The logo the editor shows, in the variants the current layout and file type need.
     /// </summary>
     public LogoConfigDto Logo { get; set; }
 
     /// <summary>
-    /// Specifies if the share should be mentioned.
+    /// Whether mentioning a user who cannot yet open the document offers to share it with them, instead of silently
+    /// notifying nobody.
     /// </summary>
     /// <example>true</example>
     public bool MentionShare { get; set; }
 
     /// <summary>
-    /// The "Complete &amp; Submit" button settings.
+    /// The submit button of a form: whether it is shown and what it says.
     /// </summary>
     public SubmitForm SubmitForm { get; set; }
 
     /// <summary>
-    /// The parameters of the button that starts filling out the form.
+    /// The button that starts filling out the form. It is empty when this opening offers no such button.
     /// </summary>
     public StartFillingForm StartFillingForm { get; set; }
 }
 
 /// <summary>
-/// The parameters of the button that starts filling out the form.
+/// The button the editor shows to begin filling out a form.
 /// </summary>
 public class StartFillingForm
 {
     /// <summary>
-    /// The caption of the button that starts filling out the form.
+    /// The caption to put on the button, already translated into the language of the caller.
     /// </summary>
-    /// <example>Start Filling</example>
+    /// <example>Start filling</example>
     public string Text { get; set; }
 }
 
 /// <summary>
-/// The logo config parameters.
+/// The logo the editor shows, resolved for the file type and the layout of this opening.
 /// </summary>
+
 public class LogoConfigDto
 {
     /// <summary>
-    /// The image of the logo.
+    /// The logo for the current layout and file type, as the portal branding defines it.
     /// </summary>
-    /// <example>http://localhost/logo.png</example>
+    /// <example>https://portal.example.com/logo/editor.png</example>
     public string Image { get; set; }
 
     /// <summary>
-    /// The dark image of the logo.
+    /// The variant for a dark interface theme.
     /// </summary>
-    /// <example>http://localhost/logo-dark.png</example>
+    /// <example>https://portal.example.com/logo/editor-dark.png</example>
     public string ImageDark { get; set; }
 
     /// <summary>
-    /// The light image of the logo.
+    /// The variant for a light interface theme.
     /// </summary>
-    /// <example>http://localhost/logo-light.png</example>
+    /// <example>https://portal.example.com/logo/editor-light.png</example>
     public string ImageLight { get; set; }
 
     /// <summary>
-    /// The embedded image of the logo.
+    /// The variant for the framed viewer. It is empty in every layout but the embedded one.
     /// </summary>
-    /// <example>http://localhost/logo-embedded.png</example>
+    /// <example>https://portal.example.com/logo/editor-embedded.png</example>
     public string ImageEmbedded { get; set; }
 
     /// <summary>
-    /// The url link of the logo.
+    /// Where clicking the logo takes the user.
     /// </summary>
-    /// <example>http://localhost</example>
+    /// <example>https://portal.example.com</example>
     public string Url { get; set; }
 
     /// <summary>
-    /// Specifies if the logo is visible.
+    /// Whether the logo is shown at all; the mobile layout hides it.
     /// </summary>
     /// <example>true</example>
     public bool Visible { get; set; }
 }
 
 /// <summary>
-/// The anonymous config parameters.
+/// How the editors treat a participant who opened the document without an account.
 /// </summary>
+
 public class AnonymousConfigDto
 {
     /// <summary>
-    /// Specifies if the anonymous is a request.
+    /// Whether the editors ask an anonymous participant for a display name before letting them in. It follows the
+    /// chat permission of the document, since a nameless participant cannot take part in one.
     /// </summary>
     /// <example>false</example>
     public required bool Request { get; set; }
 }
 
 /// <summary>
-/// The customer config parameters.
+/// The branding of the organization running the portal, as the editor About panel shows it. It is reported on a
+/// server installation only.
 /// </summary>
+
 public class CustomerConfigDto
 {
     /// <summary>
-    /// The address of the customer configuration.
+    /// The postal address from the portal branding settings; empty when none was entered.
     /// </summary>
-    /// <example>123 Main Street, City</example>
+    /// <example>20A-6 Ernesta Birznieka-Upisha Street, Riga</example>
     public string Address { get; set; }
 
     /// <summary>
-    /// The logo of the customer configuration.
+    /// The About-panel logo of the organization.
     /// </summary>
-    /// <example>http://localhost/customer-logo.png</example>
+    /// <example>https://portal.example.com/logo/about.png</example>
     public string Logo { get; set; }
 
     /// <summary>
-    /// The dark logo of the customer configuration.
+    /// The About-panel logo for a dark interface theme.
     /// </summary>
-    /// <example>http://localhost/customer-logo-dark.png</example>
+    /// <example>https://portal.example.com/logo/about-dark.png</example>
     public string LogoDark { get; set; }
 
     /// <summary>
-    /// The mail address of the customer configuration.
+    /// The contact address from the portal branding settings.
     /// </summary>
-    /// <example>contact@example.com</example>
+    /// <example>support@example.com</example>
     public string Mail { get; set; }
 
     /// <summary>
-    /// The name of the customer configuration.
+    /// The organization name shown in the editor.
     /// </summary>
-    /// <example>ONLYOFFICE</example>
+    /// <example>Example Ltd</example>
     public string Name { get; set; }
 
     /// <summary>
-    /// The site web address of the customer configuration.
+    /// The website of the organization.
     /// </summary>
     /// <example>https://www.example.com</example>
     public string Www { get; set; }
 }
 
 /// <summary>
-/// The document config parameters.
+/// The document itself as the editors address it: what to fetch, under which revision key, and what this caller may
+/// do with it.
 /// </summary>
+
 public class DocumentConfigDto
 {
     /// <summary>
-    /// The file type of the document.
+    /// The format the editors treat the content as, without the leading dot. For a file that had to be converted this
+    /// is the format it was converted to, not the one it is stored under.
     /// </summary>
     /// <example>docx</example>
     public string FileType { get; set; }
 
     /// <summary>
-    /// The configuration information of the document.
+    /// The facts the editor information panel shows about the document.
     /// </summary>
     public InfoConfigDto Info { get; set; }
 
     /// <summary>
-    /// Specifies if the documnet is linked for current user.
+    /// Whether the caller opened the original document rather than a link pointing at it, which matters only for
+    /// formats whose editing is restricted through links.
     /// </summary>
     /// <example>false</example>
     public bool IsLinkedForMe { get; set; }
 
     /// <summary>
-    /// The document key.
+    /// Identifies the exact revision to the editors: everyone who receives the same key joins the same co-editing
+    /// session, and the key changes as soon as the document is saved.
     /// </summary>
-    /// <example>doc-key-123-abc</example>
+    /// <example>1_512_3</example>
     public string Key { get; set; }
 
     /// <summary>
-    /// The document permissions.
+    /// What this caller may do inside the editor - edit, comment, review, fill, download, print, copy and chat.
     /// </summary>
     public PermissionsConfig Permissions { get; set; }
 
     /// <summary>
-    /// The shared link parameter of the document.
+    /// The name of the query parameter that carries the external share key. It is set only when the document was
+    /// opened through an external link.
     /// </summary>
-    /// <example>share-param-123</example>
+    /// <example>share</example>
     public string SharedLinkParam { get; set; }
 
     /// <summary>
-    /// The shared link key of the document.
+    /// The external share key this opening runs under, empty when the caller opened the document as a portal member.
+    /// The editors pass it back on every request they make for the document.
     /// </summary>
-    /// <example>share-key-abc</example>
+    /// <example>HkQd9nT2</example>
     public string SharedLinkKey { get; set; }
 
     /// <summary>
-    /// The reference data of the document.
+    /// How another spreadsheet names this document in a formula. Pass it to `POST api/2.0/files/file/referencedata`
+    /// to resolve such a reference.
     /// </summary>
     public FileReferenceData ReferenceData { get; set; }
 
     /// <summary>
-    /// The document title.
+    /// The name the editors display. When a past version was opened, the moment that version was created is appended
+    /// to it in brackets.
     /// </summary>
-    /// <example>Document Title</example>
+    /// <example>Budget 2026.xlsx</example>
     public string Title { get; set; }
 
     /// <summary>
-    /// The document url.
+    /// Where the editors fetch the content. It is addressed to the host the document service can reach, which is not
+    /// necessarily the address a browser should follow.
     /// </summary>
-    /// <example>http://localhost/documents/doc.docx</example>
+    /// <example>https://portal.example.com/filehandler.ashx?action=download&amp;fileid=512</example>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
-    /// Indicates whether this is a form.
+    /// Whether the document is a fillable PDF form. A PDF that the portal has never classified is inspected while the
+    /// configuration is built, so the answer is trustworthy even for a freshly uploaded file.
     /// </summary>
     /// <example>false</example>
     public bool IsForm { get; set; }
 
     /// <summary>
-    /// The options of the document.
+    /// Extra instructions for the editors, currently the watermark to draw over the document. It is empty when the
+    /// room sets no watermark.
     /// </summary>
     public Options Options { get; set; }
 }
 
 /// <summary>
-/// The information config parameters.
+/// The facts the editor information panel shows about the open document.
 /// </summary>
+
 public class InfoConfigDto
 {
     /// <summary>
-    /// Specifies if the file is favorite or not.
+    /// Whether the caller has this document among their favorites. It is empty when favorites do not apply - for an
+    /// anonymous caller, for a guest, and for an encrypted document.
     /// </summary>
     /// <example>false</example>
     public bool? Favorite { get; set; }
 
     /// <summary>
-    /// The folder of the file.
+    /// The place of the document as a readable path, its folders joined from the root downwards. It is empty in the
+    /// embedded layout, which shows no such panel.
     /// </summary>
-    /// <example>My Documents</example>
+    /// <example>My documents \\ Reports</example>
     public string Folder { get; set; }
 
     /// <summary>
-    /// The file owner.
+    /// The display name of the owner of the document. It is empty for an anonymous session.
     /// </summary>
     /// <example>John Doe</example>
     public string Owner { get; set; }
 
     /// <summary>
-    /// The sharing settings of the file.
+    /// Who the document is shared with, as the information panel lists it. An empty list means it is shared with
+    /// nobody beyond its owner.
     /// </summary>
     /// <example>[]</example>
     public List<AceShortWrapper> SharingSettings { get; set; }
 
     /// <summary>
-    /// The editor type of the file.
+    /// The layout the information panel is rendered for.
     /// </summary>
     /// <example>0</example>
     public EditorType Type { get; set; }
 
     /// <summary>
-    /// The uploaded file.
+    /// When the document was created on the portal, already formatted for reading in the culture of the caller rather
+    /// than as a machine timestamp.
     /// </summary>
-    /// <example>2025-01-01T00:00:00</example>
+    /// <example>01/01/2026 12:00 PM</example>
     public string Uploaded { get; set; }
 }
 
@@ -767,20 +816,22 @@ public class InfoConfigConverter<T>(AuthContext authContext)
 }
 
 /// <summary>
-/// The editor tool call state. Used to run the agent flow in the editor.
+/// A generation the editor is expected to run as soon as the document opens, left behind by an AI agent that created
+/// the file but not its content.
 /// </summary>
+
 public class EditorToolCallStateDto
 {
     /// <summary>
-    /// The tool name.
+    /// Which generation to run, which also decides the shape of the parameters below.
     /// </summary>
     /// <example>GenerateDocx</example>
     public required string ToolName { get; init; }
 
     /// <summary>
-    /// The tool call parameters.
+    /// The arguments of the generation named above.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>{"description": "Create a quarterly report"}</example>
     public required EditorToolCallParametersDto Parameters { get; init; }
 }
 
@@ -798,8 +849,9 @@ public abstract class EditorToolCallParametersDto;
 public class GenerateDocxToolCallParametersDto : EditorToolCallParametersDto
 {
     /// <summary>
-    /// The description of the document to generate.
+    /// What the generated text document should contain, in the words the request was made in.
     /// </summary>
+    /// <example>A quarterly report on sales with a summary table</example>
     public required string Description { get; init; }
 }
 
@@ -809,8 +861,9 @@ public class GenerateDocxToolCallParametersDto : EditorToolCallParametersDto
 public class GenerateFormToolCallParametersDto : EditorToolCallParametersDto
 {
     /// <summary>
-    /// The description of the form to generate.
+    /// What the generated fillable form should ask for, in the words the request was made in.
     /// </summary>
+    /// <example>An employee onboarding form with name, start date and department</example>
     public required string Description { get; init; }
 }
 
@@ -820,18 +873,21 @@ public class GenerateFormToolCallParametersDto : EditorToolCallParametersDto
 public class GeneratePresentationToolCallParametersDto : EditorToolCallParametersDto
 {
     /// <summary>
-    /// The presentation topic.
+    /// What the generated presentation is about.
     /// </summary>
+    /// <example>Sales results for 2026</example>
     public string Topic { get; init; }
 
     /// <summary>
-    /// The number of slides.
+    /// How many slides to generate, as the request spelled it.
     /// </summary>
+    /// <example>12</example>
     public string SlideCount { get; init; }
 
     /// <summary>
-    /// The visual style.
+    /// The visual style the slides should be generated in.
     /// </summary>
+    /// <example>minimal</example>
     public string Style { get; init; }
 }
 
