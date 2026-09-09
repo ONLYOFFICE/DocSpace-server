@@ -30,6 +30,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { EXAMPLE_AT_ISO, EXAMPLE_AT_MS, EXAMPLE_IDS } from "../../app/exampleIds.js";
+
 // Prose for the schemas derived from `@onlyoffice/ai-chat`, plus the cleanup
 // of the TSDoc syntax that survives the derivation.
 //
@@ -68,26 +70,6 @@ interface SchemaDoc {
   examples?: Readonly<Record<string, unknown>>;
 }
 
-// Identifiers this API mints are UUIDs; one per entity, so no two are
-// confusable in a sample payload. `entityId` carries a DocSpace room ID, which
-// is an integer. The same values appear in `app/openapi.ts` for the parameter
-// and request-body examples, so a payload assembled from this document is
-// internally consistent.
-const ID = {
-  profile: "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
-  thread: "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  message: "16fd2706-8baf-433b-82eb-8c7fada847da",
-  prompt: "9b2ffa1d-3f4c-4e0a-8d71-2c6b5e8a4f93",
-  promptFolder: "2c5ea4c0-4067-41e9-8bad-9b1deb4d3b7d",
-  attachment: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  room: "1234",
-} as const;
-
-// Epoch milliseconds and its ISO-8601 rendering, kept in step so a payload
-// carrying both does not look self-contradictory.
-const AT_MS = 1767225600000;
-const AT_ISO = "2026-01-01T00:00:00.000Z";
-
 const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   AiActionType: {
     description:
@@ -98,7 +80,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
 
   AiProfile: {
     examples: {
-      id: ID.profile,
+      id: EXAMPLE_IDS.profile,
       name: "OpenAI GPT-4o",
       providerType: "openai",
       basedOn: "openai",
@@ -112,7 +94,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
       useResponsesApi: false,
       isCloudProvider: true,
       useProxy: false,
-      createdAt: AT_MS,
+      createdAt: EXAMPLE_AT_MS,
     },
   },
 
@@ -136,23 +118,23 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
 
   AiThreadMessageLike: {
     examples: {
-      id: ID.message,
+      id: EXAMPLE_IDS.message,
       role: "user",
       content: "Summarise the attached contract.",
-      createdAt: AT_ISO,
+      createdAt: EXAMPLE_AT_ISO,
       status: { type: "complete" },
       metadata: {},
-      attachments: [ID.attachment],
+      attachments: [EXAMPLE_IDS.attachment],
     },
   },
 
   AiAiSendStreamBody: {
     examples: {
-      threadId: ID.thread,
+      threadId: EXAMPLE_IDS.thread,
       userMessage: { role: "user", content: "Summarise the attached contract." },
       actionArgs: { isReasoning: false },
-      entityId: ID.room,
-      profileId: ID.profile,
+      entityId: EXAMPLE_IDS.room,
+      profileId: EXAMPLE_IDS.profile,
     },
   },
 
@@ -166,33 +148,33 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
 
   AiAiToolCallData: {
     examples: {
-      threadId: ID.thread,
-      messageId: ID.message,
+      threadId: EXAMPLE_IDS.thread,
+      messageId: EXAMPLE_IDS.message,
       idx: 0,
       message: { role: "assistant", content: "" },
       actionArgs: { isReasoning: false },
-      entityId: ID.room,
-      profileId: ID.profile,
+      entityId: EXAMPLE_IDS.room,
+      profileId: EXAMPLE_IDS.profile,
     },
   },
 
   AiPrompt: {
     examples: {
-      id: ID.prompt,
+      id: EXAMPLE_IDS.prompt,
       name: "Contract summary",
       text: "Summarise the key obligations and dates in the attached contract.",
-      folderId: ID.promptFolder,
-      createdAt: AT_MS,
-      updatedAt: AT_MS,
+      folderId: EXAMPLE_IDS.promptFolder,
+      createdAt: EXAMPLE_AT_MS,
+      updatedAt: EXAMPLE_AT_MS,
     },
   },
 
   AiPromptFolder: {
     examples: {
-      id: ID.promptFolder,
+      id: EXAMPLE_IDS.promptFolder,
       name: "Contract review",
-      createdAt: AT_MS,
-      updatedAt: AT_MS,
+      createdAt: EXAMPLE_AT_MS,
+      updatedAt: EXAMPLE_AT_MS,
     },
   },
 
@@ -226,15 +208,12 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   AiErrorResponse: { examples: { error: "threadId required" } },
   AiSuccessResponse: { examples: { success: true } },
 
-  // Mutation outcomes report failure in the body, so `success: true` with the
-  // error absent is the shape a caller sees on the happy path.
-
   AiThread: {
     examples: {
-      threadId: ID.thread,
+      threadId: EXAMPLE_IDS.thread,
       title: "Contract review",
-      lastEditDate: AT_MS,
-      profileId: ID.profile,
+      lastEditDate: EXAMPLE_AT_MS,
+      profileId: EXAMPLE_IDS.profile,
     },
   },
 
@@ -259,7 +238,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
 
   AiAttachment: {
     examples: {
-      id: ID.attachment,
+      id: EXAMPLE_IDS.attachment,
       kind: "file",
       source: "user",
       title: "contract.docx",
@@ -267,10 +246,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
       base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==",
       path: "file_1234",
       type: 7,
-      messageId: ID.message,
-      threadId: ID.thread,
-      entityId: ID.room,
-      createdAt: AT_MS,
+      messageId: EXAMPLE_IDS.message,
+      threadId: EXAMPLE_IDS.thread,
+      entityId: EXAMPLE_IDS.room,
+      createdAt: EXAMPLE_AT_MS,
       canAnalyze: false,
       formKeys: [],
     },
@@ -340,13 +319,13 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   AiChatEvent: {
     examples: {
       type: "message-delta",
-      messageId: ID.message,
+      messageId: EXAMPLE_IDS.message,
       idx: 0,
-      threadId: ID.thread,
+      threadId: EXAMPLE_IDS.thread,
       autoAllow: false,
       serverExecuted: false,
       title: "Contract review",
-      profileId: ID.profile,
+      profileId: EXAMPLE_IDS.profile,
     },
     properties: {
       message: "The message the event is about, in the state it has reached.",
@@ -443,7 +422,11 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportError: {
-    examples: { kind: "prompt", ref: ID.prompt, error: "a prompt of that name already exists" },
+    examples: {
+      kind: "prompt",
+      ref: EXAMPLE_IDS.prompt,
+      error: "a prompt of that name already exists",
+    },
     properties: {
       ref: "The offending entry - its name or its id.",
       error: "Why the entry was rejected.",
@@ -456,7 +439,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     examples: {
       name: "Contract summary",
       text: "Summarise the key obligations and dates in the attached contract.",
-      folderId: ID.promptFolder,
+      folderId: EXAMPLE_IDS.promptFolder,
     },
     properties: {
       name: "The prompt name.",

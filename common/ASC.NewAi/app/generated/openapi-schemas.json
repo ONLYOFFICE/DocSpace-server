@@ -171,7 +171,7 @@
           "type": "string",
           "description": "Storage-assigned message id (absent on inbound drafts).",
           "examples": [
-            "16fd2706-8baf-433b-82eb-8c7fada847da"
+            "22222222-2222-2222-2222-222222222222"
           ]
         },
         "role": {
@@ -253,7 +253,7 @@
           "description": "Attachments linked to the message.",
           "examples": [
             [
-              "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+              "55555555-5555-5555-5555-555555555555"
             ]
           ]
         }
@@ -272,7 +272,7 @@
           "type": "string",
           "description": "Target thread; a new one is created (with an auto title) when omitted.",
           "examples": [
-            "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+            "11111111-1111-1111-1111-111111111111"
           ]
         },
         "userMessage": {
@@ -305,7 +305,7 @@
           "type": "string",
           "description": "Session-level profile override for this request only.",
           "examples": [
-            "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+            "00000000-0000-0000-0000-000000000000"
           ]
         }
       },
@@ -343,7 +343,7 @@
           "type": "string",
           "description": "The storage identifier of that message.",
           "examples": [
-            "16fd2706-8baf-433b-82eb-8c7fada847da"
+            "22222222-2222-2222-2222-222222222222"
           ]
         },
         "idx": {
@@ -357,7 +357,7 @@
           "type": "string",
           "description": "The thread the event belongs to.",
           "examples": [
-            "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+            "11111111-1111-1111-1111-111111111111"
           ]
         },
         "autoAllow": {
@@ -385,7 +385,7 @@
           "type": "string",
           "description": "The profile that generated the title, when one was used.",
           "examples": [
-            "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+            "00000000-0000-0000-0000-000000000000"
           ]
         }
       },
@@ -590,14 +590,14 @@
           "type": "string",
           "description": "Thread the assistant message belongs to.",
           "examples": [
-            "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+            "11111111-1111-1111-1111-111111111111"
           ]
         },
         "messageId": {
           "type": "string",
           "description": "Storage id of the assistant message holding the tool call.",
           "examples": [
-            "16fd2706-8baf-433b-82eb-8c7fada847da"
+            "22222222-2222-2222-2222-222222222222"
           ]
         },
         "idx": {
@@ -637,7 +637,7 @@
           "type": "string",
           "description": "Session-level profile override for this request only.",
           "examples": [
-            "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+            "00000000-0000-0000-0000-000000000000"
           ]
         }
       },
@@ -676,7 +676,7 @@
           "type": "string",
           "description": "Unique profile identifier (UUID).",
           "examples": [
-            "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+            "00000000-0000-0000-0000-000000000000"
           ]
         },
         "name": {
@@ -917,7 +917,7 @@
           "type": "string",
           "description": "Storage-assigned UUID.",
           "examples": [
-            "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+            "55555555-5555-5555-5555-555555555555"
           ]
         },
         "kind": {
@@ -981,14 +981,14 @@
           "type": "string",
           "description": "Owning message id once linked. Unset while the attachment is a draft.",
           "examples": [
-            "16fd2706-8baf-433b-82eb-8c7fada847da"
+            "22222222-2222-2222-2222-222222222222"
           ]
         },
         "threadId": {
           "type": "string",
           "description": "Owning thread id once linked. Unset while the attachment is a draft.",
           "examples": [
-            "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+            "11111111-1111-1111-1111-111111111111"
           ]
         },
         "entityId": {
@@ -1249,7 +1249,7 @@
           ],
           "description": "The folder to file the prompt under. Omit or send null to leave it outside any folder.",
           "examples": [
-            "2c5ea4c0-4067-41e9-8bad-9b1deb4d3b7d"
+            "44444444-4444-4444-4444-444444444444"
           ]
         }
       },
@@ -1291,7 +1291,7 @@
           "type": "string",
           "description": "Unique prompt identifier (UUID).",
           "examples": [
-            "9b2ffa1d-3f4c-4e0a-8d71-2c6b5e8a4f93"
+            "33333333-3333-3333-3333-333333333333"
           ]
         },
         "name": {
@@ -1312,7 +1312,7 @@
           "type": "string",
           "description": "Optional parent folder ID. `undefined` means the prompt is at the root level.",
           "examples": [
-            "2c5ea4c0-4067-41e9-8bad-9b1deb4d3b7d"
+            "44444444-4444-4444-4444-444444444444"
           ]
         },
         "createdAt": {
@@ -1371,7 +1371,7 @@
           "type": "string",
           "description": "Unique folder identifier (UUID).",
           "examples": [
-            "2c5ea4c0-4067-41e9-8bad-9b1deb4d3b7d"
+            "44444444-4444-4444-4444-444444444444"
           ]
         },
         "name": {
@@ -1520,7 +1520,7 @@
           "type": "string",
           "description": "The offending entry - its name or its id.",
           "examples": [
-            "9b2ffa1d-3f4c-4e0a-8d71-2c6b5e8a4f93"
+            "33333333-3333-3333-3333-333333333333"
           ]
         },
         "error": {
@@ -1546,7 +1546,7 @@
           "type": "string",
           "description": "Unique thread identifier (UUID).",
           "examples": [
-            "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+            "11111111-1111-1111-1111-111111111111"
           ]
         },
         "title": {
@@ -1575,7 +1575,7 @@
           "type": "string",
           "description": "ID of the profile used for this thread. Links to `Profile.id`.",
           "examples": [
-            "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+            "00000000-0000-0000-0000-000000000000"
           ]
         }
       },

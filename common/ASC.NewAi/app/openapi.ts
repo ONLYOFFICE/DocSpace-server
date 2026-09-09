@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { RouteSpec } from "@onlyoffice/ai-chat/core";
+import { EXAMPLE_AT_MS, EXAMPLE_IDS } from "./exampleIds.js";
 
 // OpenAPI document generation for the AI service.
 //
@@ -216,50 +217,35 @@ const OPERATION_PARAM_DOCS: Readonly<Record<string, Readonly<Record<string, stri
 // so the values here are shaped like the real ones: an agent ID is the integer
 // DocSpace uses for a room, a profile ID is a UUID, and the cursor is the
 // JSON-encoded sort key the previous page ended on rather than an opaque token.
-// Every identifier this API mints is a UUID - the schemas say so for threads,
-// messages, prompts, folders, attachments and profiles alike - so the values
-// below are UUIDs, one per entity so two of them are never confusable in a
-// sample payload. `entityId` is the exception: it carries a DocSpace room ID,
-// which is an integer.
-const ID_EXAMPLES = {
-  profile: "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
-  thread: "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  message: "16fd2706-8baf-433b-82eb-8c7fada847da",
-  prompt: "9b2ffa1d-3f4c-4e0a-8d71-2c6b5e8a4f93",
-  promptFolder: "2c5ea4c0-4067-41e9-8bad-9b1deb4d3b7d",
-  attachment: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  room: "1234",
-} as const;
-
 const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
   actionType: "Chat",
   count: "20",
-  cursor: `{"id":"${ID_EXAMPLES.thread}","lastEditDate":1767225600000}`,
+  cursor: `{"id":"${EXAMPLE_IDS.thread}","lastEditDate":${EXAMPLE_AT_MS}}`,
   direction: "desc",
-  entityId: ID_EXAMPLES.room,
-  folderId: ID_EXAMPLES.promptFolder,
+  entityId: EXAMPLE_IDS.room,
+  folderId: EXAMPLE_IDS.promptFolder,
   limit: 20,
-  messageId: ID_EXAMPLES.message,
+  messageId: EXAMPLE_IDS.message,
   name: "acme-mcp",
-  profileId: ID_EXAMPLES.profile,
+  profileId: EXAMPLE_IDS.profile,
   query: "contract",
   serverType: "docspace",
   startIndex: 0,
-  threadId: ID_EXAMPLES.thread,
+  threadId: EXAMPLE_IDS.thread,
   toolName: "docspace_get_folder",
 };
 
 // Per-operation examples for `id`, which the engines reuse for four entities,
 // and for the agent routes, whose `id` is an integer room ID rather than a UUID.
 const OPERATION_PARAM_EXAMPLES: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
-  aiAgentsGet: { id: ID_EXAMPLES.room },
-  aiAgentsUpdate: { id: ID_EXAMPLES.room },
-  aiAgentsDelete: { id: ID_EXAMPLES.room },
-  aiProfilesGetById: { id: ID_EXAMPLES.profile },
-  aiPromptsGetById: { id: ID_EXAMPLES.prompt },
-  aiPromptsGetFolderById: { id: ID_EXAMPLES.promptFolder },
-  aiOpenaiChatCompletions: { profileId: ID_EXAMPLES.profile },
-  aiOpenaiImagesGenerations: { profileId: ID_EXAMPLES.profile },
+  aiAgentsGet: { id: EXAMPLE_IDS.room },
+  aiAgentsUpdate: { id: EXAMPLE_IDS.room },
+  aiAgentsDelete: { id: EXAMPLE_IDS.room },
+  aiProfilesGetById: { id: EXAMPLE_IDS.profile },
+  aiPromptsGetById: { id: EXAMPLE_IDS.prompt },
+  aiPromptsGetFolderById: { id: EXAMPLE_IDS.promptFolder },
+  aiOpenaiChatCompletions: { profileId: EXAMPLE_IDS.profile },
+  aiOpenaiImagesGenerations: { profileId: EXAMPLE_IDS.profile },
 };
 
 // Resolve the prose for one parameter of one operation, or `undefined` when
@@ -932,39 +918,39 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
   // Single-argument routes: the body is the value itself.
   aiAssignmentsCascadeProfileDelete: {
     description: "The ID of the profile to detach from every assignment, as a bare JSON string.",
-    example: ID_EXAMPLES.profile,
+    example: EXAMPLE_IDS.profile,
   },
   aiAttachmentsDelete: {
     description: "The ID of the attachment to delete, as a bare JSON string.",
-    example: ID_EXAMPLES.attachment,
+    example: EXAMPLE_IDS.attachment,
   },
   aiAttachmentsDeleteMany: {
     description: "The IDs of the attachments to delete, as a bare JSON array of strings.",
-    example: [ID_EXAMPLES.attachment, "e1b8c3d4-9f2a-4b6c-8d5e-7a90b1c2d3e4"],
+    example: [EXAMPLE_IDS.attachment, EXAMPLE_IDS.attachmentSecond],
   },
   aiAttachmentsGet: {
     description: "The ID of the attachment to read, as a bare JSON string.",
-    example: ID_EXAMPLES.attachment,
+    example: EXAMPLE_IDS.attachment,
   },
   aiAttachmentsGetMany: {
     description:
       "The IDs of the attachments to read, as a bare JSON array of strings. The answer is " +
       "aligned with this array by position.",
-    example: [ID_EXAMPLES.attachment, "e1b8c3d4-9f2a-4b6c-8d5e-7a90b1c2d3e4"],
+    example: [EXAMPLE_IDS.attachment, EXAMPLE_IDS.attachmentSecond],
   },
   aiPreferencesClearDeepMode: {
     description:
       "The ID of the room whose preference is cleared, as a bare JSON string. Send an empty " +
       "body to clear the portal-wide preference.",
-    example: ID_EXAMPLES.room,
+    example: EXAMPLE_IDS.room,
   },
   aiProfilesDelete: {
     description: "The ID of the profile to delete, as a bare JSON string.",
-    example: ID_EXAMPLES.profile,
+    example: EXAMPLE_IDS.profile,
   },
   aiProfilesTestConnection: {
     description: "The ID of the profile to probe, as a bare JSON string.",
-    example: ID_EXAMPLES.profile,
+    example: EXAMPLE_IDS.profile,
   },
   aiPromptsCreateFolder: {
     description: "The name of the folder to create, as a bare JSON string.",
@@ -972,23 +958,23 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
   },
   aiPromptsDelete: {
     description: "The ID of the prompt to delete, as a bare JSON string.",
-    example: ID_EXAMPLES.prompt,
+    example: EXAMPLE_IDS.prompt,
   },
   aiPromptsDeleteFolder: {
     description: "The ID of the folder to delete, as a bare JSON string.",
-    example: ID_EXAMPLES.promptFolder,
+    example: EXAMPLE_IDS.promptFolder,
   },
   aiThreadsClearMessages: {
     description: "The ID of the thread to empty, as a bare JSON string.",
-    example: ID_EXAMPLES.thread,
+    example: EXAMPLE_IDS.thread,
   },
   aiThreadsDelete: {
     description: "The ID of the thread to delete, as a bare JSON string.",
-    example: ID_EXAMPLES.thread,
+    example: EXAMPLE_IDS.thread,
   },
   aiThreadsDeleteMessage: {
     description: "The ID of the message to delete, as a bare JSON string.",
-    example: ID_EXAMPLES.message,
+    example: EXAMPLE_IDS.message,
   },
   aiWebSearchClear: {
     description:
@@ -1002,8 +988,8 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
       "A map of action type to profile ID. Every key has to be a known action type and every " +
       "value a profile ID; one bad entry rejects the whole map.",
     example: {
-      Chat: ID_EXAMPLES.profile,
-      Default: ID_EXAMPLES.profile,
+      Chat: EXAMPLE_IDS.profile,
+      Default: EXAMPLE_IDS.profile,
     },
   },
   aiEditorToolsCall: {
