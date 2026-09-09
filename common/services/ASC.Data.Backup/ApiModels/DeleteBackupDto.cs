@@ -42,7 +42,7 @@ public class DeleteBackupDto
     /// The ID of the backup to delete, taken from the route. It is the `id` of a record listed by
     /// `GET api/2.0/backup/getbackuphistory`, which is also the `taskId` the backup was started with.
     /// </summary>
-    /// <example>5f4b2c1a-9d3e-4f8a-b7c6-1e2d3f4a5b6c</example>
+    /// <example>11111111-1111-1111-1111-111111111111</example>
     [FromRoute(Name = "id")]
     public required Guid BackupId { get; set; }
 }

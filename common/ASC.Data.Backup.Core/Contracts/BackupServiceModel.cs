@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -83,7 +83,7 @@ public class BackupHistoryRecord
     /// `DELETE api/2.0/backup/deletebackup/{id}` or as the `backupId` of
     /// `POST api/2.0/backup/startrestore`.
     /// </summary>
-    /// <example>5f4b2c1a-9d3e-4f8a-b7c6-1e2d3f4a5b6c</example>
+    /// <example>11111111-1111-1111-1111-111111111111</example>
     public required Guid Id { get; set; }
 
     /// <summary>
