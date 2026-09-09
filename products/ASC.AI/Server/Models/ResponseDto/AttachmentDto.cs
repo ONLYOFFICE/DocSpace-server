@@ -46,6 +46,22 @@ public class AttachmentDto
     public string? EntryId { get; init; }
     public long CreatedAt { get; init; }
     public bool CanAnalyze { get; init; }
+
+    /// <summary>
+    /// Starter questions about the attached form's submissions, in the current user's language. Empty
+    /// unless <see cref="CanAnalyze"/> is set, and always empty on the read paths.
+    /// </summary>
+    public IReadOnlyList<FormQuestionDto> SuggestedQuestions { get; init; } = [];
+}
+
+/// <summary>A starter question about a form's submissions, and the request the chat gets when it is picked.</summary>
+public class FormQuestionDto
+{
+    /// <summary>Short, button-sized question.</summary>
+    public required string Question { get; init; }
+
+    /// <summary>The expanded request sent to the chat.</summary>
+    public required string Prompt { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

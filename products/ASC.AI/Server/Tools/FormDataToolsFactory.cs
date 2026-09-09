@@ -36,10 +36,8 @@ namespace ASC.AI.Tools;
 [Scope(typeof(IAiToolFactory))]
 public class FormDataToolsFactory(
     ExternalDatabaseClient externalDatabaseClient,
-    IDaoFactory daoFactory,
-    FormFillingReportCreator formFillingReportCreator,
-    FileSecurity fileSecurity,
-    ILogger<FormDataToolsFactory> logger) : IAiToolFactory
+    FormSchemaProvider formSchemaProvider,
+    FileSecurity fileSecurity) : IAiToolFactory
 {
     private const string QueryName = "query_form_data";
     private const string AggregateName = "aggregated_form_data";
@@ -241,39 +239,20 @@ public class FormDataToolsFactory(
 
     private async Task<InitData?> TryInitAsync(File<int> file)
     {
-        try
+        var schema = await formSchemaProvider.TryReadAsync(file);
+        if (schema is null)
         {
-            var fileDao = daoFactory.GetFileDao<int>();
-
-            var properties = await fileDao.GetProperties(file.Id);
-            var formFilling = properties?.FormFilling;
-
-            if (formFilling?.StartFilling != true || formFilling.OriginalFormId != file.Id)
-            {
-                return null;
-            }
-
-            var tableName = FormFillingReportCreator.GetTableName(file.Id, file.Version);
-            if (!await externalDatabaseClient.TableExistsAsync(tableName))
-            {
-                return null;
-            }
-
-            var rowCount = await externalDatabaseClient.CountAsync(tableName);
-            var columns = (await formFillingReportCreator.GetColumnDefinitionsAsync(file.Id, file.Version)).ToList();
-            var allowedColumns = columns.Select(c => c.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            var pkColumn = columns.FirstOrDefault(c => c.IsPrimaryKey)
-                ?? columns.FirstOrDefault(c => c.Type == DbColumnType.Integer)
-                ?? columns.FirstOrDefault();
-
-            return new InitData(tableName, rowCount, columns, allowedColumns, pkColumn?.Name ?? string.Empty);
-        }
-        catch (Exception e)
-        {
-            logger.WarnFormDataToolsFailed(e, file.Id);
             return null;
         }
+
+        var columns = schema.Columns;
+        var allowedColumns = columns.Select(c => c.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var pkColumn = columns.FirstOrDefault(c => c.IsPrimaryKey)
+            ?? columns.FirstOrDefault(c => c.Type == DbColumnType.Integer)
+            ?? columns.FirstOrDefault();
+
+        return new InitData(schema.TableName, schema.RowCount, columns, allowedColumns, pkColumn?.Name ?? string.Empty);
     }
 
     private AIFunction MakeAggregateFunction(
@@ -562,18 +541,7 @@ public class FormDataToolsFactory(
 
     private static string FormatTableAndColumns(string tableName, IEnumerable<DbColumnDefinition> columns)
     {
-        return $"Table: '{tableName}'. Available columns: {string.Join(", ", columns.Select(FormatColumn))}";
-    }
-
-    private static string FormatColumn(DbColumnDefinition c)
-    {
-        var label = c.Label is not null && c.Label != c.Name ? $" \"{c.Label}\"" : string.Empty;
-        var desc = $"{c.Name}{label} ({c.Type})";
-        if (c.EnumValues?.Count > 0)
-        {
-            desc += $" [{string.Join("/", c.EnumValues)}]";
-        }
-        return desc;
+        return $"Table: '{tableName}'. Available columns: {string.Join(", ", columns.Select(c => FormSchemaFormatter.FormatColumn(c)))}";
     }
 
     private static readonly HashSet<string> _validDateParts =
@@ -713,10 +681,4 @@ public class FormDataToolsFactory(
             writer.WriteEndArray();
         }
     }
-}
-
-internal static partial class FormDataToolsFactoryLogger
-{
-    [LoggerMessage(LogLevel.Warning, "Failed to initialize form data tools for file {FileId}")]
-    public static partial void WarnFormDataToolsFailed(this ILogger<FormDataToolsFactory> logger, Exception exception, int fileId);
 }

@@ -112,8 +112,11 @@ global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.AI;
 
+global using System.Collections.Frozen;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
+global using System.Diagnostics;
+global using System.Globalization;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Text;
@@ -125,3 +128,5 @@ global using System.Security;
 global using Swashbuckle.AspNetCore.Annotations;
 
 global using Riok.Mapperly.Abstractions;
+
+global using ZiggyCreatures.Caching.Fusion;

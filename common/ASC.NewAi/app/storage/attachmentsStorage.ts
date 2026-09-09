@@ -42,7 +42,8 @@ import {
   canTakeUpload,
 } from "./docspaceFilesApi.js";
 import { getForwardedHeaders } from "../requestContext.js";
-import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
+import { getBoolean, getNumber, getObjectArray, getString, isObject } from "../narrow.js";
+import type { JsonObject } from "../narrow.js";
 import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
@@ -318,6 +319,35 @@ function dtoToAttachment(raw: unknown): Attachment | null {
   const canAnalyze = getBoolean(raw, "canAnalyze");
   if (canAnalyze !== undefined) {
     result.canAnalyze = canAnalyze;
+  }
+  // Starter questions C# pre-generated from the form's column schema, in the user's language.
+  const suggestedQuestions = readSuggestedQuestions(raw);
+  if (suggestedQuestions.length > 0) {
+    // `Attachment` does not declare this field yet; drop the cast once the package ships it.
+    (result as AttachmentWithSuggestions).suggestedQuestions = suggestedQuestions;
+  }
+  return result;
+}
+
+interface SuggestedQuestion {
+  question: string;
+  prompt: string;
+}
+
+type AttachmentWithSuggestions = Attachment & { suggestedQuestions?: SuggestedQuestion[] };
+
+function readSuggestedQuestions(raw: JsonObject): SuggestedQuestion[] {
+  const entries = getObjectArray(raw, "suggestedQuestions");
+  if (entries === undefined) {
+    return [];
+  }
+  const result: SuggestedQuestion[] = [];
+  for (const entry of entries) {
+    const question = getString(entry, "question");
+    const prompt = getString(entry, "prompt");
+    if (question !== undefined && prompt !== undefined) {
+      result.push({ question, prompt });
+    }
   }
   return result;
 }

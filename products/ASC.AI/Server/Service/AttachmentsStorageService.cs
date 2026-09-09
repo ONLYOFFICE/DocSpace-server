@@ -44,6 +44,7 @@ public class AttachmentResult
     public string? ThirdpartyEntryId { get; init; }
     public DateTime CreatedAt { get; init; }
     public bool CanAnalyze { get; init; }
+    public IReadOnlyList<FormQuestionSuggestion> SuggestedQuestions { get; init; } = [];
 }
 
 [Scope]
@@ -58,10 +59,18 @@ public class AttachmentsStorageService(
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     ExternalDatabaseClient externalDatabaseClient,
+    FormSchemaProvider formSchemaProvider,
+    FormPreAnalysisService formPreAnalysisService,
     ILogger<AttachmentsStorageService> logger,
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly TimeSpan _downloadUrlExpiration = TimeSpan.FromHours(1);
+
+    // Shared across the batch so several forms cannot multiply the wait. A form that runs out of it
+    // still gets its questions in the background, so the floor only has to be enough to start the call.
+    private static readonly TimeSpan _preAnalysisWait = TimeSpan.FromSeconds(8);
+    private static readonly TimeSpan _minPreAnalysisWait = TimeSpan.FromMilliseconds(200);
+
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
     public async IAsyncEnumerable<AttachmentResult> CreateManyAsync(HashSet<string> entryIds)
@@ -109,10 +118,13 @@ public class AttachmentsStorageService(
         var created = await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, createParams);
         var index = 0;
 
+        // Before the loop: this enumerable is consumed lazily, so analysing inside it would spread
+        // model calls across the whole response.
+        var analyses = await AnalyzeFormsAsync(internalFiles);
+
         foreach (var file in internalFiles)
         {
-            var canAnalyze = await CanAnalyzeFormAsync(file);
-            yield return await ToResultAsync(intDao, created[index++], file, canAnalyze);
+            yield return await ToResultAsync(intDao, created[index++], file, analyses.GetValueOrDefault(file.Id));
         }
 
         foreach (var file in thirdpartyFiles)
@@ -167,33 +179,43 @@ public class AttachmentsStorageService(
     }
 
     /// <summary>
-    /// Reports whether an attached file is a started filling-form whose submissions can be analysed by the
-    /// form-data tools. Returns false when the file is not such a form, no external forms database is
-    /// configured, or its submission table does not yet exist.
+    /// The attached files that are started filling-forms with an analysable submission table, and the
+    /// starter questions to offer for them. Anything else is absent from the result.
     /// </summary>
-    private async Task<bool> CanAnalyzeFormAsync(File<int> file)
+    private async Task<Dictionary<int, FormAnalysis>> AnalyzeFormsAsync(List<File<int>> files)
     {
-        if (file is not { IsForm: true } || !externalDatabaseClient.IsEnabled())
+        if (!externalDatabaseClient.IsEnabled() || !files.Exists(f => f.IsForm))
         {
-            return false;
+            return [];
         }
 
+        var result = new Dictionary<int, FormAnalysis>();
+        var deadline = DateTime.UtcNow + _preAnalysisWait;
+
+        foreach (var file in files.Where(f => f.IsForm))
+        {
+            var wait = deadline - DateTime.UtcNow;
+            result[file.Id] = await AnalyzeFormAsync(file, wait > _minPreAnalysisWait ? wait : _minPreAnalysisWait);
+        }
+
+        return result;
+    }
+
+    private async Task<FormAnalysis> AnalyzeFormAsync(File<int> file, TimeSpan wait)
+    {
         try
         {
-            var properties = await DaoFactory.GetFileDao<int>().GetProperties(file.Id);
-            var formFilling = properties?.FormFilling;
-            if (formFilling?.StartFilling != true || formFilling.OriginalFormId != file.Id)
+            if (await formSchemaProvider.TryGetTableNameAsync(file) is null)
             {
-                return false;
+                return FormAnalysis.None;
             }
 
-            var tableName = FormFillingReportCreator.GetTableName(file.Id, file.Version);
-            return await externalDatabaseClient.TableExistsAsync(tableName);
+            return new FormAnalysis(true, await formPreAnalysisService.GenerateAsync(file, wait));
         }
         catch (Exception e)
         {
             logger.WarnFormAnalysisFailed(e, file.Id);
-            return false;
+            return FormAnalysis.None;
         }
     }
 
@@ -276,13 +298,13 @@ public class AttachmentsStorageService(
         };
     }
 
-    private static async Task<AttachmentResult> ToResultAsync<T>(IFileDao<T> fileDao, Attachment attachment, File<T> file, bool canAnalyze = false)
+    private static async Task<AttachmentResult> ToResultAsync<T>(IFileDao<T> fileDao, Attachment attachment, File<T> file, FormAnalysis? analysis = null)
     {
         var dataUrl = attachment.Kind == AttachmentKind.Image
             ? await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration)
             : null;
 
-        return ToResult(attachment, dataUrl, file is File<string> thirdpartyFile ? thirdpartyFile.Id : null, canAnalyze);
+        return ToResult(attachment, dataUrl, file is File<string> thirdpartyFile ? thirdpartyFile.Id : null, analysis);
     }
 
     private async Task<AttachmentResult> ToResultAsync(Attachment attachment)
@@ -308,8 +330,10 @@ public class AttachmentsStorageService(
         return string.IsNullOrEmpty(entryId) ? null : entryId;
     }
 
-    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl, string? thirdpartyEntryId, bool canAnalyze = false)
+    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl, string? thirdpartyEntryId, FormAnalysis? analysis = null)
     {
+        analysis ??= FormAnalysis.None;
+
         return new AttachmentResult
         {
             Id = attachment.Id,
@@ -320,7 +344,8 @@ public class AttachmentsStorageService(
             EntryId = attachment.EntryId,
             ThirdpartyEntryId = thirdpartyEntryId,
             CreatedAt = attachment.CreatedAt,
-            CanAnalyze = canAnalyze
+            CanAnalyze = analysis.CanAnalyze,
+            SuggestedQuestions = analysis.SuggestedQuestions
         };
     }
 
@@ -341,6 +366,11 @@ public class AttachmentsStorageService(
         }
 
         return null;
+    }
+
+    private sealed record FormAnalysis(bool CanAnalyze, IReadOnlyList<FormQuestionSuggestion> SuggestedQuestions)
+    {
+        public static readonly FormAnalysis None = new(false, []);
     }
 }
 
