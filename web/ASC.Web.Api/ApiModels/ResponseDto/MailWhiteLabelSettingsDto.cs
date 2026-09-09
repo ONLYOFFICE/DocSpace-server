@@ -34,24 +34,27 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The mail white label settings parameters.
+/// What the notification letters of the installation print below their body.
 /// </summary>
 public class MailWhiteLabelSettingsDto
 {
     ///<summary>
-    /// Specifies if the mail footer is enabled or not.
+    /// Whether the letters carry a footer at all. While it is `false` neither the vendor block nor the social
+    /// media links are printed, whatever `footerSocialEnabled` says. It starts out `true`.
     ///</summary>
     /// <example>true</example>
     public bool FooterEnabled { get; set; }
 
     ///<summary>
-    /// Specifies if the footer with social media contacts is enabled or not.
+    /// Whether the footer includes the vendor's social media links. It starts out `true` and has no effect while
+    /// `footerEnabled` is `false`.
     ///</summary>
     /// <example>true</example>
     public bool FooterSocialEnabled { get; set; }
 
     ///<summary>
-    /// Specifies if the mail white label settings are default or not.
+    /// Whether both flags are still switched on as they ship. It turns `false` as soon as either of them is saved
+    /// off, and the values are installation-wide, so every portal of the installation reports the same ones.
     ///</summary>
     /// <example>false</example>
     public bool IsDefault { get; set; }

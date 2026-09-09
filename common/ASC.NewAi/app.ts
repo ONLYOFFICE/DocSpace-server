@@ -46,11 +46,16 @@ import { getAppConfig } from "./config/index.js";
 import registerRoutes, { API_PREFIX } from "./app/routes.js";
 import { requestContextMiddleware } from "./app/requestContext.js";
 import { storage } from "./app/storage/index.js";
+import { registerOnlyofficeSourceProvider } from "./app/providers/onlyofficeSourceProvider.js";
 
 const config = getAppConfig();
 
 await storage.init();
 logger.info("Storage initialized");
+
+// Before the first request: the ONLYOFFICE provider is constructed per round
+// from the registry, and the override must already be the registered one.
+await registerOnlyofficeSourceProvider();
 
 const app = express();
 

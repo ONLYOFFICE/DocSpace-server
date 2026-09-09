@@ -101,7 +101,7 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
             {
                 JsonValueKind.String => await CheckAndCopyFile(fileThirdPartyDao, fileId.Value.GetString(), extension),
                 JsonValueKind.Number => await CheckAndCopyFile(fileDao, fileId.Value.GetInt32(), extension),
-                _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound)
+                _ => throw new ArgumentException(FilesCommonResource.ErrorMessage_FileNotFound)
             };
             setting.SelectedFile = template.Id;
         }
@@ -208,7 +208,7 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
     private async Task<File<int>> CheckAndCopyFile<T>(IFileDao<T> dao, T fileId, string extension)
     {
         FileEntry<T> file = await dao.GetFileAsync(fileId)
-            ?? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
 
         if (!await fileSecurity.CanCopyAsync(file))
         {

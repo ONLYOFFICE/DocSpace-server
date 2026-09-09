@@ -409,8 +409,9 @@ export type Req_aiThreadsOpenOrCreate = {
   /** Opaque scope token persisted on a freshly created thread. */
   entityId?: string;
   /**
-   * Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is
-   * re-resolved server-side before reaching the provider as metadata.
+   * Optional entity hint (lib 0.5.64): only `entityId` is read; the source
+   * (`source_id` / `source_type` / `source_title`) is re-resolved server-side
+   * before reaching the provider as metadata.
    */
   entityMeta?: { entityId?: string; entityTitle?: string };
 };
@@ -438,8 +439,9 @@ export type Req_aiThreadsRegenerateTitle = {
   /** Profile used to regenerate the title. */
   profile: Profile;
   /**
-   * Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is
-   * re-resolved server-side before reaching the provider as metadata.
+   * Optional entity hint (lib 0.5.64): only `entityId` is read; the source
+   * (`source_id` / `source_type` / `source_title`) is re-resolved server-side
+   * before reaching the provider as metadata.
    */
   entityMeta?: { entityId?: string; entityTitle?: string };
 };

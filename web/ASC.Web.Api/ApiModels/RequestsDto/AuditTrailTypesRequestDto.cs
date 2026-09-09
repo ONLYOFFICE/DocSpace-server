@@ -34,19 +34,22 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The parameters for filtering the audit trail types.
+/// The two filters that prune the audit vocabulary tree to one product or one module.
 /// </summary>
 public class AuditTrailTypesRequestDto
 {
     /// <summary>
-    /// The type of product related to the audit trail.
+    /// The product to keep, spelled as `GET api/2.0/security/audit/types` lists it under `productTypes`. Omitting
+    /// it keeps every product; a value no product matches yields an empty list rather than an error.
     /// </summary>
     /// <example>Documents</example>
     [FromQuery(Name = "productType")]
     public ProductType? ProductType { get; set; }
 
     /// <summary>
-    /// The location associated with the audit trail.
+    /// The module to keep inside the products that survive `productType`, spelled as
+    /// `GET api/2.0/security/audit/types` lists it under `moduleTypes`. Omitting it keeps every module of those
+    /// products.
     /// </summary>
     /// <example>Files</example>
     [FromQuery(Name = "moduleType")]
