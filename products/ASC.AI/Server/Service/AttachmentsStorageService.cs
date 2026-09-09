@@ -66,10 +66,10 @@ public class AttachmentsStorageService(
 {
     private static readonly TimeSpan _downloadUrlExpiration = TimeSpan.FromHours(1);
 
-    // Shared across the batch so several forms cannot multiply the wait. A form that runs out of it
-    // still gets its questions in the background, so the floor only has to be enough to start the call.
-    private static readonly TimeSpan _preAnalysisWait = TimeSpan.FromSeconds(8);
-    private static readonly TimeSpan _minPreAnalysisWait = TimeSpan.FromMilliseconds(200);
+    // The attach never waits for the model — only long enough to start the call, which then finishes
+    // in the background and fills the cache. The client picks the questions up by re-reading the
+    // attachment; a form whose answer is already cached still gets it here, immediately.
+    private static readonly TimeSpan _preAnalysisStartWait = TimeSpan.FromMilliseconds(200);
 
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
@@ -140,7 +140,7 @@ public class AttachmentsStorageService(
         var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id)
             ?? throw new ItemNotFoundException();
 
-        return await ToResultAsync(attachment);
+        return await ToResultAsync(attachment, withFormAnalysis: true);
     }
 
     public async IAsyncEnumerable<AttachmentResult> ReadManyByIdsAsync(HashSet<Guid> ids)
@@ -190,18 +190,16 @@ public class AttachmentsStorageService(
         }
 
         var result = new Dictionary<int, FormAnalysis>();
-        var deadline = DateTime.UtcNow + _preAnalysisWait;
 
         foreach (var file in files.Where(f => f.IsForm))
         {
-            var wait = deadline - DateTime.UtcNow;
-            result[file.Id] = await AnalyzeFormAsync(file, wait > _minPreAnalysisWait ? wait : _minPreAnalysisWait);
+            result[file.Id] = await AnalyzeFormAsync(file);
         }
 
         return result;
     }
 
-    private async Task<FormAnalysis> AnalyzeFormAsync(File<int> file, TimeSpan wait)
+    private async Task<FormAnalysis> AnalyzeFormAsync(File<int> file)
     {
         try
         {
@@ -210,12 +208,48 @@ public class AttachmentsStorageService(
                 return FormAnalysis.None;
             }
 
-            return new FormAnalysis(true, await formPreAnalysisService.GenerateAsync(file, wait));
+            return new FormAnalysis(true, await formPreAnalysisService.GenerateAsync(file, _preAnalysisStartWait));
         }
         catch (Exception e)
         {
             logger.WarnFormAnalysisFailed(e, file.Id);
             return FormAnalysis.None;
+        }
+    }
+
+    /// <summary>
+    /// The flag plus whatever questions are already cached, never starting a generation. Batch reads
+    /// skip it: they hydrate whole threads, and a file lookup per attachment would not pay for itself.
+    /// </summary>
+    private async Task<FormAnalysis?> ReadCachedAnalysisAsync(Attachment attachment)
+    {
+        if (attachment.EntryId is not { } entryId || !externalDatabaseClient.IsEnabled())
+        {
+            return null;
+        }
+
+        try
+        {
+            var file = await DaoFactory.GetFileDao<int>().GetFileAsync(entryId);
+            if (file is not { IsForm: true })
+            {
+                return null;
+            }
+
+            // Questions exist only for analysable forms, so having them settles the flag without
+            // touching the external database.
+            var cached = await formPreAnalysisService.ReadCachedAsync(file);
+            if (cached.Count > 0)
+            {
+                return new FormAnalysis(true, cached);
+            }
+
+            return await formSchemaProvider.TryGetTableNameAsync(file) is null ? null : new FormAnalysis(true, cached);
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormAnalysisFailed(e, entryId);
+            return null;
         }
     }
 
@@ -307,7 +341,7 @@ public class AttachmentsStorageService(
         return ToResult(attachment, dataUrl, file is File<string> thirdpartyFile ? thirdpartyFile.Id : null, analysis);
     }
 
-    private async Task<AttachmentResult> ToResultAsync(Attachment attachment)
+    private async Task<AttachmentResult> ToResultAsync(Attachment attachment, bool withFormAnalysis = false)
     {
         var thirdpartyEntryId = await ResolveThirdpartyEntryIdAsync(attachment.ThirdpartyEntryId);
 
@@ -315,7 +349,9 @@ public class AttachmentsStorageService(
             ? await GetDataUrlAsync(attachment.EntryId, thirdpartyEntryId)
             : null;
 
-        return ToResult(attachment, dataUrl, thirdpartyEntryId);
+        var analysis = withFormAnalysis ? await ReadCachedAnalysisAsync(attachment) : null;
+
+        return ToResult(attachment, dataUrl, thirdpartyEntryId, analysis);
     }
 
     private async Task<string?> ResolveThirdpartyEntryIdAsync(string? hashId)

@@ -139,6 +139,26 @@ public class FormPreAnalysisService(
         }
     }
 
+    /// <summary>
+    /// Whatever is already cached, without starting a generation — the read path polls with this while
+    /// the call started by the attach is still running.
+    /// </summary>
+    public async Task<IReadOnlyList<FormQuestionSuggestion>> ReadCachedAsync(File<int> file)
+    {
+        try
+        {
+            var cacheKey = GetCacheKey(tenantManager.GetCurrentTenantId(), file, CultureInfo.CurrentUICulture);
+            var cached = await fusionCache.TryGetAsync<List<FormQuestionSuggestion>>(cacheKey);
+
+            return cached.HasValue ? cached.Value : [];
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormPreAnalysisFailed(e, file.Id);
+            return [];
+        }
+    }
+
     private async Task<(ChatEndpoint Endpoint, ChatCompletionMessage[] Messages)?> PrepareRequestAsync(File<int> file, CultureInfo culture)
     {
         var endpoint = await ResolveEndpointAsync();

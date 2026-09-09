@@ -49,7 +49,9 @@ public class AttachmentDto
 
     /// <summary>
     /// Starter questions about the attached form's submissions, in the current user's language. Empty
-    /// unless <see cref="CanAnalyze"/> is set, and always empty on the read paths.
+    /// unless <see cref="CanAnalyze"/> is set. On attach they are usually still being generated, so the
+    /// array arrives empty and the client re-reads the attachment to pick them up; batch reads never
+    /// carry them.
     /// </summary>
     public IReadOnlyList<FormQuestionDto> SuggestedQuestions { get; init; } = [];
 }
