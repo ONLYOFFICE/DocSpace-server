@@ -73,6 +73,57 @@ function mcpEndpointOverride(index: number): string | undefined {
     return process.env[`AI__MCP__${index}__ENDPOINT`];
 }
 
+// Portal base URL for the docspace-mcp hop, injected by the Aspire AppHost
+// as `AI__MCP_PORTAL_BASE_URL` (same `__` form as the endpoint override
+// above). docspace-mcp in internal mode reaches the portal API at the URL
+// carried in the forwarded `Referer` header; deriving that from the client
+// headers breaks in dev, where the browser origin is `localhost:8092` — a
+// loopback the MCP *container* cannot reach. When set, this address (the
+// proxy as seen from containers, e.g. `http://host.docker.internal:8092/`)
+// replaces the derived referer. Unset in production installs, where the
+// client-derived portal domain is reachable and tenant-correct.
+export function mcpPortalBaseUrl(): string | undefined {
+    return process.env["AI__MCP_PORTAL_BASE_URL"] || undefined;
+}
+
+// SSRF egress policy for user-supplied provider / web-search `baseUrl`s.
+// By default loopback and RFC1918 private ranges are rejected before any
+// outbound call (see `assertSafeBaseUrl` in app/security.ts), mirroring the
+// C# `UrlValidator` default blacklist. On-prem installs that run a model
+// server on an internal address — a local Ollama at 127.0.0.1, an inference
+// box on 10.x — opt those ranges back in by setting
+// `AI__ALLOW_PRIVATE_BASE_URL=true`. Cloud-metadata / link-local
+// (169.254.0.0/16, fe80::/10) and the unspecified 0.0.0.0/8 stay blocked
+// regardless — they are never a legitimate endpoint.
+export function allowPrivateBaseUrl(): boolean {
+    const value = process.env["AI__ALLOW_PRIVATE_BASE_URL"];
+    return value === "true" || value === "1";
+}
+
+// The portal's own MCP server (docspace-mcp, the `ai.mcp` entry named
+// below). It is always enabled everywhere — global chat, agents, the
+// editor plugin — and its tools cannot be disabled: the agent whitelist
+// always includes it (systemTools) and its tool-prefs "disabled" entries
+// are ignored (toolPrefsStorage). The client hides it from the MCP
+// management surfaces accordingly.
+export const PORTAL_MCP_SERVER_NAME = "docspace";
+
+// Group keys of the DocSpace integration tools (`httpToolsAdapter`). Defined
+// here — not in the adapter — so the storage layer can alias the two groups
+// in tool prefs without importing the adapter (which imports storage back).
+// The engine gates approval per serverType, so approval-required tools are
+// emitted under the dedicated `-approval` group; both groups are one logical
+// source, and tool prefs treat them as one namespace (Bug 83013).
+export const DOCSPACE_INTEGRATION_SERVER_TYPE = "docspace-integration";
+export const DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE =
+  "docspace-integration-approval";
+
+// Group keys of the library's built-in tool sources (mirrors of the
+// non-exported WEB_SEARCH_TYPE / IMAGE_GENERATION_TYPE constants in
+// @onlyoffice/ai-chat core). Used to validate tool-pref serverTypes.
+export const WEB_SEARCH_TYPE = "web-search";
+export const IMAGE_GENERATION_TYPE = "image-generation";
+
 // Host-preconfigured MCP servers from the shared `appsettings.json`
 // (`ai.mcp`), with the Aspire endpoint override applied per entry.
 // Malformed entries (missing id / name / endpoint) are dropped so a bad

@@ -33,7 +33,6 @@
 
 namespace ASC.People.Tests.PeopleController;
 
-[Collection("Test Collection")]
 public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
     [Fact]
@@ -41,8 +40,8 @@ public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Trait("Bug", "79334")]
     public async Task CreateUser_AsRoomAdmin_ShouldCreateUserSuccessfully()
     {
-        await _apiClient.Authenticate(Initializer.Owner);
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        await _apiClient.Authenticate(Owner);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
         await _peopleClient.Authenticate(roomAdmin);
 
         var fakeMember = Initializer.FakerMember.Generate();
@@ -67,14 +66,14 @@ public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Trait("Bug", "79724")]
     public async Task UpdateDocspaceAdmin_ByDocspaceAdmin_ShouldThrowAccessDenied()
     {
-        await _peopleClient.Authenticate(Initializer.Owner);
+        await _peopleClient.Authenticate(Owner);
 
         var owner = await _profilesApi.GetSelfProfileAsync(TestContext.Current.CancellationToken);
         owner.Should().NotBeNull();
         owner.Response.Should().NotBeNull();
 
-        var docspaceAdmin1 = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
-        var docspaceAdmin2 = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        var docspaceAdmin1 = await InviteContact(EmployeeType.DocSpaceAdmin);
+        var docspaceAdmin2 = await InviteContact(EmployeeType.DocSpaceAdmin);
 
         await _peopleClient.Authenticate(docspaceAdmin1);
 
@@ -131,10 +130,10 @@ public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Trait("Bug", "80474")]
     public async Task PromoteUserToDocspaceAdmin_ByDocspaceAdmin_ShouldThrowAccessDenied()
     {
-        await _peopleClient.Authenticate(Initializer.Owner);
+        await _peopleClient.Authenticate(Owner);
 
-        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var docspaceAdmin = await InviteContact(EmployeeType.DocSpaceAdmin);
+        var user = await InviteContact(EmployeeType.User);
 
         await _peopleClient.Authenticate(docspaceAdmin);
 
@@ -152,13 +151,12 @@ public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Trait("Bug", "80478")]
     public async Task PromoteGuestToUser_ByRoomAdmin_ShouldThrowAccessDenied()
     {
-        await _peopleClient.Authenticate(Initializer.Owner);
+        await _peopleClient.Authenticate(Owner);
 
-        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
-        var roomAdmin2 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin1 = await InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin2 = await InviteContact(EmployeeType.RoomAdmin);
 
-        await _peopleClient.Authenticate(roomAdmin1);
-        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+        var guest = await InviteGuest(roomAdmin1);
 
         await _peopleClient.Authenticate(roomAdmin2);
 

@@ -415,7 +415,7 @@
     <value>Не можете ажурирати датотеку која је отворена за уређивање</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите ONLYOFFICE PDF формулар.</value>
+    <value>Датотека не може бити отпремљена у ову просторију. Молимо покушајте да отпремите ONLYOFFICE PDF формулар.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Корисник није пронађен</value>
@@ -500,7 +500,7 @@
     <value>Креатор садржаја</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace Администратор</value>
+    <value>Пуни администратор</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Уређивач</value>

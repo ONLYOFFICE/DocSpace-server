@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import express from "express";
@@ -51,12 +51,17 @@ import { textToDocxController } from "./controllers/textToDocxController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
+import { editorToolsController } from "./controllers/editorToolsController.js";
+import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
 import { promptsController } from "./controllers/promptsController.js";
+import { settingsController } from "./controllers/settingsController.js";
 import { threadsController } from "./controllers/threadsController.js";
 import { toolsController } from "./controllers/toolsController.js";
+import { vectorizationController } from "./controllers/vectorizationController.js";
 import { webSearchController } from "./controllers/webSearchController.js";
+import { webSearchPassthroughController } from "./controllers/webSearchPassthroughController.js";
 
 export { API_PREFIX };
 
@@ -195,6 +200,45 @@ export default function registerRoutes(app: Application): void {
   router.put("/agents/resetquota", agentsController.resetAgentsQuota);
   router.put("/agents/:id", agentsController.updateAgent);
   router.delete("/agents/:id", agentsController.deleteAgent);
+
+  router.get("/config", settingsController.getAiSettings);
+  router.get("/config/vectorization", settingsController.getVectorizationSettings);
+  router.put("/config/vectorization", settingsController.setVectorizationSettings);
+  router.get("/config/user", settingsController.getUserSettings);
+  router.put("/config/user", settingsController.setUserSettings);
+
+  router.post("/vectorization/tasks", vectorizationController.startTask);
+
+  // OpenAI-compatible passthrough for the document editor's AI plugin
+  // (external-provider transport). Explicit sub-paths only — the allowlist
+  // is the registration itself. The request body is raw here: `app.ts`
+  // skips the JSON body parser for `/openai/*`.
+  router.post(
+    "/openai/:profileId/v1/chat/completions",
+    openaiPassthroughController.chatCompletions,
+  );
+  router.post(
+    "/openai/:profileId/v1/images/generations",
+    openaiPassthroughController.imagesGenerations,
+  );
+
+  // DocSpace tools for the editor AI plugin: sanitized catalog of the same
+  // composed adapter the chat engine uses, plus server-side execution with
+  // the caller's forwarded credentials (see editorToolsController).
+  router.get("/editor-tools/list", editorToolsController.list);
+  router.post("/editor-tools/call", editorToolsController.call);
+
+  // Web-search passthrough for the editor AI plugin: the plugin holds a
+  // placeholder config, the portal's active provider and key are resolved
+  // here (see webSearchPassthroughController).
+  router.post(
+    "/websearch/v1/search",
+    webSearchPassthroughController.search,
+  );
+  router.post(
+    "/websearch/v1/contents",
+    webSearchPassthroughController.contents,
+  );
 
   let total = 0;
   for (const binding of ENGINE_DOCS) {

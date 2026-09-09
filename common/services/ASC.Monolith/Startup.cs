@@ -31,7 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.ApiSystem.Extensions;
 using ASC.Data.Backup.Extensions;
 using ASC.Data.Backup.Worker.Extensions;
 using ASC.Files.Extensions;
@@ -76,7 +75,7 @@ public class Startup : BaseStartup
         services.AddFilesServerServices(_configuration);
         services.AddFilesWorkerServices(_configuration);
         services.AddPeopleServices();
-        services.AddAiServerServices(_configuration);
+        services.AddAiServerServices();
         services.AddAiWorkerServices(_configuration);
         services.AddBackupServices();
         services.AddBackupWorkerServices(_configuration);

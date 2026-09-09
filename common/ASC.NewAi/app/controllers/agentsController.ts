@@ -30,13 +30,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ActionType } from "@onlyoffice/ai-chat/core";
+import { ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
 import type { QueryValue } from "../storage/httpClient.js";
 import { asyncHandler } from "./_helpers.js";
 import { isObject, getString, getNumber, getObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
+import { sanitizeInstruction } from "../sanitizeInstruction.js";
 
 // The agent's profile is stored as an assignment scoped to the agent's
 // entry id. `Chat` is the action an agent room serves; fall back to
@@ -66,6 +67,25 @@ function rethrowAssignmentError(err: unknown, profileId: string): never {
     });
   }
   throw err;
+}
+
+// Validate the profile BEFORE touching the agent room. Without this a
+// well-formed but unknown profileId creates a full agent room with no model
+// binding (Bug 82922) or applies the room update and then wipes the binding
+// (Bug 82925), and an image-only profile binds fine but yields
+// model_not_found on every chat request (Bug 82926 / 82927). Profiles with
+// no capabilities bitmask (legacy rows) are allowed — chat is their default.
+async function assertUsableChatProfile(profileId: string): Promise<void> {
+  const profile = await storage.profiles.readById(profileId);
+  if (!profile) {
+    badRequest(`AI profile "${profileId}" does not exist`);
+  }
+  if (
+    typeof profile.capabilities === "number" &&
+    (profile.capabilities & CapabilitiesUI.Chat) === 0
+  ) {
+    badRequest(`AI profile "${profileId}" does not support chat`);
+  }
 }
 
 // Agent ids are int folder ids on the .NET side (`RoomIdRequestDto<int>`).
@@ -98,7 +118,7 @@ interface CreateAgentBody {
 
 export const agentsController = {
   // POST agents — creates an AI agent. Creation is delegated to the .NET
-  // endpoint `POST internal/ai/integration/agents` (AgentsController.CreateAgent).
+  // endpoint `POST internal/ai/agents` (AgentsController.CreateAgent).
   // The caller's body is forwarded as-is except that `profileId` and `prompt`
   // are stripped. The profile is then bound to the created agent via an
   // assignment (profileId + the agent's entry id); a binding failure is an
@@ -119,6 +139,8 @@ export const agentsController = {
       badRequest("prompt is required and must be a string");
     }
 
+    await assertUsableChatProfile(profileId);
+
     const { profileId: _profileId, prompt: _prompt, ...rest } = body;
     // The agent's model comes from the assigned profile, so only the prompt
     // is stored on the room via a prompt-only `chatSettings` (accepted by
@@ -127,8 +149,8 @@ export const agentsController = {
     // returned to the client in the same shape as a direct .NET call; the
     // agent id is read out of `response` for the assignment.
     const envelope = await aiService.post(
-      "/integration/agents",
-      { ...rest, chatSettings: { prompt } },
+      "/agents",
+      { ...rest, chatSettings: { prompt: sanitizeInstruction(prompt) } },
       { raw: true },
     );
     const created = isObject(envelope) ? getObject(envelope, "response") : undefined;
@@ -147,10 +169,10 @@ export const agentsController = {
   }),
 
   // GET agents — lists AI agents. Query params are forwarded as-is to
-  // `GET internal/ai/integration/agents` (AgentsController.GetAgents), which
+  // `GET internal/ai/agents` (AgentsController.GetAgents), which
   // reads them via [FromQuery]. Returns the upstream FolderContentDto.
   getAgents: asyncHandler(async (req, res) => {
-    const content = await aiService.get("/integration/agents", {
+    const content = await aiService.get("/agents", {
       query: forwardQuery(req.query),
       raw: true,
     });
@@ -158,17 +180,17 @@ export const agentsController = {
   }),
 
   // GET agents/news — returns the agents' new items
-  // (`GET internal/ai/integration/agents/news`).
+  // (`GET internal/ai/agents/news`).
   getAgentsNews: asyncHandler(async (_req, res) => {
-    const news = await aiService.get("/integration/agents/news", { raw: true });
+    const news = await aiService.get("/agents/news", { raw: true });
     res.json(news);
   }),
 
   // GET agents/{id} — returns a single agent
-  // (`GET internal/ai/integration/agents/{id}`).
+  // (`GET internal/ai/agents/{id}`).
   getAgentInfo: asyncHandler(async (req, res) => {
     const id = agentIdParam(req.params["id"]);
-    const envelope = await aiService.get(`/integration/agents/${id}`, { raw: true });
+    const envelope = await aiService.get(`/agents/${id}`, { raw: true });
 
     // Enrich the agent with its assigned profile so the edit dialog can
     // prefill the profile selector: the binding lives in the assignment
@@ -189,7 +211,7 @@ export const agentsController = {
   }),
 
   // PUT agents/{id} — updates an agent. The body (UpdateRoomRequest) is
-  // forwarded as-is to `PUT internal/ai/integration/agents/{id}`. `chatSettings`
+  // forwarded as-is to `PUT internal/ai/agents/{id}`. `chatSettings`
   // is the caller's responsibility here: the upstream still requires a valid
   // providerId/modelId when chatSettings is present.
   updateAgent: asyncHandler(async (req, res) => {
@@ -204,20 +226,35 @@ export const agentsController = {
     if (profileId !== undefined && !UUID_PATTERN.test(profileId)) {
       badRequest("profileId must be a UUID");
     }
+    if (profileId !== undefined) {
+      await assertUsableChatProfile(profileId);
+    }
     const { profileId: _profileId, ...rest } = body;
 
-    const agent = await aiService.put(`/integration/agents/${id}`, rest, { raw: true });
+    // The instruction (chatSettings.prompt) is untrusted: strip markup before
+    // forwarding so stored HTML can't round-trip into another user's reply
+    // (Bug 82726). Mirrors createAgent and the read-side in safeGetAgentInstruction.
+    const chatSettings = getObject(rest, "chatSettings");
+    if (chatSettings) {
+      const prompt = getString(chatSettings, "prompt");
+      if (prompt !== undefined) {
+        chatSettings["prompt"] = sanitizeInstruction(prompt);
+      }
+    }
+
+    const agent = await aiService.put(`/agents/${id}`, rest, { raw: true });
 
     if (profileId !== undefined) {
-      const existing = await storage.assignments
-        .readByType(AGENT_ACTION_TYPE, id)
-        .catch(() => null);
+      // Re-bind through the upsert endpoint: a read-then-create/update dance
+      // breaks when the agent's current profile is disabled or deleted — the
+      // resolver-backed read hides the existing row, the create then hits
+      // "assignment already exists" and surfaces as a 403 (Bug 83355). The
+      // upsert has no existence failure mode.
       try {
-        if (existing) {
-          await storage.assignments.update(AGENT_ACTION_TYPE, profileId, id);
-        } else {
-          await storage.assignments.create(AGENT_ACTION_TYPE, profileId, id);
-        }
+        await storage.assignments.upsertMany(
+          { [AGENT_ACTION_TYPE]: profileId },
+          id,
+        );
       } catch (err) {
         rethrowAssignmentError(err, profileId);
       }
@@ -228,13 +265,13 @@ export const agentsController = {
 
   // DELETE agents/{id} — removes an agent. The body (DeleteRoomRequest,
   // e.g. `{ deleteAfter }`) is forwarded to
-  // `DELETE internal/ai/integration/agents/{id}`. The per-agent profile
+  // `DELETE internal/ai/agents/{id}`. The per-agent profile
   // assignment is intentionally left untouched: the .NET assignment API
   // exposes no per-entry delete, so cleanup of orphaned assignment rows is
   // out of scope here.
   deleteAgent: asyncHandler(async (req, res) => {
     const id = agentIdParam(req.params["id"]);
-    const operation = await aiService.delete(`/integration/agents/${id}`, {
+    const operation = await aiService.delete(`/agents/${id}`, {
       body: req.body ?? {},
       raw: true,
     });
@@ -242,16 +279,16 @@ export const agentsController = {
   }),
 
   // PUT agents/agentquota — changes the quota for the given agents
-  // (`PUT internal/ai/integration/agents/agentquota`, body `{ roomIds, quota }`).
+  // (`PUT internal/ai/agents/agentquota`, body `{ roomIds, quota }`).
   updateAgentsQuota: asyncHandler(async (req, res) => {
-    const result = await aiService.put("/integration/agents/agentquota", req.body ?? {}, { raw: true });
+    const result = await aiService.put("/agents/agentquota", req.body ?? {}, { raw: true });
     res.json(result);
   }),
 
   // PUT agents/resetquota — resets the quota for the given agents
-  // (`PUT internal/ai/integration/agents/resetquota`, body `{ roomIds }`).
+  // (`PUT internal/ai/agents/resetquota`, body `{ roomIds }`).
   resetAgentsQuota: asyncHandler(async (req, res) => {
-    const result = await aiService.put("/integration/agents/resetquota", req.body ?? {}, { raw: true });
+    const result = await aiService.put("/agents/resetquota", req.body ?? {}, { raw: true });
     res.json(result);
   }),
 };

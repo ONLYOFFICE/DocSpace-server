@@ -101,6 +101,14 @@ public static class DbFilesRoomGroupExtension
             entity.HasIndex(e => new { e.TenantId, e.GroupId, e.ThirdpartyRoomId })
                 .IsUnique()
                 .HasDatabaseName("uq_roomgroup_thirdparty");
+
+            // InternalRoomId is optional, so by convention the relationship would be ClientSetNull and the
+            // database would get RESTRICT — unlike GroupId and TenantId, which are required and therefore
+            // cascade. That left deleting a folder, and with it a whole portal, blocked by a leftover link.
+            entity.HasOne(e => e.InternalRoom)
+                .WithMany()
+                .HasForeignKey(e => e.InternalRoomId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 
@@ -141,6 +149,14 @@ public static class DbFilesRoomGroupExtension
             entity.HasIndex(e => new { e.TenantId, e.GroupId, e.ThirdpartyRoomId })
                 .IsUnique()
                 .HasDatabaseName("uq_roomgroup_thirdparty");
+
+            // InternalRoomId is optional, so by convention the relationship would be ClientSetNull and the
+            // database would get RESTRICT — unlike GroupId and TenantId, which are required and therefore
+            // cascade. That left deleting a folder, and with it a whole portal, blocked by a leftover link.
+            entity.HasOne(e => e.InternalRoom)
+                .WithMany()
+                .HasForeignKey(e => e.InternalRoomId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

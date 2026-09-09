@@ -73,7 +73,19 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger, IService
 
             logger.TraceActivePassiveBackgroundServiceIsRunning(serviceName);
 
-            await ExecuteTaskAsync(stoppingToken);
+            try
+            {
+                await ExecuteTaskAsync(stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception e)
+            {
+                // a failed iteration must not take down the whole host process; retry on the next period
+                logger.ErrorWithException(e);
+            }
 
             logger.TraceActivePassiveBackgroundServiceIsSleeping(serviceName, ExecuteTaskPeriod);
 

@@ -36,8 +36,10 @@ namespace ASC.Data.Storage;
 public interface IQuotaController
 {
     //quotaCheckFileSize:hack for Backup bug 48873
-    Task QuotaUserUsedAddAsync(string module, string domain, string dataTag, long size, Guid ownerID, bool quotaCheckFileSize = true);
-    Task QuotaUsedAddAsync(string module, string domain, string dataTag, long size, Guid ownerID, bool quotaCheckFileSize = true);
+    // allowQuotaGrace: opt-in soft-overshoot of the portal (tariff) MaxTotalSize within a grace, passed by the
+    // editor file-save path only. Off by default so every other quota-checked write keeps the strict limit.
+    Task QuotaUserUsedAddAsync(string module, string domain, string dataTag, long size, Guid ownerID, bool quotaCheckFileSize = true, bool allowQuotaGrace = false);
+    Task QuotaUsedAddAsync(string module, string domain, string dataTag, long size, Guid ownerID, bool quotaCheckFileSize = true, bool allowQuotaGrace = false);
     Task QuotaUsedAddAsync(string module, string domain, string dataTag, long size, bool quotaCheckFileSize = true);
 
     Task QuotaUsedDeleteAsync(string module, string domain, string dataTag, long size);
@@ -46,7 +48,7 @@ public interface IQuotaController
 
     Task QuotaUsedSetAsync(string module, string domain, string dataTag, long size);
 
-    Task QuotaUsedCheckAsync(long size, Guid ownerId);
+    Task QuotaUsedCheckAsync(long size, Guid ownerId, bool allowQuotaGrace = false);
 
     // Single-threaded warm-up of the in-memory running total before a concurrent fan-out of
     // QuotaUsed*/QuotaUser* calls, so the controller's lock never wraps the blocking DB seed query.

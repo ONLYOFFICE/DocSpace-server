@@ -247,7 +247,7 @@
     <value>Klienta abonements atjaunināts: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti</value>
+    <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Klienta maks papildināts: {0}</value>
@@ -910,7 +910,7 @@
     <value>Nosūtīt</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Lietotājs (-a) {0} nosūtīja uzaicinājumu {1} pievienoties šim DocSpace</value>
+    <value>Lietotājs (-a) {0} nosūtīja uzaicinājumu {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Nosūtītas ielūguma instrukcijas: {0}</value>

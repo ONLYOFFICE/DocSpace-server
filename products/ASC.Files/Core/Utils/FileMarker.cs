@@ -464,14 +464,17 @@ public class FileMarker(
                 }
             }
 
-            if (updateTags.Count > 0)
-            {
-                await tagDao.IncrementNewTagsAsync(updateTags, obj.CurrentAccountId);
-            }
-
+            // The entries go in before the counters that summarise them: a reader that catches the
+            // gap must never see a positive counter with nothing behind it, because that is exactly
+            // the state the news endpoints treat as stale and clean up.
             if (newTags.Count > 0)
             {
                 await tagDao.SaveTagsAsync(newTags, obj.CurrentAccountId);
+            }
+
+            if (updateTags.Count > 0)
+            {
+                await tagDao.IncrementNewTagsAsync(updateTags, obj.CurrentAccountId);
             }
         }
 

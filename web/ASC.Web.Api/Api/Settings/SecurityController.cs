@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("security")]
+[ApiEndpoint(Template = "security")]
 public class SecurityController(
     GroupSummaryDtoHelper groupSummaryDtoHelper,
     TenantManager tenantManager,

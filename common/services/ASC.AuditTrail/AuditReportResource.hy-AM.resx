@@ -247,7 +247,7 @@
     <value>Հաճախորդի բաժանորդագրությունը թարմացվել է՝ {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են</value>
+    <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են՝ {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Հաճախորդի դրամապանակը լիցքավորվել է՝ {0}</value>
@@ -901,7 +901,7 @@
     <value>ՈՒղարկել</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>{0} օգտատերը հրավեր է ուղարկել {1}-ին միանալու այս DocSpace-ին</value>
+    <value>{0} օգտատերը հրավեր է ուղարկել {1}-ին</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Հրավերի հրահանգները ուղարկված են: {0}</value>

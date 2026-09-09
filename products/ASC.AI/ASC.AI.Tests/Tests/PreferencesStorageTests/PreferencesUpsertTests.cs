@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.PreferencesStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Preferences")]
 public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -41,7 +40,7 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
     [Fact]
     public async Task Upsert_Global_InsertsAndIsReadable()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             PreferencesPath,
             new { deepMode = true },
             TestContext.Current.CancellationToken);
@@ -58,7 +57,7 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var roomId = await CreateRoomAsync();
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             PreferencesPath,
             new { deepMode = true, entityId = roomId.ToString() },
             TestContext.Current.CancellationToken);
@@ -144,7 +143,7 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         await UpsertPreferencesAsync(deepMode: true);
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             PreferencesPath,
             new { deepMode = (bool?)null },
             TestContext.Current.CancellationToken);
@@ -158,7 +157,7 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
     [Fact]
     public async Task Upsert_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             PreferencesPath,
             new { deepMode = true, entityId = "999999999" },
             TestContext.Current.CancellationToken);

@@ -247,7 +247,7 @@
     <value>Muutos vie liian paljon aikaa.</value>
   </data>
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
-    <value>Virhe asiakirjapalvelussa. Ihan outo</value>
+    <value>Virhe asiakirjapalvelussa</value>
   </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>{0} muokkasi tiedostoa mobiilisovelluksella</value>
@@ -256,7 +256,7 @@
     <value>Tyhjä tiedosto</value>
   </data>
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
-    <value>Tarvittavaa tiedostoa ei löydy. Ei sitten mistään</value>
+    <value>Tarvittavaa tiedostoa ei löydy</value>
   </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Tiedosto joka on enemmän kuin {0} ei voida kopioida</value>
@@ -307,7 +307,7 @@
     <value>Tiedostoa ei voi siirtää tähän huoneeseen. Kokeile siirtää ONLYOFFICE PDF-lomake.</value>
   </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
-    <value>Tätä tiedostomuotoa ei tueta. Ei sitten niin mitenkään</value>
+    <value>Tätä tiedostomuotoa ei tueta</value>
   </data>
   <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
     <value>Tämä palveluntarjoaja on jo yhdistetty huoneeseen</value>
@@ -349,7 +349,7 @@
     <value>Tiedostoa ei voi poistaa, koska se on avattu muokkaamista varten</value>
   </data>
   <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
-    <value>Kansiota ei voi poistaa, koska jokin sen tiedostoista on avattu muokattavaksi. Loogista, eiks je</value>
+    <value>Kansiota ei voi poistaa, koska jokin sen tiedostoista on avattu muokattavaksi</value>
   </data>
   <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>Oikeutesi eivät riitä tiedoston poistamiseen</value>
@@ -361,7 +361,7 @@
     <value>Sinulla ei ole riittäviä oikeuksia tiedoston muokkaamiseen</value>
   </data>
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
-    <value>Olet jo muokkaamassa tätä asiakirjaa toisella välilehdellä. Nyt menee hankalaksi</value>
+    <value>Olet jo muokkaamassa tätä asiakirjaa toisella välilehdellä</value>
   </data>
   <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
     <value>Sinulla ei ole tarpeeksi oikeuksia tämän huoneen muokkaamiseen</value>
@@ -406,13 +406,13 @@
     <value>Kolmannen osapuolen kansiohässäkkää ei löydy. Yritin kyllä. Kokeile jotain outoa uudelleenkytkentää tiliisi. Tai jotain.</value>
   </data>
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
-    <value>Editorin käynnistysvirhe. Liekö akku tyhjentynyt</value>
+    <value>Editorin käynnistysvirhe</value>
   </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>Et voi muokata arkistoituja huoneita</value>
   </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
-    <value>Et voi päivittää tiedostoa, joka on avoinna muokkausta varten. Tietokone ei siihen pysty</value>
+    <value>Et voi päivittää tiedostoa, joka on avoinna muokkausta varten</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
     <value>Tiedostoa ei voi ladata tähän huoneeseen. Kokeile ladata ONLYOFFICE PDF-lomake.</value>
@@ -421,7 +421,7 @@
     <value>Käyttäjää ei löytynyt</value>
   </data>
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
-    <value>Et voi esikatsella osia Roskakorissa. Ne ovat jo liian pilaantuneita</value>
+    <value>Et voi esikatsella osia Roskakorissa</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Et voi kiinnittää huonetta</value>
@@ -500,7 +500,7 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
     <value>Sisällöntuottaja</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace ylläpitäjä</value>
+    <value>Täysi pääkäyttäjä</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Muokkaaja</value>

@@ -35,7 +35,7 @@ import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString, getNumber } from "../narrow.js";
 import type { PromptFoldersStorage, PromptFolder } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/prompt-folders";
+const PATH = "/prompt-folders";
 
 function parseFolder(raw: unknown): PromptFolder | null {
   if (!isObject(raw)) {

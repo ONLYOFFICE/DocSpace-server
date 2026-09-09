@@ -90,13 +90,15 @@ public class MdTextToDocxTask(IServiceScopeFactory serviceScopeFactory) : Distri
 
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
             var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+            var authContext = scope.ServiceProvider.GetRequiredService<AuthContext>();
 
             // Authoritative security gate: runs at execution time under the task's authenticated
             // identity (see AuthenticateMeWithoutCookieAsync above). The matching check in
             // TextToDocxTaskPublisher.PublishAsync is only an early-rejection optimisation; this
             // re-resolution and re-check is what actually protects against acting on a folder that
             // was deleted or whose permissions changed after the event was published.
-            var target = await Target.InitializeAsync(daoFactory, fileSecurity, _data.FolderId, _data.ThirdpartyFolderId);
+            var target = await Target.InitializeAsync(daoFactory, fileSecurity, userManager, authContext, _data.FolderId, _data.ThirdpartyFolderId);
 
             var pathProvider = scope.ServiceProvider.GetRequiredService<PathProvider>();
 

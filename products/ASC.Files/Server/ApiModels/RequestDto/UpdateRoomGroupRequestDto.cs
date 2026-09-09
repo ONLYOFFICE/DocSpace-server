@@ -59,18 +59,49 @@ public class UpdateRoomGroupRequest
     /// The list of room IDs to add to the group.
     /// </summary>
     /// <example>[1, 2, 3]</example>
-    public List<JsonElement> RoomsToAdd { get; set; }
+    public List<JsonElement> RoomsToAdd
+    {
+        get;
+        set
+        {
+            field = value;
+            HasPayload = true;
+        }
+    }
 
     /// <summary>
     /// The list of room IDs to remove from the group.
     /// </summary>
     /// <example>[1, 2, 3]</example>
-    public List<JsonElement> RoomsToRemove { get; set; }
+    public List<JsonElement> RoomsToRemove
+    {
+        get;
+        set
+        {
+            field = value;
+            HasPayload = true;
+        }
+    }
 
     /// <summary>
     /// The group name.
     /// </summary>
     /// <example>New Group Name</example>
     [StringLength(128)]
-    public string GroupName { get; set; }
+    public string GroupName
+    {
+        get;
+        set
+        {
+            field = value;
+            HasPayload = true;
+        }
+    }
+
+    /// <summary>
+    /// Whether the body carried at least one of the members above, even when its value was null.
+    /// An empty body (<c>{}</c>) is a no-op, while a body that explicitly nulls every member asks
+    /// for an update that cannot be performed and is rejected.
+    /// </summary>
+    internal bool HasPayload { get; private set; }
 }

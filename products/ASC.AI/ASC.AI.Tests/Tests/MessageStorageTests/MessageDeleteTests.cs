@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.MessageStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Messages")]
 public class MessageDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -44,13 +43,13 @@ public class MessageDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         var thread = await CreateThreadAsync();
         var created = await CreateMessageAsync(thread.Id);
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{MessagesPath}/{created.Id}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        using var readResponse = await Ai.GetAsync(
+        using var readResponse = await _ai.GetAsync(
             $"{MessagesPath}/{created.Id}",
             TestContext.Current.CancellationToken);
         readResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -59,7 +58,7 @@ public class MessageDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Delete_NonExisting_Returns404()
     {
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{MessagesPath}/{Guid.NewGuid()}",
             TestContext.Current.CancellationToken);
 
@@ -73,7 +72,7 @@ public class MessageDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         var first = await CreateMessageAsync(thread.Id, BuildMessageContents("first"));
         var second = await CreateMessageAsync(thread.Id, BuildMessageContents("second"));
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{MessagesPath}/{first.Id}",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -90,7 +89,7 @@ public class MessageDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         await CreateMessageAsync(thread.Id, BuildMessageContents("second"));
         await CreateMessageAsync(thread.Id, BuildMessageContents("third"));
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{ThreadsPath}/{thread.Id}/messages",
             TestContext.Current.CancellationToken);
 
@@ -109,7 +108,7 @@ public class MessageDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         await CreateMessageAsync(first.Id, BuildMessageContents("first-msg"));
         var secondMessage = await CreateMessageAsync(second.Id, BuildMessageContents("second-msg"));
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{ThreadsPath}/{first.Id}/messages",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -121,7 +120,7 @@ public class MessageDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task DeleteByThread_NonExistentThread_Returns404()
     {
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{ThreadsPath}/{Guid.NewGuid()}/messages",
             TestContext.Current.CancellationToken);
 
@@ -133,7 +132,7 @@ public class MessageDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var thread = await CreateThreadAsync();
 
-        using var response = await Ai.DeleteAsync(
+        using var response = await _ai.DeleteAsync(
             $"{ThreadsPath}/{thread.Id}/messages",
             TestContext.Current.CancellationToken);
 

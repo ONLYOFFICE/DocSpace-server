@@ -39,11 +39,11 @@ public interface ITariffService
     Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId);
     Task<Tariff> GetTariffAsync(int tenantId, bool withRequestToPaymentSystem = true, bool refresh = false);
     Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null, string successUrl = null, bool checkoutSetup = false);
-    Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity);
+    Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity, int? nextQuota = null);
     Task DeleteDefaultBillingInfoAsync();
     Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null);
     Task<Uri> GetAccountLinkAsync(int tenant, string backUrl);
-    Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null);
+    Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null, bool throwIfFailure = false);
     Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency);
     Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(int tenantId, string productId);
     Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId);
@@ -58,12 +58,10 @@ public interface ITariffService
     Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null);
 
     Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
-    Task<Balance> GetCustomerAiBalanceAsync(int tenantId, bool refresh = false);
     Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration);
     Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId);
     Task<Session> ExtendCustomerSessionAsync(int tenantId, int sessionId, int duration);
     Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
-    Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null);
     Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter);
     Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, MonthlyUsageFilter filter);
     Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter);

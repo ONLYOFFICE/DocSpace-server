@@ -39,8 +39,7 @@ internal class CrossDao(IServiceProvider serviceProvider, SetupInfo setupInfo, F
     public async Task<File<TTo>> PerformCrossDaoFileCopyAsync<TFrom, TTo>(
         TFrom fromFileId, IFileDao<TFrom> fromFileDao, Func<TFrom, TFrom> fromConverter,
         TTo toFolderId, IFileDao<TTo> toFileDao, Func<TTo, TTo> toConverter,
-        bool deleteSourceFile,
-        Guid chatId = default)
+        bool deleteSourceFile)
     {
         //Get File from first dao
         var fromFile = await fromFileDao.GetFileAsync(fromConverter(fromFileId));
@@ -83,7 +82,7 @@ internal class CrossDao(IServiceProvider serviceProvider, SetupInfo setupInfo, F
                          : await fromFileDao.GetFileStreamAsync(fromFile))
         {
             toFile.ContentLength = fromFileStream.CanSeek ? fromFileStream.Length : fromFile.ContentLength;
-            toFile = await toFileDao.SaveFileAsync(toFile, fromFileStream, chatId);
+            toFile = await toFileDao.SaveFileAsync(toFile, fromFileStream);
         }
 
         if (!deleteSourceFile)

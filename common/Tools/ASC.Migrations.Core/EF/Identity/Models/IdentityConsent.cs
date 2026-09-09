@@ -39,6 +39,10 @@ public class IdentityConsent
 
     public string RegisteredClientId { get; set; } = null!;
 
+    public long? OwnerTenantId { get; set; }
+
+    public string? OwnerUserId { get; set; }
+
     public bool? IsInvalidated { get; set; }
 
     public DateTime? ModifiedAt { get; set; }
@@ -67,12 +71,21 @@ public static class IdentityConsentExtension
 
                 entity.ToTable("identity_consents");
 
+                entity.HasIndex(e => e.PrincipalId, "idx_identity_consents_principal_id");
+
+                entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_consents_owner");
+
                 entity.Property(e => e.PrincipalId)
                     .HasMaxLength(255)
                     .HasColumnName("principal_id");
                 entity.Property(e => e.RegisteredClientId)
                     .HasMaxLength(36)
                     .HasColumnName("registered_client_id");
+                entity.Property(e => e.OwnerTenantId)
+                    .HasColumnName("owner_tenant_id");
+                entity.Property(e => e.OwnerUserId)
+                    .HasMaxLength(255)
+                    .HasColumnName("owner_user_id");
                 entity.Property(e => e.IsInvalidated)
                     .HasDefaultValueSql("'0'")
                     .HasColumnName("is_invalidated");
@@ -98,6 +111,15 @@ public static class IdentityConsentExtension
                 entity.Property(e => e.RegisteredClientId)
                     .HasMaxLength(36)
                     .HasColumnName("registered_client_id");
+
+                entity.Property(e => e.OwnerTenantId)
+                    .HasColumnName("owner_tenant_id");
+
+                entity.Property(e => e.OwnerUserId)
+                    .HasMaxLength(255)
+                    .HasColumnName("owner_user_id");
+
+                entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_consents_owner");
 
                 entity.Property(e => e.IsInvalidated)
                     .HasDefaultValueSql("false") // PostgreSQL uses "false" for boolean false

@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("license")]
+[ApiEndpoint(Template = "license")]
 public class LicenseController(
     ILoggerFactory loggerFactory,
     MessageService messageService,

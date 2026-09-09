@@ -41,8 +41,17 @@ public abstract class IntegrationServiceBase(
     AiGateway aiGateway)
 {
     protected Guid CurrentUserId => authContext.CurrentAccount.ID;
+    protected IDaoFactory DaoFactory => daoFactory;
+    protected FileSecurity FileSecurity => fileSecurity;
 
     protected async Task<int?> AssertUserHasAccessAsync(IEnumerable<EmployeeType> types, string? entityId = null)
+    {
+        var folder = await AssertUserHasAccessToFolderAsync(types, entityId);
+
+        return folder?.Id;
+    }
+
+    protected async Task<Folder<int>?> AssertUserHasAccessToFolderAsync(IEnumerable<EmployeeType> types, string? entityId = null)
     {
         var type = await userManager.GetUserTypeAsync(CurrentUserId);
         if (!types.Contains(type))
@@ -60,9 +69,7 @@ public abstract class IntegrationServiceBase(
             throw new ArgumentException($"entityId must be a numeric folder id, got '{entityId}'");
         }
 
-        int? entryId = parsed;
-
-        var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId.Value)
+        var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(parsed)
                      ?? throw new ItemNotFoundException();
 
         if (!await fileSecurity.CanUseAiAsync(folder))
@@ -70,7 +77,7 @@ public abstract class IntegrationServiceBase(
             throw new SecurityException();
         }
 
-        return entryId;
+        return folder;
     }
 
     protected void AssertGatewayNotConfigured()

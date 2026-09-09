@@ -241,7 +241,7 @@
     <value>Předplatné zákazníka aktualizováno: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Nastavení služeb s povolenou peněženkou zákazníka bylo aktualizováno</value>
+    <value>Nastavení služeb s povolenou peněženkou zákazníka bylo aktualizováno: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Peněženka zákazníka dobita: {0}</value>
@@ -886,7 +886,7 @@
     <value>Odeslat</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Uživatel {0} poslal pozvánku {1}, aby se připojil k tomuto prostoru DocSpace</value>
+    <value>Uživatel {0} poslal pozvánku {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instrukce k pozvánce byly odeslány: {0}</value>

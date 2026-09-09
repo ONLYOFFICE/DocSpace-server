@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.1",
   "info": {
     "title": "Api",
     "contact": {
@@ -53,8 +53,10 @@
             "in": "query",
             "description": "Specifies if a dump will be created or not.",
             "schema": {
-              "type": "boolean",
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": "boolean"
             }
           }
         ],
@@ -65,22 +67,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -104,8 +112,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -160,6 +170,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The backup schedule parameters.",
                 "$ref": "#/components/schemas/BackupScheduleDto"
               }
             }
@@ -172,22 +183,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -220,8 +237,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -278,8 +297,10 @@
             "in": "query",
             "description": "Specifies if a dump will be created or not.",
             "schema": {
-              "type": "boolean",
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": "boolean"
             }
           }
         ],
@@ -290,22 +311,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -329,8 +356,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -385,6 +414,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The backup parameters.",
                 "$ref": "#/components/schemas/BackupDto"
               }
             }
@@ -397,22 +427,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -445,8 +481,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -504,22 +542,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -540,8 +584,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -598,8 +644,10 @@
             "in": "query",
             "description": "Specifies if a dump will be created or not.",
             "schema": {
-              "type": "boolean",
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": "boolean"
             }
           }
         ],
@@ -610,22 +658,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -649,8 +703,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -707,8 +763,10 @@
             "in": "query",
             "description": "Specifies if a dump will be created or not.",
             "schema": {
-              "type": "boolean",
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": "boolean"
             }
           }
         ],
@@ -719,22 +777,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -758,8 +822,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -817,9 +883,11 @@
             "description": "The backup ID.",
             "required": true,
             "schema": {
+              "examples": [
+                "00000000-0000-0000-0000-000000000000"
+              ],
               "type": "string",
-              "format": "uuid",
-              "example": "00000000-0000-0000-0000-000000000000"
+              "format": "uuid"
             }
           }
         ],
@@ -830,22 +898,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -869,8 +943,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -927,8 +1003,10 @@
             "in": "query",
             "description": "Specifies if a dump will be created or not.",
             "schema": {
-              "type": "boolean",
-              "example": true
+              "examples": [
+                true
+              ],
+              "type": "boolean"
             }
           }
         ],
@@ -939,22 +1017,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -978,8 +1062,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -1034,6 +1120,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "The backup restoring parameters.",
                 "$ref": "#/components/schemas/BackupRestoreDto"
               }
             }
@@ -1046,22 +1133,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -1094,8 +1187,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -1152,8 +1247,10 @@
             "in": "query",
             "description": "Specifies if a dump will be created or not.",
             "schema": {
-              "type": "boolean",
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": "boolean"
             }
           }
         ],
@@ -1164,22 +1261,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -1197,8 +1300,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -1226,9 +1331,11 @@
             "in": "query",
             "description": "The from date.",
             "schema": {
+              "examples": [
+                "2025-01-01T00:00:00Z"
+              ],
               "type": "string",
-              "format": "date-time",
-              "example": "2025-01-01T00:00:00Z"
+              "format": "date-time"
             }
           },
           {
@@ -1236,9 +1343,11 @@
             "in": "query",
             "description": "The to date.",
             "schema": {
+              "examples": [
+                "2025-12-31T23:59:59Z"
+              ],
               "type": "string",
-              "format": "date-time",
-              "example": "2025-12-31T23:59:59Z"
+              "format": "date-time"
             }
           },
           {
@@ -1246,8 +1355,10 @@
             "in": "query",
             "description": "Specifies if the backups are paid or not.",
             "schema": {
-              "type": "boolean",
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": "boolean"
             }
           }
         ],
@@ -1258,22 +1369,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -1300,8 +1417,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -1358,9 +1477,11 @@
             "in": "query",
             "description": "The from date.",
             "schema": {
+              "examples": [
+                "2025-01-01T00:00:00Z"
+              ],
               "type": "string",
-              "format": "date-time",
-              "example": "2025-01-01T00:00:00Z"
+              "format": "date-time"
             }
           },
           {
@@ -1368,9 +1489,11 @@
             "in": "query",
             "description": "The to date.",
             "schema": {
+              "examples": [
+                "2025-12-31T23:59:59Z"
+              ],
               "type": "string",
-              "format": "date-time",
-              "example": "2025-12-31T23:59:59Z"
+              "format": "date-time"
             }
           },
           {
@@ -1378,8 +1501,10 @@
             "in": "query",
             "description": "Specifies if the backups are paid or not.",
             "schema": {
-              "type": "boolean",
-              "example": false
+              "examples": [
+                false
+              ],
+              "type": "boolean"
             }
           }
         ],
@@ -1390,22 +1515,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -1432,8 +1563,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -1491,22 +1624,28 @@
               "X-RateLimit-Limit": {
                 "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1500
+                  "examples": [
+                    1500
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Remaining": {
                 "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1
+                  "examples": [
+                    1
+                  ],
+                  "type": "integer"
                 }
               },
               "X-RateLimit-Reset": {
                 "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
                 "schema": {
-                  "type": "integer",
-                  "example": 1750000000
+                  "examples": [
+                    1750000000
+                  ],
+                  "type": "integer"
                 }
               }
             },
@@ -1530,8 +1669,10 @@
               "Retry-After": {
                 "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
                 "schema": {
-                  "type": "integer",
-                  "example": 30
+                  "examples": [
+                    30
+                  ],
+                  "type": "integer"
                 }
               }
             }
@@ -1581,26 +1722,33 @@
         "type": "object",
         "properties": {
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
-            "type": "array",
+            "examples": [
+              [
+                {
+                  "key": "path",
+                  "value": "/backup"
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
-            "description": "The backup storage parameters.",
-            "nullable": true,
-            "example": [
-              {
-                "key": "path",
-                "value": "/backup"
-              }
-            ]
+            "description": "The backup storage parameters."
           },
           "dump": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies if a dump will be created or not.",
-            "example": false
+            "description": "Specifies if a dump will be created or not."
           }
         },
         "additionalProperties": false,
@@ -1617,31 +1765,42 @@
         "type": "object",
         "properties": {
           "id": {
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ],
             "type": "string",
             "description": "The backup ID.",
-            "format": "uuid",
-            "example": "00000000-0000-0000-0000-000000000000"
+            "format": "uuid"
           },
           "fileName": {
-            "type": "string",
-            "description": "The backup file name.",
-            "nullable": true,
-            "example": "tenant-backup"
+            "examples": [
+              "tenant-backup"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The backup file name."
           },
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "createdOn": {
+            "examples": [
+              "2026-03-01T02:15:00Z"
+            ],
             "type": "string",
             "description": "The backup creation date.",
-            "format": "date-time",
-            "example": "2026-03-01T02:15:00Z"
+            "format": "date-time"
           },
           "expiresOn": {
+            "examples": [
+              "2026-03-31T02:15:00Z"
+            ],
             "type": "string",
             "description": "The backup expiration date.",
-            "format": "date-time",
-            "example": "2026-03-31T02:15:00Z"
+            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -1693,16 +1852,21 @@
       "BackupPeriod": {
         "oneOf": [
           {
+            "examples": [
+              "EveryDay"
+            ],
             "enum": [
               "EveryDay",
               "EveryWeek",
               "EveryMonth"
             ],
             "type": "string",
-            "description": "[EveryDay - Every day, EveryWeek - Every week, EveryMonth - Every month]",
-            "example": "EveryDay"
+            "description": "[EveryDay - Every day, EveryWeek - Every week, EveryMonth - Every month]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -1710,7 +1874,6 @@
             ],
             "type": "integer",
             "description": "[0 - Every day, 1 - Every week, 2 - Every month]",
-            "example": 0,
             "x-enum-varnames": [
               "EveryDay",
               "EveryWeek",
@@ -1725,51 +1888,75 @@
         "type": "object",
         "properties": {
           "isCompleted": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies if the backup is completed or not.",
-            "example": false
+            "description": "Specifies if the backup is completed or not."
           },
           "progress": {
+            "examples": [
+              50
+            ],
             "type": "integer",
             "description": "The backup progress in percentage.",
-            "format": "int32",
-            "example": 50
+            "format": "int32"
           },
           "error": {
-            "type": "string",
-            "description": "The backup error message.",
-            "nullable": true,
-            "example": null
+            "examples": [
+              null
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The backup error message."
           },
           "warning": {
-            "type": "string",
-            "description": "The backup warning message.",
-            "nullable": true,
-            "example": null
+            "examples": [
+              null
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The backup warning message."
           },
           "link": {
-            "type": "string",
-            "description": "The backup link.",
-            "nullable": true,
-            "example": "https://example.com/backup/task_123"
+            "examples": [
+              "https://example.com/backup/task_123"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The backup link."
           },
           "tenantId": {
+            "examples": [
+              1
+            ],
             "type": "integer",
             "description": "The tenant ID.",
-            "format": "int32",
-            "example": 1
+            "format": "int32"
           },
           "backupProgressEnum": {
+            "description": "The backup progress type.",
             "$ref": "#/components/schemas/BackupProgressEnum"
           },
           "status": {
+            "description": "The backup progress status.",
             "$ref": "#/components/schemas/DistributedTaskStatus"
           },
           "taskId": {
-            "type": "string",
-            "description": "The task ID.",
-            "nullable": true,
-            "example": "task_123"
+            "examples": [
+              "task_123"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The task ID."
           }
         },
         "additionalProperties": false,
@@ -1778,16 +1965,21 @@
       "BackupProgressEnum": {
         "oneOf": [
           {
+            "examples": [
+              "Backup"
+            ],
             "enum": [
               "Backup",
               "Restore",
               "Transfer"
             ],
             "type": "string",
-            "description": "[Backup - Backup, Restore - Restore, Transfer - Transfer]",
-            "example": "Backup"
+            "description": "[Backup - Backup, Restore - Restore, Transfer - Transfer]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -1795,7 +1987,6 @@
             ],
             "type": "integer",
             "description": "[0 - Backup, 1 - Restore, 2 - Transfer]",
-            "example": 0,
             "x-enum-varnames": [
               "Backup",
               "Restore",
@@ -1853,37 +2044,50 @@
         "type": "object",
         "properties": {
           "backupId": {
-            "type": "string",
-            "description": "The backup ID.",
-            "nullable": true,
-            "example": "00000000-0000-0000-0000-000000000000"
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The backup ID."
           },
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
-            "type": "array",
+            "examples": [
+              [
+                {
+                  "key": "path",
+                  "value": "/backup"
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
-            "description": "The backup storage parameters.",
-            "nullable": true,
-            "example": [
-              {
-                "key": "path",
-                "value": "/backup"
-              }
-            ]
+            "description": "The backup storage parameters."
           },
           "notify": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Notifies users about the portal restoring process or not.",
-            "example": true
+            "description": "Notifies users about the portal restoring process or not."
           },
           "dump": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies if a dump will be created or not.",
-            "example": false
+            "description": "Specifies if a dump will be created or not."
           }
         },
         "additionalProperties": false,
@@ -1893,36 +2097,48 @@
         "type": "object",
         "properties": {
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
-            "type": "array",
+            "examples": [
+              [
+                {
+                  "key": "path",
+                  "value": "/backup"
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
-            "description": "The backup storage parameters.",
-            "nullable": true,
-            "example": [
-              {
-                "key": "path",
-                "value": "/backup"
-              }
-            ]
+            "description": "The backup storage parameters."
           },
           "backupsStored": {
-            "type": "integer",
+            "examples": [
+              5
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
             "description": "The maximum number of the stored backup copies.",
-            "format": "int32",
-            "nullable": true,
-            "example": 5
+            "format": "int32"
           },
           "cronParams": {
+            "description": "The backup cron parameters.",
             "$ref": "#/components/schemas/Cron"
           },
           "dump": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies if a dump will be created or not.",
-            "example": false
+            "description": "Specifies if a dump will be created or not."
           }
         },
         "additionalProperties": false,
@@ -1932,9 +2148,11 @@
         "type": "object",
         "properties": {
           "enabled": {
+            "examples": [
+              true
+            ],
             "type": "boolean",
-            "description": "Specifies if the backup service is enabled or not.",
-            "example": true
+            "description": "Specifies if the backup service is enabled or not."
           }
         },
         "additionalProperties": false,
@@ -1983,6 +2201,9 @@
       "BackupStorageType": {
         "oneOf": [
           {
+            "examples": [
+              "Documents"
+            ],
             "enum": [
               "Documents",
               "ThridpartyDocuments",
@@ -1992,10 +2213,12 @@
               "ThirdPartyConsumer"
             ],
             "type": "string",
-            "description": "[Documents - Documents, ThridpartyDocuments - Thridparty documents, CustomCloud - Custom cloud, Local - Local, DataStore - Data store, ThirdPartyConsumer - Thirdparty consumer]",
-            "example": "Documents"
+            "description": "[Documents - Documents, ThridpartyDocuments - Thridparty documents, CustomCloud - Custom cloud, Local - Local, DataStore - Data store, ThirdPartyConsumer - Thirdparty consumer]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -2006,7 +2229,6 @@
             ],
             "type": "integer",
             "description": "[0 - Documents, 1 - Thridparty documents, 2 - Custom cloud, 3 - Local, 4 - Data store, 5 - Thirdparty consumer]",
-            "example": 0,
             "x-enum-varnames": [
               "Documents",
               "ThridpartyDocuments",
@@ -2024,16 +2246,20 @@
         "type": "object",
         "properties": {
           "free": {
+            "examples": [
+              3
+            ],
             "type": "integer",
             "description": "The number of free backups.",
-            "format": "int32",
-            "example": 3
+            "format": "int32"
           },
           "paid": {
+            "examples": [
+              5
+            ],
             "type": "integer",
             "description": "The number of paid backups.",
-            "format": "int32",
-            "example": 5
+            "format": "int32"
           }
         },
         "additionalProperties": false,
@@ -2123,20 +2349,27 @@
         "type": "object",
         "properties": {
           "period": {
+            "description": "The backup period type.",
             "$ref": "#/components/schemas/BackupPeriod"
           },
           "hour": {
+            "examples": [
+              0
+            ],
             "type": "integer",
             "description": "The time of the day to start the backup process.",
-            "format": "int32",
-            "example": 0
+            "format": "int32"
           },
           "day": {
-            "type": "integer",
+            "examples": [
+              0
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
             "description": "The day of the week to start the backup process.",
-            "format": "int32",
-            "nullable": true,
-            "example": 0
+            "format": "int32"
           }
         },
         "additionalProperties": false,
@@ -2146,19 +2379,24 @@
         "type": "object",
         "properties": {
           "period": {
+            "description": "The backup period type.",
             "$ref": "#/components/schemas/BackupPeriod"
           },
           "hour": {
+            "examples": [
+              0
+            ],
             "type": "integer",
             "description": "The time of the day to start the backup process.",
-            "format": "int32",
-            "example": 0
+            "format": "int32"
           },
           "day": {
+            "examples": [
+              0
+            ],
             "type": "integer",
             "description": "The day of the week to start the backup process.",
-            "format": "int32",
-            "example": 0
+            "format": "int32"
           }
         },
         "additionalProperties": false,
@@ -2167,6 +2405,9 @@
       "DistributedTaskStatus": {
         "oneOf": [
           {
+            "examples": [
+              "Created"
+            ],
             "enum": [
               "Created",
               "Running",
@@ -2175,10 +2416,12 @@
               "Failted"
             ],
             "type": "string",
-            "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]",
-            "example": "Created"
+            "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]"
           },
           {
+            "examples": [
+              0
+            ],
             "enum": [
               0,
               1,
@@ -2188,7 +2431,6 @@
             ],
             "type": "integer",
             "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]",
-            "example": 0,
             "x-enum-varnames": [
               "Created",
               "Running",
@@ -2244,10 +2486,10 @@
         "type": "object",
         "properties": {
           "key": {
-            "nullable": true
+            "type": "null"
           },
           "value": {
-            "nullable": true
+            "type": "null"
           }
         },
         "additionalProperties": false
@@ -2263,37 +2505,54 @@
         "type": "object",
         "properties": {
           "storageType": {
+            "description": "The backup storage type.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
-            "type": "object",
+            "examples": [
+              { }
+            ],
+            "type": [
+              "null",
+              "object"
+            ],
             "additionalProperties": {
-              "type": "string",
-              "nullable": true
+              "type": [
+                "null",
+                "string"
+              ]
             },
-            "description": "The backup storage parameters.",
-            "nullable": true
+            "description": "The backup storage parameters."
           },
           "cronParams": {
+            "description": "The backup cron parameters.",
             "$ref": "#/components/schemas/CronParams"
           },
           "backupsStored": {
-            "type": "integer",
+            "examples": [
+              5
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
             "description": "The maximum number of the stored backup copies.",
-            "format": "int32",
-            "nullable": true,
-            "example": 5
+            "format": "int32"
           },
           "lastBackupTime": {
+            "examples": [
+              "2026-01-01T00:00:00Z"
+            ],
             "type": "string",
             "description": "The date and time when the last backup was reated.",
-            "format": "date-time",
-            "example": "2026-01-01T00:00:00Z"
+            "format": "date-time"
           },
           "dump": {
+            "examples": [
+              false
+            ],
             "type": "boolean",
-            "description": "Specifies if a dump will be created or not.",
-            "example": false
+            "description": "Specifies if a dump will be created or not."
           }
         },
         "additionalProperties": false,
@@ -2344,29 +2603,37 @@
       "X-RateLimit-Limit": {
         "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
         "schema": {
-          "type": "integer",
-          "example": 1500
+          "examples": [
+            1500
+          ],
+          "type": "integer"
         }
       },
       "X-RateLimit-Remaining": {
         "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
         "schema": {
-          "type": "integer",
-          "example": 1
+          "examples": [
+            1
+          ],
+          "type": "integer"
         }
       },
       "X-RateLimit-Reset": {
         "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
         "schema": {
-          "type": "integer",
-          "example": 1750000000
+          "examples": [
+            1750000000
+          ],
+          "type": "integer"
         }
       },
       "Retry-After": {
         "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
         "schema": {
-          "type": "integer",
-          "example": 30
+          "examples": [
+            30
+          ],
+          "type": "integer"
         }
       }
     },

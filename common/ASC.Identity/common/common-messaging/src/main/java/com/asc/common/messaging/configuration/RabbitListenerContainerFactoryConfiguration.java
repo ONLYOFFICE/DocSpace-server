@@ -71,6 +71,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class RabbitListenerContainerFactoryConfiguration {
   private int prefetch = 500;
   private int batchSize = 20;
+  private long rpcTimeoutMs = 1500;
 
   /**
    * Bean for creating and configuring a Jackson2JsonMessageConverter instance.
@@ -215,7 +216,7 @@ public class RabbitListenerContainerFactoryConfiguration {
     var rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(converter);
     rabbitTemplate.setUseDirectReplyToContainer(true);
-    rabbitTemplate.setReplyTimeout(600);
+    rabbitTemplate.setReplyTimeout(rpcTimeoutMs);
     return rabbitTemplate;
   }
 

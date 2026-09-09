@@ -340,7 +340,7 @@
     <value>ليس لديك الأذونات لنسخ المجلد</value>
   </data>
   <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>ليس لديك الأذونات لنسخ المجلد</value>
+    <value>ليس لديك الأذونات للنسخ إلى هذا المجلد</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>ليس لديك الأذونات للانشاء</value>
@@ -376,7 +376,7 @@
     <value>ليس لديك الأذونات لنقل المجلد</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>ليس لديك الأذونات لنقل المجلد</value>
+    <value>ليس لديك الأذونات للنقل إلى هذا المجلد</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>ليس لديك الأذونات لمعاينة الملف</value>
@@ -500,7 +500,7 @@
     <value>صانع المحتوى</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>مسئول DocSpace</value>
+    <value>مسؤول كامل</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>المحرر</value>

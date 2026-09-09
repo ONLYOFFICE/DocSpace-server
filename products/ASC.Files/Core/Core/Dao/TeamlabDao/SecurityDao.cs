@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -151,15 +151,6 @@ internal abstract class SecurityBaseDao<T>(
                 {
                     await context.DeleteTagLinksByTypeAsync(tenantId, entryId, r.EntryType, TagType.RecentByLink, r.Subject != Guid.Empty ? r.Subject.ToString() : null);
                     await context.DeleteTagsAsync(tenantId);
-                }
-
-                if (r.EntryType is FileEntryType.Folder &&
-                    r.EntryId is int entryIdInt &&
-                    r.SubjectType is SubjectType.User or SubjectType.Group)
-                {
-                    await context.RemoveUserRoomChatsAsync(tenantId, entryIdInt, r.Subject);
-                    await context.RemoveUserRoomChatsSettingsAsync(tenantId, entryIdInt, r.Subject);
-                    await context.RemoveUserRoomMcpSettingsAsync(tenantId, entryIdInt, r.Subject);
                 }
 
                 await context.SaveChangesAsync();

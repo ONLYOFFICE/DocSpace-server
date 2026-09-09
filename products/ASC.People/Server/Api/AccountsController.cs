@@ -59,9 +59,7 @@ public class AccountsControllerThirdParty(
     : AccountsController<string>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity, fileSharing, authContext, userManager);
 
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("accounts")]
+[ApiEndpoint("accounts")]
 public class AccountsController<T>(
     IDaoFactory daoFactory,
     EmployeeFullDtoHelper employeeFullDtoHelper,

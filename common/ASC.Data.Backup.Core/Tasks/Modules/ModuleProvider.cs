@@ -43,10 +43,11 @@ public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, Cor
         new AiProvidersModuleSpecifics(helpers),
         new FilesModuleSpecifics(logger,helpers),
         new FilesModuleSpecifics2(helpers),
-        new WebStudioModuleSpecifics(helpers),
+        new WebStudioModuleSpecifics(logger, helpers),
         new CoreModuleSpecifics(helpers),
         new IdentityModuleSpecifics(helpers),
-        new AiModuleSpecifics(helpers)
+        new AiModuleSpecifics(helpers),
+        new AiIntegrationModuleSpecifics(logger, helpers)
     };
 
     private IModuleSpecifics RoomLogosModule { get; } = new RoomLogosModuleSpecifics(helpers);

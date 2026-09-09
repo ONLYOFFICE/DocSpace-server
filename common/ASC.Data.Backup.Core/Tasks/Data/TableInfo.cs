@@ -45,6 +45,7 @@ public enum IdType
 {
     Autoincrement,
     Guid,
+    GuidV7,
     Integer
 }
 

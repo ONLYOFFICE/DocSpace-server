@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Core.Tenants;
@@ -41,7 +41,7 @@ public class TenantWalletSettingsWrapper
     /// <summary>
     /// The tenant wallet settings.
     /// </summary>
-    /// <example>{"enabled": true, "minBalance": 10, "upToBalance": 100, "currency": "USD"}</example>
+    /// <example>{"enabled": true, "minBalance": 10, "upToBalance": 100, "currency": "USD", "lowBalanceThreshold": 1, "lowBalanceNotified": false}</example>
     public TenantWalletSettings Settings { get; set; }
 }
 
@@ -78,6 +78,18 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     /// <example>USD</example>
     public string Currency { get; set; }
 
+    /// <summary>
+    /// The wallet balance below which a low-balance notification is sent. Set internally, not user-configurable.
+    /// </summary>
+    /// <example>1</example>
+    public int LowBalanceThreshold { get; set; }
+
+    /// <summary>
+    /// Specifies whether a low-balance notification has already been sent for the current dip below <see cref="LowBalanceThreshold"/>.
+    /// </summary>
+    /// <example>false</example>
+    public bool LowBalanceNotified { get; set; }
+
 
     public static Guid ID => new("{40069709-492A-4F41-988C-F1A053A8A560}");
 
@@ -91,4 +103,14 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     /// </summary>
     /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
+}
+
+/// <summary>
+/// The default low-balance notification threshold, read once from config and shared by every caller
+/// (the wallet top-up API and the low-balance background poller) instead of re-parsing it each time.
+/// </summary>
+[Singleton]
+public class TenantWalletSettingsConfig(IConfiguration configuration)
+{
+    public int LowBalanceThreshold { get; } = int.Parse(configuration["core:accounting:lowbalancethreshold"] ?? "1", CultureInfo.InvariantCulture);
 }

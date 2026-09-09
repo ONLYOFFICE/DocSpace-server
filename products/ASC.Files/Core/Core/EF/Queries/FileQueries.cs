@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -177,12 +177,6 @@ public partial class FilesDbContext
     public Task<int> MarkVectorizationDeletedByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
     {
         return FileQueries.MarkVectorizationDeletedByFileIdsAsync(this, tenantId, fileIds, DateTime.UtcNow);
-    }
-
-    [PreCompileQuery]
-    public Task<int> DeleteMessageAttachmentsByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
-    {
-        return FileQueries.DeleteMessageAttachmentsByFileIdsAsync(this, tenantId, fileIds);
     }
 
     [PreCompileQuery]
@@ -826,13 +820,6 @@ static file class FileQueries
             ctx.FileVectorization
                 .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
                 .ExecuteUpdateAsync(f => f.SetProperty(x => x.DeletedOn, deletedOn));
-
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteMessageAttachmentsByFileIdsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds) =>
-                ctx.MessageAttachments
-                    .Where(r => r.TenantId == tenantId && fileIds.Contains(r.FileId))
-                    .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteOrderByFileIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -41,10 +41,8 @@ namespace ASC.Web.Api.Controllers;
 /// </remarks>
 /// <name>authentication</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
+[ApiEndpoint("authentication")]
 [WebhookDisable]
-[ControllerName("authentication")]
 public class AuthenticationController(
     UserManager userManager,
     LdapUserManager ldapUserManager,
@@ -307,7 +305,7 @@ public class AuthenticationController(
                     break;
             }
 
-            var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session, initiator, description);
+            var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session, initiator, true, description);
 
             if (!string.IsNullOrEmpty(inDto.Culture) && user.CultureName != inDto.Culture)
             {

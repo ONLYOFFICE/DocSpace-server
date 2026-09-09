@@ -68,10 +68,6 @@ public static class IdentityConsentScopeExtension
 
                 entity.ToTable("identity_consent_scopes");
 
-                entity.HasIndex(e => e.RegisteredClientId, "idx_identity_consent_scopes_registered_client_id");
-
-                entity.HasIndex(e => e.PrincipalId, "idx_identity_consent_scopes_principal_id");
-
                 entity.HasIndex(e => e.Scopes, "idx_identity_consent_scopes_scopes");
 
 

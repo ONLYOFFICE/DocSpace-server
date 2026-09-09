@@ -41,6 +41,18 @@ public class JoinSettings : CommandSettings
     [CommandOption("-f|--file <FILES>")]
     public IEnumerable<string>? Files { get; set; }
 
+    /// <summary>
+    /// Where the published contract goes - the joined document without the openapi-generator
+    /// workarounds, in the YAML the documentation site consumes. Absent from the configuration
+    /// means the SDK input is the only output.
+    /// </summary>
+    public string? PublishOutput { get; set; }
+
+    /// <summary>
+    /// Host to fill the empty `baseUrl` server variable of the published contract with.
+    /// </summary>
+    public string? ServerUrl { get; set; }
+
     public override ValidationResult Validate()
     {
         var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -57,6 +69,14 @@ public class JoinSettings : CommandSettings
                 return ValidationResult.Error("File path not specified. Use -o|--output <OUTPUT> or configure file in appsettings.json");
             }
             Output = Path.GetFullPath(Path.Combine(outputPath));
+        }
+
+        ServerUrl = configuration["serverUrl"];
+
+        var publishPath = configuration.GetSection("publish").Get<string[]>();
+        if (publishPath is { Length: > 0 })
+        {
+            PublishOutput = Path.GetFullPath(Path.Combine(publishPath));
         }
 
         if (Files == null || !Files.Any())

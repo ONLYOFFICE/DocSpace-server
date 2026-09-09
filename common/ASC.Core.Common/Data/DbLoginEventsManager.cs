@@ -71,23 +71,6 @@ public class DbLoginEventsManager(
     IDbContextFactory<MessagesContext> dbContextFactory,
     LoginEventsCache cache)
 {
-    private static readonly List<int> _loginActions =
-    [
-        (int)MessageAction.LoginSuccess,
-        (int)MessageAction.LoginSuccessViaSocialAccount,
-        (int)MessageAction.LoginSuccessViaSms,
-        (int)MessageAction.LoginSuccessViaApi,
-        (int)MessageAction.LoginSuccessViaSocialApp,
-        (int)MessageAction.LoginSuccessViaApiSms,
-        (int)MessageAction.LoginSuccessViaSSO,
-        (int)MessageAction.LoginSuccessViaApiSocialAccount,
-        (int)MessageAction.LoginSuccesViaTfaApp,
-        (int)MessageAction.LoginSuccessViaApiTfa,
-        (int)MessageAction.LoginSuccessViaPassword,
-
-        (int)MessageAction.AuthLinkActivated
-    ];
-
     public async Task<DbLoginEvent> GetByIdAsync(int tenantId, int id)
     {
         if (tenantId < 0 || id < 0)
@@ -118,7 +101,7 @@ public class DbLoginEventsManager(
 
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
-        var loginInfo = await loginEventContext.LoginEventsAsync(tenantId, userId, _loginActions, date).ToListAsync();
+        var loginInfo = await loginEventContext.LoginEventsAsync(tenantId, userId, LoginActions.Success, date).ToListAsync();
 
         return mapper.Map(loginInfo);
     }

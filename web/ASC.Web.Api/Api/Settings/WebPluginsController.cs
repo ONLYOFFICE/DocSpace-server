@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("webplugins")]
+[ApiEndpoint(Template = "webplugins")]
 public class WebPluginsController(
     IFusionCache fusionCache,
     WebItemManager webItemManager,

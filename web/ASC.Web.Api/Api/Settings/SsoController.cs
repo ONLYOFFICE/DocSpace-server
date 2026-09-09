@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("ssov2")]
+[ApiEndpoint(Template = "ssov2")]
 public class SsoController(
     TenantManager tenantManager,
     WebItemManager webItemManager,

@@ -290,3 +290,105 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         swaggerDoc.Extensions["x-tagGroups"] = new JsonNodeExtension(tagGroups);
     }
 }
+
+/// <summary>
+/// Turns the <c>example</c> that Swashbuckle fills in from the <c>&lt;example&gt;</c> xml docs into the JSON Schema
+/// <c>examples</c> array, which is what openapi 3.1 expects - <c>example</c> is deprecated there. A document filter
+/// rather than a schema filter on purpose: schema filters only see schemas generated from a type, and would miss the
+/// ones other filters assemble by hand, such as the rate limit response headers.
+/// </summary>
+public class OpenApi31SchemaDocumentFilter : IDocumentFilter
+{
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    {
+        var visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+
+        foreach (var schema in swaggerDoc.Components?.Schemas?.Values ?? [])
+        {
+            Visit(schema, visited);
+        }
+
+        foreach (var header in swaggerDoc.Components?.Headers?.Values ?? [])
+        {
+            Visit(header.Schema, visited);
+        }
+
+        foreach (var parameter in swaggerDoc.Components?.Parameters?.Values ?? [])
+        {
+            Visit(parameter.Schema, visited);
+        }
+
+        foreach (var path in swaggerDoc.Paths.Values)
+        {
+            foreach (var parameter in path.Parameters ?? [])
+            {
+                Visit(parameter.Schema, visited);
+            }
+
+            foreach (var operation in path.Operations?.Values ?? Enumerable.Empty<OpenApiOperation>())
+            {
+                VisitOperation(operation, visited);
+            }
+        }
+    }
+
+    private static void VisitOperation(OpenApiOperation operation, HashSet<object> visited)
+    {
+        foreach (var parameter in operation.Parameters ?? [])
+        {
+            Visit(parameter.Schema, visited);
+        }
+
+        foreach (var mediaType in operation.RequestBody?.Content?.Values ?? [])
+        {
+            Visit(mediaType.Schema, visited);
+        }
+
+        foreach (var response in operation.Responses?.Values ?? Enumerable.Empty<IOpenApiResponse>())
+        {
+            foreach (var mediaType in response.Content?.Values ?? [])
+            {
+                Visit(mediaType.Schema, visited);
+            }
+
+            foreach (var header in response.Headers?.Values ?? [])
+            {
+                Visit(header.Schema, visited);
+            }
+        }
+    }
+
+    private static void Visit(IOpenApiSchema schema, HashSet<object> visited)
+    {
+        // References are reached through the component they point at, so following them would only risk cycles.
+        if (schema is not OpenApiSchema concrete || !visited.Add(concrete))
+        {
+            return;
+        }
+
+        Rewrite(concrete);
+
+        Visit(concrete.Items, visited);
+        Visit(concrete.Not, visited);
+        Visit(concrete.AdditionalProperties, visited);
+
+        foreach (var child in concrete.Properties?.Values ?? [])
+        {
+            Visit(child, visited);
+        }
+
+        foreach (var child in (concrete.AllOf ?? []).Concat(concrete.AnyOf ?? []).Concat(concrete.OneOf ?? []))
+        {
+            Visit(child, visited);
+        }
+    }
+
+    private static void Rewrite(OpenApiSchema schema)
+    {
+        if (schema.Example != null)
+        {
+            schema.Examples = [schema.Example];
+            schema.Example = null;
+        }
+    }
+}

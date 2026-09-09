@@ -211,7 +211,7 @@
     <value>Spazio disponibile per gli agenti IA superato</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Impossibile impostare la quota per agente IA. Il valore inserito è superiore allo spazio totale di DocSpace.</value>
+    <value>Impossibile impostare la quota per agente IA. Il valore inserito è superiore allo spazio di archiviazione totale.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Rinnovo automatico</value>
@@ -802,7 +802,7 @@
     <value>Dimensione dell'immagine supera i parametri consentiti</value>
   </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
-    <value>E' stata superata la dimensione file massima</value>
+    <value>La dimensione del file immagine è troppo grande</value>
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
     <value>Nome o Cognome errati</value>
@@ -865,7 +865,7 @@
     <value>Troppi tentativi di accesso. Ti preghiamo di riprovare più tardi</value>
   </data>
   <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Aggiungi almeno 1 indirizzo IP permesso.</value>
+    <value>Aggiungi almeno 1 dominio attendibile.</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Utente disabilitato</value>
@@ -1120,7 +1120,7 @@
     <value>È stata superata la quota di spazio delle stanza</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Impossibile impostare la quota per stanza. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
+    <value>Impossibile impostare la quota per stanza. Il valore inserito è superiore allo spazio di archiviazione totale.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asia Pacifico (Singapore)</value>
@@ -1285,7 +1285,7 @@
     <value>Si è verificato un errore imprevisto. Riprova.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Hai collegato con successo Telegram per ricevere notifiche dal tuo DocSpace.</value>
+    <value>Hai collegato con successo Telegram per ricevere notifiche dal tuo spazio di lavoro.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Codice non corretto</value>
@@ -1300,7 +1300,7 @@
     <value>È stata superata la quota di spazio utente</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Impossibile impostare la quota per utente. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
+    <value>Impossibile impostare la quota per utente. Il valore inserito è superiore allo spazio di archiviazione totale.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Regione Ovest degli Stati Uniti (Oregon)</value>
@@ -1321,7 +1321,7 @@
     <value>Ricerca web</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Ricerca web</value>
+    <value>Ricerca IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Crediti IA</value>

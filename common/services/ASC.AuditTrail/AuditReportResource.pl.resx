@@ -247,7 +247,7 @@
     <value>Subskrypcja klienta została zaktualizowana: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta</value>
+    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Portfel klienta został zasilony: {0}</value>
@@ -901,7 +901,7 @@
     <value>Wysłać</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Użytkownik {0} zaprosił użytkownika {1}, aby dołączył do tego DocSpace</value>
+    <value>Użytkownik {0} wysłał zaproszenie do użytkownika {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Zaproś instrukcje wysłane: {0}</value>

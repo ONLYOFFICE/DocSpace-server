@@ -36,7 +36,7 @@ namespace ASC.People.Api;
 ///<remarks>
 /// Reassign API.
 ///</remarks>
-[DefaultRoute("reassign")]
+[ApiEndpoint(Template = "reassign")]
 public class ReassignController(
     PermissionContext permissionContext,
     QueueWorkerReassign queueWorkerReassign,

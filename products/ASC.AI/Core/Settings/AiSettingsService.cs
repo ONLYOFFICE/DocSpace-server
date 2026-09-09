@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.AI.Core.Knowledge;
+
 namespace ASC.AI.Core.Settings;
 
 [Scope]
@@ -39,70 +41,12 @@ public class AiSettingsService(
     AuthContext authContext,
     AiSettingsStore aiSettingsStore,
     AiAccessibility accessibility,
-    AiProviderService providerService,
     VectorizationGlobalSettings vectorizationGlobalSettings,
-    SystemMcpConfig systemMcpConfig,
-    ModelClientFactory modelClientFactory,
+    EmbeddingProviderProbe embeddingProviderProbe,
     MessageService messageService,
     SettingsManager settingsManager,
     AiGateway gateway)
 {
-    public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
-    {
-        await ThrowIfNotAccess();
-
-        var settings = await aiSettingsStore.GetWebSearchSettingsAsync();
-        settings.Enabled = enabled;
-
-        var typeChanged = settings.Type != type;
-        settings.Type = type;
-
-        var set = false;
-
-        switch (type)
-        {
-            case EngineType.Exa:
-                if (typeChanged || !string.IsNullOrEmpty(key))
-                {
-                    ArgumentException.ThrowIfNullOrEmpty(key);
-                    settings.Config = new ExaConfig
-                    {
-                        ApiKey = key
-                    };
-
-                    set = true;
-                }
-                break;
-            case EngineType.None:
-                settings.Config = null;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
-
-        await aiSettingsStore.SetWebSearchSettingsAsync(settings);
-
-        settings.NeedReset = false;
-
-        if (set)
-        {
-            messageService.Send(MessageAction.SetWebSearchSettings, type.ToStringFast());
-        }
-        else
-        {
-            messageService.Send(MessageAction.ResetWebSearchSettings);
-        }
-
-        return settings;
-    }
-
-    public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
-    {
-        await ThrowIfNotAccess();
-
-        return await aiSettingsStore.GetWebSearchSettingsAsync();
-    }
-
     public async Task<VectorizationSettings> SetVectorizationSettingsAsync(EmbeddingProviderType type, string? key)
     {
         await ThrowIfNotAccess();
@@ -127,11 +71,9 @@ public class AiSettingsService(
                         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
                     };
 
-                    var client = modelClientFactory.Create(type, url, key);
-
                     try
                     {
-                        await client.PingAsync();
+                        await embeddingProviderProbe.PingAsync(type, url, key);
                     }
                     catch (HttpRequestException httpException)
                     {
@@ -176,61 +118,33 @@ public class AiSettingsService(
 
     public async Task<AiSettings> GetAiSettingsAsync()
     {
-        var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
-            x => x.Type == ServerType.DocSpace);
-
         var aiStatus = await accessibility.GetStatusAsync();
         if (aiStatus.Enabled && aiStatus.GatewayEnabled)
         {
             return new AiSettings
             {
-                WebSearchEnabled = true,
                 VectorizationEnabled = true,
                 AiReady = true,
                 EmbeddingModel = vectorizationGlobalSettings.Model.Id,
-                ModelAliases = aiSettingsStore.GetModelAliases(),
-                PortalMcpServerId = docSpaceMcpServer?.Id,
                 SystemAiEnabled = true,
                 RecommendedModelForForms = aiSettingsStore.GetRecommendedModelForForms(),
             };
         }
 
-        var webSearchSettingsTask = aiSettingsStore.GetWebSearchSettingsAsync();
-        var webSearchEnabledTask = aiSettingsStore.IsWebSearchEnabledAsync();
-
         var vectorizationSettingsTask = aiSettingsStore.GetVectorizationSettingsAsync();
         var vectorizationEnabledTask = aiSettingsStore.IsVectorizationEnabledAsync();
 
-        var needResetProvidersTask = providerService.NeedResetProvidersAsync();
-
-        await Task.WhenAll(
-            webSearchSettingsTask,
-            webSearchEnabledTask,
-            vectorizationSettingsTask,
-            vectorizationEnabledTask,
-            needResetProvidersTask
-            );
-
-        var webSearchNeedReset = (await webSearchSettingsTask).NeedReset;
-        var webSearchEnabled = !webSearchNeedReset && (await webSearchEnabledTask);
+        await Task.WhenAll(vectorizationSettingsTask, vectorizationEnabledTask);
 
         var vectorizationNeedReset = (await vectorizationSettingsTask).NeedReset;
         var vectorizationEnabled = !vectorizationNeedReset && (await vectorizationEnabledTask);
 
-        var needResetProviders = await needResetProvidersTask;
-        var aiReady = (aiStatus.GatewayEnabled || !needResetProviders) && aiStatus.Enabled;
-
         return new AiSettings
         {
-            WebSearchEnabled = webSearchEnabled,
-            WebSearchNeedReset = webSearchNeedReset,
             VectorizationEnabled = vectorizationEnabled,
             VectorizationNeedReset = vectorizationNeedReset,
-            AiReady = aiReady,
-            AiReadyNeedReset = needResetProviders,
+            AiReady = aiStatus.Enabled,
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
-            ModelAliases = aiSettingsStore.GetModelAliases(),
-            PortalMcpServerId = docSpaceMcpServer?.Id,
             SystemAiEnabled = aiStatus.GatewayEnabled,
             RecommendedModelForForms = aiSettingsStore.GetRecommendedModelForForms(),
         };
@@ -241,11 +155,18 @@ public class AiSettingsService(
         return await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
     }
 
-    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool chatRecommendedModelVisible)
+    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool? chatRecommendedModelVisible)
     {
-        var settings = new AiUserSettings
+        var current = await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+
+        if (chatRecommendedModelVisible is null)
         {
-            ChatRecommendedModelVisible = chatRecommendedModelVisible,
+            return current;
+        }
+
+        var settings = current with
+        {
+            ChatRecommendedModelVisible = chatRecommendedModelVisible.Value
         };
 
         await settingsManager.SaveForCurrentUserAsync(settings);

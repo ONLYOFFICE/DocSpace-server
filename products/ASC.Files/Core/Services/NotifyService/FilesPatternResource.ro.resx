@@ -248,19 +248,19 @@ $Message</value>
     <value>Statutul semnării s-a schimbat</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Notificare DocSpace. Menționat într-un document</value>
+    <value>Notificare ${LetterLogoText}. Menționat într-un document</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Notificare DocSpace. Formularul este completat</value>
+    <value>Notificare ${LetterLogoText}. Formularul este completat</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Notificare DocSpace.</value>
+    <value>Notificare ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Notificare DocSpace. Formularul este completat</value>
+    <value>Notificare ${LetterLogoText}. Formularul este completat</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Notificare DocSpace.</value>
+    <value>Notificare ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Documente. Trimiterea finalizată.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Trimiterea finalizată.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Notificare DocSpace. Sala a fost ștearsă</value>
+    <value>Notificare ${LetterLogoText}. Sala a fost ștearsă</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Documente. Acces permis la documentul: $DocumentTitle</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Documente. S-au acordat permisiuni de acces la folderul: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Notificare DocSpace.</value>
+    <value>Notificare ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Notificare DocSpace.</value>
+    <value>Notificare ${LetterLogoText}.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName a șters un agent IA
@@ -310,6 +310,6 @@ $__AuthorName a șters agentul IA: $RoomTitle</value>
     <value>Ați fost invitat(ă) în agentul IA "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Notificare DocSpace. Agent IA șters</value>
+    <value>Notificare ${LetterLogoText}. Agent IA șters</value>
   </data>
 </root>

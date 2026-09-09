@@ -248,19 +248,19 @@ $Message</value>
     <value>Статуса на подписването е променен</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace известие. Споменато в документа</value>
+    <value>${LetterLogoText} известие. Споменато в документа</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace известие. Формулярът е попълнен</value>
+    <value>${LetterLogoText} известие. Формулярът е попълнен</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace известие.</value>
+    <value>${LetterLogoText} известие.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace известие. Формулярът е попълнен</value>
+    <value>${LetterLogoText} известие. Формулярът е попълнен</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace известие.</value>
+    <value>${LetterLogoText} известие.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Документи. Изпращането е пълно.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Изпращането по пощата приключи.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace известие. Стаята е изтрита</value>
+    <value>${LetterLogoText} известие. Стаята е изтрита</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Документи. Достъп до документа: $DocumentTitle</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Документи. Предоставен е достъп до папката: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace известие.</value>
+    <value>${LetterLogoText} известие.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace известие.</value>
+    <value>${LetterLogoText} известие.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName изтри AI агент
@@ -310,6 +310,6 @@ $__AuthorName изтри AI агента: $RoomTitle</value>
     <value>Бяхте поканени в AI агента "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Известие от DocSpace. AI агентът е изтрит</value>
+    <value>${LetterLogoText} известие. AI агентът е изтрит</value>
   </data>
 </root>

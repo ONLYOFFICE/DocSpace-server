@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ProfileStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Profiles")]
 public class ProfileCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -64,7 +63,7 @@ public class ProfileCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         const string invalidJson = """{ "name": "x", "providerType": "openai", "baseUrl": "https://api.openai.com", "modelId": "gpt", "capabilities": "INVALID_VALUE" }""";
 
-        using var response = await Ai.PostRawAsync(ProfilesPath, invalidJson, TestContext.Current.CancellationToken);
+        using var response = await _ai.PostRawAsync(ProfilesPath, invalidJson, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

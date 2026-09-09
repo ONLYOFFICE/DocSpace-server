@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [ApiExplorerSettings(IgnoreApi = true)]
-[DefaultRoute("version")]
+[ApiEndpoint(Template = "version")]
 public class VersionController(
     PermissionContext permissionContext,
     TenantManager tenantManager,

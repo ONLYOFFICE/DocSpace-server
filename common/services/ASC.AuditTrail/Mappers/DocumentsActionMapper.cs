@@ -42,7 +42,8 @@ internal class DocumentsActionMapper : IProductActionMapper
         new RoomsActionMapper(),
         new SettingsActionMapper(),
         new AgentsActionMapper(),
-        new MetadataActionMapper()
+        new MetadataActionMapper(),
+        new PrivacyRoomActionMapper()
     ];
 
     public ProductType Product => ProductType.Documents;
@@ -69,6 +70,7 @@ internal class FilesActionMapper : ILocationActionMapper
                             MessageAction.FormStartedToFill, MessageAction.FormPartiallyFilled, MessageAction.FormCompletelyFilled, MessageAction.FormStopped,
                             MessageAction.FileSavedButUserQuotaExceeded, MessageAction.FileNotSavedDueToUserQuota,
                             MessageAction.FileSavedButRoomQuotaExceeded, MessageAction.FileNotSavedDueToRoomQuota,
+                            MessageAction.FileSavedButTenantQuotaExceeded, MessageAction.FileNotSavedDueToTenantQuota,
                             MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling,
                             MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered, MessageAction.FileCustomFilterEnabled, MessageAction.FileCustomFilterDisabled,
                             MessageAction.FileExternalLinkUpdated
@@ -221,9 +223,11 @@ internal class AgentsActionMapper : ILocationActionMapper
                 {
                     { ActionType.Create, [MessageAction.AgentCreated] },
                     { ActionType.Update, [
-                        MessageAction.AgentRenamed, 
-                        MessageAction.AddedServerToAgent, 
-                        MessageAction.DeletedServerFromAgent
+                        MessageAction.AgentRenamed,
+                        MessageAction.AddedServerToAgent,
+                        MessageAction.DeletedServerFromAgent,
+                        MessageAction.UpdatedServerOfAgent,
+                        MessageAction.AiAgentProfileAssigned
                     ] },
                     { ActionType.Delete, [MessageAction.AgentDeleted] }
                 }
@@ -290,6 +294,35 @@ internal class MetadataActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Delete, [MessageAction.MetadataTemplateDeleted, MessageAction.MetadataFieldDeleted]
+            }
+        };
+    }
+}
+
+internal class PrivacyRoomActionMapper : ILocationActionMapper
+{
+    public LocationType Location { get; }
+    public IDictionary<MessageAction, MessageMaps> Actions { get; }
+
+    public PrivacyRoomActionMapper()
+    {
+        Location = LocationType.DocumentsSettings;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
+        {
+            {
+                ActionType.Create, [
+                    MessageAction.PrivacyRoomKeyCreated
+                ]
+            },
+            {
+                ActionType.Update, [
+                    MessageAction.PrivacyRoomKeyUpdated
+                ]
+            },
+            {
+                ActionType.Delete, [
+                    MessageAction.PrivacyRoomKeyDeleted
+                ]
             }
         };
     }

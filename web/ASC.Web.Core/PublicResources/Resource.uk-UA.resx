@@ -211,7 +211,7 @@
     <value>Перевищено квоту простору для агента AІ</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося задати квоту для агента AІ. Введене значення більше загального сховища DocSpace.</value>
+    <value>Не вдалося задати квоту для агента AІ. Введене значення більше загального сховища.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Автоматичне поновлення</value>
@@ -1120,7 +1120,7 @@
     <value>Перевищено квоту простору кімнати</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося задати квоту на кімнату. Введене значення більше загального сховища DocSpace.</value>
+    <value>Не вдалося задати квоту на кімнату. Введене значення більше загального сховища.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Азіатсько-Тихоокеанський регіон (Сінгапур)</value>
@@ -1168,7 +1168,7 @@
     <value>Кількість агентів AІ не повинна перевищувати {0}</value>
   </data>
   <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
-    <value>Пошук AI</value>
+    <value>AI-пошук</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Функції AІ</value>
@@ -1285,7 +1285,7 @@
     <value>Сталася неочікувана помилка. Повторіть спробу.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Ви успішно під'єднали Telegram для отримання сповіщень з вашого простору DocSpace.</value>
+    <value>Ви успішно під'єднали Telegram для отримання сповіщень з робочого простору.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Невірний код</value>
@@ -1297,10 +1297,10 @@
     <value>Ви надіслали забагато текстових повідомлень. Спробуйте пізніше.</value>
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>Перевищено квоту простору кімнати</value>
+    <value>Перевищено квоту простору користувача</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося задати квоту на користувача. Введене значення більше загального сховища DocSpace.</value>
+    <value>Не вдалося задати квоту на користувача. Введене значення більше загального сховища.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Регіон Заходу США (Орегон)</value>
@@ -1333,7 +1333,7 @@
     <value>Business</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Веб-пошук</value>
+    <value>AI-пошук</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Результати</value>

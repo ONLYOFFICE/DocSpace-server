@@ -65,6 +65,12 @@ public class SaveAuthorizationMessage {
   @JsonProperty(value = "tenant_id")
   private Long tenantId;
 
+  @JsonProperty(value = "owner_tenant_id")
+  private Long ownerTenantId;
+
+  @JsonProperty(value = "owner_user_id")
+  private String ownerUserId;
+
   @JsonProperty(value = "state")
   private String state;
 

@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
 public class AssignmentsReadTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -70,7 +69,7 @@ public class AssignmentsReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadByType_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.GetAsync(
+        using var response = await _ai.GetAsync(
             $"{AssignmentsPath}/Chat?entityId=999999999",
             TestContext.Current.CancellationToken);
 

@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
 public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -62,7 +61,7 @@ public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
         scoped.Name.Should().Be("server-1");
         JsonEquals(scoped.Config, config).Should().BeTrue();
 
-        using var globalResponse = await Ai.GetAsync(
+        using var globalResponse = await _ai.GetAsync(
             $"{McpServersPath}/server-1",
             TestContext.Current.CancellationToken);
         globalResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -90,7 +89,7 @@ public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         await CreateMcpServerAsync("server-1");
 
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             McpServersPath,
             new { name = "server-1", config = BuildMcpConfig() },
             TestContext.Current.CancellationToken);
@@ -104,7 +103,7 @@ public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
         var roomId = await CreateRoomAsync();
         await CreateMcpServerAsync("server-1", entityId: roomId.ToString());
 
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             McpServersPath,
             new { name = "server-1", config = BuildMcpConfig(), entityId = roomId.ToString() },
             TestContext.Current.CancellationToken);
@@ -115,7 +114,7 @@ public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Create_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             McpServersPath,
             new { name = "server-1", config = BuildMcpConfig(), entityId = "999999999" },
             TestContext.Current.CancellationToken);
@@ -128,7 +127,7 @@ public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         const string invalidJson = """{ "name": "server-1" }""";
 
-        using var response = await Ai.PostRawAsync(McpServersPath, invalidJson, TestContext.Current.CancellationToken);
+        using var response = await _ai.PostRawAsync(McpServersPath, invalidJson, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

@@ -23,12 +23,12 @@
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.People.Api;
@@ -52,9 +52,7 @@ public abstract class PeopleControllerBase(
     protected readonly ApiContext _apiContext = apiContext;
     protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-    protected readonly IUrlValidator _urlValidator = urlValidator;
     protected readonly SetupInfo _setupInfo = setupInfo;
-    protected readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
     protected async Task<UserInfo> GetUserInfoAsync(string userNameOrId)
     {
@@ -117,7 +115,7 @@ public abstract class PeopleControllerBase(
         var currentScheme = _httpContextAccessor.HttpContext?.Request.Scheme;
         var requireHttps = !string.Equals(currentScheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase);
 
-        var validationResult = await _urlValidator.ValidateAsync(url, new UrlValidationOptions
+        var validationResult = await urlValidator.ValidateAsync(url, new UrlValidationOptions
         {
             RequireHttps = requireHttps
         });
@@ -146,7 +144,7 @@ public abstract class PeopleControllerBase(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        var httpClient = _httpClientFactory.CreateClient(UrlValidator.PinnedHttpClient);
+        var httpClient = httpClientFactory.CreateClient(UrlValidator.PinnedHttpClient);
         using var request = new HttpRequestMessage(HttpMethod.Get, photoValidation.ParsedUri);
         request.Options.Set(UrlValidator.PinnedIpKey, photoValidation.ResolvedAddresses[0]);
         using var response = await httpClient.SendAsync(request);

@@ -38,9 +38,7 @@ namespace ASC.Web.Api.Controllers;
 ///</remarks>
 ///<name>thirdparty</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("thirdparty")]
+[ApiEndpoint("thirdparty")]
 public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : ControllerBase
 {
     /// <remarks>

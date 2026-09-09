@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ToolPreferenceStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/ToolPreferences")]
 public class ToolPreferenceUpsertAllowAlwaysTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -43,7 +42,7 @@ public class ToolPreferenceUpsertAllowAlwaysTests(AspireAppFixture fixture) : Ba
     {
         await CreateMcpServerAsync("server-1");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/allow-always",
             new
             {
@@ -64,7 +63,7 @@ public class ToolPreferenceUpsertAllowAlwaysTests(AspireAppFixture fixture) : Ba
     [Fact]
     public async Task UpsertAllowAlways_Global_SystemTools_PersistsValue()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/allow-always",
             new
             {
@@ -234,7 +233,7 @@ public class ToolPreferenceUpsertAllowAlwaysTests(AspireAppFixture fixture) : Ba
     [Fact]
     public async Task UpsertAllowAlways_EmptyDictionary_Returns204_NoOp()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/allow-always",
             new { allowAlways = new Dictionary<string, HashSet<string>>() },
             TestContext.Current.CancellationToken);
@@ -261,7 +260,7 @@ public class ToolPreferenceUpsertAllowAlwaysTests(AspireAppFixture fixture) : Ba
     [Fact]
     public async Task UpsertAllowAlways_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/allow-always",
             new
             {

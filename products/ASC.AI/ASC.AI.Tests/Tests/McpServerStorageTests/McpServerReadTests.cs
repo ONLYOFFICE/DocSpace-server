@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
 public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -53,7 +52,7 @@ public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadByName_NonExisting_Returns404()
     {
-        using var response = await Ai.GetAsync(
+        using var response = await _ai.GetAsync(
             $"{McpServersPath}/missing",
             TestContext.Current.CancellationToken);
 
@@ -83,7 +82,7 @@ public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         var roomId = await CreateRoomAsync();
         await CreateMcpServerAsync("server-1");
 
-        using var response = await Ai.GetAsync(
+        using var response = await _ai.GetAsync(
             $"{McpServersPath}/server-1?entityId={roomId}",
             TestContext.Current.CancellationToken);
 
@@ -93,7 +92,7 @@ public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadByName_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.GetAsync(
+        using var response = await _ai.GetAsync(
             $"{McpServersPath}/server-1?entityId=999999999",
             TestContext.Current.CancellationToken);
 
@@ -142,7 +141,7 @@ public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadAll_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.GetAsync(
+        using var response = await _ai.GetAsync(
             $"{McpServersPath}?entityId=999999999",
             TestContext.Current.CancellationToken);
 

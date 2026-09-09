@@ -491,7 +491,7 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
     <value>コンテンツ作成者</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace 管理者</value>
+    <value>フル管理者</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>編集者</value>

@@ -51,6 +51,7 @@ public class MdToDocxTaskPublisher(
     AuthContext authContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
+    UserManager userManager,
     IEventBus eventBus)
 {
     public async Task PublishAsync<T>(string title, string content, T folderId)
@@ -61,13 +62,18 @@ public class MdToDocxTaskPublisher(
         var intFolderId = folderId is int id ? id : 0;
         var thirdpartyFolderId = folderId as string;
 
+        if (string.IsNullOrEmpty(thirdpartyFolderId) && intFolderId <= 0)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_InvalidFolderId);
+        }
+
         // Early-rejection optimization only: fail fast on the HTTP request thread, so the
         // caller gets an immediate error for an invalid/forbidden folder instead of an
         // asynchronous failure on the event bus. This is NOT the authoritative gate —
         // TextToDocxTask.DoJob re-resolves the folder and re-runs CheckSecurity under the
         // task's authenticated identity at execution time, which catches folder deletion or
         // permission changes that happen between publication and execute.
-        _ = await Target.InitializeAsync(daoFactory, fileSecurity, intFolderId, thirdpartyFolderId);
+        _ = await Target.InitializeAsync(daoFactory, fileSecurity, userManager, authContext, intFolderId, thirdpartyFolderId);
 
         var data = new MdTextToDocxTaskData
         {

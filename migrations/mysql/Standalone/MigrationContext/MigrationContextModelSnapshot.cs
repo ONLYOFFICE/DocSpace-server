@@ -3,6 +3,7 @@ using System;
 using ASC.Core.Common.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -14,18 +15,27 @@ namespace ASC.Migrations.MySql.Migrations.CoreDb
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
+#pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.2")
+                .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.DbQuota", b =>
             {
-                b.Property<int>("Tenant")
+                b.Property<int>("TenantId")
                     .HasColumnType("int")
                     .HasColumnName("tenant");
 
+                b.Property<bool>("Additional")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("tinyint(1)")
+                    .HasColumnName("additional")
+                    .HasDefaultValueSql("'0'");
+
                 b.Property<string>("Description")
-                    .HasColumnType("varchar(128)")
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar")
                     .HasColumnName("description")
                     .UseCollation("utf8_general_ci")
                     .HasAnnotation("MySql:CharSet", "utf8");
@@ -35,20 +45,36 @@ namespace ASC.Migrations.MySql.Migrations.CoreDb
                     .HasColumnName("features");
 
                 b.Property<string>("Name")
-                    .HasColumnType("varchar(128)")
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar")
                     .HasColumnName("name")
                     .UseCollation("utf8_general_ci")
                     .HasAnnotation("MySql:CharSet", "utf8");
 
                 b.Property<decimal>("Price")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("decimal(10,2)")
+                    .HasColumnType("decimal(10,4)")
                     .HasColumnName("price")
                     .HasDefaultValueSql("'0.00'");
 
                 b.Property<string>("ProductId")
-                    .HasColumnType("varchar(128)")
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar")
                     .HasColumnName("product_id")
+                    .UseCollation("utf8_general_ci")
+                    .HasAnnotation("MySql:CharSet", "utf8");
+
+                b.Property<string>("ServiceGroup")
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar")
+                    .HasColumnName("service_group")
+                    .UseCollation("utf8_general_ci")
+                    .HasAnnotation("MySql:CharSet", "utf8");
+
+                b.Property<string>("ServiceName")
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar")
+                    .HasColumnName("service_name")
                     .UseCollation("utf8_general_ci")
                     .HasAnnotation("MySql:CharSet", "utf8");
 
@@ -58,7 +84,13 @@ namespace ASC.Migrations.MySql.Migrations.CoreDb
                     .HasColumnName("visible")
                     .HasDefaultValueSql("'0'");
 
-                b.HasKey("Tenant")
+                b.Property<bool>("Wallet")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("tinyint(1)")
+                    .HasColumnName("wallet")
+                    .HasDefaultValueSql("'0'");
+
+                b.HasKey("TenantId")
                     .HasName("PRIMARY");
 
                 b.ToTable("tenants_quota", (string)null);
@@ -75,6 +107,8 @@ namespace ASC.Migrations.MySql.Migrations.CoreDb
                         Visible = false
                     });
             });
+
+#pragma warning restore 612, 618
         }
     }
 }

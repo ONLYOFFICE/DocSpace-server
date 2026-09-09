@@ -38,6 +38,13 @@ public class AssignmentsStorage(
     IDbContextFactory<AiIntegrationContext> dbContextFactory,
     IDistributedLockProvider distributedLockProvider)
 {
+    /// <summary>
+    /// Profile id stored for an action type that a portal admin has explicitly unassigned.
+    /// Such a row is a tombstone: reads treat it as "no assignment" and resolution must not
+    /// substitute a default profile for it. It is not a valid profile id and cannot be assigned.
+    /// </summary>
+    public static readonly Guid UnassignedProfileId = Guid.Empty;
+
     public async Task<bool> CreateAsync(int tenantId, ActionType actionType, Guid profileId, int? entryId = null)
     {
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId, entryId)))
@@ -55,7 +62,16 @@ public class AssignmentsStorage(
 
                 if (existing != null)
                 {
-                    return false;
+                    if (existing.ProfileId != UnassignedProfileId)
+                    {
+                        return false;
+                    }
+
+                    var affected = entryId.HasValue
+                        ? await context.UpdateAssignmentProfileByEntryAsync(tenantId, actionType, entryId.Value, profileId)
+                        : await context.UpdateAssignmentProfileAsync(tenantId, actionType, profileId);
+
+                    return affected > 0;
                 }
 
                 context.Assignments.Add(new DbAssignment
@@ -163,6 +179,16 @@ public class AssignmentsStorage(
                 await context.SaveChangesAsync();
             });
         }
+    }
+
+    public Task UnassignAsync(int tenantId, ActionType actionType)
+    {
+        return UpsertManyAsync(tenantId, new Dictionary<ActionType, Guid> { [actionType] = UnassignedProfileId });
+    }
+
+    public Task UnassignManyAsync(int tenantId, IReadOnlyCollection<ActionType> actionTypes)
+    {
+        return UpsertManyAsync(tenantId, actionTypes.ToDictionary(x => x, _ => UnassignedProfileId));
     }
 
     public async Task DeleteAsync(int tenantId, ActionType actionType, int? entryId = null)

@@ -211,7 +211,7 @@
     <value>Kvóta priestoru AI agenta bola prekročená</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodarilo sa nastaviť kvótu pre agenta AI. Zadaná hodnota je väčšia ako celková kapacita úložiska DocSpace.</value>
+    <value>Nepodarilo sa nastaviť kvótu pre agenta AI. Zadaná hodnota je väčšia ako celková kapacita úložiska.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatické obnovenie</value>
@@ -1120,7 +1120,7 @@
     <value>Kvóta priestoru v miestnosti bola prekročená</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodarilo sa nastaviť kvótu pre miestnosť. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
+    <value>Nepodarilo sa nastaviť kvótu pre miestnosť. Zadaná hodnota je väčšia ako celkové úložisko.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Ázia Pacifik (Singapur)</value>
@@ -1285,7 +1285,7 @@
     <value>Došlo k neočakávanej chybe. Skúste to znovu.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Úspešne ste sa pripojili k aplikácii Telegram, aby ste mohli prijímať oznámenia z DocSpace.</value>
+    <value>Úspešne ste sa pripojili k aplikácii Telegram, aby ste mohli prijímať oznámenia z pracovného priestoru.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Nesprávny kód</value>
@@ -1297,10 +1297,10 @@
     <value>Odoslali ste príliš veľa textových správ. Skúste to prosím neskôr.</value>
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>Kvóta priestoru v miestnosti bola prekročená</value>
+    <value>Kvóta priestoru používateľa bola prekročená</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodarilo sa nastaviť kvótu pre používateľa. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
+    <value>Nepodarilo sa nastaviť kvótu pre používateľa. Zadaná hodnota je väčšia ako celkové úložisko.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Región Západ USA (Oregon)</value>
@@ -1321,7 +1321,7 @@
     <value>Webové vyhľadávanie</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Webové vyhľadávanie</value>
+    <value>Vyhľadávanie AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI kredity</value>

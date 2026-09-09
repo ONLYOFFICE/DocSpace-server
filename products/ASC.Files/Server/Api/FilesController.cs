@@ -918,6 +918,13 @@ public class FilesControllerCommon(
     [HttpPost("thumbnails")]
     public async Task<IEnumerable<JsonElement>> CreateThumbnails(BaseBatchRequestDto inDto)
     {
+        // The endpoint only ever queues files; a request naming no files (folders only, or an
+        // empty body) is answered with an empty list rather than an ArgumentNullException.
+        if (inDto.FileIds == null)
+        {
+            return [];
+        }
+
         return await fileStorageService.CreateThumbnailsAsync(inDto.FileIds.ToList());
     }
 }

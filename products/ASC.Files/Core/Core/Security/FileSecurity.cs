@@ -321,6 +321,7 @@ public class FileSecurity(
                     FilesSecurityActions.Embed,
                     FilesSecurityActions.ChangeOwner,
                     FilesSecurityActions.IndexExport,
+                    FilesSecurityActions.HistoryExport,
                     FilesSecurityActions.UseChat,
                     FilesSecurityActions.CanUseAi
                 }
@@ -380,6 +381,16 @@ public class FileSecurity(
     public async Task<bool> CanReadHistoryAsync<T>(FileEntry<T> entry, Guid userId)
     {
         return await CanAsync(entry, userId, FilesSecurityActions.ReadHistory);
+    }
+
+    public async Task<bool> CanExportHistoryAsync<T>(FileEntry<T> entry)
+    {
+        return await CanExportHistoryAsync(entry, authContext.CurrentAccount.ID);
+    }
+
+    public async Task<bool> CanExportHistoryAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.HistoryExport);
     }
 
     public async Task<bool> CanCommentAsync<T>(FileEntry<T> entry, Guid userId)
@@ -615,6 +626,18 @@ public class FileSecurity(
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.Vectorization);
     }
 
+    public async Task<VectorizationAvailability> GetVectorizationAvailabilityAsync<T>(File<T> file)
+    {
+        if (file.VectorizationStatus != null && !await IsVectorizationPendingAsync(file))
+        {
+            return VectorizationAvailability.AlreadyProcessed;
+        }
+
+        return await CanVectorizationAsync(file)
+            ? VectorizationAvailability.Available
+            : VectorizationAvailability.AccessDenied;
+    }
+
     public async Task<bool> CanUseChatAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
@@ -642,6 +665,17 @@ public class FileSecurity(
     public async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanReadSeparatelyAsync<T>(FileEntry<T> entry)
     {
         return await WhoCanAsync(entry, FilesSecurityActions.Read, true);
+    }
+
+    private async Task<bool> IsVectorizationPendingAsync<T>(File<T> file)
+    {
+        return file.VectorizationStatus switch
+        {
+            null => false,
+            VectorizationStatus.Completed => false,
+            VectorizationStatus.InProgress => !await vectorizationHelper.InProcessAsync(file.Id),
+            _ => true
+        };
     }
 
     private async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
@@ -1132,6 +1166,16 @@ public class FileSecurity(
         var folder = e as Folder<T>;
         var isRoom = folder is { IsRoom: true };
 
+        if (action == FilesSecurityActions.HistoryExport)
+        {
+            if (isGuest)
+            {
+                return false;
+            }
+
+            action = FilesSecurityActions.Read;
+        }
+
         if (file != null && action == FilesSecurityActions.FillForms && !file.IsForm)
         {
             return false;
@@ -1245,19 +1289,9 @@ public class FileSecurity(
             }
         }
 
-        if (action == FilesSecurityActions.Vectorization)
+        if (action == FilesSecurityActions.Vectorization && (file == null || !await IsVectorizationPendingAsync(file)))
         {
-            if (file?.VectorizationStatus == null)
-            {
-                return false;
-            }
-
-            switch (file.VectorizationStatus)
-            {
-                case VectorizationStatus.Completed:
-                case VectorizationStatus.InProgress when await vectorizationHelper.InProcessAsync(file.Id):
-                    return false;
-            }
+            return false;
         }
 
         if (file != null && room is { FolderType: FolderType.AiRoom } && parentFolders.Any(x => x.FolderType == FolderType.Knowledge))
@@ -2703,7 +2737,7 @@ public class FileSecurity(
 
         if (searchArea is not (SearchArea.Templates or SearchArea.FormTemplates) || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
         {
-            currentUserOrderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
+            currentUserOrderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any or SearchArea.Forms && !isAdmin);
         }
 
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserOrderedSubjects.Select(x => x.Subject))
@@ -3907,6 +3941,9 @@ public class FileSecurity(
         AnalyzeResponses,
 
         [Description("Use AI")]
-        CanUseAi
+        CanUseAi,
+
+        [Description("History export")]
+        HistoryExport
     }
 }

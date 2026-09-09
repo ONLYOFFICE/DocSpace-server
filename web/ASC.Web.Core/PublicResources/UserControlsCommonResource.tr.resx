@@ -127,7 +127,7 @@
     <value>Lisans anahtarı girmeniz gerekiyor</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Lisans Çakışması. Lütfen {0} DocSpace'in doğru sürümünü (Enterprise veya Developer) yüklediğinizden emin olun. Herhangi bir sorunuz varsa, satış müdürünüzle iletişime geçmekten çekinmeyin.</value>
+    <value>Lisans Çakışması. Lütfen {0} Docs'un doğru sürümünü (Enterprise veya Developer) yüklediğinizden emin olun. Herhangi bir sorunuz varsa, satış müdürünüzle iletişime geçmekten çekinmeyin.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Yeni Döküman</value>

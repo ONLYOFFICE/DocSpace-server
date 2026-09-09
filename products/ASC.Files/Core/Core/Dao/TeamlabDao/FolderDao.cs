@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -1061,7 +1061,6 @@ internal class FolderDao(
             await filesDbContext.DeleteOrderByFolderIdsAsync(tenantId, subfolders);
 
             await filesDbContext.DeleteAuditReferencesByFolderIdsAsync(subfolders);
-            await filesDbContext.DeleteChatsByRoomIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteAttachmentsByFolderIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteThreadsByFolderIdsAsync(tenantId, subfolders);
             await filesDbContext.DeleteAssignmentsByFolderIdsAsync(tenantId, subfolders);
@@ -1869,6 +1868,17 @@ internal class FolderDao(
 
     public async Task<int> GetFolderIDAsync(string module, string bunch, string data, bool createIfNotExists)
     {
+        var (folderId, _) = await GetFolderIdWithCreateInfoAsync(module, bunch, data, createIfNotExists);
+
+        return folderId;
+    }
+
+    private async Task<(int folderId, bool created)> GetFolderIdWithCreateInfoAsync(
+        string module,
+        string bunch,
+        string data,
+        bool createIfNotExists)
+    {
         ArgumentException.ThrowIfNullOrEmpty(module);
         ArgumentException.ThrowIfNullOrEmpty(bunch);
 
@@ -1877,13 +1887,13 @@ internal class FolderDao(
 
         if (folderId != null)
         {
-            return Convert.ToInt32(folderId);
+            return (Convert.ToInt32(folderId), false);
         }
 
         var newFolderId = 0;
         if (!createIfNotExists)
         {
-            return newFolderId;
+            return (newFolderId, false);
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -1894,7 +1904,7 @@ internal class FolderDao(
 
             if (folderId != null)
             {
-                return Convert.ToInt32(folderId);
+                return (Convert.ToInt32(folderId), false);
             }
 
             var folder = _serviceProvider.GetService<Folder<int>>();
@@ -1993,7 +2003,7 @@ internal class FolderDao(
             await PublishFolderIndexEventAsync(folder); //Publish only after the transaction has committed
         }
 
-        return newFolderId;
+        return (newFolderId, true);
     }
 
     private async Task<string> InternalGetFolderIDAsync(string key)
@@ -2023,6 +2033,16 @@ internal class FolderDao(
     public async Task<int> GetFolderIDUserAsync(bool createIfNotExists, Guid? userId = null)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, My, (userId ?? _authContext.CurrentAccount.ID).ToString(), createIfNotExists);
+    }
+
+    public async Task<(int folderId, bool created)> GetFolderIdUserWithCreateInfoAsync(bool createIfNotExists, Guid? userId = null)
+    {
+        return await GetFolderIdWithCreateInfoAsync(FileConstant.ModuleId, My, (userId ?? _authContext.CurrentAccount.ID).ToString(), createIfNotExists);
+    }
+
+    public async Task<(int folderId, bool created)> GetFolderIdCommonWithCreateInfoAsync(bool createIfNotExists)
+    {
+        return await GetFolderIdWithCreateInfoAsync(FileConstant.ModuleId, Common, null, createIfNotExists);
     }
 
     public async Task<int> GetFolderIDShareAsync(bool createIfNotExists)

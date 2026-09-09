@@ -52,6 +52,7 @@ public class DbAttachment : BaseEntity
     [MaxLength(32)]
     public string? ThirdpartyEntryId { get; init; }
 
+    public Guid CreatedBy { get; init; }
     public DateTime CreatedAt { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
@@ -128,6 +129,12 @@ public static class DbAttachmentExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("datetime");
@@ -146,6 +153,9 @@ public static class DbAttachmentExtension
 
             entity.HasIndex(e => new { e.TenantId, e.ThirdpartyEntryId })
                 .HasDatabaseName("IX_tenant_id_thirdparty_entry_id");
+
+            entity.HasIndex(e => new { e.MessageId, e.CreatedAt })
+                .HasDatabaseName("IX_message_id_created_at");
         });
     }
 
@@ -191,6 +201,10 @@ public static class DbAttachmentExtension
                 .HasColumnName("thirdparty_entry_id")
                 .HasColumnType("char(32)");
 
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasColumnType("uuid");
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("timestamp without time zone");
@@ -209,6 +223,9 @@ public static class DbAttachmentExtension
 
             entity.HasIndex(e => new { e.TenantId, e.ThirdpartyEntryId })
                 .HasDatabaseName("ix_ai_integration_attachments_tenant_id_thirdparty_entry_id");
+
+            entity.HasIndex(e => new { e.MessageId, e.CreatedAt })
+                .HasDatabaseName("ix_ai_integration_attachments_message_id_created_at");
         });
     }
 }

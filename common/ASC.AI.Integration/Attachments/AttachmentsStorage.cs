@@ -36,7 +36,7 @@ namespace ASC.AI.Integration.Attachments;
 [Scope]
 public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory)
 {
-    public async Task<List<Attachment>> CreateManyAsync(int tenantId, IReadOnlyList<CreateAttachmentParams> data)
+    public async Task<List<Attachment>> CreateManyAsync(int tenantId, Guid createdBy, IReadOnlyList<CreateAttachmentParams> data)
     {
         if (data.Count == 0)
         {
@@ -53,6 +53,7 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             Content = p.Content,
             EntryId = p.EntryId,
             ThirdpartyEntryId = p.ThirdpartyEntryId,
+            CreatedBy = createdBy,
             CreatedAt = now
         }).ToArray();
 
@@ -64,15 +65,15 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         return entities.Select(ToDomainEntity).ToList();
     }
 
-    public async Task<Attachment?> ReadByIdAsync(int tenantId, Guid id)
+    public async Task<Attachment?> ReadByIdAsync(int tenantId, Guid createdBy, Guid id)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var entity = await context.GetAttachmentAsync(tenantId, id);
+        var entity = await context.GetAttachmentAsync(tenantId, createdBy, id);
         return entity == null ? null : ToDomainEntity(entity);
     }
 
-    public async Task<List<Attachment>> ReadManyByIdsAsync(int tenantId, HashSet<Guid> ids)
+    public async Task<List<Attachment>> ReadManyByIdsAsync(int tenantId, Guid createdBy, HashSet<Guid> ids)
     {
         if (ids.Count == 0)
         {
@@ -81,12 +82,12 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.GetAttachmentsByIdsAsync(tenantId, ids)
+        return await context.GetAttachmentsByIdsAsync(tenantId, createdBy, ids)
             .Select(ToDomainEntity)
             .ToListAsync();
     }
 
-    public async Task UpdateManyAsync(int tenantId, HashSet<Guid> ids, Guid messageId)
+    public async Task UpdateManyAsync(int tenantId, Guid createdBy, HashSet<Guid> ids, Guid messageId)
     {
         if (ids.Count == 0)
         {
@@ -95,17 +96,17 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.UpdateAttachmentBindingsByIdsAsync(tenantId, ids, messageId);
+        await context.UpdateAttachmentBindingsByIdsAsync(tenantId, createdBy, ids, messageId);
     }
 
-    public async Task DeleteAsync(int tenantId, Guid id)
+    public async Task DeleteAsync(int tenantId, Guid createdBy, Guid id)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.DeleteAttachmentAsync(tenantId, id);
+        await context.DeleteAttachmentAsync(tenantId, createdBy, id);
     }
 
-    public async Task DeleteManyAsync(int tenantId, HashSet<Guid> ids)
+    public async Task DeleteManyAsync(int tenantId, Guid createdBy, HashSet<Guid> ids)
     {
         if (ids.Count == 0)
         {
@@ -114,7 +115,7 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.DeleteAttachmentsByIdsAsync(tenantId, ids);
+        await context.DeleteAttachmentsByIdsAsync(tenantId, createdBy, ids);
     }
 
     private static Attachment ToDomainEntity(DbAttachment entity)

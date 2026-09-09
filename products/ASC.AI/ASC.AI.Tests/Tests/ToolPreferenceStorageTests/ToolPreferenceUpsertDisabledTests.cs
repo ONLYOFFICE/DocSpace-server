@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ToolPreferenceStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/ToolPreferences")]
 public class ToolPreferenceUpsertDisabledTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -43,7 +42,7 @@ public class ToolPreferenceUpsertDisabledTests(AspireAppFixture fixture) : BaseT
     {
         await CreateMcpServerAsync("server-1");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/disabled",
             new
             {
@@ -64,7 +63,7 @@ public class ToolPreferenceUpsertDisabledTests(AspireAppFixture fixture) : BaseT
     [Fact]
     public async Task UpsertDisabled_Global_SystemTools_PersistsValue()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/disabled",
             new
             {
@@ -235,7 +234,7 @@ public class ToolPreferenceUpsertDisabledTests(AspireAppFixture fixture) : BaseT
     [Fact]
     public async Task UpsertDisabled_EmptyDictionary_Returns204_NoOp()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/disabled",
             new { disabled = new Dictionary<string, HashSet<string>>() },
             TestContext.Current.CancellationToken);
@@ -262,7 +261,7 @@ public class ToolPreferenceUpsertDisabledTests(AspireAppFixture fixture) : BaseT
     [Fact]
     public async Task UpsertDisabled_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{ToolPrefsPath}/disabled",
             new
             {

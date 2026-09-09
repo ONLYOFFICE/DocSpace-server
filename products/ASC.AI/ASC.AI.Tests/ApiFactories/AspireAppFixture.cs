@@ -31,161 +31,30 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Aspire.Hosting.ApplicationModel;
-
-using Microsoft.Extensions.DependencyInjection;
-
 namespace ASC.AI.Tests.ApiFactories;
 
-public class AspireAppFixture : IAsyncLifetime
+/// <summary>
+/// The AI suite's Aspire host: AI itself, plus Files and People for the entities an AI test needs
+/// (a room to scope preferences to, a member to act as).
+/// </summary>
+public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
-    private DistributedApplication _app = null!;
-    private DbConnection _dbconnection = null!;
-    private Respawner _respawner = null!;
-    private Provider _provider;
+    protected override IEnumerable<string> Resources => [ResourceNames.Ai, ResourceNames.Files, ResourceNames.People];
 
-    private readonly List<string> _tablesToBackup = ["files_folder", "files_folder_tree", "core_user", "core_usersecurity", "files_bunch_objects"];
-    private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings"];
-
-    public HttpClient AiHttpClient { get; private set; } = null!;
-    public HttpClient PeopleHttpClient { get; private set; } = null!;
-    public HttpClient WebApiHttpClient { get; private set; } = null!;
-    public HttpClient FilesHttpClient { get; private set; } = null!;
-
-    public AiApiClient AiApi { get; private set; } = null!;
-    public AiApiClient PeopleApi { get; private set; } = null!;
-    public AiApiClient WebApi { get; private set; } = null!;
-    public AiApiClient FilesApi { get; private set; } = null!;
-
-    public async ValueTask InitializeAsync()
+    protected override PortalClients CreateClients(PortalContext context)
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .AddEnvironmentVariables()
-            .Build();
-
-        _provider = config.GetValue<Provider>("dbProviderType");
-
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            ["DOTNET_LAUNCH_PROFILE=integration-test", "SKIP_CLIENT=true"]);
-
-        appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
-        appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
-
-        _app = await appHost.BuildAsync();
-        await _app.StartAsync();
-
-        const string onlyofficeAi = "onlyoffice-ai";
-        const string onlyofficePeople = "onlyoffice-people";
-        const string onlyofficeWebApi = "onlyoffice-web-api";
-        const string onlyofficeFiles = "onlyoffice-files";
-
-        var resourceNotifications = _app.ResourceNotifications;
-        var waitForAi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeAi);
-        var waitForPeople = resourceNotifications.WaitForResourceHealthyAsync(onlyofficePeople);
-        var waitForApi = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeWebApi);
-        var waitForFiles = resourceNotifications.WaitForResourceHealthyAsync(onlyofficeFiles);
-
-        await Task.WhenAll(waitForAi, waitForPeople, waitForApi, waitForFiles);
-
-        var dbConnectionString = await _app.GetConnectionStringAsync("docspace");
-
-        _dbconnection = _provider == Provider.MySql
-            ? new MySqlConnection(dbConnectionString)
-            : new NpgsqlConnection(dbConnectionString);
-        await _dbconnection.OpenAsync();
-
-        AiHttpClient = CreateHttpClientNoCookies(onlyofficeAi);
-        PeopleHttpClient = CreateHttpClientNoCookies(onlyofficePeople);
-        WebApiHttpClient = CreateHttpClientNoCookies(onlyofficeWebApi);
-        FilesHttpClient = CreateHttpClientNoCookies(onlyofficeFiles);
-
-        AiApi = new AiApiClient(AiHttpClient);
-        PeopleApi = new AiApiClient(PeopleHttpClient);
-        WebApi = new AiApiClient(WebApiHttpClient);
-        FilesApi = new AiApiClient(FilesHttpClient);
-
-        var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
-        tablesToIgnore.AddRange(_tablesToBackup.Select(r => new Table(MakeCopyTableName(r))));
-
-        _respawner = await Respawner.CreateAsync(_dbconnection, new RespawnerOptions
-        {
-            DbAdapter = _provider == Provider.MySql ? DbAdapter.MySql : DbAdapter.Postgres,
-            TablesToIgnore = tablesToIgnore.ToArray(),
-        });
+        return new PortalClients(context);
     }
 
-    internal async Task ResetDatabaseAsync()
+    protected override async ValueTask WarmUpAsync(PortalClients clients)
     {
-        await _respawner.ResetAsync(_dbconnection);
+        await clients.AiHttpClient.Authenticate(clients.Owner);
+        await clients.FilesHttpClient.Authenticate(clients.Owner);
 
-        var script = _provider switch
-        {
-            Provider.MySql => "INSERT INTO {0} SELECT * FROM {1};",
-            Provider.PostgreSql => "INSERT INTO {0} SELECT * FROM {1};SELECT setval('{0}_id_seq', (SELECT MAX(id) FROM {0})+1);",
-            _ => ""
-        };
+        using var profiles = await clients.Ai.GetAsync("/internal/ai/profiles", TestContext.Current.CancellationToken);
 
-        await ExecuteScriptAsync(script);
-        await ClearCacheAsync();
-    }
-
-    internal async Task BackupTables()
-    {
-        var script = _provider switch
-        {
-            Provider.MySql => "CREATE TABLE IF NOT EXISTS {1} LIKE {0}; \nREPLACE INTO {1} SELECT * FROM {0};",
-            Provider.PostgreSql => "CREATE TABLE IF NOT EXISTS {1} (LIKE {0} INCLUDING ALL);\n DELETE FROM {1}; \nINSERT INTO {1} SELECT * FROM {0};",
-            _ => ""
-        };
-
-        if (!string.IsNullOrEmpty(script))
-        {
-            await ExecuteScriptAsync(script);
-        }
-    }
-
-    private async Task ExecuteScriptAsync(string scriptTemplate)
-    {
-        var backupScript = new StringBuilder();
-
-        foreach (var table in _tablesToBackup)
-        {
-            backupScript.AppendFormat(scriptTemplate, table, MakeCopyTableName(table));
-        }
-
-        await using var cmd = _dbconnection.CreateCommand();
-        cmd.CommandText = backupScript.ToString();
-        await cmd.ExecuteNonQueryAsync();
-    }
-
-    private async Task ClearCacheAsync()
-    {
-        var commandService = _app.Services.GetRequiredService<ResourceCommandService>();
-        await commandService.ExecuteCommandAsync("cache", "clear-cache", CancellationToken.None);
-    }
-
-    private HttpClient CreateHttpClientNoCookies(string resourceName)
-    {
-        Uri? baseAddress;
-        using (var baseClient = _app.CreateHttpClient(resourceName))
-        {
-            baseAddress = baseClient.BaseAddress;
-        }
-        var handler = new HttpClientHandler { UseCookies = false };
-        return new HttpClient(handler) { BaseAddress = baseAddress };
-    }
-
-    private static string MakeCopyTableName(string tableName)
-    {
-        return $"{tableName}_copy";
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _app.StopAsync();
-        await _dbconnection.DisposeAsync();
-        await _app.DisposeAsync();
+        // The owner's root folder tree is provisioned lazily on first access — warm that too,
+        // it is what every test creating a room hits right after registration.
+        using var rootFolders = await clients.FilesApi.GetAsync("/api/2.0/files/@root", TestContext.Current.CancellationToken);
     }
 }

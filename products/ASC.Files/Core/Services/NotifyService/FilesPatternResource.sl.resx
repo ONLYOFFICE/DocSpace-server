@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace obvestilo. Agent umetne inteligence izbrisan</value>
+    <value>${LetterLogoText} obvestilo. Agent umetne inteligence izbrisan</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Dokumenti. Vsi podpisniki so zaključili $DocumentTitle</value>
@@ -262,19 +262,19 @@ $Message</value>
     <value>Status podpisa spremenjen</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace obvestilo. Omenjeno v dokumentu</value>
+    <value>${LetterLogoText} obvestilo. Omenjeno v dokumentu</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace obvestilo. Obrazec je izpolnjen</value>
+    <value>${LetterLogoText} obvestilo. Obrazec je izpolnjen</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace obvestilo.</value>
+    <value>${LetterLogoText} obvestilo.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace obvestilo. Obrazec je izpolnjen</value>
+    <value>${LetterLogoText} obvestilo. Obrazec je izpolnjen</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace obvestilo.</value>
+    <value>${LetterLogoText} obvestilo.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Dokumenti. Pošiljanje je zaključeno.</value>
@@ -283,7 +283,7 @@ $Message</value>
     <value>Pošiljanje je zaključeno.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace obvestilo. Soba izbrisana</value>
+    <value>${LetterLogoText} obvestilo. Soba izbrisana</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Dokumenti. Dostop dodeljen dokumentu: $DocumentTitle</value>
@@ -307,9 +307,9 @@ $Message</value>
     <value>Dokumenti. Omogočen dostop do mape: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace obvestilo.</value>
+    <value>${LetterLogoText} obvestilo.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace obvestilo.</value>
+    <value>${LetterLogoText} obvestilo.</value>
   </data>
 </root>

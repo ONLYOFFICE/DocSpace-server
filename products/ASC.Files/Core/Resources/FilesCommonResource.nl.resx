@@ -500,7 +500,7 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
     <value>Content maker</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace Beheerder</value>
+    <value>Volledige beheerder</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>

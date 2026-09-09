@@ -422,15 +422,29 @@ public class EditorConfiguration<T>(
 
         var (entries, _) = await entryManager.GetEntriesAsync(recent, null, 0, 10, [filter], false, Guid.Empty, Guid.Empty, string.Empty, null, false, false, new OrderBy(SortedByType.LastOpened, false));
 
-        var files = entries
-            .Cast<File<int>>()
-            .Where(file => file != null && !Equals(fileId, file.Id))
-            .ToList();
+        var files = entries.OfType<File<int>>().Where(file => !Equals(fileId, file.Id)).ToList();
+        var thirdPartyFiles = entries.OfType<File<string>>().Where(file => !Equals(fileId, file.Id)).ToList();
+
+        await foreach (var config in GetRecentConfigsAsync(files, folderDao))
+        {
+            yield return config;
+        }
+
+        await foreach (var config in GetRecentConfigsAsync(thirdPartyFiles, daoFactory.GetFolderDao<string>()))
+        {
+            yield return config;
+        }
+    }
+
+    private async IAsyncEnumerable<RecentConfig> GetRecentConfigsAsync<TFile>(List<File<TFile>> files, IFolderDao<TFile> folderDao)
+    {
+        if (files.Count == 0)
+        {
+            yield break;
+        }
 
         var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
         var parentFolders = await folderDao.GetFoldersAsync(parentIds).ToListAsync();
-
-
 
         foreach (var file in files)
         {
@@ -445,7 +459,7 @@ public class EditorConfiguration<T>(
 
             yield return new RecentConfig
             {
-                Folder = parentFolders.FirstOrDefault(r => file.ParentId == r.Id)?.Title,
+                Folder = parentFolders.FirstOrDefault(r => Equals(file.ParentId, r.Id))?.Title,
                 Title = file.Title,
                 Url = baseCommonLinkUtility.GetFullAbsolutePath(webUrl)
             };

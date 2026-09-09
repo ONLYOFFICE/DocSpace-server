@@ -160,8 +160,18 @@ public class RenewSubscriptionService(
                 await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, owner.Id);
             }
 
-            var walletQuotaFeatureName = walletQuota.Additional
-                ? walletQuota.Features.Split(':').FirstOrDefault()
+            // when a switch to a different quota is scheduled, buy that quota outright instead of renewing the current one
+            var targetQuota = walletQuota;
+            if (data.NextQuota is { } nextQuotaId && !_walletQuotas.TryGetValue(nextQuotaId, out targetQuota))
+            {
+                logger.ErrorRenewSubscriptionServiceUnknownNextQuota(data.TenantId, nextQuotaId);
+                return;
+            }
+
+            // the feature/capacity being checked concerns whatever is actually being purchased (targetQuota),
+            // not the quota being replaced - they only happen to match for the DevPack/DocsCloud switch today
+            var walletQuotaFeatureName = targetQuota.Additional
+                ? targetQuota.Features.Split(':').FirstOrDefault()
                 : "manager"; // wallet quota must contains only one feature
 
             var nextQuantity = data.NextQuantity ?? data.Quantity;
@@ -180,7 +190,7 @@ public class RenewSubscriptionService(
 
                     var usedSize = await maxTotalSizeStatistic.GetValueAsync();
 
-                    var walletQuotaSize = walletQuota.GetFeature<long>(feature.Name).Value; // wallet quota size by database
+                    var walletQuotaSize = targetQuota.GetFeature<long>(feature.Name).Value; // wallet quota size by database
 
                     if (walletQuotaSize > 0 && usedSize > tenantQuotaSize + walletQuotaSize * nextQuantity)
                     {
@@ -189,11 +199,11 @@ public class RenewSubscriptionService(
                     }
                 }
 
-                if (feature is CountPaidUserFeature && !walletQuota.Additional)
+                if (feature is CountPaidUserFeature && !targetQuota.Additional)
                 {
                     var usedCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupRoomAdmin.ID)).Length;
 
-                    var walletQuotaCount = walletQuota.GetFeature<int>(feature.Name).Value; // wallet quota count by database
+                    var walletQuotaCount = targetQuota.GetFeature<int>(feature.Name).Value; // wallet quota count by database
 
                     if (walletQuotaCount > 0 && usedCount > walletQuotaCount * nextQuantity)
                     {
@@ -202,9 +212,11 @@ public class RenewSubscriptionService(
                 }
             }
 
+            var productQuantityType = data.NextQuota is null ? ProductQuantityType.Renew : ProductQuantityType.Set;
+
             var quantity = new Dictionary<string, int>
             {
-                { walletQuota.Name, nextQuantity }
+                { targetQuota.Name, nextQuantity }
             };
 
             // TODO: support other currencies
@@ -212,11 +224,11 @@ public class RenewSubscriptionService(
 
             var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoRenewal } };
 
-            if (!walletQuota.Additional)
+            if (!targetQuota.Additional)
             {
                 // The user subscription is paid from the wallet, so make sure the wallet balance
-                // covers the renewal cost, topping it up for the missing amount if necessary.
-                var requiredAmount = walletQuota.Price * nextQuantity;
+                // covers the renewal cost (priced off the target quota), topping it up for the missing amount if necessary.
+                var requiredAmount = targetQuota.Price * nextQuantity;
 
                 var coreSettings = scope.ServiceProvider.GetRequiredService<CoreSettings>();
                 var siteName = tenant.GetTenantDomain(coreSettings);
@@ -227,13 +239,13 @@ public class RenewSubscriptionService(
                 }
             }
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false, null, metadata);
+            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, productQuantityType, defaultCurrency, false, null, metadata);
 
             if (result)
             {
                 var newTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);
 
-                var description = $"{walletQuota.Name} {nextQuantity}";
+                var description = $"{targetQuota.Name} {nextQuantity}";
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
                 messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerSubscriptionUpdated, description);
 

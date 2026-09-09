@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
 public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -44,7 +43,7 @@ public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         await CreateMcpServerAsync("server-1", BuildMcpConfig("https://example.com/old"));
         var newConfig = BuildMcpConfig("https://example.com/new");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{McpServersPath}/server-1",
             new { config = newConfig },
             TestContext.Current.CancellationToken);
@@ -64,7 +63,7 @@ public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         await CreateMcpServerAsync("server-1", globalConfig);
         await CreateMcpServerAsync("server-1", initialScoped, roomId.ToString());
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{McpServersPath}/server-1",
             new { config = newScoped, entityId = roomId.ToString() },
             TestContext.Current.CancellationToken);
@@ -78,7 +77,7 @@ public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Update_NonExistingName_Returns404()
     {
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{McpServersPath}/missing",
             new { config = BuildMcpConfig() },
             TestContext.Current.CancellationToken);
@@ -92,7 +91,7 @@ public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         var roomId = await CreateRoomAsync();
         await CreateMcpServerAsync("server-1");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{McpServersPath}/server-1",
             new { config = BuildMcpConfig(), entityId = roomId.ToString() },
             TestContext.Current.CancellationToken);
@@ -105,7 +104,7 @@ public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         await CreateMcpServerAsync("server-1");
 
-        using var response = await Ai.PutAsync(
+        using var response = await _ai.PutAsync(
             $"{McpServersPath}/server-1",
             new { config = BuildMcpConfig(), entityId = "999999999" },
             TestContext.Current.CancellationToken);

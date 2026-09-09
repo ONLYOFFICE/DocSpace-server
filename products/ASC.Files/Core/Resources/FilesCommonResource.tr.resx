@@ -500,7 +500,7 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
     <value>İçerik oluşturucu</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace Yöneticisi</value>
+    <value>Tam yönetici</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editör</value>

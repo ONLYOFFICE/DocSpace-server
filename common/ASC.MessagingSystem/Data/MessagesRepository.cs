@@ -75,8 +75,12 @@ public class MessagesRepository(
 
     internal static bool IsForceSave(EventMessage message)
     {
-        // messages with action code < 2000 are related to login-history
-        return (int)message.Action < 2000 || _forceSaveAuditActions.Contains(message.Action);
+        return IsLoginEvent(message.Action) || _forceSaveAuditActions.Contains(message.Action);
+    }
+
+    internal static bool IsLoginEvent(MessageAction action)
+    {
+        return (int)action < 2000;
     }
 
     private async Task<int> ForceSave(EventMessage message)
@@ -98,14 +102,9 @@ public class MessagesRepository(
         await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
         var historySocketManager = scope.ServiceProvider.GetService<HistorySocketManager>();
 
-        if ((int)message.Action < 2000)
-        {
-            id = await AddLoginEventAsync(message, ef);
-        }
-        else
-        {
-            id = await AddAuditEventAsync(message, ef, historySocketManager);
-        }
+        id = IsLoginEvent(message.Action)
+            ? await AddLoginEventAsync(message, ef)
+            : await AddAuditEventAsync(message, ef, historySocketManager);
 
         return id;
     }
@@ -236,8 +235,7 @@ public class MessageSenderService(
 
                             if (!MessagesRepository.IsForceSave(message))
                             {
-                                // messages with action code < 2000 are related to login-history
-                                if ((int)message.Action < 2000)
+                                if (MessagesRepository.IsLoginEvent(message.Action))
                                 {
                                     var loginEvent = loginEventMapper.MapManual(message);
                                     await ef.LoginEvents.AddAsync(loginEvent, stoppingToken);

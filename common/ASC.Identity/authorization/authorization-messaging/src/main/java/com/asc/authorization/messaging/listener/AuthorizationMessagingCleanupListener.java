@@ -34,6 +34,7 @@
 package com.asc.authorization.messaging.listener;
 
 import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
+import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
 import com.asc.authorization.data.consent.repository.JpaConsentRepository;
 import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
@@ -80,17 +81,27 @@ public class AuthorizationMessagingCleanupListener {
   /** Repository for managing consent entities. */
   private final JpaConsentRepository jpaConsentRepository;
 
+  /** Cache holding the clients resolved from the registration service. */
+  private final RegisteredClientCacheService registeredClientCacheService;
+
   /**
    * Handles message processing with transaction management and error handling.
    *
    * @param deliveryTag the delivery tag for the message
    * @param channel the RabbitMQ channel
    * @param operation the operation to perform within a transaction
+   * @param cacheEviction discards the cached clients the removal invalidated, run once {@code
+   *     operation} has committed so that a rolled back removal leaves the cache alone
    * @param entityType the type of entity being processed (client, user, tenant)
    * @throws IOException if an I/O error occurs during message handling
    */
   private void handleMessage(
-      long deliveryTag, Channel channel, Runnable operation, String entityType) throws IOException {
+      long deliveryTag,
+      Channel channel,
+      Runnable operation,
+      Runnable cacheEviction,
+      String entityType)
+      throws IOException {
     try {
       var template = new TransactionTemplate(transactionManager);
       template.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
@@ -107,6 +118,7 @@ public class AuthorizationMessagingCleanupListener {
             }
           });
 
+      cacheEviction.run();
       channel.basicAck(deliveryTag, false);
     } catch (IOException e) {
       log.warn("Received an unsupported message format: {}", e.getMessage());
@@ -117,6 +129,21 @@ public class AuthorizationMessagingCleanupListener {
     } finally {
       MDC.clear();
     }
+  }
+
+  /**
+   * Evicts every cached client of a tenant, skipping the eviction when the tenant is unknown.
+   *
+   * @param tenantId the tenant whose clients should be evicted
+   * @param context the entity the originating event referred to, used for logging
+   */
+  private void evictTenantClients(long tenantId, String context) {
+    if (tenantId <= 0) {
+      log.warn("Skipping client cache eviction for {}: event carries no tenant id", context);
+      return;
+    }
+
+    registeredClientCacheService.evictAllByTenantId(tenantId);
   }
 
   /**
@@ -142,6 +169,7 @@ public class AuthorizationMessagingCleanupListener {
           log.info(
               "Authorizations and consents for client {} have been removed", event.getClientId());
         },
+        () -> registeredClientCacheService.evict(event.getClientId(), 0L),
         "client");
   }
 
@@ -167,8 +195,22 @@ public class AuthorizationMessagingCleanupListener {
           log.info("Removing authorizations and consents for user: {}", event.getUserId());
           jpaAuthorizationRepository.deleteAllAuthorizationsByPrincipalId(event.getUserId());
           jpaConsentRepository.deleteAllConsentsByPrincipalId(event.getUserId());
+
+          // The grants above are the ones the departing user made, these are the ones anyone made
+          // to the clients they created, which their own principal id does not reach.
+          if (event.getTenantId() > 0) {
+            jpaAuthorizationRepository.deleteAllAuthorizationsByOwner(
+                event.getTenantId(), event.getUserId());
+            jpaConsentRepository.deleteAllConsentsByOwner(event.getTenantId(), event.getUserId());
+          } else {
+            log.warn(
+                "Skipping removal of grants made to the clients of user {}: event carries no tenant id",
+                event.getUserId());
+          }
+
           log.info("Authorizations and consents for user {} have been removed", event.getUserId());
         },
+        () -> evictTenantClients(event.getTenantId(), "user " + event.getUserId()),
         "user");
   }
 
@@ -193,9 +235,16 @@ public class AuthorizationMessagingCleanupListener {
           log.info("Removing authorizations and consents for tenant: {}", event.getTenantId());
           jpaConsentRepository.deleteAllConsentsByTenantId(event.getTenantId());
           jpaAuthorizationRepository.deleteAllAuthorizationsByTenantId(event.getTenantId());
+
+          // The grants above are the ones the tenant's own users made, these are the ones users of
+          // any other tenant made to the departing tenant's clients.
+          jpaConsentRepository.deleteAllConsentsByOwnerTenantId(event.getTenantId());
+          jpaAuthorizationRepository.deleteAllAuthorizationsByOwnerTenantId(event.getTenantId());
+
           log.info(
               "Authorizations and consents for tenant {} have been removed", event.getTenantId());
         },
+        () -> evictTenantClients(event.getTenantId(), "tenant " + event.getTenantId()),
         "tenant");
   }
 

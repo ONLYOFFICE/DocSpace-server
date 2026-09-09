@@ -59,5 +59,5 @@ public class RoomGroupRequestDto
     /// </summary>
     /// <example>[1, 2, 3]</example>
     [Required]
-    public List<JsonElement> Rooms { get; set; } = [];
+    public List<JsonElement> Rooms { get; set; }
 }

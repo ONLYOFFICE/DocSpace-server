@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,11 +31,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Core.Database.Models;
+using ASC.AI.Core.Database.Legacy;
+using ASC.Core.Common.EF.Model.Ai.Legacy;
+using ASC.Files.Core.EF.Legacy;
 using ASC.AI.Integration.Database.Models;
 
 using DbServer = ASC.AI.Integration.Database.Models.DbMcpServer;
-using DbMcpServer = ASC.AI.Core.Database.Models.DbMcpServer;
+using DbMcpServer = ASC.AI.Core.Database.Legacy.DbMcpServer;
 
 namespace ASC.Migrations.Core;
 

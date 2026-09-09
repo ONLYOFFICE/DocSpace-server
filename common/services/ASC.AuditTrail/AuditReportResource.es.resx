@@ -247,7 +247,7 @@
     <value>Suscripción del cliente actualizada: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Se ha actualizado la configuración de los servicios habilitados para el monedero del cliente</value>
+    <value>Se ha actualizado la configuración de los servicios habilitados para el monedero del cliente: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Monedero del cliente recargado: {0}</value>
@@ -901,7 +901,7 @@
     <value>Enviar</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>El usuario {0} ha enviado una invitación a {1} para que se una a este DocSpace</value>
+    <value>El usuario {0} ha enviado una invitación a {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instrucción de invitación enviada: {0}</value>

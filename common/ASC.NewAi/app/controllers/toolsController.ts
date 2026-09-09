@@ -33,15 +33,60 @@
 
 import { ToolsEngine } from "@onlyoffice/ai-chat/core";
 import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
+import {
+  PORTAL_MCP_SERVER_NAME,
+  DOCSPACE_INTEGRATION_SERVER_TYPE,
+  DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+  WEB_SEARCH_TYPE,
+  IMAGE_GENERATION_TYPE,
+} from "../../config/index.js";
+import {
+  customToolsSource,
+  resolveCustomServers,
+} from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import {
   systemToolsSource,
   getSystemServerConfig,
 } from "../tools/systemTools.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { asString, isObject } from "../narrow.js";
+import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
 const engine = new ToolsEngine({ storage, systemToolsSource });
+
+// A custom MCP server name is used verbatim as a single URL path segment on
+// the read / update / delete routes (`/mcp-servers/{name}` on the .NET AI
+// service, and `/mcp-servers/${encodeURIComponent(name)}` on the way there).
+// `create` takes the name in the request body, so a name that isn't a safe
+// path segment registers fine but is then unreachable by name: a `/` becomes
+// `%2F` (rejected / mis-routed by the .NET host) and a `.`/`..` dot-segment is
+// normalised away, orphaning a stored-but-undeletable entry (Bug 82985).
+// Reject such names at the source with a 400 instead. Printable punctuation
+// and spaces survive URL-encoding and stay routable, so they are allowed.
+const UNSAFE_NAME_CHARS = /[\u0000-\u001f\u007f/\\]/;
+
+function assertRoutableServerName(rawName: unknown): string {
+  if (typeof rawName !== "string" || rawName.trim().length === 0) {
+    throw Object.assign(new Error("name is required"), {
+      status: 400,
+      expose: true,
+    });
+  }
+  if (
+    rawName === "." ||
+    rawName === ".." ||
+    UNSAFE_NAME_CHARS.test(rawName)
+  ) {
+    throw Object.assign(
+      new Error(
+        'name must not be ".", "..", or contain a path separator or control character',
+      ),
+      { status: 400, expose: true },
+    );
+  }
+  return rawName;
+}
 
 // Resolve the config to store for an entry. Entries named after a
 // configured system server are whitelist markers (see agentServerWhitelist
@@ -71,10 +116,32 @@ async function resolveConfig(
   );
 }
 
+// System-server entries are whitelist markers pinned to the canonical
+// internal endpoint (see resolveConfig above). Redact — never drop — the
+// config on the way out: system servers run server-side only (see
+// tools/systemTools.ts), so the browser must not receive a config it
+// would try to start itself, and the internal endpoint must not leak.
+// The name still round-trips: the agent dialog pre-selects by key, and
+// saving the whole map from the chat config editor re-pins the entry
+// through resolveConfig.
+function redactSystemServer(
+  name: string,
+  config: McpServerConfig,
+): McpServerConfig {
+  return getSystemServerConfig(name) ? {} : config;
+}
+
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
-    const name = args.name as string;
+    const name = assertRoutableServerName(args.name);
+    // A supplied entityId must at least be REACHABLE: a nonexistent or
+    // deleted id otherwise folds silently into the portal-wide scope and
+    // mutates it (Bug 82975). An accessible NON-agent folder still folds to
+    // global BY DESIGN (Bug 82863: the widget sends the current location
+    // here) — the gate is on accessibility, not agent-ness, mirroring the
+    // threads/create decision (Bug 82719).
+    await assertEntityAccessible(args.entityId as string | undefined);
     const result = await engine.addCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -85,7 +152,9 @@ export const toolsController = {
 
   updateCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
-    const name = args.name as string;
+    const name = assertRoutableServerName(args.name);
+    // Same accessibility gate as addCustomServer (Bug 82975).
+    await assertEntityAccessible(args.entityId as string | undefined);
     const result = await engine.updateCustomServer(
       name,
       await resolveConfig(name, args.config as McpServerConfig | undefined),
@@ -102,6 +171,8 @@ export const toolsController = {
       return;
     }
     const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    // Same accessibility gate as addCustomServer (Bug 82975).
+    await assertEntityAccessible(entityId);
     await engine.removeCustomServer(name, entityId);
     res.json({ success: true });
   }),
@@ -114,26 +185,62 @@ export const toolsController = {
     }
     const entityId = asString(req.query["entityId"]);
     const config = await engine.getCustomServer(name, entityId);
-    res.json(config);
+    res.json(config === null ? null : redactSystemServer(name, config));
   }),
 
   listCustomServers: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     const servers = await engine.listCustomServers(entityId);
-    res.json(servers);
+    const redacted: Record<string, McpServerConfig> = {};
+    for (const [name, config] of Object.entries(servers)) {
+      // The portal MCP server is not user-manageable: legacy per-agent
+      // whitelist markers named after it must not surface as selectable
+      // entries (it is always enabled server-side, see systemTools).
+      if (name === PORTAL_MCP_SERVER_NAME) continue;
+      redacted[name] = redactSystemServer(name, config);
+    }
+    res.json(redacted);
   }),
 
   listSystemTools: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    const tools = await engine.listSystemTools(entityId);
-    res.json(tools);
+    // The catalog is the system groups plus the registered custom MCP
+    // servers' live tools — before this merge no listing route could show a
+    // registered server's tools at all (Bug 83163). Server-type keys are
+    // unique across the two sources (customToolsSource skips system-server
+    // markers), so a plain spread cannot clobber a group.
+    const [tools, custom] = await Promise.all([
+      engine.listSystemTools(entityId),
+      customToolsSource.getTools(entityId),
+    ]);
+    // Hide the portal MCP server from every management surface (the MCP
+    // settings page's permission cards, the agent dialog's server picker):
+    // it is always enabled with all tools and cannot be configured. The
+    // chat engine's tool context does not go through this listing, so the
+    // tools themselves stay available everywhere.
+    if (isObject(tools)) {
+      delete (tools as Record<string, unknown>)[PORTAL_MCP_SERVER_NAME];
+    }
+    res.json({ ...tools, ...custom });
   }),
 
   replaceAllCustomServers: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["map", "entityId"] as const);
-    const map = (args.map as Record<string, McpServerConfig>) ?? {};
+    // `map` is required. Without it the loop below yields an empty map and
+    // replaceAll wipes every registered MCP server for the scope, silently
+    // destroying the configuration on a malformed request (Bug 82864). Reject
+    // a missing/invalid map with a 400 instead.
+    if (!isObject(args.map)) {
+      res.status(400).json({ error: "map is required and must be an object" });
+      return;
+    }
+    // Critical here: an unreachable entityId used to fold to the portal-wide
+    // scope and WIPE its whole server map (Bug 82975).
+    await assertEntityAccessible(args.entityId as string | undefined);
+    const map = args.map as Record<string, McpServerConfig>;
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
+      assertRoutableServerName(name);
       normalized[name] = await resolveConfig(name, config);
     }
     const result = await engine.replaceAllCustomServers(
@@ -145,6 +252,33 @@ export const toolsController = {
 
   setDisabled: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["serverType", "toolNames", "entityId"] as const);
+    // Same accessibility gate as the server writes above (Bug 82975): a
+    // bogus entityId must not silently write prefs into the global scope.
+    await assertEntityAccessible(args.entityId as string | undefined);
+    // The serverType must be a group key the round's tool filter actually
+    // matches — an arbitrary string used to be stored verbatim and read back
+    // "successfully" while never disabling anything (Bug 83013). Valid keys:
+    // the host-configured system servers, the two DocSpace-integration
+    // groups, web-search / image-generation, and the scope's registered
+    // custom MCP servers.
+    const serverType = args.serverType as string;
+    const entityId = args.entityId as string | undefined;
+    const validTypes = new Set<string>([
+      ...systemToolsSource.getServerTypes(),
+      DOCSPACE_INTEGRATION_SERVER_TYPE,
+      DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+      WEB_SEARCH_TYPE,
+      IMAGE_GENERATION_TYPE,
+      ...Object.keys(await resolveCustomServers(entityId)),
+    ]);
+    if (typeof serverType !== "string" || !validTypes.has(serverType)) {
+      res.status(400).json({
+        error:
+          `unknown serverType "${String(serverType)}"; valid values: ` +
+          [...validTypes].sort().join(", "),
+      });
+      return;
+    }
     await engine.setDisabled(
       args.serverType as string,
       (args.toolNames as string[]) ?? [],
@@ -176,6 +310,8 @@ export const toolsController = {
       req.body,
       ["serverType", "toolName", "value", "entityId"] as const,
     );
+    // Same accessibility gate as the server writes above (Bug 82975).
+    await assertEntityAccessible(args.entityId as string | undefined);
     await engine.setAllowAlways(
       args.serverType as string,
       args.toolName as string,

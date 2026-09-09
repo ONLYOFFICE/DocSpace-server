@@ -247,7 +247,7 @@
     <value>Актуализиран потребителски абонамент: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Актуализирани са настройките за услуги с активиран клиентски портфейл</value>
+    <value>Актуализирани са настройките за услуги с активиран клиентски портфейл: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Зареден потребителски портфейл: {0}</value>
@@ -901,7 +901,7 @@
     <value>Изпращам</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Потребител {0} изпрати покана до {1} да се присъедини към този DocSpace</value>
+    <value>Потребител {0} изпрати покана до {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Изпратени са указания за покани: {0}</value>

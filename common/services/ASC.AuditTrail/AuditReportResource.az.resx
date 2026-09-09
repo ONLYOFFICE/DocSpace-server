@@ -241,7 +241,7 @@
     <value>Müştəri abunəliyi yeniləndi: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Müştəri pulqabı aktivləşdirilmiş xidmətlər parametrləri yeniləndi</value>
+    <value>Müştəri pulqabı aktivləşdirilmiş xidmətlər parametrləri yeniləndi: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Müştəri pul kisəsinə pul yükləndi: {0}</value>
@@ -886,7 +886,7 @@
     <value>Göndər</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>İstifadəçi {0} bu DocSpace-ə qoşulmaq üçün {1} ünvanına dəvət göndərdi</value>
+    <value>İstifadəçi {0} {1} ünvanına dəvət göndərdi</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Dəvət Təlimatları Göndərildi: {0}</value>

@@ -500,7 +500,7 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
     <value>Twórca treści</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Administrator DocSpace</value>
+    <value>Pełny administrator</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Edytujący</value>

@@ -127,7 +127,7 @@
     <value>Sie müssen Lizenzschlüssel einsetzen</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Lizenzkonflikt. Bitte stellen Sie sicher, dass Sie die richtige Edition von {0} DocSpace (Enterprise oder Developer) installiert haben. Bei Fragen wenden Sie sich bitte an Ihren Sales Manager.</value>
+    <value>Lizenzkonflikt. Bitte stellen Sie sicher, dass Sie die richtige Edition von {0} Docs (Enterprise oder Developer) installiert haben. Bei Fragen wenden Sie sich bitte an Ihren Sales Manager.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Neues Dokument</value>

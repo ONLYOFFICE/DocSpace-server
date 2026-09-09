@@ -248,19 +248,19 @@ $Message</value>
     <value>Tekenstatus gewijzigd</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace melding. Vermeld in document</value>
+    <value>${LetterLogoText}-melding. Vermeld in document</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace melding. Het formulier is ingevuld</value>
+    <value>${LetterLogoText}-melding. Het formulier is ingevuld</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace melding.</value>
+    <value>${LetterLogoText}-melding.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace melding. Het formulier is ingevuld</value>
+    <value>${LetterLogoText}-melding. Het formulier is ingevuld</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace melding.</value>
+    <value>${LetterLogoText}-melding.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Documenten. Mailing is voltooid.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Mailing is voltooid.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace melding. Kamer verwijderd</value>
+    <value>${LetterLogoText}-melding. Kamer verwijderd</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Documenten. Toegang verleend tot Document: $DocumentTitle</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Documenten. Toegang verleend tot map: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace melding.</value>
+    <value>${LetterLogoText}-melding.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace melding.</value>
+    <value>${LetterLogoText}-melding.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName heeft een AI-agent verwijderd
@@ -310,6 +310,6 @@ $__AuthorName heeft de AI-agent verwijderd: $RoomTitle</value>
     <value>U bent uitgenodigd voor de AI-agent "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace-melding. AI-agent verwijderd</value>
+    <value>${LetterLogoText}-melding. AI-agent verwijderd</value>
   </data>
 </root>

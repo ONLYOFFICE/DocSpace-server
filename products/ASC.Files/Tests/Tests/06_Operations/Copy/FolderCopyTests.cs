@@ -37,7 +37,7 @@ namespace ASC.Files.Tests.Tests._06_Operations.Copy;
 [Trait("Feature", "Folders")]
 public class FolderCopyTests(
     AspireAppFixture fixture)
-    : BaseTest(fixture)
+    : CopyTestBase(fixture)
 {
     [Fact]
     public async Task CopyFolder_ToItsSubfolder_ReturnError()
@@ -149,5 +149,110 @@ public class FolderCopyTests(
 
         // Assert
         exception.ErrorCode.Should().Be(500);
+    }
+
+    [Fact]
+    public async Task CopyFolder_FromMyDocsToCustomRoom_AppearsWithContents()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var myDocsId = await GetUserFolderIdAsync(Owner);
+        const string folderTitle = "Autotest CopyBatch Source Folder";
+        var sourceFolder = await CreateFolder(folderTitle, myDocsId);
+        const string innerFileTitle = "Autotest CopyBatch File In Folder.docx";
+        await CreateFile(innerFileTitle, sourceFolder.Id);
+        var destRoom = await CreateCustomRoom("Autotest CopyBatch Folder Dest Room");
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destRoom.Id, folderIds: [sourceFolder.Id]));
+
+        // Assert
+        FolderTitles(await GetFolderContent(destRoom.Id)).Should().Contain(folderTitle);
+        var copiedFolderId = await FindEntryIdByTitle(destRoom.Id, folderTitle, inFolders: true);
+        FileTitles(await GetFolderContent(copiedFolderId)).Should().Contain(innerFileTitle);
+    }
+
+    [Fact]
+    public async Task CopyFolder_WithContentTrue_CopiesContentsWithoutFolderItself()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var myDocsId = await GetUserFolderIdAsync(Owner);
+        const string folderTitle = "Autotest CopyBatch Content Folder";
+        var sourceFolder = await CreateFolder(folderTitle, myDocsId);
+        const string innerFileTitle = "Autotest CopyBatch Content Inner File.docx";
+        await CreateFile(innerFileTitle, sourceFolder.Id);
+        var destRoom = await CreateCustomRoom("Autotest CopyBatch Content Dest Room");
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destRoom.Id, content: true, folderIds: [sourceFolder.Id]));
+
+        // Assert
+        var content = await GetFolderContent(destRoom.Id);
+        FileTitles(content).Should().Contain(innerFileTitle);
+        FolderTitles(content).Should().NotContain(folderTitle, "content=true copies the folder's contents, not the folder itself");
+    }
+
+    [Fact]
+    public async Task CopyFilesAndFolders_Together_AllAppearInDestination()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var myDocsId = await GetUserFolderIdAsync(Owner);
+        const string fileTitle = "Autotest CopyBatch Mixed File.docx";
+        const string folderTitle = "Autotest CopyBatch Mixed Folder";
+        var sourceFile = await CreateFile(fileTitle, myDocsId);
+        var sourceFolder = await CreateFolder(folderTitle, myDocsId);
+        var destRoom = await CreateCustomRoom("Autotest CopyBatch Mixed Room");
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destRoom.Id, fileIds: [sourceFile.Id], folderIds: [sourceFolder.Id]));
+
+        // Assert
+        var content = await GetFolderContent(destRoom.Id);
+        FileTitles(content).Should().Contain(fileTitle);
+        FolderTitles(content).Should().Contain(folderTitle);
+    }
+
+    [Fact]
+    public async Task CopyMultipleFolders_AllAppearInDestination()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var myDocsId = await GetUserFolderIdAsync(Owner);
+        const string folder1Title = "Autotest CopyBatch MultiFolders Folder1";
+        const string folder2Title = "Autotest CopyBatch MultiFolders Folder2";
+        var folder1 = await CreateFolder(folder1Title, myDocsId);
+        var folder2 = await CreateFolder(folder2Title, myDocsId);
+        var destRoom = await CreateCustomRoom("Autotest CopyBatch MultiFolders Room");
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destRoom.Id, folderIds: [folder1.Id, folder2.Id]));
+
+        // Assert
+        var destFolderTitles = FolderTitles(await GetFolderContent(destRoom.Id));
+        destFolderTitles.Should().Contain(folder1Title);
+        destFolderTitles.Should().Contain(folder2Title);
+    }
+
+    [Fact]
+    public async Task CopyEmptyFolder_AppearsEmptyInDestination()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var myDocsId = await GetUserFolderIdAsync(Owner);
+        const string emptyFolderTitle = "Autotest CopyBatch EmptyFolder";
+        var emptyFolder = await CreateFolder(emptyFolderTitle, myDocsId);
+        var destRoom = await CreateCustomRoom("Autotest CopyBatch EmptyFolder Room");
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destRoom.Id, folderIds: [emptyFolder.Id]));
+
+        // Assert
+        FolderTitles(await GetFolderContent(destRoom.Id)).Should().Contain(emptyFolderTitle);
+        var copiedFolderId = await FindEntryIdByTitle(destRoom.Id, emptyFolderTitle, inFolders: true);
+        var copiedContent = await GetFolderContent(copiedFolderId);
+        copiedContent.Files.Should().BeEmpty();
+        copiedContent.Folders.Should().BeEmpty();
     }
 }

@@ -43,6 +43,10 @@ public class IdentityAuthorization
 
     public int TenantId { get; set; }
 
+    public long? OwnerTenantId { get; set; }
+
+    public string? OwnerUserId { get; set; }
+
     public string? State { get; set; }
 
     public string? Attributes { get; set; }
@@ -122,6 +126,23 @@ public static class IdentityExtension
 
                 entity.HasIndex(e => e.Id, "idx_identity_authorizations_id");
 
+                entity.HasIndex(e => e.AccessTokenHash, "idx_identity_authorizations_access_token_hash")
+                    .HasPrefixLength(64);
+
+                entity.HasIndex(e => e.RefreshTokenHash, "idx_identity_authorizations_refresh_token_hash")
+                    .HasPrefixLength(64);
+
+                entity.HasIndex(e => e.State, "idx_identity_authorizations_state");
+
+                entity.HasIndex(e => e.AuthorizationCodeValue, "idx_identity_authorizations_authorization_code_value")
+                    .HasPrefixLength(255);
+
+                entity.HasIndex(e => e.RegisteredClientId, "idx_identity_authorizations_registered_client_id");
+
+                entity.HasIndex(e => e.TenantId, "idx_identity_authorizations_tenant_id");
+
+                entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_authorizations_owner");
+
                 entity.Property(e => e.PrincipalId).HasColumnName("principal_id");
                 entity.Property(e => e.RegisteredClientId)
                     .HasColumnName("registered_client_id");
@@ -195,6 +216,11 @@ public static class IdentityExtension
                 entity.Property(e => e.TenantId)
                     .HasColumnName("tenant_id")
                     .IsRequired();
+                entity.Property(e => e.OwnerTenantId)
+                    .HasColumnName("owner_tenant_id");
+                entity.Property(e => e.OwnerUserId)
+                    .HasMaxLength(255)
+                    .HasColumnName("owner_user_id");
 
                 entity.Property(e => e.IdTokenValue)
                     .HasColumnType("text")
@@ -248,6 +274,14 @@ public static class IdentityExtension
                 entity.Property(e => e.TenantId)
                     .IsRequired()
                     .HasColumnType("integer");
+
+                entity.Property(e => e.OwnerTenantId)
+                    .HasColumnType("bigint");
+
+                entity.Property(e => e.OwnerUserId)
+                    .HasMaxLength(255);
+
+                entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_authorizations_owner");
 
                 entity.Property(e => e.State)
                     .HasColumnType("text");

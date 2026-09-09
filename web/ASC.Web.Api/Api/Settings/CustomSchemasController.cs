@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("customschemas")]
+[ApiEndpoint(Template = "customschemas")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class CustomSchemasController(
     MessageService messageService,

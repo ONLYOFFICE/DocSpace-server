@@ -248,19 +248,19 @@ $Message</value>
     <value>Status potpisa promenjen</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace notifikacija. Spomenuto u dokumentu</value>
+    <value>${LetterLogoText} obaveštenje. Spomenuto u dokumentu</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace notifikacija. Formular je popunjen</value>
+    <value>${LetterLogoText} obaveštenje. Formular je popunjen</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Obaveštenje iz DocSpace-a.</value>
+    <value>${LetterLogoText} obaveštenje.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace notifikacija. Formular je popunjen</value>
+    <value>${LetterLogoText} obaveštenje. Formular je popunjen</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Obaveštenje iz DocSpace-a.</value>
+    <value>${LetterLogoText} obaveštenje.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Dokumenti. Slanje je završeno.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Slanje je završeno.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace notifikacija. Soba obrisana</value>
+    <value>${LetterLogoText} obaveštenje. Soba obrisana</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Dokumenti. Pristup dozvoljen dokumentu: $DocumentTitle</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Dokumenti. Pristup dozvoljen folderu: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Obaveštenje iz DocSpace-a.</value>
+    <value>${LetterLogoText} obaveštenje.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Obaveštenje iz DocSpace-a.</value>
+    <value>${LetterLogoText} obaveštenje.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName je obrisao AI agenta
@@ -310,6 +310,6 @@ $__AuthorName je obrisao AI agenta: $RoomTitle</value>
     <value>Pozvani ste u AI agenta "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace obaveštenje. AI agent obrisan</value>
+    <value>${LetterLogoText} obaveštenje. AI agent obrisan</value>
   </data>
 </root>

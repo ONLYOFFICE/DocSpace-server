@@ -500,7 +500,7 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
     <value>Créateur de contenu</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Administrateur de DocSpace</value>
+    <value>Administrateur complet</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Éditeur</value>
@@ -600,5 +600,8 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>L'instruction d'un agent IA ne peut pas dépasser {0} caractères</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Cette action est uniquement disponible dans une salle privée</value>
   </data>
 </root>

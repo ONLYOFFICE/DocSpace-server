@@ -37,7 +37,7 @@ import { isObject, getString, getNumber } from "../narrow.js";
 import type { ThreadsStorage } from "@onlyoffice/ai-chat/core";
 import type { Thread } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/threads";
+const PATH = "/threads";
 
 function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
   return entityId ? { entityId } : undefined;

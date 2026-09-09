@@ -211,7 +211,7 @@
     <value>Квотата за пространство на AI агенти е превишена</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Неуспешно задаване на квота за AI агент. Въведената стойност е по-голяма от общото пространство за съхранение на DocSpace.</value>
+    <value>Неуспешно задаване на квота за AI агент. Въведената стойност е по-голяма от общото хранилище.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Автоматично подновяване</value>
@@ -1120,7 +1120,7 @@
     <value>Квотата за пространство в стаята е надвишена</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Неуспешно задаване на квота за стая. Въведената стойност е по-голяма от общото хранилище на DocSpace.</value>
+    <value>Неуспешно задаване на квота за стая. Въведената стойност е по-голяма от общото хранилище.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Тихоокеанска Азия (Сингапур)</value>
@@ -1261,7 +1261,7 @@
     <value>Потребители в стаята</value>
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
-    <value>Броят потребители не трябва да надвишава {0}</value>
+    <value>Броят потребители в стаята не трябва да надвишава {0}</value>
   </data>
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Броят на администраторите надвишава ограничението: {0}/{1}.</value>
@@ -1285,7 +1285,7 @@
     <value>Възникна неочаквана грешка. Моля, опитайте отново.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Успешно се свързахте с Telegram, за да получавате известия от вашия DocSpace.</value>
+    <value>Успешно се свързахте с Telegram, за да получавате известия от работното пространство.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Грешен код</value>
@@ -1300,7 +1300,7 @@
     <value>Квотата за потребителс пространство е надвишена</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Неуспешно задаване на квота за потребител. Въведената стойност е по-голяма от общото хранилище на DocSpace.</value>
+    <value>Неуспешно задаване на квота за потребител. Въведената стойност е по-голяма от общото хранилище.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Регион Западен Орегон</value>
@@ -1321,7 +1321,7 @@
     <value>Уеб търсене</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>Уеб търсене</value>
+    <value>AI търсене</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI кредити</value>

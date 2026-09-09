@@ -247,7 +247,7 @@
     <value>Abonnement client mis à jour : {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Paramètres des services activés via le wallet client mis à jour</value>
+    <value>Paramètres des services activés via le wallet client mis à jour : {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Wallet du client rechargé : {0}</value>
@@ -901,7 +901,7 @@
     <value>Envoyer</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>L'utilisateur {0} a envoyé une invitation à {1} pour qu'il rejoigne ce DocSpace</value>
+    <value>L'utilisateur {0} a envoyé une invitation à {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instructions d'invitation envoyées : {0}</value>
@@ -1211,5 +1211,17 @@
   </data>
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Les paramètres IA de l'utilisateur ont été mis à jour</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Fichiers [{0}]. Fichier non enregistré. Quota de stockage du portail dépassé.</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Fichiers [{0}]. Marqués comme lus</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Fichiers [{0}]. L'enregistrement du fichier dépasse le quota de stockage du portail.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Dossiers [{0}]. Marqués comme lus</value>
   </data>
 </root>

@@ -248,19 +248,19 @@ $Message</value>
     <value>Նշանի կարգավիճակը փոխվել է</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace ծանուցում. Նշված է փաստաթղթում</value>
+    <value>${LetterLogoText} ծանուցում։ Նշված է փաստաթղթում</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace ծանուցում՝ Ձևաթուղթը լրացված է</value>
+    <value>${LetterLogoText} ծանուցում։ Ձևաթուղթը լրացված է</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace ծանուցում։</value>
+    <value>${LetterLogoText} ծանուցում։</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace ծանուցում՝ Ձևաթուղթը լրացված է</value>
+    <value>${LetterLogoText} ծանուցում։ Ձևաթուղթը լրացված է</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace ծանուցում։</value>
+    <value>${LetterLogoText} ծանուցում։</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Փաստաթղթեր. Փոստի ուղարկումն ավարտված է.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Փոստի ուղարկումն ավարտված է.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace ծանուցում. Սենյակը ջնջված է</value>
+    <value>${LetterLogoText} ծանուցում։ Սենյակը ջնջված է</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Փաստաթղթեր. Փաստաթղթի մուտքը տրված է: $DocumentTitle</value>
@@ -293,15 +293,15 @@ $Message</value>
     <value>Փաստաթղթեր. Մատչումը տրված է թղթապանակին: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace ծանուցում։</value>
+    <value>${LetterLogoText} ծանուցում։</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace ծանուցում։</value>
+    <value>${LetterLogoText} ծանուցում։</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName-ը ջնջել է ԱԲ գործակալ
+    <value>h1. ${__AuthorName}-ը ջնջել է ԱԲ գործակալ
 
-$__AuthorName-ը ջնջել է ԱԲ գործակալը. $RoomTitle</value>
+${__AuthorName}-ը ջնջել է ԱԲ գործակալը. $RoomTitle</value>
   </data>
   <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
     <value>Ձեր դերը "$RoomTitle" ԱԲ գործակալում փոխվել է "$RoomRole"-ի</value>
@@ -310,6 +310,6 @@ $__AuthorName-ը ջնջել է ԱԲ գործակալը. $RoomTitle</value>
     <value>Դուք հրավիրվել եք ԱԲ գործակալ "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace ծանուցում: ԱԲ գործակալը ջնջվել է</value>
+    <value>${LetterLogoText} ծանուցում։ ԱԲ գործակալը ջնջվել է</value>
   </data>
 </root>

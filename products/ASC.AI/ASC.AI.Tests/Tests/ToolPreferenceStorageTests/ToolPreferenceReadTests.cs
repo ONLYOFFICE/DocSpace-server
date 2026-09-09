@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ToolPreferenceStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/ToolPreferences")]
 public class ToolPreferenceReadTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -234,7 +233,7 @@ public class ToolPreferenceReadTests(AspireAppFixture fixture) : BaseTest(fixtur
     [Fact]
     public async Task Read_NonExistentEntityId_Returns404()
     {
-        using var response = await Ai.GetAsync(
+        using var response = await _ai.GetAsync(
             $"{ToolPrefsPath}?entityId=999999999",
             TestContext.Current.CancellationToken);
 

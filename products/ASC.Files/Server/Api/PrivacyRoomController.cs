@@ -31,21 +31,18 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.MessagingSystem.EF.Model;
-
 namespace ASC.Api.Documents;
 
 /// <summary>
 /// Provides API endpoints for managing privacy rooms and encryption keys.
 /// </summary>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("privacyroom")]
+[ApiEndpoint("privacyroom")]
 public class PrivacyRoomControllerCommon(
     AuthContext authContext,
     PermissionContext permissionContext,
-    EncryptionKeyPairDtoHelper encryptionKeyPairHelper)
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
+    MessageService messageService)
     : ControllerBase
 {
     /// <summary>
@@ -54,96 +51,50 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Creates and sets encryption keys for the user.
     /// </remarks>
+    /// <path>api/2.0/privacyroom/keys</path>
     /// <param name="inDto">The request object containing public and private key information.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
+    [SwaggerResponse(201, "The encryption key is created. Answered 200 before DocSpace 4.0; the response body is unchanged", typeof(IEnumerable<EncryptionKeyDto>))]
+    [SwaggerResponse(400, "The key material is missing, blank or too large to be stored")]
+    [SwaggerResponse(409, "A key with the same identifier already exists")]
     [HttpPost("keys")]
-    public Task<IEnumerable<EncryptionKeyDto>> SetKeys(EncryptionKeyRequestDto inDto)
-    {
-        return CreateKeysAsync([inDto], false);
-    }
-
-    /// <summary>
-    /// Replaces an existing encryption key with a new one for the user.
-    /// </summary>
-    /// <remarks>
-    /// Replaces an existing encryption key with a new one for the user.
-    /// </remarks>
-    /// <param name="inDto">The request object containing the public and private key information to replace the existing key.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
-    [HttpPut("keys")]
-    public Task<IEnumerable<EncryptionKeyDto>> ReplaceKey(EncryptionKeyRequestDto inDto)
-    {
-        return CreateKeysAsync([inDto], true);
-    }
-
-    /// <summary>
-    /// Retrieves a specific user encryption key based on the provided filter conditions.
-    /// </summary>
-    /// <remarks>
-    /// Retrieves a specific user encryption key based on the provided filter conditions.
-    /// </remarks>
-    /// <returns>The encryption key data transfer object that matches the provided filter conditions, or null if no match is found.</returns>
-    [HttpGet("keys/filter")]
-    public async Task<EncryptionKeyDto> GetUserKeysByFilter([FromQuery] GetUserKeysByFilterRequestDto inDto)
+    public async Task<ActionResult<IEnumerable<EncryptionKeyDto>>> SetKeys([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] EncryptionKeyRequestDto inDto)
     {
         await Demand();
 
-        return (await encryptionKeyPairHelper.GetKeyPairAsync()).FirstOrDefault(r =>
-        {
-            var result = false;
+        var keyPair = inDto?.Map();
 
-            if (inDto.Id.HasValue)
-            {
-                if (r.Id != inDto.Id)
-                {
-                    return false;
-                }
+        var keys = await encryptionKeyPairHelper.CreateKeyPairAsync(keyPair);
 
-                result = true;
-            }
+        messageService.Send(MessageAction.PrivacyRoomKeyCreated, MessageTarget.Create(keyPair!.Id), keyPair.Id.ToString());
 
-            // if (inDto.Type.HasValue)
-            // {
-            //     if (r.Type != inDto.Type.Value)
-            //     {
-            //         return false;
-            //     }
-            //
-            //     result = true;
-            // }
-            //
-            // if (!string.IsNullOrEmpty(inDto.Version))
-            // {
-            //     if (!r.Version.Equals(inDto.Version, StringComparison.OrdinalIgnoreCase))
-            //     {
-            //         return false;
-            //     }
-            //
-            //     result = true;
-            // }
+        return Created(Request.Path.Value, keys);
+    }
 
-            if (!string.IsNullOrEmpty(inDto.PublicKey))
-            {
-                if (!r.PublicKey.Equals(inDto.PublicKey, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
+    /// <summary>
+    /// Replaces an existing encryption key with a new one for the user.
+    /// </summary>
+    /// <remarks>
+    /// Replaces an existing encryption key with a new one for the user.
+    /// </remarks>
+    /// <path>api/2.0/privacyroom/keys</path>
+    /// <param name="inDto">The request object containing the public and private key information to replace the existing key.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
+    [SwaggerResponse(200, "The encryption key is replaced", typeof(IEnumerable<EncryptionKeyDto>))]
+    [SwaggerResponse(400, "The key material is missing, blank or too large to be stored")]
+    [SwaggerResponse(404, "The encryption key to replace is not found")]
+    [HttpPut("keys")]
+    public async Task<IEnumerable<EncryptionKeyDto>> ReplaceKey([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] EncryptionKeyRequestDto inDto)
+    {
+        await Demand();
 
-                result = true;
-            }
+        var keyPair = inDto?.Map();
 
-            if (!string.IsNullOrEmpty(inDto.PrivateKeyEnc))
-            {
-                if (!r.PrivateKeyEnc.Equals(inDto.PrivateKeyEnc, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
+        var keys = await encryptionKeyPairHelper.ReplaceKeyPairAsync(keyPair);
 
-                result = true;
-            }
+        messageService.Send(MessageAction.PrivacyRoomKeyUpdated, MessageTarget.Create(keyPair!.Id), keyPair.Id.ToString());
 
-            return result;
-        });
+        return keys;
     }
 
     /// <summary>
@@ -152,6 +103,7 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Retrieves encryption keys associated with the current user.
     /// </remarks>
+    /// <path>api/2.0/privacyroom/keys</path>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpGet("keys")]
     public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeys()
@@ -167,6 +119,7 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Retrieves the encryption keys associated with a specific privacy room.
     /// </remarks>
+    /// <path>api/2.0/privacyroom/{roomId}/access</path>
     /// <param name="roomId">The identifier of the privacy room.</param>
     /// <returns>A task containing a collection of encryption key data transfer objects for the specified room.</returns>
     [HttpGet("{roomId:int}/access")]
@@ -182,25 +135,31 @@ public class PrivacyRoomControllerCommon(
     /// </summary>
     /// <remarks>
     /// Deletes an encryption key and removes it from the system based on the provided key identifier.
+    /// <para>
+    /// Breaking change in DocSpace 4.0: the endpoint used to answer 200 with the caller's remaining
+    /// encryption keys and now answers 204 with no body. A client that read that list must call
+    /// <c>GET api/2.0/privacyroom/keys</c> instead.
+    /// </para>
     /// </remarks>
-    /// <returns>The task result contains a collection of remaining encryption key data transfer objects after the deletion.</returns>
-    [HttpDelete("keys/{id:guid}")]
-    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(DeleteEncryptionKeyRequestDto inDto)
+    /// <path>api/2.0/privacyroom/keys/{id}</path>
+    /// <returns>A task that represents the asynchronous operation. No content is returned.</returns>
+    [SwaggerResponse(204, "The encryption key is deleted. Answered 200 with the remaining keys before DocSpace 4.0")]
+    [SwaggerResponse(400, "The key identifier is not a valid GUID")]
+    [SwaggerResponse(404, "The encryption key is not found")]
+    [HttpDelete("keys/{id}")]
+    public async Task<IActionResult> DeleteKeys(DeleteEncryptionKeyRequestDto inDto)
     {
         await Demand();
 
-        return await encryptionKeyPairHelper.DeleteAsync(inDto.Id);
+        await encryptionKeyPairHelper.DeleteAsync(inDto.Id);
+
+        messageService.Send(MessageAction.PrivacyRoomKeyDeleted, MessageTarget.Create(inDto.Id), inDto.Id.ToString());
+
+        return NoContent();
     }
 
     private async Task Demand()
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
-    }
-
-    private async Task<IEnumerable<EncryptionKeyDto>> CreateKeysAsync(IEnumerable<EncryptionKeyRequestDto> inDto, bool replace)
-    {
-        await Demand();
-
-        return await encryptionKeyPairHelper.SetKeyPairAsync(inDto.Select(r=> r.Map()), replace);
     }
 }

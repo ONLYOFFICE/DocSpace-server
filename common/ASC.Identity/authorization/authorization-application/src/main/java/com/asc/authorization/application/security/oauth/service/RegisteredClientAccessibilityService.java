@@ -33,14 +33,17 @@
 
 package com.asc.authorization.application.security.oauth.service;
 
+import java.util.Optional;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+
 /** Repository interface for validating the accessibility of registered clients. */
 public interface RegisteredClientAccessibilityService {
 
   /**
-   * Validates the accessibility of the client associated with the given tenant.
+   * Loads a registered client in a single remote call when it is public and enabled.
    *
-   * @param clientId the ID of the registered client.
-   * @return true if the client is accessible, false otherwise.
+   * @param clientId the ID of the registered client
+   * @return the accessible client, or empty if missing, private, or disabled
    */
-  boolean validateClientAccessibility(String clientId);
+  Optional<RegisteredClient> findAccessibleClient(String clientId);
 }

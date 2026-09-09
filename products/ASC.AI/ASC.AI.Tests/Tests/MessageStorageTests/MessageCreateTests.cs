@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.MessageStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Messages")]
 public class MessageCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -78,7 +77,7 @@ public class MessageCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Create_NonExistentThread_Returns404()
     {
-        using var response = await Ai.PostAsync(
+        using var response = await _ai.PostAsync(
             $"{ThreadsPath}/{Guid.NewGuid()}/messages",
             new { contents = BuildMessageContents() },
             TestContext.Current.CancellationToken);
@@ -92,7 +91,7 @@ public class MessageCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
         var thread = await CreateThreadAsync();
         const string invalidJson = """{ "foo": "bar" }""";
 
-        using var response = await Ai.PostRawAsync(
+        using var response = await _ai.PostRawAsync(
             $"{ThreadsPath}/{thread.Id}/messages",
             invalidJson,
             TestContext.Current.CancellationToken);

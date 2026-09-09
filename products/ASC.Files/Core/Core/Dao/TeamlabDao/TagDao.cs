@@ -268,7 +268,7 @@ internal abstract class BaseTagDao<T>(
                         continue;
                     }
 
-                    var id = await internalFilesDbContext.TagIdAsync(t.Owner, t.Name, t.Type, tenantId);
+                    var id = await internalFilesDbContext.FirstTagIdAsync(tenantId, t.Owner, t.Name, t.Type);
 
                     var toAdd = new DbFilesTag
                     {
@@ -375,7 +375,7 @@ internal abstract class BaseTagDao<T>(
 
         if (!cacheTagId.TryGetValue(cacheTagIdKey, out var id))
         {
-            id = await filesDbContext.TagIdAsync(t.Owner, t.Name, t.Type, tenantId);
+            id = await filesDbContext.FirstTagIdAsync(tenantId, t.Owner, t.Name, t.Type);
 
             if (id == 0)
             {

@@ -460,7 +460,10 @@ public class EmployeeFullDtoHelper(
 
     private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
     {
-        if (await _userManager.IsUserAsync(_authContext.CurrentAccount.ID) && _authContext.CurrentAccount.ID != userInfo.Id)
+        var currentId = _authContext.CurrentAccount.ID;
+
+        // A User or a Guest may only see their own group membership; anyone else's is not theirs to know.
+        if (currentId != userInfo.Id && (await _userManager.IsUserAsync(currentId) || await _userManager.IsGuestAsync(currentId)))
         {
             return;
         }

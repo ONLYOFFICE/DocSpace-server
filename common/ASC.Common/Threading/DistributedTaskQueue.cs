@@ -185,7 +185,8 @@ public class DistributedTaskQueueService<T>(
     IServiceProvider serviceProvider,
     ChannelReader<T> channelReader,
     IDistributedLockProvider distributedLockProvider,
-    ICacheNotify<DistributedTaskCancelation> cancelTaskNotify
+    ICacheNotify<DistributedTaskCancelation> cancelTaskNotify,
+    ILogger<DistributedTaskQueueService<T>> logger
 ) : BackgroundService where T : DistributedTask
 {
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancellations = new();
@@ -212,12 +213,25 @@ public class DistributedTaskQueueService<T>(
         {
             await foreach (var distributedTask in reader1.ReadAllAsync(stoppingToken))
             {
-                var cancellation = new CancellationTokenSource();
-                var token = cancellation.Token;
-                _cancellations[distributedTask.Id] = cancellation;
+                // a failure of one task (including transient Redis/cache errors while publishing its
+                // status) must not fault the reader loop: that would stop the host process itself
+                try
+                {
+                    var cancellation = new CancellationTokenSource();
+                    var token = cancellation.Token;
+                    _cancellations[distributedTask.Id] = cancellation;
 
-                var task = distributedTask.RunJob(token);
-                await task.ContinueWith(async t => await OnCompleted(t, distributedTask), CancellationToken.None).ConfigureAwait(false);
+                    var task = distributedTask.RunJob(token);
+                    await task.ContinueWith(async t => await OnCompleted(t, distributedTask), CancellationToken.None).Unwrap().ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorWithException(e);
+                }
             }
         }, stoppingToken)).ToList();
 
@@ -225,32 +239,44 @@ public class DistributedTaskQueueService<T>(
         {
             while (await _timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
             {
-                var now = DateTime.UtcNow;
-                var queueTasks = await queue.LoadKeysFromCache();
-                var toRemove = new List<string>();
-
-                foreach (var q in queueTasks)
+                // a failed sweep (e.g. Redis connection blip in DequeueTask) is retried on the next
+                // tick; letting it fault would take down the whole host process via StopHost
+                try
                 {
-                    var task = await queue.PeekTask(q);
-                    if (task == null)
+                    var now = DateTime.UtcNow;
+                    var queueTasks = await queue.LoadKeysFromCache();
+                    var toRemove = new List<string>();
+
+                    foreach (var q in queueTasks)
                     {
-                        toRemove.Add(q);
+                        var task = await queue.PeekTask(q);
+                        if (task == null)
+                        {
+                            toRemove.Add(q);
+                        }
+                        else if (task.LastModifiedOn.AddSeconds(queue.TimeUntilUnregisterInSeconds) < now)
+                        {
+                            toRemove.Add(q);
+                            await queue.DequeueTask(q);
+                        }
                     }
-                    else if (task.LastModifiedOn.AddSeconds(queue.TimeUntilUnregisterInSeconds) < now)
+
+                    if (toRemove.Count > 0)
                     {
-                        toRemove.Add(q);
-                        await queue.DequeueTask(q);
+                        await using (await distributedLockProvider.TryAcquireFairLockAsync(queue.LockKey, cancellationToken: stoppingToken))
+                        {
+                            var queueTasksFromCache = await queue.LoadKeysFromCache();
+                            await queue.SaveKeysToCache(queueTasksFromCache.Except(toRemove).ToList());
+                        }
                     }
                 }
-
-                if (toRemove.Count > 0)
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
-                    await using (await distributedLockProvider.TryAcquireFairLockAsync(queue.LockKey, cancellationToken: stoppingToken))
-                    {
-                        var queueTasksFromCache = await queue.LoadKeysFromCache();
-                        await queue.SaveKeysToCache(queueTasksFromCache.Except(toRemove).ToList());
-                    }
-
+                    break;
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorWithException(e);
                 }
             }
         }, stoppingToken);

@@ -38,16 +38,21 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// </summary>
 public class UpdateComment
 {
+    /// <summary>The longest a version comment may be — the width of the `comment` column.</summary>
+    public const int MaxCommentLength = 255;
+
     /// <summary>
     /// The comment version.
     /// </summary>
     /// <example>1</example>
+    [Range(1, int.MaxValue)]
     public required int Version { get; set; }
 
     /// <summary>
     /// The comment text.
     /// </summary>
     /// <example>This is a comment</example>
+    [StringLength(MaxCommentLength)]
     public string Comment { get; set; }
 }
 

@@ -127,7 +127,7 @@
     <value>Πρέπει να εισαγάγετε ένα κλειδί άδειας χρήσης</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Σύγκρουση αδειών. Βεβαιωθείτε ότι έχετε εγκαταστήσει τη σωστή έκδοση του {0} DocSpace (Enterprise ή Developer). Εάν έχετε οποιεσδήποτε ερωτήσεις, μη διστάσετε να επικοινωνήσετε με τον υπεύθυνο πωλήσεων.</value>
+    <value>Σύγκρουση αδειών. Βεβαιωθείτε ότι έχετε εγκαταστήσει τη σωστή έκδοση του {0} Docs (Enterprise ή Developer). Εάν έχετε οποιεσδήποτε ερωτήσεις, μη διστάσετε να επικοινωνήσετε με τον υπεύθυνο πωλήσεων.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Νέο έγγραφο</value>

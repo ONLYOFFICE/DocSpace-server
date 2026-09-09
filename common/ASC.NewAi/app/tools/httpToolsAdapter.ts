@@ -39,23 +39,21 @@ import { getArray, getString, isObject, parseInt10 } from "../narrow.js";
 import logger from "../log.js";
 import type { ToolsAdapter, TMCPItem } from "@onlyoffice/ai-chat/core";
 
-const LIST_PATH = "/integration/tools/list";
-const CALL_PATH = "/integration/tools/call";
+const LIST_PATH = "/tools/list";
+const CALL_PATH = "/tools/call";
 
 // Group key for the disabled / allow-always filters in `storage.toolPrefs`.
 // DocSpace tools are a single logical source, so they share one serverType.
 // Distinct from the MCP server name ("docspace") so Object.assign in
 // composeToolsAdapters does not overwrite the 23 MCP tools with these 3.
-const SERVER_TYPE = "docspace-integration";
+// Canonical values live in config/index.ts (see the note there); re-exported
+// here so existing importers keep working.
+import {
+  DOCSPACE_INTEGRATION_SERVER_TYPE as SERVER_TYPE,
+  DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+} from "../../config/index.js";
 
-// Tools that must surface a UI approval dialog before running. The engine
-// gates approval per serverType (a serverType listed in `systemServerTypes`
-// requires approval), so these tools are emitted under a dedicated
-// serverType (`DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE`) which the engine
-// is configured to treat as approval-required; everything else stays under
-// `SERVER_TYPE` and runs in-engine without a round-trip.
-export const DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE =
-    "docspace-integration-approval";
+export { DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE };
 
 const APPROVAL_TOOL_NAMES = new Set<string>([
     "docspace_generate_docx",
@@ -125,7 +123,7 @@ export function extractAttachmentRefIds(message: unknown): string[] {
 // Resolve an attachment ref id to the DocSpace numeric file id the C# side
 // expects as `formId`. `HttpAttachmentsStorage` composes `path` as
 // `${entryId}/${title}` (see `dtoToAttachment`) — the leading segment is the
-// DocSpace entry id, echoed back verbatim from `/integration/attachments`.
+// DocSpace entry id, echoed back verbatim from `/attachments`.
 // Whether the file actually is a started form is validated on the C# side
 // (`FormDataToolsFactory.TryInitAsync`); a non-form id resolves to an empty
 // tool bundle.
@@ -214,7 +212,7 @@ function parseList(raw: unknown): ToolsList {
 
 /**
  * {@link ToolsAdapter} backed by the DocSpace AI integration endpoints
- * (`integration/tools/list` / `integration/tools/call`). Most tools served
+ * (`tools/list` / `tools/call`). Most tools served
  * by this adapter are executed in-engine and the chat resumes automatically
  * with no approval round-trip; the tools in `APPROVAL_TOOL_NAMES` are
  * emitted under a separate serverType so the engine surfaces an approval

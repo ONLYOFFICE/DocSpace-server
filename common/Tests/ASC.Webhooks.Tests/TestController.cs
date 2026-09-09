@@ -38,8 +38,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ASC.Webhooks.Tests
 {
     [Scope]
-    [DefaultRoute]
-    [ApiController]
+    [ApiEndpoint]
     public class TestController : ControllerBase
     {
         private readonly RequestHistory requestHistory;

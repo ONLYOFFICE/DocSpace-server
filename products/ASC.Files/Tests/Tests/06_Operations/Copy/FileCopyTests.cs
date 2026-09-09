@@ -37,7 +37,7 @@ namespace ASC.Files.Tests.Tests._06_Operations.Copy;
 [Trait("Feature", "Files")]
 public class FileCopyTests(
     AspireAppFixture fixture)
-    : BaseTest(fixture)
+    : CopyTestBase(fixture)
 {
     [Fact]
     public async Task CopyFile_BetweenUserFolders_ReturnsValidFile()
@@ -123,7 +123,12 @@ public class FileCopyTests(
         copiedFile.Should().NotBeNull();
     }
 
+    /// <summary>
+    /// Copying a non-existent file used to return 403 ("Access denied") instead of 404 (BUG
+    /// 82204). Fixed: a file id that resolves to nothing is now reported as not found.
+    /// </summary>
     [Fact]
+    [Trait("Bug", "82204")]
     public async Task CopyFile_FileNotFound_ReturnsError()
     {
         // Arrange
@@ -226,6 +231,34 @@ public class FileCopyTests(
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(targertRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(firstSourceFile.Id), new(secondSourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesOperationsApi.CopyBatchItemsAsync(
+                copyParams,
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task CopyFile_ToFormsRoot_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("source_file.docx", Owner);
+
+        var formsRootId = await GetFolderIdAsync(FolderType.Forms, Owner);
+
+        // Act
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(formsRootId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
             FolderIds = [],
             ReturnSingleOperation = true
         };
@@ -493,5 +526,37 @@ public class FileCopyTests(
         settings.ExtsFilesVectorized.Should().NotContain(
             ext => string.Equals(ext, attemptedExtension, StringComparison.OrdinalIgnoreCase),
             $"copied file '{resultFile.Title}' has unsupported extraction format");
+    }
+
+    [Fact]
+    public async Task CopyFile_FormFileToFillingFormsRoom_AppearsInDestination()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var myDocsId = await GetUserFolderIdAsync(Owner);
+        var formFileId = await CreateOoForm(myDocsId);
+        var destRoom = await CreateFillingFormsRoom("Autotest CopyBatch FillingForms Form Room");
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destRoom.Id, fileIds: [formFileId]));
+
+        // Assert
+        (await GetFolderContent(destRoom.Id)).Files.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task CopyFile_FormWithToFillOutTrue_CreatesFillOutCopyInDestination()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var myDocsId = await GetUserFolderIdAsync(Owner);
+        var formFileId = await CreateOoForm(myDocsId);
+        var destRoom = await CreateFillingFormsRoom("Autotest CopyBatch FillOut Dest");
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destRoom.Id, toFillOut: true, fileIds: [formFileId]));
+
+        // Assert
+        (await GetFolderContent(destRoom.Id)).Files.Should().NotBeEmpty();
     }
 }

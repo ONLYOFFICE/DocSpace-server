@@ -127,7 +127,7 @@
     <value>Devi inserire una chiave di licenza</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Conflitto di licenza. Assicurati di aver installato l'edizione corretta di {0} DocSpace (Enterprise o Developer). In caso di dubbi, contatta il tuo responsabile commerciale.</value>
+    <value>Conflitto di licenza. Assicurati di aver installato l'edizione corretta di {0} Docs (Enterprise o Developer). In caso di dubbi, contatta il tuo responsabile commerciale.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Nuovo documento</value>

@@ -247,7 +247,7 @@
     <value>Претплата корисника је ажурирана: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Подашавања услуга омогућених за кориснички новчаник су ажурирана</value>
+    <value>Подашавања услуга омогућених за кориснички новчаник су ажурирана: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Кориснички новчаник је допуњен: {0}</value>
@@ -901,7 +901,7 @@
     <value>Пошаљи</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Корисник {0} је послао позивницу {1} да се придружи овом DocSpace-у</value>
+    <value>Корисник {0} је послао позивницу {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Инструкције позива послате: {0}</value>

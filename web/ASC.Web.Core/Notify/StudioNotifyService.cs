@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AuditTrail.Models;
-
 using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
@@ -56,6 +54,7 @@ public class StudioNotifyService(
     ILoggerFactory loggerFactory)
 {
     public static string EMailSenderName => Constants.NotifyEMailSenderSysName;
+    public static string TelegramSenderName => Constants.NotifyTelegramSenderSysName;
 
     private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
 
@@ -112,6 +111,15 @@ public class StudioNotifyService(
         passwordChangedNotifyAction.Init(userInfo, auditEvent);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(passwordChangedNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
+    }
+
+    public async Task SendSuspiciousLoginAsync(UserInfo userInfo, BaseEvent loginEvent)
+    {
+        var suspiciousLoginNotifyAction = serviceProvider.GetService<SuspiciousLoginNotifyAction>();
+        suspiciousLoginNotifyAction.Init(userInfo, loginEvent);
+
+        var recipient = new DirectRecipient(userInfo.Id.ToString(), null, [userInfo.Email], false);
+        await studioNotifyServiceHelper.SendNoticeToAsync(suspiciousLoginNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
     }
 
     #endregion
@@ -475,18 +483,9 @@ public class StudioNotifyService(
             throw new ArgumentException("User is not activated yet!");
         }
 
-        if (tenantExtra.Enterprise)
+        if (!tenantExtra.Saas)
         {
             return;
-            //var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(_settingsManager);
-            //notifyAction = defaultRebranding ? Actions.EnterpriseAdminWelcomeV1 : Actions.EnterpriseWhitelabelAdminWelcomeV1;
-        }
-
-        if (tenantExtra.Opensource)
-        {
-            return;
-            //notifyAction = Actions.OpensourceAdminWelcomeV1;
-            //tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
         }
 
         var saasAdminWelcomeV1NotifyAction = serviceProvider.GetService<SaasAdminWelcomeV1NotifyAction>();
@@ -866,7 +865,25 @@ public class StudioNotifyService(
         {
             topUpWalletErrorNotifyAction.Init(user);
 
-            await studioNotifyServiceHelper.SendNoticeToAsync(topUpWalletErrorNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+            var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
+            await studioNotifyServiceHelper.SendNoticeToAsync(topUpWalletErrorNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
+        }
+    }
+
+    public async Task SendLowWalletBalanceAsync(UserInfo payer, UserInfo owner)
+    {
+        var users = new[] { payer, owner }
+            .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
+            .DistinctBy(user => user.Email);
+
+        var lowWalletBalanceNotifyAction = serviceProvider.GetService<LowWalletBalanceNotifyAction>();
+
+        foreach (var user in users)
+        {
+            lowWalletBalanceNotifyAction.Init(user);
+
+            var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
+            await studioNotifyServiceHelper.SendNoticeToAsync(lowWalletBalanceNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
         }
     }
 
@@ -882,40 +899,13 @@ public class StudioNotifyService(
         {
             renewSubscriptionErrorNotifyAction.Init(user);
 
-            await studioNotifyServiceHelper.SendNoticeToAsync(renewSubscriptionErrorNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+            var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
+            await studioNotifyServiceHelper.SendNoticeToAsync(renewSubscriptionErrorNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
         }
     }
 
     #endregion
 
-
-    #region Migration Personal to Docspace
-
-    public async Task MigrationPersonalToDocspaceAsync(UserInfo userInfo)
-    {
-        var auditEventDate = DateTime.UtcNow;
-
-        auditEventDate = new DateTime(
-            auditEventDate.Year,
-            auditEventDate.Month,
-            auditEventDate.Day,
-            auditEventDate.Hour,
-            auditEventDate.Minute,
-            auditEventDate.Second,
-            0,
-            DateTimeKind.Utc);
-
-        var migrationPersonalToDocspaceNotifyAction = serviceProvider.GetService<MigrationPersonalToDocspaceNotifyAction>();
-        await migrationPersonalToDocspaceNotifyAction.Init(userInfo, auditEventDate);
-
-        await studioNotifyServiceHelper.SendNoticeToAsync(migrationPersonalToDocspaceNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false), [EMailSenderName]);
-
-        var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
-
-        messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
-    }
-
-    #endregion
 
 
     #region API Keys

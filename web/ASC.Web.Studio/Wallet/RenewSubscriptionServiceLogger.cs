@@ -43,4 +43,7 @@ internal static partial class RenewSubscriptionServiceLogger
 
     [LoggerMessage(LogLevel.Error, "Subscription renewal failed: tenant {tenantId}")]
     public static partial void ErrorRenewSubscriptionServiceFail(this ILogger<RenewSubscriptionService> logger, int tenantId);
+
+    [LoggerMessage(LogLevel.Error, "Subscription renewal for tenant {tenantId} scheduled a switch to unknown wallet quota {nextQuotaId}")]
+    public static partial void ErrorRenewSubscriptionServiceUnknownNextQuota(this ILogger<RenewSubscriptionService> logger, int tenantId, int nextQuotaId);
 }

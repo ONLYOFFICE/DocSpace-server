@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Upozornenie DocSpace. AI agent bol odstránený</value>
+    <value>Oznámenie ${LetterLogoText}. AI agent bol odstránený</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Dokumenty. Všetci signatári vyplnili $DocumentTitle</value>
@@ -262,19 +262,19 @@ $Message</value>
     <value>Stav podpisu zmenený</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Oznámenie DocSpace. Uvedené v dokumente</value>
+    <value>Oznámenie ${LetterLogoText}. Uvedené v dokumente</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Oznámenie DocSpace. Formulár je vyplnený</value>
+    <value>Oznámenie ${LetterLogoText}. Formulár je vyplnený</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Oznámenie DocSpace.</value>
+    <value>Oznámenie ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Oznámenie DocSpace. Formulár je vyplnený</value>
+    <value>Oznámenie ${LetterLogoText}. Formulár je vyplnený</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Oznámenie DocSpace.</value>
+    <value>Oznámenie ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Dokumenty. Pošta je odoslaná.</value>
@@ -283,7 +283,7 @@ $Message</value>
     <value>Odosielanie je ukončené.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Oznámenie DocSpace. Miestnosť vymazaná</value>
+    <value>Oznámenie ${LetterLogoText}. Miestnosť vymazaná</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Dokumenty. Prístup umožnený k dokumentu $DocumentTitle</value>
@@ -307,9 +307,9 @@ $Message</value>
     <value>Dokumenty. Prístup udelený k priečinku: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Oznámenie DocSpace.</value>
+    <value>Oznámenie ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Oznámenie DocSpace.</value>
+    <value>Oznámenie ${LetterLogoText}.</value>
   </data>
 </root>

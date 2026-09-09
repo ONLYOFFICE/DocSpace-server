@@ -72,28 +72,28 @@ public class TfaappController(
     {
         var result = new List<TfaSettingsDto>();
 
-        var SmsVisible = studioSmsNotificationSettingsHelper.IsVisibleSettings;
-        var SmsEnable = SmsVisible && smsProviderManager.Enabled();
-        var TfaVisible = tfaAppAuthSettingsHelper.IsVisibleSettings;
+        var smsVisible = studioSmsNotificationSettingsHelper.IsVisibleSettings;
+        var smsEnable = smsVisible && smsProviderManager.Enabled();
+        var tfaVisible = tfaAppAuthSettingsHelper.IsVisibleSettings;
 
         var tfaAppSettings = await settingsManager.LoadAsync<TfaAppAuthSettings>();
         var tfaSmsSettings = await settingsManager.LoadAsync<StudioSmsNotificationSettings>();
 
-        if (SmsVisible)
+        if (smsVisible)
         {
             result.Add(new TfaSettingsDto
             {
                 Enabled = tfaSmsSettings.EnableSetting && smsProviderManager.Enabled(),
                 Id = "sms",
                 Title = Resource.ButtonSmsEnable,
-                Available = SmsEnable,
+                Available = smsEnable,
                 MandatoryUsers = tfaSmsSettings.MandatoryUsers,
                 MandatoryGroups = tfaSmsSettings.MandatoryGroups,
                 TrustedIps = tfaSmsSettings.TrustedIps
             });
         }
 
-        if (TfaVisible)
+        if (tfaVisible)
         {
             result.Add(new TfaSettingsDto
             {
@@ -301,8 +301,10 @@ public class TfaappController(
     {
         if (await UpdateTfaSettings(inDto))
         {
+            // No confirmation data when the caller is exempt from the TFA they just switched on -
+            // a trusted IP, most often their own address added in the very same request.
             var data = await GetTfaConfirmData();
-            return data.Url;
+            return data?.Url ?? string.Empty;
         }
 
         return string.Empty;

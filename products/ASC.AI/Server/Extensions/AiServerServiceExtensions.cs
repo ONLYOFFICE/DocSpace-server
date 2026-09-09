@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,34 +31,14 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Core.Chat.Tool;
-
-using AiDbContext = ASC.AI.Core.Database.AiDbContext;
-
 namespace ASC.AI.Extensions;
 
 public static class AiServerServiceExtensions
 {
-    public static IServiceCollection AddAiServerServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAiServerServices(this IServiceCollection services)
     {
-        services.AddBaseDbContextPool<AiDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
-
-        if (ServiceCollectionExtension.IsRedisEnabled(configuration))
-        {
-            services.AddSingleton<IToolCallReceiver, RedisToolCallReceiver>();
-            services.AddSingleton<IToolCallPublisher, RedisToolCallPublisher>();
-        }
-        else
-        {
-            services.AddSingleton<IToolCallReceiver, InMemoryToolCallReceiver>();
-            services.AddSingleton<IToolCallPublisher, InMemoryToolCallPublisher>();
-        }
-
-        services.AddTransient<McpContentTypeHandler>();
-        services.AddHttpClient(McpContentTypeHandler.HttpClientName)
-            .AddHttpMessageHandler<McpContentTypeHandler>();
 
         return services;
     }

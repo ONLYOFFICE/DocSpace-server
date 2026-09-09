@@ -33,6 +33,7 @@
 
 package com.asc.registration.application.configuration;
 
+import java.time.Duration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -61,4 +62,26 @@ public class ClientCacheConfigurationProperties {
 
   /** Indicates whether SSL is enabled for the Redis connection. Defaults to false. */
   private boolean ssl = false;
+
+  /** Command timeout for Redis operations. Defaults to 1 second. */
+  private Duration timeout = Duration.ofSeconds(1);
+
+  /** Lettuce connection pool settings. */
+  private Pool pool = new Pool();
+
+  /** Configuration properties for the Lettuce connection pool. */
+  @Data
+  public static class Pool {
+    /** Maximum number of connections in the pool. */
+    private int maxActive = 32;
+
+    /** Maximum number of idle connections in the pool. */
+    private int maxIdle = 16;
+
+    /** Minimum number of idle connections in the pool. */
+    private int minIdle = 0;
+
+    /** Maximum time to wait for a pooled connection. Defaults to 200ms. */
+    private Duration maxWait = Duration.ofMillis(200);
+  }
 }

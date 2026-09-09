@@ -50,6 +50,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
@@ -190,8 +191,11 @@ public class AuthorizationServiceIT {
 
   @BeforeEach
   void setUp() {
-    Mockito.when(registeredClientService.validateClientAccessibility(Mockito.anyString()))
-        .thenReturn(true);
+    Mockito.when(registeredClientService.findAccessibleClient(Mockito.anyString()))
+        .thenAnswer(
+            invocation ->
+                Optional.ofNullable(
+                    registeredClientService.findByClientId(invocation.getArgument(0))));
     Mockito.when(hashingService.hash(Mockito.anyString()))
         .thenAnswer(invocation -> invocation.getArgument(0));
   }

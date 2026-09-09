@@ -54,12 +54,6 @@ public partial class TenantDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> TenantsCountAsync(string startAlias)
-    {
-        return Queries.TenantsCountAsync(this, startAlias);
-    }
-
-    [PreCompileQuery]
     public IAsyncEnumerable<TenantVersion> TenantVersionsAsync()
     {
         return Queries.TenantVersionsAsync(this);
@@ -122,12 +116,6 @@ static file class Queries
             (TenantDbContext ctx, int tenantId) =>
                 ctx.Tenants.AsTracking().FirstOrDefault(r => r.Id == tenantId));
 
-
-    public static readonly Func<TenantDbContext, string, Task<int>> TenantsCountAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-    (TenantDbContext ctx, string startAlias) =>
-        ctx.Tenants
-            .Count(r => r.Alias.StartsWith(startAlias)));
 
     public static readonly Func<TenantDbContext, IAsyncEnumerable<TenantVersion>> TenantVersionsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

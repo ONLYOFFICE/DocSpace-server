@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Thông báo DocSpace. Tác nhân Agent đã bị xóa</value>
+    <value>Thông báo ${LetterLogoText}. Tác nhân Agent đã bị xóa</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Tài liệu. Tất cả đã hoàn tất ký tên vào $DocumentTitle</value>
@@ -262,19 +262,19 @@ $Message</value>
     <value>Trạng thái ký tên đã thay đổi</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Thông báo DocSpace. Được nhắc đến trong tài liệu</value>
+    <value>Thông báo ${LetterLogoText}. Được nhắc đến trong tài liệu</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>
+    <value>Thông báo ${LetterLogoText}. Biểu mẫu đã được điền</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Thông báo DocSpace.</value>
+    <value>Thông báo ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>
+    <value>Thông báo ${LetterLogoText}. Biểu mẫu đã được điền</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Thông báo DocSpace.</value>
+    <value>Thông báo ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Tài liệu. Đã gửi thư thành công.</value>
@@ -283,7 +283,7 @@ $Message</value>
     <value>Gửi thư đã xong.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Thông báo DocSpace. Đã xóa phòng</value>
+    <value>Thông báo ${LetterLogoText}. Đã xóa phòng</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Tài liệu. Đã cấp quyền truy cập cho tài liệu: $DocumentTitle</value>
@@ -307,9 +307,9 @@ $Message</value>
     <value>Tài liệu. Đã cấp quyền truy cập vào thư mục: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Thông báo DocSpace.</value>
+    <value>Thông báo ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Thông báo DocSpace.</value>
+    <value>Thông báo ${LetterLogoText}.</value>
   </data>
 </root>

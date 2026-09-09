@@ -195,7 +195,7 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         {
             return await crypto.DecryptAsync(encryptedKey);
         }
-        catch (CryptographicException)
+        catch (Exception ex) when (ex is CryptographicException or FormatException)
         {
             return string.Empty;
         }

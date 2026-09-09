@@ -46,7 +46,7 @@ import type {
     WebSearchConfig,
 } from "@onlyoffice/ai-chat/core";
 
-const PATH = "/integration/web-search";
+const PATH = "/web-search";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
 function withOnlyofficeProviderOverrides(

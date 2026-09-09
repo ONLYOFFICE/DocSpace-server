@@ -386,6 +386,20 @@ public class ExternalShare(
         };
     }
 
+    /// <summary>
+    /// Returns <c>true</c> when a new room may not be created as a <see cref="FolderType.PublicRoom"/>
+    /// because the admin has restricted external sharing for the Rooms section. Unlike
+    /// <see cref="IsCreationRestrictedAsync"/> this takes no entry: it is evaluated before the room
+    /// exists. A public room always carries a public primary link, so creating one under the
+    /// restriction would bypass the policy.
+    /// </summary>
+    public async Task<bool> IsPublicRoomCreationRestrictedAsync()
+    {
+        var settings = await filesSettingsHelper.GetTenantFilesSettingsAsync();
+
+        return settings.DisableShareLinkSetting && settings.ExternalShareApplyToRoomsSetting;
+    }
+
     private static bool IsGlobalRestrictionApplies(FileEntry entry, FilesSettings settings)
     {
         if (!settings.DisableShareLinkSetting)

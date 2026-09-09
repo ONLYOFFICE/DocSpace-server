@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ProfileStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Profiles")]
 public class ProfileCreateManyTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -51,8 +50,8 @@ public class ProfileCreateManyTests(AspireAppFixture fixture) : BaseTest(fixture
             ]
         };
 
-        using var response = await Ai.PostAsync(ProfilesBatchPath, batch, TestContext.Current.CancellationToken);
-        var created = await Ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.PostAsync(ProfilesBatchPath, batch, TestContext.Current.CancellationToken);
+        var created = await _ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
 
         created.Should().HaveCount(3);
         created.Select(p => p.Name).Should().BeEquivalentTo(["batch-1", "batch-2", "batch-3"]);
@@ -64,8 +63,8 @@ public class ProfileCreateManyTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var batch = new CreateProfilesRequestDto { Profiles = [] };
 
-        using var response = await Ai.PostAsync(ProfilesBatchPath, batch, TestContext.Current.CancellationToken);
-        var created = await Ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.PostAsync(ProfilesBatchPath, batch, TestContext.Current.CancellationToken);
+        var created = await _ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
 
         created.Should().BeEmpty();
     }

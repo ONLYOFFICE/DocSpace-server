@@ -31,18 +31,89 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ThreadsEngine } from "@onlyoffice/ai-chat/core";
-import type { Profile, OpenOrCreateInput } from "@onlyoffice/ai-chat/core";
+import { ThreadsEngine, AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
+import type {
+  Profile,
+  OpenOrCreateInput,
+  MessagesCursor,
+} from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
-import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString, parseInt10 } from "../narrow.js";
+import { asyncHandler, unpackPositional, attachmentLimitError } from "./_helpers.js";
+import { asString, parseInt10, isObject, getString } from "../narrow.js";
+import {
+  assertEntityAccessible,
+  safeGetAgentEntity,
+} from "../storage/docspaceFilesApi.js";
+import { agentAssignedProfileId } from "./agentProfile.js";
+
+// `cursor` arrives JSON-stringified in the query (see the route table in
+// the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
+// values degrade to `undefined` — an unpaginated read — rather than 400,
+// matching the storage contract's "may ignore pagination" latitude.
+function parseMessagesCursor(raw: unknown): MessagesCursor | undefined {
+  if (typeof raw !== "string" || raw.length === 0) {
+    return undefined;
+  }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (isObject(parsed) && getString(parsed, "id") !== undefined) {
+      return parsed as unknown as MessagesCursor;
+    }
+  } catch {
+    // fall through — not JSON
+  }
+  return undefined;
+}
 
 const engine = new ThreadsEngine({ storage });
 
 interface CreateBody {
   title: string;
   profileId?: string;
+  entityId?: string;
+}
+
+const assignmentsEngine = new AssignmentsEngine({ storage });
+
+// Gate for creating a thread (review #6, Bug 82719). Two requirements:
+//  1. If an `entityId` is supplied it must reference a folder the caller can
+//     access — a missing folder or a no-access response both surface as 404
+//     (see `assertEntityAccessible`). An accessible NON-agent folder is
+//     allowed BY DESIGN (Bug 82719 reopen decision): threads are either
+//     global or agent-scoped, so `HttpThreadsStorage` folds a non-agent
+//     entityId (e.g. the Trash root, an ordinary room — the main client
+//     sends the current location here) to the global scope instead of
+//     rejecting it. An absent entityId is the legitimate global scope.
+//  2. A live profile must be resolvable — an explicit `profileId` that exists,
+//     or the `Chat` assignment for the scope — otherwise there is no model to
+//     run the thread against, so reject with 404.
+export async function assertThreadCreatable(
+  entityId: string | undefined,
+  profileId: string | undefined,
+): Promise<void> {
+  await assertEntityAccessible(entityId);
+  // A malformed profileId makes the C# lookup fail with a non-404 status;
+  // treat that the same as "no such profile" and fall through to the
+  // scope-assignment resolution instead of relaying an opaque error
+  // (Bug 83045).
+  if (
+    profileId
+    && (await storage.profiles.readById(profileId).catch(() => undefined))
+  ) {
+    return;
+  }
+  const resolved = await assignmentsEngine.tryResolveForAction(
+    ActionType.Chat,
+    entityId,
+  );
+  if (resolved?.profile) {
+    return;
+  }
+  throw Object.assign(new Error("no AI profile is available for this thread"), {
+    status: 404,
+    expose: true,
+  });
 }
 
 type ThreadMessageInput = Omit<ThreadMessageLike, "id" | "createdAt">;
@@ -75,17 +146,60 @@ interface UpdateMessageBody {
 
 export const threadsController = {
   create: asyncHandler<CreateBody>(async (req, res) => {
+    // The agent's assigned profile is authoritative for threads created in
+    // its room: substitute it over any caller-supplied profileId so a new
+    // thread cannot start on a different model (Bug 82915).
+    if (req.body && typeof req.body === "object") {
+      const agentProfileId = await agentAssignedProfileId(req.body.entityId);
+      if (agentProfileId) {
+        req.body.profileId = agentProfileId;
+      }
+    }
+    await assertThreadCreatable(req.body?.entityId, req.body?.profileId);
     const thread = await engine.create(req.body);
     res.json(thread);
   }),
 
   openOrCreate: asyncHandler<OpenOrCreateInput>(async (req, res) => {
-    const result = await engine.openOrCreate(req.body);
+    // Thread creation requires a profile and, when scoped, an accessible entity
+    // (review #6, Bug 82826). openOrCreate carries the resolved `profile`
+    // object directly, so a missing/non-object profile means there is no model
+    // to run the thread against → 404 (this also avoids the engine TypeError
+    // that previously collapsed to a 500). A supplied entityId must be
+    // reachable; a non-agent one folds to the global scope downstream (see
+    // `assertThreadCreatable` for the Bug 82719 design decision).
+    const body = req.body;
+    if (!isObject(body) || !isObject(body.profile)) {
+      res.status(404).json({
+        error: "an AI profile is required to open or create a thread",
+      });
+      return;
+    }
+    await assertEntityAccessible(getString(body, "entityId"));
+    // The title generated on create must reach the provider with the same
+    // entity metadata a chat round sends (lib 0.5.64: `entityMeta` input).
+    // Server-resolved on purpose, overriding anything client-supplied: the
+    // pair comes from the Files API under the caller's credentials, so a
+    // client cannot claim someone else's agent (mirrors withEntityMetadata
+    // in aiController).
+    const entity = await safeGetAgentEntity(getString(body, "entityId"));
+    const result = await engine.openOrCreate(
+      entity.entityId
+        ? ({ ...body, entityMeta: entity } as OpenOrCreateInput)
+        : (body as OpenOrCreateInput),
+    );
     res.json(result);
   }),
 
   appendUserMessage: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "message", "profileId"] as const);
+    // Enforce the composer's per-kind attachment cap server-side — the UI
+    // cannot exceed it, so only a direct API call can (Bug 82894).
+    const limitError = attachmentLimitError(args.message);
+    if (limitError) {
+      res.status(400).json({ error: limitError });
+      return;
+    }
     const messageId = await engine.appendUserMessage(
       args.threadId as string,
       args.message as ThreadMessageInput,
@@ -102,7 +216,21 @@ export const threadsController = {
 
   rename: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "title"] as const);
-    await engine.rename(args.threadId as string, args.title as string);
+    // Same title rules as threads/create: a missing/null/empty/whitespace
+    // title is a 400, never a silent success — rename used to accept all of
+    // those and blank the stored name, a state create can't produce
+    // (Bug 83094).
+    if (typeof args.threadId !== "string" || args.threadId.length === 0) {
+      res.status(400).json({ error: "threadId required" });
+      return;
+    }
+    if (typeof args.title !== "string" || args.title.trim().length === 0) {
+      res.status(400).json({
+        error: "title is required and must be a non-empty string",
+      });
+      return;
+    }
+    await engine.rename(args.threadId, args.title);
     res.json({ success: true });
   }),
 
@@ -111,6 +239,14 @@ export const threadsController = {
     const idStr = typeof threadId === "string" ? threadId : asString(req.query["threadId"]);
     if (!idStr) {
       res.status(400).json({ error: "threadId required" });
+      return;
+    }
+    // The storage layer deliberately swallows the C# 404 (idempotent delete
+    // for engine cascades), so without this check deleting a nonexistent or
+    // already-deleted thread reported success — unlike rename/clear-messages
+    // on the same ids (Bug 83095). Verify existence at the HTTP boundary.
+    if ((await storage.threads.readById(idStr)) === null) {
+      res.status(404).json({ error: "thread not found" });
       return;
     }
     await engine.delete(idStr);
@@ -129,8 +265,33 @@ export const threadsController = {
   }),
 
   regenerateTitle: asyncHandler(async (req, res) => {
-    const args = unpackPositional(req.body, ["threadId", "profile"] as const);
-    const title = await engine.regenerateTitle(args.threadId as string, args.profile as Profile);
+    const args = unpackPositional(
+      req.body,
+      ["threadId", "profile", "entityMeta"] as const,
+    );
+    // The engine dereferences `profile` (and needs a real threadId); a missing
+    // profile makes it throw a TypeError → 500 (Bug 82828). Validate both up
+    // front and return a clean 400.
+    if (typeof args.threadId !== "string" || !isObject(args.profile)) {
+      res.status(400).json({
+        error: "threadId (string) and profile (object) are required",
+      });
+      return;
+    }
+    // Optional third element (lib 0.5.64): the entity pair the title request
+    // runs for. The Thread DTO does not echo its entityId back, so the body
+    // is the only scope source here — but only the id is taken as a hint;
+    // the pair itself is re-resolved server-side under the caller's
+    // credentials so a client cannot claim someone else's agent.
+    const entityIdHint = isObject(args.entityMeta)
+      ? getString(args.entityMeta, "entityId")
+      : undefined;
+    const entity = await safeGetAgentEntity(entityIdHint);
+    const title = await engine.regenerateTitle(
+      args.threadId,
+      args.profile as Profile,
+      entity.entityId ? entity : undefined,
+    );
     res.json({ title });
   }),
 
@@ -146,9 +307,9 @@ export const threadsController = {
       res.json([]);
       return;
     }
-    const limit = parseInt10(req.query["limit"]);
-    const startIndex = parseInt10(req.query["startIndex"]);
-    const messages = await engine.readMessages(threadId, limit, startIndex);
+    const count = parseInt10(req.query["count"]);
+    const cursor = parseMessagesCursor(req.query["cursor"]);
+    const messages = await engine.readMessages(threadId, count, cursor);
     res.json(messages);
   }),
 
@@ -159,6 +320,12 @@ export const threadsController = {
       return;
     }
     const thread = await engine.getById(threadId);
+    // Storage returns null for a missing thread; without this guard the handler
+    // answers 200 with a null body for a nonexistent threadId (Bug 82718).
+    if (thread === null) {
+      res.status(404).json({ error: "thread not found" });
+      return;
+    }
     res.json(thread);
   }),
 

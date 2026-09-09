@@ -33,7 +33,6 @@
 
 namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
-[Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
 public class ThreadTouchTests(AspireAppFixture fixture) : BaseTest(fixture)
@@ -41,7 +40,7 @@ public class ThreadTouchTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Touch_NonExisting_Returns404()
     {
-        using var response = await Ai.PatchAsync(
+        using var response = await _ai.PatchAsync(
             $"{ThreadsPath}/{Guid.NewGuid()}/touch",
             new { lastEditDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
             TestContext.Current.CancellationToken);
@@ -55,7 +54,7 @@ public class ThreadTouchTests(AspireAppFixture fixture) : BaseTest(fixture)
         var created = await CreateThreadAsync();
         var profile = await CreateProfileAsync();
 
-        using var response = await Ai.PatchAsync(
+        using var response = await _ai.PatchAsync(
             $"{ThreadsPath}/{created.Id}/touch",
             new { lastEditDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), profileId = profile.Id },
             TestContext.Current.CancellationToken);
@@ -70,7 +69,7 @@ public class ThreadTouchTests(AspireAppFixture fixture) : BaseTest(fixture)
         var profile = await CreateProfileAsync();
         var created = await CreateThreadAsync(profileId: profile.Id);
 
-        using var response = await Ai.PatchAsync(
+        using var response = await _ai.PatchAsync(
             $"{ThreadsPath}/{created.Id}/touch",
             new { lastEditDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), clearProfile = true },
             TestContext.Current.CancellationToken);
@@ -84,7 +83,7 @@ public class ThreadTouchTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreateThreadAsync();
 
-        using var response = await Ai.PatchAsync(
+        using var response = await _ai.PatchAsync(
             $"{ThreadsPath}/{created.Id}/touch",
             new { lastEditDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), profileId = Guid.NewGuid() },
             TestContext.Current.CancellationToken);

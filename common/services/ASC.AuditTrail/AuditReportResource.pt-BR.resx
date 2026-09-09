@@ -247,7 +247,7 @@
     <value>Assinatura do cliente atualizada: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Configurações de serviços habilitados para carteira do cliente atualizadas</value>
+    <value>Configurações de serviços habilitados para carteira do cliente atualizadas: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Carteira do cliente recarregada: {0}</value>
@@ -529,7 +529,7 @@
     <value>Usuários [{0}]. Começou a preencher: {1}</value>
   </data>
   <data name="FormStopped" xml:space="preserve">
-    <value>Usuários [{0}]. Começou a preencher: {1}</value>
+    <value>Usuários [{0}]. Formulário interrompido: {1}</value>
   </data>
   <data name="FormSubmit" xml:space="preserve">
     <value>Usuários [{0}]. Formulário enviado: {1}</value>
@@ -901,7 +901,7 @@
     <value>Enviar</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>O usuário {0} enviou um convite para {1} para ingressar neste DocSpace</value>
+    <value>O usuário {0} enviou um convite para {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instruções de convite enviadas: {0}</value>

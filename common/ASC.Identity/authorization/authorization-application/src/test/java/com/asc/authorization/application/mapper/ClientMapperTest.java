@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.asc.authorization.application.configuration.properties.RegisteredClientConfigurationProperties;
 import com.asc.authorization.application.security.oauth.grant.ExtendedAuthorizationGrantType;
 import com.asc.common.service.transfer.response.ClientResponse;
+import com.asc.common.utilities.crypto.NoOpEncryptionService;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Set;
@@ -56,7 +57,7 @@ public class ClientMapperTest {
     configuration.setAccessTokenMinutesTTL(60);
     configuration.setRefreshTokenDaysTTL(30);
     configuration.setAuthorizationCodeMinutesTTL(1);
-    clientMapper = new ClientMapper(configuration);
+    clientMapper = new ClientMapper(configuration, new NoOpEncryptionService());
   }
 
   @Test

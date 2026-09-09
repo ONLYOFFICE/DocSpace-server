@@ -55,7 +55,7 @@ if (otelFileLogging)
     connectionManager.AddOpenTelemetryCollector();
 }
 
-var isIntegrationTest = launchProfile == "integration-test";
+var isIntegrationTest = launchProfile is "integration-test" or "notify-test";
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker, isIntegrationTest);
 
 switch (launchProfile)
@@ -63,7 +63,7 @@ switch (launchProfile)
     case "integration-test":
         connectionManager
             .AddMySql(withDataVolume: false, withTmpfs: true)
-            .AddRabbitMq()
+            .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()
             .AddOpensearch(withDashboard: false, isProxied: false)
             .AllowPortalRegistration();
@@ -76,6 +76,24 @@ switch (launchProfile)
             .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
             .AddProject<ASC_AI>(Constants.AiPort)
             .AddSocketIO();
+
+        break;
+    case "notify-test":
+        // The letter suite's graph (ASC.Notify.Tests). The letters render in-process out of the
+        // suite's own service host, so of the services only portal registration (ApiSystem) and the
+        // password salt (Web.Api) are needed, plus the MailPit the previews are delivered to. The
+        // containers are the same as integration-test: the two services expect all of them.
+        connectionManager
+            .AddMySql(withDataVolume: false, withTmpfs: true)
+            .AddRabbitMq(withManagementPlugin: false)
+            .AddRedis()
+            .AddOpensearch(withDashboard: false, isProxied: false)
+            .AddMailPit()
+            .AllowPortalRegistration();
+
+        configurator
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort);
 
         break;
     case "preview":
@@ -179,9 +197,14 @@ if (storybook)
         .WithEnvironment("BROWSER", "none");
 }
 
-var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
-var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
+// The letter suite never goes through the proxy, and OpenResty binds fixed host ports (8092, 443)
+// and mounts the client packages — which a server-only checkout does not have.
+if (launchProfile != "notify-test")
+{
+    var isPreview = launchProfile == "preview";
+    var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
 
-playwright?.WaitFor(openresty);
+    playwright?.WaitFor(openresty);
+}
 
 await builder.Build().RunAsync();

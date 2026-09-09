@@ -54,9 +54,9 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateMessageContentsAsync(int tenantId, Guid id, string contents, DateTime timestamp)
+    public Task<int> UpdateMessageContentsAsync(int tenantId, Guid id, string contents)
     {
-        return MessageQueriesContainer.UpdateMessageContentsAsync(this, tenantId, id, contents, timestamp);
+        return MessageQueriesContainer.UpdateMessageContentsAsync(this, tenantId, id, contents);
     }
 
     [PreCompileQuery]
@@ -95,13 +95,12 @@ static file class MessageQueriesContainer
                     .Skip(skip)
                     .Take(take));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, string, DateTime, Task<int>> UpdateMessageContentsAsync =
-        (AiIntegrationContext ctx, int tenantId, Guid id, string contents, DateTime timestamp) =>
+    public static readonly Func<AiIntegrationContext, int, Guid, string, Task<int>> UpdateMessageContentsAsync =
+        (ctx, tenantId, id, contents) =>
             ctx.Messages
                 .Where(x => x.TenantId == tenantId && x.Id == id)
                 .ExecuteUpdateAsync(x => x
-                    .SetProperty(y => y.Contents, contents)
-                    .SetProperty(y => y.Timestamp, timestamp));
+                    .SetProperty(y => y.Contents, contents));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteMessageAsync =
         EF.CompileAsyncQuery(

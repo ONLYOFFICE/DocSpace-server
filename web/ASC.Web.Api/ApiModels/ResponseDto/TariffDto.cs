@@ -165,6 +165,12 @@ public class TariffQuotaDto(Quota quota, DateTime tariffDueDate, ApiDateTimeHelp
     public int? NextQuantity { get; set; } = quota.NextQuantity;
 
     /// <summary>
+    /// The quota ID to switch to at the next period.
+    /// </summary>
+    /// <example></example>
+    public int? NextQuota { get; set; } = quota.NextQuota;
+
+    /// <summary>
     /// The quota state.
     /// </summary>
     /// <example>Active</example>

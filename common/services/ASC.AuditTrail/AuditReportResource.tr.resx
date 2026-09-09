@@ -247,7 +247,7 @@
     <value>Müşteri aboneliği güncellendi: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi</value>
+    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Müşteri cüzdanına para yüklendi: {0}</value>
@@ -910,7 +910,7 @@
     <value>Gönder</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Kullanıcı {0}, {1} kullanıcısına bu DocSpace'e katılması için bir davet gönderdi</value>
+    <value>Kullanıcı {0}, {1} kullanıcısına bir davet gönderdi</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Davet Kılavuzları Gönderildi: {0}</value>

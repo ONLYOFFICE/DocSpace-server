@@ -37,10 +37,9 @@ namespace ASC.Web.Api.Controllers;
 /// Portal capabilities API.
 /// </remarks>
 /// <name>capabilities</name>
-[DefaultRoute, Route("api/2.0/capabilities.json")]
-[ApiController]
+[ApiEndpoint("capabilities")]
+[Route("api/2.0/capabilities.json")]
 [AllowAnonymous]
-[ControllerName("capabilities")]
 public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         TenantManager tenantManager,
         ProviderManager providerManager,

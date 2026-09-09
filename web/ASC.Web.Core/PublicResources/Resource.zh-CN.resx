@@ -205,7 +205,7 @@
     <value>AI 智能体空间配额已超出限制</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>设置每个 AI 智能体的配额失败。输入的值大于协作空间总存储空间。</value>
+    <value>设置每个 AI 智能体的配额失败。输入的值大于总存储空间。</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>自动续订</value>
@@ -1114,7 +1114,7 @@
     <value>已超出房间空间配额</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>无法设置每个房间的配额。输入值大于协作空间总存储空间。</value>
+    <value>无法设置每个房间的配额。输入值大于总存储空间。</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asia Pacific (新加坡)</value>
@@ -1279,7 +1279,7 @@
     <value>发生意外错误，请重试。</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>您已成功连接 Telegram 并接收来自协作空间的通知。</value>
+    <value>您已成功连接 Telegram 并接收来自工作区的通知。</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>验证码有误</value>
@@ -1294,7 +1294,7 @@
     <value>已超出用户空间配额</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>无法设置每个用户的配额。输入值大于协作空间总存储空间。</value>
+    <value>无法设置每个用户的配额。输入值大于总存储空间。</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>美国西部（俄勒冈州）地区</value>
@@ -1315,7 +1315,7 @@
     <value>网络搜索</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>网络搜索</value>
+    <value>AI 搜索</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI 积分</value>

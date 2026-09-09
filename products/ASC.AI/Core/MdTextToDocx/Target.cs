@@ -35,8 +35,19 @@ namespace ASC.AI.Core.MdTextToDocx;
 
 internal abstract class Target
 {
-    public static async Task<Target> InitializeAsync(IDaoFactory daoFactory, FileSecurity fileSecurity, int folderId, string? thirdpartyFolderId)
+    public static async Task<Target> InitializeAsync(
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity,
+        UserManager userManager,
+        AuthContext authContext,
+        int folderId,
+        string? thirdpartyFolderId)
     {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+
         Target target;
 
         if (!string.IsNullOrEmpty(thirdpartyFolderId))
@@ -69,13 +80,13 @@ internal class Target<TFolder>(IFolderDao<TFolder> folderDao, TFolder folderId) 
 
         if (_folder == null)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (_folder.FolderType is FolderType.AiRoom)
         {
             var folder = await folderDao.GetFoldersAsync(_folder.Id, FolderType.ResultStorage)
-                .FirstOrDefaultAsync() ?? throw new Exception(FilesCommonResource.ErrorMessage_FolderNotFound);
+                .FirstOrDefaultAsync() ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
 
             _folder = folder;
         }

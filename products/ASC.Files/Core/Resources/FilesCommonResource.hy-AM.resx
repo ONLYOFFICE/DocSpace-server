@@ -500,7 +500,7 @@
     <value>Բովանդակության ստեղծող</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace ադմինիստրատոր</value>
+    <value>Լիարժեք ադմինիստրատոր</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Խմբագիր</value>

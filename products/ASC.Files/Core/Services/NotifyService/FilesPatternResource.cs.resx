@@ -248,19 +248,19 @@ $Message</value>
     <value>Změna stavu značky</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Oznámení DocSpace. Zmíněno v dokumentu</value>
+    <value>Oznámení ${LetterLogoText}. Zmíněno v dokumentu</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Upozornění pro DocSpace. Formulář je vyplněn</value>
+    <value>Oznámení ${LetterLogoText}. Formulář je vyplněn</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Oznámení DocSpace.</value>
+    <value>Oznámení ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Upozornění pro DocSpace. Formulář je vyplněn</value>
+    <value>Oznámení ${LetterLogoText}. Formulář je vyplněn</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Oznámení DocSpace.</value>
+    <value>Oznámení ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Dokumenty. Pošta je odeslána.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Odesílání je dokončeno.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Oznámení DocSpace. Místnost odstraněna</value>
+    <value>Oznámení ${LetterLogoText}. Místnost odstraněna</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Dokumenty. Přístup umožněn k dokumentu $DocumentTitle</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Dokumenty. Přístup udělen do složky: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Oznámení DocSpace.</value>
+    <value>Oznámení ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Oznámení DocSpace.</value>
+    <value>Oznámení ${LetterLogoText}.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>$__AuthorName odstranil agenta AI
@@ -310,6 +310,6 @@ $__AuthorName odstranil agenta AI: $RoomTitle</value>
     <value>Byli jste pozváni do agenta AI "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Upozornění DocSpace. Agent AI odstraněn</value>
+    <value>Oznámení ${LetterLogoText}. Agent AI odstraněn</value>
   </data>
 </root>

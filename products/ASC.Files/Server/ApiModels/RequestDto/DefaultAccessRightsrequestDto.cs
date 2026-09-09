@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The request parameters for changing the default access rights.
 /// </summary>
-public class DefaultAccessRightsrequestDto
+public class DefaultAccessRightsrequestDto : IValidatableObject
 {
     /// <summary>
     /// Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator).
@@ -44,4 +44,14 @@ public class DefaultAccessRightsrequestDto
     /// <example>[1]</example>
     [FromBody]
     public List<FileShare> Value { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        // System.Text.Json binds any number into the enum, so an out-of-range value must be
+        // rejected here rather than stored as an unknown access right.
+        if (Value != null && Value.Any(v => !Enum.IsDefined(v)))
+        {
+            yield return new ValidationResult("Unknown sharing right value.", [nameof(Value)]);
+        }
+    }
 }

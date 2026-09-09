@@ -43,7 +43,8 @@ public class ProfileStorageService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     AiGateway aiGateway,
-    BaseCommonLinkUtility linkUtility) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, aiGateway)
+    BaseCommonLinkUtility linkUtility,
+    MessageService messageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, aiGateway)
 {
     private readonly AiGateway _aiGateway = aiGateway;
 
@@ -58,7 +59,11 @@ public class ProfileStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayNotConfigured();
 
-        return await storage.CreateAsync(tenantManager.GetCurrentTenantId(), profile);
+        var created = await storage.CreateAsync(tenantManager.GetCurrentTenantId(), profile);
+
+        messageService.Send(MessageAction.AiProfileCreated, MessageTarget.Create(created.Id), created.Name);
+
+        return created;
     }
 
     public async Task<IReadOnlyList<Profile>> CreateManyAsync(IReadOnlyList<ProfileData> profiles)
@@ -66,7 +71,14 @@ public class ProfileStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayNotConfigured();
 
-        return await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), profiles);
+        var created = await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), profiles);
+
+        if (created.Count > 0)
+        {
+            messageService.Send(MessageAction.AiProfileCreated, MessageTarget.Create(created.Select(p => p.Id)), created.Select(p => p.Name));
+        }
+
+        return created;
     }
 
     public async Task<Profile> ReadByIdAsync(Guid id)
@@ -102,7 +114,11 @@ public class ProfileStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayNotConfigured();
 
-        return await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), profile);
+        var updated = await storage.UpdateAsync(tenantManager.GetCurrentTenantId(), profile);
+
+        messageService.Send(MessageAction.AiProfileUpdated, MessageTarget.Create(updated.Id), updated.Name);
+
+        return updated;
     }
 
     public async Task DeleteAsync(Guid id)
@@ -114,7 +130,14 @@ public class ProfileStorageService(
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, id)))
         {
+            var profile = await storage.ReadByIdAsync(tenantId, id);
+
             await storage.DeleteAsync(tenantId, id);
+
+            if (profile is not null)
+            {
+                messageService.Send(MessageAction.AiProfileDeleted, MessageTarget.Create(profile.Id), profile.Name);
+            }
         }
     }
 

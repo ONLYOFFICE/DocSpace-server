@@ -247,7 +247,7 @@
     <value>Klantabonnement bijgewerkt: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Instellingen voor ingeschakelde klantwallet-services bijgewerkt</value>
+    <value>Instellingen voor ingeschakelde klantwallet-services bijgewerkt: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Klant wallet opgeladen: {0}</value>
@@ -901,7 +901,7 @@
     <value>Verzenden</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Gebruiker {0} stuurde een uitnodiging naar {1} om lid te worden van deze DocSpace</value>
+    <value>Gebruiker {0} stuurde een uitnodiging naar {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Uitnodigingsinstructies Verstuurd: {0}</value>

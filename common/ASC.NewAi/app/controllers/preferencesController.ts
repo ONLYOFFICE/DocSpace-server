@@ -47,8 +47,16 @@ export const preferencesController = {
 
   setDeepMode: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["value", "entityId"] as const);
+    // Require a real boolean. `Boolean(args.value)` mis-handled non-booleans:
+    // the string "false" coerced to `true` (Bug 82813), and an absent value
+    // coerced to `false`, silently overwriting the stored setting on an empty
+    // request (Bug 82814). Reject anything that is not a boolean with a 400.
+    if (typeof args.value !== "boolean") {
+      res.status(400).json({ error: "value is required and must be a boolean" });
+      return;
+    }
     const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
-    await engine.setDeepMode(Boolean(args.value), entityId);
+    await engine.setDeepMode(args.value, entityId);
     res.json({ success: true });
   }),
 

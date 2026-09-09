@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace bildirimi. Yapay Zekâ Ajanı silindi</value>
+    <value>${LetterLogoText} bildirimi. Yapay Zekâ Ajanı silindi</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Belgeler. Tüm imzalayanlar $DocumentTitle tamamladı</value>
@@ -262,19 +262,19 @@ $Message</value>
     <value>İmza durumu değişti</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace bildirimi. Belgede bahsedilen</value>
+    <value>${LetterLogoText} bildirimi. Belgede bahsedilen</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace bildirimi. Form dolduruldu</value>
+    <value>${LetterLogoText} bildirimi. Form dolduruldu</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace bildirimi.</value>
+    <value>${LetterLogoText} bildirimi.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace bildirimi. Form dolduruldu</value>
+    <value>${LetterLogoText} bildirimi. Form dolduruldu</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace bildirimi.</value>
+    <value>${LetterLogoText} bildirimi.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Belgeler. E-postalaşma tamamlandı.</value>
@@ -283,7 +283,7 @@ $Message</value>
     <value>Postalama tamamlandı.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace bildirimi. Oda silindi</value>
+    <value>${LetterLogoText} bildirimi. Oda silindi</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Belgeler. Şu belgeye erişim izni verildi: $DocumentTitle</value>
@@ -307,9 +307,9 @@ $Message</value>
     <value>Belgeler. Şu klasöre erişim izni verildi: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace bildirimi.</value>
+    <value>${LetterLogoText} bildirimi.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace bildirimi.</value>
+    <value>${LetterLogoText} bildirimi.</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -111,12 +111,6 @@ public partial class FilesDbContext
     public Task<int> MarkAuditReferencesAsCorruptedAsync(IEnumerable<int> eventsIds)
     {
         return AbstractQueries.MarkAuditReferencesAsCorruptedAsync(this, eventsIds);
-    }
-
-    [PreCompileQuery]
-    public Task DeleteChatsByRoomIdsAsync(int tenantId, IEnumerable<int> folderIds)
-    {
-        return AbstractQueries.DeleteChatsByRoomIdsAsync(this, tenantId, folderIds);
     }
 
     [PreCompileQuery]
@@ -238,12 +232,6 @@ static file class AbstractQueries
                 .ExecuteUpdateAsync(x =>
                     x.SetProperty(y => y.Corrupted, a => true))
     ;
-
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteChatsByRoomIdsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
-            ctx.Chats
-                .Where(x => x.TenantId == tenantId && folderIds.Contains(x.RoomId))
-                .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, int, IEnumerable<Guid>, Task> DeleteFileKeysByUsersAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int fileId, IEnumerable<Guid> userIds) =>

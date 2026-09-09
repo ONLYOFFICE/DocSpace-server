@@ -211,7 +211,7 @@
     <value>AIエージェントのスペースクォータが上限に達しました</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>AIエージェントごとのクォータ設定に失敗しました。入力した値がDocSpace全体のストレージ容量を超えています。</value>
+    <value>AIエージェントごとのクォータ設定に失敗しました。入力した値が合計ストレージ容量を超えています。</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>自動更新</value>
@@ -1120,7 +1120,7 @@
     <value>ルームの容量制限を超えています</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>ルームごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
+    <value>ルームごとの容量制限の設定に失敗しました。入力された値は合計ストレージ容量を超えています。</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>アジア太平洋 (シンガポール)</value>
@@ -1294,7 +1294,7 @@
     <value>ユーザーの容量制限を超えています</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>ユーザーごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
+    <value>ユーザーごとの容量制限の設定に失敗しました。入力された値は合計ストレージ容量を超えています。</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>US西部地域（オレゴン）</value>
@@ -1321,7 +1321,7 @@
     <value>ウェブ検索</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
-    <value>ウェブ検索</value>
+    <value>AI検索</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AIクレジット</value>
@@ -1402,7 +1402,7 @@
     <value>予期しないエラーが発生しました。もう一度お試しください。</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>DocSpaceからの通知を受け取るためにTelegramへの接続が完了しました。</value>
+    <value>ワークスペースからの通知を受け取るためにTelegramへの接続が完了しました。</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>追加ディスクストレージ</value>

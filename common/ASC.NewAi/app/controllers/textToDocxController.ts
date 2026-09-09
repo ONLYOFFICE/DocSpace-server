@@ -36,7 +36,7 @@ import { isObject } from "../narrow.js";
 import logger from "../log.js";
 
 // Proxy for the .NET md→docx export pipeline
-// (`POST internal/ai/integration/text-to-docx/start`,
+// (`POST internal/ai/text-to-docx/start`,
 // `TextToDocxController.PublishAsync`): validates the payload and forwards
 // it with the caller's credentials. The conversion itself is asynchronous —
 // the AI Worker converts the markdown via DocumentService and saves the
@@ -52,7 +52,10 @@ export const textToDocxController = {
     const content = typeof body["content"] === "string" ? body["content"] : "";
     const folderId = body["folderId"];
 
-    if (!title || !content) {
+    // Whitespace-only content is still truthy, so `!content` misses it: check
+    // the trimmed length for emptiness while forwarding the ORIGINAL untrimmed
+    // `content` below (trimming would alter the document body).
+    if (!title || content.trim().length === 0) {
       res.status(400).json({ error: "title and content are required" });
       return;
     }
@@ -69,7 +72,7 @@ export const textToDocxController = {
     // BaseUri (the host DocumentService downloads the export source from) —
     // an SSRF vector. The portal root resolves on the .NET side instead
     // (tenant domain fallback / `files.docservice.url.portal`).
-    await aiService.post("/integration/text-to-docx/start", {
+    await aiService.post("/text-to-docx/start", {
       title,
       content,
       folderId,

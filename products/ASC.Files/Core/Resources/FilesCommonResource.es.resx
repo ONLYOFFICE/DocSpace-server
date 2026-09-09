@@ -376,7 +376,7 @@
     <value>No tiene permiso para mover la carpeta</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>No tiene permisos suficientes para copiar la carpeta</value>
+    <value>No tiene permisos para mover algo a esta carpeta</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>No hay permiso suficiente para ver el archivo</value>
@@ -500,7 +500,7 @@
     <value>Creador de contenido</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Administrador de DocSpace</value>
+    <value>Administrador completo</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>

@@ -1,65 +1,45 @@
-**/obj/
-**/bin/
+# ---------- .NET / IDE ----------
+bin/
+obj/
+publish/
 *.suo
 *.user
+*.binlog
 .vs/
-*-lock.json
-**/node_modules/
-**/storybook-static/
-**/dist
-/build/deploy
-*.log
-/products/ASC.People/Data/
-/Data
-Logs/
-**/.DS_Store
-.eslintcache
-build/deploy/
-/public/debuginfo.md
+.idea/
+
+# ---------- Tests ----------
+TestResults/
 TestsResults/
-/Data.Test
-/build/install/RadicalePlugins/app_auth_plugin/app_auth_plugin.egg-info/PKG-INFO
-/build/install/RadicalePlugins/app_auth_plugin/app_auth_plugin.egg-info/SOURCES.txt
-/build/install/RadicalePlugins/app_auth_plugin/app_auth_plugin.egg-info/dependency_links.txt
-/build/install/RadicalePlugins/app_auth_plugin/app_auth_plugin.egg-info/top_level.txt
-/build/install/RadicalePlugins/app_auth_plugin/build/lib/app_auth_plugin/__init__.py
-/build/install/RadicalePlugins/app_rights_plugin/app_rights_plugin.egg-info/PKG-INFO
-/build/install/RadicalePlugins/app_rights_plugin/app_rights_plugin.egg-info/SOURCES.txt
-/build/install/RadicalePlugins/app_rights_plugin/app_rights_plugin.egg-info/dependency_links.txt
-/build/install/RadicalePlugins/app_rights_plugin/app_rights_plugin.egg-info/top_level.txt
-/build/install/RadicalePlugins/app_rights_plugin/build/lib/app_rights_plugin/__init__.py
-/build/install/RadicalePlugins/app_store_plugin/app_store_plugin.egg-info/PKG-INFO
-/build/install/RadicalePlugins/app_store_plugin/app_store_plugin.egg-info/SOURCES.txt
-/build/install/RadicalePlugins/app_store_plugin/app_store_plugin.egg-info/dependency_links.txt
-/build/install/RadicalePlugins/app_store_plugin/app_store_plugin.egg-info/top_level.txt
-/build/install/RadicalePlugins/app_store_plugin/build/lib/app_store_plugin/__init__.py
-/build/install/RadicalePlugins/app_store_plugin/build/lib/app_store_plugin/cache.py
-/build/install/RadicalePlugins/app_store_plugin/build/lib/app_store_plugin/delete.py
-/build/install/RadicalePlugins/app_store_plugin/build/lib/app_store_plugin/history.py
-/build/install/RadicalePlugins/app_store_plugin/build/lib/app_store_plugin/log.py
-/build/install/RadicalePlugins/app_store_plugin/build/lib/app_store_plugin/sync.py
-/build/install/RadicalePlugins/app_store_plugin/build/lib/app_store_plugin/upload.py
 
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-
-
+# ---------- Node.js services (common/ASC.*) ----------
+node_modules/
 **/.yarn/cache
 **/.yarn/install-state.gz
+*-lock.json
+
+# ---------- OS ----------
+.DS_Store
+
+# ---------- Runtime & generated ----------
+*.log
+Logs/
 licenses.csv
-publish/
-
-.idea
 common/*/docker-entrypoint.py
-/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/target
-/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/openapitools.json
+# ---- ASC.Api.Documentation ----
+# Its inputs stay under revision: json/*_2.0.json, emitted by the service builds, and
+# SDK/json/oauth.json, which comes from ASC.Identity. Nothing derived from them does.
 
+# Rebuilt on every run and kept between runs: the custom generator, and the joined spec that
+# every SDK command reads.
+/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/target
+/common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/SDK/json/api-docs.json
+
+# DocStore copies (source: common/resources/DocStore submodule)
 products/ASC.AI/Server/DocStore/
 products/ASC.Files/Server/DocStore/
 common/services/ASC.Monolith/DocStore/
+
+# ---------- Claude Code ----------
 /.claude/settings.local.json
 /.claude/worktrees

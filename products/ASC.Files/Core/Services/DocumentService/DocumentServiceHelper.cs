@@ -65,10 +65,20 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var fileDao = daoFactory.GetFileDao<T>();
 
         var file = await fileDao.GetFileAsync(fileId);
-        if (file != null && 0 < version && version < file.Version)
+        if (file != null && 0 < version)
         {
-            file = await fileDao.GetFileAsync(fileId, version);
-            lastVersion = false;
+            // An explicit ?version= is a history read whatever value it names; a caller allowed to
+            // see only the current document must not address versions at all.
+            if (!await fileSecurity.CanReadHistoryAsync(file))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
+            if (version < file.Version)
+            {
+                file = await fileDao.GetFileAsync(fileId, version);
+                lastVersion = false;
+            }
         }
 
         if (file == null)
@@ -103,13 +113,25 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task<QuotaScope?> CheckCustomQuotaAsync<T>(Folder<T> rootFolder)
     {
+        // portal (tariff) quota: once the tenant is over MaxTotalSize there is no room left to save
+        // (the save-time grace in FileDao is denied when used > MaxTotalSize), so open in viewer
+        var tenantQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
-        if (tenantQuotaSetting.EnableQuota)
+
+        var tariffEnforced = tenantQuota is { MaxTotalSize: > 0 };
+        if (tariffEnforced || tenantQuotaSetting.EnableQuota)
         {
+            // compute the used size only when a tenant-wide quota is actually enforced
             var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenantManager.GetCurrentTenant().Id))
                 .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
                 .Sum(r => r.Counter);
-            if (tenantQuotaSetting.Quota < usedSize)
+
+            if (tariffEnforced && tenantQuota.MaxTotalSize < usedSize)
+            {
+                return QuotaScope.Tenant;
+            }
+
+            if (tenantQuotaSetting.EnableQuota && tenantQuotaSetting.Quota < usedSize)
             {
                 return QuotaScope.Tenant;
             }

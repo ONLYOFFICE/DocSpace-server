@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Ειδοποίηση DocSpace. Ο πράκτορας τεχνητής νοημοσύνης διαγράφηκε</value>
+    <value>Ειδοποίηση ${LetterLogoText}. Ο πράκτορας τεχνητής νοημοσύνης διαγράφηκε</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Έγγραφα. Όλοι οι υπογράφοντες συμπλήρωσαν το $DocumentTitle</value>
@@ -262,19 +262,19 @@ $Message</value>
     <value>Η κατάσταση υπογραφής άλλαξε</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Ειδοποίηση DocSpace. Αναφέρεται στο έγγραφο</value>
+    <value>Ειδοποίηση ${LetterLogoText}. Αναφέρεται στο έγγραφο</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Ειδοποίηση DocSpace. Η φόρμα έχει συμπληρωθεί</value>
+    <value>Ειδοποίηση ${LetterLogoText}. Η φόρμα έχει συμπληρωθεί</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Ειδοποίηση DocSpace.</value>
+    <value>Ειδοποίηση ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Ειδοποίηση DocSpace. Η φόρμα έχει συμπληρωθεί</value>
+    <value>Ειδοποίηση ${LetterLogoText}. Η φόρμα έχει συμπληρωθεί</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Ειδοποίηση DocSpace.</value>
+    <value>Ειδοποίηση ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Έγγραφα. Η αποστολή έχει ολοκληρωθεί.</value>
@@ -283,7 +283,7 @@ $Message</value>
     <value>Η αποστολή έχει ολοκληρωθεί.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Ειδοποίηση DocSpace. Διαγραφή δωματίου</value>
+    <value>Ειδοποίηση ${LetterLogoText}. Διαγραφή δωματίου</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Έγγραφα. Πρόσβαση που παρέχεται στο $DocumentTitle</value>
@@ -307,9 +307,9 @@ $Message</value>
     <value>Έγγραφα. Παραχωρήθηκε πρόσβαση στον φάκελο: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Ειδοποίηση DocSpace.</value>
+    <value>Ειδοποίηση ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Ειδοποίηση DocSpace.</value>
+    <value>Ειδοποίηση ${LetterLogoText}.</value>
   </data>
 </root>
