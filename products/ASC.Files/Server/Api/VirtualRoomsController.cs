@@ -781,13 +781,16 @@ public abstract class VirtualRoomsController<T>(
         {
             var subjects = await fileSecurity.GetUserSubjectsAsync(authContext.CurrentAccount.ID);
 
-            // Both key kinds: share records for rooms on the portal's own storage are int-keyed,
-            // those for third-party-backed rooms are string-keyed and live in a separate table. A
-            // guest whose only membership is in a third-party room has no int-keyed record at all.
-            var isRoomMember = await daoFactory.GetSecurityDao<int>().GetSharesAsync(subjects).AnyAsync()
-                            || await daoFactory.GetSecurityDao<string>().GetSharesAsync(subjects).AnyAsync();
+            // Any share at all, deliberately - not room membership specifically. The gallery is
+            // reference data, so the bar is only "this guest has been let into something"; a guest
+            // shared a single document passes, and there is nothing room-specific here for them to
+            // learn. Both key kinds are asked: share records for rooms on the portal's own storage
+            // are int-keyed, those for third-party-backed rooms string-keyed and in a separate table,
+            // so a guest whose only membership is in a third-party room has no int-keyed record.
+            var hasAnyShare = await daoFactory.GetSecurityDao<int>().GetSharesAsync(subjects).AnyAsync()
+                           || await daoFactory.GetSecurityDao<string>().GetSharesAsync(subjects).AnyAsync();
 
-            if (!isRoomMember)
+            if (!hasAnyShare)
             {
                 throw new SecurityException(Resource.ErrorAccessDenied);
             }
