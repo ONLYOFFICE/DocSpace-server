@@ -43,10 +43,7 @@ import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional, attachmentLimitError } from "./_helpers.js";
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
-import {
-  assertEntityAccessible,
-  safeGetAgentEntity,
-} from "../storage/docspaceFilesApi.js";
+import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { agentAssignedProfileId } from "./agentProfile.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
@@ -203,17 +200,13 @@ export const threadsController = {
     }
     await assertEntityAccessible(getString(body, "entityId"));
     // The title generated on create must reach the provider with the same
-    // entity metadata a chat round sends (lib 0.5.64: `entityMeta` input).
-    // Server-resolved on purpose, overriding anything client-supplied: the
-    // pair comes from the Files API under the caller's credentials, so a
-    // client cannot claim someone else's agent (mirrors withEntityMetadata
-    // in aiController).
-    const entity = await safeGetAgentEntity(getString(body, "entityId"));
-    const result = await engine.openOrCreate(
-      entity.entityId
-        ? ({ ...body, entityMeta: entity } as OpenOrCreateInput)
-        : (body as OpenOrCreateInput),
-    );
+    // source metadata a chat round sends. Resolved server-side into the
+    // request context, where the ONLYOFFICE provider override reads it
+    // (mirrors withSourceMetadata in aiController); a client-supplied
+    // `entityMeta` is ignored — type and title come from the Files API under
+    // the caller's credentials, so a client cannot claim someone else's entry.
+    await primeSourceMeta(getString(body, "entityId"));
+    const result = await engine.openOrCreate(body as OpenOrCreateInput);
     res.json(result);
   }),
 
@@ -304,20 +297,16 @@ export const threadsController = {
       });
       return;
     }
-    // Optional third element (lib 0.5.64): the entity pair the title request
-    // runs for. The Thread DTO does not echo its entityId back, so the body
-    // is the only scope source here — but only the id is taken as a hint;
-    // the pair itself is re-resolved server-side under the caller's
-    // credentials so a client cannot claim someone else's agent.
+    // Optional third element (lib 0.5.64): the entity the title request runs
+    // for. The Thread DTO does not echo its entityId back, so the body is the
+    // only scope source here — but only the id is taken as a hint; the source
+    // itself is re-resolved server-side under the caller's credentials into
+    // the request context, where the ONLYOFFICE provider override reads it.
     const entityIdHint = isObject(args.entityMeta)
       ? getString(args.entityMeta, "entityId")
       : undefined;
-    const entity = await safeGetAgentEntity(entityIdHint);
-    const title = await engine.regenerateTitle(
-      args.threadId,
-      args.profile as Profile,
-      entity.entityId ? entity : undefined,
-    );
+    await primeSourceMeta(entityIdHint);
+    const title = await engine.regenerateTitle(args.threadId, args.profile as Profile);
     res.json({ title });
   }),
 

@@ -61,9 +61,14 @@ public partial class SuspiciousLoginNotifier(
     UserManager userManager,
     GeolocationHelper geolocationHelper,
     StudioNotifyService studioNotifyService,
+    MessageService messageService,
     SuspiciousLoginNotifierConfiguration configuration,
     ILogger<SuspiciousLoginNotifier> logger)
 {
+    private const string NewDeviceReason = "new device";
+    private const string NewLocationReason = "new location";
+    private const string FailedAttemptsReason = "failed login attempts";
+
     private static readonly Regex _versionToken = VersionRegex();
     private static readonly Regex _whitespace = WhitespaceRegex();
 
@@ -167,6 +172,26 @@ public partial class SuspiciousLoginNotifier(
             {
                 return;
             }
+
+            var reasons = new List<string>();
+
+            if (newDevice)
+            {
+                reasons.Add(NewDeviceReason);
+            }
+
+            if (newCountry)
+            {
+                reasons.Add(NewLocationReason);
+            }
+
+            if (manyFails)
+            {
+                reasons.Add(FailedAttemptsReason);
+            }
+
+            await messageService.SendAsync(new MessageUserData(tenantId, userId), MessageAction.SuspiciousLoginDetected, current.Ip, current.Browser,
+                current.Platform, string.Join(", ", reasons));
 
             var loginEvent = new BaseEvent
             {

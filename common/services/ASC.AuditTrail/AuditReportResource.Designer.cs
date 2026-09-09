@@ -2860,6 +2860,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Suspicious Login Detected: {0}.
+        /// </summary>
+        public static string SuspiciousLoginDetected {
+            get {
+                return ResourceManager.GetString("SuspiciousLoginDetected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to System Account.
         /// </summary>
         public static string SystemAccount {

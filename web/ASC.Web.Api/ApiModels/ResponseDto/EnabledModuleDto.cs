@@ -34,18 +34,19 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// An enabled portal module.
+/// One portal module the calling user may open.
 /// </summary>
 public class EnabledModuleDto
 {
     /// <summary>
-    /// The module ID, which is the name of its product class.
+    /// The module's product class name, HTML-escaped. It is a display-oriented identifier and not the GUID the
+    /// access-settings operations work with, so it must not be passed to `GET api/2.0/settings/security/{id}`.
     /// </summary>
     /// <example>ASC.Web.Files.Configuration.FilesSpaceUsageStatManager</example>
     public string Id { get; set; }
 
     /// <summary>
-    /// The module title.
+    /// The module name in the portal language, HTML-escaped and ready to be rendered as text.
     /// </summary>
     /// <example>Documents</example>
     public string Title { get; set; }

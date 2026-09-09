@@ -1066,6 +1066,9 @@ public enum MessageAction
     [Description("Contact sales mail sent")]
     ContactSalesMailSent = 7004,
 
+    [Description("Suspicious login detected")]
+    SuspiciousLoginDetected = 7005,
+
     #endregion
 
     #region Oauth
