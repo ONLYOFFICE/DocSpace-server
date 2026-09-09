@@ -48,8 +48,12 @@ public class FormSchemaProvider(
     IDaoFactory daoFactory,
     ExternalDatabaseClient externalDatabaseClient,
     FormFillingReportCreator formFillingReportCreator,
+    TenantManager tenantManager,
+    IFusionCache fusionCache,
     ILogger<FormSchemaProvider> logger)
 {
+    private static readonly TimeSpan _tableNameCacheDuration = TimeSpan.FromMinutes(30);
+
     /// <summary>
     /// The cheap half: the submission table name, or null when this is not a started filling-form of its
     /// own or the table does not exist yet. Reads no rows and no metadata. Callers are expected to have
@@ -57,6 +61,14 @@ public class FormSchemaProvider(
     /// </summary>
     public async Task<string?> TryGetTableNameAsync(File<int> file)
     {
+        var cacheKey = GetTableNameCacheKey(tenantManager.GetCurrentTenantId(), file);
+
+        var cached = await fusionCache.TryGetAsync<string>(cacheKey);
+        if (cached.HasValue)
+        {
+            return cached.Value;
+        }
+
         var properties = await daoFactory.GetFileDao<int>().GetProperties(file.Id);
         var formFilling = properties?.FormFilling;
 
@@ -66,8 +78,22 @@ public class FormSchemaProvider(
         }
 
         var tableName = FormFillingReportCreator.GetTableName(file.Id, file.Version);
+        if (!await externalDatabaseClient.TableExistsAsync(tableName))
+        {
+            return null;
+        }
 
-        return await externalDatabaseClient.TableExistsAsync(tableName) ? tableName : null;
+        // Only the positive answer is cached. A table is created once per form version and never
+        // renamed, so a hit stays valid; caching the negative would keep a form that has just received
+        // its first submission reporting "not analysable" for half an hour.
+        await fusionCache.SetAsync(cacheKey, tableName, opt => opt.SetDuration(_tableNameCacheDuration));
+
+        return tableName;
+    }
+
+    private static string GetTableNameCacheKey(int tenantId, File<int> file)
+    {
+        return $"ai:form:table:{tenantId}:{file.Id}:{file.Version}";
     }
 
     /// <summary>Full schema. Null when there is no submission table or it cannot be read.</summary>
