@@ -473,57 +473,17 @@ public class EntryManager(IDaoFactory daoFactory,
             var userId = authContext.CurrentAccount.ID;
 
             var trashId = await globalFolderHelper.FolderTrashAsync;
-            total = 0;
 
             var providerFolders = await GetThirdPartyFoldersByTagAsync<T>(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId,
                 folderType, orderBy);
             var providerFiles = await GetThirdPartyFilesByTagAsync<T>(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject,
                 location, trashId, folderType, orderBy);
 
-            if (providerFolders.Count == 0 && providerFiles.Count == 0)
-            {
-                // SQL already applies (from, count) to both queries, so everything they return belongs
-                // on the page. The in-memory gate below used to cut it a second time with a counter
-                // that also served as the total, which made `total` report the page size and made a
-                // non-zero `from` come back empty.
-                var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, from, count);
-                List<Folder<T>> folders = [];
-
-                await foreach (var e in fileSecurity.CanReadAsync(foldersFromDb).Where(r => r.Item2).Select(t => t.Item1))
-                {
-                    folders.Add((Folder<T>)e);
-                    entries.Add(e);
-                }
-
-                var filesCount = count > 0 ? count - folders.Count : count;
-                var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - folders.Count, 0);
-
-                var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, filesOffset, filesCount);
-                List<File<T>> files = [];
-
-                await foreach (var e in fileSecurity.CanReadAsync(filesFromDb).Where(r => r.Item2).Select(t => t.Item1))
-                {
-                    files.Add((File<T>)e);
-                    entries.Add(e);
-                }
-
-                // The whole selection, not the page: counted without the (from, count) limits, but
-                // through the same permission filter the entries above go through. Counting the raw
-                // DAO query instead would include favorites the caller may no longer read - access to
-                // the room revoked after favoriting - and `total` would permanently overstate what
-                // paging can actually reach.
-                total = await fileSecurity.CanReadAsync(folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, 0, -1))
-                          .Where(r => r.Item2).CountAsync()
-                      + await fileSecurity.CanReadAsync(fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, 0, -1))
-                          .Where(r => r.Item2).CountAsync();
-
-                var setFilesStatus = entryStatusManager.SetFileStatusAsync(files);
-                var setFavorites = entryStatusManager.SetIsFavoriteFoldersAsync(folders);
-
-                await Task.WhenAll(setFilesStatus, setFavorites);
-
-                return (entries, total);
-            }
+            // No branch for "no third-party entries": the path below already handles that case, and
+            // handles it better. Paging the two DAO queries in SQL means the page and the total have
+            // to be derived separately - two more unpaginated scans and a second full permission pass
+            // per call - and the split offset between folders and files has to be maintained by hand.
+            // Reading the readable selection once and slicing it serves both from one pass.
 
             var dbFolders = await fileSecurity.CanReadAsync(folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject,
                     location, trashId, folderType, orderBy, 0, -1))
