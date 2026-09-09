@@ -58,12 +58,222 @@ interface SchemaDoc {
   description?: string;
   /** Prose per property name (`schema-property-description`). */
   properties?: Readonly<Record<string, string>>;
+  /**
+   * One realistic value per property name, emitted as the property's
+   * `examples`. The library declares none, and a generated SDK's own docs plus
+   * any assistant reading this document take their sample payloads from here,
+   * so a placeholder (`"string"`, `0`) actively misleads. Same two rules as
+   * `properties`: fill-in only, and a dead entry is reported.
+   */
+  examples?: Readonly<Record<string, unknown>>;
 }
+
+// Identifiers this API mints are UUIDs; one per entity, so no two are
+// confusable in a sample payload. `entityId` carries a DocSpace room ID, which
+// is an integer. The same values appear in `app/openapi.ts` for the parameter
+// and request-body examples, so a payload assembled from this document is
+// internally consistent.
+const ID = {
+  profile: "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+  thread: "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  message: "16fd2706-8baf-433b-82eb-8c7fada847da",
+  prompt: "9b2ffa1d-3f4c-4e0a-8d71-2c6b5e8a4f93",
+  promptFolder: "2c5ea4c0-4067-41e9-8bad-9b1deb4d3b7d",
+  attachment: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  room: "1234",
+} as const;
+
+// Epoch milliseconds and its ISO-8601 rendering, kept in step so a payload
+// carrying both does not look self-contradictory.
+const AT_MS = 1767225600000;
+const AT_ISO = "2026-01-01T00:00:00.000Z";
 
 const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   AiActionType: {
     description:
       "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty.",
+  },
+
+  /* --- Request-side types: what a caller has to construct --------------- */
+
+  AiProfile: {
+    examples: {
+      id: ID.profile,
+      name: "OpenAI GPT-4o",
+      providerType: "openai",
+      basedOn: "openai",
+      baseUrl: "https://api.openai.com/v1",
+      key: "sk-your-provider-api-key",
+      headers: { "X-Organization": "acme" },
+      modelId: "gpt-4o",
+      reasoning: false,
+      capabilities: 7,
+      canUseTool: true,
+      useResponsesApi: false,
+      isCloudProvider: true,
+      useProxy: false,
+      createdAt: AT_MS,
+    },
+  },
+
+  AiCreateProfileInput: {
+    examples: {
+      name: "OpenAI GPT-4o",
+      providerType: "openai",
+      basedOn: "openai",
+      baseUrl: "https://api.openai.com/v1",
+      key: "sk-your-provider-api-key",
+      headers: { "X-Organization": "acme" },
+      modelId: "gpt-4o",
+      reasoning: false,
+      capabilities: 7,
+      canUseTool: true,
+      useResponsesApi: false,
+      isCloudProvider: true,
+      useProxy: false,
+    },
+  },
+
+  AiThreadMessageLike: {
+    examples: {
+      id: ID.message,
+      role: "user",
+      content: "Summarise the attached contract.",
+      createdAt: AT_ISO,
+      status: { type: "complete" },
+      metadata: {},
+      attachments: [ID.attachment],
+    },
+  },
+
+  AiAiSendStreamBody: {
+    examples: {
+      threadId: ID.thread,
+      userMessage: { role: "user", content: "Summarise the attached contract." },
+      actionArgs: { isReasoning: false },
+      entityId: ID.room,
+      profileId: ID.profile,
+    },
+  },
+
+  AiAiActionArgs: {
+    examples: {
+      tools: [],
+      isReasoning: false,
+      prompt: { mode: "append", text: "Answer in British English." },
+    },
+  },
+
+  AiAiToolCallData: {
+    examples: {
+      threadId: ID.thread,
+      messageId: ID.message,
+      idx: 0,
+      message: { role: "assistant", content: "" },
+      actionArgs: { isReasoning: false },
+      entityId: ID.room,
+      profileId: ID.profile,
+    },
+  },
+
+  AiPrompt: {
+    examples: {
+      id: ID.prompt,
+      name: "Contract summary",
+      text: "Summarise the key obligations and dates in the attached contract.",
+      folderId: ID.promptFolder,
+      createdAt: AT_MS,
+      updatedAt: AT_MS,
+    },
+  },
+
+  AiPromptFolder: {
+    examples: {
+      id: ID.promptFolder,
+      name: "Contract review",
+      createdAt: AT_MS,
+      updatedAt: AT_MS,
+    },
+  },
+
+  AiTMCPItem: {
+    examples: {
+      name: "docspace_get_folder",
+      description: "Read the contents of a DocSpace folder.",
+      inputSchema: {
+        type: "object",
+        properties: { folderId: { type: "string" } },
+        required: ["folderId"],
+      },
+      enabled: true,
+      serverType: "docspace",
+      requireApproval: false,
+    },
+  },
+
+  AiWebSearchConfig: {
+    examples: {
+      provider: "exa",
+      key: "your-web-search-api-key",
+      baseUrl: "https://api.exa.ai",
+      isCloudProvider: true,
+      headers: {},
+    },
+  },
+
+  /* --- Response-side types: what a caller has to parse ------------------ */
+
+  AiErrorResponse: { examples: { error: "threadId required" } },
+  AiSuccessResponse: { examples: { success: true } },
+
+  // Mutation outcomes report failure in the body, so `success: true` with the
+  // error absent is the shape a caller sees on the happy path.
+
+  AiThread: {
+    examples: {
+      threadId: ID.thread,
+      title: "Contract review",
+      lastEditDate: AT_MS,
+      profileId: ID.profile,
+    },
+  },
+
+  AiModel: {
+    examples: {
+      id: "gpt-4o",
+      name: "GPT-4o",
+      provider: "openai",
+      reasoning: false,
+      capabilities: 7,
+    },
+  },
+
+  AiTProvider: {
+    examples: {
+      type: "openai",
+      name: "OpenAI GPT-4o",
+      key: "sk-your-provider-api-key",
+      baseUrl: "https://api.openai.com/v1",
+    },
+  },
+
+  AiAttachment: {
+    examples: {
+      id: ID.attachment,
+      kind: "file",
+      source: "user",
+      title: "contract.docx",
+      content: "This agreement is made on 1 January 2026 between …",
+      base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==",
+      path: "file_1234",
+      type: 7,
+      messageId: ID.message,
+      threadId: ID.thread,
+      entityId: ID.room,
+      createdAt: AT_MS,
+      canAnalyze: false,
+      formKeys: [],
+    },
   },
 
   AiTErrorData: {
@@ -128,6 +338,16 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Chat stream ------------------------------------------------------ */
 
   AiChatEvent: {
+    examples: {
+      type: "message",
+      messageId: ID.message,
+      idx: 0,
+      threadId: ID.thread,
+      autoAllow: false,
+      serverExecuted: false,
+      title: "Contract review",
+      profileId: ID.profile,
+    },
     properties: {
       message: "The message the event is about, in the state it has reached.",
       messageId: "The storage identifier of that message.",
@@ -141,6 +361,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Mutation outcomes ------------------------------------------------ */
 
   AiProfileMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the profile was persisted.",
       profile: "The persisted profile. Present on success.",
@@ -150,6 +371,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiPromptMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the prompt was persisted.",
       prompt: "The persisted prompt. Present on success.",
@@ -158,6 +380,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiFolderMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the folder was persisted.",
       folder: "The persisted folder. Present on success.",
@@ -166,6 +389,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiAssignmentMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the assignment was persisted.",
       error: "Why the assignment was rejected. Present on failure.",
@@ -173,6 +397,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiToolsMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the MCP server was persisted.",
       error: "Why the MCP server was rejected. Present on failure.",
@@ -180,6 +405,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiWebSearchMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the configuration was persisted.",
       config: "The persisted web-search configuration. Present on success.",
@@ -190,6 +416,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Bulk outcomes: on failure nothing at all was persisted ------------ */
 
   AiBulkAssignmentResult: {
+    examples: { success: true, errors: [] },
     properties: {
       success: "True when every entry was persisted.",
       errors:
@@ -198,6 +425,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiToolsBulkResult: {
+    examples: { success: true, errors: [] },
     properties: {
       success: "True when every custom MCP server was persisted.",
       errors:
@@ -206,6 +434,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportResult: {
+    examples: { success: true, imported: 12, errors: [] },
     properties: {
       success: "True when the whole bundle was imported.",
       imported: "How many folders and prompts were created. Present on success.",
@@ -214,6 +443,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportError: {
+    examples: { kind: "prompt", ref: ID.prompt, error: "a prompt of that name already exists" },
     properties: {
       ref: "The offending entry - its name or its id.",
       error: "Why the entry was rejected.",
@@ -223,6 +453,11 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Prompts and threads ---------------------------------------------- */
 
   AiCreatePromptInput: {
+    examples: {
+      name: "Contract summary",
+      text: "Summarise the key obligations and dates in the attached contract.",
+      folderId: ID.promptFolder,
+    },
     properties: {
       name: "The prompt name.",
       text: "The prompt body.",
@@ -232,6 +467,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiPromptBundle: {
+    examples: { version: 1, folders: [], prompts: [] },
     properties: {
       version: "The bundle format version, so an import can migrate an older export.",
       folders: "Every exported prompt folder.",
@@ -343,6 +579,19 @@ export function applySchemaDocs(components: Record<string, unknown>): {
       }
       if (target["description"] === undefined) {
         target["description"] = description;
+      } else {
+        unused.push({ schema: name, property, reason: "already described" });
+      }
+    }
+
+    for (const [property, example] of Object.entries(doc.examples ?? {})) {
+      const target = isObject(properties) ? properties[property] : undefined;
+      if (!isObject(target)) {
+        unused.push({ schema: name, property, reason: "no such property" });
+        continue;
+      }
+      if (target["examples"] === undefined && target["example"] === undefined) {
+        target["examples"] = [example];
       } else {
         unused.push({ schema: name, property, reason: "already described" });
       }

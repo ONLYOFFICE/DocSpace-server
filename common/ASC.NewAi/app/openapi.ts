@@ -211,11 +211,69 @@ const OPERATION_PARAM_DOCS: Readonly<Record<string, Readonly<Record<string, stri
   aiPromptsGetFolderById: { id: "The prompt folder identifier." },
 };
 
+// One realistic value per parameter name, keyed the same way as `PARAM_DOCS`.
+// A placeholder teaches nothing and assistants generate parsing code from these,
+// so the values here are shaped like the real ones: an agent ID is the integer
+// DocSpace uses for a room, a profile ID is a UUID, and the cursor is the
+// JSON-encoded sort key the previous page ended on rather than an opaque token.
+// Every identifier this API mints is a UUID - the schemas say so for threads,
+// messages, prompts, folders, attachments and profiles alike - so the values
+// below are UUIDs, one per entity so two of them are never confusable in a
+// sample payload. `entityId` is the exception: it carries a DocSpace room ID,
+// which is an integer.
+const ID_EXAMPLES = {
+  profile: "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+  thread: "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  message: "16fd2706-8baf-433b-82eb-8c7fada847da",
+  prompt: "9b2ffa1d-3f4c-4e0a-8d71-2c6b5e8a4f93",
+  promptFolder: "2c5ea4c0-4067-41e9-8bad-9b1deb4d3b7d",
+  attachment: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  room: "1234",
+} as const;
+
+const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
+  actionType: "Chat",
+  count: 20,
+  cursor: `{"id":"${ID_EXAMPLES.thread}","lastEditDate":1767225600000}`,
+  direction: "desc",
+  entityId: ID_EXAMPLES.room,
+  folderId: ID_EXAMPLES.promptFolder,
+  limit: 20,
+  messageId: ID_EXAMPLES.message,
+  name: "acme-mcp",
+  profileId: ID_EXAMPLES.profile,
+  query: "contract",
+  serverType: "docspace",
+  startIndex: 0,
+  threadId: ID_EXAMPLES.thread,
+  toolName: "docspace_get_folder",
+};
+
+// Per-operation examples for `id`, which the engines reuse for four entities,
+// and for the agent routes, whose `id` is an integer room ID rather than a UUID.
+const OPERATION_PARAM_EXAMPLES: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
+  aiAgentsGet: { id: ID_EXAMPLES.room },
+  aiAgentsUpdate: { id: ID_EXAMPLES.room },
+  aiAgentsDelete: { id: ID_EXAMPLES.room },
+  aiProfilesGetById: { id: ID_EXAMPLES.profile },
+  aiPromptsGetById: { id: ID_EXAMPLES.prompt },
+  aiPromptsGetFolderById: { id: ID_EXAMPLES.promptFolder },
+  aiOpenaiChatCompletions: { profileId: ID_EXAMPLES.profile },
+  aiOpenaiImagesGenerations: { profileId: ID_EXAMPLES.profile },
+};
+
 // Resolve the prose for one parameter of one operation, or `undefined` when
 // neither table describes it (see the note above `PARAM_DOCS`).
 function paramDescription(operationId: string, name: string): Json {
   const description = OPERATION_PARAM_DOCS[operationId]?.[name] ?? PARAM_DOCS[name];
   return description === undefined ? {} : { description };
+}
+
+// The example belongs on the parameter's schema, which is where the rest of the
+// document carries its examples.
+function paramExample(operationId: string, name: string): Json {
+  const example = OPERATION_PARAM_EXAMPLES[operationId]?.[name] ?? PARAM_EXAMPLES[name];
+  return example === undefined ? {} : { examples: [example] };
 }
 
 // Prose per operation, keyed by `operationId`. Engine routes carry no prose at
@@ -833,7 +891,10 @@ function queryParameters(params: readonly string[], operationId: string): Json[]
     in: "query",
     ...(paramDescription(operationId, name) as object),
     required: !OPTIONAL_QUERY_PARAMS.has(name),
-    schema: INTEGER_QUERY_PARAMS.has(name) ? { type: "integer" } : { type: "string" },
+    schema: {
+      ...(INTEGER_QUERY_PARAMS.has(name) ? { type: "integer" } : { type: "string" }),
+      ...(paramExample(operationId, name) as object),
+    },
   }));
 }
 
@@ -843,14 +904,168 @@ function pathParameters(names: readonly string[], operationId: string): Json[] {
     in: "path",
     ...(paramDescription(operationId, name) as object),
     required: true,
-    schema: { type: "string" },
+    schema: { type: "string", ...(paramExample(operationId, name) as object) },
   }));
 }
 
-function jsonBody(schema: Json = JSON_OBJECT_SCHEMA): Json {
+// Prose and an example for a request body whose schema alone does not say what
+// to send, keyed by `operationId`.
+//
+// Two shapes need it. A single-argument engine route is serialized by the
+// library's `ApiProvider` as the bare value - `JSON.stringify(arg)` - so its
+// body is a naked string or array rather than an object, and the generated
+// schema is a bare `{"type": "string"}` with nothing to read (`unpackPositional`
+// also accepts the legacy `{name: value}` form, but the bare value is the
+// documented one). A free-form body is an object whose shape is owned
+// elsewhere - by the provider's own API, or by the .NET service the request is
+// proxied to - so the generator has no properties to emit.
+//
+// A body with a generated object schema needs no entry: its properties carry
+// their own prose.
+interface RequestBodyDoc {
+  readonly description: string;
+  /** Example value for the body, emitted on the schema as `examples`. */
+  readonly example?: Json;
+}
+
+const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
+  // Single-argument routes: the body is the value itself.
+  aiAssignmentsCascadeProfileDelete: {
+    description: "The ID of the profile to detach from every assignment, as a bare JSON string.",
+    example: ID_EXAMPLES.profile,
+  },
+  aiAttachmentsDelete: {
+    description: "The ID of the attachment to delete, as a bare JSON string.",
+    example: ID_EXAMPLES.attachment,
+  },
+  aiAttachmentsDeleteMany: {
+    description: "The IDs of the attachments to delete, as a bare JSON array of strings.",
+    example: [ID_EXAMPLES.attachment, "e1b8c3d4-9f2a-4b6c-8d5e-7a90b1c2d3e4"],
+  },
+  aiAttachmentsGet: {
+    description: "The ID of the attachment to read, as a bare JSON string.",
+    example: ID_EXAMPLES.attachment,
+  },
+  aiAttachmentsGetMany: {
+    description:
+      "The IDs of the attachments to read, as a bare JSON array of strings. The answer is " +
+      "aligned with this array by position.",
+    example: [ID_EXAMPLES.attachment, "e1b8c3d4-9f2a-4b6c-8d5e-7a90b1c2d3e4"],
+  },
+  aiPreferencesClearDeepMode: {
+    description:
+      "The ID of the room whose preference is cleared, as a bare JSON string. Send an empty " +
+      "body to clear the portal-wide preference.",
+    example: ID_EXAMPLES.room,
+  },
+  aiProfilesDelete: {
+    description: "The ID of the profile to delete, as a bare JSON string.",
+    example: ID_EXAMPLES.profile,
+  },
+  aiProfilesTestConnection: {
+    description: "The ID of the profile to probe, as a bare JSON string.",
+    example: ID_EXAMPLES.profile,
+  },
+  aiPromptsCreateFolder: {
+    description: "The name of the folder to create, as a bare JSON string.",
+    example: "Contract review",
+  },
+  aiPromptsDelete: {
+    description: "The ID of the prompt to delete, as a bare JSON string.",
+    example: ID_EXAMPLES.prompt,
+  },
+  aiPromptsDeleteFolder: {
+    description: "The ID of the folder to delete, as a bare JSON string.",
+    example: ID_EXAMPLES.promptFolder,
+  },
+  aiThreadsClearMessages: {
+    description: "The ID of the thread to empty, as a bare JSON string.",
+    example: ID_EXAMPLES.thread,
+  },
+  aiThreadsDelete: {
+    description: "The ID of the thread to delete, as a bare JSON string.",
+    example: ID_EXAMPLES.thread,
+  },
+  aiThreadsDeleteMessage: {
+    description: "The ID of the message to delete, as a bare JSON string.",
+    example: ID_EXAMPLES.message,
+  },
+  aiWebSearchClear: {
+    description:
+      "Ignored. The operation always clears the portal-wide configuration, so send an empty " +
+      "body; a value here does not scope it to a room.",
+  },
+
+  // Free-form bodies: the shape belongs to another contract.
+  aiAssignmentsBulkAssign: {
+    description:
+      "A map of action type to profile ID. Every key has to be a known action type and every " +
+      "value a profile ID; one bad entry rejects the whole map.",
+    example: {
+      Chat: ID_EXAMPLES.profile,
+      Default: ID_EXAMPLES.profile,
+    },
+  },
+  aiEditorToolsCall: {
+    description:
+      "The tool to run: `name` from `GET api/2.0/ai/editor-tools/list`, `arguments` matching " +
+      "that tool's input schema, and an optional `entityId` for the room to run it in.",
+    example: { name: "docspace_get_folder", arguments: { folderId: "1234" }, entityId: "1234" },
+  },
+  aiOpenaiChatCompletions: {
+    description:
+      "An OpenAI Chat Completions request, forwarded to the provider byte for byte. The shape " +
+      "is the provider's, not this API's, so consult the provider's own reference; the model " +
+      "and the credentials come from the profile in the path and must not be sent here.",
+  },
+  aiOpenaiImagesGenerations: {
+    description:
+      "An OpenAI image-generation request, forwarded to the provider byte for byte. The shape " +
+      "is the provider's, not this API's, and the credentials come from the profile in the path.",
+  },
+  aiSettingsSetUser: {
+    description:
+      "The user's AI settings, proxied unchanged to the DocSpace AI service, which owns and " +
+      "validates the shape. Read the current one with `GET api/2.0/ai/config/user` and send " +
+      "it back changed.",
+  },
+  aiSettingsSetVectorization: {
+    description:
+      "The portal's vectorization settings, proxied unchanged to the DocSpace AI service, which " +
+      "owns and validates the shape. Read the current one with " +
+      "`GET api/2.0/ai/config/vectorization` and send it back changed.",
+  },
+  aiVectorizationStartTask: {
+    description:
+      "The files to index, proxied unchanged to the DocSpace AI service, which owns and " +
+      "validates the shape.",
+  },
+  aiWebSearchPassthroughSearch: {
+    description:
+      "A search request in the shape the portal's active web-search provider expects, forwarded " +
+      "to it unchanged. The endpoint and the key come from the stored configuration and must " +
+      "not be sent here.",
+  },
+  aiWebSearchPassthroughContents: {
+    description:
+      "A page-contents request in the shape the portal's active web-search provider expects, " +
+      "forwarded to it unchanged. The endpoint and the key come from the stored configuration.",
+  },
+};
+
+function jsonBody(schema: Json = JSON_OBJECT_SCHEMA, operationId?: string): Json {
+  const doc = operationId === undefined ? undefined : REQUEST_BODY_DOCS[operationId];
+  // The example goes on the schema rather than on the media type: that is where
+  // every other example in this document sits, and it keeps
+  // `oas3-valid-media-example` out of the picture.
+  const described =
+    doc?.example === undefined
+      ? schema
+      : ({ ...(schema as { [k: string]: Json }), examples: [doc.example] } as Json);
   return {
     required: true,
-    content: { "application/json": { schema } },
+    ...(doc === undefined ? {} : { description: doc.description }),
+    content: { "application/json": { schema: described } },
   };
 }
 
@@ -908,7 +1123,9 @@ function responseFor(operations: OperationSchemaLookup, operationId: string): Js
 
 function requestBodyFor(operations: OperationSchemaLookup, operationId: string): Json {
   const schema = operations[operationId]?.request;
-  return schema === undefined ? jsonBody() : jsonBody(schema as Json);
+  return schema === undefined
+    ? jsonBody(JSON_OBJECT_SCHEMA, operationId)
+    : jsonBody(schema as Json, operationId);
 }
 
 // Build the operation object for one engine route. GET routes expose their
