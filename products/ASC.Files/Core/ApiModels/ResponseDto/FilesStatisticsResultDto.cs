@@ -34,60 +34,71 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The file statistics result parameters.
+/// The space that stored documents take in each section of the portal, in bytes. The figures cover every account of
+/// the portal rather than the caller alone, and a section the portal does not have comes back as null instead of a
+/// zero figure.
 /// </summary>
 public class FilesStatisticsResultDto
 {
     /// <summary>
-    /// The used space of files in the \"My Documents\" section.
+    /// The space taken by the personal "Files" sections of all accounts of the portal added together. An item deleted
+    /// to the trash keeps taking space and is counted in `trashUsedSpace` until the trash is emptied.
     /// </summary>
-    /// <example>{"title": "My Documents", "usedSpace": 10240}</example>
+    /// <example>{"title": "Files", "usedSpace": 10240}</example>
     public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
     /// <summary>
-    /// The used space of files in the \"Trash\" section.
+    /// The space held by the items deleted to the trash from any section, which is given back only when the trash is
+    /// emptied or the items are erased for good.
     /// </summary>
-    /// <example>{"title": "My Documents", "usedSpace": 512}</example>
+    /// <example>{"title": "Trash", "usedSpace": 512}</example>
     public FilesStatisticsFolder TrashUsedSpace { get; set; }
 
     /// <summary>
-    /// The used space of files in the \"Archive\" section.
+    /// The space taken by the content of the archived rooms, the archived form filling rooms included. Restoring a
+    /// room moves its space back to `roomsUsedSpace` or `formsUsedSpace`.
     /// </summary>
-    /// <example>{"title": "My Documents", "usedSpace": 2048}</example>
+    /// <example>{"title": "Archive", "usedSpace": 2048}</example>
     public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
 
     /// <summary>
-    /// The used space of files in the \"Rooms\" section.
+    /// The space taken by the content of the active rooms, except the form filling rooms, whose content is reported
+    /// in `formsUsedSpace`. Archiving a room moves its space to `archiveUsedSpace`.
     /// </summary>
-    /// <example>{"title": "My Documents", "usedSpace": 5120}</example>
+    /// <example>{"title": "Rooms", "usedSpace": 5120}</example>
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
 
     /// <summary>
-    /// The used space of files in the \"AI agents\" section.
+    /// The space taken by the content of the "AI agents" section, which exists only in a portal where the AI agents
+    /// feature is active; creating an AI room is not enough to bring the section into being.
     /// </summary>
-    /// <example>{"title": "My Documents", "usedSpace": 1024}</example>
+    /// <example>{"title": "AI agents", "usedSpace": 1024}</example>
     public FilesStatisticsFolder AiAgentsUsedSpace { get; set; }
 
     /// <summary>
-    /// The used space of files in the \"Forms\" section.
+    /// The space taken by the content of the active form filling rooms, which is kept apart from `roomsUsedSpace`
+    /// even though those rooms are listed among the rooms.
     /// </summary>
-    /// <example>{"title": "My Documents", "usedSpace": 1024}</example>
+    /// <example>{"title": "Forms", "usedSpace": 1024}</example>
     public FilesStatisticsFolder FormsUsedSpace { get; set; }
 }
 
 /// <summary>
-/// The file statictics folder parameters.
+/// One section of the portal and the space its documents take.
 /// </summary>
 public class FilesStatisticsFolder
 {
     /// <summary>
-    /// The folder title.
+    /// The name of the section as the interface shows it, translated into the language used by the caller, so it
+    /// suits display but not matching - which section an entry describes is told by the field that carries it.
     /// </summary>
-    /// <example>My Documents</example>
+    /// <example>Files</example>
     public string Title { get; set; }
 
     /// <summary>
-    /// The used space in the folder.
+    /// The size of the files kept in the section, in bytes, counting every folder and room inside it; 0 means the
+    /// section holds nothing. The counter is brought up to date as an operation finishes, so a reading taken right
+    /// after an upload or a delete can still show the previous value.
     /// </summary>
     /// <example>1048576</example>
     public long UsedSpace { get; set; }

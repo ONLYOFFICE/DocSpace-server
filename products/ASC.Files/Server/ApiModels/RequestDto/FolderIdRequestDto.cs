@@ -34,12 +34,14 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for accessing a folder by its ID.
+/// The request that names one folder by its identifier.
 /// </summary>
 public class FolderIdRequestDto<T>
 {
     /// <summary>
-    /// The folder unique identifier.
+    /// The folder the operation acts on. Take the identifier from a listing such as `GET api/2.0/files/@root` or
+    /// `GET api/2.0/files/{folderId}`: a folder stored in the portal is numbered, while a folder in a connected
+    /// third-party account is named by an opaque string.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]
@@ -47,19 +49,21 @@ public class FolderIdRequestDto<T>
 }
 
 /// <summary>
-/// The request parameters for accessing a folder by its primary ID.
+/// The request that names one folder whose primary external link is read.
 /// </summary>
 public class FolderPrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// The folder unique identifier.
+    /// The folder or room whose primary external link is read. A folder stored in the portal is numbered, while a
+    /// folder in a connected third-party account is named by an opaque string.
     /// </summary>
     /// <example>10</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The number of items to retrieve in the request.
+    /// Accepted for symmetry with the paged link listings; the single primary link answered here does not depend on
+    /// it.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -67,7 +71,8 @@ public class FolderPrimaryIdRequestDto<T>
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index for the query results.
+    /// Accepted for symmetry with the paged link listings; the single primary link answered here does not depend on
+    /// it.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]

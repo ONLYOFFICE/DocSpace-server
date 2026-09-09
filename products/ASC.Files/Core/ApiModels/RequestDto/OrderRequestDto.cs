@@ -34,12 +34,14 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for ordering requests.
+/// The position an entry is to take inside its folder.
 /// </summary>
 public class OrderRequestDto
 {
     /// <summary>
-    /// The order value.
+    /// The position the entry is to take, counting from 1. The entry that held it, and everything after it, is
+    /// shifted to make room. A dotted path such as "1.2.3" is accepted as well, of which only the last segment is
+    /// read.
     /// </summary>
     /// <example>1</example>
     [Range(1, int.MaxValue)]
@@ -143,20 +145,21 @@ public class OrderFileRequestDto<T>
 }
 
 /// <summary>
-/// The request parameters for ordering a folder.
+/// The request that moves one folder to a given position inside its parent.
 /// </summary>
 public class OrderFolderRequestDto<T>
 {
     /// <summary>
-    /// The folder unique identifier.
+    /// The folder to move.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
-    /// The folder order information.
+    /// The position the folder is to take.
     /// </summary>
+    /// <example>{"order": 1}</example>
     [FromBody]
     public OrderRequestDto Order { get; set; }
 }

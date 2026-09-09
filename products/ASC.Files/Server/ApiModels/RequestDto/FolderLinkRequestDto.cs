@@ -34,76 +34,86 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The folder link parameters.
+/// The external link of a folder, as it is to be created or rewritten.
 /// </summary>
 public class FolderLinkRequest
 {
     /// <summary>
-    /// The folder link ID.
+    /// Which link the request addresses: the identifier of an existing link rewrites that link, while an identifier
+    /// that is not in use, the empty one included, creates a new link. Take an existing identifier from
+    /// `GET api/2.0/files/folder/{id}/links`.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid LinkId { get; set; }
 
     /// <summary>
-    /// The link sharing rights.
+    /// The rights a visitor following the link is given. The value that grants nothing revokes the link instead of
+    /// setting it, and the answer is then empty.
     /// </summary>
     /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// The link expiration date.
+    /// The moment the link stops working, sent as an ISO-8601 stamp. A moment that lies in the past is ignored,
+    /// and leaving the field out gives the link no expiry.
     /// </summary>
     /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// The link name.
+    /// The name the link is listed under for the people who manage the folder; a visitor following it never sees the
+    /// name.
     /// </summary>
-    /// <example>My Document</example>
+    /// <example>Public link</example>
     [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>
-    /// The link password.
+    /// The secret a visitor has to enter before the link opens. Leave it out for a link that opens without one; the
+    /// secret itself is never given back, only the fact that one is set.
     /// </summary>
     /// <example>p@ssw0rd</example>
     [StringLength(255)]
     public string Password { get; set; }
 
     /// <summary>
-    /// Specifies if downloading the file from the link is disabled or not.
+    /// Whether visitors are left with viewing alone: with true downloading and copying through the link are blocked,
+    /// with false they are allowed.
     /// </summary>
     /// <example>false</example>
     public bool DenyDownload { get; set; }
 
     /// <summary>
-    /// The link scope, whether it is internal or not.
+    /// Whether the link admits signed-in portal members only: with true a visitor has to sign in before the link
+    /// opens, with false anyone holding the address may follow it.
     /// </summary>
     /// <example>false</example>
     public bool Internal { get; set; }
 
     /// <summary>
-    /// Specifies whether the folder link is primary or not.
+    /// Whether this link becomes the primary link of the folder, the one the "Copy link" action of a client hands
+    /// out; a folder has one primary link at a time.
     /// </summary>
     /// <example>true</example>
     public bool Primary { get; set; }
 }
 
 /// <summary>
-/// The request parameters for accessing the folder link.
+/// The request that creates, rewrites or revokes an external link of one folder.
 /// </summary>
 public class FolderLinkRequestDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder or room the link belongs to.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The folder link parameters.
+    /// The link and the way it is to be shaped.
     /// </summary>
+    /// <example>{"access": 1, "title": "Public link", "internal": false, "denyDownload": false}</example>
     [FromBody]
     public required FolderLinkRequest FolderLink { get; set; }
 }

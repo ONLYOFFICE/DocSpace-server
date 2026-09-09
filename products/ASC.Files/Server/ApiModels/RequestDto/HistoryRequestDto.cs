@@ -80,33 +80,36 @@ public class HistoryRequestDto
 }
 
 /// <summary>
-/// The request parameters for the folder history.
+/// The query that selects the activity entries of one folder.
 /// </summary>
 public class HistoryFolderRequestDto
 {
     /// <summary>
-    /// The folder ID of the history request.
+    /// The folder whose activity log is read; the log covers the folder itself and the entries inside it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required int FolderId { get; set; }
 
     /// <summary>
-    /// The start date of the history request.
+    /// The earliest moment an entry may have, read in the time zone of the portal; left out, the log starts at the
+    /// oldest entry the portal still keeps.
     /// </summary>
     /// <example>2025-01-01T00:00:00.0000000Z</example>
     [FromQuery(Name = "fromDate")]
     public ApiDateTime FromDate { get; set; }
 
     /// <summary>
-    /// The end date of the history request.
+    /// The latest moment an entry may have, read in the time zone of the portal; left out, the log ends at the newest
+    /// entry.
     /// </summary>
     /// <example>2025-12-31T23:59:59.0000000Z</example>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
 
     /// <summary>
-    /// The number of records to retrieve for the folder history.
+    /// How many entries one page holds. The number of entries that match the query is reported in the response
+    /// headers, not in the body.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -114,7 +117,8 @@ public class HistoryFolderRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index from which the history records are retrieved in the request.
+    /// How many entries to skip before the page begins, counted from the newest one, so pages are taken by adding the
+    /// page size to it.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]

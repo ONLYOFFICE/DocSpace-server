@@ -39,42 +39,47 @@ using ASC.MessagingSystem.EF.Model;
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The file history information.
+/// One record of the activity log of a file or a folder.
 /// </summary>
 public record HistoryDto
 {
     /// <summary>
-    /// The unique identifier for the file history entry.
+    /// The identifier of the record, which tells two records of the same action apart and stays stable as long as the
+    /// portal keeps the log.
     /// </summary>
     /// <example>123</example>
     public required int Id { get; init; }
 
     /// <summary>
-    /// The action performed on the file.
+    /// What happened - the kind of event the record stands for, such as a file being uploaded, renamed, moved or
+    /// shared - with the key a client can key its own wording off.
     /// </summary>
     /// <example>0</example>
     public required HistoryAction Action { get; init; }
 
     /// <summary>
-    /// The action initiator.
+    /// Who caused the event. For an event caused by a visitor following an external link only the name they gave is
+    /// filled in, the account fields staying empty.
     /// </summary>
     /// <example>{"displayName": "John Doe"}</example>
     public required EmployeeDto Initiator { get; init; }
 
     /// <summary>
-    /// The date and time when an action on the file was performed.
+    /// When the event happened, written with the offset of the portal's time zone.
     /// </summary>
     /// <example>2021-01-01T00:00:00Z</example>
     public required ApiDateTime Date { get; init; }
 
     /// <summary>
-    /// The history data.
+    /// What the event touched - the file, folder, room or member behind it - carrying the fields that make sense for
+    /// that kind of action and leaving the rest out.
     /// </summary>
     /// <example>{"fileId": 123, "title": "document.docx"}</example>
     public required HistoryData Data { get; init; }
 
     /// <summary>
-    /// The list of related history.
+    /// The records folded into this one because they belong to the same action, the separate files of one upload for
+    /// instance. It is empty when the record stands alone, and the records inside it carry no further nesting.
     /// </summary>
     /// <example>[{"id": 124, "action": 0}]</example>
     public List<HistoryDto> Related { get; set; }
