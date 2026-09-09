@@ -286,47 +286,45 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Attachments - message files and images, saved as drafts first.
   aiAttachmentsSaveFile:
-    "Stores one file attachment as a draft, carrying the host-extracted text of the file. Prefer `save-files-many` when adding several files at once so they land as one round trip.",
+    "Stores one file attachment as a draft and returns it, so its ID can be attached to a message later. `input` carries the host `path` - the DocSpace entry ID the AI backend resolves server-side - the text `content` already extracted from that file, the ONLYOFFICE numeric file `type`, and optionally a `title`; the text is what the model reads, so this operation does not open the file itself. Archives are refused outright, whatever their declared name says. Drafts are not bound to a conversation until `POST api/2.0/ai/attachments/link-to-message` is called, so an unlinked draft outlives the round that created it.",
   aiAttachmentsSaveFilesMany:
-    "Stores a batch of file attachments as drafts in a single round trip. The returned records keep the order of the input.",
-  aiAttachmentsSaveImage:
-    "Stores one image attachment as a draft from a `data:` URL. Prefer `save-images-many` when adding several images at once.",
-  aiAttachmentsSaveImagesMany:
-    "Stores a batch of image attachments as drafts in a single round trip. The returned records keep the order of the input.",
-  aiAttachmentsGet: "Returns one attachment by identifier.",
+    'Stores several file attachments as drafts in one round trip and returns them in the order they were sent. Each entry is validated exactly as the single-file operation validates its `input`, and the first bad one rejects the whole batch with its index named in the message - nothing is stored. `inputs` has to be present and an array: an absent or null value is a malformed request rather than an empty batch, and only an explicit empty array means "no files". Follow up with `POST api/2.0/ai/attachments/link-to-message` to bind the drafts to a message.',
+  aiAttachmentsGet:
+    'Returns one attachment by its ID, whether it is still a draft or already bound to a message. The ID is required and has to be a non-empty string. An ID that no longer exists is not reported as 404: the answer is a null body with status 200, so treat a missing payload as "no such attachment". Use `POST api/2.0/ai/attachments/get-many` to read several at once.',
   aiAttachmentsGetMany:
-    "Returns a batch of attachments, preserving the requested order; an identifier that no longer exists comes back empty.",
+    "Returns several attachments in one call, aligned by position with the `ids` that were sent, so the answer can be zipped straight onto the request. An ID that no longer exists leaves its slot empty rather than shortening the list, which is how a caller tells which of them are gone. `ids` has to be present and non-empty - an empty batch is rejected rather than answered with an empty list. Nothing is changed by the call.",
   aiAttachmentsDelete:
-    "Permanently deletes one attachment, whether it is still a draft or already linked to a message.",
-  aiAttachmentsDeleteMany: "Permanently deletes a batch of attachments in a single round trip.",
+    "Permanently deletes one attachment, whether it is still a draft or already bound to a message. The ID is not validated here, so a malformed one surfaces as an error relayed from storage rather than as a 400, and an ID that does not exist answers success without deleting anything. Deleting a bound attachment leaves the message in place without it. The deletion cannot be undone.",
+  aiAttachmentsDeleteMany:
+    "Permanently deletes several attachments in one round trip. `ids` is optional and an absent value is treated as an empty list, so a malformed request quietly deletes nothing instead of failing. IDs that do not exist are skipped without being reported, so the answer confirms only that the call was accepted. The deletions cannot be undone.",
   aiAttachmentsLinkToMessage:
-    "Binds draft attachments to the chat message that owns them, once that message has been persisted, so deleting the message removes them too. Identifiers that no longer exist are skipped.",
+    "Binds draft attachments to the chat message that owns them, after that message has been persisted, so that deleting the message removes them too. All three of `ids`, `messageId` and `threadId` are required, and the references are verified rather than trusted: an unknown message answers 404, a message that belongs to a different thread answers 400, and attachments that no longer exist answer 404 naming each missing ID. That verification exists because the underlying binding call skips unknown IDs silently, which used to report success for a link that had not happened. Drafts stay unbound until this succeeds.",
 
   // Editor tools - DocSpace tools exposed to the document editor's AI plugin.
   aiEditorToolsList:
-    "Returns the sanitized catalog of DocSpace tools available to the document editor's AI plugin - the same composed tool set the DocSpace chat sees, minus the web-search pair the editor already has through its own passthrough. Only the name, description, parameters and approval flag of each tool are exposed; transport details never reach the browser.",
+    "Returns the catalogue of DocSpace tools the document editor's AI plugin may offer the model - the same composed set the DocSpace chat sees, minus the two web-search tools the editor already reaches through its own passthrough. `entityId` scopes the catalogue to a room, which decides the room-specific tools it contains. Each entry carries exactly four fields: the tool name, its description, its input schema, and whether calling it requires an approval dialog; nothing else is exposed, because the raw listings of system servers carry transport details that must not reach a browser. The approval flag follows the same policy the chat engine applies, and a read-only tool comes back needing none - execute a tool with `POST api/2.0/ai/editor-tools/call`, which accepts only the names this catalogue reports.",
   aiEditorToolsCall:
-    "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and with the caller's forwarded credentials. Whatever the tool produced is returned for the plugin to relay to the model; a failure comes back as an error payload.",
+    "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and under the caller's own credentials, so the browser never holds the transport. `name` has to be one of the tools `GET api/2.0/ai/editor-tools/list` reports; anything else, including a tool the editor is not allowed to reach, is refused. The result is always returned as a string - a structured result is serialised - because the plugin relays it to the model verbatim. A tool that fails does so inside that string as an error payload rather than as an HTTP status, so check the content before trusting it.",
 
   // Export.
   aiExportTextToDocx:
-    "Starts an asynchronous markdown-to-docx export. The response only acknowledges the task: the AI Worker converts the content and saves the .docx into the target folder (an agent room resolves to its result-storage subfolder), and completion reaches the client as the usual folder-modified socket event.",
+    "Queues a markdown-to-docx export and answers 202 as soon as the job is accepted, without waiting for it. `title`, `content` and `folderId` are all required, and a `content` of only whitespace counts as missing even though it is not empty. The conversion runs in the AI worker, which saves the .docx into the target folder - an agent room resolves to its own result-storage subfolder - so there is nothing to poll here: completion arrives as the ordinary folder-modified socket event. This route accepts a body of up to 15 MB rather than the 100 KB the rest of the API allows, because a whole thread transcript is sent in one request.",
 
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
     "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider verbatim - the payload is owned by the plugin's SDK on one end and the provider on the other. A client disconnect cancels the provider call.",
   aiOpenaiImagesGenerations:
-    "OpenAI-compatible image generation for the document editor's AI plugin. As with the chat-completions passthrough, the profile's credentials are attached server-side and the body reaches the provider unchanged.",
+    "OpenAI-compatible image generation for the document editor's AI plugin, working exactly as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider unchanged. The provider's status and body are relayed verbatim, so its 429 and its own error envelope surface as they stand. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
 
   // Preferences - per-scope chat toggles.
   aiPreferencesGetDeepMode:
-    "Returns the deep-mode toggle of the scope, falling back to the configured default when nothing has been persisted.",
+    'Returns whether deep mode is on for a scope, as a bare boolean. `entityId` picks a room and omitting it reads the portal-wide preference. A scope that has never had a value stored falls back to the configured default, so the answer never distinguishes "off" from "unset" - ask `GET api/2.0/ai/preferences/is-deep-mode-set` for that. This is a read-only operation.',
   aiPreferencesSetDeepMode:
-    "Persists the deep-mode toggle of the scope. Idempotent - there is no need to check whether a value already exists.",
+    'Stores the deep-mode preference for a scope. `value` has to be a real boolean: a string, a number or an absent value is rejected rather than coerced, so the string "false" cannot silently switch the setting on and an empty request cannot silently switch it off. `entityId` picks a room and omitting it writes the portal-wide preference. It is idempotent, so there is no need to read the current value first.',
   aiPreferencesClearDeepMode:
-    "Drops the persisted deep-mode toggle of the scope, so later reads fall back to the configured default.",
+    "Removes the stored deep-mode preference of a scope, after which reads fall back to the configured default rather than to false. `entityId` picks a room and omitting it clears the portal-wide preference. Clearing a scope that has no stored value is not an error. This differs from storing false, which is an explicit choice a later read reports as set.",
   aiPreferencesIsDeepModeSet:
-    "Tells whether the scope has an explicitly persisted deep-mode value, whichever way that value is set.",
+    "Tells whether a scope has a deep-mode preference of its own, as opposed to inheriting the configured default. `entityId` picks a room and omitting it asks about the portal-wide preference. A true answer means a value was stored, whether that value is on or off - read the value itself with `GET api/2.0/ai/preferences/get-deep-mode`. This is the check a settings screen uses to show an explicit override rather than an inherited state.",
 
   // Profiles - AI provider credentials and model discovery.
   aiProfilesCreate:
@@ -375,11 +373,16 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Writes a bundle produced by `GET api/2.0/ai/prompts/export` back into the caller's library. `mode` decides how: `replace` deletes the current prompts and folders before writing, and `merge` writes the bundle on top of what is already there. The folder references inside the bundle are validated before anything is written, so a corrupt bundle is rejected whole rather than applied halfway. `replace` is destructive and cannot be undone - export first if the current library matters.",
 
   // Settings - proxied to the .NET AI service.
-  aiSettingsGet: "Reports the portal's combined AI configuration and readiness.",
-  aiSettingsGetVectorization: "Returns the portal's vectorization settings.",
-  aiSettingsSetVectorization: "Updates the portal's vectorization settings.",
-  aiSettingsGetUser: "Returns the current user's AI settings.",
-  aiSettingsSetUser: "Updates the current user's AI settings.",
+  aiSettingsGet:
+    "Reports the portal's AI configuration and whether AI is usable at all, which is the first call a client makes before offering any AI feature. It takes no parameters and is proxied unchanged to the DocSpace AI service, so the answer is that service's settings payload. Among other things it says whether the portal runs on the central AI gateway, which decides whether provider profiles can be edited here at all. This is a read-only operation.",
+  aiSettingsGetVectorization:
+    "Returns the portal's vectorization settings - the embedding provider and the options used when portal content is indexed for retrieval. It takes no parameters and is proxied unchanged to the DocSpace AI service. Vectorization is a portal-wide setting, so there is no room-scoped form of it. Change it with `PUT api/2.0/ai/config/vectorization`.",
+  aiSettingsSetVectorization:
+    "Replaces the portal's vectorization settings and returns the stored result. The body is proxied unchanged to the DocSpace AI service, which validates it, so a rejected value is reported with that service's own verdict rather than being checked here. Changing the embedding provider does not re-index anything already indexed - start that separately with `POST api/2.0/ai/vectorization/tasks`. This is a portal-wide setting and requires the permissions the AI service demands for it.",
+  aiSettingsGetUser:
+    "Returns the AI settings of the calling user, as opposed to the portal-wide ones. It takes no parameters - the user is the authenticated caller, and there is no way to read somebody else's settings - and is proxied unchanged to the DocSpace AI service. Use `GET api/2.0/ai/config` for the portal-wide configuration. This is a read-only operation.",
+  aiSettingsSetUser:
+    "Replaces the AI settings of the calling user and returns the stored result. The body is proxied unchanged to the DocSpace AI service, which validates it, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
@@ -441,7 +444,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Vectorization.
   aiVectorizationStartTask:
-    "Starts a vectorization task over the supplied portal files. The indexing itself runs asynchronously on the .NET side.",
+    "Queues the indexing of the portal files named in the body so their contents can be retrieved during a chat round. The body is proxied unchanged to the DocSpace AI service, which validates it and owns the job. Indexing is asynchronous and fire-and-forget: the answer acknowledges the request without carrying a job handle, so there is nothing to poll and progress is not reported here. The embedding provider used is the one in `GET api/2.0/ai/config/vectorization`, and changing that setting does not re-index anything already indexed - queue it again for that.",
 
   // Web search - the portal's provider configuration, plus the editor passthrough.
   aiWebSearchGetActiveConfig:
