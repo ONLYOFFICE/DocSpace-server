@@ -780,7 +780,12 @@ public abstract class VirtualRoomsController<T>(
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             var subjects = await fileSecurity.GetUserSubjectsAsync(authContext.CurrentAccount.ID);
-            var isRoomMember = await daoFactory.GetSecurityDao<int>().GetSharesAsync(subjects).AnyAsync();
+
+            // Both key kinds: share records for rooms on the portal's own storage are int-keyed,
+            // those for third-party-backed rooms are string-keyed and live in a separate table. A
+            // guest whose only membership is in a third-party room has no int-keyed record at all.
+            var isRoomMember = await daoFactory.GetSecurityDao<int>().GetSharesAsync(subjects).AnyAsync()
+                            || await daoFactory.GetSecurityDao<string>().GetSharesAsync(subjects).AnyAsync();
 
             if (!isRoomMember)
             {

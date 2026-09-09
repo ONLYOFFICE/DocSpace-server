@@ -507,9 +507,15 @@ public class EntryManager(IDaoFactory daoFactory,
                     entries.Add(e);
                 }
 
-                // The whole selection, not the page: counted without the (from, count) limits.
-                total = await folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, 0, -1).CountAsync()
-                      + await fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, 0, -1).CountAsync();
+                // The whole selection, not the page: counted without the (from, count) limits, but
+                // through the same permission filter the entries above go through. Counting the raw
+                // DAO query instead would include favorites the caller may no longer read - access to
+                // the room revoked after favoriting - and `total` would permanently overstate what
+                // paging can actually reach.
+                total = await fileSecurity.CanReadAsync(folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, 0, -1))
+                          .Where(r => r.Item2).CountAsync()
+                      + await fileSecurity.CanReadAsync(fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, 0, -1))
+                          .Where(r => r.Item2).CountAsync();
 
                 var setFilesStatus = entryStatusManager.SetFileStatusAsync(files);
                 var setFavorites = entryStatusManager.SetIsFavoriteFoldersAsync(folders);

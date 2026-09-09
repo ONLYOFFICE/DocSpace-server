@@ -599,8 +599,9 @@ internal abstract class BaseTagDao<T>(
 
             // The tag id is often absent: several of these are built in memory (Tag.New(...)) rather
             // than read back, so resolve it the same way RemoveTagInDbAsync does - by owner, name and
-            // type - and then delete only this entry's link to it.
+            // type - and then delete only these entries' links to it.
             var resolved = new Dictionary<(Guid Owner, string Name, TagType Type), int>();
+            var batches = new Dictionary<(int TagId, FileEntryType EntryType), HashSet<string>>();
 
             foreach (var tag in toDetach)
             {
@@ -620,7 +621,21 @@ internal abstract class BaseTagDao<T>(
                     continue;
                 }
 
-                await filesDbContext.DeleteTagLinksAsync(tenantId, [tagId], tag.EntryId.ToString(), tag.EntryType);
+                if (!batches.TryGetValue((tagId, tag.EntryType), out var entryIds))
+                {
+                    entryIds = [];
+                    batches[(tagId, tag.EntryType)] = entryIds;
+                }
+
+                entryIds.Add(tag.EntryId.ToString());
+            }
+
+            // One statement per (tag, entry type) rather than one per entry. Marking a section as read
+            // detaches many entries from a single "new" tag row, so this is the difference between one
+            // round-trip and one per file - all of it under a held distributed lock.
+            foreach (var ((tagId, entryType), entryIds) in batches)
+            {
+                await filesDbContext.DeleteTagLinksForEntriesAsync(tenantId, tagId, entryIds, entryType);
             }
         }
     }
