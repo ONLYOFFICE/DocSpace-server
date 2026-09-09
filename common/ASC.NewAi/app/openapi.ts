@@ -1103,6 +1103,174 @@ const STREAMING_RESPONSES: Readonly<Record<string, { mediaType: string; descript
   },
 };
 
+// What the success response carries, per operation. The generated schema says
+// what the shape is; this says what it means - which of a mutation's fields to
+// read, what an empty answer stands for, whose payload is being relayed. A
+// single shared "Success." on ninety-six operations said none of that.
+//
+// The streaming operations are absent: `STREAMING_RESPONSES` describes their
+// framing instead. An operation missing from both falls back to "Success.",
+// which should never be what a reader sees.
+const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  aiAiSend: "The assistant's reply as one message. Nothing was persisted.",
+  aiAiSendCustom:
+    "The assistant's reply as one message, or a newline-delimited stream of chat events when " +
+    "`isStream` was set. Nothing was persisted.",
+
+  aiAgentsList: "The agent rooms, in the DocSpace AI service's folder-content envelope.",
+  aiAgentsCreate: "The created agent room, with the model already bound to it.",
+  aiAgentsNews: "The unread items of the caller's agent rooms.",
+  aiAgentsGet: "The agent room, with `profileId` added when a model is bound to it.",
+  aiAgentsUpdate: "The updated agent room.",
+  aiAgentsDelete:
+    "The queued file operation. Deletion runs asynchronously, so poll DocSpace for its outcome.",
+  aiAgentsUpdateQuota: "The updated agent rooms, one entry each.",
+  aiAgentsResetQuota: "The updated agent rooms, one entry each.",
+
+  aiAssignmentsResolveForAction: "The profile that will serve the action.",
+  aiAssignmentsTryResolveForAction:
+    "The profile that will serve the action, or an empty result when none is configured.",
+  aiAssignmentsAssign:
+    "Whether the binding was stored. A failure is reported in `error` rather than as a status.",
+  aiAssignmentsUnassign: "Confirms the action now has no profile of its own.",
+  aiAssignmentsBulkAssign:
+    "Whether the set was stored, with `errors` listing the entries that were refused.",
+  aiAssignmentsGetAssignment:
+    "The profile bound to the action, or an empty result when it has none of its own.",
+  aiAssignmentsGetAllAssignments:
+    "The scope's bindings as a map of action type to profile ID. An action with no binding is absent.",
+  aiAssignmentsCascadeProfileDelete: "Confirms no assignment points at the profile any more.",
+
+  aiAttachmentsSaveFile: "The stored draft, whose ID links it to a message later.",
+  aiAttachmentsSaveFilesMany: "The stored drafts, in the order they were sent.",
+  aiAttachmentsGet: "The attachment, or a null body when no attachment has that ID.",
+  aiAttachmentsGetMany:
+    "The attachments, aligned by position with the IDs that were sent. A missing one leaves its " +
+    "slot empty.",
+  aiAttachmentsDelete: "Confirms the request was accepted, whether or not anything was deleted.",
+  aiAttachmentsDeleteMany:
+    "Confirms the request was accepted, whether or not anything was deleted.",
+  aiAttachmentsLinkToMessage: "Confirms the attachments are now bound to the message.",
+
+  aiEditorToolsList: "The tools the editor plugin may offer the model, four fields each.",
+  aiEditorToolsCall:
+    "The tool's output as a string. A tool that failed reports it inside that string.",
+
+  aiExportTextToDocx:
+    "Confirms the export was queued. The .docx arrives in the target folder later, announced by " +
+    "a folder-modified socket event.",
+
+  aiOpenaiChatCompletions:
+    "The provider's own response, relayed verbatim with its status and content type.",
+  aiOpenaiImagesGenerations:
+    "The provider's own response, relayed verbatim with its status and content type.",
+
+  aiPreferencesGetDeepMode:
+    "Whether deep mode is on, falling back to the configured default when the scope has no value " +
+    "of its own.",
+  aiPreferencesSetDeepMode: "Confirms the preference was stored.",
+  aiPreferencesClearDeepMode:
+    "Confirms the scope has no preference of its own and now inherits the default.",
+  aiPreferencesIsDeepModeSet:
+    "Whether the scope has a preference of its own, whichever way that preference is set.",
+
+  aiProfilesCreate:
+    "Whether the profile was created, with it in `profile`. A refusal is reported in `error` " +
+    "rather than as a status.",
+  aiProfilesUpdate: "Whether the profile was updated, with the stored profile in `profile`.",
+  aiProfilesDelete: "Confirms the request was accepted, whether or not a profile was deleted.",
+  aiProfilesList: "The portal's profiles, with their keys and headers stripped.",
+  aiProfilesGetById: "The profile, with its key and headers stripped.",
+  aiProfilesListModels: "The models the profile's provider currently offers.",
+  aiProfilesListProviderModels: "The models the endpoint offers for the supplied credentials.",
+  aiProfilesTestConnection:
+    "The outcome of the probe. A failed probe is reported here, not as a status.",
+
+  aiPromptsCreate: "Whether the prompt was saved, with it in `prompt`.",
+  aiPromptsUpdate: "Whether the prompt was updated, with the stored prompt in `prompt`.",
+  aiPromptsMove: "Whether the prompt was moved, with the moved prompt in `prompt`.",
+  aiPromptsDelete: "Confirms the request was accepted, whether or not a prompt was deleted.",
+  aiPromptsList: "The prompts of the scope, newest first.",
+  aiPromptsGetById: "The prompt, or an empty body when no prompt of the caller's has that ID.",
+  aiPromptsCreateFolder: "Whether the folder was created, with it in `folder`.",
+  aiPromptsRenameFolder: "Whether the folder was renamed, with the stored folder in `folder`.",
+  aiPromptsDeleteFolder: "Confirms the folder and the prompts inside it are gone.",
+  aiPromptsListFolders: "Every folder of the caller's library, newest first.",
+  aiPromptsGetFolderById:
+    "The folder, or an empty body when no folder of the caller's has that ID.",
+  aiPromptsExport: "The whole library as a versioned bundle, ready to import.",
+  aiPromptsImportBundle:
+    "Whether the bundle was written, how many prompts it imported, and what was refused.",
+
+  aiSettingsGet: "The portal's AI configuration and whether AI is usable at all.",
+  aiSettingsGetVectorization: "The portal's vectorization settings.",
+  aiSettingsSetVectorization: "The stored vectorization settings.",
+  aiSettingsGetUser: "The calling user's AI settings.",
+  aiSettingsSetUser: "The calling user's stored AI settings.",
+
+  aiThreadsCreate: "The created thread.",
+  aiThreadsOpenOrCreate:
+    "The thread that was opened or created, with its prior messages. A created one carries the " +
+    "generated title.",
+  aiThreadsAppendUserMessage: "The stored message, with the ID storage assigned to it.",
+  aiThreadsTouch: "Confirms the thread's activity date moved forward.",
+  aiThreadsRename: "Confirms the new title was stored.",
+  aiThreadsDelete: "Confirms the thread and its messages are gone.",
+  aiThreadsClearMessages: "Confirms the request was accepted. It does not mean the thread existed.",
+  aiThreadsRegenerateTitle: "The newly generated title, already stored on the thread.",
+  aiThreadsList: "The threads of the scope, most recently edited first.",
+  aiThreadsReadMessages:
+    "The thread's messages, oldest first unless `direction` reversed them. An empty list also " +
+    "means the request carried no thread ID.",
+  aiThreadsGetById: "The thread, without its messages.",
+  aiThreadsGetMessageById: "The message, or an empty body when no message has that ID.",
+  aiThreadsUpdateMessage: "Confirms the replacement was stored.",
+  aiThreadsDeleteMessage:
+    "Confirms the request was accepted, whether or not a message was deleted.",
+
+  aiToolsAddCustomServer: "Whether the server was registered, with the stored entry.",
+  aiToolsUpdateCustomServer: "Whether the server was updated, with the stored entry.",
+  aiToolsRemoveCustomServer:
+    "Confirms the request was accepted, whether or not a registration was removed.",
+  aiToolsGetCustomServer:
+    "The stored configuration, empty for a system server and null when the name is not " +
+    "registered.",
+  aiToolsListCustomServers:
+    "The scope's registrations as a map of name to configuration, system entries emptied and the " +
+    "portal's built-in server left out.",
+  aiToolsListSystemTools:
+    "The scope's tools grouped by server type, the system group keys named in `system`, and the " +
+    "reason a registered server delivered none in `errors`.",
+  aiToolsReplaceAllCustomServers:
+    "Whether the registry was replaced, with `errors` listing what was refused.",
+  aiToolsSetDisabled: "Confirms the new disable list was stored for that server type.",
+  aiToolsGetDisabled:
+    "The switched-off tools as a map of server type to tool names. An absent type means nothing " +
+    "is switched off for it.",
+  aiToolsIsToolDisabled: "Whether that one tool is switched off in the scope.",
+  aiToolsSetAllowAlways: "Confirms the always-allow list was updated.",
+  aiToolsGetAllowAlways:
+    "The tools that run without an approval pause. An empty list means every call needs approval.",
+  aiToolsIsAllowAlways: "Whether that one tool runs without an approval pause.",
+
+  aiVectorizationStartTask:
+    "Confirms the indexing was queued. It carries no job handle, so there is nothing to poll.",
+
+  aiWebSearchGetActiveConfig:
+    "The configuration in force for the scope, without the provider key, or an empty result when " +
+    "web search is not configured.",
+  aiWebSearchIsConfigured: "Whether a web-search provider is stored for the scope.",
+  aiWebSearchTestConnection:
+    "The outcome of the probe. A failed probe is reported here, not as a status.",
+  aiWebSearchConfigure: "Whether the configuration was stored, after the provider answered.",
+  aiWebSearchSetActiveConfig: "Confirms the configuration was stored, unverified.",
+  aiWebSearchClear: "Confirms the portal has no web-search configuration any more.",
+  aiWebSearchPassthroughSearch:
+    "The provider's own response, relayed verbatim with its status and content type.",
+  aiWebSearchPassthroughContents:
+    "The provider's own response, relayed verbatim with its status and content type.",
+};
+
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {
   const schema = operations[operationId]?.response;
   const streaming = STREAMING_RESPONSES[operationId];
@@ -1114,11 +1282,12 @@ function responseFor(operations: OperationSchemaLookup, operationId: string): Js
       content: { [streaming.mediaType]: { schema: schema as Json } },
     };
   }
+  const description = SUCCESS_DESCRIPTIONS[operationId] ?? "Success.";
   // No generated schema ⇒ a `void` engine method; every such controller
   // replies `{ success: true }`, so document that rather than a generic object.
   return schema === undefined
-    ? jsonResponse("Success.", SUCCESS_RESPONSE_REF)
-    : jsonResponse("Success.", schema as Json);
+    ? jsonResponse(description, SUCCESS_RESPONSE_REF)
+    : jsonResponse(description, schema as Json);
 }
 
 function requestBodyFor(operations: OperationSchemaLookup, operationId: string): Json {
