@@ -53,6 +53,7 @@ public class FormSchemaProvider(
     ILogger<FormSchemaProvider> logger)
 {
     private static readonly TimeSpan _tableNameCacheDuration = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan _noTableCacheDuration = TimeSpan.FromMinutes(1);
 
     /// <summary>
     /// The cheap half: the submission table name, or null when this is not a started filling-form of its
@@ -63,7 +64,7 @@ public class FormSchemaProvider(
     {
         var cacheKey = GetTableNameCacheKey(tenantManager.GetCurrentTenantId(), file);
 
-        var cached = await fusionCache.TryGetAsync<string>(cacheKey);
+        var cached = await fusionCache.TryGetAsync<string?>(cacheKey);
         if (cached.HasValue)
         {
             return cached.Value;
@@ -72,23 +73,23 @@ public class FormSchemaProvider(
         var properties = await daoFactory.GetFileDao<int>().GetProperties(file.Id);
         var formFilling = properties?.FormFilling;
 
+        // Left uncached: filling starts at any moment, and this branch costs no external call anyway.
         if (formFilling?.StartFilling != true || formFilling.OriginalFormId != file.Id)
         {
             return null;
         }
 
         var tableName = FormFillingReportCreator.GetTableName(file.Id, file.Version);
-        if (!await externalDatabaseClient.TableExistsAsync(tableName))
-        {
-            return null;
-        }
+        var exists = await externalDatabaseClient.TableExistsAsync(tableName);
 
-        // Only the positive answer is cached. A table is created once per form version and never
-        // renamed, so a hit stays valid; caching the negative would keep a form that has just received
-        // its first submission reporting "not analysable" for half an hour.
-        await fusionCache.SetAsync(cacheKey, tableName, opt => opt.SetDuration(_tableNameCacheDuration));
+        // A table is created once per form version and never renamed, so a hit stays valid. The
+        // "not yet" answer is held far shorter — it flips as soon as the first submission lands.
+        await fusionCache.SetAsync<string?>(
+            cacheKey,
+            exists ? tableName : null,
+            opt => opt.SetDuration(exists ? _tableNameCacheDuration : _noTableCacheDuration));
 
-        return tableName;
+        return exists ? tableName : null;
     }
 
     private static string GetTableNameCacheKey(int tenantId, File<int> file)
