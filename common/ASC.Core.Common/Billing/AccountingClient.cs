@@ -952,16 +952,22 @@ public class Operation
     public string ParticipantDisplayName { get; set; }
 
     /// <summary>
-    /// AI Agent id.
+    /// Id of the entity the AI operation was performed on.
     /// </summary>
     /// <example>123</example>
-    public string AgentId { get; set; }
+    public string SourceId { get; set; }
 
     /// <summary>
-    /// AI Agent name.
+    /// Type of the entity the AI operation was performed on: Agent, File, Folder, Room or Form.
+    /// </summary>
+    /// <example>Agent</example>
+    public string SourceType { get; set; }
+
+    /// <summary>
+    /// Name of the entity the AI operation was performed on.
     /// </summary>
     /// <example>My AI Agent</example>
-    public string AgentTitle { get; set; }
+    public string SourceTitle { get; set; }
 
     /// <summary>
     /// Metadata of the operation.

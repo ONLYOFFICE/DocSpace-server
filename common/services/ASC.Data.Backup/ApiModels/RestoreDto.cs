@@ -34,12 +34,15 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// The backup restoring parameters.
+/// The request parameter that picks which restoring job to report on.
 /// </summary>
 public class RestoreDto
 {
     /// <summary>
-    /// Specifies if a dump will be created or not.
+    /// Which restoring job to look for, read as three states rather than as a flag: leave it out for
+    /// whichever job concerns this portal, including a server-wide one, send false for the job of this
+    /// portal alone, and send true for the server-wide job. On a portal that is not a standalone
+    /// installation the value is forced to false.
     /// </summary>
     /// <example>false</example>
     [FromQuery]

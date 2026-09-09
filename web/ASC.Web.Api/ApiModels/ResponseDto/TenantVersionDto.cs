@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
-/// The tenant version information.
+/// The portal versions the installation offers, and the one this portal is pinned to.
 /// </summary>
 /// <example>
 /// {
@@ -45,13 +45,15 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 public class TenantVersionDto(int version, IEnumerable<TenantVersion> tenantVersions)
 {
     /// <summary>
-    /// The current portal version.
+    /// The `id` of the entry in `versions` this portal currently runs on. It is `0` on a portal that was never
+    /// pinned to a version, in which case no entry matches it.
     /// </summary>
     /// <example>1</example>
     public int Current { get; set; } = version;
 
     /// <summary>
-    /// The list of available portal versions.
+    /// The versions the installation makes available, each with the `id` to pin a portal to and the version
+    /// string to show. It is empty on an installation that offers no choice, which is the usual case.
     /// </summary>
     /// <example>[{"id": 1, "version": "2.0"}]</example>
     public IEnumerable<TenantVersion> Versions { get; set; } = tenantVersions;

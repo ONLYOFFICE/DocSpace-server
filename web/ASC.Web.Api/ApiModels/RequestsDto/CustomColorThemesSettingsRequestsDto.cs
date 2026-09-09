@@ -34,12 +34,16 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing the portal theme settings.
+/// The custom colour theme being saved, the theme being selected, or both.
 /// </summary>
 public class CustomColorThemesSettingsRequestsDto
 {
     /// <summary>
-    /// The custom color theme configuration.
+    /// The theme to store, with its accent and button colours for the interface and for the text on it. An `id` that
+    /// matches a stored custom theme replaces it, an unknown `id` appends a new one, and an `id` belonging to a
+    /// built-in theme is treated as a request for a new custom theme rather than overwriting the built-in one. Once
+    /// the plan limit on custom themes is reached a new theme is silently not added, so compare the returned themes
+    /// against `limit` instead of assuming it was saved. Leave it out to change only the selection.
     /// </summary>
     /// <example>
     /// {
@@ -58,7 +62,8 @@ public class CustomColorThemesSettingsRequestsDto
     public CustomColorThemesSettingsItem Theme { get; set; }
 
     /// <summary>
-    /// Specifies the optional value indicating the selected custom color theme.
+    /// The theme the whole portal switches to, by theme ID. An ID matching no stored theme is ignored rather than
+    /// refused, and leaving it out keeps the selection as it is.
     /// </summary>
     /// <example>1</example>
     public int? Selected { get; set; }

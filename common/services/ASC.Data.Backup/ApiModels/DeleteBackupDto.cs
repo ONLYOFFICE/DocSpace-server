@@ -34,14 +34,15 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// The parameters to delete the backup.
+/// The request parameters for deleting one backup.
 /// </summary>
 public class DeleteBackupDto
 {
     /// <summary>
-    /// The backup ID.
+    /// The ID of the backup to delete, taken from the route. It is the `id` of a record listed by
+    /// `GET api/2.0/backup/getbackuphistory`, which is also the `taskId` the backup was started with.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>11111111-1111-1111-1111-111111111111</example>
     [FromRoute(Name = "id")]
     public required Guid BackupId { get; set; }
 }
