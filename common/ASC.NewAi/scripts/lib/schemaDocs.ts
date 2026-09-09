@@ -236,6 +236,12 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
+  // `kind` decides which half of this shape is populated: `content`, `path` and
+  // `type` belong to a file, `base64` to an image. Every renderer builds its
+  // sample payload by taking one example per property, so giving both halves an
+  // example would describe an attachment that cannot exist. This example is a
+  // file, so `base64` deliberately has none - see the note on variant fields in
+  // `ai-api-findings.md`.
   AiAttachment: {
     examples: {
       id: EXAMPLE_IDS.attachment,
@@ -243,7 +249,6 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
       source: "user",
       title: "contract.docx",
       content: "This agreement is made on 1 January 2026 between …",
-      base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==",
       path: "file_1234",
       type: 7,
       messageId: EXAMPLE_IDS.message,
@@ -317,15 +322,15 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Chat stream ------------------------------------------------------ */
 
   AiChatEvent: {
+    // A union over seven `type` values, and most fields belong to one variant
+    // only: `idx`, `autoAllow` and `serverExecuted` to `tool-call-pending`,
+    // `title` and `profileId` to `thread-title`. Only the fields every event
+    // carries get an example, so an assembled sample stays a payload that can
+    // actually occur.
     examples: {
       type: "message-delta",
       messageId: EXAMPLE_IDS.message,
-      idx: 0,
       threadId: EXAMPLE_IDS.thread,
-      autoAllow: false,
-      serverExecuted: false,
-      title: "Contract review",
-      profileId: EXAMPLE_IDS.profile,
     },
     properties: {
       message: "The message the event is about, in the state it has reached.",

@@ -348,10 +348,7 @@
         },
         "idx": {
           "type": "number",
-          "description": "The zero-based position of the pending tool call within the message.",
-          "examples": [
-            0
-          ]
+          "description": "The zero-based position of the pending tool call within the message."
         },
         "threadId": {
           "type": "string",
@@ -362,31 +359,19 @@
         },
         "autoAllow": {
           "type": "boolean",
-          "description": "The consumer should execute the tool without prompting the user. True when the tool is in the persisted \"always-allow\" list, or the tool itself opts in via `TMCPItem.requireApproval === false` (host tools default to this). For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip.",
-          "examples": [
-            false
-          ]
+          "description": "The consumer should execute the tool without prompting the user. True when the tool is in the persisted \"always-allow\" list, or the tool itself opts in via `TMCPItem.requireApproval === false` (host tools default to this). For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
         },
         "serverExecuted": {
           "type": "boolean",
-          "description": "Set when the tool is served by a server-side system source: the consumer must NOT execute it locally — only show the approval UI (unless `autoAllow`) and resume via `approveToolCall` (no `result` needed) / `denyToolCall`. The engine runs it in-engine.",
-          "examples": [
-            false
-          ]
+          "description": "Set when the tool is served by a server-side system source: the consumer must NOT execute it locally — only show the approval UI (unless `autoAllow`) and resume via `approveToolCall` (no `result` needed) / `denyToolCall`. The engine runs it in-engine."
         },
         "title": {
           "type": "string",
-          "description": "The generated thread title.",
-          "examples": [
-            "Contract review"
-          ]
+          "description": "The generated thread title."
         },
         "profileId": {
           "type": "string",
-          "description": "The profile that generated the title, when one was used.",
-          "examples": [
-            "00000000-0000-0000-0000-000000000000"
-          ]
+          "description": "The profile that generated the title, when one was used."
         }
       },
       "required": [
@@ -958,10 +943,7 @@
         },
         "base64": {
           "type": "string",
-          "description": "Base64 data URL for images.",
-          "examples": [
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg=="
-          ]
+          "description": "Base64 data URL for images."
         },
         "path": {
           "type": "string",
