@@ -34,33 +34,36 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for file history.
+/// The query that selects the activity entries of one file.
 /// </summary>
 public class HistoryRequestDto
 {
     /// <summary>
-    /// The file ID of the history request.
+    /// The file whose activity log is read; only files stored in the portal itself have one.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required int FileId { get; set; }
 
     /// <summary>
-    /// The start date of the history.
+    /// The earliest moment an entry may have, read in the time zone of the portal; left out, the log starts at the
+    /// oldest entry the portal still keeps.
     /// </summary>
     /// <example>2025-01-01T00:00:00.0000000Z</example>
     [FromQuery(Name = "fromDate")]
     public ApiDateTime FromDate { get; set; }
 
     /// <summary>
-    /// The end date of the history.
+    /// The latest moment an entry may have, read in the time zone of the portal; left out, the log ends at the newest
+    /// entry.
     /// </summary>
     /// <example>2025-12-31T23:59:59.0000000Z</example>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
 
     /// <summary>
-    /// The number of history entries to retrieve for the file log.
+    /// How many entries one page holds. The number of entries that match the query is reported in the response
+    /// headers, not in the body.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -68,7 +71,8 @@ public class HistoryRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index for retrieving a subset of file history entries.
+    /// How many entries to skip before the page begins, counted from the newest one, so pages are taken by adding the
+    /// page size to it.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]

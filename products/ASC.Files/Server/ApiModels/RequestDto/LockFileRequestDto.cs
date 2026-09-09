@@ -34,32 +34,35 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for locking a file.
+/// The lock state a file is to be put into.
 /// </summary>
 public class LockFileParameters
 {
     /// <summary>
-    /// Specifies whether to lock a file or not.
+    /// The state to reach: `true` locks the file, which blocks editing, renaming and deleting for everybody but the
+    /// account that locked it and the room admins, and drops the others out of a running editing session; `false`
+    /// releases the lock.
     /// </summary>
     /// <example>true</example>
     public bool LockFile { get; set; }
 }
 
 /// <summary>
-/// The request parameters for locking a file.
+/// The request that locks or unlocks a file.
 /// </summary>
 public class LockFileRequestDto<T>
 {
     /// <summary>
-    /// The file ID for locking.
+    /// The file to lock or unlock.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for locking a file.
+    /// The lock state to reach.
     /// </summary>
+    /// <example>{"lockFile": true}</example>
     [FromBody]
     public required LockFileParameters File { get; set; }
 }

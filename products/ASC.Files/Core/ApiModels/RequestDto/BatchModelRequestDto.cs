@@ -166,37 +166,39 @@ public class DeleteVersionBatchRequestDto : FileOperationRequestBaseDto
 }
 
 /// <summary>
-/// The parameters for deleting a file.
+/// The parameters of a single file deletion.
 /// </summary>
 public class Delete
 {
     /// <summary>
-    /// Specifies whether to delete a file after the editing session is finished or not.
+    /// When to delete: `true` waits until the editing session on the file has ended, `false` deletes at once, pulling
+    /// the file away from whoever is working on it.
     /// </summary>
     /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately.
+    /// Where the file goes: `false` moves it to Trash, from where it can be restored, `true` deletes it for good.
+    /// Inside a room, where there is no Trash, deletion is always final.
     /// </summary>
     /// <example>false</example>
     public bool Immediately { get; set; }
 }
 
 /// <summary>
-/// The request parameters for deleting a file.
+/// The request that deletes one file.
 /// </summary>
 public class DeleteRequestDto<T> : FileOperationRequestBaseDto
 {
     /// <summary>
-    /// The file ID to delete.
+    /// The file to delete.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for deleting a file.
+    /// When and how the file is deleted.
     /// </summary>
     /// <example>{"deleteAfter": false, "immediately": false}</example>
     [FromBody]

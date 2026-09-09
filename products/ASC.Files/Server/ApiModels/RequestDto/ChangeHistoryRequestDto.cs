@@ -34,37 +34,39 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for changing version history.
+/// The change to make to a revision group of a file.
 /// </summary>
 public class ChangeHistory
 {
     /// <summary>
-    /// The file version of the change history.
+    /// The version the change applies to; 0 means the current version of the file.
     /// </summary>
     /// <example>1</example>
     public required int Version { get; set; }
 
     /// <summary>
-    /// Specifies whether to start a new version or continue revision of the change history.
+    /// What to do with the revision group: `false` completes the named version, storing its content again as a fresh
+    /// version that opens a new group, while `true` folds the last group back into the group before it, so the next
+    /// save continues that revision.
     /// </summary>
     /// <example>false</example>
     public bool ContinueVersion { get; set; }
 }
 
 /// <summary>
-/// The request parameters for changing version history.
+/// The request that closes or reopens a revision group of a file.
 /// </summary>
 public class ChangeHistoryRequestDto<T>
 {
     /// <summary>
-    /// The file Id to change its version history.
+    /// The file whose version history is changed.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for changing version history.
+    /// The change to make to the revision group.
     /// </summary>
     /// <example>{"version": 1, "continueVersion": false}</example>
     [FromBody]

@@ -33,25 +33,29 @@
 
 namespace ASC.Files.ApiModels.RequestDto;
 
+/// <summary>
+/// The file keys that let people open one file of an end-to-end encrypted private room.
+/// </summary>
 public class AccessRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file the keys are issued for; it has to lie in a private room.
     /// </summary>
     /// <example>12345</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// Collection of encryption key data for users with access to the file
+    /// One key per account that is to open the file. The keys of the accounts named here are replaced and the keys of
+    /// everybody else are left as they are, so sending no entry for a person does not revoke that person's key.
     /// </summary>
     /// <example type="array">
     /// [
-    ///   {
-    ///     "userId": "00000000-0000-0000-0000-000000000000",
-    ///     "publicKeyId": "00000000-0000-0000-0000-000000000000",
-    ///     "privateKeyEnc": "encrypted_key_string"
-    ///   }
+    /// {
+    /// "userId": "00000000-0000-0000-0000-000000000000",
+    /// "publicKeyId": "00000000-0000-0000-0000-000000000000",
+    /// "privateKeyEnc": "encrypted_key_string"
+    /// }
     /// ]
     /// </example>
     [FromBody]
@@ -59,24 +63,26 @@ public class AccessRequestDto<T>
 }
 
 /// <summary>
-/// The encryption key granting one user access to a file.
+/// The file key issued to one account.
 /// </summary>
 public class AccessRequestKeyDto
 {
     /// <summary>
-    /// User ID
+    /// The account that is to open the file with this key; it has to have read access to the file.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Public key ID
+    /// The public key the file key was encrypted with, as reported for that account by
+    /// `GET api/2.0/files/file/{fileId}/publickeys`.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid PublicKeyId { get; set; }
 
     /// <summary>
-    /// Encrypted private key
+    /// The key of the file itself, encrypted by the client with that public key, so that the plain key never reaches
+    /// the portal.
     /// </summary>
     /// <example>encrypted_key_string</example>
     public string PrivateKeyEnc { get; set; }

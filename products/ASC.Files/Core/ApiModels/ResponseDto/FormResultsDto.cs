@@ -34,36 +34,44 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// A single filled-in form submission.
+/// One completed copy of a form, with the values that were entered into it.
 /// </summary>
 public class FormResultsDto
 {
     /// <summary>
-    /// The date and time when the form was created.
+    /// When the portal recorded this copy, in UTC: the moment the filled copy was completed and its data indexed, not
+    /// the moment the form itself was made.
     /// </summary>
     /// <example>2025-01-01T00:00:00</example>
     public DateTime CreateOn { get; set; }
 
     /// <summary>
-    /// The list of forms data.
+    /// The values that were entered into this copy, one entry per field, preceded by an entry keyed `FormNumber` that
+    /// carries the number of the copy and is what the submissions are ordered by. Fields holding a picture or a
+    /// signature are left out of the record, so a field missing here was not necessarily left blank.
     /// </summary>
     /// <example>[{"key": "field1", "value": "Answer"}]</example>
     public IEnumerable<FormsItemData> FormsData { get; set; }
 }
 
 /// <summary>
-/// All submissions of a form, together with the metadata of its fields.
+/// All completed copies of a form, together with the description of the fields they were filled into.
 /// </summary>
 public class FormSubmissionsDto
 {
     /// <summary>
-    /// The form field metadata.
+    /// Describes the fields of the form version that is being filled - the key each value is stored under, the type
+    /// and format of the field and, where the field offers a fixed set of answers, those answers - in the order the
+    /// fields are laid out, which is the order to build a results table in. It comes back empty when the portal holds
+    /// no indexed description of that version.
     /// </summary>
     /// <example>[]</example>
     public IEnumerable<FormMetadata> Metadata { get; set; }
 
     /// <summary>
-    /// All submissions.
+    /// One entry per completed copy, ordered by the copy number that `formsData` carries. An empty list means nothing
+    /// has been completed for the version that is currently being filled; the copies of earlier versions of the form
+    /// are not reported here.
     /// </summary>
     /// <example>[]</example>
     public IEnumerable<FormResultsDto> Submissions { get; set; }

@@ -34,32 +34,35 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for setting the Custom Filter editing mode.
+/// The Custom Filter state a spreadsheet is to be put into.
 /// </summary>
 public class CustomFilterParameters
 {
     /// <summary>
-    /// Specifies whether the Custom Filter editing mode is enabled or not.
+    /// The state to reach: `true` turns the mode on, so that the sorting and filtering each person applies stays
+    /// visible to that person alone, and drops the others out of a running editing session; `false` turns it off and
+    /// makes filtering shared again.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }
 }
 
 /// <summary>
-/// The request parameters for setting the Custom Filter editing mode for a file.
+/// The request that switches the Custom Filter editing mode of a spreadsheet.
 /// </summary>
 public class FileCustomFilterRequestDto<T>
 {
     /// <summary>
-    /// The file ID.
+    /// The spreadsheet whose Custom Filter mode is switched.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for setting the Custom Filter editing mode.
+    /// The Custom Filter state to reach.
     /// </summary>
+    /// <example>{"enabled": true}</example>
     [FromBody]
     public required CustomFilterParameters Parameters { get; set; }
 }

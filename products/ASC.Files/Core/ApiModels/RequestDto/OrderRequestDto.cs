@@ -48,24 +48,26 @@ public class OrderRequestDto
 }
 
 /// <summary>
-/// An item in the ordering request with its entry type and ID.
+/// One entry to move to a given position inside its folder.
 /// </summary>
 public class OrdersItemRequestDto<T>
 {
     /// <summary>
-    /// The entry unique identifier (file or folder).
+    /// The file or folder to move.
     /// </summary>
     /// <example>1</example>
     public required T EntryId { get; set; }
 
     /// <summary>
-    /// The entry type (file or folder).
+    /// Which of the two the identifier names, because a file and a folder may carry the same number.
     /// </summary>
     /// <example>1</example>
     public required FileEntryType EntryType { get; set; }
 
     /// <summary>
-    /// The order value.
+    /// The position the entry is to take, counting from 1. The entry that held it, and everything after it, is
+    /// shifted to make room. A dotted path such as "1.2.3" is accepted as well, of which only the last segment is
+    /// read.
     /// </summary>
     /// <example>1</example>
     [Range(1, int.MaxValue)]
@@ -74,14 +76,15 @@ public class OrdersItemRequestDto<T>
 }
 
 /// <summary>
-/// The collection of items to be ordered.
+/// The request that moves several files and folders to given positions.
 /// </summary>
 public class OrdersRequestDto<T>
 {
     /// <summary>
-    /// The list of items with their ordering information.
+    /// The entries to move, applied one after another in the order they are sent, so each of them shifts the
+    /// neighbours the ones before it left behind.
     /// </summary>
-    /// <example>[{"entryId": 1, "order": 1}]</example>
+    /// <example>[{"entryId": 1, "entryType": 2, "order": 1}, {"entryId": 4, "entryType": 1, "order": 2}]</example>
     public required List<OrdersItemRequestDto<T>> Items { get; set; }
 }
 
@@ -120,20 +123,21 @@ public class OrderRequestDtoConverter : JsonConverter<int>
 }
 
 /// <summary>
-/// The request parameters for ordering a file.
+/// The request that moves one file to a given position inside its folder.
 /// </summary>
 public class OrderFileRequestDto<T>
 {
     /// <summary>
-    /// The file unique identifier.
+    /// The file to move.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The file order information.
+    /// The position the file is to take.
     /// </summary>
+    /// <example>{"order": 1}</example>
     [FromBody]
     public OrderRequestDto Order { get; set; }
 }

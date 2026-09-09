@@ -34,39 +34,42 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for updating a file.
+/// The changes to make to a file: a new title, an earlier version to restore, or both.
 /// </summary>
 public class UpdateFile
 {
     /// <summary>
-    /// The file title to update.
+    /// The new title of the file, without an extension - the stored extension is kept whatever the title says, so a
+    /// rename cannot change the format. Left empty, the file keeps its name.
     /// </summary>
     /// <example>My Document</example>
     [StringLength(165)]
     public string Title { get; set; }
 
     /// <summary>
-    /// The number of the latest file version.
+    /// The version to restore on top of the history, as reported by `GET api/2.0/files/file/{fileId}/history`; 0 or
+    /// less leaves the versions untouched.
     /// </summary>
     /// <example>1</example>
     public int LastVersion { get; set; }
 }
 
 /// <summary>
-/// The request parameters for updating a file.
+/// The request that renames a file, restores one of its versions, or both.
 /// </summary>
 public class UpdateFileRequestDto<T>
 {
     /// <summary>
-    /// The file ID to update.
+    /// The file to update.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for updating a file.
+    /// The new title and the version to restore.
     /// </summary>
+    /// <example>{"title": "Price list", "lastVersion": 0}</example>
     [FromBody]
     public required UpdateFile File { get; set; }
 }

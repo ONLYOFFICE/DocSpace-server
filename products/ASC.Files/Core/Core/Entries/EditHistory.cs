@@ -203,19 +203,22 @@ internal class ChangesUserData
 }
 
 /// <summary>
-/// The information about the file editing history author.
+/// The person a saved revision of a file, or one single change in it, is attributed to.
 /// </summary>
 [DebuggerDisplay("{Id} {Name}")]
 public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     /// <summary>
-    /// The author ID.
+    /// The account the revision or the change is attributed to, as the editing service stored it. It is normally the
+    /// identifier of a portal account; the empty identifier stands for a change nobody could be named for.
     /// </summary>
-    /// <example>author_123</example>
+    /// <example>9924256b-447c-4f19-9dbd-8ad8c39e8ff5</example>
     public required string Id { get; init; }
 
     /// <summary>
-    /// The author name.
+    /// The display name of that account as the portal spells it now, which need not be the name that was stored with
+    /// the revision. An account that cannot be resolved - one removed from the portal, or a change made through an
+    /// anonymous link - is reported as a guest.
     /// </summary>
     /// <example>John Doe</example>
     public string Name
@@ -264,78 +267,88 @@ public class EditHistoryChanges
 }
 
 /// <summary>
-/// The file editing history data.
+/// Everything an editor needs in order to show what one revision of a file changed.
 /// </summary>
 [DebuggerDisplay("{Version}")]
 public class EditHistoryDataDto
 {
     /// <summary>
-    /// The URL address of the file with the document changes data.
+    /// The address the editor downloads the recorded changes of this revision from. It is filled in only when the
+    /// portal has a change record for the revision; without it the revision can be shown as a whole document but not
+    /// as a set of changes.
     /// </summary>
     /// <example>https://example.com/changes</example>
     [Url]
     public string ChangesUrl { get; set; }
 
     /// <summary>
-    /// The document identifier used to unambiguously identify the document file.
+    /// The document key of the revision being shown, which the editing service uses to identify it and to reuse the
+    /// copy it has cached.
     /// </summary>
     /// <example>doc1</example>
     public required string Key { get; set; }
 
     /// <summary>
-    /// The object of the previous version of the document.
+    /// The revision this one is compared against. It arrives together with `changesUrl`, and when the revision shown
+    /// is the first one the file ever had, it points at the blank template the file was created from instead of at an
+    /// earlier revision.
     /// </summary>
     /// <example>{"url": "https://example.com/prev.docx", "key": "prev-doc-key"}</example>
     public EditHistoryUrl Previous { get; set; }
 
     /// <summary>
-    /// The encrypted signature added to the parameter in the form of a token.
+    /// The signature over the whole answer, as a JSON Web Token that the editing service verifies before it accepts
+    /// the addresses in it. Empty when the portal runs without a document-service secret.
     /// </summary>
-    /// <example>token</example>
+    /// <example>eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxfQ.7HxQ0Zx1</example>
     public string Token { get; set; }
 
     /// <summary>
-    /// The URL address of the current document version.
+    /// The address the content of this revision is served from. It is meant for the editing service and carries its
+    /// own key, which is valid for a limited time.
     /// </summary>
     /// <example>https://example.com/file.docx</example>
     [Url]
     public required string Url { get; set; }
 
     /// <summary>
-    /// The document version number.
+    /// Echoes the revision that was asked for, so it reports 0 when the request named no version and the current
+    /// revision was taken.
     /// </summary>
     /// <example>1</example>
     public required int Version { get; init; }
 
     /// <summary>
-    /// The document extension.
+    /// The format of the revision being shown, as an extension without the leading dot.
     /// </summary>
     /// <example>docx</example>
     public required string FileType { get; set; }
 }
 
 /// <summary>
-/// The file editing history URL parameters.
+/// The address, document key and format of the revision a comparison is made against.
 /// </summary>
 [DebuggerDisplay("{Key} - {Url}")]
 public class EditHistoryUrl
 {
     /// <summary>
-    /// The document identifier of the previous version of the document.
+    /// The document key of that revision. When the file has no earlier revision the portal generates a fresh key for
+    /// the template it falls back to, so the value is not always one an earlier revision ever had.
     /// </summary>
     /// <example>doc_v2_20260101</example>
     public string Key { get; init; }
 
     /// <summary>
-    /// The url address of the previous version of the document.
+    /// The address that revision's content is served from. It is meant for the editing service and carries its own
+    /// key, which is valid for a limited time.
     /// </summary>
     /// <example>https://files.example.com/history/doc_v2_20260101.docx</example>
     [Url]
     public string Url { get; init; }
 
     /// <summary>
-    /// The document extension.
+    /// The format of that revision, as an extension without the leading dot.
     /// </summary>
-    /// <example>.docx</example>
+    /// <example>docx</example>
     public string FileType { get; set; }
 }

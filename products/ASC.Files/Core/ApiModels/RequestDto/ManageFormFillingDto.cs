@@ -34,37 +34,53 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for managing form filling.
+/// The action to apply to the filling of a PDF form.
 /// </summary>
 public class ManageFormFillingDto<T>
 {
     /// <summary>
-    /// The ID of the form to manage.
+    /// The PDF form the action applies to. This is the value the operation reads, rather than the identifier in its
+    /// route, and the two are to be sent the same.
     /// </summary>
     /// <example>1</example>
     public required T FormId { get; set; }
 
     /// <summary>
-    /// The action to perform on the form.
+    /// The action to apply.
     /// </summary>
     /// <example>1</example>
     public FormFillingManageAction Action { get; set; }
 }
 
 /// <summary>
-/// The action to perform on the form.
+/// The actions that drive the filling of a PDF form through its states.
 /// </summary>
 public enum FormFillingManageAction
 {
+    /// <summary>
+    /// Closes the form for filling. In a virtual data room the interruption is recorded together with the role it
+    /// happened at and the other role holders are notified; in a form-filling room the form stops accepting
+    /// submissions.
+    /// </summary>
     [Description("Stop")]
     Stop,
 
+    /// <summary>
+    /// Lifts a stop, clearing the record of it, so the role whose turn it was may go on filling.
+    /// </summary>
     [Description("Resume")]
     Resume,
 
+    /// <summary>
+    /// Opens the form for filling and lets in the members whose room rights are limited to filling forms. A form that
+    /// was edited since it was last started has the drafts of the previous round dropped.
+    /// </summary>
     [Description("Start")]
     Start,
 
+    /// <summary>
+    /// Puts the form back into editing, closing it for filling and remembering the version it is edited from.
+    /// </summary>
     [Description("Edit")]
     Edit
 }
