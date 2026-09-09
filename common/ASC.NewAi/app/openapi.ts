@@ -762,6 +762,60 @@ function capitalize(name: string): string {
   return name.length > 0 ? name.charAt(0).toUpperCase() + name.slice(1) : name;
 }
 
+// Titles for engine operations whose `humanize`d method name does not make a
+// usable one, keyed by `operationId`.
+//
+// `humanize` is a good default for a compound method name (`sendWithStream` →
+// "Send with stream"), but it fails in two ways that matter. A single-word
+// method yields a title that says nothing without the path (`Send`, `Delete`,
+// `List`) and, worse, collides with the same word in another engine - four
+// operations were called "Delete" and three "Create", which makes them
+// indistinguishable in a tool list, a sidebar and eight generated SDKs. And it
+// splits acronyms, so `sendWithStreamOpenAI` came out as "Send with stream open
+// ai" and `getById` as "Get by id".
+//
+// Only those cases are listed here; a compound name that reads correctly keeps
+// its derived title. There is no lint signal for this - the `operation-summary`
+// rule only checks that a summary is truthy, which `humanize` always satisfies.
+const ENGINE_SUMMARIES: Readonly<Record<string, string>> = {
+  aiAiSend: "Run an AI action",
+  aiAiSendWithStreamOpenAI: "Stream a chat in OpenAI format",
+
+  aiAssignmentsAssign: "Bind a profile to an action",
+  aiAssignmentsUnassign: "Clear an action's profile",
+
+  aiAttachmentsGet: "Get one attachment",
+  aiAttachmentsDelete: "Delete one attachment",
+
+  aiProfilesCreate: "Create a provider profile",
+  aiProfilesUpdate: "Update a provider profile",
+  aiProfilesDelete: "Delete a provider profile",
+  aiProfilesList: "List provider profiles",
+  aiProfilesGetById: "Get a provider profile",
+  aiProfilesTestConnection: "Test a profile's provider",
+
+  aiPromptsCreate: "Save a prompt",
+  aiPromptsUpdate: "Update a saved prompt",
+  aiPromptsMove: "Move a prompt to a folder",
+  aiPromptsDelete: "Delete a saved prompt",
+  aiPromptsList: "List saved prompts",
+  aiPromptsExport: "Export the prompt library",
+  aiPromptsGetById: "Get a saved prompt",
+  aiPromptsGetFolderById: "Get a prompt folder",
+
+  aiThreadsCreate: "Create a chat thread",
+  aiThreadsDelete: "Delete a chat thread",
+  aiThreadsList: "List chat threads",
+  aiThreadsRename: "Rename a chat thread",
+  aiThreadsTouch: "Bump a thread's activity",
+  aiThreadsGetById: "Get a chat thread",
+  aiThreadsGetMessageById: "Get one chat message",
+
+  aiWebSearchConfigure: "Configure and verify web search",
+  aiWebSearchClear: "Clear the web-search configuration",
+  aiWebSearchTestConnection: "Test a web-search provider",
+};
+
 // Turn a `camelCase`/`kebab` token into a human title, e.g.
 // `sendWithStream` → "Send with stream".
 function humanize(name: string): string {
@@ -874,7 +928,7 @@ function engineOperation(
   const operation: Record<string, Json> = {
     tags: [tag(engine.tag)],
     operationId,
-    summary: humanize(methodName),
+    summary: ENGINE_SUMMARIES[operationId] ?? humanize(methodName),
     ...(operationDescription(operationId) as object),
     responses: {
       [OPERATION_SUCCESS_CODES[operationId] ?? "200"]: responseFor(operations, operationId),
