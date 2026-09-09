@@ -1592,6 +1592,20 @@ public class PaymentController(
         return await tariffService.GetAccountingServicePricesAsync(inDto.ServiceName, inDto.Active);
     }
 
+    /// <remarks>
+    /// Returns the portal's automatic wallet top-up settings - whether it is on, the balance that triggers a
+    /// charge, the balance it is topped up to, and the currency both are expressed in. Any DocSpace
+    /// administrator may read them, and unlike the operation that changes them this one needs neither a
+    /// billing customer nor a configured billing service, so it answers on a portal that has never paid for
+    /// anything. It is read-only and changes nothing.
+    /// A portal that has never configured top-up gets the defaults rather than an empty result: `enabled` is
+    /// false, `currency` is null, and `minBalance` and `upToBalance` are 0. Those two zeros are outside the
+    /// ranges `POST api/2.0/portal/payment/topupsettings` accepts - 5 to 1000 and 6 to 5000 - so the answer
+    /// cannot be sent straight back to it; supply real values instead. `lastModified` is
+    /// `0001-01-01T00:00:00` until the settings are stored for the first time.
+    /// `lowBalanceThreshold` and `lowBalanceNotified` are maintained by the portal itself: they are reported
+    /// here, but ignored when the settings are written.
+    /// </remarks>
     /// <summary>
     /// Get the auto top-up settings
     /// </summary>
