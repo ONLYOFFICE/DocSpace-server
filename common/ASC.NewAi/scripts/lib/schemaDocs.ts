@@ -339,7 +339,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
 
   AiChatEvent: {
     examples: {
-      type: "message",
+      type: "message-delta",
       messageId: ID.message,
       idx: 0,
       threadId: ID.thread,
@@ -434,7 +434,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportResult: {
-    examples: { success: true, imported: 12, errors: [] },
+    examples: { success: true, imported: { folders: 2, prompts: 12 }, errors: [] },
     properties: {
       success: "True when the whole bundle was imported.",
       imported: "How many folders and prompts were created. Present on success.",

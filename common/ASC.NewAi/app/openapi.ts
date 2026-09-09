@@ -233,7 +233,7 @@ const ID_EXAMPLES = {
 
 const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
   actionType: "Chat",
-  count: 20,
+  count: "20",
   cursor: `{"id":"${ID_EXAMPLES.thread}","lastEditDate":1767225600000}`,
   direction: "desc",
   entityId: ID_EXAMPLES.room,
