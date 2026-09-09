@@ -416,40 +416,20 @@ public class EntryManager(IDaoFactory daoFactory,
             // and FolderType.USER keeps the caller's own My Documents files in the Rooms-section view,
             // which is what Recent has always shown. Built from DocSpaceHelper.RoomTypes rather than
             // spelled out, so a room type added later lands on the right side by itself.
-            List<FolderType> sectionTypes = searchArea switch
+            //
+            // Only when the caller named no folderType. An explicit folderType is the more specific
+            // request and wins outright: the client selects the Forms section of Recent with
+            // folderType=FillingFormsRoom and no searchArea at all, and on this endpoint searchArea
+            // is not nullable, so "not sent" arrives as Active and must not be read as "the Rooms
+            // section, therefore not forms".
+            if (folderType is not { Count: > 0 })
             {
-                SearchArea.Forms => [FolderType.FillingFormsRoom],
-                SearchArea.Active => [.. DocSpaceHelper.RoomTypes.Where(t => t != FolderType.FillingFormsRoom), FolderType.USER],
-                _ => null
-            };
-
-            if (sectionTypes != null)
-            {
-                if (folderType is { Count: > 0 })
+                folderType = searchArea switch
                 {
-                    // An explicit folderType narrows the section, it does not replace it. VirtualRooms
-                    // is expanded first: callers use it to mean "any room", but as a section root it is
-                    // also an ancestor of the form rooms, so intersecting with it directly would either
-                    // select nothing or undo the split.
-                    var requested = folderType.Contains(FolderType.VirtualRooms)
-                        ? folderType.Where(t => t != FolderType.VirtualRooms).Concat(DocSpaceHelper.RoomTypes).Distinct().ToList()
-                        : folderType;
-
-                    // Asking for a type the section does not contain is answered with nothing rather
-                    // than with the whole section - an empty list would read as "no filter" further down.
-                    var narrowed = requested.Intersect(sectionTypes).ToList();
-
-                    if (narrowed.Count == 0)
-                    {
-                        return (entries, 0);
-                    }
-
-                    folderType = narrowed;
-                }
-                else
-                {
-                    folderType = sectionTypes;
-                }
+                    SearchArea.Forms => [FolderType.FillingFormsRoom],
+                    SearchArea.Active => [.. DocSpaceHelper.RoomTypes.Where(t => t != FolderType.FillingFormsRoom), FolderType.USER],
+                    _ => folderType
+                };
             }
 
             var providerFiles = await GetThirdPartyFilesByTagAsync<T>(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject,

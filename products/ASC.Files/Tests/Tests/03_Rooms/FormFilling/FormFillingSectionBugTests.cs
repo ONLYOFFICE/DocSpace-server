@@ -136,6 +136,37 @@ public class FormFillingSectionBugTests(
             "filterValue under searchArea=Forms must not match a file from a Rooms-section room");
     }
 
+    /// <remarks>
+    /// The shape the real client uses: it opens the Forms section of Recent through
+    /// <c>GET /files/{recentId}?folderType=15</c> and sends no <c>searchArea</c> at all. On that
+    /// endpoint <c>SearchArea</c> is not nullable, so "not sent" arrives as
+    /// <see cref="SearchArea.Active"/> - an explicit <c>folderType</c> must therefore win over the
+    /// section the parameter defaults to, or the section comes back empty.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "82873")]
+    public async Task GetRecent_FolderTypeFormsWithoutSearchArea_ReturnsFormFillingRoomFile()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var (formTitle, docxTitle) = await SeedRecent();
+
+        var recentId = (await _foldersApi.GetRecentFolderAsync(
+            cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
+
+        // Act - folderType only, exactly as the client sends it
+        var recent = (await _foldersApi.GetFolderByFolderIdAsync(
+            recentId,
+            folderType: [(int)FolderType.FillingFormsRoom],
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        var titles = recent.Files.Select(f => f.Title).ToList();
+        titles.Should().Contain(formTitle,
+            "an explicit folderType must not be overruled by the searchArea default");
+        titles.Should().NotContain(docxTitle);
+    }
+
     #endregion
 
     #region GET /files/recent - total collapses to the page size
