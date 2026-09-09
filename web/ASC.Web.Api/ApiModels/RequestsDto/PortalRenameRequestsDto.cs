@@ -34,17 +34,19 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for the portal renaming operations.
+/// The new address the portal is to answer on.
 /// </summary>
 /// <example>
 /// {
-///   // TODO: Add appropriate JSON example
+///   "alias": "my-portal"
 /// }
 /// </example>
 public class PortalRenameRequestsDto
 {
     /// <summary>
-    /// The portal name or identifier.
+    /// The new portal alias - the leftmost label of the portal address, without the base domain. It may not be
+    /// empty, has to be free on this installation, and once it is applied the previous address stops answering, so
+    /// every stored link built on the old alias breaks.
     /// </summary>
     /// <example>my-portal</example>
     public required string Alias { get; set; }

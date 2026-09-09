@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring the white label branding settings.
+/// The branding a portal is given: the wordmark, the logo images, or both.
 /// </summary>
 /// <example>
 /// {
@@ -45,50 +45,59 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class WhiteLabelRequestsDto
 {
     /// <summary>
-    /// The text to display alongside or in place of the logo.
+    /// The wordmark printed next to or instead of a logo image, on the login page, in the editors and in
+    /// notification letters. An empty or blank value, and the built-in `ONLYOFFICE` itself, clear the setting rather
+    /// than store it. The text is not rendered into the logo images, which carry their own wordmark.
     /// </summary>
     /// <example>Company Name</example>
     [StringLength(40)]
     public string LogoText { get; set; }
 
     /// <summary>
-    /// The white label tenant IDs with their logos (light or dark).
+    /// The logo images to store, each entry naming a logo slot in its `key` - the numeric `type` published by
+    /// `GET api/2.0/settings/whitelabel/logos` - and carrying the two theme images in its value. A slot left out of
+    /// the list keeps the image it has, so this is a partial update rather than a replacement of the whole branding.
+    /// Saving the login-page slot also rebuilds the notification logo from it.
     /// </summary>
     /// <example>["item1", "item2"]</example>
     public IEnumerable<ItemKeyValuePair<string, LogoRequestsDto>> Logo { get; set; }
 }
 
 /// <summary>
-/// The request parameters for the theme-specific logo configurations.
+/// The two theme variants of one branding logo.
 /// </summary>
 public class LogoRequestsDto
 {
     /// <summary>
-    /// The URL or base64-encoded image data for the light theme logo.
+    /// The image used on a light background, either as a `data:image/png;base64,...` payload - `png`, `jpg` and
+    /// `svg` are accepted - or as the name of a file already put in the temporary store.
     /// </summary>
     /// <example>data:image/png;base64,iVBORw0KGgoAAAANS...</example>
     public string Light { get; set; }
 
     /// <summary>
-    /// The URL or base64-encoded image data for the dark theme logo.
+    /// The image used on a dark background, in the same two forms as `light`. It is only stored for the slots that
+    /// have a dark variant and is ignored for the favicon and the editor logos.
     /// </summary>
     /// <example>data:image/png;base64,iVBORw0KGgoAAAANS...</example>
     public string Dark { get; set; }
 }
 
 /// <summary>
-/// The request parameters for querying the white label configurations.
+/// Whose branding is read or written, and which theme of it.
 /// </summary>
 public class WhiteLabelQueryRequestsDto
 {
     /// <summary>
-    /// Specifies if the white label logo is for the dark theme or not.
+    /// Which theme the answer is filled in for: `true` fills the dark image only, `false` the light one only.
+    /// Omitting it fills both, leaving the dark one empty for the slots that have no separate dark image.
     /// </summary>
     /// <example>true</example>
     public bool? IsDark { get; set; }
 
     /// <summary>
-    /// Specifies if the logo is for a default tenant or not.
+    /// Whether the installation-wide default branding is addressed instead of this portal own. Writing the default
+    /// branding is only allowed on a self-hosted installation; elsewhere it is refused with 403.
     /// </summary>
     /// <example>true</example>
     public bool? IsDefault { get; set; }
